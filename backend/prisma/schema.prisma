@@ -1,0 +1,398 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================
+// ENUMS
+// =====================================================
+
+enum TipoEstablecimiento {
+  centro_acopio
+  centro_salud
+  puesto_salud
+}
+
+enum EstadoGeneral {
+  activo
+  inactivo
+}
+
+enum EstadoPlanificacion {
+  borrador
+  aprobado
+  ejecutado
+}
+
+enum EstadoLote {
+  disponible
+  vencido
+  agotado
+}
+
+enum FormaIngreso {
+  PRIMER_TRIMESTRE @map("1° TRIMESTRE")
+  SEGUNDO_TRIMESTRE @map("2° TRIMESTRE")
+  TERCER_TRIMESTRE @map("3° TRIMESTRE")
+  CUARTO_TRIMESTRE @map("4° TRIMESTRE")
+}
+
+enum ComprobanteClase {
+  PECOSA
+  GUIA
+  TRASLADO
+  OTROS
+}
+
+enum RolUsuario {
+  administrador
+  coordinador
+  responsable_acopio
+  operador
+}
+
+enum TipoMovimientoKardex {
+  ingreso
+  salida
+  transferencia
+  ajuste
+}
+
+enum EstadoVale {
+  generado
+  impreso
+  entregado
+}
+
+enum TipoVale {
+  completo
+  solo_base
+  solo_adicionales
+}
+
+enum TipoAlerta {
+  vencimiento
+  stock_bajo
+  discrepancia
+  sistema
+}
+
+enum NivelAlerta {
+  info
+  warning
+  error
+  success
+}
+
+// =====================================================
+// MODELOS
+// =====================================================
+
+model Establecimiento {
+  id                String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre            String                @db.VarChar(255)
+  tipo              TipoEstablecimiento
+  codigo            String                @unique @db.VarChar(50)
+  centroAcopioId    String?               @map("centro_acopio_id") @db.Uuid
+  direccion         String                @db.Text
+  responsable       String                @db.VarChar(255)
+  telefono          String?               @db.VarChar(20)
+  estado            EstadoGeneral         @default(activo)
+  createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  centroAcopio      Establecimiento?      @relation("EstablecimientoJerarquia", fields: [centroAcopioId], references: [id])
+  establecimientos  Establecimiento[]     @relation("EstablecimientoJerarquia")
+  usuarios          Usuario[]
+  planificaciones   PlanificacionAnual[]
+  movimientos       MovimientoVacuna[]
+  valesEntrega      ValeEntrega[]
+  valesDetalle      ValeDetalle[]
+  kardexOrigen      Kardex[]              @relation("KardexOrigen")
+  kardexDestino     Kardex[]              @relation("KardexDestino")
+
+  @@map("establecimientos")
+}
+
+model Vacuna {
+  id                        String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre                    String                @db.VarChar(255)
+  tipo                      String                @db.VarChar(100)
+  presentacion              String                @db.VarChar(100)
+  dosisPorFrasco            Int                   @map("dosis_por_frasco")
+  tiempoVidaUtil            Int                   @map("tiempo_vida_util")
+  temperaturaAlmacenamiento String                @map("temperatura_almacenamiento") @db.VarChar(50)
+  estado                    EstadoGeneral         @default(activo)
+  createdAt                 DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  lotes                     LoteVacuna[]
+  planificaciones           PlanificacionAnual[]
+  movimientos               MovimientoVacuna[]
+  valesDetalle              ValeDetalle[]
+
+  @@map("vacunas")
+}
+
+model Jeringa {
+  id        String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tipo      String        @db.VarChar(100)
+  capacidad String        @db.VarChar(20)
+  color     String        @db.VarChar(50)
+  estado    EstadoGeneral @default(activo)
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  lotes     LoteJeringa[]
+
+  @@map("jeringas")
+}
+
+model LoteVacuna {
+  id                  String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  numero              String           @unique @db.VarChar(100)
+  vacunaId            String           @map("vacuna_id") @db.Uuid
+  fechaIngreso        DateTime         @map("fecha_ingreso") @db.Date
+  fechaVencimiento    DateTime         @map("fecha_vencimiento") @db.Date
+  formaIngreso        FormaIngreso     @map("forma_ingreso")
+  comprobanteClase    ComprobanteClase @map("comprobante_clase")
+  numeroComprobante   String           @map("numero_comprobante") @db.VarChar(100)
+  cantidadInicial     Int              @map("cantidad_inicial")
+  cantidadActual      Int              @map("cantidad_actual")
+  estado              EstadoLote       @default(disponible)
+  observaciones       String?          @db.Text
+  createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  vacuna              Vacuna           @relation(fields: [vacunaId], references: [id])
+
+  @@map("lotes_vacunas")
+}
+
+model LoteJeringa {
+  id                  String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  jeringaId           String           @map("jeringa_id") @db.Uuid
+  numero              String           @unique @db.VarChar(100)
+  fechaIngreso        DateTime         @map("fecha_ingreso") @db.Date
+  fechaVencimiento    DateTime?        @map("fecha_vencimiento") @db.Date
+  formaIngreso        FormaIngreso     @map("forma_ingreso")
+  comprobanteClase    ComprobanteClase @map("comprobante_clase")
+  numeroComprobante   String           @map("numero_comprobante") @db.VarChar(100)
+  cantidadInicial     Int              @map("cantidad_inicial")
+  cantidadActual      Int              @map("cantidad_actual")
+  estado              EstadoLote       @default(disponible)
+  observaciones       String?          @db.Text
+  createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  jeringa             Jeringa          @relation(fields: [jeringaId], references: [id])
+
+  @@map("lotes_jeringas")
+}
+
+model Usuario {
+  id                String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombres           String           @db.VarChar(255)
+  apellidos         String           @db.VarChar(255)
+  email             String           @unique @db.VarChar(255)
+  usuario           String           @unique @db.VarChar(100)
+  passwordHash      String           @map("password_hash") @db.VarChar(255)
+  rol               RolUsuario
+  establecimientoId String?          @map("establecimiento_id") @db.Uuid
+  estado            EstadoGeneral    @default(activo)
+  ultimoAcceso      DateTime?        @map("ultimo_acceso") @db.Timestamptz(6)
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  establecimiento   Establecimiento? @relation(fields: [establecimientoId], references: [id])
+  movimientos       MovimientoVacuna[]
+  entregas          EntregaAdicional[]
+  vales             ValeEntrega[]
+  kardex            Kardex[]
+  alertas           Alerta[]
+
+  @@map("usuarios")
+}
+
+model PlanificacionAnual {
+  id                   String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  establecimientoId    String              @map("establecimiento_id") @db.Uuid
+  vacunaId             String              @map("vacuna_id") @db.Uuid
+  anio                 Int
+  metaAnual            Int                 @map("meta_anual")
+  distribucionMensual  Int[]               @map("distribucion_mensual")
+  estado               EstadoPlanificacion @default(borrador)
+  createdAt            DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  establecimiento      Establecimiento     @relation(fields: [establecimientoId], references: [id])
+  vacuna               Vacuna              @relation(fields: [vacunaId], references: [id])
+
+  @@unique([establecimientoId, vacunaId, anio], name: "uk_planificacion_establecimiento_vacuna_anio")
+  @@map("planificacion_anual")
+}
+
+model MovimientoVacuna {
+  id                String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  establecimientoId String             @map("establecimiento_id") @db.Uuid
+  vacunaId          String             @map("vacuna_id") @db.Uuid
+  mes               Int
+  anio              Int
+  saldoAnterior     Int                @default(0) @map("saldo_anterior")
+  transIngreso      Int                @default(0) @map("trans_ingreso")
+  salida            Int                @default(0)
+  transSalida       Int                @default(0) @map("trans_salida")
+  entrega           Int                @default(0)
+  entregaBase       Int?               @map("entrega_base") // Valor base de planificación (null = usar entrega)
+  observaciones     String?            @db.Text
+  fechaMovimiento   DateTime           @default(now()) @map("fecha_movimiento") @db.Date
+  usuarioId         String             @map("usuario_id") @db.Uuid
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  establecimiento   Establecimiento    @relation(fields: [establecimientoId], references: [id])
+  vacuna            Vacuna             @relation(fields: [vacunaId], references: [id])
+  usuario           Usuario            @relation(fields: [usuarioId], references: [id])
+  entregasAdicionales EntregaAdicional[]
+
+  @@unique([establecimientoId, vacunaId, mes, anio], name: "uk_movimiento_establecimiento_vacuna_mes_anio")
+  @@map("movimientos_vacunas")
+}
+
+model EntregaAdicional {
+  id                  String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  movimientoVacunaId  String           @map("movimiento_vacuna_id") @db.Uuid
+  numeroEntrega       Int              @map("numero_entrega")
+  cantidad            Int
+  fechaEntrega        DateTime         @default(now()) @map("fecha_entrega") @db.Date
+  motivo              String?          @db.Text
+  usuarioId           String           @map("usuario_id") @db.Uuid
+  createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relaciones
+  movimientoVacuna    MovimientoVacuna @relation(fields: [movimientoVacunaId], references: [id])
+  usuario             Usuario          @relation(fields: [usuarioId], references: [id])
+
+  @@unique([movimientoVacunaId, numeroEntrega], name: "uk_movimiento_numero_entrega")
+  @@map("entregas_adicionales")
+}
+
+model ValeEntrega {
+  id                    String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  numero                String        @unique @db.VarChar(50)
+  centroAcopioId        String        @map("centro_acopio_id") @db.Uuid
+  mes                   Int
+  anio                  Int
+  fechaGeneracion       DateTime      @default(now()) @map("fecha_generacion") @db.Timestamptz(6)
+  estado                EstadoVale    @default(generado)
+  tipoVale              TipoVale      @default(completo) @map("tipo_vale")
+  totalVacunas          Int           @default(0) @map("total_vacunas")
+  totalEstablecimientos Int           @default(0) @map("total_establecimientos")
+  usuarioId             String        @map("usuario_id") @db.Uuid
+  observaciones         String?       @db.Text
+  createdAt             DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  centroAcopio          Establecimiento @relation(fields: [centroAcopioId], references: [id])
+  usuario               Usuario         @relation(fields: [usuarioId], references: [id])
+  detalles              ValeDetalle[]
+
+  // Permitir múltiples vales por período pero con diferentes tipos
+  @@unique([centroAcopioId, mes, anio, tipoVale], name: "uk_centro_periodo_tipo")
+  @@map("vales_entrega")
+}
+
+model ValeDetalle {
+  id                      String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  valeEntregaId           String          @map("vale_entrega_id") @db.Uuid
+  establecimientoId       String          @map("establecimiento_id") @db.Uuid
+  vacunaId                String          @map("vacuna_id") @db.Uuid
+  cantidadProgramada      Int             @default(0) @map("cantidad_programada")
+  cantidadAdicional       Int             @default(0) @map("cantidad_adicional")
+  numeroEntregaAdicional  Int?            @map("numero_entrega_adicional")
+  createdAt               DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relaciones
+  valeEntrega             ValeEntrega     @relation(fields: [valeEntregaId], references: [id])
+  establecimiento         Establecimiento @relation(fields: [establecimientoId], references: [id])
+  vacuna                  Vacuna          @relation(fields: [vacunaId], references: [id])
+
+  @@unique([valeEntregaId, establecimientoId, vacunaId, numeroEntregaAdicional], name: "uk_vale_establecimiento_vacuna")
+  @@map("vales_detalle")
+}
+
+model Kardex {
+  id                        String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tipo                      String                @db.VarChar(20)
+  itemId                    String                @map("item_id") @db.Uuid
+  loteId                    String                @map("lote_id") @db.Uuid
+  tipoMovimiento            TipoMovimientoKardex  @map("tipo_movimiento")
+  cantidad                  Int
+  saldoAnterior             Int                   @default(0) @map("saldo_anterior")
+  saldoActual               Int                   @map("saldo_actual")
+  establecimientoOrigenId   String?               @map("establecimiento_origen_id") @db.Uuid
+  establecimientoDestinoId  String?               @map("establecimiento_destino_id") @db.Uuid
+  documento                 String                @db.VarChar(100)
+  numeroDocumento           String                @map("numero_documento") @db.VarChar(100)
+  observaciones             String?               @db.Text
+  usuarioId                 String                @map("usuario_id") @db.Uuid
+  fechaMovimiento           DateTime              @default(now()) @map("fecha_movimiento") @db.Timestamptz(6)
+  createdAt                 DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relaciones
+  establecimientoOrigen     Establecimiento?      @relation("KardexOrigen", fields: [establecimientoOrigenId], references: [id])
+  establecimientoDestino    Establecimiento?      @relation("KardexDestino", fields: [establecimientoDestinoId], references: [id])
+  usuario                   Usuario               @relation(fields: [usuarioId], references: [id])
+
+  @@map("kardex")
+}
+
+model Alerta {
+  id                String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tipo              TipoAlerta
+  titulo            String      @db.VarChar(255)
+  descripcion       String      @db.Text
+  nivel             NivelAlerta
+  fechaCreacion     DateTime    @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaVencimiento  DateTime?   @map("fecha_vencimiento") @db.Timestamptz(6)
+  leida             Boolean     @default(false)
+  usuarioId         String?     @map("usuario_id") @db.Uuid
+  parametros        Json?       @db.JsonB
+  createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  usuario           Usuario?    @relation(fields: [usuarioId], references: [id])
+
+  @@map("alertas")
+}
+
+model ConfiguracionSistema {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  clave       String   @unique @db.VarChar(100)
+  valor       String   @db.Text
+  descripcion String?  @db.Text
+  tipoDato    String   @default("string") @map("tipo_dato") @db.VarChar(20)
+  categoria   String   @default("general") @db.VarChar(50)
+  esPublico   Boolean  @default(false) @map("es_publico")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("configuracion_sistema")
+}

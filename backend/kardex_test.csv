@@ -1,0 +1,3 @@
+Fecha y Hora,Tipo,Item,Lote,Tipo Movimiento,Cantidad,Saldo Anterior,Saldo Actual,Establecimiento Origen,Establecimiento Destino,Documento,Número Documento,Observaciones,Usuario
+"8/8/2025, 2:26:14 a. m.","vacuna","BCG","LT-BCG-2023-005","salida",50,500,450,"Centro de Acopio Abancay","-","VALE","V-001-2025","Entrega a establecimiento de salud","Ana Patricia García Huamán"
+"8/8/2025, 2:25:59 a. m.","vacuna","BCG","LT-BCG-2023-005","ingreso",500,0,500,"-","Centro de Acopio Abancay","PECOSA","P-001-2025","Ingreso inicial de lote BCG para pruebas","Ana Patricia García Huamán"

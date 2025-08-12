@@ -1,0 +1,481 @@
+/* Estilos Minimalistas y Empresariales para el Módulo de Vales */
+
+/* Animaciones suaves y profesionales */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Clases de utilidad minimalistas */
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.2s ease-out;
+}
+
+.animate-slideDown {
+  animation: slideDown 0.2s ease-out;
+}
+
+/* Transiciones empresariales */
+.transition-smooth {
+  transition: all 0.15s ease-in-out;
+}
+
+/* Efectos hover minimalistas */
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Botones empresariales */
+.btn-enterprise {
+  @apply px-4 py-2 rounded-lg font-medium transition-smooth;
+}
+
+.btn-enterprise-primary {
+  @apply btn-enterprise bg-blue-600 text-white;
+}
+
+.btn-enterprise-primary:hover {
+  @apply bg-blue-700;
+}
+
+.btn-enterprise-secondary {
+  @apply btn-enterprise bg-gray-100 text-gray-700 border border-gray-300;
+}
+
+.btn-enterprise-secondary:hover {
+  @apply bg-gray-200 border-gray-400;
+}
+
+.btn-enterprise-success {
+  @apply btn-enterprise bg-green-600 text-white;
+}
+
+.btn-enterprise-success:hover {
+  @apply bg-green-700;
+}
+
+.btn-enterprise-danger {
+  @apply btn-enterprise bg-red-600 text-white;
+}
+
+.btn-enterprise-danger:hover {
+  @apply bg-red-700;
+}
+
+/* Cards empresariales */
+.card-enterprise {
+  @apply bg-white rounded-lg border border-gray-200 transition-smooth;
+}
+
+.card-enterprise:hover {
+  @apply shadow-sm;
+}
+
+/* Inputs empresariales */
+.input-enterprise {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg transition-smooth;
+}
+
+.input-enterprise:focus {
+  @apply ring-2 ring-blue-500 border-transparent outline-none;
+}
+
+/* Tabla empresarial */
+.table-enterprise {
+  @apply w-full bg-white;
+}
+
+.table-enterprise th {
+  @apply px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50;
+}
+
+.table-enterprise td {
+  @apply px-4 py-3 whitespace-nowrap text-sm text-gray-900;
+}
+
+.table-enterprise tbody tr {
+  @apply border-b border-gray-200 transition-colors;
+}
+
+.table-enterprise tbody tr:hover {
+  @apply bg-gray-50;
+}
+
+/* Estados de vale empresariales */
+.status-badge {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.status-generado {
+  @apply status-badge bg-blue-100 text-blue-800;
+}
+
+.status-impreso {
+  @apply status-badge bg-yellow-100 text-yellow-800;
+}
+
+.status-entregado {
+  @apply status-badge bg-green-100 text-green-800;
+}
+
+/* Modales empresariales */
+.modal-backdrop {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  @apply bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden;
+  animation: slideUp 0.2s ease-out;
+}
+
+/* Responsive design empresarial */
+@media (max-width: 768px) {
+  .modal-content {
+    @apply mx-2 max-h-[95vh];
+  }
+
+  .btn-enterprise {
+    @apply px-3 py-2 text-sm;
+  }
+
+  .table-enterprise th,
+  .table-enterprise td {
+    @apply px-2 py-2;
+  }
+}
+
+/* Loading states empresariales */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f8f9fa 25%, #e9ecef 50%, #f8f9fa 75%);
+  background-size: 200% 100%;
+  animation: loading 1.2s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Efectos de focus empresariales */
+.focus-ring:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Iconos empresariales */
+.icon-enterprise {
+  @apply h-4 w-4 text-gray-500;
+}
+
+.icon-enterprise-primary {
+  @apply icon-enterprise text-blue-600;
+}
+
+.icon-enterprise-success {
+  @apply icon-enterprise text-green-600;
+}
+
+.icon-enterprise-warning {
+  @apply icon-enterprise text-yellow-600;
+}
+
+.icon-enterprise-danger {
+  @apply icon-enterprise text-red-600;
+}
+
+/* Utilidades adicionales para diseño empresarial */
+
+/* Espaciado consistente */
+.spacing-enterprise {
+  @apply space-y-4;
+}
+
+.spacing-enterprise-sm {
+  @apply space-y-2;
+}
+
+.spacing-enterprise-lg {
+  @apply space-y-6;
+}
+
+/* Tipografía empresarial */
+.text-enterprise-title {
+  @apply text-xl font-semibold text-gray-900;
+}
+
+.text-enterprise-subtitle {
+  @apply text-sm text-gray-600;
+}
+
+.text-enterprise-body {
+  @apply text-sm text-gray-700;
+}
+
+.text-enterprise-caption {
+  @apply text-xs text-gray-500;
+}
+
+/* Colores empresariales consistentes */
+.bg-enterprise-primary {
+  @apply bg-blue-600;
+}
+
+.bg-enterprise-secondary {
+  @apply bg-gray-100;
+}
+
+.bg-enterprise-success {
+  @apply bg-green-600;
+}
+
+.bg-enterprise-warning {
+  @apply bg-yellow-600;
+}
+
+.bg-enterprise-danger {
+  @apply bg-red-600;
+}
+
+.text-enterprise-primary {
+  @apply text-blue-600;
+}
+
+.text-enterprise-secondary {
+  @apply text-gray-600;
+}
+
+.text-enterprise-success {
+  @apply text-green-600;
+}
+
+.text-enterprise-warning {
+  @apply text-yellow-600;
+}
+
+.text-enterprise-danger {
+  @apply text-red-600;
+}
+
+/* Bordes empresariales */
+.border-enterprise {
+  @apply border border-gray-200;
+}
+
+.border-enterprise-primary {
+  @apply border border-blue-200;
+}
+
+.border-enterprise-success {
+  @apply border border-green-200;
+}
+
+.border-enterprise-warning {
+  @apply border border-yellow-200;
+}
+
+.border-enterprise-danger {
+  @apply border border-red-200;
+}
+
+/* Sombras empresariales */
+.shadow-enterprise {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.shadow-enterprise-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-enterprise-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Estados de interacción empresariales */
+.interactive-enterprise {
+  @apply transition-smooth cursor-pointer;
+}
+
+.interactive-enterprise:hover {
+  @apply shadow-enterprise-md;
+  transform: translateY(-1px);
+}
+
+.interactive-enterprise:active {
+  transform: translateY(0);
+}
+
+/* Layouts empresariales */
+.layout-enterprise-header {
+  @apply bg-white border-b border-gray-200 px-6 py-4;
+}
+
+.layout-enterprise-content {
+  @apply max-w-7xl mx-auto px-6 py-6;
+}
+
+.layout-enterprise-sidebar {
+  @apply w-64 bg-white border-r border-gray-200;
+}
+
+.layout-enterprise-main {
+  @apply flex-1 bg-gray-50;
+}
+
+/* Formularios empresariales */
+.form-enterprise-group {
+  @apply space-y-1;
+}
+
+.form-enterprise-label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.form-enterprise-input {
+  @apply input-enterprise;
+}
+
+.form-enterprise-select {
+  @apply input-enterprise;
+}
+
+.form-enterprise-textarea {
+  @apply input-enterprise resize-none;
+}
+
+.form-enterprise-error {
+  @apply text-xs text-red-600 mt-1;
+}
+
+.form-enterprise-help {
+  @apply text-xs text-gray-500 mt-1;
+}
+
+/* Navegación empresarial */
+.nav-enterprise {
+  @apply flex space-x-8;
+}
+
+.nav-enterprise-item {
+  @apply px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors;
+}
+
+.nav-enterprise-item.active {
+  @apply text-blue-600 border-b-2 border-blue-600;
+}
+
+/* Alertas empresariales */
+.alert-enterprise {
+  @apply p-4 rounded-lg border;
+}
+
+.alert-enterprise-info {
+  @apply alert-enterprise bg-blue-50 border-blue-200 text-blue-800;
+}
+
+.alert-enterprise-success {
+  @apply alert-enterprise bg-green-50 border-green-200 text-green-800;
+}
+
+.alert-enterprise-warning {
+  @apply alert-enterprise bg-yellow-50 border-yellow-200 text-yellow-800;
+}
+
+.alert-enterprise-error {
+  @apply alert-enterprise bg-red-50 border-red-200 text-red-800;
+}
+
+/* Badges empresariales */
+.badge-enterprise {
+  @apply inline-flex items-center px-2 py-1 rounded text-xs font-medium;
+}
+
+.badge-enterprise-primary {
+  @apply badge-enterprise bg-blue-100 text-blue-800;
+}
+
+.badge-enterprise-secondary {
+  @apply badge-enterprise bg-gray-100 text-gray-800;
+}
+
+.badge-enterprise-success {
+  @apply badge-enterprise bg-green-100 text-green-800;
+}
+
+.badge-enterprise-warning {
+  @apply badge-enterprise bg-yellow-100 text-yellow-800;
+}
+
+.badge-enterprise-danger {
+  @apply badge-enterprise bg-red-100 text-red-800;
+}
+
+/* Optimizaciones de rendimiento */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Accesibilidad empresarial */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus visible para accesibilidad */
+.focus-visible:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .card-enterprise,
+  .modal-content {
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important;
+  }
+}

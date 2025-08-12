@@ -1,0 +1,223 @@
+import React, { useState } from 'react';
+import { Plus, Search, Package, Syringe, AlertTriangle, CheckCircle, Clock, FileText, Settings, Edit, Trash2 } from 'lucide-react';
+import { Vacuna, Lote, Jeringa, LoteJeringa } from '../../types';
+import NuevoIngreso from './NuevoIngreso';
+import LotesVacunasPage from './LotesVacunasPage';
+import LotesJeringasPage from './LotesJeringasPage';
+import GestionVacunas from './GestionVacunas';
+import GestionJeringas from './GestionJeringas';
+import { useVacunas } from '../../hooks/useVacunas';
+import { useJeringas } from '../../hooks/useJeringas';
+
+// Utility functions moved outside component scope
+const getEstadoColor = (estado: string) => {
+  switch (estado) {
+    case 'disponible': return 'bg-green-100 text-green-800';
+    case 'vencido': return 'bg-red-100 text-red-800';
+    case 'agotado': return 'bg-gray-100 text-gray-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const getEstadoIcon = (estado: string) => {
+  switch (estado) {
+    case 'disponible': return CheckCircle;
+    case 'vencido': return AlertTriangle;
+    case 'agotado': return Clock;
+    default: return Clock;
+  }
+};
+
+const getDaysToExpire = (fechaVencimiento: Date) => {
+  const today = new Date();
+  const diffTime = fechaVencimiento.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+};
+
+const Inventario: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'vacunas' | 'jeringas' | 'lotes-vacunas' | 'lotes-jeringas' | 'recepcion'>('vacunas');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showNuevoIngreso, setShowNuevoIngreso] = useState(false);
+
+  // Hooks para cargar datos necesarios para el modal
+  const { vacunasActivas, loadVacunasActivas, isLoadingActivas: isLoadingVacunas } = useVacunas();
+  const { jeringasActivas, loadJeringasActivas, isLoadingActivas: isLoadingJeringas } = useJeringas();
+
+  // Cargar datos cuando se abre el modal de nuevo ingreso
+  React.useEffect(() => {
+    if (showNuevoIngreso) {
+      console.log('🔄 Modal de Nuevo Ingreso abierto, cargando datos...');
+      loadVacunasActivas();
+      loadJeringasActivas();
+    }
+  }, [showNuevoIngreso, loadVacunasActivas, loadJeringasActivas]);
+
+  const tabs = [
+    { id: 'vacunas', label: 'Catálogo de Vacunas', icon: Package },
+    { id: 'jeringas', label: 'Catálogo de Jeringas', icon: Syringe },
+    { id: 'lotes-vacunas', label: 'Lotes de Vacunas', icon: Package },
+    { id: 'lotes-jeringas', label: 'Lotes de Jeringas', icon: Syringe },
+    { id: 'recepcion', label: 'Nuevo Ingreso', icon: Plus },
+  ];
+
+  // Los handlers ahora son manejados por las páginas individuales
+  const handleNuevoIngresoSuccess = (tipo: 'vacuna' | 'jeringa', data: any) => {
+    // Las páginas individuales manejan la actualización de datos
+    console.log('Nuevo ingreso exitoso:', tipo, data);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Gestión de Inventario</h2>
+          <p className="text-gray-600 mt-1">Control integral de vacunas, jeringas y recepción de lotes</p>
+        </div>
+        <button 
+          onClick={() => setShowNuevoIngreso(true)}
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Nuevo Ingreso
+        </button>
+      </div>
+
+      {/* Stats Cards - Ahora las estadísticas se muestran en cada página individual */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Sistema de Gestión de Inventario SIVAC</h3>
+          <p className="text-gray-600">
+            Gestione de manera integral vacunas, jeringas y sus respectivos lotes con control completo de stock y vencimientos
+          </p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Icon className="h-4 w-4 mr-2" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Search */}
+      {activeTab === 'vacunas' && (
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar vacunas..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Content */}
+      {activeTab === 'vacunas' && (
+        <GestionVacunas />
+      )}
+
+      {activeTab === 'jeringas' && (
+        <GestionJeringas />
+      )}
+
+      {activeTab === 'lotes-vacunas' && (
+        <LotesVacunasPage />
+      )}
+
+      {activeTab === 'lotes-jeringas' && (
+        <LotesJeringasPage />
+      )}
+
+      {activeTab === 'recepcion' && (
+        <RecepcionTab onNuevoIngreso={() => setShowNuevoIngreso(true)} />
+      )}
+
+      {/* Modal de Nuevo Ingreso */}
+      {showNuevoIngreso && (
+        <NuevoIngreso
+          onClose={() => setShowNuevoIngreso(false)}
+          onSuccess={handleNuevoIngresoSuccess}
+          vacunas={vacunasActivas}
+          jeringas={jeringasActivas}
+          isLoadingVacunas={isLoadingVacunas}
+          isLoadingJeringas={isLoadingJeringas}
+        />
+      )}
+    </div>
+  );
+};
+
+// Recepción Tab
+interface RecepcionTabProps {
+  onNuevoIngreso: () => void;
+}
+
+const RecepcionTab: React.FC<RecepcionTabProps> = ({ onNuevoIngreso }) => {
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+        <FileText className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Nuevo Ingreso de Inventario</h3>
+        <p className="text-gray-600 mb-6">
+          Registre la recepción de nuevos lotes de vacunas y jeringas de manera rápida y sencilla.
+        </p>
+        <div className="flex justify-center space-x-4">
+          <button 
+            onClick={onNuevoIngreso}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+          >
+            <Plus className="h-5 w-5 inline mr-2" />
+            Nuevo Ingreso
+          </button>
+        </div>
+        
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h4 className="font-medium text-gray-900 mb-2">✅ Proceso Simplificado:</h4>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• Selección rápida de tipo (Vacuna/Jeringa)</li>
+              <li>• Formulario intuitivo paso a paso</li>
+              <li>• Validaciones automáticas</li>
+              <li>• Generación automática de códigos</li>
+              <li>• Confirmación visual de ingreso</li>
+            </ul>
+          </div>
+          <div className="border border-gray-200 rounded-lg p-4">
+            <h4 className="font-medium text-gray-900 mb-2">🔄 Controles Automáticos:</h4>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• Validación de fechas de vencimiento</li>
+              <li>• Verificación de lotes duplicados</li>
+              <li>• Cálculo automático de stock</li>
+              <li>• Generación de alertas</li>
+              <li>• Registro en historial (Kardex)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Inventario;

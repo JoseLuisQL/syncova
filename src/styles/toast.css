@@ -1,0 +1,253 @@
+/* Toast Animations */
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes progress-shrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Toast Container */
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  max-width: 24rem;
+  width: 100%;
+  pointer-events: none;
+}
+
+.toast-container > * {
+  pointer-events: auto;
+}
+
+/* Toast Base Styles */
+.toast {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid;
+  animation: toast-slide-in 0.3s ease-out forwards;
+  transition: all 0.3s ease;
+}
+
+.toast.toast-leaving {
+  animation: toast-slide-out 0.3s ease-in forwards;
+}
+
+/* Toast Types */
+.toast-success {
+  border-left-color: #10b981;
+}
+
+.toast-error {
+  border-left-color: #ef4444;
+}
+
+.toast-warning {
+  border-left-color: #f59e0b;
+}
+
+.toast-info {
+  border-left-color: #3b82f6;
+}
+
+/* Toast Content */
+.toast-icon {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.75rem;
+  margin-top: 0.125rem;
+}
+
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 0.25rem;
+}
+
+.toast-message {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.toast-action {
+  margin-top: 0.75rem;
+}
+
+.toast-action button {
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toast-action button:hover {
+  text-decoration: none;
+}
+
+/* Close Button */
+.toast-close {
+  flex-shrink: 0;
+  margin-left: 0.75rem;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  color: #9ca3af;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toast-close:hover {
+  color: #6b7280;
+  background-color: #f3f4f6;
+}
+
+/* Progress Bar */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0.25rem;
+  background-color: #e5e7eb;
+  border-radius: 0 0 0.5rem 0.5rem;
+  overflow: hidden;
+}
+
+.toast-progress-bar {
+  height: 100%;
+  transition: all 0.1s ease-linear;
+}
+
+.toast-progress-bar.success {
+  background-color: #10b981;
+}
+
+.toast-progress-bar.error {
+  background-color: #ef4444;
+}
+
+.toast-progress-bar.warning {
+  background-color: #f59e0b;
+}
+
+.toast-progress-bar.info {
+  background-color: #3b82f6;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .toast-container {
+    top: 0.5rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    max-width: none;
+  }
+  
+  .toast {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .toast {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .toast-message {
+    color: #d1d5db;
+  }
+  
+  .toast-close {
+    color: #6b7280;
+  }
+  
+  .toast-close:hover {
+    color: #9ca3af;
+    background-color: #374151;
+  }
+  
+  .toast-progress {
+    background-color: #374151;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .toast {
+    border-width: 2px;
+    border-style: solid;
+  }
+  
+  .toast-success {
+    border-color: #10b981;
+  }
+  
+  .toast-error {
+    border-color: #ef4444;
+  }
+  
+  .toast-warning {
+    border-color: #f59e0b;
+  }
+  
+  .toast-info {
+    border-color: #3b82f6;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+    transition: none;
+  }
+  
+  .toast-progress-bar {
+    transition: none;
+  }
+}
