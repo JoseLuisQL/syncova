@@ -79,23 +79,20 @@ const Kardex: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<string>('todos');
   const [selectedLote, setSelectedLote] = useState<string>('todos');
   const [selectedEstablecimiento, setSelectedEstablecimiento] = useState<string>('todos');
-  const [fechaInicio, setFechaInicio] = useState<string>(filtros.fechaInicio || '');
-  const [fechaFin, setFechaFin] = useState<string>(filtros.fechaFin || '');
+  const [fechaInicio, setFechaInicio] = useState<string>('');
+  const [fechaFin, setFechaFin] = useState<string>('');
   const [tipoMovimiento, setTipoMovimiento] = useState<string>('todos');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Sincronizar filtros locales con el hook cuando cambian (solo si son diferentes)
+  // Inicializar fechas solo una vez cuando los filtros estén disponibles
   useEffect(() => {
-    const nuevaFechaInicio = filtros.fechaInicio || '';
-    const nuevaFechaFin = filtros.fechaFin || '';
-
-    if (fechaInicio !== nuevaFechaInicio) {
-      setFechaInicio(nuevaFechaInicio);
+    if (filtros.fechaInicio && !fechaInicio) {
+      setFechaInicio(filtros.fechaInicio);
     }
-    if (fechaFin !== nuevaFechaFin) {
-      setFechaFin(nuevaFechaFin);
+    if (filtros.fechaFin && !fechaFin) {
+      setFechaFin(filtros.fechaFin);
     }
-  }, [filtros.fechaInicio, filtros.fechaFin, fechaInicio, fechaFin]);
+  }, [filtros.fechaInicio, filtros.fechaFin]); // Solo cuando cambien los filtros iniciales
 
   // Función para aplicar filtros (sin useCallback para evitar dependencias)
   const aplicarFiltros = () => {
@@ -132,14 +129,7 @@ const Kardex: React.FC = () => {
     }
   }, [selectedTipo, selectedItem, cargarLotes]);
 
-  // Aplicar filtros con debounce cuando cambian los valores
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      aplicarFiltros();
-    }, 100); // Debounce reducido para testing
-
-    return () => clearTimeout(timeoutId);
-  }, [selectedTipo, selectedItem, selectedLote, tipoMovimiento, fechaInicio, fechaFin, searchTerm]); // Dependencias directas
+  // Removed automatic filter execution - filters now only execute when "Apply Filters" button is clicked
 
   const tabs = [
     { id: 'movimientos', label: 'Movimientos de Kardex', icon: BookOpen },
@@ -193,7 +183,7 @@ const Kardex: React.FC = () => {
     refrescarTodo();
   };
 
-  // Función para limpiar filtros
+  // Función para limpiar filtros (solo resetea UI, no ejecuta automáticamente)
   const handleLimpiarFiltros = () => {
     console.log('🧹 Limpiando filtros UI');
     setSelectedTipo('todos');
@@ -203,7 +193,7 @@ const Kardex: React.FC = () => {
     setSearchTerm('');
     setFechaInicio('');
     setFechaFin('');
-    limpiarFiltros();
+    // No llamamos limpiarFiltros() aquí - el usuario debe hacer clic en "Aplicar Filtros"
   };
 
   // Mostrar loading inicial si están cargando los datos básicos
