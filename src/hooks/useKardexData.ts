@@ -69,9 +69,10 @@ interface KardexDataActions {
  */
 const FILTROS_DEFECTO: KardexFilters = {
   page: 1,
-  limit: 10, // Cambiado a 10 elementos por página por defecto
-  fechaInicio: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0], // Inicio del año actual
-  fechaFin: new Date().toISOString().split('T')[0] // Fecha actual
+  limit: 100, // Aumentado a 100 elementos por página para mostrar más datos
+  // Removidas las fechas por defecto para mostrar todos los registros históricos
+  // fechaInicio: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0], // Inicio del año actual
+  // fechaFin: new Date().toISOString().split('T')[0] // Fecha actual
 };
 
 /**
@@ -93,7 +94,7 @@ export const useKardexData = () => {
 
     // Estados de paginación
     currentPage: 1,
-    itemsPerPage: 10, // Cambiado a 10 elementos por página por defecto
+    itemsPerPage: 100, // Aumentado a 100 elementos por página por defecto
     totalPages: 0,
 
     // Estados de carga
@@ -125,14 +126,14 @@ export const useKardexData = () => {
       console.log('📊 Resultado obtenido:', { total: resultado.total, movimientos: resultado.movimientos.length }); // Debug log
 
       setState(prev => {
-        const totalPages = Math.ceil(resultado.total / (filtrosFinales.limit || 10));
+        const totalPages = Math.ceil(resultado.total / (filtrosFinales.limit || 100));
         return {
           ...prev,
           movimientos: resultado.movimientos,
           total: resultado.total,
           totalPages,
           currentPage: filtrosFinales.page || 1,
-          itemsPerPage: filtrosFinales.limit || 10,
+          itemsPerPage: filtrosFinales.limit || 100,
           loading: false
         };
       });

@@ -105,7 +105,7 @@ const Kardex: React.FC = () => {
       fechaFin: fechaFin || undefined,
       search: searchTerm || undefined,
       page: 1, // Resetear a la primera página al aplicar filtros
-      limit: 10 // Usar 10 elementos por página por defecto
+      limit: 100 // Aumentado a 100 elementos por página para mostrar más datos
     };
 
     console.log('🎯 Aplicando filtros desde UI:', {
@@ -917,7 +917,7 @@ const PaginationComponent: React.FC<PaginationComponentProps> = ({
   };
 
   const pageNumbers = getPageNumbers();
-  const itemsPerPageOptions = [10, 25, 50, 100];
+  const itemsPerPageOptions = [25, 50, 100, 200, 500];
 
   if (total === 0) return null;
 

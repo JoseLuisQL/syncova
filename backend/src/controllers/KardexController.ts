@@ -27,7 +27,7 @@ export class KardexController {
         fechaFin,
         search,
         page = '1',
-        limit = '50'
+        limit = '100'
       } = req.query;
 
       // Validaciones de parámetros
@@ -39,8 +39,8 @@ export class KardexController {
         return;
       }
 
-      if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
-        ResponseUtil.error(res, 'El parámetro limit debe ser un número entre 1 y 100', 400);
+      if (isNaN(limitNum) || limitNum < 1 || limitNum > 1000) {
+        ResponseUtil.error(res, 'El parámetro limit debe ser un número entre 1 y 1000', 400);
         return;
       }
 

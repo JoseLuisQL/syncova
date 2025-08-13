@@ -145,7 +145,7 @@ export class KardexService {
         fechaFin,
         search,
         page = 1,
-        limit = 50
+        limit = 100
       } = filters || {};
 
       // Construir condiciones de filtro
