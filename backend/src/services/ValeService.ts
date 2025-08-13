@@ -902,6 +902,9 @@ export class ValeService {
           },
           errores
         };
+      }, {
+        maxWait: 30000, // 30 segundos máximo de espera
+        timeout: 120000, // 120 segundos de timeout (2 minutos)
       });
 
       return {
@@ -1738,6 +1741,9 @@ export class ValeService {
           stocksAfectadosVacunas,
           stocksAfectadosJeringas
         };
+      }, {
+        maxWait: 30000, // 30 segundos máximo de espera
+        timeout: 120000, // 120 segundos de timeout (2 minutos)
       });
 
       console.log(`✅ [ValeService] Vale sincronizado exitosamente. Modificaciones: ${result.modificaciones.length}`);
