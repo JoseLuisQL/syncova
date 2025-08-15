@@ -4,7 +4,8 @@ import {
   Establecimiento,
   CreateEstablecimientoDto,
   UpdateEstablecimientoDto,
-  EstablecimientoFilters
+  EstablecimientoFilters,
+  CentroAcopio
 } from '../types';
 import EstablecimientoService from '../services/establecimientoService';
 import { useApi, useCrudApi } from './useApi';
@@ -16,11 +17,11 @@ import { logger } from '../utils/debug';
 export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
   // Estados principales
   const [establecimientos, setEstablecimientos] = useState<Establecimiento[]>([]);
-  const [centrosAcopio, setCentrosAcopio] = useState<Establecimiento[]>([]);
+  const [centrosAcopio, setCentrosAcopio] = useState<CentroAcopio[]>([]);
   const [filters, setFilters] = useState<EstablecimientoFilters>(initialFilters || {});
   const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 50,
+    page: initialFilters?.page || 1,
+    limit: initialFilters?.limit || 50,
     total: 0,
     totalPages: 0
   });
@@ -32,7 +33,7 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
     pagination: any;
   }>();
   const crudApi = useCrudApi<Establecimiento>();
-  const centrosApi = useApi<Establecimiento[]>();
+  const centrosApi = useApi<CentroAcopio[]>();
 
   /**
    * Cargar establecimientos con filtros
@@ -68,7 +69,7 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
       logger.error('Error al cargar establecimientos:', error);
       setEstablecimientos([]);
     }
-  }, [listApi.isLoading]); // Solo depende del estado de carga
+  }, [listApi]); // Solo depende de la API para evitar problemas de dependencias circulares
 
   /**
    * Cargar centros de acopio
@@ -247,16 +248,19 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
   // Cargar datos iniciales - SIN DEPENDENCIAS para evitar bucle infinito
   useEffect(() => {
     logger.info('Inicializando hook useEstablecimientos');
-
     const initializeData = async () => {
       try {
-        await loadEstablecimientos();
+        // Usar los filtros iniciales si están disponibles, sino usar filtros por defecto
+        if (initialFilters) {
+          await loadEstablecimientos(initialFilters);
+        } else {
+          await loadEstablecimientos();
+        }
         await loadCentrosAcopio();
       } catch (error) {
         logger.error('Error al inicializar datos:', error);
       }
     };
-
     initializeData();
   }, []); // Array vacío para ejecutar solo una vez
 

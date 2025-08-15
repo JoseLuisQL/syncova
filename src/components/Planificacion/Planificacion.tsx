@@ -32,7 +32,8 @@ import {
   PlanificacionAnual,
   PlanificacionConRelaciones,
   CreatePlanificacionDto,
-  UpdatePlanificacionDto
+  UpdatePlanificacionDto,
+  CentroAcopio
 } from '../../types';
 import { usePlanificacion } from '../../hooks/usePlanificacion';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
@@ -93,7 +94,13 @@ const Planificacion: React.FC = () => {
     refresh
   } = usePlanificacion();
 
-  const { establecimientos, loadEstablecimientos, isLoading: isLoadingEstablecimientos } = useEstablecimientos();
+  const {
+    establecimientos,
+    centrosAcopio,
+    loadEstablecimientos,
+    loadCentrosAcopio,
+    isLoading: isLoadingEstablecimientos
+  } = useEstablecimientos({ limit: 1000 }); // Cargar hasta 1000 establecimientos para planificaciones
   const { vacunas, loadVacunasActivas, isLoading: isLoadingVacunas } = useVacunas();
 
   const tabs = [
@@ -102,9 +109,6 @@ const Planificacion: React.FC = () => {
     { id: 'distribucion', label: 'Distribución Automática', icon: Calculator },
     { id: 'reportes', label: 'Reportes y Análisis', icon: BarChart3 },
   ];
-
-  // Filtrar centros de acopio
-  const centrosAcopio = establecimientos.filter(e => e.tipo === 'centro_acopio');
 
   // Obtener establecimientos según el filtro seleccionado
   const getEstablecimientosFiltrados = () => {
@@ -119,9 +123,13 @@ const Planificacion: React.FC = () => {
 
   const establecimientosFiltrados = getEstablecimientosFiltrados();
 
+
+
   // Cargar datos iniciales
   useEffect(() => {
-    loadEstablecimientos();
+    // Cargar establecimientos con límite alto para planificaciones
+    loadEstablecimientos({ limit: 1000 });
+    loadCentrosAcopio();
     loadVacunasActivas();
   }, []);
 
@@ -843,7 +851,7 @@ interface ProgramacionPorVacunaTabProps {
   setSelectedCentroAcopio: (id: string) => void;
   selectedVacuna: string;
   setSelectedVacuna: (id: string) => void;
-  centrosAcopio: Establecimiento[];
+  centrosAcopio: CentroAcopio[];
   vacunas: Vacuna[];
   datosVacuna: any;
   mesesCortos: string[];

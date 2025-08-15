@@ -37,7 +37,8 @@ import {
   MovimientoConRelaciones,
   MovimientoCalculado,
   CreateMovimientoDto,
-  UpdateMovimientoDto
+  UpdateMovimientoDto,
+  CentroAcopio
 } from '../../types';
 import { useMovimientos } from '../../hooks/useMovimientos';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
@@ -69,9 +70,11 @@ const Movimientos: React.FC = () => {
 
   const {
     establecimientos,
+    centrosAcopio,
     isLoading: isLoadingEstablecimientos,
-    loadEstablecimientos
-  } = useEstablecimientos();
+    loadEstablecimientos,
+    loadCentrosAcopio
+  } = useEstablecimientos({ limit: 1000 }); // Cargar hasta 1000 establecimientos para movimientos
 
   const {
     vacunasActivas,
@@ -177,7 +180,8 @@ const Movimientos: React.FC = () => {
     const loadInitialData = async () => {
       try {
         await Promise.all([
-          loadEstablecimientos(),
+          // loadEstablecimientos({ limit: 1000 }), // El hook ya carga automáticamente con los filtros correctos
+          loadCentrosAcopio(),
           loadVacunasActivas()
         ]);
       } catch (error) {
@@ -246,10 +250,6 @@ const Movimientos: React.FC = () => {
   }, []);
 
   // Datos derivados
-  const centrosAcopio = useMemo(() => 
-    establecimientos.filter(e => e.tipo === 'centro_acopio'),
-    [establecimientos]
-  );
 
   const vacunaSeleccionada = useMemo(() =>
     vacunasActivas.find(v => v.id === selectedVacuna),

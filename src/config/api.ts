@@ -146,15 +146,21 @@ export interface QueryParams {
 export const buildQueryParams = (params?: QueryParams): string => {
   if (!params) return '';
 
+  console.log('🔧 buildQueryParams - Parámetros recibidos:', params);
+
   const searchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
+      console.log(`🔧 buildQueryParams - Agregando: ${key} = ${value}`);
       searchParams.append(key, value.toString());
+    } else {
+      console.log(`🔧 buildQueryParams - Omitiendo: ${key} = ${value} (undefined/null/empty)`);
     }
   });
 
   const queryString = searchParams.toString();
+  console.log('🔧 buildQueryParams - Query string final:', queryString);
   return queryString ? `?${queryString}` : '';
 };
 

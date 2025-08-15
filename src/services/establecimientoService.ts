@@ -9,7 +9,8 @@ import {
   Establecimiento,
   CreateEstablecimientoDto,
   UpdateEstablecimientoDto,
-  EstablecimientoFilters
+  EstablecimientoFilters,
+  CentroAcopio
 } from '../types';
 import { AxiosError } from 'axios';
 import { logger } from '../utils/debug';
@@ -36,7 +37,7 @@ export class EstablecimientoService {
   }> {
     try {
       const queryString = filters ? buildQueryParams(filters) : '';
-      const url = `${this.BASE_PATH}${queryString ? `?${queryString}` : ''}`;
+      const url = `${this.BASE_PATH}${queryString}`;
 
       logger.debug('Obteniendo establecimientos', { url, filters });
 
@@ -113,11 +114,11 @@ export class EstablecimientoService {
   /**
    * Obtener todos los centros de acopio
    */
-  static async getCentrosAcopio(): Promise<Establecimiento[]> {
+  static async getCentrosAcopio(): Promise<CentroAcopio[]> {
     try {
       logger.debug('Obteniendo centros de acopio');
 
-      const response = await apiClient.get<ApiResponse<Establecimiento[]>>(`${this.BASE_PATH}/centros-acopio`);
+      const response = await apiClient.get<ApiResponse<CentroAcopio[]>>(`${this.BASE_PATH}/centros-acopio`);
 
       if (response.data.success && response.data.data) {
         logger.info(`Centros de acopio obtenidos: ${response.data.data.length}`);

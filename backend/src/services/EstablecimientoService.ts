@@ -27,6 +27,8 @@ export class EstablecimientoService {
         limit = 50
       } = filters || {};
 
+
+
       // Construir condiciones de filtro
       const where: any = {};
 

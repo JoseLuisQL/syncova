@@ -724,478 +724,559 @@ async function main() {
     console.log('   - Centros de Acopio creados');
     console.log(`   - ${establecimientosCreados} Establecimientos creados`);
 
-    // Insertar vacunas del esquema nacional
-    console.log('💉 Insertando catálogo de vacunas...');
+    // Insertar vacunas del esquema nacional - DATOS REALES
+    console.log('💉 Insertando catálogo de vacunas con datos reales...');
 
-    const vacunas = [
-      // Vacunas del esquema regular
+    const vacunasReales = [
+      // Datos reales del sistema SIVAC
       {
-        nombre: 'BCG',
-        tipo: 'Antituberculosa',
-        presentacion: 'Frasco multidosis',
-        dosisPorFrasco: 10,
-        tiempoVidaUtil: 1825, // 5 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 1,
+        sigla: 'BCG',
+        nombre: 'VACUNA ANTITUBERCULOSA (BCG) 3200000 U/0.1 ML INY 10 DOSIS',
+        numDosis: 1,
+        estado: 1
       },
       {
-        nombre: 'HVB Pediátrico',
-        tipo: 'Hepatitis B',
-        presentacion: 'Frasco unidosis',
-        dosisPorFrasco: 1,
-        tiempoVidaUtil: 1095, // 3 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 2,
+        sigla: 'HVB Pediatrico',
+        nombre: 'VACUNA CONTRA LA HEPATITIS B 10 UG/0.5 ML INY 1 DOSIS',
+        numDosis: 1,
+        estado: 1
       },
       {
-        nombre: 'HVB Adulto',
-        tipo: 'Hepatitis B',
-        presentacion: 'Frasco unidosis',
-        dosisPorFrasco: 1,
-        tiempoVidaUtil: 1095, // 3 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 3,
+        sigla: 'HVB Adulto',
+        nombre: 'VACUNA CONTRA LA HEPATITIS B ADULTO 20 UG/ML INY 1 DOSIS',
+        numDosis: 3,
+        estado: 1
       },
       {
-        nombre: 'Pentavalente',
-        tipo: 'Combinada',
-        presentacion: 'Frasco unidosis',
-        dosisPorFrasco: 1,
-        tiempoVidaUtil: 1095, // 3 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 4,
+        sigla: 'Pentavalente',
+        nombre: 'VACUNA DPT  HIB Y VHB (PENTAVALENTE) INY  1 DOSIS',
+        numDosis: 3,
+        estado: 1
       },
       {
-        nombre: 'Polio IPV',
-        tipo: 'Antipoliomielítica',
-        presentacion: 'Frasco unidosis',
-        dosisPorFrasco: 1,
-        tiempoVidaUtil: 1095, // 3 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 5,
+        sigla: 'APO',
+        nombre: 'VACUNA ANTIPOLIOMIELITICA BIVALENTE TIPO 1 Y 3 SUSPENSION ORAL 20 DOSIS',
+        numDosis: 1,
+        estado: 1
       },
       {
-        nombre: 'Polio bOPV',
-        tipo: 'Antipoliomielítica',
-        presentacion: 'Frasco multidosis',
-        dosisPorFrasco: 20,
-        tiempoVidaUtil: 730, // 2 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 6,
+        sigla: 'Neumococo',
+        nombre: 'VACUNA ANTINEUMOCOCICA CONJUGADA 13-VALENTE INY 1 DOSIS',
+        numDosis: 3,
+        estado: 1
       },
       {
-        nombre: 'Rotavirus',
-        tipo: 'Antirrotavirus',
-        presentacion: 'Frasco unidosis',
-        dosisPorFrasco: 1,
-        tiempoVidaUtil: 1095, // 3 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 7,
+        sigla: 'Rotavirus',
+        nombre: 'VACUNA CONTRA EL ROTAVIRUS PLV 1 DOSIS',
+        numDosis: 2,
+        estado: 1
       },
       {
-        nombre: 'Neumococo',
-        tipo: 'Antineumocócica',
-        presentacion: 'Frasco unidosis',
-        dosisPorFrasco: 1,
-        tiempoVidaUtil: 1095, // 3 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 8,
+        sigla: 'Influenza Pediatrica',
+        nombre: 'VACUNA CONTRA LA INFLUENZA (ANTIGENO TIPO A (H1N1 + H3N2) + ANTIGENO TIPO B) INY 20 DOSIS PEDIÃTRICO',
+        numDosis: 4,
+        estado: 1
       },
       {
-        nombre: 'SPR',
-        tipo: 'Triple viral',
-        presentacion: 'Frasco multidosis',
-        dosisPorFrasco: 10,
-        tiempoVidaUtil: 730, // 2 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 9,
+        sigla: 'DPT',
+        nombre: 'VACUNA CONTRA DIFTERIA TETANOS Y TOS FERINA (DPT TRIPLE)  INY 10 DOSIS',
+        numDosis: 2,
+        estado: 1
       },
       {
-        nombre: 'Varicela',
-        tipo: 'Antivaricela',
-        presentacion: 'Frasco unidosis',
-        dosisPorFrasco: 1,
-        tiempoVidaUtil: 730, // 2 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 10,
+        sigla: 'HIB',
+        nombre: 'HIB',
+        numDosis: 1,
+        estado: 0
       },
       {
-        nombre: 'Influenza Pediátrica',
-        tipo: 'Antiinfluenza',
-        presentacion: 'Frasco multidosis',
-        dosisPorFrasco: 10,
-        tiempoVidaUtil: 365, // 1 año
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 11,
+        sigla: 'SPR X 1 DOSIS',
+        nombre: 'VACUNA ANTIPAROTIDITIS RUBEOLA Y SARAMPION 700 DCI/0.5 ML INY 1 DOSIS',
+        numDosis: 2,
+        estado: 1
       },
       {
-        nombre: 'Influenza Adulto',
-        tipo: 'Antiinfluenza',
-        presentacion: 'Frasco multidosis',
-        dosisPorFrasco: 10,
-        tiempoVidaUtil: 365, // 1 año
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 12,
+        sigla: 'AMA',
+        nombre: 'VACUNA ANTIAMARILICA 1000 DL/0.5 ML INY 10 DOSIS',
+        numDosis: 10,
+        estado: 1
       },
       {
-        nombre: 'DT Adulto',
-        tipo: 'Antidiftérica-Antitetánica',
-        presentacion: 'Frasco multidosis',
-        dosisPorFrasco: 10,
-        tiempoVidaUtil: 1095, // 3 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 14,
+        sigla: 'Dt Adulto',
+        nombre: 'VACUNA CONTRA LA DIFTERIA Y TETANOS (DT ADULTO)  INY 10 DOSIS',
+        numDosis: 3,
+        estado: 1
       },
       {
-        nombre: 'dT Adulto',
-        tipo: 'Antidiftérica-Antitetánica',
-        presentacion: 'Frasco multidosis',
-        dosisPorFrasco: 10,
-        tiempoVidaUtil: 1095, // 3 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
+        codVacuna: 15,
+        sigla: 'Dt Pediatrico',
+        nombre: 'VACUNA CONTRA LA DIFTERIA Y TETANOS (DT PEDIATRICO)  INY 10 DOSIS',
+        numDosis: 1,
+        estado: 1
       },
       {
-        nombre: 'Fiebre Amarilla',
-        tipo: 'Antiamarílica',
-        presentacion: 'Frasco multidosis',
-        dosisPorFrasco: 5,
-        tiempoVidaUtil: 1095, // 3 años
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo'
-      },
-      // Vacunas especiales
-      {
-        nombre: 'COVID-19 Pfizer',
-        tipo: 'Anti-SARS-CoV-2',
-        presentacion: 'Frasco multidosis',
-        dosisPorFrasco: 6,
-        tiempoVidaUtil: 270, // 9 meses
-        temperaturaAlmacenamiento: '-70°C a -80°C',
-        estado: 'activo'
+        codVacuna: 16,
+        sigla: 'IPV',
+        nombre: 'VACUNA ANTIPOLIOMIELITICA 80 LF/0.5 ML INY 1 DOSIS',
+        numDosis: 4,
+        estado: 1
       },
       {
-        nombre: 'COVID-19 AstraZeneca',
-        tipo: 'Anti-SARS-CoV-2',
-        presentacion: 'Frasco multidosis',
-        dosisPorFrasco: 10,
-        tiempoVidaUtil: 180, // 6 meses
-        temperaturaAlmacenamiento: '2°C a 8°C',
-        estado: 'activo' as const
+        codVacuna: 17,
+        sigla: 'Influenza Adulto',
+        nombre: 'VACUNA CONTRA LA INFLUENZA ESTACIONARIA - ADULTO 1 DOSIS (0.5 ML)',
+        numDosis: 1,
+        estado: 1
+      },
+      {
+        codVacuna: 18,
+        sigla: 'VPH',
+        nombre: 'VACUNA DEL VIRUS DEL PAPILOMA HUMANO',
+        numDosis: 1,
+        estado: 1
+      },
+      {
+        codVacuna: 19,
+        sigla: 'Varicela',
+        nombre: 'VACUNA ANTIVARICELA 1350 UFP/0.5 ML INY 0.7 ML',
+        numDosis: 1,
+        estado: 1
+      },
+      {
+        codVacuna: 20,
+        sigla: 'DPTA',
+        nombre: 'VACUNA DPTA ACELULAR',
+        numDosis: 1,
+        estado: 1
+      },
+      {
+        codVacuna: 22,
+        sigla: 'HEPATITIS A',
+        nombre: 'VACUNA CONTRA LA HEPATITIS A 720 UI/0.5 ML INY 1 DOSIS',
+        numDosis: 1,
+        estado: 1
+      },
+      {
+        codVacuna: 38,
+        sigla: 'VIRUELA',
+        nombre: 'VIRUELA SIMICA',
+        numDosis: 10,
+        estado: 0
+      },
+      {
+        codVacuna: 39,
+        sigla: 'SPR X 5 DOSIS',
+        nombre: 'VACUNA ANTIPAROTIDITIS RUBEOLA Y SARAMPION 5 DOSIS',
+        numDosis: 3,
+        estado: 1
       }
     ];
 
-    // Corregir tipos de estado
-    const vacunasCorregidas = vacunas.map(vacuna => ({
-      ...vacuna,
-      estado: 'activo' as const
-    }));
+    // Mapear datos reales a estructura de la base de datos
+    const vacunas = vacunasReales.map(vacuna => {
+      // Determinar tipo basado en el nombre
+      let tipo = 'Vacuna';
+      if (vacuna.nombre.includes('TUBERCULOSA')) tipo = 'Antituberculosa';
+      else if (vacuna.nombre.includes('HEPATITIS B')) tipo = 'Hepatitis B';
+      else if (vacuna.nombre.includes('HEPATITIS A')) tipo = 'Hepatitis A';
+      else if (vacuna.nombre.includes('PENTAVALENTE')) tipo = 'Pentavalente';
+      else if (vacuna.nombre.includes('POLIOMIELITICA')) tipo = 'Antipoliomielítica';
+      else if (vacuna.nombre.includes('NEUMOCOCICA')) tipo = 'Antineumocócica';
+      else if (vacuna.nombre.includes('ROTAVIRUS')) tipo = 'Antirrotavirus';
+      else if (vacuna.nombre.includes('INFLUENZA')) tipo = 'Antiinfluenza';
+      else if (vacuna.nombre.includes('DIFTERIA') && vacuna.nombre.includes('TETANOS')) tipo = 'Antidiftérica-Antitetánica';
+      else if (vacuna.nombre.includes('DPT')) tipo = 'DPT Triple';
+      else if (vacuna.nombre.includes('SARAMPION') || vacuna.nombre.includes('RUBEOLA')) tipo = 'Triple viral';
+      else if (vacuna.nombre.includes('AMARILICA')) tipo = 'Antiamarílica';
+      else if (vacuna.nombre.includes('PAPILOMA')) tipo = 'VPH';
+      else if (vacuna.nombre.includes('VARICELA')) tipo = 'Antivaricela';
+      else if (vacuna.nombre.includes('VIRUELA')) tipo = 'Antiviruela';
+
+      // Determinar presentación basada en el nombre
+      let presentacion = 'Frasco';
+      if (vacuna.nombre.includes('1 DOSIS')) presentacion = 'Frasco unidosis';
+      else if (vacuna.nombre.includes('5 DOSIS')) presentacion = 'Frasco 5 dosis';
+      else if (vacuna.nombre.includes('10 DOSIS')) presentacion = 'Frasco 10 dosis';
+      else if (vacuna.nombre.includes('20 DOSIS')) presentacion = 'Frasco 20 dosis';
+      else if (vacuna.nombre.includes('SUSPENSION ORAL')) presentacion = 'Frasco multidosis oral';
+
+      // Determinar dosis por frasco
+      let dosisPorFrasco = 1;
+      if (vacuna.nombre.includes('5 DOSIS')) dosisPorFrasco = 5;
+      else if (vacuna.nombre.includes('10 DOSIS')) dosisPorFrasco = 10;
+      else if (vacuna.nombre.includes('20 DOSIS')) dosisPorFrasco = 20;
+
+      // Tiempo de vida útil estimado (en días)
+      let tiempoVidaUtil = 1095; // 3 años por defecto
+      if (tipo === 'Antiinfluenza') tiempoVidaUtil = 365; // 1 año
+      else if (tipo === 'Antituberculosa') tiempoVidaUtil = 1825; // 5 años
+      else if (tipo === 'Triple viral' || tipo === 'Antivaricela') tiempoVidaUtil = 730; // 2 años
+
+      return {
+        nombre: vacuna.sigla,
+        tipo: tipo,
+        presentacion: presentacion,
+        dosisPorFrasco: dosisPorFrasco,
+        tiempoVidaUtil: tiempoVidaUtil,
+        temperaturaAlmacenamiento: '2°C a 8°C',
+        estado: vacuna.estado === 1 ? 'activo' as const : 'inactivo' as const
+      };
+    });
 
     await prisma.vacuna.createMany({
-      data: vacunasCorregidas
+      data: vacunas
     });
 
-    console.log(`✅ ${vacunas.length} vacunas insertadas`);
+    console.log(`✅ ${vacunas.length} vacunas reales insertadas`);
 
-    // Insertar catálogo de jeringas
-    console.log('💉 Insertando catálogo de jeringas...');
+    // Insertar catálogo de jeringas - DATOS REALES
+    console.log('💉 Insertando catálogo de jeringas con datos reales...');
 
-    const jeringas = [
-      // Jeringas desechables
+    // Datos reales de jeringas del sistema SIVAC
+    const jeringasReales = [
       {
-        tipo: 'Desechable',
-        capacidad: '0.5ml',
-        color: 'Transparente',
-        estado: 'activo'
+        codJeringa: 1,
+        descripcion: 'Jeringa autoretractil 1cc 27 G x 1/2"'
       },
       {
-        tipo: 'Desechable',
-        capacidad: '1ml',
-        color: 'Transparente',
-        estado: 'activo'
+        codJeringa: 2,
+        descripcion: 'Jeringa autoretractil 1cc 25 G x 5/8"'
       },
       {
-        tipo: 'Desechable',
-        capacidad: '2ml',
-        color: 'Transparente',
-        estado: 'activo'
+        codJeringa: 3,
+        descripcion: 'Jeringa autoretractil 1cc 25 G x 1"'
       },
       {
-        tipo: 'Desechable',
-        capacidad: '3ml',
-        color: 'Transparente',
-        estado: 'activo'
+        codJeringa: 5,
+        descripcion: 'Jeringa 5cc con aguja 21 G X 1 1/2"'
       },
       {
-        tipo: 'Desechable',
-        capacidad: '5ml',
-        color: 'Transparente',
-        estado: 'activo'
-      },
-      {
-        tipo: 'Desechable',
-        capacidad: '10ml',
-        color: 'Transparente',
-        estado: 'activo'
-      },
-      {
-        tipo: 'Desechable',
-        capacidad: '20ml',
-        color: 'Transparente',
-        estado: 'activo'
-      },
-      // Jeringas autoretraíbles
-      {
-        tipo: 'Autoretraíble',
-        capacidad: '0.5ml',
-        color: 'Azul',
-        estado: 'activo'
-      },
-      {
-        tipo: 'Autoretraíble',
-        capacidad: '1ml',
-        color: 'Azul',
-        estado: 'activo'
-      },
-      {
-        tipo: 'Autoretraíble',
-        capacidad: '3ml',
-        color: 'Azul',
-        estado: 'activo'
-      },
-      {
-        tipo: 'Autoretraíble',
-        capacidad: '5ml',
-        color: 'Azul',
-        estado: 'activo'
-      },
-      // Jeringas de seguridad
-      {
-        tipo: 'De seguridad',
-        capacidad: '1ml',
-        color: 'Verde',
-        estado: 'activo'
-      },
-      {
-        tipo: 'De seguridad',
-        capacidad: '3ml',
-        color: 'Verde',
-        estado: 'activo'
-      },
-      {
-        tipo: 'De seguridad',
-        capacidad: '5ml',
-        color: 'Verde',
-        estado: 'activo'
-      },
-      // Jeringas para insulina
-      {
-        tipo: 'Para insulina',
-        capacidad: '0.5ml',
-        color: 'Naranja',
-        estado: 'activo'
-      },
-      {
-        tipo: 'Para insulina',
-        capacidad: '1ml',
-        color: 'Naranja',
-        estado: 'activo'
-      },
-      // Jeringas tuberculina
-      {
-        tipo: 'Tuberculina',
-        capacidad: '1ml',
-        color: 'Amarillo',
-        estado: 'activo'
-      },
-      // Jeringas especiales con otros colores
-      {
-        tipo: 'Desechable',
-        capacidad: '1ml',
-        color: 'Rojo',
-        estado: 'activo'
-      },
-      {
-        tipo: 'Desechable',
-        capacidad: '3ml',
-        color: 'Morado',
-        estado: 'activo'
+        codJeringa: 9,
+        descripcion: 'Jeringa 3 mL con aguja 23 G X 1"'
       }
     ];
 
-    // Corregir tipos de estado para jeringas
-    const jeringasCorregidas = jeringas.map(jeringa => ({
-      ...jeringa,
-      estado: 'activo' as const
-    }));
+    // Mapear datos reales a estructura de la base de datos
+    const jeringas = jeringasReales.map(jeringa => {
+      // Extraer información de la descripción
+      let tipo = 'Jeringa';
+      let capacidad = '';
+      let color = 'Transparente';
 
-    await prisma.jeringa.createMany({
-      data: jeringasCorregidas
+      const desc = jeringa.descripcion.toLowerCase();
+
+      // Determinar tipo
+      if (desc.includes('autoretractil')) {
+        tipo = 'Autoretraíble';
+        color = 'Azul'; // Las jeringas autoretraíbles suelen ser azules
+      } else if (desc.includes('con aguja')) {
+        tipo = 'Con aguja';
+        color = 'Transparente';
+      }
+
+      // Extraer capacidad
+      if (desc.includes('1cc') || desc.includes('1 cc')) {
+        capacidad = '1cc';
+      } else if (desc.includes('3cc') || desc.includes('3 ml') || desc.includes('3ml')) {
+        capacidad = '3ml';
+      } else if (desc.includes('5cc') || desc.includes('5 ml') || desc.includes('5ml')) {
+        capacidad = '5ml';
+      }
+
+      return {
+        tipo: jeringa.descripcion, // Usar la descripción completa como tipo para mayor precisión
+        capacidad: capacidad,
+        color: color,
+        estado: 'activo' as const
+      };
     });
 
-    console.log(`✅ ${jeringas.length} jeringas insertadas`);
+    await prisma.jeringa.createMany({
+      data: jeringas
+    });
 
-    // Insertar lotes de vacunas
-    console.log('📦 Insertando lotes de vacunas...');
+    console.log(`✅ ${jeringas.length} jeringas reales insertadas`);
 
-    // Obtener las vacunas creadas para referenciarlas
+    // Insertar lotes de vacunas - DATOS REALES
+    console.log('📦 Insertando lotes de vacunas con datos reales...');
+
+    // Obtener las vacunas creadas para referenciarlas por sigla
     const vacunasCreadas = await prisma.vacuna.findMany({
       select: { id: true, nombre: true }
     });
 
+    // Crear mapa de vacunas por sigla para búsqueda rápida
+    const vacunaMap = new Map(vacunasCreadas.map(v => [v.nombre, v.id]));
+
+    // Datos reales de lotes de vacunas
+    const lotesReales = [
+      { codLote: 97, lote: "0373MA087", cantIngreso: 200, cantidadActual: 0, fechaIngreso: "2024-12-16", fechaVencimiento: "2026-01-31", codVacuna: 1, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "108730-2024", fechaRegistro: "2025-01-09 21:59:45" },
+      { codLote: 98, lote: "0343Q013C", cantIngreso: 1000, cantidadActual: 0, fechaIngreso: "2024-12-16", fechaVencimiento: "2026-02-28", codVacuna: 3, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "109381-2024", fechaRegistro: "2025-01-09 22:04:24" },
+      { codLote: 99, lote: "HG2621", cantIngreso: 5000, cantidadActual: 0, fechaIngreso: "2024-12-16", fechaVencimiento: "2026-05-31", codVacuna: 6, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "108730-20254", fechaRegistro: "2025-01-09 22:06:56" },
+      { codLote: 100, lote: "1804P063", cantIngreso: 200, cantidadActual: 0, fechaIngreso: "2024-12-16", fechaVencimiento: "2026-03-31", codVacuna: 5, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "108730-2024", fechaRegistro: "2025-01-09 22:16:02" },
+      { codLote: 101, lote: "2823Q0188", cantIngreso: 200, cantidadActual: 37, fechaIngreso: "2024-12-16", fechaVencimiento: "2025-12-31", codVacuna: 9, habilitado: 1, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "108730-2024", fechaRegistro: "2025-01-09 22:21:50" },
+      { codLote: 102, lote: "0323Y009E", cantIngreso: 500, cantidadActual: 0, fechaIngreso: "2024-12-16", fechaVencimiento: "2026-02-28", codVacuna: 2, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "108730-2024", fechaRegistro: "2025-01-09 22:24:15" },
+      { codLote: 103, lote: "AROLLE017BB", cantIngreso: 900, cantidadActual: 0, fechaIngreso: "2024-12-16", fechaVencimiento: "2026-08-31", codVacuna: 7, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "108730-2024", fechaRegistro: "2025-01-09 22:28:40" },
+      { codLote: 151, lote: "2332X013A", cantIngreso: 150, cantidadActual: 0, fechaIngreso: "2025-02-11", fechaVencimiento: "2025-07-31", codVacuna: 14, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "0099251-2025", fechaRegistro: "2025-03-05 14:53:10" },
+      { codLote: 105, lote: "Y005723", cantIngreso: 600, cantidadActual: 0, fechaIngreso: "2024-12-16", fechaVencimiento: "2025-12-07", codVacuna: 19, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "108730-2024", fechaRegistro: "2025-01-09 22:32:09" },
+      { codLote: 106, lote: "2854Z011", cantIngreso: 1500, cantidadActual: 0, fechaIngreso: "2024-12-16", fechaVencimiento: "2026-11-30", codVacuna: 4, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "108730-2024", fechaRegistro: "2025-01-09 22:33:46" },
+      { codLote: 107, lote: "X3H441V", cantIngreso: 200, cantidadActual: 0, fechaIngreso: "2024-12-16", fechaVencimiento: "2026-09-30", codVacuna: 12, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "200", fechaRegistro: "2025-01-09 22:35:49" },
+      { codLote: 108, lote: "X3G510V", cantIngreso: 1000, cantidadActual: 0, fechaIngreso: "2024-12-16", fechaVencimiento: "2026-08-31", codVacuna: 16, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "108730-2024", fechaRegistro: "2025-01-09 22:37:33" },
+      { codLote: 109, lote: "0154W005", cantIngreso: 400, cantidadActual: 25, fechaIngreso: "2024-12-16", fechaVencimiento: "2026-11-30", codVacuna: 39, habilitado: 1, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "108730-2024", fechaRegistro: "2025-01-15 17:40:33" },
+      { codLote: 152, lote: "Y008969", cantIngreso: 2000, cantidadActual: 0, fechaIngreso: "2025-01-25", fechaVencimiento: "2027-02-08", codVacuna: 18, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "1198-2025", fechaRegistro: "2025-02-04 14:56:40" },
+      { codLote: 159, lote: "X2A691V", cantIngreso: 1500, cantidadActual: 0, fechaIngreso: "2025-01-25", fechaVencimiento: "2026-09-30", codVacuna: 16, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "1868-2025", fechaRegistro: "2025-02-04 15:28:03" },
+      { codLote: 164, lote: "AHAVC159CA", cantIngreso: 500, cantidadActual: 0, fechaIngreso: "2025-01-25", fechaVencimiento: "2026-06-30", codVacuna: 22, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "2561-2025", fechaRegistro: "2025-02-04 15:46:50" },
+      { codLote: 149, lote: "0373MA116", cantIngreso: 200, cantidadActual: 0, fechaIngreso: "2025-01-25", fechaVencimiento: "2026-06-30", codVacuna: 1, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "2561-2025", fechaRegistro: "2025-02-04 14:43:23" },
+      { codLote: 157, lote: "0344L001B", cantIngreso: 1171, cantidadActual: 0, fechaIngreso: "2025-02-11", fechaVencimiento: "2027-05-31", codVacuna: 3, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "009251-2025", fechaRegistro: "2025-03-05 15:15:22" },
+      { codLote: 155, lote: "HW2966", cantIngreso: 2000, cantidadActual: 255, fechaIngreso: "2025-03-25", fechaVencimiento: "2026-11-30", codVacuna: 6, habilitado: 1, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "14991-2025", fechaRegistro: "2025-04-08 15:06:11" },
+      { codLote: 158, lote: "AROLE054AA", cantIngreso: 900, cantidadActual: 0, fechaIngreso: "2025-03-25", fechaVencimiento: "2026-10-31", codVacuna: 7, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "15427-2025", fechaRegistro: "2025-04-08 15:19:45" },
+      { codLote: 163, lote: "Y3A821V", cantIngreso: 200, cantidadActual: 0, fechaIngreso: "2025-03-25", fechaVencimiento: "2027-01-31", codVacuna: 12, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "16057-2025", fechaRegistro: "2025-04-08 15:43:57" },
+      { codLote: 156, lote: "Y018366", cantIngreso: 600, cantidadActual: 0, fechaIngreso: "2025-03-25", fechaVencimiento: "2026-11-05", codVacuna: 19, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "15859-2025", fechaRegistro: "2025-04-08 15:10:31" },
+      { codLote: 154, lote: "0324Q002E", cantIngreso: 500, cantidadActual: 0, fechaIngreso: "2025-03-25", fechaVencimiento: "2027-05-31", codVacuna: 2, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "15875-2025", fechaRegistro: "2025-04-08 15:03:20" },
+      { codLote: 150, lote: "2823Q019A", cantIngreso: 200, cantidadActual: 0, fechaIngreso: "2025-03-25", fechaVencimiento: "2025-12-11", codVacuna: 9, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "15109-2025", fechaRegistro: "2025-04-08 14:50:08" },
+      { codLote: 162, lote: "2854X013F", cantIngreso: 1500, cantidadActual: 0, fechaIngreso: "2025-03-25", fechaVencimiento: "2026-11-30", codVacuna: 4, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "17386-2025", fechaRegistro: "2025-04-08 15:37:17" },
+      { codLote: 175, lote: "X019915", cantIngreso: 2500, cantidadActual: 0, fechaIngreso: "2025-04-28", fechaVencimiento: "2026-05-15", codVacuna: 18, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "035316", fechaRegistro: "2025-04-28 21:12:59" },
+      { codLote: 147, lote: "0133N019B", cantIngreso: 1000, cantidadActual: 0, fechaIngreso: "2025-03-25", fechaVencimiento: "2025-10-31", codVacuna: 11, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "15333-2025", fechaRegistro: "2025-04-03 17:33:02" },
+      { codLote: 160, lote: "X3H252V", cantIngreso: 2000, cantidadActual: 0, fechaIngreso: "2025-03-25", fechaVencimiento: "2026-08-31", codVacuna: 16, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "15601-2025", fechaRegistro: "2025-04-08 15:30:02" },
+      { codLote: 161, lote: "AC37B473AA", cantIngreso: 100, cantidadActual: 0, fechaIngreso: "2025-02-11", fechaVencimiento: "2027-04-30", codVacuna: 20, habilitado: 0, formaIngreso: "1° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "008978", fechaRegistro: "2025-02-16 15:33:04" },
+      { codLote: 165, lote: "AC37B489", cantIngreso: 300, cantidadActual: 0, fechaIngreso: "2025-04-18", fechaVencimiento: "2027-12-31", codVacuna: 20, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "035351", fechaRegistro: "2025-04-28 13:46:50" },
+      { codLote: 166, lote: "U8664EA", cantIngreso: 2000, cantidadActual: 0, fechaIngreso: "2025-04-18", fechaVencimiento: "2026-01-15", codVacuna: 17, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "035404", fechaRegistro: "2025-04-28 13:49:46" },
+      { codLote: 167, lote: "AHAVC171BA", cantIngreso: 200, cantidadActual: 0, fechaIngreso: "2025-04-18", fechaVencimiento: "2026-10-31", codVacuna: 22, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "035285", fechaRegistro: "2025-04-28 13:51:47" },
+      { codLote: 168, lote: "V50525001", cantIngreso: 1000, cantidadActual: 0, fechaIngreso: "2025-04-28", fechaVencimiento: "2026-01-26", codVacuna: 8, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "035285", fechaRegistro: "2025-04-28 13:54:44" },
+      { codLote: 169, lote: "0344Q005", cantIngreso: 1000, cantidadActual: 0, fechaIngreso: "2025-04-16", fechaVencimiento: "2027-08-31", codVacuna: 3, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "035167", fechaRegistro: "2025-04-28 13:56:59" },
+      { codLote: 170, lote: "2334L015D", cantIngreso: 200, cantidadActual: 0, fechaIngreso: "2025-04-16", fechaVencimiento: "2027-02-28", codVacuna: 14, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "034945", fechaRegistro: "2025-04-28 13:58:52" },
+      { codLote: 171, lote: "0373MA118", cantIngreso: 300, cantidadActual: 0, fechaIngreso: "2025-04-16", fechaVencimiento: "2026-06-30", codVacuna: 1, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "035248", fechaRegistro: "2025-04-28 14:01:48" },
+      { codLote: 174, lote: "Y009841", cantIngreso: 1000, cantidadActual: 0, fechaIngreso: "2025-03-25", fechaVencimiento: "2027-03-11", codVacuna: 18, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "24804-2025", fechaRegistro: "2025-04-08 21:09:42" },
+      { codLote: 176, lote: "022044 VIRAFLU", cantIngreso: 2600, cantidadActual: 2600, fechaIngreso: "2025-05-22", fechaVencimiento: "2026-01-31", codVacuna: 17, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "041829", fechaRegistro: "2025-05-23 15:31:46" },
+      { codLote: 177, lote: "U8664DA FLUPREVLI", cantIngreso: 2000, cantidadActual: 412, fechaIngreso: "2025-05-22", fechaVencimiento: "2026-01-15", codVacuna: 17, habilitado: 1, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "041143", fechaRegistro: "2025-05-23 15:34:04" },
+      { codLote: 178, lote: "2824Q003A", cantIngreso: 200, cantidadActual: 200, fechaIngreso: "2025-05-23", fechaVencimiento: "2026-05-31", codVacuna: 9, habilitado: 0, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "050912", fechaRegistro: "2025-06-16 15:17:11" },
+      { codLote: 179, lote: "1805P005", cantIngreso: 170, cantidadActual: 8, fechaIngreso: "2025-05-23", fechaVencimiento: "2026-12-31", codVacuna: 5, habilitado: 1, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "050263", fechaRegistro: "2025-06-16 15:19:30" },
+      { codLote: 180, lote: "AROLE056AD", cantIngreso: 900, cantidadActual: 580, fechaIngreso: "2025-05-23", fechaVencimiento: "2026-10-31", codVacuna: 7, habilitado: 1, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "051029", fechaRegistro: "2025-06-16 15:22:36" },
+      { codLote: 181, lote: "0324Y005A", cantIngreso: 500, cantidadActual: 124, fechaIngreso: "2025-05-23", fechaVencimiento: "2027-06-30", codVacuna: 2, habilitado: 1, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "051029", fechaRegistro: "2025-06-16 15:25:42" },
+      { codLote: 182, lote: "2854Y021B", cantIngreso: 900, cantidadActual: 661, fechaIngreso: "2025-05-23", fechaVencimiento: "2026-12-31", codVacuna: 4, habilitado: 1, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "049819", fechaRegistro: "2025-06-16 15:27:13" },
+      { codLote: 183, lote: "0344L006A", cantIngreso: 1000, cantidadActual: 7, fechaIngreso: "2025-05-27", fechaVencimiento: "2027-11-30", codVacuna: 3, habilitado: 1, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "051583", fechaRegistro: "2025-06-16 15:29:08" },
+      { codLote: 196, lote: "2334L016E", cantIngreso: 100, cantidadActual: 0, fechaIngreso: "2025-05-23", fechaVencimiento: "2027-03-31", codVacuna: 14, habilitado: 0, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "050856", fechaRegistro: "2025-08-12 16:20:51" },
+      { codLote: 186, lote: "0374MA051", cantIngreso: 300, cantidadActual: 61, fechaIngreso: "2025-05-27", fechaVencimiento: "2026-10-31", codVacuna: 1, habilitado: 1, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "051805", fechaRegistro: "2025-06-16 15:45:32" },
+      { codLote: 187, lote: "AC37B505AA", cantIngreso: 300, cantidadActual: 53, fechaIngreso: "2025-05-23", fechaVencimiento: "2028-04-30", codVacuna: 20, habilitado: 1, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "050483", fechaRegistro: "2025-06-16 15:45:37" },
+      { codLote: 188, lote: "0154W008", cantIngreso: 500, cantidadActual: 500, fechaIngreso: "2025-05-23", fechaVencimiento: "2026-11-30", codVacuna: 39, habilitado: 0, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "050132", fechaRegistro: "2025-06-16 15:45:43" },
+      { codLote: 189, lote: "021930", cantIngreso: 13163, cantidadActual: 0, fechaIngreso: "2025-06-06", fechaVencimiento: "2025-12-31", codVacuna: 17, habilitado: 0, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "055334", fechaRegistro: "2025-06-16 15:47:22" },
+      { codLote: 190, lote: "LE5782", cantIngreso: 2000, cantidadActual: 2000, fechaIngreso: "2025-06-09", fechaVencimiento: "2027-05-31", codVacuna: 6, habilitado: 0, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "055961", fechaRegistro: "2025-06-16 15:49:10" },
+      { codLote: 191, lote: "Z005864", cantIngreso: 600, cantidadActual: 227, fechaIngreso: "2025-06-09", fechaVencimiento: "2027-03-11", codVacuna: 19, habilitado: 1, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "059007", fechaRegistro: "2025-06-16 15:51:10" },
+      { codLote: 192, lote: "X3K029V", cantIngreso: 2000, cantidadActual: 514, fechaIngreso: "2025-06-24", fechaVencimiento: "2026-11-30", codVacuna: 16, habilitado: 1, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "838-2025", fechaRegistro: "2025-06-30 17:12:08" },
+      { codLote: 193, lote: "021994", cantIngreso: 1812, cantidadActual: 0, fechaIngreso: "2025-06-18", fechaVencimiento: "2025-12-31", codVacuna: 17, habilitado: 0, formaIngreso: "2° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "805-2025", fechaRegistro: "2025-06-30 17:20:23" },
+      { codLote: 194, lote: "Y3D071V", cantIngreso: 200, cantidadActual: 8, fechaIngreso: "2025-06-30", fechaVencimiento: "2027-04-30", codVacuna: 12, habilitado: 1, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "063666", fechaRegistro: "2025-07-09 14:44:06" },
+      { codLote: 195, lote: "2334L016A", cantIngreso: 200, cantidadActual: 0, fechaIngreso: "2025-05-23", fechaVencimiento: "2027-03-31", codVacuna: 14, habilitado: 0, formaIngreso: "3° Trimestre", comprobanteClase: "Pecosa", comprobanteNumero: "050063", fechaRegistro: "2025-08-12 16:19:32" }
+    ];
+
+    // Mapeo de códigos de vacuna a siglas
+    const codigoVacunaMap: { [key: number]: string } = {
+      1: 'BCG',
+      2: 'HVB Pediatrico',
+      3: 'HVB Adulto',
+      4: 'Pentavalente',
+      5: 'APO',
+      6: 'Neumococo',
+      7: 'Rotavirus',
+      8: 'Influenza Pediatrica',
+      9: 'DPT',
+      10: 'HIB',
+      11: 'SPR X 1 DOSIS',
+      12: 'AMA',
+      14: 'Dt Adulto',
+      15: 'Dt Pediatrico',
+      16: 'IPV',
+      17: 'Influenza Adulto',
+      18: 'VPH',
+      19: 'Varicela',
+      20: 'DPTA',
+      22: 'HEPATITIS A',
+      38: 'VIRUELA',
+      39: 'SPR X 5 DOSIS'
+    };
+
     const lotesVacunas: any[] = [];
-    let loteCounter = 1;
 
-    // Crear lotes para cada vacuna
-    for (let i = 0; i < vacunasCreadas.length; i++) {
-      const vacuna = vacunasCreadas[i];
-      const vacunaPrefix = vacuna.nombre.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'X');
+    for (const loteReal of lotesReales) {
+      const siglaVacuna = codigoVacunaMap[loteReal.codVacuna];
+      const vacunaId = vacunaMap.get(siglaVacuna);
 
-      // Lote 1: Disponible con buen stock
-      lotesVacunas.push({
-        numero: `LT-${vacunaPrefix}-2025-${(loteCounter++).toString().padStart(3, '0')}`,
-        vacunaId: vacuna.id,
-        fechaIngreso: new Date('2025-01-15'),
-        fechaVencimiento: new Date('2025-12-31'),
-        formaIngreso: 'PRIMER_TRIMESTRE' as const,
-        comprobanteClase: 'PECOSA' as const,
-        numeroComprobante: `PEC-2025-${Math.floor(Math.random() * 9000 + 1000)}`,
-        cantidadInicial: 1000,
-        cantidadActual: 850,
-        estado: 'disponible' as const,
-        observaciones: 'Lote en perfecto estado, almacenado correctamente'
-      });
-
-      // Lote 2: Disponible con stock medio
-      lotesVacunas.push({
-        numero: `LT-${vacunaPrefix}-2025-${(loteCounter++).toString().padStart(3, '0')}`,
-        vacunaId: vacuna.id,
-        fechaIngreso: new Date('2025-02-10'),
-        fechaVencimiento: new Date('2026-02-28'),
-        formaIngreso: 'PRIMER_TRIMESTRE' as const,
-        comprobanteClase: 'GUIA' as const,
-        numeroComprobante: `GUI-2025-${Math.floor(Math.random() * 9000 + 1000)}`,
-        cantidadInicial: 500,
-        cantidadActual: 200,
-        estado: 'disponible' as const,
-        observaciones: 'Lote con rotación normal'
-      });
-
-      // Lote 3: Próximo a vencer
-      lotesVacunas.push({
-        numero: `LT-${vacunaPrefix}-2024-${(loteCounter++).toString().padStart(3, '0')}`,
-        vacunaId: vacuna.id,
-        fechaIngreso: new Date('2024-03-20'),
-        fechaVencimiento: new Date('2025-08-15'), // Próximo a vencer
-        formaIngreso: 'PRIMER_TRIMESTRE' as const,
-        comprobanteClase: 'PECOSA' as const,
-        numeroComprobante: `PEC-2024-${Math.floor(Math.random() * 9000 + 1000)}`,
-        cantidadInicial: 750,
-        cantidadActual: 120,
-        estado: 'disponible' as const,
-        observaciones: 'Priorizar uso - próximo a vencer'
-      });
-
-      // Lote 4: Agotado
-      lotesVacunas.push({
-        numero: `LT-${vacunaPrefix}-2024-${(loteCounter++).toString().padStart(3, '0')}`,
-        vacunaId: vacuna.id,
-        fechaIngreso: new Date('2024-12-01'),
-        fechaVencimiento: new Date('2025-11-30'),
-        formaIngreso: 'CUARTO_TRIMESTRE' as const,
-        comprobanteClase: 'TRASLADO' as const,
-        numeroComprobante: `TRA-2024-${Math.floor(Math.random() * 9000 + 1000)}`,
-        cantidadInicial: 300,
-        cantidadActual: 0,
-        estado: 'agotado' as const,
-        observaciones: 'Lote completamente distribuido'
-      });
-
-      // Lote 5: Vencido (solo para algunas vacunas)
-      if (i % 2 === 0) { // Cada segunda vacuna tendrá un lote vencido
-        lotesVacunas.push({
-          numero: `LT-${vacunaPrefix}-2023-${(loteCounter++).toString().padStart(3, '0')}`,
-          vacunaId: vacuna.id,
-          fechaIngreso: new Date('2023-06-15'),
-          fechaVencimiento: new Date('2024-12-31'), // Ya vencido
-          formaIngreso: 'SEGUNDO_TRIMESTRE' as const,
-          comprobanteClase: 'OTROS' as const,
-          numeroComprobante: `OTR-2023-${Math.floor(Math.random() * 9000 + 1000)}`,
-          cantidadInicial: 200,
-          cantidadActual: 45,
-          estado: 'vencido' as const,
-          observaciones: 'Lote vencido - pendiente de disposición final'
-        });
+      if (!vacunaId) {
+        console.warn(`⚠️ Vacuna no encontrada para código ${loteReal.codVacuna} (${siglaVacuna})`);
+        continue;
       }
+
+      // Mapear forma de ingreso
+      let formaIngreso: 'PRIMER_TRIMESTRE' | 'SEGUNDO_TRIMESTRE' | 'TERCER_TRIMESTRE' | 'CUARTO_TRIMESTRE';
+      switch (loteReal.formaIngreso) {
+        case '1° Trimestre':
+          formaIngreso = 'PRIMER_TRIMESTRE';
+          break;
+        case '2° Trimestre':
+          formaIngreso = 'SEGUNDO_TRIMESTRE';
+          break;
+        case '3° Trimestre':
+          formaIngreso = 'TERCER_TRIMESTRE';
+          break;
+        case '4° Trimestre':
+          formaIngreso = 'CUARTO_TRIMESTRE';
+          break;
+        default:
+          formaIngreso = 'PRIMER_TRIMESTRE';
+      }
+
+      // Determinar estado del lote
+      let estado: 'disponible' | 'agotado' | 'vencido' = 'disponible';
+      const fechaVencimiento = new Date(loteReal.fechaVencimiento);
+      const hoy = new Date();
+
+      if (loteReal.cantidadActual === 0) {
+        estado = 'agotado';
+      } else if (fechaVencimiento < hoy) {
+        estado = 'vencido';
+      }
+
+      lotesVacunas.push({
+        numero: loteReal.lote,
+        vacunaId: vacunaId,
+        fechaIngreso: new Date(loteReal.fechaIngreso),
+        fechaVencimiento: fechaVencimiento,
+        formaIngreso: formaIngreso,
+        comprobanteClase: 'PECOSA' as const,
+        numeroComprobante: loteReal.comprobanteNumero,
+        cantidadInicial: loteReal.cantIngreso,
+        cantidadActual: loteReal.cantidadActual,
+        estado: estado,
+        observaciones: loteReal.habilitado === 1 ? 'Lote habilitado para uso' : 'Lote no habilitado'
+      });
     }
 
     await prisma.loteVacuna.createMany({
       data: lotesVacunas
     });
 
-    console.log(`✅ ${lotesVacunas.length} lotes de vacunas insertados`);
+    console.log(`✅ ${lotesVacunas.length} lotes de vacunas reales insertados`);
 
-    // Insertar lotes de jeringas
-    console.log('💉 Insertando lotes de jeringas...');
+    // Insertar lotes de jeringas - DATOS REALES
+    console.log('💉 Insertando lotes de jeringas con datos reales...');
 
-    const lotesJeringas: any[] = [];
-    const formasIngreso = ['PRIMER_TRIMESTRE', 'SEGUNDO_TRIMESTRE', 'TERCER_TRIMESTRE', 'CUARTO_TRIMESTRE'] as const;
-    const comprobantesClase = ['PECOSA', 'GUIA', 'TRASLADO', 'OTROS'] as const;
-
-    // Obtener jeringas de la base de datos
-    const jeringasFromDB = await prisma.jeringa.findMany({
-      where: { estado: 'activo' },
-      orderBy: { createdAt: 'asc' }
+    // Obtener las jeringas creadas para referenciarlas por código
+    const jeringasCreadas = await prisma.jeringa.findMany({
+      select: { id: true, tipo: true }
     });
 
-    // Crear lotes para cada jeringa
-    for (let i = 0; i < jeringasFromDB.length; i++) {
-      const jeringa = jeringasFromDB[i];
-      const numLotes = Math.floor(Math.random() * 4) + 2; // 2-5 lotes por jeringa
+    // Crear mapa de jeringas por descripción para búsqueda rápida
+    const jeringaMap = new Map(jeringasCreadas.map(j => [j.tipo, j.id]));
 
-      for (let j = 0; j < numLotes; j++) {
-        const fechaIngreso = new Date(2025, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
-        const cantidadInicial = Math.floor(Math.random() * 5000) + 1000; // 1000-6000 unidades
-        const cantidadActual = Math.floor(Math.random() * cantidadInicial);
+    // Datos reales de lotes de jeringas
+    const lotesJeringasReales = [
+      { codJeringaLote: 2, codJeringa: 1, nombreLote: "G220216", cantidadIngreso: 1590, cantidadActual: 1000, fechaVencimiento: "2027-01-31", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 3, codJeringa: 1, nombreLote: "G220319", cantidadIngreso: 90, cantidadActual: 0, fechaVencimiento: "2027-02-28", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 4, codJeringa: 1, nombreLote: "G221006", cantidadIngreso: 600, cantidadActual: 0, fechaVencimiento: "2027-09-30", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 5, codJeringa: 1, nombreLote: "G221003", cantidadIngreso: 1000, cantidadActual: 1000, fechaVencimiento: "2027-09-30", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 20, codJeringa: 2, nombreLote: "W230606", cantidadIngreso: 3750, cantidadActual: 0, fechaVencimiento: "2026-06-30", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 7, codJeringa: 3, nombreLote: "G220218", cantidadIngreso: 25600, cantidadActual: 25000, fechaVencimiento: "2027-01-31", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 8, codJeringa: 3, nombreLote: "G220225-COV19", cantidadIngreso: 26602, cantidadActual: 0, fechaVencimiento: "2027-01-31", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 9, codJeringa: 3, nombreLote: "G220411", cantidadIngreso: 10000, cantidadActual: 0, fechaVencimiento: "2027-03-31", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 16, codJeringa: 5, nombreLote: "20230712", cantidadIngreso: 3000, cantidadActual: 0, fechaVencimiento: "2028-07-31", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 17, codJeringa: 5, nombreLote: "20240723", cantidadIngreso: 82700, cantidadActual: 50122, fechaVencimiento: "2029-07-31", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 18, codJeringa: 5, nombreLote: "JK092305", cantidadIngreso: 3000, cantidadActual: 0, fechaVencimiento: "2028-07-31", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 15, codJeringa: 5, nombreLote: "AH082305", cantidadIngreso: 22032, cantidadActual: 0, fechaVencimiento: "2028-07-31", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 19, codJeringa: 5, nombreLote: "JKA34092405", cantidadIngreso: 20000, cantidadActual: 20000, fechaVencimiento: "2029-09-30", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 21, codJeringa: 2, nombreLote: "W240804", cantidadIngreso: 10000, cantidadActual: 10000, fechaVencimiento: "2027-08-31", fechaRegistro: "2025-03-27", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 22, codJeringa: 9, nombreLote: "20220818", cantidadIngreso: 4708, cantidadActual: 4000, fechaVencimiento: "2027-08-31", fechaRegistro: "2025-06-05", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 23, codJeringa: 9, nombreLote: "20240910", cantidadIngreso: 800, cantidadActual: 0, fechaVencimiento: "2029-09-30", fechaRegistro: "2025-06-05", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 24, codJeringa: 3, nombreLote: "G220311", cantidadIngreso: 6000, cantidadActual: 0, fechaVencimiento: "2027-02-28", fechaRegistro: "2025-06-09", formaIngreso: "2° Trimestre" },
+      { codJeringaLote: 25, codJeringa: 2, nombreLote: "W240805", cantidadIngreso: 4000, cantidadActual: 3689, fechaVencimiento: "2027-08-31", fechaRegistro: "2025-06-09", formaIngreso: "2° Trimestre" }
+    ];
 
-        // Fecha de vencimiento opcional (70% de probabilidad)
-        let fechaVencimiento: Date | null = null;
-        if (Math.random() > 0.3) {
-          fechaVencimiento = new Date(fechaIngreso);
-          fechaVencimiento.setFullYear(fechaVencimiento.getFullYear() + Math.floor(Math.random() * 3) + 2); // 2-4 años
-        }
+    // Mapeo de códigos de jeringa a descripciones
+    const codigoJeringaMap: { [key: number]: string } = {
+      1: 'Jeringa autoretractil 1cc 27 G x 1/2"',
+      2: 'Jeringa autoretractil 1cc 25 G x 5/8"',
+      3: 'Jeringa autoretractil 1cc 25 G x 1"',
+      5: 'Jeringa 5cc con aguja 21 G X 1 1/2"',
+      9: 'Jeringa 3 mL con aguja 23 G X 1"'
+    };
 
-        // Determinar estado
-        let estado = 'disponible';
-        if (cantidadActual === 0) {
-          estado = 'agotado';
-        } else if (fechaVencimiento && fechaVencimiento < new Date()) {
-          estado = 'vencido';
-        }
+    const lotesJeringas: any[] = [];
 
-        lotesJeringas.push({
-          numero: `LJ-${jeringa.tipo.substring(0, 3).toUpperCase()}-${(i + 1).toString().padStart(3, '0')}-${(j + 1).toString().padStart(2, '0')}`,
-          jeringaId: jeringa.id,
-          fechaIngreso,
-          fechaVencimiento,
-          formaIngreso: formasIngreso[Math.floor(Math.random() * formasIngreso.length)],
-          comprobanteClase: comprobantesClase[Math.floor(Math.random() * comprobantesClase.length)],
-          numeroComprobante: `${Math.floor(Math.random() * 9000) + 1000}-${new Date().getFullYear()}`,
-          cantidadInicial,
-          cantidadActual,
-          estado: estado as any,
-          observaciones: estado === 'vencido' ? 'Lote vencido - pendiente de disposición final' :
-                        estado === 'agotado' ? 'Stock agotado - requiere reposición' :
-                        cantidadActual < cantidadInicial * 0.2 ? 'Stock bajo - programar reposición' : null
-        });
+    for (const loteReal of lotesJeringasReales) {
+      const descripcionJeringa = codigoJeringaMap[loteReal.codJeringa];
+      const jeringaId = jeringaMap.get(descripcionJeringa);
+
+      if (!jeringaId) {
+        console.warn(`⚠️ Jeringa no encontrada para código ${loteReal.codJeringa} (${descripcionJeringa})`);
+        continue;
       }
+
+      // Mapear forma de ingreso
+      let formaIngreso: 'PRIMER_TRIMESTRE' | 'SEGUNDO_TRIMESTRE' | 'TERCER_TRIMESTRE' | 'CUARTO_TRIMESTRE';
+      switch (loteReal.formaIngreso) {
+        case '1° Trimestre':
+          formaIngreso = 'PRIMER_TRIMESTRE';
+          break;
+        case '2° Trimestre':
+          formaIngreso = 'SEGUNDO_TRIMESTRE';
+          break;
+        case '3° Trimestre':
+          formaIngreso = 'TERCER_TRIMESTRE';
+          break;
+        case '4° Trimestre':
+          formaIngreso = 'CUARTO_TRIMESTRE';
+          break;
+        default:
+          formaIngreso = 'SEGUNDO_TRIMESTRE';
+      }
+
+      // Determinar estado del lote
+      let estado: 'disponible' | 'agotado' | 'vencido' = 'disponible';
+      const fechaVencimiento = new Date(loteReal.fechaVencimiento);
+      const hoy = new Date();
+
+      if (loteReal.cantidadActual === 0) {
+        estado = 'agotado';
+      } else if (fechaVencimiento < hoy) {
+        estado = 'vencido';
+      }
+
+      // Fecha de ingreso (usar fecha de registro como referencia)
+      const fechaIngreso = new Date(loteReal.fechaRegistro);
+
+      lotesJeringas.push({
+        numero: loteReal.nombreLote,
+        jeringaId: jeringaId,
+        fechaIngreso: fechaIngreso,
+        fechaVencimiento: fechaVencimiento,
+        formaIngreso: formaIngreso,
+        comprobanteClase: 'PECOSA' as const,
+        numeroComprobante: `COMP-${loteReal.codJeringaLote}-2025`,
+        cantidadInicial: loteReal.cantidadIngreso,
+        cantidadActual: loteReal.cantidadActual,
+        estado: estado,
+        observaciones: estado === 'agotado' ? 'Lote agotado - requiere reposición' :
+                      loteReal.cantidadActual < loteReal.cantidadIngreso * 0.2 ? 'Stock bajo - programar reposición' :
+                      'Lote en condiciones normales'
+      });
     }
 
     await prisma.loteJeringa.createMany({
       data: lotesJeringas
     });
 
-    console.log(`✅ ${lotesJeringas.length} lotes de jeringas insertados`);
+    console.log(`✅ ${lotesJeringas.length} lotes de jeringas reales insertados`);
 
     // Insertar usuarios del sistema
     console.log('👥 Insertando usuarios del sistema...');

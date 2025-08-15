@@ -34,8 +34,8 @@ export class MovimientosController {
         return;
       }
 
-      if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
-        ResponseUtil.error(res, 'El parámetro limit debe ser un número entre 1 y 100', 400);
+      if (isNaN(limitNum) || limitNum < 1 || limitNum > 2000) {
+        ResponseUtil.error(res, 'El parámetro limit debe ser un número entre 1 y 2000', 400);
         return;
       }
 

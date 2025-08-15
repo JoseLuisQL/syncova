@@ -23,17 +23,21 @@ export class EstablecimientoController {
         limit = '50'
       } = req.query;
 
+
+
       // Validaciones de parámetros
       const pageNum = parseInt(page as string, 10);
       const limitNum = parseInt(limit as string, 10);
+
+
 
       if (isNaN(pageNum) || pageNum < 1) {
         errorResponse(res, 'El parámetro page debe ser un número mayor a 0', 400);
         return;
       }
 
-      if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
-        errorResponse(res, 'El parámetro limit debe ser un número entre 1 y 100', 400);
+      if (isNaN(limitNum) || limitNum < 1 || limitNum > 2000) {
+        errorResponse(res, 'El parámetro limit debe ser un número entre 1 y 2000', 400);
         return;
       }
 
