@@ -17,28 +17,53 @@ async function setupDatabase() {
     await prisma.$connect();
     console.log('✅ Conexión a la base de datos establecida');
 
-    // 2. Ejecutar migraciones de Prisma
+    // 2. Configurar extensiones de PostgreSQL
+    console.log('🔧 Configurando extensiones de PostgreSQL...');
+    try {
+      // Habilitar extensión UUID
+      await prisma.$executeRaw`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`;
+      console.log('✅ Extensión uuid-ossp habilitada');
+    } catch (error) {
+      console.log('⚠️  Extensión uuid-ossp ya existe o no se pudo crear');
+    }
+
+    try {
+      // Crear función para generar UUIDs v4 si no existe
+      await prisma.$executeRaw`
+        CREATE OR REPLACE FUNCTION uuid_generate_v4()
+        RETURNS uuid AS $$
+        BEGIN
+          RETURN gen_random_uuid();
+        END;
+        $$ LANGUAGE plpgsql;
+      `;
+      console.log('✅ Función uuid_generate_v4() configurada');
+    } catch (error) {
+      console.log('⚠️  Función uuid_generate_v4() ya existe o no se pudo crear');
+    }
+
+    // 3. Ejecutar migraciones de Prisma
     console.log('📦 Aplicando migraciones de Prisma...');
     // Nota: Las migraciones de Prisma se ejecutan con `prisma migrate deploy` en producción
     // o `prisma migrate dev` en desarrollo
 
-    // 3. Verificar si hay datos existentes
+    // 4. Verificar si hay datos existentes
     const movimientosCount = await prisma.movimientoVacuna.count();
     console.log(`📊 Movimientos de vacunas existentes: ${movimientosCount}`);
 
     if (movimientosCount > 0) {
-      // 4. Ejecutar migración de entrega_base si hay datos
+      // 5. Ejecutar migración de entrega_base si hay datos
       console.log('🔄 Ejecutando migración de entrega_base...');
       await migrateEntregaBase();
     } else {
       console.log('ℹ️  No hay datos existentes, omitiendo migración de entrega_base');
     }
 
-    // 5. Crear funciones y triggers de PostgreSQL
+    // 6. Crear funciones y triggers de PostgreSQL
     console.log('🔧 Configurando triggers de base de datos...');
     await createDatabaseTriggers();
 
-    // 6. Verificar configuraciones del sistema
+    // 7. Verificar configuraciones del sistema
     const configCount = await prisma.configuracionSistema.count();
     console.log(`⚙️  Configuraciones del sistema: ${configCount}`);
 
@@ -46,7 +71,7 @@ async function setupDatabase() {
       console.log('⚠️  No se encontraron configuraciones del sistema. Ejecuta el seeder: npm run db:seed');
     }
 
-    // 7. Verificar triggers creados
+    // 8. Verificar triggers creados
     console.log('🔍 Verificando triggers de base de datos...');
     await verifyTriggers();
 
