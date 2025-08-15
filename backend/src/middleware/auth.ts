@@ -259,8 +259,12 @@ export const checkPermissions = (permission: string) => {
   };
 };
 
+// Alias para compatibilidad con rutas existentes
+export const authenticateToken = authenticate;
+
 export default {
   authenticate,
+  authenticateToken,
   authorize,
   checkEstablecimiento,
   optionalAuth,

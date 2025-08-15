@@ -1,48 +1,64 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Building2, MapPin, Phone, User, MoreVertical, AlertCircle, Loader2, Wifi, WifiOff, Settings, Bug } from 'lucide-react';
-import { Establecimiento, CreateEstablecimientoDto, UpdateEstablecimientoDto } from '../../types';
-import { useEstablecimientos } from '../../hooks/useEstablecimientos';
+import { Plus, Search, Filter, Edit, Trash2, Building, Network, GitBranch, MapPin, Phone, User, MoreVertical, AlertCircle, Loader2, Wifi, WifiOff, Settings, Bug } from 'lucide-react';
+import { CentroAcopio, CreateCentroAcopioDto, UpdateCentroAcopioDto } from '../../types';
+import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
+import { useRedes } from '../../hooks/useRedes';
+import { useMicroredes } from '../../hooks/useMicroredes';
 import { useToastContext } from '../../contexts/ToastContext';
 import { checkBackendConnection, logger } from '../../utils/debug';
-import TestConnection from '../TestConnection';
-import DebugPanel from '../DebugPanel';
-import CascadingSelector from '../common/CascadingSelector';
+import { validateCentroAcopio, sanitizeInput } from '../../utils/validation';
 
-const Establecimientos: React.FC = () => {
+interface CentrosAcopioProps {
+  selectedMicroredId?: string;
+  selectedMicroredNombre?: string;
+  onNavigateToEstablecimientos?: (centroAcopioId: string, centroAcopioNombre: string) => void;
+}
+
+const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
+  selectedMicroredId,
+  selectedMicroredNombre,
+  onNavigateToEstablecimientos
+}) => {
   // Estados locales para UI
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterTipo, setFilterTipo] = useState<string>('todos');
   const [filterEstado, setFilterEstado] = useState<string>('todos');
+  const [filterRedId, setFilterRedId] = useState<string>('');
+  const [filterMicroredId, setFilterMicroredId] = useState<string>('');
   const [showModal, setShowModal] = useState(false);
-  const [editingEstablecimiento, setEditingEstablecimiento] = useState<Establecimiento | null>(null);
+  const [editingCentro, setEditingCentro] = useState<CentroAcopio | null>(null);
   const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
-  const [showTestConnection, setShowTestConnection] = useState(false);
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
 
-  // Hook personalizado para gestión de establecimientos
+  // Hook personalizado para gestión de centros de acopio
   const {
-    establecimientos,
     centrosAcopio,
-    pagination,
-    isLoading,
+    loading,
     error,
-    createEstablecimiento,
-    updateEstablecimiento,
-    deleteEstablecimiento,
-    search,
-    applyFilters,
-    changePage,
-    refresh,
-    isCreating,
-    isUpdating,
-    isDeleting,
-    createError,
-    updateError,
-    deleteError
-  } = useEstablecimientos();
+    total,
+    currentPage,
+    totalPages,
+    filters,
+    setFilters,
+    fetchCentrosAcopio,
+    createCentroAcopio,
+    updateCentroAcopio,
+    deleteCentroAcopio
+  } = useCentrosAcopio();
+
+  // Hook para obtener redes para el filtro
+  const { redes } = useRedes();
+
+  // Hook para obtener microredes para el filtro (filtradas por red seleccionada)
+  const { microredes } = useMicroredes();
 
   // Hook para toast notifications
   const { toast } = useToastContext();
+
+  // Establecer filtro inicial si se proporciona una microred seleccionada
+  useEffect(() => {
+    if (selectedMicroredId && selectedMicroredId !== filterMicroredId) {
+      setFilterMicroredId(selectedMicroredId);
+    }
+  }, [selectedMicroredId]);
 
   // Verificar conexión con backend
   useEffect(() => {
@@ -68,64 +84,85 @@ const Establecimientos: React.FC = () => {
   // Aplicar filtros cuando cambien los valores (con debounce para búsqueda)
   React.useEffect(() => {
     // Evitar ejecutar en la primera carga
-    if (!establecimientos.length && !searchTerm && filterTipo === 'todos' && filterEstado === 'todos') {
+    if (!centrosAcopio.length && !searchTerm && filterEstado === 'todos' && !filterRedId && !filterMicroredId) {
       return;
     }
 
     const timeoutId = setTimeout(() => {
-      const filters: any = {};
-
-      if (filterTipo !== 'todos') {
-        filters.tipo = filterTipo;
-      }
+      const newFilters: any = {};
 
       if (filterEstado !== 'todos') {
-        filters.estado = filterEstado;
+        newFilters.estado = filterEstado;
+      }
+
+      if (filterRedId) {
+        newFilters.redId = filterRedId;
+      }
+
+      if (filterMicroredId) {
+        newFilters.microredId = filterMicroredId;
       }
 
       if (searchTerm.trim()) {
-        filters.search = searchTerm.trim();
+        newFilters.search = searchTerm.trim();
       }
 
-      logger.debug('Aplicando filtros después de debounce:', filters);
-      applyFilters(filters);
+      logger.debug('Aplicando filtros después de debounce:', newFilters);
+      setFilters(newFilters);
     }, 1000); // Aumentado a 1 segundo para evitar demasiadas peticiones
 
     return () => clearTimeout(timeoutId);
-  }, [filterTipo, filterEstado, searchTerm]); // Sin applyFilters en dependencias
+  }, [filterEstado, filterRedId, filterMicroredId, searchTerm]); // Sin setFilters en dependencias
 
-  const handleEdit = (establecimiento: Establecimiento) => {
-    setEditingEstablecimiento(establecimiento);
+  // Limpiar microred cuando cambie la red
+  React.useEffect(() => {
+    if (filterRedId !== filters.redId) {
+      setFilterMicroredId('');
+    }
+  }, [filterRedId]);
+
+  const handleEdit = (centro: CentroAcopio) => {
+    setEditingCentro(centro);
     setShowModal(true);
   };
 
   const handleDelete = async (id: string, nombre: string) => {
-    if (window.confirm(`¿Está seguro de eliminar el establecimiento "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
-      const success = await deleteEstablecimiento(id);
-      if (!success && deleteError) {
-        alert(`Error al eliminar: ${deleteError}`);
+    if (window.confirm(`¿Está seguro de eliminar el centro de acopio "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+      const success = await deleteCentroAcopio(id);
+      if (success) {
+        toast.success(
+          'Centro de acopio eliminado',
+          `El centro de acopio "${nombre}" ha sido eliminado exitosamente.`,
+          { duration: 4000 }
+        );
+      } else {
+        toast.error(
+          'Error al eliminar centro de acopio',
+          'No se pudo eliminar el centro de acopio. Verifique que no tenga establecimientos asociados.',
+          { duration: 6000 }
+        );
       }
     }
   };
 
-  const handleSubmit = async (formData: CreateEstablecimientoDto | UpdateEstablecimientoDto) => {
+  const handleSubmit = async (formData: CreateCentroAcopioDto | UpdateCentroAcopioDto) => {
     let success = false;
 
-    if (editingEstablecimiento) {
+    if (editingCentro) {
       // Editar
-      success = await updateEstablecimiento(editingEstablecimiento.id, formData as UpdateEstablecimientoDto);
+      success = await updateCentroAcopio(editingCentro.id, formData as UpdateCentroAcopioDto);
       if (success) {
         toast.success(
-          'Establecimiento actualizado',
-          `El establecimiento "${formData.nombre || editingEstablecimiento.nombre}" ha sido actualizado exitosamente.`,
+          'Centro de acopio actualizado',
+          `El centro de acopio "${formData.nombre || editingCentro.nombre}" ha sido actualizado exitosamente.`,
           { duration: 4000 }
         );
         setShowModal(false);
-        setEditingEstablecimiento(null);
-      } else if (updateError) {
+        setEditingCentro(null);
+      } else {
         toast.error(
-          'Error al actualizar establecimiento',
-          updateError,
+          'Error al actualizar centro de acopio',
+          'No se pudo actualizar el centro de acopio. Intente nuevamente.',
           {
             duration: 6000,
             action: {
@@ -137,19 +174,19 @@ const Establecimientos: React.FC = () => {
       }
     } else {
       // Crear nuevo
-      success = await createEstablecimiento(formData as CreateEstablecimientoDto);
+      success = await createCentroAcopio(formData as CreateCentroAcopioDto);
       if (success) {
         toast.success(
-          'Establecimiento creado',
-          `El establecimiento "${formData.nombre}" ha sido creado exitosamente en el sistema.`,
+          'Centro de acopio creado',
+          `El centro de acopio "${formData.nombre}" ha sido creado exitosamente en el sistema.`,
           { duration: 4000 }
         );
         setShowModal(false);
-        setEditingEstablecimiento(null);
-      } else if (createError) {
+        setEditingCentro(null);
+      } else {
         toast.error(
-          'Error al crear establecimiento',
-          createError,
+          'Error al crear centro de acopio',
+          'No se pudo crear el centro de acopio. Intente nuevamente.',
           {
             duration: 6000,
             action: {
@@ -167,30 +204,23 @@ const Establecimientos: React.FC = () => {
 
     // Limpiar filtros y recargar
     setSearchTerm('');
-    setFilterTipo('todos');
     setFilterEstado('todos');
+    setFilterRedId('');
+    setFilterMicroredId('');
 
     // Recargar datos sin filtros
-    applyFilters({});
+    setFilters({});
   }, []);
 
-  const getTipoLabel = (tipo: string) => {
-    switch (tipo) {
-      case 'centro_acopio': return 'Centro de Acopio';
-      case 'centro_salud': return 'Centro de Salud';
-      case 'puesto_salud': return 'Puesto de Salud';
-      default: return tipo;
-    }
+  const changePage = (page: number) => {
+    setFilters({ ...filters, page });
   };
 
-  const getTipoColor = (tipo: string) => {
-    switch (tipo) {
-      case 'centro_acopio': return 'bg-blue-100 text-blue-800';
-      case 'centro_salud': return 'bg-green-100 text-green-800';
-      case 'puesto_salud': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // Filtrar microredes por red seleccionada
+  const microredesFiltradas = React.useMemo(() => {
+    if (!filterRedId) return microredes;
+    return microredes.filter(m => m.redId === filterRedId);
+  }, [microredes, filterRedId]);
 
   // Si no hay conexión con el backend, mostrar mensaje de error
   if (backendConnected === false) {
@@ -235,32 +265,22 @@ const Establecimientos: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Gestión de Establecimientos</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Gestión de Centros de Acopio
+            {selectedMicroredNombre && (
+              <span className="text-base font-normal text-gray-600 ml-2">
+                - Microred: {selectedMicroredNombre}
+              </span>
+            )}
+          </h2>
           <p className="text-gray-600 mt-1">
-            Administre centros de acopio y establecimientos de salud
-            {pagination.total > 0 && (
+            Administre los centros de acopio del sistema
+            {total > 0 && (
               <span className="ml-2 text-sm">
-                ({pagination.total} establecimiento{pagination.total !== 1 ? 's' : ''})
+                ({total} centro{total !== 1 ? 's' : ''})
               </span>
             )}
           </p>
-          {/* Botones de desarrollo */}
-          {import.meta.env.VITE_ENVIRONMENT === 'development' && (
-            <div className="mt-2 space-x-2">
-              <button
-                onClick={() => setShowTestConnection(true)}
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
-              >
-                Probar conexión
-              </button>
-              <button
-                onClick={() => setShowDebugPanel(!showDebugPanel)}
-                className="text-xs text-green-600 hover:text-green-800 underline"
-              >
-                {showDebugPanel ? 'Ocultar' : 'Mostrar'} debug
-              </button>
-            </div>
-          )}
         </div>
         <div className="flex items-center space-x-2">
           {/* Indicador de conexión */}
@@ -283,23 +303,19 @@ const Establecimientos: React.FC = () => {
 
           <button
             onClick={handleRefresh}
-            disabled={isLoading || backendConnected === false}
+            disabled={loading || backendConnected === false}
             className="flex items-center px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
-            <Loader2 className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            <Loader2 className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Actualizar
           </button>
           <button
             onClick={() => setShowModal(true)}
-            disabled={isCreating || backendConnected === false}
+            disabled={loading || backendConnected === false}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isCreating ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4 mr-2" />
-            )}
-            Nuevo Establecimiento
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Centro de Acopio
           </button>
         </div>
       </div>
@@ -312,7 +328,7 @@ const Establecimientos: React.FC = () => {
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar por nombre, código o responsable..."
+                placeholder="Buscar por nombre, código, responsable o dirección..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -321,14 +337,31 @@ const Establecimientos: React.FC = () => {
           </div>
           <div className="sm:w-48">
             <select
-              value={filterTipo}
-              onChange={(e) => setFilterTipo(e.target.value)}
+              value={filterRedId}
+              onChange={(e) => setFilterRedId(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="todos">Todos los tipos</option>
-              <option value="centro_acopio">Centro de Acopio</option>
-              <option value="centro_salud">Centro de Salud</option>
-              <option value="puesto_salud">Puesto de Salud</option>
+              <option value="">Todas las redes</option>
+              {redes.map((red) => (
+                <option key={red.id} value={red.id}>
+                  {red.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="sm:w-48">
+            <select
+              value={filterMicroredId}
+              onChange={(e) => setFilterMicroredId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={!filterRedId}
+            >
+              <option value="">Todas las microredes</option>
+              {microredesFiltradas.map((microred) => (
+                <option key={microred.id} value={microred.id}>
+                  {microred.nombre}
+                </option>
+              ))}
             </select>
           </div>
           <div className="sm:w-48">
@@ -346,40 +379,27 @@ const Establecimientos: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-blue-600" />
+            <div className="p-2 bg-orange-100 rounded-lg">
+              <Building className="h-6 w-6 text-orange-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Centros de Acopio</p>
-              <p className="text-2xl font-bold text-gray-900">{centrosAcopio.length}</p>
+              <p className="text-sm font-medium text-gray-600">Total Centros</p>
+              <p className="text-2xl font-bold text-gray-900">{total}</p>
             </div>
           </div>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-green-600" />
+              <Building className="h-6 w-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Centros de Salud</p>
+              <p className="text-sm font-medium text-gray-600">Centros Activos</p>
               <p className="text-2xl font-bold text-gray-900">
-                {establecimientos.filter(e => e.tipo === 'centro_salud').length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-orange-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Puestos de Salud</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {establecimientos.filter(e => e.tipo === 'puesto_salud').length}
+                {centrosAcopio.filter(c => c.estado === 'activo').length}
               </p>
             </div>
           </div>
@@ -387,11 +407,13 @@ const Establecimientos: React.FC = () => {
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center">
             <div className="p-2 bg-gray-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-gray-600" />
+              <Building className="h-6 w-6 text-gray-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total</p>
-              <p className="text-2xl font-bold text-gray-900">{pagination.total}</p>
+              <p className="text-sm font-medium text-gray-600">Centros Inactivos</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {centrosAcopio.filter(c => c.estado === 'inactivo').length}
+              </p>
             </div>
           </div>
         </div>
@@ -399,10 +421,10 @@ const Establecimientos: React.FC = () => {
 
       {/* Table */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {isLoading ? (
+        {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            <span className="ml-2 text-gray-600">Cargando establecimientos...</span>
+            <span className="ml-2 text-gray-600">Cargando centros de acopio...</span>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -410,19 +432,22 @@ const Establecimientos: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Establecimiento
+                  Centro de Acopio
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tipo
+                  Código
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estructura Jerárquica
+                  Microred
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Responsable
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contacto
+                  Dirección
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Establecimientos
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
@@ -433,119 +458,99 @@ const Establecimientos: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {establecimientos.length === 0 && !isLoading ? (
+              {centrosAcopio.length === 0 && !loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                    <Building2 className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                    <p className="text-lg font-medium">No se encontraron establecimientos</p>
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                    <Building className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                    <p className="text-lg font-medium">No se encontraron centros de acopio</p>
                     <p className="text-sm">Intente ajustar los filtros de búsqueda</p>
                   </td>
                 </tr>
               ) : (
-                establecimientos.map((establecimiento) => {
-                  // Usar la relación centroAcopio del backend si está disponible
-                  const centroAcopio = establecimiento.centroAcopio ||
-                    (establecimiento.centroAcopioId
-                      ? centrosAcopio.find(c => c.id === establecimiento.centroAcopioId)
-                      : null);
-
-                  // Obtener información jerárquica
-                  const microred = centroAcopio?.microred;
-                  const red = microred?.red;
-                
-                return (
-                  <tr key={establecimiento.id} className="hover:bg-gray-50">
+                centrosAcopio.map((centro) => (
+                  <tr key={centro.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <Building2 className="h-5 w-5 text-gray-500" />
+                            <Building className="h-5 w-5 text-gray-500" />
                           </div>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {establecimiento.nombre}
+                            {centro.nombre}
                           </div>
-                          <div className="text-sm text-gray-500">{establecimiento.codigo}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTipoColor(establecimiento.tipo)}`}>
-                        {getTipoLabel(establecimiento.tipo)}
-                      </span>
+                      <span className="text-sm text-gray-900">{centro.codigo || '-'}</span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      {centroAcopio ? (
-                        <div className="space-y-1">
-                          <div className="font-medium">{centroAcopio.nombre}</div>
-                          {microred && (
-                            <div className="text-xs text-gray-500">
-                              {microred.red?.nombre} → {microred.nombre}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <GitBranch className="h-4 w-4 text-gray-400 mr-2" />
+                        <div>
+                          <div className="text-sm text-gray-900">{centro.microred?.nombre || 'Sin microred'}</div>
+                          {centro.microred?.red && (
+                            <div className="text-xs text-gray-500 flex items-center">
+                              <Network className="h-3 w-3 mr-1" />
+                              {centro.microred.red.nombre}
                             </div>
                           )}
                         </div>
-                      ) : (
-                        <span className="text-gray-400">Sin asignar</span>
-                      )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <User className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">{establecimiento.responsable}</span>
+                        <span className="text-sm text-gray-900">{centro.responsable || '-'}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      <div className="max-w-xs truncate flex items-center">
+                        <MapPin className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                        {centro.direccion || '-'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        <div className="flex items-center mb-1">
-                          <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                          {establecimiento.telefono}
-                        </div>
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="truncate max-w-xs">{establecimiento.direccion}</span>
-                        </div>
-                      </div>
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                        {centro._count?.establecimientos || 0}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        establecimiento.estado === 'activo' 
-                          ? 'bg-green-100 text-green-800' 
+                        centro.estado === 'activo'
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {establecimiento.estado === 'activo' ? 'Activo' : 'Inactivo'}
+                        {centro.estado === 'activo' ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
                         <button
-                          onClick={() => handleEdit(establecimiento)}
-                          disabled={isUpdating}
+                          onClick={() => handleEdit(centro)}
+                          disabled={loading}
                           className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded disabled:opacity-50"
                         >
-                          {isUpdating ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Edit className="h-4 w-4" />
-                          )}
+                          <Edit className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(establecimiento.id, establecimiento.nombre)}
-                          disabled={isDeleting}
+                          onClick={() => handleDelete(centro.id, centro.nombre)}
+                          disabled={loading || (centro._count?.establecimientos || 0) > 0}
                           className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded disabled:opacity-50"
-                          title="Eliminar establecimiento"
+                          title={
+                            (centro._count?.establecimientos || 0) > 0
+                              ? 'No se puede eliminar: tiene establecimientos asociados'
+                              : 'Eliminar centro de acopio'
+                          }
                         >
-                          {isDeleting ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>
                   </tr>
-                );
-                })
+                ))
               )}
             </tbody>
           </table>
@@ -553,20 +558,20 @@ const Establecimientos: React.FC = () => {
         )}
 
         {/* Paginación */}
-        {pagination.totalPages > 1 && (
+        {totalPages > 1 && (
           <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
             <div className="flex items-center justify-between">
               <div className="flex-1 flex justify-between sm:hidden">
                 <button
-                  onClick={() => changePage(pagination.page - 1)}
-                  disabled={pagination.page <= 1}
+                  onClick={() => changePage(currentPage - 1)}
+                  disabled={currentPage <= 1}
                   className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Anterior
                 </button>
                 <button
-                  onClick={() => changePage(pagination.page + 1)}
-                  disabled={pagination.page >= pagination.totalPages}
+                  onClick={() => changePage(currentPage + 1)}
+                  disabled={currentPage >= totalPages}
                   className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Siguiente
@@ -577,33 +582,33 @@ const Establecimientos: React.FC = () => {
                   <p className="text-sm text-gray-700">
                     Mostrando{' '}
                     <span className="font-medium">
-                      {((pagination.page - 1) * pagination.limit) + 1}
+                      {((currentPage - 1) * (filters.limit || 10)) + 1}
                     </span>{' '}
                     a{' '}
                     <span className="font-medium">
-                      {Math.min(pagination.page * pagination.limit, pagination.total)}
+                      {Math.min(currentPage * (filters.limit || 10), total)}
                     </span>{' '}
                     de{' '}
-                    <span className="font-medium">{pagination.total}</span> resultados
+                    <span className="font-medium">{total}</span> resultados
                   </p>
                 </div>
                 <div>
                   <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                     <button
-                      onClick={() => changePage(pagination.page - 1)}
-                      disabled={pagination.page <= 1}
+                      onClick={() => changePage(currentPage - 1)}
+                      disabled={currentPage <= 1}
                       className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Anterior
                     </button>
-                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       const pageNum = i + 1;
                       return (
                         <button
                           key={pageNum}
                           onClick={() => changePage(pageNum)}
                           className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                            pageNum === pagination.page
+                            pageNum === currentPage
                               ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
                               : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                           }`}
@@ -613,8 +618,8 @@ const Establecimientos: React.FC = () => {
                       );
                     })}
                     <button
-                      onClick={() => changePage(pagination.page + 1)}
-                      disabled={pagination.page >= pagination.totalPages}
+                      onClick={() => changePage(currentPage + 1)}
+                      disabled={currentPage >= totalPages}
                       className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Siguiente
@@ -629,89 +634,90 @@ const Establecimientos: React.FC = () => {
 
       {/* Modal */}
       {showModal && (
-        <EstablecimientoModal
-          establecimiento={editingEstablecimiento}
+        <CentroAcopioModal
+          centro={editingCentro}
           onClose={() => {
             setShowModal(false);
-            setEditingEstablecimiento(null);
+            setEditingCentro(null);
           }}
           onSubmit={handleSubmit}
-          isLoading={isCreating || isUpdating}
+          isLoading={loading}
+          redes={redes}
+          microredes={microredes}
         />
       )}
-
-      {/* Test Connection Modal */}
-      {showTestConnection && (
-        <TestConnection onClose={() => setShowTestConnection(false)} />
-      )}
-
-      {/* Debug Panel */}
-      <DebugPanel
-        isVisible={showDebugPanel}
-        onClose={() => setShowDebugPanel(false)}
-      />
     </div>
   );
 };
 
 // Modal Component
-interface EstablecimientoModalProps {
-  establecimiento: Establecimiento | null;
+interface CentroAcopioModalProps {
+  centro: CentroAcopio | null;
   onClose: () => void;
-  onSubmit: (data: CreateEstablecimientoDto | UpdateEstablecimientoDto) => Promise<void>;
+  onSubmit: (data: CreateCentroAcopioDto | UpdateCentroAcopioDto) => Promise<void>;
   isLoading?: boolean;
+  redes: any[];
+  microredes: any[];
 }
 
-const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
-  establecimiento,
+const CentroAcopioModal: React.FC<CentroAcopioModalProps> = ({
+  centro,
   onClose,
   onSubmit,
   isLoading = false,
+  redes,
+  microredes,
 }) => {
   const [formData, setFormData] = useState({
-    nombre: establecimiento?.nombre || '',
-    tipo: establecimiento?.tipo || 'centro_salud',
-    codigo: establecimiento?.codigo || '',
-    centroAcopioId: establecimiento?.centroAcopioId || '',
-    direccion: establecimiento?.direccion || '',
-    responsable: establecimiento?.responsable || '',
-    telefono: establecimiento?.telefono || '',
-    // Campos para el selector en cascada
-    redId: establecimiento?.centroAcopio?.microred?.redId || '',
-    microredId: establecimiento?.centroAcopio?.microredId || '',
+    nombre: centro?.nombre || '',
+    codigo: centro?.codigo || '',
+    microredId: centro?.microredId || '',
+    direccion: centro?.direccion || '',
+    responsable: centro?.responsable || '',
+    telefono: centro?.telefono || '',
     // Solo incluir estado si estamos editando (no en creación)
-    ...(establecimiento && { estado: establecimiento.estado }),
+    ...(centro && { estado: centro.estado }),
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Validar formulario
+  // Filtrar microredes por red seleccionada
+  const microredesFiltradas = React.useMemo(() => {
+    if (!formData.microredId) return microredes;
+    const microredSeleccionada = microredes.find(m => m.id === formData.microredId);
+    if (!microredSeleccionada) return microredes;
+    return microredes.filter(m => m.redId === microredSeleccionada.redId);
+  }, [microredes, formData.microredId]);
+
+  // Validar formulario usando la utilidad de validación
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+    // Sanitizar datos antes de validar
+    const sanitizedData = {
+      nombre: sanitizeInput(formData.nombre),
+      codigo: formData.codigo ? sanitizeInput(formData.codigo) : '',
+      direccion: sanitizeInput(formData.direccion),
+      responsable: sanitizeInput(formData.responsable),
+      telefono: formData.telefono ? sanitizeInput(formData.telefono) : '',
+      microredId: formData.microredId,
+      ...(centro && { estado: formData.estado })
+    };
 
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = 'El nombre es requerido';
+    const validation = validateCentroAcopio(sanitizedData);
+    setErrors(validation.errors);
+
+    // Actualizar formData con datos sanitizados si la validación es exitosa
+    if (validation.isValid) {
+      setFormData(prev => ({
+        ...prev,
+        nombre: sanitizedData.nombre,
+        codigo: sanitizedData.codigo,
+        direccion: sanitizedData.direccion,
+        responsable: sanitizedData.responsable,
+        telefono: sanitizedData.telefono
+      }));
     }
 
-    if (!formData.codigo.trim()) {
-      newErrors.codigo = 'El código es requerido';
-    }
-
-    if (!formData.direccion.trim()) {
-      newErrors.direccion = 'La dirección es requerida';
-    }
-
-    if (!formData.responsable.trim()) {
-      newErrors.responsable = 'El responsable es requerido';
-    }
-
-    // Validar centroAcopioId (requerido para todos los establecimientos)
-    if (!formData.centroAcopioId || formData.centroAcopioId.trim() === '') {
-      newErrors.centroAcopioId = 'Debe seleccionar un centro de acopio';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return validation.isValid;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -724,14 +730,8 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
     // Preparar datos para envío
     const submitData = { ...formData };
 
-    // Asegurar que centroAcopioId no esté vacío (requerido para todos los establecimientos)
-    if (!submitData.centroAcopioId || submitData.centroAcopioId.trim() === '') {
-      // Esto no debería pasar debido a la validación, pero por seguridad
-      return;
-    }
-
     // Para CREACIÓN, NO enviar el campo estado (el backend lo asigna automáticamente)
-    if (!establecimiento) {
+    if (!centro) {
       delete submitData.estado;
     }
 
@@ -741,12 +741,12 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full m-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg max-w-4xl w-full m-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            {establecimiento ? 'Editar Establecimiento' : 'Nuevo Establecimiento'}
+            {centro ? 'Editar Centro de Acopio' : 'Nuevo Centro de Acopio'}
           </h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -771,131 +771,38 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
                   <p className="mt-1 text-sm text-red-600">{errors.nombre}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Código *
+                  Código
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.codigo}
-                  onChange={(e) => {
-                    setFormData({...formData, codigo: e.target.value});
-                    if (errors.codigo) setErrors({...errors, codigo: ''});
-                  }}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                    errors.codigo
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-300 focus:ring-blue-500'
-                  }`}
-                />
-                {errors.codigo && (
-                  <p className="mt-1 text-sm text-red-600">{errors.codigo}</p>
-                )}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo *
-                </label>
-                <select
-                  required
-                  value={formData.tipo}
-                  onChange={(e) => {
-                    const newTipo = e.target.value as 'centro_salud' | 'puesto_salud' | 'hospital';
-                    setFormData({
-                      ...formData,
-                      tipo: newTipo
-                    });
-                  }}
+                  onChange={(e) => setFormData({...formData, codigo: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="centro_salud">Centro de Salud</option>
-                  <option value="puesto_salud">Puesto de Salud</option>
-                  <option value="hospital">Hospital</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ubicación en la Estructura Jerárquica *
-                </label>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <CascadingSelector
-                    selectedRedId={formData.redId || ''}
-                    selectedMicroredId={formData.microredId || ''}
-                    selectedCentroAcopioId={formData.centroAcopioId}
-                    onRedChange={(redId) => {
-                      setFormData({
-                        ...formData,
-                        redId,
-                        microredId: '',
-                        centroAcopioId: ''
-                      });
-                    }}
-                    onMicroredChange={(microredId) => {
-                      setFormData({
-                        ...formData,
-                        microredId,
-                        centroAcopioId: ''
-                      });
-                    }}
-                    onCentroAcopioChange={(centroAcopioId) => {
-                      setFormData({
-                        ...formData,
-                        centroAcopioId
-                      });
-                      if (errors.centroAcopioId) setErrors({...errors, centroAcopioId: ''});
-                    }}
-                    required={{ centroAcopio: true }}
-                    errors={{ centroAcopio: errors.centroAcopioId }}
-                  />
-                </div>
+                  placeholder="Opcional"
+                />
               </div>
 
-              {/* Campo de estado solo para edición */}
-              {establecimiento && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Estado
-                  </label>
-                  <select
-                    value={formData.estado}
-                    onChange={(e) => setFormData({...formData, estado: e.target.value as any})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="activo">Activo</option>
-                    <option value="inactivo">Inactivo</option>
-                  </select>
-                </div>
-              )}
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Dirección *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.direccion}
-                onChange={(e) => {
-                  setFormData({...formData, direccion: e.target.value});
-                  if (errors.direccion) setErrors({...errors, direccion: ''});
-                }}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                  errors.direccion
-                    ? 'border-red-300 focus:ring-red-500'
-                    : 'border-gray-300 focus:ring-blue-500'
-                }`}
-              />
-              {errors.direccion && (
-                <p className="mt-1 text-sm text-red-600">{errors.direccion}</p>
-              )}
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Microred
+                </label>
+                <select
+                  value={formData.microredId}
+                  onChange={(e) => setFormData({...formData, microredId: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Seleccionar microred...</option>
+                  {microredes.map((microred) => (
+                    <option key={microred.id} value={microred.id}>
+                      {microred.nombre} {microred.red && `(${microred.red.nombre})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Responsable *
@@ -918,7 +825,7 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
                   <p className="mt-1 text-sm text-red-600">{errors.responsable}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Teléfono
@@ -931,8 +838,49 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
                   placeholder="Opcional"
                 />
               </div>
+
+              {/* Campo de estado solo para edición */}
+              {centro && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Estado
+                  </label>
+                  <select
+                    value={formData.estado}
+                    onChange={(e) => setFormData({...formData, estado: e.target.value as any})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="activo">Activo</option>
+                    <option value="inactivo">Inactivo</option>
+                  </select>
+                </div>
+              )}
             </div>
-            
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Dirección *
+              </label>
+              <textarea
+                required
+                value={formData.direccion}
+                onChange={(e) => {
+                  setFormData({...formData, direccion: e.target.value});
+                  if (errors.direccion) setErrors({...errors, direccion: ''});
+                }}
+                rows={3}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                  errors.direccion
+                    ? 'border-red-300 focus:ring-red-500'
+                    : 'border-gray-300 focus:ring-blue-500'
+                }`}
+                placeholder="Dirección completa del centro de acopio"
+              />
+              {errors.direccion && (
+                <p className="mt-1 text-sm text-red-600">{errors.direccion}</p>
+              )}
+            </div>
+
             <div className="flex justify-end space-x-3 pt-4 border-t">
               <button
                 type="button"
@@ -947,7 +895,7 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
                 {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {establecimiento ? 'Actualizar' : 'Crear'}
+                {centro ? 'Actualizar' : 'Crear'}
               </button>
             </div>
           </form>
@@ -957,4 +905,4 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
   );
 };
 
-export default Establecimientos;
+export default CentrosAcopio;

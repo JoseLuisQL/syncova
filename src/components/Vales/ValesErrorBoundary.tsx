@@ -79,7 +79,7 @@ class ValesErrorBoundary extends Component<Props, State> {
             </p>
 
             {/* Detalles del error (solo en desarrollo) */}
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.MODE === 'development' && this.state.error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-left">
                 <h3 className="font-medium text-red-900 mb-2">Detalles del Error:</h3>
                 <p className="text-sm text-red-800 font-mono break-all">

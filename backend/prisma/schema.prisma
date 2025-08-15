@@ -15,9 +15,9 @@ datasource db {
 // =====================================================
 
 enum TipoEstablecimiento {
-  centro_acopio
   centro_salud
   puesto_salud
+  hospital
 }
 
 enum EstadoGeneral {
@@ -95,12 +95,66 @@ enum NivelAlerta {
 // MODELOS
 // =====================================================
 
+model Red {
+  id          String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre      String        @unique @db.VarChar(255)
+  codigo      String?       @unique @db.VarChar(50)
+  descripcion String?       @db.Text
+  estado      EstadoGeneral @default(activo)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  microredes  Microred[]
+
+  @@map("redes")
+}
+
+model Microred {
+  id            String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre        String        @db.VarChar(255)
+  codigo        String?       @db.VarChar(50)
+  descripcion   String?       @db.Text
+  redId         String        @map("red_id") @db.Uuid
+  estado        EstadoGeneral @default(activo)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  red           Red           @relation(fields: [redId], references: [id])
+  centrosAcopio CentroAcopio[]
+
+  @@unique([nombre, redId], name: "uk_microred_nombre_red")
+  @@map("microredes")
+}
+
+model CentroAcopio {
+  id          String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre      String        @db.VarChar(255)
+  codigo      String?       @unique @db.VarChar(50)
+  microredId  String?       @map("microred_id") @db.Uuid
+  direccion   String        @db.Text
+  responsable String        @db.VarChar(255)
+  telefono    String?       @db.VarChar(20)
+  estado      EstadoGeneral @default(activo)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  microred        Microred?         @relation(fields: [microredId], references: [id])
+  establecimientos Establecimiento[]
+  valesEntrega    ValeEntrega[]
+
+  @@unique([nombre, microredId], name: "uk_centro_acopio_nombre_microred")
+  @@map("centros_acopio")
+}
+
 model Establecimiento {
   id                String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   nombre            String                @db.VarChar(255)
   tipo              TipoEstablecimiento
   codigo            String                @unique @db.VarChar(50)
-  centroAcopioId    String?               @map("centro_acopio_id") @db.Uuid
+  centroAcopioId    String                @map("centro_acopio_id") @db.Uuid
   direccion         String                @db.Text
   responsable       String                @db.VarChar(255)
   telefono          String?               @db.VarChar(20)
@@ -109,12 +163,10 @@ model Establecimiento {
   updatedAt         DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   // Relaciones
-  centroAcopio      Establecimiento?      @relation("EstablecimientoJerarquia", fields: [centroAcopioId], references: [id])
-  establecimientos  Establecimiento[]     @relation("EstablecimientoJerarquia")
+  centroAcopio      CentroAcopio          @relation(fields: [centroAcopioId], references: [id])
   usuarios          Usuario[]
   planificaciones   PlanificacionAnual[]
   movimientos       MovimientoVacuna[]
-  valesEntrega      ValeEntrega[]
   valesDetalle      ValeDetalle[]
   kardexOrigen      Kardex[]              @relation("KardexOrigen")
   kardexDestino     Kardex[]              @relation("KardexDestino")
@@ -309,7 +361,7 @@ model ValeEntrega {
   updatedAt             DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   // Relaciones
-  centroAcopio          Establecimiento @relation(fields: [centroAcopioId], references: [id])
+  centroAcopio          CentroAcopio    @relation(fields: [centroAcopioId], references: [id])
   usuario               Usuario         @relation(fields: [usuarioId], references: [id])
   detalles              ValeDetalle[]
 

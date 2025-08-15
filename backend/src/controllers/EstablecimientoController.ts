@@ -146,7 +146,7 @@ export class EstablecimientoController {
   }
 
   /**
-   * Obtener centros de acopio
+   * Obtener centros de acopio (ahora desde la tabla centros_acopio)
    * GET /api/establecimientos/centros-acopio
    */
   static async getCentrosAcopio(req: Request, res: Response): Promise<void> {
@@ -161,6 +161,39 @@ export class EstablecimientoController {
       successResponse(res, result.data, 'Centros de acopio obtenidos exitosamente');
     } catch (error) {
       console.error('Error en EstablecimientoController.getCentrosAcopio:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Obtener opciones jerárquicas para formularios
+   * GET /api/establecimientos/opciones-jerarquicas
+   */
+  static async getOpcionesJerarquicas(req: Request, res: Response): Promise<void> {
+    try {
+      // Importar servicios dinámicamente para evitar dependencias circulares
+      const { RedService } = await import('@/services/RedService');
+      const { MicroredService } = await import('@/services/MicroredService');
+      const { CentroAcopioService } = await import('@/services/CentroAcopioService');
+
+      const [redesResult, microredesResult, centrosResult] = await Promise.all([
+        RedService.getAll({ estado: 'activo', limit: 1000 }),
+        MicroredService.getAll({ estado: 'activo', limit: 1000 }),
+        CentroAcopioService.getAll({ estado: 'activo', limit: 1000 })
+      ]);
+
+      if (!redesResult.success || !microredesResult.success || !centrosResult.success) {
+        errorResponse(res, 'Error al obtener opciones jerárquicas', 500);
+        return;
+      }
+
+      successResponse(res, {
+        redes: redesResult.data.redes,
+        microredes: microredesResult.data.microredes,
+        centrosAcopio: centrosResult.data.centrosAcopio
+      }, 'Opciones jerárquicas obtenidas exitosamente');
+    } catch (error) {
+      console.error('Error en EstablecimientoController.getOpcionesJerarquicas:', error);
       errorResponse(res, 'Error interno del servidor', 500);
     }
   }

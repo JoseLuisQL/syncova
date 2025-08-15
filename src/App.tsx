@@ -6,7 +6,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
 import Dashboard from './components/Dashboard/Dashboard';
-import Establecimientos from './components/Establecimientos/Establecimientos';
+import EstablecimientosModule from './components/Establecimientos/EstablecimientosModule';
 import Inventario from './components/Inventario/Inventario';
 import Movimientos from './components/Movimientos/Movimientos';
 import Planificacion from './components/Planificacion/Planificacion';
@@ -42,7 +42,7 @@ function App() {
       case 'dashboard':
         return <Dashboard />;
       case 'establecimientos':
-        return <Establecimientos />;
+        return <EstablecimientosModule />;
       case 'inventario':
         return <Inventario />;
       case 'movimientos':

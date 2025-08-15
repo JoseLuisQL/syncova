@@ -27,6 +27,13 @@ router.get('/', EstablecimientoController.getAll);
 router.get('/centros-acopio', EstablecimientoController.getCentrosAcopio);
 
 /**
+ * @route GET /api/establecimientos/opciones-jerarquicas
+ * @desc Obtener opciones jerárquicas para formularios (redes, microredes, centros de acopio)
+ * @access Public (TODO: Proteger con autenticación)
+ */
+router.get('/opciones-jerarquicas', EstablecimientoController.getOpcionesJerarquicas);
+
+/**
  * @route GET /api/establecimientos/centro-acopio/:centroAcopioId
  * @desc Obtener establecimientos por centro de acopio
  * @access Public (TODO: Proteger con autenticación)

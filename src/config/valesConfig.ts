@@ -210,7 +210,7 @@ export const STORAGE_KEYS = {
 
 // Configuración de logs
 export const LOG_CONFIG = {
-  ENABLED: process.env.NODE_ENV === 'development',
+  ENABLED: import.meta.env.MODE === 'development',
   LEVEL: 'info' as const,
   PREFIX: '[VALES]',
   COLORS: {
@@ -262,18 +262,18 @@ export const TEST_CONFIG = {
 
 // Función para obtener configuración por entorno
 export const getEnvironmentConfig = () => {
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const isProduction = process.env.NODE_ENV === 'production';
-  const isTesting = process.env.NODE_ENV === 'test';
+  const isDevelopment = import.meta.env.MODE === 'development';
+  const isProduction = import.meta.env.MODE === 'production';
+  const isTesting = import.meta.env.MODE === 'test';
 
   return {
     isDevelopment,
     isProduction,
     isTesting,
-    apiBaseUrl: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001',
-    enableMocks: isDevelopment && process.env.REACT_APP_ENABLE_MOCKS === 'true',
-    enableLogs: isDevelopment || process.env.REACT_APP_ENABLE_LOGS === 'true',
-    enableAnalytics: isProduction && process.env.REACT_APP_ENABLE_ANALYTICS === 'true'
+    apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001',
+    enableMocks: isDevelopment && import.meta.env.VITE_ENABLE_MOCKS === 'true',
+    enableLogs: isDevelopment || import.meta.env.VITE_ENABLE_LOGS === 'true',
+    enableAnalytics: isProduction && import.meta.env.VITE_ENABLE_ANALYTICS === 'true'
   };
 };
 

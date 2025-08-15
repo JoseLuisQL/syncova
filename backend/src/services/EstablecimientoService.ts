@@ -31,7 +31,10 @@ export class EstablecimientoService {
       const where: any = {};
 
       if (tipo) {
-        where.tipo = tipo;
+        // Filtrar solo tipos válidos (excluir centro_acopio que ya no existe)
+        if (['centro_salud', 'puesto_salud', 'hospital'].includes(tipo)) {
+          where.tipo = tipo;
+        }
       }
 
       if (estado && estado !== 'todos') {
@@ -63,15 +66,6 @@ export class EstablecimientoService {
                 id: true,
                 nombre: true,
                 codigo: true
-              }
-            },
-            establecimientos: {
-              select: {
-                id: true,
-                nombre: true,
-                codigo: true,
-                tipo: true,
-                estado: true
               }
             }
           },
@@ -173,13 +167,27 @@ export class EstablecimientoService {
   }
 
   /**
-   * Obtener centros de acopio
+   * Obtener centros de acopio (ahora desde la tabla centros_acopio)
    */
-  static async getCentrosAcopio(): Promise<ServiceResult<IEstablecimiento[]>> {
+  static async getCentrosAcopio(): Promise<ServiceResult<any[]>> {
     try {
-      const centrosAcopio = await prisma.establecimiento.findMany({
+      const centrosAcopio = await prisma.centroAcopio.findMany({
         where: {
-          tipo: 'centro_acopio'
+          estado: 'activo'
+        },
+        include: {
+          microred: {
+            select: {
+              id: true,
+              nombre: true,
+              red: {
+                select: {
+                  id: true,
+                  nombre: true
+                }
+              }
+            }
+          }
         },
         orderBy: { nombre: 'asc' }
       });
@@ -392,36 +400,22 @@ export class EstablecimientoService {
       }
     }
 
-    // Validaciones de jerarquía
-    if (data.tipo) {
-      if (data.tipo === 'centro_acopio') {
-        // Centro de acopio no puede tener centro_acopio_id
-        if (data.centroAcopioId) {
-          throw createError.badRequest('Un centro de acopio no puede tener un centro de acopio padre');
-        }
-      } else {
-        // Centros y puestos de salud DEBEN tener centro_acopio_id
-        if (!data.centroAcopioId) {
-          throw createError.badRequest('Los centros y puestos de salud deben tener un centro de acopio asignado');
-        }
+    // Validar centro de acopio (ahora es requerido para todos los establecimientos)
+    if (data.centroAcopioId) {
+      const centroAcopio = await prisma.centroAcopio.findUnique({
+        where: { id: data.centroAcopioId }
+      });
 
-        // Verificar que el centro de acopio existe y es válido
-        const centroAcopio = await prisma.establecimiento.findUnique({
-          where: { id: data.centroAcopioId }
-        });
-
-        if (!centroAcopio) {
-          throw createError.badRequest('El centro de acopio especificado no existe');
-        }
-
-        if (centroAcopio.tipo !== 'centro_acopio') {
-          throw createError.badRequest('El establecimiento padre debe ser un centro de acopio');
-        }
-
-        if (centroAcopio.estado !== 'activo') {
-          throw createError.badRequest('El centro de acopio debe estar activo');
-        }
+      if (!centroAcopio) {
+        throw createError.badRequest('El centro de acopio especificado no existe');
       }
+
+      if (centroAcopio.estado !== 'activo') {
+        throw createError.badRequest('El centro de acopio debe estar activo');
+      }
+    } else {
+      // centroAcopioId es requerido para todos los establecimientos
+      throw createError.badRequest('Todos los establecimientos deben tener un centro de acopio asignado');
     }
   }
 }

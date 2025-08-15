@@ -4,7 +4,7 @@ import { Request } from 'express';
 // TIPOS BASE DE LA BASE DE DATOS
 // =====================================================
 
-export type TipoEstablecimiento = 'centro_acopio' | 'centro_salud' | 'puesto_salud';
+export type TipoEstablecimiento = 'centro_salud' | 'puesto_salud' | 'hospital';
 export type EstadoGeneral = 'activo' | 'inactivo';
 export type EstadoPlanificacion = 'borrador' | 'aprobado' | 'ejecutado';
 export type EstadoLote = 'disponible' | 'vencido' | 'agotado';
@@ -20,12 +20,46 @@ export type NivelAlerta = 'info' | 'warning' | 'error' | 'success';
 // INTERFACES DE ENTIDADES
 // =====================================================
 
+export interface IRed {
+  id: string;
+  nombre: string;
+  codigo?: string;
+  descripcion?: string;
+  estado: EstadoGeneral;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IMicrored {
+  id: string;
+  nombre: string;
+  codigo?: string;
+  descripcion?: string;
+  redId: string;
+  estado: EstadoGeneral;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ICentroAcopio {
+  id: string;
+  nombre: string;
+  codigo?: string;
+  microredId?: string;
+  direccion: string;
+  responsable: string;
+  telefono?: string;
+  estado: EstadoGeneral;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IEstablecimiento {
   id: string;
   nombre: string;
   tipo: TipoEstablecimiento;
   codigo: string;
-  centroAcopioId?: string;
+  centroAcopioId: string;
   direccion: string;
   responsable: string;
   telefono?: string;
@@ -168,11 +202,58 @@ export interface IAlerta {
 // TIPOS PARA DTOs (Data Transfer Objects)
 // =====================================================
 
+export interface CreateRedDto {
+  nombre: string;
+  codigo?: string;
+  descripcion?: string;
+}
+
+export interface UpdateRedDto {
+  nombre?: string;
+  codigo?: string;
+  descripcion?: string;
+  estado?: EstadoGeneral;
+}
+
+export interface CreateMicroredDto {
+  nombre: string;
+  codigo?: string;
+  descripcion?: string;
+  redId: string;
+}
+
+export interface UpdateMicroredDto {
+  nombre?: string;
+  codigo?: string;
+  descripcion?: string;
+  redId?: string;
+  estado?: EstadoGeneral;
+}
+
+export interface CreateCentroAcopioDto {
+  nombre: string;
+  codigo?: string;
+  microredId?: string;
+  direccion: string;
+  responsable: string;
+  telefono?: string;
+}
+
+export interface UpdateCentroAcopioDto {
+  nombre?: string;
+  codigo?: string;
+  microredId?: string;
+  direccion?: string;
+  responsable?: string;
+  telefono?: string;
+  estado?: EstadoGeneral;
+}
+
 export interface CreateEstablecimientoDto {
   nombre: string;
   tipo: TipoEstablecimiento;
   codigo: string;
-  centroAcopioId?: string;
+  centroAcopioId: string;
   direccion: string;
   responsable: string;
   telefono?: string;
@@ -355,7 +436,7 @@ export interface PlanificacionConRelaciones extends IPlanificacionAnual {
     nombre: string;
     tipo: TipoEstablecimiento;
     codigo: string;
-    centroAcopioId?: string;
+    centroAcopioId: string;
   };
   vacuna: {
     id: string;
@@ -364,6 +445,28 @@ export interface PlanificacionConRelaciones extends IPlanificacionAnual {
     presentacion: string;
     dosisPorFrasco: number;
   };
+}
+
+// =====================================================
+// TIPOS PARA ENTIDADES CON RELACIONES
+// =====================================================
+
+export interface RedConRelaciones extends IRed {
+  microredes?: MicroredConRelaciones[];
+}
+
+export interface MicroredConRelaciones extends IMicrored {
+  red?: IRed;
+  centrosAcopio?: CentroAcopioConRelaciones[];
+}
+
+export interface CentroAcopioConRelaciones extends ICentroAcopio {
+  microred?: IMicrored;
+  establecimientos?: EstablecimientoConRelaciones[];
+}
+
+export interface EstablecimientoConRelaciones extends IEstablecimiento {
+  centroAcopio?: ICentroAcopio;
 }
 
 export interface EstadisticasPlanificacion {

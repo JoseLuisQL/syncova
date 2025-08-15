@@ -1,45 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Building2, MapPin, Phone, User, MoreVertical, AlertCircle, Loader2, Wifi, WifiOff, Settings, Bug } from 'lucide-react';
-import { Establecimiento, CreateEstablecimientoDto, UpdateEstablecimientoDto } from '../../types';
-import { useEstablecimientos } from '../../hooks/useEstablecimientos';
+import { Plus, Search, Filter, Edit, Trash2, Network, GitBranch, MapPin, Phone, User, MoreVertical, AlertCircle, Loader2, Wifi, WifiOff, Settings, Bug } from 'lucide-react';
+import { Red, CreateRedDto, UpdateRedDto } from '../../types';
+import { useRedes } from '../../hooks/useRedes';
 import { useToastContext } from '../../contexts/ToastContext';
 import { checkBackendConnection, logger } from '../../utils/debug';
-import TestConnection from '../TestConnection';
-import DebugPanel from '../DebugPanel';
-import CascadingSelector from '../common/CascadingSelector';
+import { validateRed, sanitizeInput } from '../../utils/validation';
+import { TableLoadingSkeleton } from '../common/LoadingSkeleton';
+import { DeleteConfirmation } from '../common/ConfirmationDialog';
 
-const Establecimientos: React.FC = () => {
+const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
   // Estados locales para UI
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterTipo, setFilterTipo] = useState<string>('todos');
   const [filterEstado, setFilterEstado] = useState<string>('todos');
   const [showModal, setShowModal] = useState(false);
-  const [editingEstablecimiento, setEditingEstablecimiento] = useState<Establecimiento | null>(null);
+  const [editingRed, setEditingRed] = useState<Red | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    redId: string;
+    redNombre: string;
+  }>({
+    isOpen: false,
+    redId: '',
+    redNombre: ''
+  });
   const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
-  const [showTestConnection, setShowTestConnection] = useState(false);
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
 
-  // Hook personalizado para gestión de establecimientos
+  // Hook personalizado para gestión de redes
   const {
-    establecimientos,
-    centrosAcopio,
-    pagination,
-    isLoading,
+    redes,
+    loading,
     error,
-    createEstablecimiento,
-    updateEstablecimiento,
-    deleteEstablecimiento,
-    search,
-    applyFilters,
-    changePage,
-    refresh,
-    isCreating,
-    isUpdating,
-    isDeleting,
-    createError,
-    updateError,
-    deleteError
-  } = useEstablecimientos();
+    total,
+    currentPage,
+    totalPages,
+    filters,
+    setFilters,
+    fetchRedes,
+    createRed,
+    updateRed,
+    deleteRed
+  } = useRedes();
 
   // Hook para toast notifications
   const { toast } = useToastContext();
@@ -68,64 +68,81 @@ const Establecimientos: React.FC = () => {
   // Aplicar filtros cuando cambien los valores (con debounce para búsqueda)
   React.useEffect(() => {
     // Evitar ejecutar en la primera carga
-    if (!establecimientos.length && !searchTerm && filterTipo === 'todos' && filterEstado === 'todos') {
+    if (!redes.length && !searchTerm && filterEstado === 'todos') {
       return;
     }
 
     const timeoutId = setTimeout(() => {
-      const filters: any = {};
-
-      if (filterTipo !== 'todos') {
-        filters.tipo = filterTipo;
-      }
+      const newFilters: any = {};
 
       if (filterEstado !== 'todos') {
-        filters.estado = filterEstado;
+        newFilters.estado = filterEstado;
       }
 
       if (searchTerm.trim()) {
-        filters.search = searchTerm.trim();
+        newFilters.search = searchTerm.trim();
       }
 
-      logger.debug('Aplicando filtros después de debounce:', filters);
-      applyFilters(filters);
+      logger.debug('Aplicando filtros después de debounce:', newFilters);
+      setFilters(newFilters);
     }, 1000); // Aumentado a 1 segundo para evitar demasiadas peticiones
 
     return () => clearTimeout(timeoutId);
-  }, [filterTipo, filterEstado, searchTerm]); // Sin applyFilters en dependencias
+  }, [filterEstado, searchTerm]); // Sin setFilters en dependencias
 
-  const handleEdit = (establecimiento: Establecimiento) => {
-    setEditingEstablecimiento(establecimiento);
+  const handleEdit = (red: Red) => {
+    setEditingRed(red);
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string, nombre: string) => {
-    if (window.confirm(`¿Está seguro de eliminar el establecimiento "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
-      const success = await deleteEstablecimiento(id);
-      if (!success && deleteError) {
-        alert(`Error al eliminar: ${deleteError}`);
-      }
-    }
+  const handleDelete = (id: string, nombre: string) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      redId: id,
+      redNombre: nombre
+    });
   };
 
-  const handleSubmit = async (formData: CreateEstablecimientoDto | UpdateEstablecimientoDto) => {
+  const confirmDelete = async () => {
+    const success = await deleteRed(deleteConfirmation.redId);
+    if (success) {
+      toast.success(
+        'Red eliminada',
+        `La red "${deleteConfirmation.redNombre}" ha sido eliminada exitosamente.`,
+        { duration: 4000 }
+      );
+    } else {
+      toast.error(
+        'Error al eliminar red',
+        'No se pudo eliminar la red. Verifique que no tenga microredes asociadas.',
+        { duration: 6000 }
+      );
+    }
+    setDeleteConfirmation({
+      isOpen: false,
+      redId: '',
+      redNombre: ''
+    });
+  };
+
+  const handleSubmit = async (formData: CreateRedDto | UpdateRedDto) => {
     let success = false;
 
-    if (editingEstablecimiento) {
+    if (editingRed) {
       // Editar
-      success = await updateEstablecimiento(editingEstablecimiento.id, formData as UpdateEstablecimientoDto);
+      success = await updateRed(editingRed.id, formData as UpdateRedDto);
       if (success) {
         toast.success(
-          'Establecimiento actualizado',
-          `El establecimiento "${formData.nombre || editingEstablecimiento.nombre}" ha sido actualizado exitosamente.`,
+          'Red actualizada',
+          `La red "${formData.nombre || editingRed.nombre}" ha sido actualizada exitosamente.`,
           { duration: 4000 }
         );
         setShowModal(false);
-        setEditingEstablecimiento(null);
-      } else if (updateError) {
+        setEditingRed(null);
+      } else {
         toast.error(
-          'Error al actualizar establecimiento',
-          updateError,
+          'Error al actualizar red',
+          'No se pudo actualizar la red. Intente nuevamente.',
           {
             duration: 6000,
             action: {
@@ -137,19 +154,19 @@ const Establecimientos: React.FC = () => {
       }
     } else {
       // Crear nuevo
-      success = await createEstablecimiento(formData as CreateEstablecimientoDto);
+      success = await createRed(formData as CreateRedDto);
       if (success) {
         toast.success(
-          'Establecimiento creado',
-          `El establecimiento "${formData.nombre}" ha sido creado exitosamente en el sistema.`,
+          'Red creada',
+          `La red "${formData.nombre}" ha sido creada exitosamente en el sistema.`,
           { duration: 4000 }
         );
         setShowModal(false);
-        setEditingEstablecimiento(null);
-      } else if (createError) {
+        setEditingRed(null);
+      } else {
         toast.error(
-          'Error al crear establecimiento',
-          createError,
+          'Error al crear red',
+          'No se pudo crear la red. Intente nuevamente.',
           {
             duration: 6000,
             action: {
@@ -167,29 +184,14 @@ const Establecimientos: React.FC = () => {
 
     // Limpiar filtros y recargar
     setSearchTerm('');
-    setFilterTipo('todos');
     setFilterEstado('todos');
 
     // Recargar datos sin filtros
-    applyFilters({});
+    setFilters({});
   }, []);
 
-  const getTipoLabel = (tipo: string) => {
-    switch (tipo) {
-      case 'centro_acopio': return 'Centro de Acopio';
-      case 'centro_salud': return 'Centro de Salud';
-      case 'puesto_salud': return 'Puesto de Salud';
-      default: return tipo;
-    }
-  };
-
-  const getTipoColor = (tipo: string) => {
-    switch (tipo) {
-      case 'centro_acopio': return 'bg-blue-100 text-blue-800';
-      case 'centro_salud': return 'bg-green-100 text-green-800';
-      case 'puesto_salud': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const changePage = (page: number) => {
+    setFilters({ ...filters, page });
   };
 
   // Si no hay conexión con el backend, mostrar mensaje de error
@@ -235,32 +237,15 @@ const Establecimientos: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Gestión de Establecimientos</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Gestión de Redes</h2>
           <p className="text-gray-600 mt-1">
-            Administre centros de acopio y establecimientos de salud
-            {pagination.total > 0 && (
+            Administre las redes de salud del sistema
+            {total > 0 && (
               <span className="ml-2 text-sm">
-                ({pagination.total} establecimiento{pagination.total !== 1 ? 's' : ''})
+                ({total} red{total !== 1 ? 'es' : ''})
               </span>
             )}
           </p>
-          {/* Botones de desarrollo */}
-          {import.meta.env.VITE_ENVIRONMENT === 'development' && (
-            <div className="mt-2 space-x-2">
-              <button
-                onClick={() => setShowTestConnection(true)}
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
-              >
-                Probar conexión
-              </button>
-              <button
-                onClick={() => setShowDebugPanel(!showDebugPanel)}
-                className="text-xs text-green-600 hover:text-green-800 underline"
-              >
-                {showDebugPanel ? 'Ocultar' : 'Mostrar'} debug
-              </button>
-            </div>
-          )}
         </div>
         <div className="flex items-center space-x-2">
           {/* Indicador de conexión */}
@@ -283,23 +268,19 @@ const Establecimientos: React.FC = () => {
 
           <button
             onClick={handleRefresh}
-            disabled={isLoading || backendConnected === false}
+            disabled={loading || backendConnected === false}
             className="flex items-center px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
-            <Loader2 className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            <Loader2 className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Actualizar
           </button>
           <button
             onClick={() => setShowModal(true)}
-            disabled={isCreating || backendConnected === false}
+            disabled={loading || backendConnected === false}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isCreating ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4 mr-2" />
-            )}
-            Nuevo Establecimiento
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva Red
           </button>
         </div>
       </div>
@@ -312,24 +293,12 @@ const Establecimientos: React.FC = () => {
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar por nombre, código o responsable..."
+                placeholder="Buscar por nombre, código o descripción..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-          </div>
-          <div className="sm:w-48">
-            <select
-              value={filterTipo}
-              onChange={(e) => setFilterTipo(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="todos">Todos los tipos</option>
-              <option value="centro_acopio">Centro de Acopio</option>
-              <option value="centro_salud">Centro de Salud</option>
-              <option value="puesto_salud">Puesto de Salud</option>
-            </select>
           </div>
           <div className="sm:w-48">
             <select
@@ -346,40 +315,27 @@ const Establecimientos: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-blue-600" />
+              <Network className="h-6 w-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Centros de Acopio</p>
-              <p className="text-2xl font-bold text-gray-900">{centrosAcopio.length}</p>
+              <p className="text-sm font-medium text-gray-600">Total Redes</p>
+              <p className="text-2xl font-bold text-gray-900">{total}</p>
             </div>
           </div>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-green-600" />
+              <Network className="h-6 w-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Centros de Salud</p>
+              <p className="text-sm font-medium text-gray-600">Redes Activas</p>
               <p className="text-2xl font-bold text-gray-900">
-                {establecimientos.filter(e => e.tipo === 'centro_salud').length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-orange-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Puestos de Salud</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {establecimientos.filter(e => e.tipo === 'puesto_salud').length}
+                {redes.filter(r => r.estado === 'activo').length}
               </p>
             </div>
           </div>
@@ -387,11 +343,13 @@ const Establecimientos: React.FC = () => {
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center">
             <div className="p-2 bg-gray-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-gray-600" />
+              <Network className="h-6 w-6 text-gray-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total</p>
-              <p className="text-2xl font-bold text-gray-900">{pagination.total}</p>
+              <p className="text-sm font-medium text-gray-600">Redes Inactivas</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {redes.filter(r => r.estado === 'inactivo').length}
+              </p>
             </div>
           </div>
         </div>
@@ -399,10 +357,10 @@ const Establecimientos: React.FC = () => {
 
       {/* Table */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {isLoading ? (
+        {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            <span className="ml-2 text-gray-600">Cargando establecimientos...</span>
+            <span className="ml-2 text-gray-600">Cargando redes...</span>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -410,19 +368,16 @@ const Establecimientos: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Establecimiento
+                  Red
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tipo
+                  Código
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estructura Jerárquica
+                  Descripción
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Responsable
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contacto
+                  Microredes
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
@@ -433,140 +388,140 @@ const Establecimientos: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {establecimientos.length === 0 && !isLoading ? (
+              {loading ? (
+                // Loading skeleton rows
+                Array.from({ length: 5 }).map((_, index) => (
+                  <tr key={`skeleton-${index}`} className="animate-pulse">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+                        <div className="ml-4">
+                          <div className="h-4 bg-gray-200 rounded w-24"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="h-4 bg-gray-200 rounded w-16"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded w-32"></div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="h-6 w-8 bg-gray-200 rounded-full"></div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end space-x-2">
+                        <div className="h-8 w-8 bg-gray-200 rounded"></div>
+                        <div className="h-8 w-8 bg-gray-200 rounded"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : redes.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                    <Building2 className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                    <p className="text-lg font-medium">No se encontraron establecimientos</p>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    <Network className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                    <p className="text-lg font-medium">No se encontraron redes</p>
                     <p className="text-sm">Intente ajustar los filtros de búsqueda</p>
                   </td>
                 </tr>
               ) : (
-                establecimientos.map((establecimiento) => {
-                  // Usar la relación centroAcopio del backend si está disponible
-                  const centroAcopio = establecimiento.centroAcopio ||
-                    (establecimiento.centroAcopioId
-                      ? centrosAcopio.find(c => c.id === establecimiento.centroAcopioId)
-                      : null);
-
-                  // Obtener información jerárquica
-                  const microred = centroAcopio?.microred;
-                  const red = microred?.red;
-                
-                return (
-                  <tr key={establecimiento.id} className="hover:bg-gray-50">
+                redes.map((red) => (
+                  <tr key={red.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <Building2 className="h-5 w-5 text-gray-500" />
+                            <Network className="h-5 w-5 text-gray-500" />
                           </div>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {establecimiento.nombre}
+                            {red.nombre}
                           </div>
-                          <div className="text-sm text-gray-500">{establecimiento.codigo}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTipoColor(establecimiento.tipo)}`}>
-                        {getTipoLabel(establecimiento.tipo)}
-                      </span>
+                      <span className="text-sm text-gray-900">{red.codigo || '-'}</span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
-                      {centroAcopio ? (
-                        <div className="space-y-1">
-                          <div className="font-medium">{centroAcopio.nombre}</div>
-                          {microred && (
-                            <div className="text-xs text-gray-500">
-                              {microred.red?.nombre} → {microred.nombre}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">Sin asignar</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <User className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">{establecimiento.responsable}</span>
+                      <div className="max-w-xs truncate">
+                        {red.descripcion || '-'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        <div className="flex items-center mb-1">
-                          <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                          {establecimiento.telefono}
-                        </div>
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="truncate max-w-xs">{establecimiento.direccion}</span>
-                        </div>
-                      </div>
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                        {red._count?.microredes || 0}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        establecimiento.estado === 'activo' 
-                          ? 'bg-green-100 text-green-800' 
+                        red.estado === 'activo'
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {establecimiento.estado === 'activo' ? 'Activo' : 'Inactivo'}
+                        {red.estado === 'activo' ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
+                        {onNavigateToMicroredes && (red._count?.microredes || 0) > 0 && (
+                          <button
+                            onClick={() => onNavigateToMicroredes(red.id, red.nombre)}
+                            disabled={loading}
+                            className="text-purple-600 hover:text-purple-900 p-1 hover:bg-purple-50 rounded disabled:opacity-50"
+                            title="Ver microredes"
+                          >
+                            <GitBranch className="h-4 w-4" />
+                          </button>
+                        )}
                         <button
-                          onClick={() => handleEdit(establecimiento)}
-                          disabled={isUpdating}
+                          onClick={() => handleEdit(red)}
+                          disabled={loading}
                           className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded disabled:opacity-50"
                         >
-                          {isUpdating ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Edit className="h-4 w-4" />
-                          )}
+                          <Edit className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(establecimiento.id, establecimiento.nombre)}
-                          disabled={isDeleting}
+                          onClick={() => handleDelete(red.id, red.nombre)}
+                          disabled={loading || (red._count?.microredes || 0) > 0}
                           className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded disabled:opacity-50"
-                          title="Eliminar establecimiento"
+                          title={
+                            (red._count?.microredes || 0) > 0
+                              ? 'No se puede eliminar: tiene microredes asociadas'
+                              : 'Eliminar red'
+                          }
                         >
-                          {isDeleting ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>
                   </tr>
-                );
-                })
+                ))
               )}
             </tbody>
           </table>
         </div>
         )}
-
         {/* Paginación */}
-        {pagination.totalPages > 1 && (
+        {totalPages > 1 && (
           <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
             <div className="flex items-center justify-between">
               <div className="flex-1 flex justify-between sm:hidden">
                 <button
-                  onClick={() => changePage(pagination.page - 1)}
-                  disabled={pagination.page <= 1}
+                  onClick={() => changePage(currentPage - 1)}
+                  disabled={currentPage <= 1}
                   className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Anterior
                 </button>
                 <button
-                  onClick={() => changePage(pagination.page + 1)}
-                  disabled={pagination.page >= pagination.totalPages}
+                  onClick={() => changePage(currentPage + 1)}
+                  disabled={currentPage >= totalPages}
                   className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Siguiente
@@ -577,33 +532,33 @@ const Establecimientos: React.FC = () => {
                   <p className="text-sm text-gray-700">
                     Mostrando{' '}
                     <span className="font-medium">
-                      {((pagination.page - 1) * pagination.limit) + 1}
+                      {((currentPage - 1) * (filters.limit || 10)) + 1}
                     </span>{' '}
                     a{' '}
                     <span className="font-medium">
-                      {Math.min(pagination.page * pagination.limit, pagination.total)}
+                      {Math.min(currentPage * (filters.limit || 10), total)}
                     </span>{' '}
                     de{' '}
-                    <span className="font-medium">{pagination.total}</span> resultados
+                    <span className="font-medium">{total}</span> resultados
                   </p>
                 </div>
                 <div>
                   <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                     <button
-                      onClick={() => changePage(pagination.page - 1)}
-                      disabled={pagination.page <= 1}
+                      onClick={() => changePage(currentPage - 1)}
+                      disabled={currentPage <= 1}
                       className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Anterior
                     </button>
-                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       const pageNum = i + 1;
                       return (
                         <button
                           key={pageNum}
                           onClick={() => changePage(pageNum)}
                           className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                            pageNum === pagination.page
+                            pageNum === currentPage
                               ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
                               : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                           }`}
@@ -613,8 +568,8 @@ const Establecimientos: React.FC = () => {
                       );
                     })}
                     <button
-                      onClick={() => changePage(pagination.page + 1)}
-                      disabled={pagination.page >= pagination.totalPages}
+                      onClick={() => changePage(currentPage + 1)}
+                      disabled={currentPage >= totalPages}
                       className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Siguiente
@@ -629,89 +584,83 @@ const Establecimientos: React.FC = () => {
 
       {/* Modal */}
       {showModal && (
-        <EstablecimientoModal
-          establecimiento={editingEstablecimiento}
+        <RedModal
+          red={editingRed}
           onClose={() => {
             setShowModal(false);
-            setEditingEstablecimiento(null);
+            setEditingRed(null);
           }}
           onSubmit={handleSubmit}
-          isLoading={isCreating || isUpdating}
+          isLoading={loading}
         />
       )}
 
-      {/* Test Connection Modal */}
-      {showTestConnection && (
-        <TestConnection onClose={() => setShowTestConnection(false)} />
-      )}
-
-      {/* Debug Panel */}
-      <DebugPanel
-        isVisible={showDebugPanel}
-        onClose={() => setShowDebugPanel(false)}
+      {/* Confirmation Dialog */}
+      <DeleteConfirmation
+        isOpen={deleteConfirmation.isOpen}
+        onClose={() => setDeleteConfirmation({ isOpen: false, redId: '', redNombre: '' })}
+        onConfirm={confirmDelete}
+        itemName={deleteConfirmation.redNombre}
+        itemType="red"
+        isLoading={loading}
+        additionalWarning="Verifique que no tenga microredes asociadas."
       />
     </div>
   );
 };
 
-// Modal Component
-interface EstablecimientoModalProps {
-  establecimiento: Establecimiento | null;
+// Interfaces
+interface RedesProps {
+  onNavigateToMicroredes?: (redId: string, redNombre: string) => void;
+}
+
+interface RedModalProps {
+  red: Red | null;
   onClose: () => void;
-  onSubmit: (data: CreateEstablecimientoDto | UpdateEstablecimientoDto) => Promise<void>;
+  onSubmit: (data: CreateRedDto | UpdateRedDto) => Promise<void>;
   isLoading?: boolean;
 }
 
-const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
-  establecimiento,
+const RedModal: React.FC<RedModalProps> = ({
+  red,
   onClose,
   onSubmit,
   isLoading = false,
 }) => {
   const [formData, setFormData] = useState({
-    nombre: establecimiento?.nombre || '',
-    tipo: establecimiento?.tipo || 'centro_salud',
-    codigo: establecimiento?.codigo || '',
-    centroAcopioId: establecimiento?.centroAcopioId || '',
-    direccion: establecimiento?.direccion || '',
-    responsable: establecimiento?.responsable || '',
-    telefono: establecimiento?.telefono || '',
-    // Campos para el selector en cascada
-    redId: establecimiento?.centroAcopio?.microred?.redId || '',
-    microredId: establecimiento?.centroAcopio?.microredId || '',
+    nombre: red?.nombre || '',
+    codigo: red?.codigo || '',
+    descripcion: red?.descripcion || '',
     // Solo incluir estado si estamos editando (no en creación)
-    ...(establecimiento && { estado: establecimiento.estado }),
+    ...(red && { estado: red.estado }),
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Validar formulario
+  // Validar formulario usando la utilidad de validación
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+    // Sanitizar datos antes de validar
+    const sanitizedData = {
+      nombre: sanitizeInput(formData.nombre),
+      codigo: formData.codigo ? sanitizeInput(formData.codigo) : '',
+      descripcion: formData.descripcion ? sanitizeInput(formData.descripcion) : '',
+      ...(red && { estado: formData.estado })
+    };
 
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = 'El nombre es requerido';
+    const validation = validateRed(sanitizedData);
+    setErrors(validation.errors);
+
+    // Actualizar formData con datos sanitizados si la validación es exitosa
+    if (validation.isValid) {
+      setFormData(prev => ({
+        ...prev,
+        nombre: sanitizedData.nombre,
+        codigo: sanitizedData.codigo,
+        descripcion: sanitizedData.descripcion
+      }));
     }
 
-    if (!formData.codigo.trim()) {
-      newErrors.codigo = 'El código es requerido';
-    }
-
-    if (!formData.direccion.trim()) {
-      newErrors.direccion = 'La dirección es requerida';
-    }
-
-    if (!formData.responsable.trim()) {
-      newErrors.responsable = 'El responsable es requerido';
-    }
-
-    // Validar centroAcopioId (requerido para todos los establecimientos)
-    if (!formData.centroAcopioId || formData.centroAcopioId.trim() === '') {
-      newErrors.centroAcopioId = 'Debe seleccionar un centro de acopio';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return validation.isValid;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -724,14 +673,8 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
     // Preparar datos para envío
     const submitData = { ...formData };
 
-    // Asegurar que centroAcopioId no esté vacío (requerido para todos los establecimientos)
-    if (!submitData.centroAcopioId || submitData.centroAcopioId.trim() === '') {
-      // Esto no debería pasar debido a la validación, pero por seguridad
-      return;
-    }
-
     // Para CREACIÓN, NO enviar el campo estado (el backend lo asigna automáticamente)
-    if (!establecimiento) {
+    if (!red) {
       delete submitData.estado;
     }
 
@@ -744,9 +687,9 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
       <div className="bg-white rounded-lg max-w-2xl w-full m-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            {establecimiento ? 'Editar Establecimiento' : 'Nuevo Establecimiento'}
+            {red ? 'Editar Red' : 'Nueva Red'}
           </h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -771,14 +714,13 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
                   <p className="mt-1 text-sm text-red-600">{errors.nombre}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Código *
+                  Código
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.codigo}
                   onChange={(e) => {
                     setFormData({...formData, codigo: e.target.value});
@@ -789,73 +731,15 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
                       ? 'border-red-300 focus:ring-red-500'
                       : 'border-gray-300 focus:ring-blue-500'
                   }`}
+                  placeholder="Opcional"
                 />
                 {errors.codigo && (
                   <p className="mt-1 text-sm text-red-600">{errors.codigo}</p>
                 )}
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo *
-                </label>
-                <select
-                  required
-                  value={formData.tipo}
-                  onChange={(e) => {
-                    const newTipo = e.target.value as 'centro_salud' | 'puesto_salud' | 'hospital';
-                    setFormData({
-                      ...formData,
-                      tipo: newTipo
-                    });
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="centro_salud">Centro de Salud</option>
-                  <option value="puesto_salud">Puesto de Salud</option>
-                  <option value="hospital">Hospital</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ubicación en la Estructura Jerárquica *
-                </label>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <CascadingSelector
-                    selectedRedId={formData.redId || ''}
-                    selectedMicroredId={formData.microredId || ''}
-                    selectedCentroAcopioId={formData.centroAcopioId}
-                    onRedChange={(redId) => {
-                      setFormData({
-                        ...formData,
-                        redId,
-                        microredId: '',
-                        centroAcopioId: ''
-                      });
-                    }}
-                    onMicroredChange={(microredId) => {
-                      setFormData({
-                        ...formData,
-                        microredId,
-                        centroAcopioId: ''
-                      });
-                    }}
-                    onCentroAcopioChange={(centroAcopioId) => {
-                      setFormData({
-                        ...formData,
-                        centroAcopioId
-                      });
-                      if (errors.centroAcopioId) setErrors({...errors, centroAcopioId: ''});
-                    }}
-                    required={{ centroAcopio: true }}
-                    errors={{ centroAcopio: errors.centroAcopioId }}
-                  />
-                </div>
-              </div>
 
               {/* Campo de estado solo para edición */}
-              {establecimiento && (
+              {red && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Estado
@@ -871,68 +755,30 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
                 </div>
               )}
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Dirección *
+                Descripción
               </label>
-              <input
-                type="text"
-                required
-                value={formData.direccion}
+              <textarea
+                value={formData.descripcion}
                 onChange={(e) => {
-                  setFormData({...formData, direccion: e.target.value});
-                  if (errors.direccion) setErrors({...errors, direccion: ''});
+                  setFormData({...formData, descripcion: e.target.value});
+                  if (errors.descripcion) setErrors({...errors, descripcion: ''});
                 }}
+                rows={3}
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                  errors.direccion
+                  errors.descripcion
                     ? 'border-red-300 focus:ring-red-500'
                     : 'border-gray-300 focus:ring-blue-500'
                 }`}
+                placeholder="Descripción opcional de la red"
               />
-              {errors.direccion && (
-                <p className="mt-1 text-sm text-red-600">{errors.direccion}</p>
+              {errors.descripcion && (
+                <p className="mt-1 text-sm text-red-600">{errors.descripcion}</p>
               )}
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Responsable *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.responsable}
-                  onChange={(e) => {
-                    setFormData({...formData, responsable: e.target.value});
-                    if (errors.responsable) setErrors({...errors, responsable: ''});
-                  }}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                    errors.responsable
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-300 focus:ring-blue-500'
-                  }`}
-                />
-                {errors.responsable && (
-                  <p className="mt-1 text-sm text-red-600">{errors.responsable}</p>
-                )}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Teléfono
-                </label>
-                <input
-                  type="tel"
-                  value={formData.telefono}
-                  onChange={(e) => setFormData({...formData, telefono: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Opcional"
-                />
-              </div>
-            </div>
-            
+
             <div className="flex justify-end space-x-3 pt-4 border-t">
               <button
                 type="button"
@@ -947,7 +793,7 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
                 {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {establecimiento ? 'Actualizar' : 'Crear'}
+                {red ? 'Actualizar' : 'Crear'}
               </button>
             </div>
           </form>
@@ -957,4 +803,4 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
   );
 };
 
-export default Establecimientos;
+export default Redes;

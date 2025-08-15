@@ -1,13 +1,150 @@
 // =====================================================
+// TIPOS PARA REDES
+// =====================================================
+
+export interface Red {
+  id: string;
+  nombre: string;
+  codigo?: string;
+  descripcion?: string;
+  estado: 'activo' | 'inactivo';
+  createdAt: Date;
+  updatedAt: Date;
+  // Relaciones incluidas en respuestas del backend
+  microredes?: Microred[];
+  _count?: {
+    microredes: number;
+    centrosAcopio: number;
+    establecimientos: number;
+  };
+}
+
+export interface CreateRedDto {
+  nombre: string;
+  codigo?: string;
+  descripcion?: string;
+}
+
+export interface UpdateRedDto {
+  nombre?: string;
+  codigo?: string;
+  descripcion?: string;
+  estado?: 'activo' | 'inactivo';
+}
+
+export interface RedFilters {
+  estado?: 'activo' | 'inactivo' | 'todos';
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+// =====================================================
+// TIPOS PARA MICROREDES
+// =====================================================
+
+export interface Microred {
+  id: string;
+  nombre: string;
+  codigo?: string;
+  descripcion?: string;
+  redId: string;
+  estado: 'activo' | 'inactivo';
+  createdAt: Date;
+  updatedAt: Date;
+  // Relaciones incluidas en respuestas del backend
+  red?: Red;
+  centrosAcopio?: CentroAcopio[];
+  _count?: {
+    centrosAcopio: number;
+    establecimientos: number;
+  };
+}
+
+export interface CreateMicroredDto {
+  nombre: string;
+  codigo?: string;
+  descripcion?: string;
+  redId: string;
+}
+
+export interface UpdateMicroredDto {
+  nombre?: string;
+  codigo?: string;
+  descripcion?: string;
+  redId?: string;
+  estado?: 'activo' | 'inactivo';
+}
+
+export interface MicroredFilters {
+  redId?: string;
+  estado?: 'activo' | 'inactivo' | 'todos';
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+// =====================================================
+// TIPOS PARA CENTROS DE ACOPIO
+// =====================================================
+
+export interface CentroAcopio {
+  id: string;
+  nombre: string;
+  codigo?: string;
+  microredId?: string;
+  direccion: string;
+  responsable: string;
+  telefono?: string;
+  estado: 'activo' | 'inactivo';
+  createdAt: Date;
+  updatedAt: Date;
+  // Relaciones incluidas en respuestas del backend
+  microred?: Microred;
+  establecimientos?: Establecimiento[];
+  _count?: {
+    establecimientos: number;
+  };
+}
+
+export interface CreateCentroAcopioDto {
+  nombre: string;
+  codigo?: string;
+  microredId?: string;
+  direccion: string;
+  responsable: string;
+  telefono?: string;
+}
+
+export interface UpdateCentroAcopioDto {
+  nombre?: string;
+  codigo?: string;
+  microredId?: string;
+  direccion?: string;
+  responsable?: string;
+  telefono?: string;
+  estado?: 'activo' | 'inactivo';
+}
+
+export interface CentroAcopioFilters {
+  microredId?: string;
+  redId?: string;
+  estado?: 'activo' | 'inactivo' | 'todos';
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+// =====================================================
 // TIPOS PARA ESTABLECIMIENTOS
 // =====================================================
 
 export interface Establecimiento {
   id: string;
   nombre: string;
-  tipo: 'centro_acopio' | 'centro_salud' | 'puesto_salud';
+  tipo: 'centro_salud' | 'puesto_salud' | 'hospital';
   codigo: string;
-  centroAcopioId?: string;
+  centroAcopioId: string;
   direccion: string;
   responsable: string;
   telefono?: string;
@@ -15,19 +152,15 @@ export interface Establecimiento {
   createdAt: Date;
   updatedAt: Date;
   // Relación con centro de acopio (incluida en respuestas del backend)
-  centroAcopio?: {
-    id: string;
-    nombre: string;
-    codigo: string;
-  };
+  centroAcopio?: CentroAcopio;
 }
 
 // DTOs para el backend
 export interface CreateEstablecimientoDto {
   nombre: string;
-  tipo: 'centro_acopio' | 'centro_salud' | 'puesto_salud';
+  tipo: 'centro_salud' | 'puesto_salud' | 'hospital';
   codigo: string;
-  centroAcopioId?: string;
+  centroAcopioId: string;
   direccion: string;
   responsable: string;
   telefono?: string;
@@ -35,7 +168,7 @@ export interface CreateEstablecimientoDto {
 
 export interface UpdateEstablecimientoDto {
   nombre?: string;
-  tipo?: 'centro_acopio' | 'centro_salud' | 'puesto_salud';
+  tipo?: 'centro_salud' | 'puesto_salud' | 'hospital';
   codigo?: string;
   centroAcopioId?: string;
   direccion?: string;
@@ -46,10 +179,12 @@ export interface UpdateEstablecimientoDto {
 
 // Filtros para consultas
 export interface EstablecimientoFilters {
-  tipo?: 'centro_acopio' | 'centro_salud' | 'puesto_salud';
+  tipo?: 'centro_salud' | 'puesto_salud' | 'hospital';
   estado?: 'activo' | 'inactivo' | 'todos';
   search?: string;
   centroAcopioId?: string;
+  microredId?: string;
+  redId?: string;
   page?: number;
   limit?: number;
 }
