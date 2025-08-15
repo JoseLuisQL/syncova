@@ -35,6 +35,13 @@ import {
   UpdatePlanificacionDto,
   CentroAcopio
 } from '../../types';
+import {
+  ordenarEstablecimientos,
+  getEstiloEstablecimiento,
+  getColoresEstablecimiento,
+  getIconoTipoEstablecimiento,
+  getCentroAcopioPorNombre
+} from '../../utils/centroAcopioUtils';
 import { usePlanificacion } from '../../hooks/usePlanificacion';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useVacunas } from '../../hooks/useVacunas';
@@ -110,15 +117,20 @@ const Planificacion: React.FC = () => {
     { id: 'reportes', label: 'Reportes y Análisis', icon: BarChart3 },
   ];
 
-  // Obtener establecimientos según el filtro seleccionado
+  // Obtener establecimientos según el filtro seleccionado con ordenamiento profesional
   const getEstablecimientosFiltrados = () => {
+    let filtrados: Establecimiento[];
+
     if (selectedCentroAcopio === 'todos') {
       // Retornar todos los establecimientos que no sean centros de acopio
-      return establecimientos.filter(e => e.tipo !== 'centro_acopio');
+      filtrados = establecimientos.filter(e => e.tipo !== 'centro_acopio');
     } else {
       // Retornar solo los establecimientos del centro de acopio seleccionado
-      return establecimientos.filter(e => e.centroAcopioId === selectedCentroAcopio);
+      filtrados = establecimientos.filter(e => e.centroAcopioId === selectedCentroAcopio);
     }
+
+    // Aplicar ordenamiento profesional por centro de acopio
+    return ordenarEstablecimientos(filtrados);
   };
 
   const establecimientosFiltrados = getEstablecimientosFiltrados();
@@ -1060,39 +1072,24 @@ const ProgramacionPorVacunaTab: React.FC<ProgramacionPorVacunaTabProps> = ({
                 </td>
               </tr>
 
-              {/* Filas de establecimientos */}
+              {/* Filas de establecimientos con colores por centro de acopio */}
               {datosVacuna?.establecimientos.map((estData: any, estIndex: number) => {
-                const esHospital = estData.establecimiento.nombre.includes('HOSPITAL') || estData.establecimiento.nombre.includes('ESSALUD');
-                const esCentroSalud = estData.establecimiento.tipo === 'centro_salud' && !esHospital;
-                
-                let bgColor = 'bg-white';
-                let textColor = 'text-gray-900';
-                let iconoTipo = '🏥';
-                
-                if (esHospital) {
-                  bgColor = 'bg-green-50';
-                  textColor = 'text-green-900';
-                  iconoTipo = '🏥';
-                } else if (esCentroSalud) {
-                  bgColor = 'bg-green-50';
-                  textColor = 'text-green-900';
-                  iconoTipo = '🏥';
-                } else if (estData.establecimiento.tipo === 'puesto_salud') {
-                  bgColor = 'bg-orange-50';
-                  textColor = 'text-orange-900';
-                  iconoTipo = '🏪';
-                }
-                
+                // Obtener estilo profesional basado en centro de acopio
+                const estiloEstablecimiento = getEstiloEstablecimiento(estData.establecimiento);
+                const { colores, icono, centro } = estiloEstablecimiento;
+
                 return (
-                  <tr key={estIndex} className={`${bgColor} hover:bg-gray-100 border-b border-gray-200`}>
-                    <td className={`px-4 py-3 text-sm font-medium ${textColor} border-r border-gray-200`}>
+                  <tr key={estIndex} className={`${colores.bg} hover:bg-gray-100 border-b border-gray-200 ${colores.border}`}>
+                    <td className={`px-4 py-3 text-sm font-medium ${colores.text} border-r border-gray-200`}>
                       <div className="flex items-center">
-                        <span className="mr-2">{iconoTipo}</span>
+                        <span className="mr-2">{icono}</span>
                         <div>
                           <div className="font-medium">{estData.establecimiento.nombre}</div>
                           {selectedCentroAcopio === 'todos' && (
-                            <div className="text-xs text-gray-500">
-                              {establecimientos.find(ca => ca.id === estData.establecimiento.centroAcopioId)?.nombre}
+                            <div className="text-xs opacity-75">
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colores.bg} ${colores.text} border ${colores.border}`}>
+                                {colores.icon} {centro !== 'DEFAULT' ? centro : 'Regional'}
+                              </span>
                             </div>
                           )}
                         </div>

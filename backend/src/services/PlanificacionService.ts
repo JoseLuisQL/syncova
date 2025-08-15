@@ -14,7 +14,11 @@ import {
 import { HttpError } from '@/middleware/errorHandler';
 import { MovimientosService } from './MovimientosService';
 import ExcelJS from 'exceljs';
-import { MovimientosService } from './MovimientosService';
+import {
+  ordenarEstablecimientos,
+  getCentroAcopioPorNombre,
+  getColoresCentroAcopioExcel
+} from '@/utils/centroAcopioUtils';
 
 /**
  * Función helper para crear errores consistentes
@@ -828,8 +832,7 @@ export class PlanificacionService {
       } else {
         establecimientos = await prisma.establecimiento.findMany({
           where: {
-            estado: 'activo',
-            tipo: { not: 'centro_acopio' }
+            estado: 'activo'
           },
           select: {
             id: true,
@@ -1105,25 +1108,19 @@ export class PlanificacionService {
         };
       }
 
-      // Obtener todos los establecimientos (excluyendo centros de acopio)
-      const establecimientos = await prisma.establecimiento.findMany({
-        where: {
-          tipo: {
-            not: 'centro_acopio'
-          }
-        },
+      // Obtener todos los establecimientos (todos los tipos disponibles)
+      const establecimientosRaw = await prisma.establecimiento.findMany({
         include: {
           centroAcopio: {
             select: {
               nombre: true
             }
           }
-        },
-        orderBy: [
-          { centroAcopioId: 'asc' },
-          { nombre: 'asc' }
-        ]
+        }
       });
+
+      // Aplicar ordenamiento profesional por centro de acopio
+      const establecimientos = ordenarEstablecimientos(establecimientosRaw);
 
       // Crear workbook
       const workbook = new ExcelJS.Workbook();
@@ -1244,13 +1241,18 @@ export class PlanificacionService {
         fgColor: { argb: 'FF1B4F72' }
       };
 
-      // Agregar datos de establecimientos
+      // Agregar datos de establecimientos con colores por centro de acopio
       establecimientos.forEach((establecimiento, index) => {
         const rowNumber = 5 + index; // Fila 5 es la primera fila de datos
+
+        // Obtener colores del centro de acopio
+        const centroAcopio = getCentroAcopioPorNombre(establecimiento.nombre);
+        const colores = getColoresCentroAcopioExcel(centroAcopio);
+
         const row = worksheet.addRow({
           codigo: establecimiento.codigo,
           establecimiento: establecimiento.nombre,
-          centroAcopio: establecimiento.centroAcopio?.nombre || 'N/A',
+          centroAcopio: establecimiento.centroAcopio?.nombre || (centroAcopio !== 'DEFAULT' ? centroAcopio : 'Regional'),
           enero: 0,
           febrero: 0,
           marzo: 0,
@@ -1266,14 +1268,17 @@ export class PlanificacionService {
           total: { formula: `SUM(D${rowNumber}:O${rowNumber})` }
         });
 
-        // Estilo alternado para filas
-        if (index % 2 === 0) {
-          row.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFF8F9FA' }
-          };
-        }
+        // Aplicar colores profesionales por centro de acopio
+        row.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: colores.bg }
+        };
+
+        // Aplicar color de texto
+        row.font = {
+          color: { argb: colores.text }
+        };
 
         // Formato para números
         for (let col = 4; col <= 16; col++) {
@@ -1415,25 +1420,21 @@ export class PlanificacionService {
         };
       }
 
-      // Obtener todos los establecimientos (excluyendo centros de acopio)
-      const establecimientos = await prisma.establecimiento.findMany({
-        where: {
-          tipo: {
-            not: 'centro_acopio'
-          }
-        },
+      // Obtener todos los establecimientos (todos los tipos disponibles)
+      const establecimientosRaw = await prisma.establecimiento.findMany({
         include: {
           centroAcopio: {
             select: {
               nombre: true
             }
           }
-        },
-        orderBy: [
-          { centroAcopioId: 'asc' },
-          { nombre: 'asc' }
-        ]
+        }
       });
+
+      // Aplicar ordenamiento profesional por centro de acopio
+      const establecimientos = ordenarEstablecimientos(establecimientosRaw);
+
+      console.log(`Establecimientos ordenados profesionalmente: ${establecimientos.length}`);
 
       // Crear workbook
       const workbook = new ExcelJS.Workbook();
@@ -1581,13 +1582,18 @@ export class PlanificacionService {
           fgColor: { argb: 'FF1B4F72' }
         };
 
-        // Agregar datos de establecimientos
+        // Agregar datos de establecimientos con colores por centro de acopio
         establecimientos.forEach((establecimiento, index) => {
           const rowNumber = 5 + index;
+
+          // Obtener colores del centro de acopio
+          const centroAcopio = getCentroAcopioPorNombre(establecimiento.nombre);
+          const colores = getColoresCentroAcopioExcel(centroAcopio);
+
           const row = worksheet.addRow({
             codigo: establecimiento.codigo,
             establecimiento: establecimiento.nombre,
-            centroAcopio: establecimiento.centroAcopio?.nombre || 'N/A',
+            centroAcopio: (establecimiento as any).centroAcopio?.nombre || (centroAcopio !== 'DEFAULT' ? centroAcopio : 'Regional'),
             enero: 0,
             febrero: 0,
             marzo: 0,
@@ -1603,14 +1609,17 @@ export class PlanificacionService {
             total: { formula: `SUM(D${rowNumber}:O${rowNumber})` }
           });
 
-          // Estilo alternado para filas
-          if (index % 2 === 0) {
-            row.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'FFF8F9FA' }
-            };
-          }
+          // Aplicar colores profesionales por centro de acopio
+          row.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: colores.bg }
+          };
+
+          // Aplicar color de texto
+          row.font = {
+            color: { argb: colores.text }
+          };
 
           // Formato para números
           for (let col = 4; col <= 16; col++) {

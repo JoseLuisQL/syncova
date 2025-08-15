@@ -46,6 +46,14 @@ import { useVacunas } from '../../hooks/useVacunas';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useAutoSync } from '../../hooks/useAutoSync';
 import { debounce } from '../../utils/debounce';
+import {
+  ordenarEstablecimientos,
+  getEstiloEstablecimiento,
+  getColoresEstablecimiento,
+  getIconoTipoEstablecimiento,
+  getCentroAcopioPorNombre,
+  COLORES_CENTROS_ACOPIO
+} from '../../utils/centroAcopioUtils';
 import Vales from '../Vales/Vales';
 import ValesErrorBoundary from '../Vales/ValesErrorBoundary';
 
@@ -257,11 +265,16 @@ const Movimientos: React.FC = () => {
   );
 
   const establecimientosFiltrados = useMemo(() => {
+    let filtrados: Establecimiento[];
+
     if (selectedCentroAcopio === 'todos') {
-      return establecimientos.filter(e => e.tipo !== 'centro_acopio');
+      filtrados = establecimientos.filter(e => e.tipo !== 'centro_acopio');
     } else {
-      return establecimientos.filter(e => e.centroAcopioId === selectedCentroAcopio);
+      filtrados = establecimientos.filter(e => e.centroAcopioId === selectedCentroAcopio);
     }
+
+    // Aplicar ordenamiento profesional por centro de acopio
+    return ordenarEstablecimientos(filtrados);
   }, [establecimientos, selectedCentroAcopio]);
 
   // Calcular movimientos con campos derivados
@@ -350,12 +363,8 @@ const Movimientos: React.FC = () => {
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
 
-  // Colores profesionales para cada centro de acopio
-  const coloresAcopio = {
-    '1': { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', accent: 'bg-blue-500', icon: '🏥' },
-    '2': { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-800', accent: 'bg-emerald-500', icon: '🏢' },
-    '3': { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', accent: 'bg-purple-500', icon: '🏛️' },
-  };
+  // Usar colores profesionales del sistema centralizado
+  const coloresAcopio = COLORES_CENTROS_ACOPIO;
 
   // Función para manejar cambios temporales (onChange)
   const handleTempValueChange = (establecimientoId: string, campo: string, newValue: number) => {
@@ -1014,7 +1023,7 @@ const Movimientos: React.FC = () => {
             >
               <option value="todos">🌐 Todos los Centros de Acopio</option>
               {centrosAcopio.map((centro) => {
-                const colores = coloresAcopio[centro.id as keyof typeof coloresAcopio] || coloresAcopio['1'];
+                const colores = coloresAcopio[centro.nombre as keyof typeof coloresAcopio] || coloresAcopio['DEFAULT'];
                 return (
                   <option key={centro.id} value={centro.id}>
                     {colores.icon} {centro.nombre}
@@ -1334,24 +1343,38 @@ const Movimientos: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                datosTabla.map((movimiento) => (
-                  <tr key={`${movimiento.establecimientoId}-${selectedVacuna}-${selectedMes}-${selectedAnio}`} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200">
-                      <div className="flex items-center">
-                        <div className={`w-3 h-3 rounded-full mr-3 ${
-                          movimiento.tieneMovimiento ? 'bg-green-500' : 'bg-gray-300'
-                        }`}></div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {movimiento.establecimiento.nombre}
+                datosTabla.map((movimiento) => {
+                  // Obtener estilo profesional basado en centro de acopio
+                  const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento);
+                  const { colores, icono, centro } = estiloEstablecimiento;
+
+                  return (
+                    <tr key={`${movimiento.establecimientoId}-${selectedVacuna}-${selectedMes}-${selectedAnio}`}
+                        className={`${colores.bg} hover:bg-gray-100 border-b ${colores.border}`}>
+                      <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200">
+                        <div className="flex items-center">
+                          <div className={`w-3 h-3 rounded-full mr-3 ${
+                            movimiento.tieneMovimiento ? 'bg-green-500' : 'bg-gray-300'
+                          }`}></div>
+                          <div>
+                            <div className={`text-sm font-medium ${colores.text} flex items-center`}>
+                              <span className="mr-2">{icono}</span>
+                              {movimiento.establecimiento.nombre}
+                            </div>
+                            <div className="text-sm opacity-75">{movimiento.establecimiento.codigo}</div>
+                            {selectedCentroAcopio === 'todos' && (
+                              <div className="text-xs mt-1">
+                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colores.bg} ${colores.text} border ${colores.border}`}>
+                                  {colores.icon} {centro !== 'DEFAULT' ? centro : 'Regional'}
+                                </span>
+                              </div>
+                            )}
+                            {!movimiento.tieneMovimiento && (
+                              <div className="text-xs text-orange-600 font-medium mt-1">Sin movimiento</div>
+                            )}
                           </div>
-                          <div className="text-sm text-gray-500">{movimiento.establecimiento.codigo}</div>
-                          {!movimiento.tieneMovimiento && (
-                            <div className="text-xs text-orange-600 font-medium">Sin movimiento</div>
-                          )}
                         </div>
-                      </div>
-                    </td>
+                      </td>
                     <td className="px-4 py-4 text-center text-sm text-gray-900 border-r border-gray-200">
                       {movimiento.saldoAnterior}
                     </td>
@@ -1555,7 +1578,8 @@ const Movimientos: React.FC = () => {
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
             {datosTabla.length > 0 && (
