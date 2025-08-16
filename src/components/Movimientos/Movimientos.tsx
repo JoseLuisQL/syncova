@@ -221,6 +221,9 @@ const Movimientos: React.FC = () => {
       };
 
       console.log(`🔄 Cargando movimientos con filtros:`, filters);
+      console.log(`🏥 Estado actual de establecimientos: ${establecimientos.length} cargados`);
+      console.log(`🏥 Centro de acopio seleccionado: ${selectedCentroAcopio}`);
+
       loadMovimientos(filters);
     }
   }, [selectedVacuna, selectedMes, selectedAnio, selectedCentroAcopio]); // Removido loadMovimientos para evitar loop
@@ -271,7 +274,8 @@ const Movimientos: React.FC = () => {
     let filtrados: Establecimiento[];
 
     if (selectedCentroAcopio === 'todos') {
-      filtrados = establecimientos.filter(e => e.tipo !== 'centro_acopio');
+      // CORRECCIÓN: Los establecimientos ya no incluyen centros de acopio por diseño de BD
+      filtrados = establecimientos;
       console.log(`🏥 Filtro "Todos": ${filtrados.length} establecimientos de ${establecimientos.length} totales`);
     } else {
       filtrados = establecimientos.filter(e => e.centroAcopioId === selectedCentroAcopio);
@@ -292,7 +296,12 @@ const Movimientos: React.FC = () => {
 
   // Generar datos para la tabla (incluyendo establecimientos sin movimientos) con valores temporales
   const datosTabla = useMemo(() => {
-    return establecimientosFiltrados.map(establecimiento => {
+    console.log(`📊 Generando datos de tabla:`);
+    console.log(`   - Establecimientos filtrados: ${establecimientosFiltrados.length}`);
+    console.log(`   - Movimientos calculados: ${movimientosCalculados.length}`);
+    console.log(`   - Centro de acopio seleccionado: ${selectedCentroAcopio}`);
+
+    const datos = establecimientosFiltrados.map(establecimiento => {
       // Buscar movimiento existente
       const movimientoExistente = movimientosCalculados.find(
         m => m.establecimientoId === establecimiento.id
@@ -309,6 +318,8 @@ const Movimientos: React.FC = () => {
         const totalSaldo = movimientoExistente.saldoAnterior + transIngreso;
         const saldo = totalSaldo - salida - transSalida;
         const stock = saldo + entrega;
+
+        console.log(`   ✅ ${establecimiento.nombre}: CON movimiento (${movimientoExistente.id})`);
 
         return {
           ...movimientoExistente,
@@ -333,6 +344,8 @@ const Movimientos: React.FC = () => {
         const totalSaldo = 0 + transIngreso;
         const saldo = totalSaldo - salida - transSalida;
         const stock = saldo + entrega;
+
+        console.log(`   ⚠️  ${establecimiento.nombre}: SIN movimiento (creando temporal)`);
 
         return {
           id: `temp-${establecimiento.id}`,
@@ -363,6 +376,14 @@ const Movimientos: React.FC = () => {
         } as MovimientoCalculado & { tieneMovimiento: boolean };
       }
     });
+
+    console.log(`📊 Datos de tabla generados: ${datos.length} registros`);
+    const conMovimiento = datos.filter(d => d.tieneMovimiento).length;
+    const sinMovimiento = datos.filter(d => !d.tieneMovimiento).length;
+    console.log(`   - Con movimiento: ${conMovimiento}`);
+    console.log(`   - Sin movimiento: ${sinMovimiento}`);
+
+    return datos;
   }, [establecimientosFiltrados, movimientosCalculados, selectedVacuna, selectedMes, selectedAnio, vacunaSeleccionada, tempValues]);
 
   const meses = [

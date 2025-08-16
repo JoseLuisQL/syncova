@@ -95,8 +95,19 @@ export class MovimientosService {
         centroAcopioId,
         search,
         page = 1,
-        limit = 50
+        limit = 1000 // CORRECCIÓN: Aumentar límite para cargar todos los movimientos
       } = filters || {};
+
+      console.log('🔍 MovimientosService.getAll - Filtros recibidos:', {
+        establecimientoId,
+        vacunaId,
+        mes,
+        anio,
+        centroAcopioId,
+        search,
+        page,
+        limit
+      });
 
       // Construir condiciones de filtro
       const where: any = {};
@@ -117,18 +128,26 @@ export class MovimientosService {
         where.anio = anio;
       }
 
-      // Filtro por centro de acopio
+      // CORRECCIÓN: Filtro por centro de acopio
       if (centroAcopioId && centroAcopioId !== 'todos') {
+        // Filtrar por centro de acopio específico
         where.establecimiento = {
           centroAcopioId: centroAcopioId
         };
+        console.log('🏥 Aplicando filtro por centro de acopio específico:', centroAcopioId);
+      } else {
+        // Para "todos los centros", no aplicar filtro adicional
+        // Los establecimientos ya están filtrados por naturaleza (no incluyen centros de acopio)
+        console.log('🏥 Aplicando filtro para todos los centros (sin filtro adicional)');
       }
 
-      // Búsqueda por texto
+      // CORRECCIÓN: Búsqueda por texto mejorada
       if (search) {
-        where.OR = [
+        // Combinar búsqueda con filtros de establecimiento existentes
+        const searchConditions = [
           {
             establecimiento: {
+              ...where.establecimiento,
               nombre: {
                 contains: search,
                 mode: 'insensitive'
@@ -150,58 +169,87 @@ export class MovimientosService {
             }
           }
         ];
+
+        // Si ya hay filtros de establecimiento, combinarlos con la búsqueda
+        where.OR = searchConditions;
+        console.log('🔍 Aplicando búsqueda por texto:', search);
       }
 
-      // Calcular offset para paginación
-      const offset = (page - 1) * limit;
+      console.log('📋 Condiciones de filtro construidas:', JSON.stringify(where, null, 2));
+
+      // CORRECCIÓN: Para el módulo de movimientos, cargar todos los datos sin paginación
+      // cuando se consultan por mes/año específico
+      const shouldPaginate = !mes || !anio || (search && search.length > 0);
+
+      console.log(`🔍 Evaluando paginación:`);
+      console.log(`   - mes: ${mes} (!mes = ${!mes})`);
+      console.log(`   - anio: ${anio} (!anio = ${!anio})`);
+      console.log(`   - search: ${search} (search && search.length > 0 = ${search && search.length > 0})`);
+      console.log(`   - shouldPaginate: ${shouldPaginate}`);
+
+      let queryOptions: any = {
+        where,
+        include: {
+          establecimiento: {
+            select: {
+              id: true,
+              nombre: true,
+              tipo: true,
+              codigo: true,
+              centroAcopioId: true
+            }
+          },
+          vacuna: {
+            select: {
+              id: true,
+              nombre: true,
+              tipo: true,
+              presentacion: true,
+              dosisPorFrasco: true
+            }
+          },
+          usuario: {
+            select: {
+              id: true,
+              nombres: true,
+              apellidos: true,
+              email: true
+            }
+          },
+          entregasAdicionales: {
+            orderBy: {
+              numeroEntrega: 'asc'
+            }
+          }
+        },
+        orderBy: [
+          { anio: 'desc' },
+          { mes: 'desc' },
+          { establecimiento: { nombre: 'asc' } }
+        ]
+      };
+
+      // Solo aplicar paginación si es necesario
+      if (shouldPaginate) {
+        const offset = (page - 1) * limit;
+        queryOptions.skip = offset;
+        queryOptions.take = limit;
+        console.log(`📄 Aplicando paginación: offset=${offset}, limit=${limit}`);
+      } else {
+        console.log(`📄 Cargando TODOS los movimientos sin paginación para mes=${mes}, año=${anio}`);
+      }
 
       // Obtener movimientos con relaciones
       const [movimientos, total] = await Promise.all([
-        prisma.movimientoVacuna.findMany({
-          where,
-          include: {
-            establecimiento: {
-              select: {
-                id: true,
-                nombre: true,
-                tipo: true,
-                codigo: true,
-                centroAcopioId: true
-              }
-            },
-            vacuna: {
-              select: {
-                id: true,
-                nombre: true,
-                tipo: true,
-                presentacion: true,
-                dosisPorFrasco: true
-              }
-            },
-            usuario: {
-              select: {
-                id: true,
-                nombres: true,
-                apellidos: true,
-                email: true
-              }
-            },
-            entregasAdicionales: {
-              orderBy: {
-                numeroEntrega: 'asc'
-              }
-            }
-          },
-          orderBy: [
-            { anio: 'desc' },
-            { mes: 'desc' },
-            { establecimiento: { nombre: 'asc' } }
-          ],
-          skip: offset,
-          take: limit
-        }),
+        prisma.movimientoVacuna.findMany(queryOptions),
         prisma.movimientoVacuna.count({ where })
       ]);
+
+      console.log(`✅ MovimientosService.getAll - Resultados: ${movimientos.length} movimientos de ${total} totales`);
+
+      // Log de establecimientos únicos encontrados
+      const establecimientosUnicos = [...new Set(movimientos.map(m => (m as any).establecimiento?.nombre || 'Sin nombre'))];
+      console.log(`🏥 Establecimientos con movimientos: ${establecimientosUnicos.length}`, establecimientosUnicos);
 
       return {
         success: true,

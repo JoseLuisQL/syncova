@@ -66,16 +66,32 @@ export const useMovimientos = () => {
   const loadMovimientos = useCallback(async (newFilters?: MovimientosFilters) => {
     const filtersToUse = newFilters || filters;
 
-    logger.debug('Cargando movimientos con filtros:', filtersToUse);
+    logger.debug('🔄 useMovimientos.loadMovimientos - Iniciando carga con filtros:', filtersToUse);
 
-    const result = await listApi.execute(() => MovimientosService.getAll(filtersToUse));
+    try {
+      const result = await listApi.execute(() => MovimientosService.getAll(filtersToUse));
 
-    if (result) {
-      setMovimientos(result.movimientos);
-      setTotal(result.total);
-      if (newFilters) {
-        setFilters(filtersToUse);
+      if (result) {
+        logger.info(`✅ useMovimientos.loadMovimientos - Movimientos cargados: ${result.movimientos.length} de ${result.total}`);
+
+        // Log detallado de establecimientos con movimientos
+        const establecimientosConMovimientos = [...new Set(result.movimientos.map(m => m.establecimiento.nombre))];
+        logger.debug(`🏥 Establecimientos con movimientos: ${establecimientosConMovimientos.length}`, establecimientosConMovimientos);
+
+        setMovimientos(result.movimientos);
+        setTotal(result.total);
+        if (newFilters) {
+          setFilters(filtersToUse);
+        }
+      } else {
+        logger.warn('⚠️ useMovimientos.loadMovimientos - No se obtuvieron resultados');
+        setMovimientos([]);
+        setTotal(0);
       }
+    } catch (error) {
+      logger.error('❌ useMovimientos.loadMovimientos - Error al cargar movimientos:', error);
+      setMovimientos([]);
+      setTotal(0);
     }
   }, [filters, listApi]);
 

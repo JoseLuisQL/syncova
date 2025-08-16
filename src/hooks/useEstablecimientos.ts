@@ -41,20 +41,33 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
   const loadEstablecimientos = useCallback(async (newFilters?: EstablecimientoFilters) => {
     // Evitar múltiples llamadas simultáneas
     if (listApi.isLoading) {
-      logger.debug('Ya hay una carga en progreso, saltando...');
+      logger.debug('🔄 useEstablecimientos.loadEstablecimientos - Ya hay una carga en progreso, saltando...');
       return;
     }
 
     const currentFilters = newFilters || filters;
 
     try {
-      logger.debug('Cargando establecimientos con filtros:', currentFilters);
+      logger.debug('🔄 useEstablecimientos.loadEstablecimientos - Cargando con filtros:', currentFilters);
 
       const result = await listApi.execute(() =>
         EstablecimientoService.getAll(currentFilters)
       );
 
       if (result) {
+        logger.info(`✅ useEstablecimientos.loadEstablecimientos - Establecimientos cargados: ${result.establecimientos.length} de ${result.pagination.total}`);
+
+        // Log detallado por tipo de establecimiento
+        const porTipo = result.establecimientos.reduce((acc, est) => {
+          acc[est.tipo] = (acc[est.tipo] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        logger.debug('🏥 Establecimientos por tipo:', porTipo);
+
+        // Log de centros de acopio únicos
+        const centrosUnicos = [...new Set(result.establecimientos.map(e => e.centroAcopioId).filter(Boolean))];
+        logger.debug(`🏢 Centros de acopio únicos: ${centrosUnicos.length}`, centrosUnicos);
+
         setEstablecimientos(result.establecimientos);
         setPagination(result.pagination);
 
@@ -62,11 +75,12 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
         if (newFilters) {
           setFilters(newFilters);
         }
-
-        logger.info(`Establecimientos cargados: ${result.establecimientos.length}`);
+      } else {
+        logger.warn('⚠️ useEstablecimientos.loadEstablecimientos - No se obtuvieron resultados');
+        setEstablecimientos([]);
       }
     } catch (error) {
-      logger.error('Error al cargar establecimientos:', error);
+      logger.error('❌ useEstablecimientos.loadEstablecimientos - Error al cargar establecimientos:', error);
       setEstablecimientos([]);
     }
   }, [listApi]); // Solo depende de la API para evitar problemas de dependencias circulares
