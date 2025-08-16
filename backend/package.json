@@ -16,6 +16,7 @@
     "db:migrate-entrega-base": "tsx scripts/migrate-entrega-base.ts",
     "db:create-triggers": "tsx scripts/create-triggers.ts",
     "db:setup": "tsx scripts/setup-database.ts",
+    "clear-rate-limit": "node ../scripts/clear-rate-limit.js",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "test": "jest",

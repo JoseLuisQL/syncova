@@ -2,18 +2,23 @@ import { Router } from 'express';
 import { AuthController } from '@/controllers/AuthController';
 import { authenticate } from '@/middleware/auth';
 import rateLimit from 'express-rate-limit';
+import { clearRateLimitEndpoint } from '@/utils/rateLimitUtils';
 
 /**
  * Rate limiting para endpoints de autenticación
+ * Configuración diferente para desarrollo y producción
  */
 const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // máximo 5 intentos por IP en 15 minutos
+  windowMs: process.env.NODE_ENV === 'development' ? 5 * 60 * 1000 : 15 * 60 * 1000, // 5 min en dev, 15 min en prod
+  max: process.env.NODE_ENV === 'development' ? 50 : 5, // 50 intentos en dev, 5 en prod
   message: {
     success: false,
-    message: 'Demasiados intentos de autenticación. Intente nuevamente en 15 minutos.',
+    message: process.env.NODE_ENV === 'development'
+      ? 'Demasiados intentos de autenticación. Intente nuevamente en 5 minutos.'
+      : 'Demasiados intentos de autenticación. Intente nuevamente en 15 minutos.',
     error: 'RATE_LIMIT_EXCEEDED',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    retryAfter: process.env.NODE_ENV === 'development' ? 300 : 900 // segundos
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -23,12 +28,13 @@ const authRateLimit = rateLimit({
 
 const refreshRateLimit = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutos
-  max: 10, // máximo 10 refresh por IP en 5 minutos
+  max: process.env.NODE_ENV === 'development' ? 100 : 10, // 100 en dev, 10 en prod
   message: {
     success: false,
     message: 'Demasiados intentos de refresh. Intente nuevamente en 5 minutos.',
     error: 'RATE_LIMIT_EXCEEDED',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    retryAfter: 300
   },
   standardHeaders: true,
   legacyHeaders: false
@@ -36,12 +42,13 @@ const refreshRateLimit = rateLimit({
 
 const passwordChangeRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hora
-  max: 3, // máximo 3 cambios de contraseña por IP en 1 hora
+  max: process.env.NODE_ENV === 'development' ? 20 : 3, // 20 en dev, 3 en prod
   message: {
     success: false,
     message: 'Demasiados cambios de contraseña. Intente nuevamente en 1 hora.',
     error: 'RATE_LIMIT_EXCEEDED',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    retryAfter: 3600
   },
   standardHeaders: true,
   legacyHeaders: false
@@ -133,13 +140,32 @@ router.get('/health', (req, res) => {
         verify: 'GET /api/auth/verify'
       },
       rateLimits: {
-        login: '5 intentos por 15 minutos',
-        refresh: '10 intentos por 5 minutos',
-        changePassword: '3 intentos por 1 hora'
-      }
+        login: process.env.NODE_ENV === 'development'
+          ? '50 intentos por 5 minutos (desarrollo)'
+          : '5 intentos por 15 minutos (producción)',
+        refresh: process.env.NODE_ENV === 'development'
+          ? '100 intentos por 5 minutos (desarrollo)'
+          : '10 intentos por 5 minutos (producción)',
+        changePassword: process.env.NODE_ENV === 'development'
+          ? '20 intentos por 1 hora (desarrollo)'
+          : '3 intentos por 1 hora (producción)'
+      },
+      developmentFeatures: process.env.NODE_ENV === 'development' ? {
+        clearRateLimit: 'POST /api/auth/clear-rate-limit'
+      } : undefined
     },
     timestamp: new Date().toISOString()
   });
 });
+
+/**
+ * @route POST /api/auth/clear-rate-limit
+ * @desc Limpiar rate limiting para la IP actual (solo desarrollo)
+ * @access Public (solo en desarrollo)
+ * @returns {ApiResponse} Confirmación de limpieza
+ */
+if (process.env.NODE_ENV === 'development') {
+  router.post('/clear-rate-limit', clearRateLimitEndpoint);
+}
 
 export default router;

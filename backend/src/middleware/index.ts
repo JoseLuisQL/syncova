@@ -42,20 +42,26 @@ export const setupMiddlewares = (app: Application): void => {
     exposedHeaders: ['X-Total-Count'],
   }));
 
-  // Rate limiting
+  // Rate limiting con configuración diferente para desarrollo
   const limiter = rateLimit({
     windowMs: config.rateLimit.windowMs,
-    max: config.rateLimit.maxRequests,
+    max: config.env === 'development' ? config.rateLimit.maxRequests * 10 : config.rateLimit.maxRequests, // 10x más en desarrollo
     message: {
       success: false,
       message: 'Demasiadas solicitudes desde esta IP, intente nuevamente más tarde',
       timestamp: new Date().toISOString(),
+      retryAfter: Math.ceil(config.rateLimit.windowMs / 1000),
     },
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => {
-      // Saltar rate limiting para rutas de salud
-      return req.path === '/health' || req.path === '/api/health';
+      // Saltar rate limiting para rutas de salud y en desarrollo para ciertas rutas
+      const healthRoutes = req.path === '/health' || req.path === '/api/health';
+      const devSkipRoutes = config.env === 'development' && (
+        req.path.includes('/api/auth/verify') ||
+        req.path.includes('/api/auth/refresh')
+      );
+      return healthRoutes || devSkipRoutes;
     },
   });
 

@@ -450,9 +450,7 @@ async function main() {
       { cod: 91, nombre: 'P.S. CHANTA UMACA', codigo: '7251', acopio: 'Andarapa', microred: 'ANDARAPA', red: 'SONDOR', tipo: 'puesto_salud' },
       { cod: 92, nombre: 'P.S. SAN JUAN DE MIRAFLORES', codigo: '19629', acopio: 'Andarapa', microred: 'ANDARAPA', red: 'SONDOR', tipo: 'puesto_salud' },
 
-      // Establecimientos adicionales (completando los 95)
-      { cod: 93, nombre: 'P.S. ESTABLECIMIENTO 93', codigo: 'EST-093', acopio: 'Andarapa', microred: 'ANDARAPA', red: 'SONDOR', tipo: 'puesto_salud' },
-      { cod: 94, nombre: 'P.S. ESTABLECIMIENTO 94', codigo: 'EST-094', acopio: 'Andarapa', microred: 'ANDARAPA', red: 'SONDOR', tipo: 'puesto_salud' },
+      // Establecimientos adicionales (completando los 93)
       { cod: 95, nombre: 'P.S. COCAIRO', codigo: '34001', acopio: 'Kaquiabamba', microred: 'PACUCHA', red: 'SONDOR', tipo: 'puesto_salud' },
     ];
 

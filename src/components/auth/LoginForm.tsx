@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoginDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
+import { useRateLimitHandler } from '../../hooks/useRateLimitHandler';
 
 /**
  * Componente de formulario de login
@@ -9,12 +10,13 @@ import { useToastContext } from '../../contexts/ToastContext';
 const LoginForm: React.FC = () => {
   const { login, isLoading } = useAuth();
   const { toast } = useToastContext();
-  
+  const { rateLimitState, handleRateLimitError, canRetry } = useRateLimitHandler();
+
   const [formData, setFormData] = useState<LoginDto>({
     usuario: '',
     password: '',
   });
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<LoginDto>>({});
 
@@ -67,12 +69,24 @@ const LoginForm: React.FC = () => {
       return;
     }
 
+    // Verificar si se puede reintentar
+    if (!canRetry) {
+      const minutes = Math.ceil(rateLimitState.remainingTime / 60);
+      toast.error(`Debe esperar ${minutes} minuto${minutes > 1 ? 's' : ''} antes de intentar nuevamente`);
+      return;
+    }
+
     try {
       await login(formData);
       toast.success('Inicio de sesión exitoso');
     } catch (error: any) {
       console.error('Error en login:', error);
-      toast.error(error.message || 'Error al iniciar sesión');
+
+      // Manejar error de rate limiting
+      if (!handleRateLimitError(error)) {
+        // Si no es un error de rate limiting, mostrar error normal
+        toast.error(error.message || 'Error al iniciar sesión');
+      }
     }
   };
 
@@ -214,9 +228,9 @@ const LoginForm: React.FC = () => {
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !canRetry}
                 className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-                  isLoading
+                  isLoading || !canRetry
                     ? 'bg-indigo-400 cursor-not-allowed'
                     : 'bg-indigo-600 hover:bg-indigo-700'
                 }`}
@@ -229,10 +243,36 @@ const LoginForm: React.FC = () => {
                     </svg>
                     Iniciando sesión...
                   </>
+                ) : !canRetry ? (
+                  <>
+                    <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Espere {Math.ceil(rateLimitState.remainingTime / 60)} min
+                  </>
                 ) : (
                   'Iniciar Sesión'
                 )}
               </button>
+
+              {/* Mensaje de rate limiting */}
+              {rateLimitState.isBlocked && (
+                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-center">
+                    <svg className="h-5 w-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <div>
+                      <p className="text-sm text-yellow-800 font-medium">
+                        Demasiados intentos de login
+                      </p>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        Podrá intentar nuevamente en {Math.floor(rateLimitState.remainingTime / 60)}:{String(rateLimitState.remainingTime % 60).padStart(2, '0')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </form>
