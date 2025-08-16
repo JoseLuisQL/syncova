@@ -461,8 +461,9 @@ export class MovimientosService {
       for (let mes = 1; mes <= 12; mes++) {
         const entregaMes = planificacion.distribucionMensual[mes - 1]; // Array es 0-indexed
 
-        // Solo crear movimiento si hay entrega para ese mes
-        if (entregaMes && entregaMes > 0) {
+        // CORRECCIÓN: Crear movimiento para TODOS los meses, incluyendo cantidades 0
+        // Esto permite que los usuarios puedan modificar las entregas desde el módulo de movimientos
+        if (entregaMes !== null && entregaMes !== undefined) {
           try {
             // Verificar si ya existe un movimiento para este mes
             const movimientoExistente = await prisma.movimientoVacuna.findUnique({
@@ -477,7 +478,7 @@ export class MovimientosService {
             });
 
             if (movimientoExistente) {
-              // Actualizar entrega existente
+              // Actualizar entrega existente (incluso si es 0)
               await prisma.movimientoVacuna.update({
                 where: { id: movimientoExistente.id },
                 data: {
@@ -487,7 +488,7 @@ export class MovimientosService {
               });
               actualizados++;
             } else {
-              // Crear nuevo movimiento
+              // Crear nuevo movimiento (incluso si la entrega es 0)
               await prisma.movimientoVacuna.create({
                 data: {
                   establecimientoId: planificacion.establecimientoId,

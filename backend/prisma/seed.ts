@@ -1521,11 +1521,12 @@ async function main() {
 
       for (const planificacion of planificacionesCreadas_data) {
         try {
-          // Generar movimientos para cada mes que tenga entrega > 0
+          // CORRECCIÓN: Generar movimientos para TODOS los meses, incluyendo entregas 0
+          // Esto permite que los usuarios puedan modificar las entregas desde el módulo de movimientos
           for (let mes = 1; mes <= 12; mes++) {
             const entregaMes = planificacion.distribucionMensual[mes - 1];
 
-            if (entregaMes && entregaMes > 0) {
+            if (entregaMes !== null && entregaMes !== undefined) {
               await prisma.movimientoVacuna.create({
                 data: {
                   establecimientoId: planificacion.establecimientoId,

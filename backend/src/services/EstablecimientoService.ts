@@ -16,6 +16,7 @@ export class EstablecimientoService {
     centroAcopioId?: string;
     page?: number;
     limit?: number;
+    noPagination?: boolean; // NUEVO: Opción para desactivar paginación
   }): Promise<ServiceResult<{ establecimientos: IEstablecimiento[]; total: number }>> {
     try {
       const {
@@ -24,7 +25,8 @@ export class EstablecimientoService {
         search,
         centroAcopioId,
         page = 1,
-        limit = 50
+        limit = 50,
+        noPagination = false
       } = filters || {};
 
 
@@ -55,29 +57,34 @@ export class EstablecimientoService {
         where.centroAcopioId = centroAcopioId;
       }
 
-      // Calcular offset para paginación
-      const offset = (page - 1) * limit;
+      // CORRECCIÓN: Configurar paginación solo si no está desactivada
+      const queryOptions: any = {
+        where,
+        include: {
+          centroAcopio: {
+            select: {
+              id: true,
+              nombre: true,
+              codigo: true
+            }
+          }
+        },
+        orderBy: [
+          { tipo: 'asc' },
+          { nombre: 'asc' }
+        ]
+      };
+
+      // Solo aplicar paginación si no está desactivada
+      if (!noPagination) {
+        const offset = (page - 1) * limit;
+        queryOptions.skip = offset;
+        queryOptions.take = limit;
+      }
 
       // Obtener establecimientos con relaciones
       const [establecimientos, total] = await Promise.all([
-        prisma.establecimiento.findMany({
-          where,
-          include: {
-            centroAcopio: {
-              select: {
-                id: true,
-                nombre: true,
-                codigo: true
-              }
-            }
-          },
-          orderBy: [
-            { tipo: 'asc' },
-            { nombre: 'asc' }
-          ],
-          skip: offset,
-          take: limit
-        }),
+        prisma.establecimiento.findMany(queryOptions),
         prisma.establecimiento.count({ where })
       ]);
 

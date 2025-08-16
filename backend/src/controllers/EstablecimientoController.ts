@@ -20,7 +20,8 @@ export class EstablecimientoController {
         search,
         centroAcopioId,
         page = '1',
-        limit = '50'
+        limit = '50',
+        noPagination
       } = req.query;
 
 
@@ -62,7 +63,8 @@ export class EstablecimientoController {
         search: search as string,
         centroAcopioId: centroAcopioId as string,
         page: pageNum,
-        limit: limitNum
+        limit: limitNum,
+        noPagination: noPagination === 'true' // NUEVO: Convertir string a boolean
       });
 
       if (!result.success) {

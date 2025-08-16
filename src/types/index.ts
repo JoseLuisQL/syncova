@@ -187,6 +187,7 @@ export interface EstablecimientoFilters {
   redId?: string;
   page?: number;
   limit?: number;
+  noPagination?: boolean; // NUEVO: Opción para desactivar paginación
 }
 
 export interface Vacuna {

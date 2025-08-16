@@ -2126,8 +2126,9 @@ export class PlanificacionService {
             });
 
             console.log(`Sincronización: Movimiento ${movimientoExistente.id} actualizado. Entrega: ${movimientoExistente.entrega} → ${nuevaEntrega}`);
-          } else if (entregaNueva > 0) {
-            // Crear nuevo movimiento si no existe y la nueva entrega es mayor a 0
+          } else if (entregaNueva !== null && entregaNueva !== undefined) {
+            // CORRECCIÓN: Crear nuevo movimiento para TODAS las entregas, incluyendo 0
+            // Esto permite que los usuarios puedan modificar las entregas desde el módulo de movimientos
             // Nota: Necesitamos un usuarioId para crear el movimiento
             // Por ahora, registramos que se necesita crear el movimiento
             console.log(`Sincronización: Se necesita crear movimiento para ${planificacionAnterior.establecimientoId}, vacuna ${planificacionAnterior.vacunaId}, mes ${mes}/${planificacionAnterior.anio} con entrega ${entregaNueva}`);
@@ -2197,8 +2198,9 @@ export class PlanificacionService {
               });
               movimientosActualizados++;
             }
-          } else if (entregaPlanificada > 0) {
-            // Crear nuevo movimiento automáticamente
+          } else if (entregaPlanificada !== null && entregaPlanificada !== undefined) {
+            // CORRECCIÓN: Crear nuevo movimiento para TODAS las entregas, incluyendo 0
+            // Esto permite que los usuarios puedan modificar las entregas desde el módulo de movimientos
             try {
               await prisma.movimientoVacuna.create({
                 data: {

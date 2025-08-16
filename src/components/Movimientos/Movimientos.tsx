@@ -82,7 +82,7 @@ const Movimientos: React.FC = () => {
     isLoading: isLoadingEstablecimientos,
     loadEstablecimientos,
     loadCentrosAcopio
-  } = useEstablecimientos({ limit: 1000 }); // Cargar hasta 1000 establecimientos para movimientos
+  } = useEstablecimientos({ noPagination: true }); // CORRECCIÓN: Desactivar paginación para cargar TODOS los establecimientos
 
   const {
     vacunasActivas,
@@ -188,10 +188,12 @@ const Movimientos: React.FC = () => {
     const loadInitialData = async () => {
       try {
         await Promise.all([
-          // loadEstablecimientos({ limit: 1000 }), // El hook ya carga automáticamente con los filtros correctos
+          // CORRECCIÓN: Asegurar que los establecimientos se cargan con noPagination
+          loadEstablecimientos({ noPagination: true }),
           loadCentrosAcopio(),
           loadVacunasActivas()
         ]);
+        console.log(`✅ Datos iniciales cargados: ${establecimientos.length} establecimientos`);
       } catch (error) {
         console.error('Error al cargar datos iniciales:', error);
         toast.error('Error al cargar datos iniciales');
@@ -218,6 +220,7 @@ const Movimientos: React.FC = () => {
         ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
       };
 
+      console.log(`🔄 Cargando movimientos con filtros:`, filters);
       loadMovimientos(filters);
     }
   }, [selectedVacuna, selectedMes, selectedAnio, selectedCentroAcopio]); // Removido loadMovimientos para evitar loop
@@ -269,12 +272,16 @@ const Movimientos: React.FC = () => {
 
     if (selectedCentroAcopio === 'todos') {
       filtrados = establecimientos.filter(e => e.tipo !== 'centro_acopio');
+      console.log(`🏥 Filtro "Todos": ${filtrados.length} establecimientos de ${establecimientos.length} totales`);
     } else {
       filtrados = establecimientos.filter(e => e.centroAcopioId === selectedCentroAcopio);
+      console.log(`🏥 Filtro específico (${selectedCentroAcopio}): ${filtrados.length} establecimientos`);
     }
 
     // Aplicar ordenamiento profesional por centro de acopio
-    return ordenarEstablecimientos(filtrados);
+    const ordenados = ordenarEstablecimientos(filtrados);
+    console.log(`📋 Establecimientos ordenados: ${ordenados.length}`);
+    return ordenados;
   }, [establecimientos, selectedCentroAcopio]);
 
   // Calcular movimientos con campos derivados
