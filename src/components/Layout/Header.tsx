@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Bell, Search } from 'lucide-react';
 import UserMenu from '../auth/UserMenu';
+import Breadcrumbs from '../common/Breadcrumbs';
 
 interface HeaderProps {
   title: string;
@@ -14,11 +15,16 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Sistema Integral de Gestión de Vacunas - DIRESA Apurímac II
-          </p>
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Sistema Integral de Gestión de Vacunas - DIRESA Apurímac II
+              </p>
+            </div>
+          </div>
+          <Breadcrumbs />
         </div>
 
         <div className="flex items-center space-x-4">

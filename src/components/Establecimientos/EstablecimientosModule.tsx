@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import {
   Network,
   GitBranch,
@@ -11,6 +12,7 @@ import Establecimientos from './Establecimientos';
 import Redes from '../Redes/Redes';
 import Microredes from '../Microredes/Microredes';
 import CentrosAcopio from '../CentrosAcopio/CentrosAcopio';
+import { useAppNavigation, useCurrentRoute, useUrlState } from '../../hooks/useRouting';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -39,7 +41,10 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const EstablecimientosModule: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState(0);
+  const { navigateToModule } = useAppNavigation();
+  const { currentSubModule, searchParams } = useCurrentRoute();
+
+  // Estado de navegación sincronizado con URL
   const [navigationState, setNavigationState] = useState({
     selectedRedId: '',
     selectedRedNombre: '',
@@ -49,90 +54,90 @@ const EstablecimientosModule: React.FC = () => {
     selectedCentroAcopioNombre: ''
   });
 
-  const handleTabChange = (newValue: number) => {
-    setCurrentTab(newValue);
-  };
+  // Sincronizar estado con parámetros de URL
+  useEffect(() => {
+    const redId = searchParams.get('redId') || '';
+    const redNombre = searchParams.get('redNombre') || '';
+    const microredId = searchParams.get('microredId') || '';
+    const microredNombre = searchParams.get('microredNombre') || '';
+    const centroAcopioId = searchParams.get('centroAcopioId') || '';
+    const centroAcopioNombre = searchParams.get('centroAcopioNombre') || '';
+
+    setNavigationState({
+      selectedRedId: redId,
+      selectedRedNombre: redNombre,
+      selectedMicroredId: microredId,
+      selectedMicroredNombre: microredNombre,
+      selectedCentroAcopioId: centroAcopioId,
+      selectedCentroAcopioNombre: centroAcopioNombre
+    });
+  }, [searchParams]);
 
   // Navigation handlers
   const handleNavigateToMicroredes = (redId: string, redNombre: string) => {
-    setNavigationState(prev => ({
-      ...prev,
-      selectedRedId: redId,
-      selectedRedNombre: redNombre,
-      selectedMicroredId: '',
-      selectedMicroredNombre: '',
-      selectedCentroAcopioId: '',
-      selectedCentroAcopioNombre: ''
-    }));
-    setCurrentTab(1); // Switch to Microredes tab
+    const params = {
+      redId,
+      redNombre
+    };
+    navigateToModule('establecimientos', 'microredes', params);
   };
 
   const handleNavigateToCentrosAcopio = (microredId: string, microredNombre: string) => {
-    setNavigationState(prev => ({
-      ...prev,
-      selectedMicroredId: microredId,
-      selectedMicroredNombre: microredNombre,
-      selectedCentroAcopioId: '',
-      selectedCentroAcopioNombre: ''
-    }));
-    setCurrentTab(2); // Switch to Centros de Acopio tab
+    const params = {
+      redId: navigationState.selectedRedId,
+      redNombre: navigationState.selectedRedNombre,
+      microredId,
+      microredNombre
+    };
+    navigateToModule('establecimientos', 'centros-acopio', params);
   };
 
   const handleNavigateToEstablecimientos = (centroAcopioId: string, centroAcopioNombre: string) => {
-    setNavigationState(prev => ({
-      ...prev,
-      selectedCentroAcopioId: centroAcopioId,
-      selectedCentroAcopioNombre: centroAcopioNombre
-    }));
-    setCurrentTab(3); // Switch to Establecimientos tab
+    const params = {
+      redId: navigationState.selectedRedId,
+      redNombre: navigationState.selectedRedNombre,
+      microredId: navigationState.selectedMicroredId,
+      microredNombre: navigationState.selectedMicroredNombre,
+      centroAcopioId,
+      centroAcopioNombre
+    };
+    navigateToModule('establecimientos', 'establecimientos', params);
   };
 
   const tabs = [
     {
+      id: 'redes',
       label: 'Redes',
       icon: <Network className="w-5 h-5" />,
       description: 'Gestión de redes de salud',
-      component: <Redes onNavigateToMicroredes={handleNavigateToMicroredes} />
+      path: '/establecimientos/redes'
     },
     {
+      id: 'microredes',
       label: 'Microredes',
       icon: <GitBranch className="w-5 h-5" />,
       description: 'Gestión de microredes',
-      component: (
-        <Microredes
-          selectedRedId={navigationState.selectedRedId}
-          selectedRedNombre={navigationState.selectedRedNombre}
-          onNavigateToCentrosAcopio={handleNavigateToCentrosAcopio}
-        />
-      )
+      path: '/establecimientos/microredes'
     },
     {
+      id: 'centros-acopio',
       label: 'Centros de Acopio',
       icon: <Building2 className="w-5 h-5" />,
       description: 'Gestión de centros de acopio',
-      component: (
-        <CentrosAcopio
-          selectedMicroredId={navigationState.selectedMicroredId}
-          selectedMicroredNombre={navigationState.selectedMicroredNombre}
-          onNavigateToEstablecimientos={handleNavigateToEstablecimientos}
-        />
-      )
+      path: '/establecimientos/centros-acopio'
     },
     {
+      id: 'establecimientos',
       label: 'Establecimientos',
       icon: <Building className="w-5 h-5" />,
       description: 'Gestión de establecimientos de salud',
-      component: (
-        <Establecimientos
-          selectedCentroAcopioId={navigationState.selectedCentroAcopioId}
-          selectedCentroAcopioNombre={navigationState.selectedCentroAcopioNombre}
-        />
-      )
+      path: '/establecimientos/establecimientos'
     }
   ];
 
   const getCurrentBreadcrumb = () => {
-    const currentTabData = tabs[currentTab];
+    // Encontrar el tab actual basado en currentSubModule
+    const currentTabData = tabs.find(tab => tab.id === currentSubModule) || tabs[0];
     const breadcrumbItems = [];
 
     // Always start with the module home
@@ -140,7 +145,7 @@ const EstablecimientosModule: React.FC = () => {
       <li key="home" className="inline-flex items-center">
         <button
           onClick={() => {
-            setCurrentTab(0);
+            navigateToModule('establecimientos', 'redes');
             setNavigationState({
               selectedRedId: '',
               selectedRedNombre: '',
@@ -172,13 +177,15 @@ const EstablecimientosModule: React.FC = () => {
     );
 
     // Add navigation context if available
-    if (navigationState.selectedRedNombre && currentTab >= 1) {
+    const currentTabIndex = tabs.findIndex(tab => tab.id === currentSubModule);
+
+    if (navigationState.selectedRedNombre && currentTabIndex >= 1) {
       breadcrumbItems.splice(-1, 0,
         <li key="red">
           <div className="flex items-center">
             <ChevronRight className="w-4 h-4 text-gray-400" />
             <button
-              onClick={() => setCurrentTab(0)}
+              onClick={() => navigateToModule('establecimientos', 'redes')}
               className="ml-1 text-sm font-medium text-blue-600 hover:text-blue-800 md:ml-2"
             >
               Red: {navigationState.selectedRedNombre}
@@ -188,13 +195,13 @@ const EstablecimientosModule: React.FC = () => {
       );
     }
 
-    if (navigationState.selectedMicroredNombre && currentTab >= 2) {
+    if (navigationState.selectedMicroredNombre && currentTabIndex >= 2) {
       breadcrumbItems.splice(-1, 0,
         <li key="microred">
           <div className="flex items-center">
             <ChevronRight className="w-4 h-4 text-gray-400" />
             <button
-              onClick={() => setCurrentTab(1)}
+              onClick={() => navigateToModule('establecimientos', 'microredes')}
               className="ml-1 text-sm font-medium text-blue-600 hover:text-blue-800 md:ml-2"
             >
               Microred: {navigationState.selectedMicroredNombre}
@@ -204,13 +211,13 @@ const EstablecimientosModule: React.FC = () => {
       );
     }
 
-    if (navigationState.selectedCentroAcopioNombre && currentTab >= 3) {
+    if (navigationState.selectedCentroAcopioNombre && currentTabIndex >= 3) {
       breadcrumbItems.splice(-1, 0,
         <li key="centro">
           <div className="flex items-center">
             <ChevronRight className="w-4 h-4 text-gray-400" />
             <button
-              onClick={() => setCurrentTab(2)}
+              onClick={() => navigateToModule('establecimientos', 'centros-acopio')}
               className="ml-1 text-sm font-medium text-blue-600 hover:text-blue-800 md:ml-2"
             >
               Centro: {navigationState.selectedCentroAcopioNombre}
@@ -248,38 +255,72 @@ const EstablecimientosModule: React.FC = () => {
       <div className="bg-white rounded-lg shadow mb-6">
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex" aria-label="Tabs">
-            {tabs.map((tab, index) => (
-              <button
-                key={index}
-                onClick={() => handleTabChange(index)}
-                className={`w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm ${
-                  currentTab === index
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-                aria-current={currentTab === index ? 'page' : undefined}
-              >
-                <div className="flex flex-col items-center">
-                  <div className="mb-2">
-                    {React.cloneElement(tab.icon, {
-                      className: `w-6 h-6 ${currentTab === index ? 'text-blue-600' : 'text-gray-400'}`
-                    })}
+            {tabs.map((tab) => {
+              const isActive = currentSubModule === tab.id || (!currentSubModule && tab.id === 'redes');
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => navigateToModule('establecimientos', tab.id)}
+                  className={`w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm ${
+                    isActive
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <div className="flex flex-col items-center">
+                    <div className="mb-2">
+                      {React.cloneElement(tab.icon, {
+                        className: `w-6 h-6 ${isActive ? 'text-blue-600' : 'text-gray-400'}`
+                      })}
+                    </div>
+                    <div className="font-medium">{tab.label}</div>
+                    <div className="text-xs text-gray-500 mt-1">{tab.description}</div>
                   </div>
-                  <div className="font-medium">{tab.label}</div>
-                  <div className="text-xs text-gray-500 mt-1">{tab.description}</div>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </nav>
         </div>
       </div>
 
-      {/* Tab Content */}
-      {tabs.map((tab, index) => (
-        <TabPanel key={index} value={currentTab} index={index}>
-          {tab.component}
-        </TabPanel>
-      ))}
+      {/* Routes Content */}
+      <Routes>
+        <Route path="/" element={<Navigate to="redes" replace />} />
+        <Route
+          path="redes"
+          element={<Redes onNavigateToMicroredes={handleNavigateToMicroredes} />}
+        />
+        <Route
+          path="microredes"
+          element={
+            <Microredes
+              selectedRedId={navigationState.selectedRedId}
+              selectedRedNombre={navigationState.selectedRedNombre}
+              onNavigateToCentrosAcopio={handleNavigateToCentrosAcopio}
+            />
+          }
+        />
+        <Route
+          path="centros-acopio"
+          element={
+            <CentrosAcopio
+              selectedMicroredId={navigationState.selectedMicroredId}
+              selectedMicroredNombre={navigationState.selectedMicroredNombre}
+              onNavigateToEstablecimientos={handleNavigateToEstablecimientos}
+            />
+          }
+        />
+        <Route
+          path="establecimientos"
+          element={
+            <Establecimientos
+              selectedCentroAcopioId={navigationState.selectedCentroAcopioId}
+              selectedCentroAcopioNombre={navigationState.selectedCentroAcopioNombre}
+            />
+          }
+        />
+      </Routes>
 
       {/* Information Panel */}
       <div className="bg-gray-50 rounded-lg p-6 mt-6">

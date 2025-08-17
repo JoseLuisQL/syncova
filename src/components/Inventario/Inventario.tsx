@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Plus, Search, Package, Syringe, AlertTriangle, CheckCircle, Clock, FileText, Settings, Edit, Trash2 } from 'lucide-react';
 import { Vacuna, Lote, Jeringa, LoteJeringa } from '../../types';
 import NuevoIngreso from './NuevoIngreso';
@@ -8,6 +9,7 @@ import GestionVacunas from './GestionVacunas';
 import GestionJeringas from './GestionJeringas';
 import { useVacunas } from '../../hooks/useVacunas';
 import { useJeringas } from '../../hooks/useJeringas';
+import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 
 // Utility functions moved outside component scope
 const getEstadoColor = (estado: string) => {
@@ -36,7 +38,8 @@ const getDaysToExpire = (fechaVencimiento: Date) => {
 };
 
 const Inventario: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'vacunas' | 'jeringas' | 'lotes-vacunas' | 'lotes-jeringas' | 'recepcion'>('vacunas');
+  const { navigateToModule } = useAppNavigation();
+  const { currentSubModule } = useCurrentRoute();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNuevoIngreso, setShowNuevoIngreso] = useState(false);
 
@@ -54,11 +57,11 @@ const Inventario: React.FC = () => {
   }, [showNuevoIngreso, loadVacunasActivas, loadJeringasActivas]);
 
   const tabs = [
-    { id: 'vacunas', label: 'Catálogo de Vacunas', icon: Package },
-    { id: 'jeringas', label: 'Catálogo de Jeringas', icon: Syringe },
-    { id: 'lotes-vacunas', label: 'Lotes de Vacunas', icon: Package },
-    { id: 'lotes-jeringas', label: 'Lotes de Jeringas', icon: Syringe },
-    { id: 'recepcion', label: 'Nuevo Ingreso', icon: Plus },
+    { id: 'vacunas', label: 'Catálogo de Vacunas', icon: Package, path: '/inventario/vacunas' },
+    { id: 'jeringas', label: 'Catálogo de Jeringas', icon: Syringe, path: '/inventario/jeringas' },
+    { id: 'lotes-vacunas', label: 'Lotes de Vacunas', icon: Package, path: '/inventario/lotes-vacunas' },
+    { id: 'lotes-jeringas', label: 'Lotes de Jeringas', icon: Syringe, path: '/inventario/lotes-jeringas' },
+    { id: 'recepcion', label: 'Nuevo Ingreso', icon: Plus, path: '/inventario/recepcion' },
   ];
 
   // Los handlers ahora son manejados por las páginas individuales
@@ -99,12 +102,13 @@ const Inventario: React.FC = () => {
         <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => {
             const Icon = tab.icon;
+            const isActive = currentSubModule === tab.id || (!currentSubModule && tab.id === 'vacunas');
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => navigateToModule('inventario', tab.id)}
                 className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
+                  isActive
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
@@ -117,42 +121,15 @@ const Inventario: React.FC = () => {
         </nav>
       </div>
 
-      {/* Search */}
-      {activeTab === 'vacunas' && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar vacunas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Content */}
-      {activeTab === 'vacunas' && (
-        <GestionVacunas />
-      )}
-
-      {activeTab === 'jeringas' && (
-        <GestionJeringas />
-      )}
-
-      {activeTab === 'lotes-vacunas' && (
-        <LotesVacunasPage />
-      )}
-
-      {activeTab === 'lotes-jeringas' && (
-        <LotesJeringasPage />
-      )}
-
-      {activeTab === 'recepcion' && (
-        <RecepcionTab onNuevoIngreso={() => setShowNuevoIngreso(true)} />
-      )}
+      {/* Routes Content */}
+      <Routes>
+        <Route path="/" element={<Navigate to="vacunas" replace />} />
+        <Route path="vacunas" element={<GestionVacunas />} />
+        <Route path="jeringas" element={<GestionJeringas />} />
+        <Route path="lotes-vacunas" element={<LotesVacunasPage />} />
+        <Route path="lotes-jeringas" element={<LotesJeringasPage />} />
+        <Route path="recepcion" element={<RecepcionTab onNuevoIngreso={() => setShowNuevoIngreso(true)} />} />
+      </Routes>
 
       {/* Modal de Nuevo Ingreso */}
       {showNuevoIngreso && (

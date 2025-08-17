@@ -28,9 +28,8 @@ const envSchema = Joi.object({
     .description('Tiempo de expiración del JWT'),
   
   CORS_ORIGIN: Joi.string()
-    .uri()
-    .default('http://localhost:5173')
-    .description('Origen permitido para CORS'),
+    .default('http://localhost:5173,http://localhost:5174')
+    .description('Orígenes permitidos para CORS (separados por comas)'),
   
   RATE_LIMIT_WINDOW_MS: Joi.number()
     .positive()
@@ -106,7 +105,7 @@ export const config = {
     expiresIn: envVars.JWT_EXPIRES_IN as string,
   },
   cors: {
-    origin: envVars.CORS_ORIGIN as string,
+    origin: (envVars.CORS_ORIGIN as string).split(',').map(origin => origin.trim()),
   },
   rateLimit: {
     windowMs: envVars.RATE_LIMIT_WINDOW_MS as number,

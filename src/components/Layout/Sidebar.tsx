@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
+import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 import {
   LayoutDashboard,
   Building2,
@@ -18,26 +19,23 @@ import {
   Bug,
 } from 'lucide-react';
 
-interface SidebarProps {
-  activeModule: string;
-  onModuleChange: (module: string) => void;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ activeModule, onModuleChange }) => {
+const Sidebar: React.FC = () => {
   const { sidebarCollapsed, setSidebarCollapsed } = useApp();
+  const { navigateToModule } = useAppNavigation();
+  const { currentModule } = useCurrentRoute();
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'establecimientos', label: 'Establecimientos', icon: Building2 },
-    { id: 'inventario', label: 'Inventario', icon: Package },
-    { id: 'movimientos', label: 'Movimientos', icon: ArrowRightLeft },
-    { id: 'planificacion', label: 'Planificación', icon: Calendar },
-    { id: 'kardex', label: 'Kardex', icon: BookOpen },
-    { id: 'reportes', label: 'Reportes', icon: FileText },
-    { id: 'alertas', label: 'Alertas', icon: Bell },
-    { id: 'usuarios', label: 'Usuarios', icon: Users },
-    { id: 'configuracion', label: 'Configuración', icon: Settings },
-    { id: 'debug', label: 'Debug', icon: Bug },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    { id: 'establecimientos', label: 'Establecimientos', icon: Building2, path: '/establecimientos' },
+    { id: 'inventario', label: 'Inventario', icon: Package, path: '/inventario' },
+    { id: 'movimientos', label: 'Movimientos', icon: ArrowRightLeft, path: '/movimientos' },
+    { id: 'planificacion', label: 'Planificación', icon: Calendar, path: '/planificacion' },
+    { id: 'kardex', label: 'Kardex', icon: BookOpen, path: '/kardex' },
+    { id: 'reportes', label: 'Reportes', icon: FileText, path: '/reportes' },
+    { id: 'alertas', label: 'Alertas', icon: Bell, path: '/alertas' },
+    { id: 'usuarios', label: 'Usuarios', icon: Users, path: '/usuarios' },
+    { id: 'configuracion', label: 'Configuración', icon: Settings, path: '/configuracion' },
+    { id: 'debug', label: 'Debug', icon: Bug, path: '/debug' },
   ];
 
   return (
@@ -75,12 +73,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeModule, onModuleChange }) => {
       <nav className="mt-4 px-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeModule === item.id;
-          
+          const isActive = currentModule === item.id;
+
           return (
             <button
               key={item.id}
-              onClick={() => onModuleChange(item.id)}
+              onClick={() => navigateToModule(item.id)}
               className={`w-full flex items-center px-3 py-3 mb-1 rounded-lg transition-all duration-200 group ${
                 isActive
                   ? 'bg-blue-600 text-white shadow-lg'

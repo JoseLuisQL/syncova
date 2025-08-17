@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import {
   Calendar,
   Upload,
@@ -48,9 +49,11 @@ import { useVacunas } from '../../hooks/useVacunas';
 import { useToastContext } from '../../contexts/ToastContext';
 import ImportarModal from './ImportarModal';
 import { PlanificacionService } from '../../services/planificacionService';
+import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 
 const Planificacion: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'programacion' | 'importar' | 'distribucion' | 'reportes'>('programacion');
+  const { navigateToModule } = useAppNavigation();
+  const { currentSubModule } = useCurrentRoute();
   const [selectedAnio, setSelectedAnio] = useState<number>(2025);
   const [selectedCentroAcopio, setSelectedCentroAcopio] = useState<string>('todos');
   const [selectedVacuna, setSelectedVacuna] = useState<string>('');
@@ -111,10 +114,10 @@ const Planificacion: React.FC = () => {
   const { vacunas, loadVacunasActivas, isLoading: isLoadingVacunas } = useVacunas();
 
   const tabs = [
-    { id: 'programacion', label: 'Programación por Vacuna', icon: Package },
-    { id: 'importar', label: 'Importar Programación', icon: Upload },
-    { id: 'distribucion', label: 'Distribución Automática', icon: Calculator },
-    { id: 'reportes', label: 'Reportes y Análisis', icon: BarChart3 },
+    { id: 'programacion', label: 'Programación por Vacuna', icon: Package, path: '/planificacion/programacion' },
+    { id: 'importar', label: 'Importar Programación', icon: Upload, path: '/planificacion/importar' },
+    { id: 'distribucion', label: 'Distribución Automática', icon: Calculator, path: '/planificacion/distribucion' },
+    { id: 'reportes', label: 'Reportes y Análisis', icon: BarChart3, path: '/planificacion/reportes' },
   ];
 
   // Obtener establecimientos según el filtro seleccionado con ordenamiento profesional
@@ -773,12 +776,13 @@ const Planificacion: React.FC = () => {
         <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => {
             const Icon = tab.icon;
+            const isActive = currentSubModule === tab.id || (!currentSubModule && tab.id === 'programacion');
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => navigateToModule('planificacion', tab.id)}
                 className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
+                  isActive
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
@@ -791,53 +795,61 @@ const Planificacion: React.FC = () => {
         </nav>
       </div>
 
-      {/* Content */}
-      {activeTab === 'programacion' && (
-        <ProgramacionPorVacunaTab
-          selectedAnio={selectedAnio}
-          setSelectedAnio={setSelectedAnio}
-          selectedCentroAcopio={selectedCentroAcopio}
-          setSelectedCentroAcopio={setSelectedCentroAcopio}
-          selectedVacuna={selectedVacuna}
-          setSelectedVacuna={setSelectedVacuna}
-          centrosAcopio={centrosAcopio}
-          vacunas={vacunas}
-          datosVacuna={datosVacuna}
-          mesesCortos={mesesCortos}
-          handleActualizarDistribucion={handleActualizarDistribucion}
-          calcularTotalMes={calcularTotalMes}
-          calcularTotalGeneral={calcularTotalGeneral}
-          getCentroAcopioTexto={getCentroAcopioTexto}
-          isLoading={isLoading}
-          isUpdating={isUpdating}
-          establecimientos={establecimientos}
-          handleGuardarProgramacion={handleGuardarProgramacion}
-          loadPlanificacionesPorVacuna={loadPlanificacionesPorVacuna}
-          getCurrentValue={getCurrentValue}
-          hasPendingChange={hasPendingChange}
-          handleTempValueChange={handleTempValueChange}
-          handleFieldBlur={handleFieldBlur}
-          handleSaveAllPendingChanges={handleSaveAllPendingChanges}
-          pendingChanges={pendingChanges}
-          handleSincronizarConMovimientos={handleSincronizarConMovimientos}
+      {/* Routes Content */}
+      <Routes>
+        <Route path="/" element={<Navigate to="programacion" replace />} />
+        <Route
+          path="programacion"
+          element={
+            <ProgramacionPorVacunaTab
+              selectedAnio={selectedAnio}
+              setSelectedAnio={setSelectedAnio}
+              selectedCentroAcopio={selectedCentroAcopio}
+              setSelectedCentroAcopio={setSelectedCentroAcopio}
+              selectedVacuna={selectedVacuna}
+              setSelectedVacuna={setSelectedVacuna}
+              centrosAcopio={centrosAcopio}
+              vacunas={vacunas}
+              datosVacuna={datosVacuna}
+              mesesCortos={mesesCortos}
+              handleActualizarDistribucion={handleActualizarDistribucion}
+              calcularTotalMes={calcularTotalMes}
+              calcularTotalGeneral={calcularTotalGeneral}
+              getCentroAcopioTexto={getCentroAcopioTexto}
+              isLoading={isLoading}
+              isUpdating={isUpdating}
+              establecimientos={establecimientos}
+              handleGuardarProgramacion={handleGuardarProgramacion}
+              loadPlanificacionesPorVacuna={loadPlanificacionesPorVacuna}
+              getCurrentValue={getCurrentValue}
+              hasPendingChange={hasPendingChange}
+              handleTempValueChange={handleTempValueChange}
+              handleFieldBlur={handleFieldBlur}
+              handleSaveAllPendingChanges={handleSaveAllPendingChanges}
+              pendingChanges={pendingChanges}
+              handleSincronizarConMovimientos={handleSincronizarConMovimientos}
+            />
+          }
         />
-      )}
-
-      {activeTab === 'importar' && (
-        <ImportarPorVacunaTab onImportar={handleImportarPorVacuna} />
-      )}
-
-      {activeTab === 'distribucion' && (
-        <DistribucionAutomaticaTab
-          vacunas={vacunas}
-          onGenerar={generarDistribucionAutomatica}
-          isGenerating={isGeneratingDistribution}
+        <Route
+          path="importar"
+          element={<ImportarPorVacunaTab onImportar={handleImportarPorVacuna} />}
         />
-      )}
-
-      {activeTab === 'reportes' && (
-        <ReportesTab stats={stats} isLoadingStats={isLoadingStats} />
-      )}
+        <Route
+          path="distribucion"
+          element={
+            <DistribucionAutomaticaTab
+              vacunas={vacunas}
+              onGenerar={generarDistribucionAutomatica}
+              isGenerating={isGeneratingDistribution}
+            />
+          }
+        />
+        <Route
+          path="reportes"
+          element={<ReportesTab stats={stats} isLoadingStats={isLoadingStats} />}
+        />
+      </Routes>
 
       {/* Modal Importar Avanzado */}
       <ImportarModal
