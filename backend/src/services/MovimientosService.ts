@@ -2,6 +2,7 @@ import { prisma } from '@/config/database';
 import { ServiceResult } from '@/types';
 import { IMovimientoVacuna, IEntregaAdicional } from '@/types';
 import { ValeService } from './ValeService';
+import * as ExcelJS from 'exceljs';
 
 /**
  * Interfaces para filtros y DTOs
@@ -1262,5 +1263,1291 @@ export class MovimientosService {
         error: error instanceof Error ? error.message : 'Error al sincronizar saldo anterior'
       };
     }
+  }
+
+  /**
+   * Generar plantilla Excel para importación por vacuna específica
+   * Nota: El saldo anterior NO se incluye en la importación ya que se calcula automáticamente
+   */
+  static async generarPlantillaVacuna(vacunaId: string, anio: number): Promise<ServiceResult<ExcelJS.Workbook>> {
+    try {
+      // Validar parámetros
+      if (!vacunaId) {
+        return {
+          success: false,
+          error: 'ID de vacuna requerido'
+        };
+      }
+
+      if (!anio || anio < 2020 || anio > 2050) {
+        return {
+          success: false,
+          error: 'Año debe estar entre 2020 y 2050'
+        };
+      }
+
+      // Obtener información de la vacuna
+      const vacuna = await prisma.vacuna.findUnique({
+        where: { id: vacunaId },
+        select: {
+          id: true,
+          nombre: true,
+          tipo: true,
+          presentacion: true,
+          dosisPorFrasco: true
+        }
+      });
+
+      if (!vacuna) {
+        return {
+          success: false,
+          error: 'Vacuna no encontrada'
+        };
+      }
+
+      // Obtener todos los establecimientos activos
+      const establecimientos = await prisma.establecimiento.findMany({
+        where: { estado: 'activo' },
+        include: {
+          centroAcopio: {
+            include: {
+              microred: {
+                include: {
+                  red: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: [
+          { centroAcopio: { microred: { red: { nombre: 'asc' } } } },
+          { centroAcopio: { microred: { nombre: 'asc' } } },
+          { centroAcopio: { nombre: 'asc' } },
+          { tipo: 'asc' },
+          { nombre: 'asc' }
+        ]
+      });
+
+      // Crear workbook
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC - Sistema de Vacunas';
+      workbook.created = new Date();
+
+      // Crear hoja de trabajo
+      const worksheet = workbook.addWorksheet(`${vacuna.nombre} - ${anio}`);
+
+      // Configurar columnas
+      worksheet.columns = [
+        { header: 'Establecimiento ID', key: 'establecimientoId', width: 40 },
+        { header: 'Establecimiento', key: 'establecimiento', width: 30 },
+        { header: 'Tipo', key: 'tipo', width: 15 },
+        { header: 'Centro Acopio', key: 'centroAcopio', width: 25 },
+        { header: 'Mes', key: 'mes', width: 10 },
+        { header: 'Año', key: 'anio', width: 10 },
+        { header: 'Trans. Ingreso', key: 'transIngreso', width: 15 },
+        { header: 'Salida', key: 'salida', width: 15 },
+        { header: 'Trans. Salida', key: 'transSalida', width: 15 },
+        { header: 'Observaciones', key: 'observaciones', width: 30 }
+      ];
+
+      // Estilo del encabezado
+      const headerRow = worksheet.getRow(1);
+      headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: '366092' }
+      };
+      headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+
+      // Agregar filas de datos para cada establecimiento y mes
+      let rowIndex = 2;
+      for (const establecimiento of establecimientos) {
+        for (let mes = 1; mes <= 12; mes++) {
+          const row = worksheet.addRow({
+            establecimientoId: establecimiento.id,
+            establecimiento: establecimiento.nombre,
+            tipo: establecimiento.tipo.replace('_', ' ').toUpperCase(),
+            centroAcopio: establecimiento.centroAcopio?.nombre || '',
+            mes: mes,
+            anio: anio,
+            transIngreso: 0,
+            salida: 0,
+            transSalida: 0,
+            observaciones: ''
+          });
+
+          // Alternar colores de fila
+          if (rowIndex % 2 === 0) {
+            row.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'F8F9FA' }
+            };
+          }
+
+          rowIndex++;
+        }
+      }
+
+      // Agregar bordes a todas las celdas
+      worksheet.eachRow((row, rowNumber) => {
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
+        });
+      });
+
+      return {
+        success: true,
+        data: workbook
+      };
+
+    } catch (error) {
+      console.error('Error al generar plantilla de vacuna:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al generar plantilla'
+      };
+    }
+  }
+
+  /**
+   * Generar plantilla Excel masiva para todas las vacunas de un año
+   * Nota: El saldo anterior NO se incluye en la importación ya que se calcula automáticamente
+   */
+  static async generarPlantillaMasiva(anio: number): Promise<ServiceResult<ExcelJS.Workbook>> {
+    try {
+      // Validar parámetros
+      if (!anio || anio < 2020 || anio > 2050) {
+        return {
+          success: false,
+          error: 'Año debe estar entre 2020 y 2050'
+        };
+      }
+
+      // Obtener todas las vacunas activas
+      const vacunas = await prisma.vacuna.findMany({
+        where: { estado: 'activo' },
+        orderBy: { nombre: 'asc' }
+      });
+
+      if (vacunas.length === 0) {
+        return {
+          success: false,
+          error: 'No se encontraron vacunas activas'
+        };
+      }
+
+      // Obtener todos los establecimientos activos
+      const establecimientos = await prisma.establecimiento.findMany({
+        where: { estado: 'activo' },
+        include: {
+          centroAcopio: {
+            include: {
+              microred: {
+                include: {
+                  red: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: [
+          { centroAcopio: { microred: { red: { nombre: 'asc' } } } },
+          { centroAcopio: { microred: { nombre: 'asc' } } },
+          { centroAcopio: { nombre: 'asc' } },
+          { tipo: 'asc' },
+          { nombre: 'asc' }
+        ]
+      });
+
+      // Crear workbook
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC - Sistema de Vacunas';
+      workbook.created = new Date();
+
+      // Crear una hoja por cada vacuna
+      for (const vacuna of vacunas) {
+        const worksheet = workbook.addWorksheet(vacuna.nombre.substring(0, 31)); // Excel limita a 31 caracteres
+
+        // Configurar columnas
+        worksheet.columns = [
+          { header: 'Establecimiento ID', key: 'establecimientoId', width: 40 },
+          { header: 'Establecimiento', key: 'establecimiento', width: 30 },
+          { header: 'Tipo', key: 'tipo', width: 15 },
+          { header: 'Centro Acopio', key: 'centroAcopio', width: 25 },
+          { header: 'Mes', key: 'mes', width: 10 },
+          { header: 'Año', key: 'anio', width: 10 },
+          { header: 'Trans. Ingreso', key: 'transIngreso', width: 15 },
+          { header: 'Salida', key: 'salida', width: 15 },
+          { header: 'Trans. Salida', key: 'transSalida', width: 15 },
+          { header: 'Observaciones', key: 'observaciones', width: 30 }
+        ];
+
+        // Estilo del encabezado
+        const headerRow = worksheet.getRow(1);
+        headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
+        headerRow.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: '366092' }
+        };
+        headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+
+        // Agregar filas de datos para cada establecimiento y mes
+        let rowIndex = 2;
+        for (const establecimiento of establecimientos) {
+          for (let mes = 1; mes <= 12; mes++) {
+            const row = worksheet.addRow({
+              establecimientoId: establecimiento.id,
+              establecimiento: establecimiento.nombre,
+              tipo: establecimiento.tipo.replace('_', ' ').toUpperCase(),
+              centroAcopio: establecimiento.centroAcopio?.nombre || '',
+              mes: mes,
+              anio: anio,
+              transIngreso: 0,
+              salida: 0,
+              transSalida: 0,
+              observaciones: ''
+            });
+
+            // Alternar colores de fila
+            if (rowIndex % 2 === 0) {
+              row.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'F8F9FA' }
+              };
+            }
+
+            rowIndex++;
+          }
+        }
+
+        // Agregar bordes a todas las celdas
+        worksheet.eachRow((row) => {
+          row.eachCell((cell) => {
+            cell.border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' }
+            };
+          });
+        });
+      }
+
+      return {
+        success: true,
+        data: workbook
+      };
+
+    } catch (error) {
+      console.error('Error al generar plantilla masiva:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al generar plantilla masiva'
+      };
+    }
+  }
+
+  /**
+   * Validar y limpiar UUID de establecimiento
+   */
+  private static validarUUID(uuid: string): boolean {
+    if (!uuid || typeof uuid !== 'string') return false;
+
+    // Limpiar espacios y caracteres extraños
+    const cleanUuid = uuid.trim();
+
+    // Verificar longitud exacta
+    if (cleanUuid.length !== 36) return false;
+
+    // Verificar formato UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(cleanUuid);
+  }
+
+  /**
+   * Importar movimientos desde archivo Excel por vacuna específica
+   * Nota: El saldo anterior NO se importa ya que se calcula automáticamente por el sistema
+   */
+  static async importarDesdeExcelVacuna(
+    vacunaId: string,
+    anio: number,
+    buffer: Buffer
+  ): Promise<ServiceResult<{ creadas: number; actualizadas: number; errores: string[] }>> {
+    try {
+      // Validar parámetros
+      if (!vacunaId) {
+        return {
+          success: false,
+          error: 'ID de vacuna requerido'
+        };
+      }
+
+      if (!anio || anio < 2020 || anio > 2050) {
+        return {
+          success: false,
+          error: 'Año debe estar entre 2020 y 2050'
+        };
+      }
+
+      // Verificar que la vacuna existe
+      const vacuna = await prisma.vacuna.findUnique({
+        where: { id: vacunaId }
+      });
+
+      if (!vacuna) {
+        return {
+          success: false,
+          error: 'Vacuna no encontrada'
+        };
+      }
+
+      // Leer archivo Excel
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer as any);
+
+      if (workbook.worksheets.length === 0) {
+        return {
+          success: false,
+          error: 'No se encontraron hojas de trabajo en el archivo Excel'
+        };
+      }
+
+      const worksheet = workbook.worksheets[0];
+      if (!worksheet) {
+        return {
+          success: false,
+          error: 'No se pudo acceder a la hoja de trabajo'
+        };
+      }
+
+      const errores: string[] = [];
+      let creadas = 0;
+      let actualizadas = 0;
+
+      // Procesar filas en lotes para evitar timeouts
+      const batchSize = 100; // Procesar de 100 en 100
+      const totalRows = worksheet.rowCount;
+
+      console.log(`Procesando ${totalRows - 1} filas en lotes de ${batchSize}`);
+
+      for (let startRow = 2; startRow <= totalRows; startRow += batchSize) {
+        const endRow = Math.min(startRow + batchSize - 1, totalRows);
+        console.log(`Procesando lote: filas ${startRow} a ${endRow}`);
+
+        // Procesar lote actual
+        for (let rowNumber = startRow; rowNumber <= endRow; rowNumber++) {
+          const row = worksheet.getRow(rowNumber);
+
+          try {
+          // Extraer datos de la fila
+          const rawEstablecimientoId = row.getCell(1).value;
+          const establecimientoId = rawEstablecimientoId?.toString().trim();
+          const mes = parseInt(row.getCell(5).value?.toString() || '0');
+          const anioExcel = parseInt(row.getCell(6).value?.toString() || '0');
+          const transIngreso = parseInt(row.getCell(7).value?.toString() || '0');
+          const salida = parseInt(row.getCell(8).value?.toString() || '0');
+          const transSalida = parseInt(row.getCell(9).value?.toString() || '0');
+          const observaciones = row.getCell(10).value?.toString() || '';
+
+          // Log para debugging
+          console.log(`Fila ${rowNumber} - Raw: "${rawEstablecimientoId}", EstablecimientoId: "${establecimientoId}", Mes: ${mes}, Año: ${anioExcel}`);
+
+          // Saltar filas vacías o con datos inválidos
+          if (!establecimientoId || establecimientoId === '' || establecimientoId === 'undefined' || establecimientoId === 'null') {
+            console.log(`Saltando fila ${rowNumber}: establecimientoId vacío o inválido`);
+            continue;
+          }
+
+          // Validaciones básicas
+          if (!establecimientoId) {
+            errores.push(`Fila ${rowNumber}: ID de establecimiento requerido`);
+            continue;
+          }
+
+          // Validar formato UUID usando método dedicado
+          if (!this.validarUUID(establecimientoId)) {
+            errores.push(`Fila ${rowNumber}: ID de establecimiento "${establecimientoId}" no es un UUID válido. Debe tener formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (longitud: ${establecimientoId.length})`);
+            console.log(`UUID inválido en fila ${rowNumber}: "${establecimientoId}" (tipo: ${typeof establecimientoId}, longitud: ${establecimientoId.length})`);
+            continue;
+          }
+
+          if (mes < 1 || mes > 12) {
+            errores.push(`Fila ${rowNumber}: Mes debe estar entre 1 y 12`);
+            continue;
+          }
+
+          if (anioExcel !== anio) {
+            errores.push(`Fila ${rowNumber}: Año debe ser ${anio}`);
+            continue;
+          }
+
+          // Verificar que el establecimiento existe
+          let establecimiento;
+          try {
+            establecimiento = await prisma.establecimiento.findUnique({
+              where: { id: establecimientoId }
+            });
+          } catch (error) {
+            errores.push(`Fila ${rowNumber}: Error al buscar establecimiento "${establecimientoId}": ${error instanceof Error ? error.message : 'Error desconocido'}`);
+            continue;
+          }
+
+          if (!establecimiento) {
+            errores.push(`Fila ${rowNumber}: Establecimiento con ID "${establecimientoId}" no encontrado en la base de datos`);
+            continue;
+          }
+
+          // Buscar movimiento existente
+          const movimientoExistente = await prisma.movimientoVacuna.findUnique({
+            where: {
+              uk_movimiento_establecimiento_vacuna_mes_anio: {
+                establecimientoId,
+                vacunaId,
+                mes,
+                anio
+              }
+            }
+          });
+
+          // Operaciones de base de datos con manejo de errores específico
+          try {
+            if (movimientoExistente) {
+              // Actualizar movimiento existente
+              await prisma.movimientoVacuna.update({
+                where: { id: movimientoExistente.id },
+                data: {
+                  transIngreso,
+                  salida,
+                  transSalida,
+                  observaciones: observaciones || null,
+                  updatedAt: new Date()
+                }
+              });
+              actualizadas++;
+              console.log(`Fila ${rowNumber}: Movimiento actualizado exitosamente`);
+            } else {
+              // Crear nuevo movimiento
+              console.log(`Fila ${rowNumber}: Creando movimiento con establecimientoId: "${establecimientoId}", vacunaId: "${vacunaId}"`);
+              await prisma.movimientoVacuna.create({
+                data: {
+                  establecimientoId,
+                  vacunaId,
+                  mes,
+                  anio,
+                  transIngreso,
+                  salida,
+                  transSalida,
+                  observaciones: observaciones || null,
+                  usuarioId: 'system-import', // TODO: Obtener del contexto de usuario
+                  fechaMovimiento: new Date()
+                }
+              });
+              creadas++;
+              console.log(`Fila ${rowNumber}: Movimiento creado exitosamente`);
+            }
+          } catch (dbError) {
+            const errorMsg = `Fila ${rowNumber}: Error de base de datos - ${dbError instanceof Error ? dbError.message : 'Error desconocido'}`;
+            console.error(errorMsg);
+            console.error(`Datos problemáticos: establecimientoId="${establecimientoId}", vacunaId="${vacunaId}", mes=${mes}, anio=${anio}`);
+            errores.push(errorMsg);
+            continue;
+          }
+
+        } catch (error) {
+          errores.push(`Fila ${rowNumber}: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+        }
+      }
+      }
+
+      return {
+        success: true,
+        data: {
+          creadas,
+          actualizadas,
+          errores
+        }
+      };
+
+    } catch (error) {
+      console.error('Error al importar desde Excel por vacuna:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al importar desde Excel'
+      };
+    }
+  }
+
+  /**
+   * Importar movimientos masivos desde archivo Excel (múltiples hojas)
+   * Nota: El saldo anterior NO se importa ya que se calcula automáticamente por el sistema
+   */
+  static async importarDesdeExcelMasivo(
+    anio: number,
+    buffer: Buffer
+  ): Promise<ServiceResult<{
+    totalCreadas: number;
+    totalActualizadas: number;
+    erroresPorVacuna: {
+      vacuna: string;
+      vacunaId: string;
+      errores: string[];
+      erroresDetallados: {
+        fila: number;
+        establecimientoId: string;
+        establecimientoNombre: string;
+        mes: number;
+        error: string;
+        tipoError: 'UUID_INVALIDO' | 'ESTABLECIMIENTO_NO_ENCONTRADO' | 'MES_INVALIDO' | 'ANIO_INVALIDO' | 'ERROR_BD' | 'DATOS_FALTANTES';
+        datosOriginales: any;
+      }[];
+    }[];
+    vacunasProcesadas: number;
+    reporteErrores?: any;
+  }>> {
+    try {
+      // Validar parámetros
+      if (!anio || anio < 2020 || anio > 2050) {
+        return {
+          success: false,
+          error: 'Año debe estar entre 2020 y 2050'
+        };
+      }
+
+      // Leer archivo Excel
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer as any);
+
+      if (workbook.worksheets.length === 0) {
+        return {
+          success: false,
+          error: 'No se encontraron hojas de trabajo en el archivo Excel'
+        };
+      }
+
+      // Obtener todas las vacunas para mapear nombres a IDs
+      const vacunas = await prisma.vacuna.findMany({
+        where: { estado: 'activo' }
+      });
+
+      const vacunaMap = new Map(vacunas.map(v => [v.nombre, v.id]));
+
+      let totalCreadas = 0;
+      let totalActualizadas = 0;
+      const erroresPorVacuna: {
+        vacuna: string;
+        vacunaId: string;
+        errores: string[];
+        erroresDetallados: {
+          fila: number;
+          establecimientoId: string;
+          establecimientoNombre: string;
+          mes: number;
+          error: string;
+          tipoError: 'UUID_INVALIDO' | 'ESTABLECIMIENTO_NO_ENCONTRADO' | 'MES_INVALIDO' | 'ANIO_INVALIDO' | 'ERROR_BD' | 'DATOS_FALTANTES';
+          datosOriginales: any;
+        }[];
+      }[] = [];
+      let vacunasProcesadas = 0;
+
+      // Procesar cada hoja de trabajo (una por vacuna)
+      for (const worksheet of workbook.worksheets) {
+        const nombreVacuna = worksheet.name;
+        const erroresVacuna: string[] = [];
+        const erroresDetallados: {
+          fila: number;
+          establecimientoId: string;
+          establecimientoNombre: string;
+          mes: number;
+          error: string;
+          tipoError: 'UUID_INVALIDO' | 'ESTABLECIMIENTO_NO_ENCONTRADO' | 'MES_INVALIDO' | 'ANIO_INVALIDO' | 'ERROR_BD' | 'DATOS_FALTANTES';
+          datosOriginales: any;
+        }[] = [];
+
+        try {
+          // Buscar ID de vacuna por nombre
+          const vacunaId = vacunaMap.get(nombreVacuna);
+          if (!vacunaId) {
+            erroresVacuna.push(`Vacuna "${nombreVacuna}" no encontrada en el sistema`);
+            erroresPorVacuna.push({
+              vacuna: nombreVacuna,
+              vacunaId: '',
+              errores: erroresVacuna,
+              erroresDetallados: []
+            });
+            continue;
+          }
+
+          let creadasVacuna = 0;
+          let actualizadasVacuna = 0;
+
+          // Procesar filas en lotes para evitar timeouts
+          const batchSize = 50; // Lotes más pequeños para importación masiva
+          const totalRows = worksheet.rowCount;
+
+          console.log(`Procesando vacuna ${nombreVacuna}: ${totalRows - 1} filas en lotes de ${batchSize}`);
+
+          for (let startRow = 2; startRow <= totalRows; startRow += batchSize) {
+            const endRow = Math.min(startRow + batchSize - 1, totalRows);
+
+            // Procesar lote actual
+            for (let rowNumber = startRow; rowNumber <= endRow; rowNumber++) {
+              const row = worksheet.getRow(rowNumber);
+
+              try {
+              // Extraer datos de la fila
+              const rawEstablecimientoId = row.getCell(1).value;
+              const establecimientoId = rawEstablecimientoId?.toString().trim();
+              const mes = parseInt(row.getCell(5).value?.toString() || '0');
+              const anioExcel = parseInt(row.getCell(6).value?.toString() || '0');
+              const transIngreso = parseInt(row.getCell(7).value?.toString() || '0');
+              const salida = parseInt(row.getCell(8).value?.toString() || '0');
+              const transSalida = parseInt(row.getCell(9).value?.toString() || '0');
+              const observaciones = row.getCell(10).value?.toString() || '';
+
+              // Log para debugging
+              if (rowNumber <= 3) {
+                console.log(`Vacuna ${nombreVacuna}, Fila ${rowNumber} - Raw: "${rawEstablecimientoId}", EstablecimientoId: "${establecimientoId}"`);
+              }
+
+              // Saltar filas vacías o con datos inválidos
+              if (!establecimientoId || establecimientoId === '' || establecimientoId === 'undefined' || establecimientoId === 'null') {
+                console.log(`Saltando fila ${rowNumber} en vacuna ${nombreVacuna}: establecimientoId vacío o inválido`);
+                erroresDetallados.push({
+                  fila: rowNumber,
+                  establecimientoId: establecimientoId || 'VACIO',
+                  establecimientoNombre: 'N/A',
+                  mes: mes,
+                  error: 'ID de establecimiento vacío o inválido',
+                  tipoError: 'DATOS_FALTANTES',
+                  datosOriginales: {
+                    rawEstablecimientoId,
+                    mes,
+                    anioExcel,
+                    transIngreso,
+                    salida,
+                    transSalida
+                  }
+                });
+                continue;
+              }
+
+              // Validaciones básicas
+              if (!establecimientoId) {
+                const errorMsg = `Fila ${rowNumber}: ID de establecimiento requerido`;
+                erroresVacuna.push(errorMsg);
+                erroresDetallados.push({
+                  fila: rowNumber,
+                  establecimientoId: establecimientoId || 'VACIO',
+                  establecimientoNombre: 'N/A',
+                  mes: mes,
+                  error: errorMsg,
+                  tipoError: 'DATOS_FALTANTES',
+                  datosOriginales: { rawEstablecimientoId, mes, anioExcel }
+                });
+                continue;
+              }
+
+              // Validar formato UUID usando método dedicado
+              if (!this.validarUUID(establecimientoId)) {
+                const errorMsg = `ID de establecimiento "${establecimientoId}" no es un UUID válido. Debe tener formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (longitud: ${establecimientoId.length})`;
+                erroresVacuna.push(`Fila ${rowNumber}: ${errorMsg}`);
+                erroresDetallados.push({
+                  fila: rowNumber,
+                  establecimientoId: establecimientoId,
+                  establecimientoNombre: 'N/A',
+                  mes: mes,
+                  error: errorMsg,
+                  tipoError: 'UUID_INVALIDO',
+                  datosOriginales: { rawEstablecimientoId, establecimientoId, mes, anioExcel }
+                });
+                console.log(`UUID inválido en vacuna ${nombreVacuna}, fila ${rowNumber}: "${establecimientoId}" (tipo: ${typeof establecimientoId}, longitud: ${establecimientoId.length})`);
+                continue;
+              }
+
+              if (mes < 1 || mes > 12) {
+                const errorMsg = `Mes debe estar entre 1 y 12, encontrado: ${mes}`;
+                erroresVacuna.push(`Fila ${rowNumber}: ${errorMsg}`);
+                erroresDetallados.push({
+                  fila: rowNumber,
+                  establecimientoId: establecimientoId,
+                  establecimientoNombre: 'N/A',
+                  mes: mes,
+                  error: errorMsg,
+                  tipoError: 'MES_INVALIDO',
+                  datosOriginales: { mes, anioExcel, transIngreso, salida, transSalida }
+                });
+                continue;
+              }
+
+              if (anioExcel !== anio) {
+                const errorMsg = `Año debe ser ${anio}, encontrado: ${anioExcel}`;
+                erroresVacuna.push(`Fila ${rowNumber}: ${errorMsg}`);
+                erroresDetallados.push({
+                  fila: rowNumber,
+                  establecimientoId: establecimientoId,
+                  establecimientoNombre: 'N/A',
+                  mes: mes,
+                  error: errorMsg,
+                  tipoError: 'ANIO_INVALIDO',
+                  datosOriginales: { mes, anioExcel, transIngreso, salida, transSalida }
+                });
+                continue;
+              }
+
+              // Verificar que el establecimiento existe
+              let establecimiento;
+              try {
+                establecimiento = await prisma.establecimiento.findUnique({
+                  where: { id: establecimientoId },
+                  select: {
+                    id: true,
+                    nombre: true,
+                    tipo: true
+                  }
+                });
+              } catch (error) {
+                const errorMsg = `Error al buscar establecimiento "${establecimientoId}": ${error instanceof Error ? error.message : 'Error desconocido'}`;
+                erroresVacuna.push(`Fila ${rowNumber}: ${errorMsg}`);
+                erroresDetallados.push({
+                  fila: rowNumber,
+                  establecimientoId: establecimientoId,
+                  establecimientoNombre: 'N/A',
+                  mes: mes,
+                  error: errorMsg,
+                  tipoError: 'ERROR_BD',
+                  datosOriginales: { establecimientoId, mes, anioExcel }
+                });
+                continue;
+              }
+
+              if (!establecimiento) {
+                const errorMsg = `Establecimiento con ID "${establecimientoId}" no encontrado en la base de datos`;
+                erroresVacuna.push(`Fila ${rowNumber}: ${errorMsg}`);
+                erroresDetallados.push({
+                  fila: rowNumber,
+                  establecimientoId: establecimientoId,
+                  establecimientoNombre: 'NO ENCONTRADO',
+                  mes: mes,
+                  error: errorMsg,
+                  tipoError: 'ESTABLECIMIENTO_NO_ENCONTRADO',
+                  datosOriginales: { establecimientoId, mes, anioExcel, transIngreso, salida, transSalida }
+                });
+                continue;
+              }
+
+              // Buscar movimiento existente
+              const movimientoExistente = await prisma.movimientoVacuna.findUnique({
+                where: {
+                  uk_movimiento_establecimiento_vacuna_mes_anio: {
+                    establecimientoId,
+                    vacunaId,
+                    mes,
+                    anio
+                  }
+                }
+              });
+
+              // Operaciones de base de datos con manejo de errores específico
+              try {
+                if (movimientoExistente) {
+                  // Actualizar movimiento existente
+                  await prisma.movimientoVacuna.update({
+                    where: { id: movimientoExistente.id },
+                    data: {
+                      transIngreso,
+                      salida,
+                      transSalida,
+                      observaciones: observaciones || null,
+                      updatedAt: new Date()
+                    }
+                  });
+                  actualizadasVacuna++;
+                } else {
+                  // Crear nuevo movimiento
+                  console.log(`Vacuna ${nombreVacuna}, Fila ${rowNumber}: Creando movimiento con establecimientoId: "${establecimientoId}"`);
+                  await prisma.movimientoVacuna.create({
+                    data: {
+                      establecimientoId,
+                      vacunaId,
+                      mes,
+                      anio,
+                      transIngreso,
+                      salida,
+                      transSalida,
+                      observaciones: observaciones || null,
+                      usuarioId: 'system-import', // TODO: Obtener del contexto de usuario
+                      fechaMovimiento: new Date()
+                    }
+                  });
+                  creadasVacuna++;
+                }
+              } catch (dbError) {
+                const errorMsg = `Error de base de datos - ${dbError instanceof Error ? dbError.message : 'Error desconocido'}`;
+                console.error(`Vacuna ${nombreVacuna}, Fila ${rowNumber}: ${errorMsg}`);
+                console.error(`Datos problemáticos: establecimientoId="${establecimientoId}", vacunaId="${vacunaId}"`);
+                erroresVacuna.push(`Fila ${rowNumber}: ${errorMsg}`);
+                erroresDetallados.push({
+                  fila: rowNumber,
+                  establecimientoId: establecimientoId,
+                  establecimientoNombre: establecimiento?.nombre || 'N/A',
+                  mes: mes,
+                  error: errorMsg,
+                  tipoError: 'ERROR_BD',
+                  datosOriginales: {
+                    establecimientoId,
+                    vacunaId,
+                    mes,
+                    anio,
+                    transIngreso,
+                    salida,
+                    transSalida,
+                    observaciones
+                  }
+                });
+                continue;
+              }
+
+            } catch (error) {
+              erroresVacuna.push(`Fila ${rowNumber}: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+            }
+          }
+          }
+
+          totalCreadas += creadasVacuna;
+          totalActualizadas += actualizadasVacuna;
+          vacunasProcesadas++;
+
+          // Solo agregar errores si los hay
+          if (erroresVacuna.length > 0 || erroresDetallados.length > 0) {
+            erroresPorVacuna.push({
+              vacuna: nombreVacuna,
+              vacunaId: vacunaId || '',
+              errores: erroresVacuna,
+              erroresDetallados: erroresDetallados
+            });
+          }
+
+        } catch (error) {
+          erroresVacuna.push(`Error general en vacuna: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+          erroresPorVacuna.push({
+            vacuna: nombreVacuna,
+            vacunaId: '',
+            errores: erroresVacuna,
+            erroresDetallados: []
+          });
+        }
+      }
+
+      return {
+        success: true,
+        data: {
+          totalCreadas,
+          totalActualizadas,
+          erroresPorVacuna,
+          vacunasProcesadas
+        }
+      };
+
+    } catch (error) {
+      console.error('Error al importar masivamente desde Excel:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al importar masivamente desde Excel'
+      };
+    }
+  }
+
+  /**
+   * Validar plantilla Excel antes de importar
+   */
+  static async validarPlantillaExcel(
+    anio: number,
+    buffer: Buffer
+  ): Promise<ServiceResult<{
+    valida: boolean;
+    errores: string[];
+    advertencias: string[];
+    estadisticas: {
+      totalFilas: number;
+      filasConDatos: number;
+      establecimientosUnicos: number;
+      vacunasEncontradas: number;
+    };
+  }>> {
+    try {
+      // Validar parámetros
+      if (!anio || anio < 2020 || anio > 2050) {
+        return {
+          success: false,
+          error: 'Año debe estar entre 2020 y 2050'
+        };
+      }
+
+      // Leer archivo Excel
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer as any);
+
+      if (workbook.worksheets.length === 0) {
+        return {
+          success: false,
+          error: 'No se encontraron hojas de trabajo en el archivo Excel'
+        };
+      }
+
+      const errores: string[] = [];
+      const advertencias: string[] = [];
+      let totalFilas = 0;
+      let filasConDatos = 0;
+      const establecimientosUnicos = new Set<string>();
+      const vacunasEncontradas = new Set<string>();
+
+      // Validar cada hoja de trabajo
+      for (const worksheet of workbook.worksheets) {
+        const nombreVacuna = worksheet.name;
+        vacunasEncontradas.add(nombreVacuna);
+
+        // Validar estructura de columnas
+        const headerRow = worksheet.getRow(1);
+        const expectedHeaders = [
+          'Establecimiento ID',
+          'Establecimiento',
+          'Tipo',
+          'Centro Acopio',
+          'Mes',
+          'Año',
+          'Trans. Ingreso',
+          'Salida',
+          'Trans. Salida',
+          'Observaciones'
+        ];
+
+        for (let i = 0; i < expectedHeaders.length; i++) {
+          const cellValue = headerRow.getCell(i + 1).value?.toString();
+          if (cellValue !== expectedHeaders[i]) {
+            errores.push(`Hoja "${nombreVacuna}": Columna ${i + 1} debe ser "${expectedHeaders[i]}", encontrado "${cellValue}"`);
+          }
+        }
+
+        // Validar datos
+        for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
+          const row = worksheet.getRow(rowNumber);
+          totalFilas++;
+
+          const establecimientoId = row.getCell(1).value?.toString().trim();
+          const mes = row.getCell(5).value?.toString();
+          const anioExcel = row.getCell(6).value?.toString();
+
+          if (establecimientoId) {
+            filasConDatos++;
+            establecimientosUnicos.add(establecimientoId);
+
+            // Validar UUID
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            if (!uuidRegex.test(establecimientoId)) {
+              errores.push(`Hoja "${nombreVacuna}", Fila ${rowNumber}: ID de establecimiento inválido`);
+            }
+
+            // Validar mes
+            const mesNum = parseInt(mes || '0');
+            if (mesNum < 1 || mesNum > 12) {
+              errores.push(`Hoja "${nombreVacuna}", Fila ${rowNumber}: Mes debe estar entre 1 y 12`);
+            }
+
+            // Validar año
+            const anioNum = parseInt(anioExcel || '0');
+            if (anioNum !== anio) {
+              errores.push(`Hoja "${nombreVacuna}", Fila ${rowNumber}: Año debe ser ${anio}`);
+            }
+          }
+        }
+      }
+
+      const valida = errores.length === 0;
+
+      if (filasConDatos === 0) {
+        advertencias.push('No se encontraron filas con datos para procesar');
+      }
+
+      return {
+        success: true,
+        data: {
+          valida,
+          errores,
+          advertencias,
+          estadisticas: {
+            totalFilas,
+            filasConDatos,
+            establecimientosUnicos: establecimientosUnicos.size,
+            vacunasEncontradas: vacunasEncontradas.size
+          }
+        }
+      };
+
+    } catch (error) {
+      console.error('Error al validar plantilla Excel:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al validar plantilla Excel'
+      };
+    }
+  }
+
+  /**
+   * Debug plantilla Excel - mostrar primeras filas para identificar problemas
+   */
+  static async debugPlantillaExcel(buffer: Buffer): Promise<ServiceResult<any>> {
+    try {
+      // Leer archivo Excel
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer as any);
+
+      if (workbook.worksheets.length === 0) {
+        return {
+          success: false,
+          error: 'No se encontraron hojas de trabajo en el archivo Excel'
+        };
+      }
+
+      const debug: any = {
+        totalHojas: workbook.worksheets.length,
+        hojas: []
+      };
+
+      // Analizar cada hoja
+      for (const worksheet of workbook.worksheets) {
+        const hojaDebug: any = {
+          nombre: worksheet.name,
+          totalFilas: worksheet.rowCount,
+          primeras5Filas: []
+        };
+
+        // Obtener las primeras 5 filas con datos
+        for (let rowNumber = 1; rowNumber <= Math.min(6, worksheet.rowCount); rowNumber++) {
+          const row = worksheet.getRow(rowNumber);
+          const filaData: any = {
+            numero: rowNumber,
+            celdas: []
+          };
+
+          // Obtener las primeras 11 columnas
+          for (let colNumber = 1; colNumber <= 11; colNumber++) {
+            const cell = row.getCell(colNumber);
+            filaData.celdas.push({
+              columna: colNumber,
+              valor: cell.value,
+              tipo: typeof cell.value,
+              texto: cell.value?.toString(),
+              longitud: cell.value?.toString().length || 0
+            });
+          }
+
+          hojaDebug.primeras5Filas.push(filaData);
+        }
+
+        debug.hojas.push(hojaDebug);
+      }
+
+      return {
+        success: true,
+        data: debug
+      };
+
+    } catch (error) {
+      console.error('Error al hacer debug de plantilla Excel:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al hacer debug de plantilla Excel'
+      };
+    }
+  }
+
+  /**
+   * Generar reporte de errores en Excel
+   */
+  static async generarReporteErrores(
+    erroresPorVacuna: {
+      vacuna: string;
+      vacunaId: string;
+      errores: string[];
+      erroresDetallados: {
+        fila: number;
+        establecimientoId: string;
+        establecimientoNombre: string;
+        mes: number;
+        error: string;
+        tipoError: string;
+        datosOriginales: any;
+      }[];
+    }[]
+  ): Promise<ServiceResult<ExcelJS.Workbook>> {
+    try {
+      // Crear workbook
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC - Sistema de Vacunas';
+      workbook.created = new Date();
+
+      // Crear hoja de resumen
+      const resumenSheet = workbook.addWorksheet('Resumen de Errores');
+
+      // Configurar columnas del resumen
+      resumenSheet.columns = [
+        { header: 'Vacuna', key: 'vacuna', width: 25 },
+        { header: 'ID Vacuna', key: 'vacunaId', width: 40 },
+        { header: 'Total Errores', key: 'totalErrores', width: 15 },
+        { header: 'UUID Inválidos', key: 'uuidInvalidos', width: 15 },
+        { header: 'Establecimientos No Encontrados', key: 'establecimientosNoEncontrados', width: 30 },
+        { header: 'Errores de Mes', key: 'erroresMes', width: 15 },
+        { header: 'Errores de Año', key: 'erroresAnio', width: 15 },
+        { header: 'Errores de BD', key: 'erroresBD', width: 15 },
+        { header: 'Datos Faltantes', key: 'datosFaltantes', width: 15 }
+      ];
+
+      // Estilo del encabezado
+      const headerRow = resumenSheet.getRow(1);
+      headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'D32F2F' }
+      };
+      headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+
+      // Agregar datos del resumen
+      let rowIndex = 2;
+      for (const vacunaError of erroresPorVacuna) {
+        const conteoErrores = {
+          UUID_INVALIDO: 0,
+          ESTABLECIMIENTO_NO_ENCONTRADO: 0,
+          MES_INVALIDO: 0,
+          ANIO_INVALIDO: 0,
+          ERROR_BD: 0,
+          DATOS_FALTANTES: 0
+        };
+
+        // Contar tipos de errores
+        vacunaError.erroresDetallados.forEach(error => {
+          if (conteoErrores.hasOwnProperty(error.tipoError)) {
+            conteoErrores[error.tipoError as keyof typeof conteoErrores]++;
+          }
+        });
+
+        resumenSheet.addRow({
+          vacuna: vacunaError.vacuna,
+          vacunaId: vacunaError.vacunaId,
+          totalErrores: vacunaError.erroresDetallados.length,
+          uuidInvalidos: conteoErrores.UUID_INVALIDO,
+          establecimientosNoEncontrados: conteoErrores.ESTABLECIMIENTO_NO_ENCONTRADO,
+          erroresMes: conteoErrores.MES_INVALIDO,
+          erroresAnio: conteoErrores.ANIO_INVALIDO,
+          erroresBD: conteoErrores.ERROR_BD,
+          datosFaltantes: conteoErrores.DATOS_FALTANTES
+        });
+
+        rowIndex++;
+      }
+
+      // Crear hoja detallada de errores
+      const detalleSheet = workbook.addWorksheet('Errores Detallados');
+
+      // Configurar columnas del detalle
+      detalleSheet.columns = [
+        { header: 'Vacuna', key: 'vacuna', width: 25 },
+        { header: 'Fila Excel', key: 'fila', width: 10 },
+        { header: 'Establecimiento ID', key: 'establecimientoId', width: 40 },
+        { header: 'Establecimiento Nombre', key: 'establecimientoNombre', width: 30 },
+        { header: 'Mes', key: 'mes', width: 10 },
+        { header: 'Tipo Error', key: 'tipoError', width: 25 },
+        { header: 'Descripción Error', key: 'error', width: 50 },
+        { header: 'Trans. Ingreso', key: 'transIngreso', width: 15 },
+        { header: 'Salida', key: 'salida', width: 15 },
+        { header: 'Trans. Salida', key: 'transSalida', width: 15 }
+      ];
+
+      // Estilo del encabezado detalle
+      const headerRowDetalle = detalleSheet.getRow(1);
+      headerRowDetalle.font = { bold: true, color: { argb: 'FFFFFF' } };
+      headerRowDetalle.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF5722' }
+      };
+      headerRowDetalle.alignment = { horizontal: 'center', vertical: 'middle' };
+
+      // Agregar datos detallados
+      for (const vacunaError of erroresPorVacuna) {
+        for (const errorDetalle of vacunaError.erroresDetallados) {
+          const row = detalleSheet.addRow({
+            vacuna: vacunaError.vacuna,
+            fila: errorDetalle.fila,
+            establecimientoId: errorDetalle.establecimientoId,
+            establecimientoNombre: errorDetalle.establecimientoNombre,
+            mes: errorDetalle.mes,
+            tipoError: errorDetalle.tipoError,
+            error: errorDetalle.error,
+            transIngreso: errorDetalle.datosOriginales?.transIngreso || '',
+            salida: errorDetalle.datosOriginales?.salida || '',
+            transSalida: errorDetalle.datosOriginales?.transSalida || ''
+          });
+
+          // Colorear filas según tipo de error
+          const fillColor = this.getErrorColor(errorDetalle.tipoError);
+          row.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: fillColor }
+          };
+        }
+      }
+
+      // Agregar bordes a todas las celdas
+      [resumenSheet, detalleSheet].forEach(sheet => {
+        sheet.eachRow((row) => {
+          row.eachCell((cell) => {
+            cell.border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' }
+            };
+          });
+        });
+      });
+
+      return {
+        success: true,
+        data: workbook
+      };
+
+    } catch (error) {
+      console.error('Error al generar reporte de errores:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al generar reporte de errores'
+      };
+    }
+  }
+
+  /**
+   * Obtener color para tipo de error
+   */
+  private static getErrorColor(tipoError: string): string {
+    const colores = {
+      'UUID_INVALIDO': 'FFCDD2',
+      'ESTABLECIMIENTO_NO_ENCONTRADO': 'FFE0B2',
+      'MES_INVALIDO': 'F3E5F5',
+      'ANIO_INVALIDO': 'E1F5FE',
+      'ERROR_BD': 'FFEBEE',
+      'DATOS_FALTANTES': 'F9FBE7'
+    };
+    return colores[tipoError as keyof typeof colores] || 'FFFFFF';
   }
 }

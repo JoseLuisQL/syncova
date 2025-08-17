@@ -372,4 +372,199 @@ export class MovimientosService {
       throw handleApiError(error as AxiosError);
     }
   }
+
+  /**
+   * Descargar plantilla Excel para importación por vacuna específica
+   */
+  static async descargarPlantillaVacuna(vacunaId: string, anio: number): Promise<boolean> {
+    try {
+      logger.debug('Descargando plantilla de vacuna:', { vacunaId, anio });
+
+      const response = await apiClient.get(
+        `${this.BASE_PATH}/plantilla/vacuna/${vacunaId}/anio/${anio}`,
+        {
+          responseType: 'blob'
+        }
+      );
+
+      // Crear blob y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `plantilla_movimientos_${vacunaId}_${anio}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      logger.debug('Plantilla de vacuna descargada exitosamente');
+      return true;
+    } catch (error) {
+      logger.error('Error al descargar plantilla de vacuna:', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
+
+  /**
+   * Descargar plantilla Excel masiva para todas las vacunas
+   */
+  static async descargarPlantillaMasiva(anio: number): Promise<boolean> {
+    try {
+      logger.debug('Descargando plantilla masiva:', { anio });
+
+      const response = await apiClient.get(
+        `${this.BASE_PATH}/plantilla/masiva/anio/${anio}`,
+        {
+          responseType: 'blob'
+        }
+      );
+
+      // Crear blob y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `plantilla_movimientos_masiva_${anio}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      logger.debug('Plantilla masiva descargada exitosamente');
+      return true;
+    } catch (error) {
+      logger.error('Error al descargar plantilla masiva:', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
+
+  /**
+   * Importar movimientos desde archivo Excel por vacuna específica
+   */
+  static async importarDesdeExcelVacuna(
+    vacunaId: string,
+    anio: number,
+    archivo: File
+  ): Promise<{
+    creadas: number;
+    actualizadas: number;
+    errores: string[];
+  }> {
+    try {
+      logger.debug('Importando desde Excel por vacuna:', { vacunaId, anio, archivo: archivo.name });
+
+      const formData = new FormData();
+      formData.append('archivo', archivo);
+
+      const response = await apiClient.post<ApiResponse<{
+        creadas: number;
+        actualizadas: number;
+        errores: string[];
+      }>>(`${this.BASE_PATH}/importar/vacuna/${vacunaId}/anio/${anio}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        timeout: 300000 // 5 minutos para importaciones
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al importar desde Excel');
+      }
+
+      logger.debug('Importación por vacuna completada:', response.data.data);
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al importar desde Excel por vacuna:', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
+
+  /**
+   * Importar movimientos masivos desde archivo Excel (múltiples hojas)
+   */
+  static async importarDesdeExcelMasivo(
+    anio: number,
+    archivo: File
+  ): Promise<{
+    totalCreadas: number;
+    totalActualizadas: number;
+    erroresPorVacuna: { vacuna: string; errores: string[] }[];
+    vacunasProcesadas: number;
+  }> {
+    try {
+      logger.debug('Importando masivamente desde Excel:', { anio, archivo: archivo.name });
+
+      const formData = new FormData();
+      formData.append('archivo', archivo);
+
+      const response = await apiClient.post<ApiResponse<{
+        totalCreadas: number;
+        totalActualizadas: number;
+        erroresPorVacuna: { vacuna: string; errores: string[] }[];
+        vacunasProcesadas: number;
+      }>>(`${this.BASE_PATH}/importar/masivo/anio/${anio}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        timeout: 600000 // 10 minutos para importaciones masivas
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al importar masivamente desde Excel');
+      }
+
+      logger.debug('Importación masiva completada:', response.data.data);
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al importar masivamente desde Excel:', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
+
+  /**
+   * Generar reporte de errores en Excel
+   */
+  static async generarReporteErrores(erroresPorVacuna: any[]): Promise<boolean> {
+    try {
+      logger.debug('Generando reporte de errores:', { totalVacunas: erroresPorVacuna.length });
+
+      const response = await apiClient.post(
+        `${this.BASE_PATH}/reporte-errores`,
+        { erroresPorVacuna },
+        {
+          responseType: 'blob'
+        }
+      );
+
+      // Crear blob y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      link.download = `reporte_errores_importacion_${timestamp}.xlsx`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      logger.debug('Reporte de errores generado exitosamente');
+      return true;
+    } catch (error) {
+      logger.error('Error al generar reporte de errores:', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
 }

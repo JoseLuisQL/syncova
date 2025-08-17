@@ -3,6 +3,7 @@ import { MovimientosService, MovimientosFilters, CreateMovimientoDto, UpdateMovi
 import { ResponseUtil } from '@/utils/response';
 import { validateUUID } from '@/utils/validation';
 import { prisma } from '@/config/database';
+import { successResponse, errorResponse } from '@/utils/response';
 
 /**
  * Controlador para gestión de movimientos de vacunas
@@ -507,6 +508,284 @@ export class MovimientosController {
     } catch (error) {
       console.error('Error al sincronizar saldo anterior:', error);
       ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Descargar plantilla Excel para importación por vacuna específica
+   * GET /api/movimientos/plantilla/vacuna/:vacunaId/anio/:anio
+   */
+  static async descargarPlantillaVacuna(req: Request, res: Response): Promise<void> {
+    try {
+      const { vacunaId, anio } = req.params;
+
+      // Validaciones
+      if (!validateUUID(vacunaId)) {
+        errorResponse(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      const result = await MovimientosService.generarPlantillaVacuna(vacunaId, anioNum);
+
+      if (!result.success) {
+        errorResponse(res, result.error || 'Error al generar plantilla', 400);
+        return;
+      }
+
+      // Configurar headers para descarga de archivo Excel
+      const filename = `plantilla_movimientos_${vacunaId}_${anioNum}.xlsx`;
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+      // Escribir el workbook al response
+      await result.data!.xlsx.write(res);
+      res.end();
+
+    } catch (error) {
+      console.error('Error en MovimientosController.descargarPlantillaVacuna:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Descargar plantilla Excel masiva para todas las vacunas
+   * GET /api/movimientos/plantilla/masiva/anio/:anio
+   */
+  static async descargarPlantillaMasiva(req: Request, res: Response): Promise<void> {
+    try {
+      const { anio } = req.params;
+
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      const result = await MovimientosService.generarPlantillaMasiva(anioNum);
+
+      if (!result.success) {
+        errorResponse(res, result.error || 'Error al generar plantilla masiva', 400);
+        return;
+      }
+
+      // Configurar headers para descarga de archivo Excel
+      const filename = `plantilla_movimientos_masiva_${anioNum}.xlsx`;
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+      // Escribir el workbook al response
+      await result.data!.xlsx.write(res);
+      res.end();
+
+    } catch (error) {
+      console.error('Error en MovimientosController.descargarPlantillaMasiva:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Importar movimientos desde archivo Excel por vacuna específica
+   * POST /api/movimientos/importar/vacuna/:vacunaId/anio/:anio
+   */
+  static async importarDesdeExcelVacuna(req: Request, res: Response): Promise<void> {
+    try {
+      const { vacunaId, anio } = req.params;
+
+      // Validaciones
+      if (!validateUUID(vacunaId)) {
+        errorResponse(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      if (!req.file) {
+        errorResponse(res, 'No se ha subido ningún archivo', 400);
+        return;
+      }
+
+      // Verificar tipo de archivo
+      if (!req.file.mimetype.includes('spreadsheet') && !req.file.originalname.endsWith('.xlsx')) {
+        errorResponse(res, 'El archivo debe ser un Excel (.xlsx)', 400);
+        return;
+      }
+
+      const result = await MovimientosService.importarDesdeExcelVacuna(
+        vacunaId,
+        anioNum,
+        req.file.buffer
+      );
+
+      if (!result.success) {
+        errorResponse(res, result.error || 'Error al importar desde Excel', 400);
+        return;
+      }
+
+      successResponse(res, result.data, 'Movimientos importados exitosamente desde Excel');
+
+    } catch (error) {
+      console.error('Error en MovimientosController.importarDesdeExcelVacuna:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Debug plantilla Excel - mostrar primeras filas
+   * POST /api/movimientos/debug-plantilla/anio/:anio
+   */
+  static async debugPlantilla(req: Request, res: Response): Promise<void> {
+    try {
+      const { anio } = req.params;
+
+      if (!req.file) {
+        errorResponse(res, 'No se ha subido ningún archivo', 400);
+        return;
+      }
+
+      const result = await MovimientosService.debugPlantillaExcel(req.file.buffer);
+
+      if (!result.success) {
+        errorResponse(res, result.error || 'Error al hacer debug de plantilla', 400);
+        return;
+      }
+
+      successResponse(res, result.data, 'Debug de plantilla completado');
+
+    } catch (error) {
+      console.error('Error en MovimientosController.debugPlantilla:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Validar plantilla Excel antes de importar
+   * POST /api/movimientos/validar-plantilla/anio/:anio
+   */
+  static async validarPlantilla(req: Request, res: Response): Promise<void> {
+    try {
+      const { anio } = req.params;
+
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      if (!req.file) {
+        errorResponse(res, 'No se ha subido ningún archivo', 400);
+        return;
+      }
+
+      // Verificar tipo de archivo
+      if (!req.file.mimetype.includes('spreadsheet') && !req.file.originalname.endsWith('.xlsx')) {
+        errorResponse(res, 'El archivo debe ser un Excel (.xlsx)', 400);
+        return;
+      }
+
+      const result = await MovimientosService.validarPlantillaExcel(
+        anioNum,
+        req.file.buffer
+      );
+
+      if (!result.success) {
+        errorResponse(res, result.error || 'Error al validar plantilla', 400);
+        return;
+      }
+
+      successResponse(res, result.data, 'Plantilla validada exitosamente');
+
+    } catch (error) {
+      console.error('Error en MovimientosController.validarPlantilla:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Importar movimientos masivos desde archivo Excel (múltiples hojas)
+   * POST /api/movimientos/importar/masivo/anio/:anio
+   */
+  static async importarDesdeExcelMasivo(req: Request, res: Response): Promise<void> {
+    try {
+      const { anio } = req.params;
+
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      if (!req.file) {
+        errorResponse(res, 'No se ha subido ningún archivo', 400);
+        return;
+      }
+
+      // Verificar tipo de archivo
+      if (!req.file.mimetype.includes('spreadsheet') && !req.file.originalname.endsWith('.xlsx')) {
+        errorResponse(res, 'El archivo debe ser un Excel (.xlsx)', 400);
+        return;
+      }
+
+      const result = await MovimientosService.importarDesdeExcelMasivo(
+        anioNum,
+        req.file.buffer
+      );
+
+      if (!result.success) {
+        errorResponse(res, result.error || 'Error al importar masivamente desde Excel', 400);
+        return;
+      }
+
+      successResponse(res, result.data, 'Movimientos importados masivamente exitosamente desde Excel');
+
+    } catch (error) {
+      console.error('Error en MovimientosController.importarDesdeExcelMasivo:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Generar reporte de errores en Excel
+   * POST /api/movimientos/reporte-errores
+   */
+  static async generarReporteErrores(req: Request, res: Response): Promise<void> {
+    try {
+      const { erroresPorVacuna } = req.body;
+
+      if (!erroresPorVacuna || !Array.isArray(erroresPorVacuna)) {
+        errorResponse(res, 'Datos de errores requeridos', 400);
+        return;
+      }
+
+      const result = await MovimientosService.generarReporteErrores(erroresPorVacuna);
+
+      if (!result.success) {
+        errorResponse(res, result.error || 'Error al generar reporte de errores', 400);
+        return;
+      }
+
+      // Configurar headers para descarga de archivo Excel
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      const filename = `reporte_errores_importacion_${timestamp}.xlsx`;
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+      // Escribir el workbook al response
+      await result.data!.xlsx.write(res);
+      res.end();
+
+    } catch (error) {
+      console.error('Error en MovimientosController.generarReporteErrores:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
     }
   }
 }

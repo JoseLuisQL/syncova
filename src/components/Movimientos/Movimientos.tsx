@@ -28,7 +28,8 @@ import {
   Calculator,
   Loader2,
   Save,
-  Receipt
+  Receipt,
+  Upload
 } from 'lucide-react';
 import {
   Establecimiento,
@@ -56,6 +57,7 @@ import {
 } from '../../utils/centroAcopioUtils';
 import Vales from '../Vales/Vales';
 import ValesErrorBoundary from '../Vales/ValesErrorBoundary';
+import ImportarModal from './ImportarModal';
 
 const Movimientos: React.FC = () => {
   // Hooks para gestión de datos
@@ -73,7 +75,14 @@ const Movimientos: React.FC = () => {
     updateEntregaAdicional,
     deleteEntregaAdicional,
     calcularCamposDerivados,
-    sincronizarSaldoAnterior
+    sincronizarSaldoAnterior,
+    descargarPlantillaVacuna,
+    descargarPlantillaMasiva,
+    importarDesdeExcelVacuna,
+    importarDesdeExcelMasivo,
+    generarReporteErrores,
+    isDownloadingTemplate,
+    isImportingExcel
   } = useMovimientos();
 
   const {
@@ -148,6 +157,9 @@ const Movimientos: React.FC = () => {
 
   // Estado para modal de vales
   const [showValesModal, setShowValesModal] = useState<boolean>(false);
+
+  // Estado para modal de importación
+  const [showImportarModal, setShowImportarModal] = useState<boolean>(false);
 
   // Estados para stock disponible
   const [stockInfo, setStockInfo] = useState<{
@@ -975,6 +987,14 @@ const Movimientos: React.FC = () => {
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
             Actualizar
+          </button>
+          <button
+            onClick={() => setShowImportarModal(true)}
+            className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+            title="Importar movimientos desde Excel"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Importar Movimientos
           </button>
           <button
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -1985,6 +2005,44 @@ const Movimientos: React.FC = () => {
             </ValesErrorBoundary>
           </div>
         </div>
+      )}
+
+      {/* Modal de Importación */}
+      {showImportarModal && (
+        <ImportarModal
+          isOpen={showImportarModal}
+          onClose={() => setShowImportarModal(false)}
+          vacunas={vacunasActivas}
+          onDescargarPlantillaVacuna={descargarPlantillaVacuna}
+          onDescargarPlantillaMasiva={descargarPlantillaMasiva}
+          onImportarVacuna={async (vacunaId: string, anio: number, archivo: File) => {
+            const resultado = await importarDesdeExcelVacuna(vacunaId, anio, archivo);
+            if (resultado) {
+              const { creadas, actualizadas, errores } = resultado;
+              if (errores.length === 0) {
+                toast.success(`Importación exitosa: ${creadas} creados, ${actualizadas} actualizados`);
+              } else {
+                toast.warning(`Importación con errores: ${creadas} creados, ${actualizadas} actualizados, ${errores.length} errores`);
+              }
+            }
+            return resultado;
+          }}
+          onImportarMasivo={async (anio: number, archivo: File) => {
+            const resultado = await importarDesdeExcelMasivo(anio, archivo);
+            if (resultado) {
+              const { totalCreadas, totalActualizadas, erroresPorVacuna, vacunasProcesadas } = resultado;
+              if (erroresPorVacuna.length === 0) {
+                toast.success(`Importación masiva exitosa: ${totalCreadas} creados, ${totalActualizadas} actualizados en ${vacunasProcesadas} vacunas`);
+              } else {
+                toast.warning(`Importación masiva con errores: ${totalCreadas} creados, ${totalActualizadas} actualizados, ${erroresPorVacuna.length} vacunas con errores`);
+              }
+            }
+            return resultado;
+          }}
+          onGenerarReporteErrores={generarReporteErrores}
+          isDownloadingTemplate={isDownloadingTemplate}
+          isImportingExcel={isImportingExcel}
+        />
       )}
     </div>
   );

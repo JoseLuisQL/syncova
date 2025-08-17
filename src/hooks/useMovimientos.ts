@@ -358,6 +358,127 @@ export const useMovimientos = () => {
     };
   }, []);
 
+  // Estados para importación
+  const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
+  const [isImportingExcel, setIsImportingExcel] = useState(false);
+
+  // API calls para importación
+  const descargarPlantillaVacunaApi = useApi();
+  const descargarPlantillaMasivaApi = useApi();
+  const importarExcelVacunaApi = useApi();
+  const importarExcelMasivoApi = useApi();
+
+  /**
+   * Descargar plantilla Excel para importación por vacuna específica
+   */
+  const descargarPlantillaVacuna = useCallback(async (
+    vacunaId: string,
+    anio: number
+  ): Promise<boolean> => {
+    logger.debug('Descargando plantilla de vacuna:', { vacunaId, anio });
+
+    setIsDownloadingTemplate(true);
+    const result = await descargarPlantillaVacunaApi.execute(() =>
+      MovimientosService.descargarPlantillaVacuna(vacunaId, anio)
+    );
+    setIsDownloadingTemplate(false);
+
+    return result || false;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * Descargar plantilla Excel masiva para todas las vacunas
+   */
+  const descargarPlantillaMasiva = useCallback(async (
+    anio: number
+  ): Promise<boolean> => {
+    logger.debug('Descargando plantilla masiva:', { anio });
+
+    setIsDownloadingTemplate(true);
+    const result = await descargarPlantillaMasivaApi.execute(() =>
+      MovimientosService.descargarPlantillaMasiva(anio)
+    );
+    setIsDownloadingTemplate(false);
+
+    return result || false;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * Importar desde Excel por vacuna específica
+   */
+  const importarDesdeExcelVacuna = useCallback(async (
+    vacunaId: string,
+    anio: number,
+    archivo: File
+  ): Promise<{
+    creadas: number;
+    actualizadas: number;
+    errores: string[];
+  } | null> => {
+    logger.debug('Importando desde Excel por vacuna:', { vacunaId, anio, archivo: archivo.name });
+
+    setIsImportingExcel(true);
+    const result = await importarExcelVacunaApi.execute(() =>
+      MovimientosService.importarDesdeExcelVacuna(vacunaId, anio, archivo)
+    );
+    setIsImportingExcel(false);
+
+    if (result) {
+      // Recargar la lista después de importar
+      await loadMovimientos();
+      return result;
+    }
+
+    return null;
+  }, [loadMovimientos]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * Importar masivamente desde Excel
+   */
+  const importarDesdeExcelMasivo = useCallback(async (
+    anio: number,
+    archivo: File
+  ): Promise<{
+    totalCreadas: number;
+    totalActualizadas: number;
+    erroresPorVacuna: { vacuna: string; errores: string[] }[];
+    vacunasProcesadas: number;
+  } | null> => {
+    logger.debug('Importando masivamente desde Excel:', { anio, archivo: archivo.name });
+
+    setIsImportingExcel(true);
+    const result = await importarExcelMasivoApi.execute(() =>
+      MovimientosService.importarDesdeExcelMasivo(anio, archivo)
+    );
+    setIsImportingExcel(false);
+
+    if (result) {
+      // Recargar la lista después de importar
+      await loadMovimientos();
+      return result;
+    }
+
+    return null;
+  }, [loadMovimientos]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // API call para reporte de errores
+  const generarReporteErroresApi = useApi();
+
+  /**
+   * Generar reporte de errores en Excel
+   */
+  const generarReporteErrores = useCallback(async (
+    erroresPorVacuna: any[]
+  ): Promise<boolean> => {
+    logger.debug('Generando reporte de errores:', { totalVacunas: erroresPorVacuna.length });
+
+    const result = await generarReporteErroresApi.execute(() =>
+      MovimientosService.generarReporteErrores(erroresPorVacuna)
+    );
+
+    return result || false;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return {
     // Datos
     movimientos,
@@ -376,6 +497,8 @@ export const useMovimientos = () => {
     isCreatingEntrega,
     isUpdatingEntrega,
     isDeletingEntrega,
+    isDownloadingTemplate,
+    isImportingExcel,
 
     // Errores
     error,
@@ -404,6 +527,13 @@ export const useMovimientos = () => {
     createEntregaAdicional,
     updateEntregaAdicional,
     deleteEntregaAdicional,
+
+    // Importación
+    descargarPlantillaVacuna,
+    descargarPlantillaMasiva,
+    importarDesdeExcelVacuna,
+    importarDesdeExcelMasivo,
+    generarReporteErrores,
 
     // Utilidades
     refresh,

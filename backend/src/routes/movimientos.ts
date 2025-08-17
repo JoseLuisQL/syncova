@@ -1,10 +1,91 @@
 import { Router } from 'express';
 import { MovimientosController } from '@/controllers/MovimientosController';
+import { uploadSingleExcel, handleUploadError } from '@/middleware/upload';
 
 /**
  * Rutas para gestión de movimientos de vacunas
  */
 const router = Router();
+
+/**
+ * @route GET /api/movimientos/plantilla/vacuna/:vacunaId/anio/:anio
+ * @desc Descargar plantilla Excel para importación por vacuna específica
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {string} vacunaId - ID de la vacuna
+ * @param {number} anio - Año de movimientos
+ */
+router.get('/plantilla/vacuna/:vacunaId/anio/:anio', MovimientosController.descargarPlantillaVacuna);
+
+/**
+ * @route GET /api/movimientos/plantilla/masiva/anio/:anio
+ * @desc Descargar plantilla Excel masiva para todas las vacunas
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {number} anio - Año de movimientos
+ */
+router.get('/plantilla/masiva/anio/:anio', MovimientosController.descargarPlantillaMasiva);
+
+/**
+ * @route POST /api/movimientos/importar/vacuna/:vacunaId/anio/:anio
+ * @desc Importar movimientos desde archivo Excel por vacuna específica
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {string} vacunaId - ID de la vacuna
+ * @param {number} anio - Año de movimientos
+ * @body {file} archivo - Archivo Excel con los movimientos
+ */
+router.post('/importar/vacuna/:vacunaId/anio/:anio',
+  uploadSingleExcel,
+  handleUploadError,
+  MovimientosController.importarDesdeExcelVacuna
+);
+
+/**
+ * @route POST /api/movimientos/debug-plantilla/anio/:anio
+ * @desc Debug plantilla Excel - mostrar primeras filas
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {number} anio - Año de movimientos
+ * @body {file} archivo - Archivo Excel para debug
+ */
+router.post('/debug-plantilla/anio/:anio',
+  uploadSingleExcel,
+  handleUploadError,
+  MovimientosController.debugPlantilla
+);
+
+/**
+ * @route POST /api/movimientos/validar-plantilla/anio/:anio
+ * @desc Validar plantilla Excel antes de importar
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {number} anio - Año de movimientos
+ * @body {file} archivo - Archivo Excel para validar
+ */
+router.post('/validar-plantilla/anio/:anio',
+  uploadSingleExcel,
+  handleUploadError,
+  MovimientosController.validarPlantilla
+);
+
+/**
+ * @route POST /api/movimientos/importar/masivo/anio/:anio
+ * @desc Importar movimientos masivos desde archivo Excel (múltiples hojas)
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {number} anio - Año de movimientos
+ * @body {file} archivo - Archivo Excel con múltiples hojas de movimientos
+ */
+router.post('/importar/masivo/anio/:anio',
+  uploadSingleExcel,
+  handleUploadError,
+  MovimientosController.importarDesdeExcelMasivo
+);
+
+/**
+ * @route POST /api/movimientos/reporte-errores
+ * @desc Generar reporte de errores en Excel
+ * @access Public (TODO: Proteger con autenticación)
+ * @body {object} erroresPorVacuna - Datos de errores por vacuna
+ */
+router.post('/reporte-errores',
+  MovimientosController.generarReporteErrores
+);
 
 /**
  * @route GET /api/movimientos/estadisticas
