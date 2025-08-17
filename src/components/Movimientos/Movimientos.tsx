@@ -1391,7 +1391,49 @@ const Movimientos: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                datosTabla.map((movimiento) => {
+                <>
+                  {/* TOTALES ROW - Positioned immediately after headers */}
+                  <tr className="bg-gray-50 border-t-2 border-gray-300 border-b-2">
+                    <td className="px-6 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">
+                      TOTALES ({datosTabla.length} establecimientos)
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
+                      {totalesGenerales.saldoAnterior.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
+                      {totalesGenerales.transIngreso.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm font-bold text-blue-600 border-r border-gray-200">
+                      {totalesGenerales.totalSaldo.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
+                      {totalesGenerales.salida.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
+                      {totalesGenerales.transSalida.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm font-bold text-green-600 border-r border-gray-200">
+                      {totalesGenerales.saldo.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm font-bold text-emerald-600 border-r border-gray-200">
+                      {totalesGenerales.entrega.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
+                      {totalesGenerales.stock.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
+                      -
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
+                      -
+                    </td>
+                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900">
+                      -
+                    </td>
+                  </tr>
+
+                  {/* Health establishments data rows */}
+                  {datosTabla.map((movimiento) => {
                   // Obtener estilo profesional basado en centro de acopio
                   const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento);
                   const { colores, icono, centro } = estiloEstablecimiento;
@@ -1628,50 +1670,11 @@ const Movimientos: React.FC = () => {
                   </tr>
                   );
                 })
+                }
+                </>
               )}
             </tbody>
-            {datosTabla.length > 0 && (
-              <tfoot className="bg-gray-50">
-                <tr className="border-t-2 border-gray-300">
-                  <td className="px-6 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">
-                    TOTALES ({datosTabla.length} establecimientos)
-                  </td>
-                  <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                    {totalesGenerales.saldoAnterior.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                    {totalesGenerales.transIngreso.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-4 text-center text-sm font-bold text-blue-600 border-r border-gray-200">
-                    {totalesGenerales.totalSaldo.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                    {totalesGenerales.salida.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                    {totalesGenerales.transSalida.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-4 text-center text-sm font-bold text-green-600 border-r border-gray-200">
-                    {totalesGenerales.saldo.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-4 text-center text-sm font-bold text-emerald-600 border-r border-gray-200">
-                    {totalesGenerales.entrega.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                    {totalesGenerales.stock.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                    -
-                  </td>
-                  <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                    -
-                  </td>
-                  <td className="px-4 py-4 text-center text-sm font-bold text-gray-900">
-                    -
-                  </td>
-                </tr>
-              </tfoot>
-            )}
+
           </table>
         </div>
       </div>
