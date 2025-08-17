@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Plus, Search, Package, Syringe, AlertTriangle, CheckCircle, Clock, FileText, Settings, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Package, Syringe, AlertTriangle, CheckCircle, Clock, FileText, Settings, Edit, Trash2, Link } from 'lucide-react';
 import { Vacuna, Lote, Jeringa, LoteJeringa } from '../../types';
 import NuevoIngreso from './NuevoIngreso';
 import LotesVacunasPage from './LotesVacunasPage';
 import LotesJeringasPage from './LotesJeringasPage';
 import GestionVacunas from './GestionVacunas';
 import GestionJeringas from './GestionJeringas';
+import ConfiguracionJeringas from './ConfiguracionJeringas';
 import { useVacunas } from '../../hooks/useVacunas';
 import { useJeringas } from '../../hooks/useJeringas';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
@@ -61,6 +62,7 @@ const Inventario: React.FC = () => {
     { id: 'jeringas', label: 'Catálogo de Jeringas', icon: Syringe, path: '/inventario/jeringas' },
     { id: 'lotes-vacunas', label: 'Lotes de Vacunas', icon: Package, path: '/inventario/lotes-vacunas' },
     { id: 'lotes-jeringas', label: 'Lotes de Jeringas', icon: Syringe, path: '/inventario/lotes-jeringas' },
+    { id: 'configuracion-jeringas', label: 'Configuración Jeringas', icon: Link, path: '/inventario/configuracion-jeringas' },
     { id: 'recepcion', label: 'Nuevo Ingreso', icon: Plus, path: '/inventario/recepcion' },
   ];
 
@@ -128,6 +130,7 @@ const Inventario: React.FC = () => {
         <Route path="jeringas" element={<GestionJeringas />} />
         <Route path="lotes-vacunas" element={<LotesVacunasPage />} />
         <Route path="lotes-jeringas" element={<LotesJeringasPage />} />
+        <Route path="configuracion-jeringas" element={<ConfiguracionJeringas />} />
         <Route path="recepcion" element={<RecepcionTab onNuevoIngreso={() => setShowNuevoIngreso(true)} />} />
       </Routes>
 

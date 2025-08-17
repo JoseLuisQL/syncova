@@ -2,6 +2,7 @@ import { prisma } from '@/config/database';
 import { ServiceResult } from '@/types';
 import { createError } from '@/utils/errors';
 import { EstadoVale, TipoMovimientoKardex, TipoVale } from '@prisma/client';
+import { ConfiguracionJeringaVacunaService } from './ConfiguracionJeringaVacunaService';
 
 /**
  * Interface para modificaciones de vale
@@ -645,27 +646,158 @@ export class ValeService {
   }
 
   /**
-   * Afectar stock de lotes de jeringas (calculado por dosis)
+   * Afectar stock de lotes de jeringas (calculado por configuración)
    */
   private static async afectarStockJeringas(
     tx: any,
     vacunaId: string,
     cantidadVacunas: number,
     valeNumero: string,
-    usuarioId: string
+    usuarioId: string,
+    centroAcopioId?: string
   ): Promise<StockAfectacion[]> {
-    // Obtener información de la vacuna para calcular jeringas necesarias
-    const vacuna = await tx.vacuna.findUnique({
-      where: { id: vacunaId },
-      select: { dosisPorFrasco: true }
+    // Obtener configuración efectiva de jeringas para esta vacuna
+    const configResult = await ConfiguracionJeringaVacunaService.calcularJeringasNecesarias(
+      vacunaId,
+      cantidadVacunas,
+      centroAcopioId
+    );
+
+    if (!configResult.success || !configResult.data || configResult.data.length === 0) {
+      // Fallback al comportamiento anterior si no hay configuración
+      const vacuna = await tx.vacuna.findUnique({
+        where: { id: vacunaId },
+        select: { dosisPorFrasco: true }
+      });
+
+      if (!vacuna) return [];
+
+      // Usar configuración por defecto (1 jeringa por dosis)
+      const jeringasNecesarias = cantidadVacunas * vacuna.dosisPorFrasco;
+      return await this.afectarStockJeringasLegacy(tx, jeringasNecesarias, valeNumero, usuarioId, vacunaId);
+    }
+
+    const stocksAfectados: StockAfectacion[] = [];
+
+    // Procesar cada tipo de jeringa según la configuración
+    for (const jeringaConfig of configResult.data) {
+      const stocksJeringa = await this.afectarStockJeringaEspecifica(
+        tx,
+        jeringaConfig.jeringaId,
+        jeringaConfig.cantidad,
+        valeNumero,
+        usuarioId,
+        vacunaId,
+        jeringaConfig.multiplicador
+      );
+      stocksAfectados.push(...stocksJeringa);
+    }
+
+    return stocksAfectados;
+  }
+
+  /**
+   * Afectar stock de una jeringa específica
+   */
+  private static async afectarStockJeringaEspecifica(
+    tx: any,
+    jeringaId: string,
+    cantidadNecesaria: number,
+    valeNumero: string,
+    usuarioId: string,
+    vacunaId: string,
+    multiplicador: number
+  ): Promise<StockAfectacion[]> {
+
+    // Obtener lotes de la jeringa específica disponibles (FIFO)
+    const lotesJeringas = await tx.loteJeringa.findMany({
+      where: {
+        jeringaId: jeringaId,
+        estado: 'disponible',
+        cantidadActual: { gt: 0 }
+      },
+      orderBy: [
+        { fechaVencimiento: 'asc' },
+        { fechaIngreso: 'asc' }
+      ]
     });
 
-    if (!vacuna) return [];
+    const stocksAfectados: StockAfectacion[] = [];
+    let jeringasRestantes = cantidadNecesaria;
 
-    // Calcular jeringas necesarias (1 jeringa por dosis)
-    const jeringasNecesarias = cantidadVacunas * vacuna.dosisPorFrasco;
+    for (const lote of lotesJeringas) {
+      if (jeringasRestantes <= 0) break;
 
-    // Obtener lotes de jeringas disponibles (FIFO)
+      const cantidadAfectar = Math.min(lote.cantidadActual, jeringasRestantes);
+      const saldoAnterior = lote.cantidadActual;
+      const saldoNuevo = saldoAnterior - cantidadAfectar;
+
+      // Actualizar lote de jeringas
+      await tx.loteJeringa.update({
+        where: { id: lote.id },
+        data: {
+          cantidadActual: saldoNuevo,
+          estado: saldoNuevo === 0 ? 'agotado' : 'disponible'
+        }
+      });
+
+      // Registrar en kardex
+      await tx.kardex.create({
+        data: {
+          tipo: 'jeringa',
+          itemId: lote.jeringaId,
+          loteId: lote.id,
+          tipoMovimiento: TipoMovimientoKardex.salida,
+          cantidad: cantidadAfectar,
+          saldoAnterior,
+          saldoActual: saldoNuevo,
+          documento: 'VALE_ENTREGA',
+          numeroDocumento: valeNumero,
+          observaciones: `Salida por vale de entrega ${valeNumero} - Vacuna: ${vacunaId} (Multiplicador: ${multiplicador})`,
+          usuarioId,
+          fechaMovimiento: new Date()
+        }
+      });
+
+      stocksAfectados.push({
+        loteId: lote.id,
+        cantidadAfectada: cantidadAfectar,
+        saldoAnterior,
+        saldoNuevo
+      });
+
+      jeringasRestantes -= cantidadAfectar;
+    }
+
+    if (jeringasRestantes > 0) {
+      // Obtener información de la jeringa para el mensaje de error
+      const jeringa = await tx.jeringa.findUnique({
+        where: { id: jeringaId },
+        select: { tipo: true, capacidad: true }
+      });
+
+      const jeringaInfo = jeringa ? `${jeringa.tipo} ${jeringa.capacidad}` : 'jeringa específica';
+
+      throw createError(
+        `Stock insuficiente de ${jeringaInfo}. Requerido: ${cantidadNecesaria}, Disponible: ${cantidadNecesaria - jeringasRestantes}`,
+        400
+      );
+    }
+
+    return stocksAfectados;
+  }
+
+  /**
+   * Método legacy para compatibilidad con el comportamiento anterior
+   */
+  private static async afectarStockJeringasLegacy(
+    tx: any,
+    jeringasNecesarias: number,
+    valeNumero: string,
+    usuarioId: string,
+    vacunaId: string
+  ): Promise<StockAfectacion[]> {
+    // Obtener lotes de jeringas disponibles (FIFO) - cualquier jeringa
     const lotesJeringas = await tx.loteJeringa.findMany({
       where: {
         estado: 'disponible',
@@ -708,7 +840,7 @@ export class ValeService {
           saldoActual: saldoNuevo,
           documento: 'VALE_ENTREGA',
           numeroDocumento: valeNumero,
-          observaciones: `Salida por vale de entrega ${valeNumero} - Vacuna: ${vacunaId}`,
+          observaciones: `Salida por vale de entrega ${valeNumero} - Vacuna: ${vacunaId} (Legacy)`,
           usuarioId,
           fechaMovimiento: new Date()
         }
@@ -865,7 +997,8 @@ export class ValeService {
                     movimiento.vacunaId,
                     cantidadTotalParaVale,
                     numeroVale,
-                    usuarioIdFinal
+                    usuarioIdFinal,
+                    data.centroAcopioId
                   );
                   stocksAfectadosJeringas.push(...stockJeringas);
                 } catch (stockError) {
@@ -1661,7 +1794,8 @@ export class ValeService {
                     modificacion.vacunaId,
                     modificacion.diferencia,
                     valeExistente.numero,
-                    usuarioId
+                    usuarioId,
+                    valeExistente.centroAcopioId
                   );
                   stocksAfectadosJeringas.push(...stockJeringas);
                 } else {

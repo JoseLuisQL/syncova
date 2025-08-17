@@ -144,6 +144,7 @@ model CentroAcopio {
   microred        Microred?         @relation(fields: [microredId], references: [id])
   establecimientos Establecimiento[]
   valesEntrega    ValeEntrega[]
+  configuracionesJeringaVacuna ConfiguracionJeringaVacunaCentro[]
 
   @@unique([nombre, microredId], name: "uk_centro_acopio_nombre_microred")
   @@map("centros_acopio")
@@ -191,6 +192,8 @@ model Vacuna {
   planificaciones           PlanificacionAnual[]
   movimientos               MovimientoVacuna[]
   valesDetalle              ValeDetalle[]
+  configuracionesDefecto    ConfiguracionJeringaVacunaDefecto[]
+  configuracionesCentro     ConfiguracionJeringaVacunaCentro[]
 
   @@map("vacunas")
 }
@@ -205,7 +208,9 @@ model Jeringa {
   updatedAt DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   // Relaciones
-  lotes     LoteJeringa[]
+  lotes                     LoteJeringa[]
+  configuracionesDefecto    ConfiguracionJeringaVacunaDefecto[]
+  configuracionesCentro     ConfiguracionJeringaVacunaCentro[]
 
   @@map("jeringas")
 }
@@ -447,4 +452,53 @@ model ConfiguracionSistema {
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("configuracion_sistema")
+}
+
+model ConfiguracionJeringaVacunaDefecto {
+  id           String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  vacunaId     String        @map("vacuna_id") @db.Uuid
+  jeringaId    String        @map("jeringa_id") @db.Uuid
+  multiplicador Decimal      @default(1.0) @db.Decimal(10, 4)
+  prioridad    Int           @default(1)
+  activo       Boolean       @default(true)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  vacuna       Vacuna        @relation(fields: [vacunaId], references: [id], onDelete: Cascade)
+  jeringa      Jeringa       @relation(fields: [jeringaId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([vacunaId, jeringaId], name: "uk_vacuna_jeringa_defecto")
+  @@index([vacunaId], name: "idx_config_defecto_vacuna")
+  @@index([jeringaId], name: "idx_config_defecto_jeringa")
+  @@index([activo], name: "idx_config_defecto_activo")
+  @@index([vacunaId, prioridad], name: "idx_config_defecto_prioridad")
+  @@map("configuracion_jeringa_vacuna_defecto")
+}
+
+model ConfiguracionJeringaVacunaCentro {
+  id              String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  centroAcopioId  String        @map("centro_acopio_id") @db.Uuid
+  vacunaId        String        @map("vacuna_id") @db.Uuid
+  jeringaId       String        @map("jeringa_id") @db.Uuid
+  multiplicador   Decimal       @default(1.0) @db.Decimal(10, 4)
+  prioridad       Int           @default(1)
+  activo          Boolean       @default(true)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  centroAcopio    CentroAcopio  @relation(fields: [centroAcopioId], references: [id], onDelete: Cascade)
+  vacuna          Vacuna        @relation(fields: [vacunaId], references: [id], onDelete: Cascade)
+  jeringa         Jeringa       @relation(fields: [jeringaId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([centroAcopioId, vacunaId, jeringaId], name: "uk_centro_vacuna_jeringa")
+  @@index([centroAcopioId], name: "idx_config_centro_centro")
+  @@index([vacunaId], name: "idx_config_centro_vacuna")
+  @@index([jeringaId], name: "idx_config_centro_jeringa")
+  @@index([activo], name: "idx_config_centro_activo")
+  @@index([centroAcopioId, vacunaId, prioridad], name: "idx_config_centro_prioridad")
+  @@map("configuracion_jeringa_vacuna_centro")
 }

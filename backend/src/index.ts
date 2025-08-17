@@ -4,6 +4,7 @@ import { config } from '@/config/env';
 import { connectDatabase, checkDatabaseHealth } from '@/config/database';
 import { setupMiddlewares, setupErrorHandling, healthCheck } from '@/middleware';
 import configuracionRoutes from '@/routes/configuracion';
+import configuracionJeringaVacunaRoutes from '@/routes/configuracion-jeringa-vacuna';
 import establecimientosRoutes from '@/routes/establecimientos';
 import redesRoutes from '@/routes/redes';
 import microredesRoutes from '@/routes/microredes';
@@ -71,6 +72,7 @@ async function startServer(): Promise<void> {
     // Configurar rutas de la API
     app.use('/api/auth', authRoutes);
     app.use('/api/configuracion', configuracionRoutes);
+    app.use('/api/configuracion-jeringa-vacuna', configuracionJeringaVacunaRoutes);
     app.use('/api/establecimientos', establecimientosRoutes);
     app.use('/api/redes', redesRoutes);
     app.use('/api/microredes', microredesRoutes);

@@ -15,6 +15,7 @@ export type TipoMovimientoKardex = 'ingreso' | 'salida' | 'transferencia' | 'aju
 export type EstadoVale = 'generado' | 'impreso' | 'entregado';
 export type TipoAlerta = 'vencimiento' | 'stock_bajo' | 'discrepancia' | 'sistema';
 export type NivelAlerta = 'info' | 'warning' | 'error' | 'success';
+export type TipoConfiguracion = 'defecto' | 'centro';
 
 // =====================================================
 // INTERFACES DE ENTIDADES
@@ -674,4 +675,95 @@ export interface IValeDetalle {
   cantidadAdicional: number;
   numeroEntregaAdicional?: number;
   createdAt: Date;
+}
+
+// =====================================================
+// INTERFACES PARA CONFIGURACIÓN JERINGA-VACUNA
+// =====================================================
+
+export interface IConfiguracionJeringaVacunaDefecto {
+  id: string;
+  vacunaId: string;
+  jeringaId: string;
+  multiplicador: number;
+  prioridad: number;
+  activo: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  // Relaciones incluidas en respuestas del backend
+  vacuna?: IVacuna;
+  jeringa?: IJeringa;
+}
+
+export interface IConfiguracionJeringaVacunaCentro {
+  id: string;
+  centroAcopioId: string;
+  vacunaId: string;
+  jeringaId: string;
+  multiplicador: number;
+  prioridad: number;
+  activo: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  // Relaciones incluidas en respuestas del backend
+  centroAcopio?: ICentroAcopio;
+  vacuna?: IVacuna;
+  jeringa?: IJeringa;
+}
+
+export interface CreateConfiguracionDefectoDto {
+  vacunaId: string;
+  jeringaId: string;
+  multiplicador: number;
+  prioridad?: number;
+  activo?: boolean;
+}
+
+export interface UpdateConfiguracionDefectoDto {
+  multiplicador?: number;
+  prioridad?: number;
+  activo?: boolean;
+}
+
+export interface CreateConfiguracionCentroDto {
+  centroAcopioId: string;
+  vacunaId: string;
+  jeringaId: string;
+  multiplicador: number;
+  prioridad?: number;
+  activo?: boolean;
+}
+
+export interface UpdateConfiguracionCentroDto {
+  multiplicador?: number;
+  prioridad?: number;
+  activo?: boolean;
+}
+
+export interface ConfiguracionJeringaVacunaFilters {
+  vacunaId?: string;
+  jeringaId?: string;
+  centroAcopioId?: string;
+  activo?: boolean;
+  tipo?: TipoConfiguracion;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface ConfiguracionCalculada {
+  vacunaId: string;
+  jeringaId: string;
+  multiplicador: number;
+  prioridad: number;
+  origen: 'defecto' | 'centro';
+  configuracionId: string;
+}
+
+export interface JeringasCalculadas {
+  jeringaId: string;
+  cantidad: number;
+  multiplicador: number;
+  prioridad: number;
+  origen: 'defecto' | 'centro';
 }
