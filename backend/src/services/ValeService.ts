@@ -122,11 +122,10 @@ export class ValeService {
    * Validar datos para generar vale
    */
   private static async validateGenerarValeData(data: GenerarValeDto): Promise<void> {
-    // Validar centro de acopio
-    const centroAcopio = await prisma.establecimiento.findFirst({
+    // Validar centro de acopio (ahora desde la tabla centros_acopio)
+    const centroAcopio = await prisma.centroAcopio.findFirst({
       where: {
         id: data.centroAcopioId,
-        tipo: 'centro_acopio',
         estado: 'activo'
       }
     });
@@ -208,7 +207,7 @@ export class ValeService {
    * Generar número de vale automático
    */
   private static async generarNumeroVale(centroAcopioId: string, _mes: number, anio: number): Promise<string> {
-    const centroAcopio = await prisma.establecimiento.findUnique({
+    const centroAcopio = await prisma.centroAcopio.findUnique({
       where: { id: centroAcopioId },
       select: { codigo: true }
     });
@@ -442,7 +441,7 @@ export class ValeService {
       }
 
       // Obtener información del centro de acopio
-      const centroAcopio = await prisma.establecimiento.findUnique({
+      const centroAcopio = await prisma.centroAcopio.findUnique({
         where: { id: centroAcopioId },
         select: { id: true, nombre: true, codigo: true }
       });

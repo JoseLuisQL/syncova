@@ -258,7 +258,9 @@ const Vales: React.FC<ValesProps> = ({
 
   const {
     establecimientos,
-    loadEstablecimientos
+    centrosAcopio,
+    loadEstablecimientos,
+    loadCentrosAcopio
   } = useEstablecimientos();
 
   const {
@@ -332,9 +334,22 @@ const Vales: React.FC<ValesProps> = ({
 
   // Cargar datos iniciales
   useEffect(() => {
-    loadEstablecimientos();
-    loadVacunasActivas();
-  }, []);
+    const initializeData = async () => {
+      try {
+        await Promise.all([
+          loadEstablecimientos(),
+          loadCentrosAcopio(), // CORRECCIÓN: Cargar centros de acopio
+          loadVacunasActivas()
+        ]);
+        console.log('✅ Datos iniciales cargados para Vales');
+        console.log(`🏢 Centros de acopio cargados: ${centrosAcopio.length}`);
+      } catch (error) {
+        console.error('❌ Error al cargar datos iniciales:', error);
+      }
+    };
+
+    initializeData();
+  }, []); // Sin dependencias para evitar bucles infinitos
 
   // Cargar vales cuando cambian los filtros (con debounce para búsqueda)
   useEffect(() => {
@@ -371,11 +386,7 @@ const Vales: React.FC<ValesProps> = ({
     }
   }, [isGenerating, generandoVale]);
 
-  // Datos derivados
-  const centrosAcopio = useMemo(() =>
-    establecimientos.filter(e => e.tipo === 'centro_acopio'),
-    [establecimientos]
-  );
+  // Datos derivados - Usar centrosAcopio directamente del hook
 
   const centroAcopioSeleccionado = useMemo(() =>
     centrosAcopio.find(c => c.id === selectedCentroAcopio),
@@ -615,7 +626,7 @@ const Vales: React.FC<ValesProps> = ({
         ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio }),
         mes: selectedMes,
         anio: selectedAnio,
-        ...(selectedEstado !== 'todos' && { estado: selectedEstado }),
+        ...(selectedEstado !== 'todos' && { estado: selectedEstado as any }),
         ...(searchTerm && { search: searchTerm }),
         limit: 100
       };
