@@ -10,7 +10,7 @@ import { clearRateLimitEndpoint } from '@/utils/rateLimitUtils';
  */
 const authRateLimit = rateLimit({
   windowMs: process.env.NODE_ENV === 'development' ? 5 * 60 * 1000 : 15 * 60 * 1000, // 5 min en dev, 15 min en prod
-  max: process.env.NODE_ENV === 'development' ? 50 : 5, // 50 intentos en dev, 5 en prod
+  max: process.env.NODE_ENV === 'development' ? 10000 : 5, // 10000 intentos en dev, 5 en prod
   message: {
     success: false,
     message: process.env.NODE_ENV === 'development'
@@ -28,7 +28,7 @@ const authRateLimit = rateLimit({
 
 const refreshRateLimit = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutos
-  max: process.env.NODE_ENV === 'development' ? 100 : 10, // 100 en dev, 10 en prod
+  max: process.env.NODE_ENV === 'development' ? 10000 : 10, // 10000 en dev, 10 en prod
   message: {
     success: false,
     message: 'Demasiados intentos de refresh. Intente nuevamente en 5 minutos.',
@@ -42,7 +42,7 @@ const refreshRateLimit = rateLimit({
 
 const passwordChangeRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hora
-  max: process.env.NODE_ENV === 'development' ? 20 : 3, // 20 en dev, 3 en prod
+  max: process.env.NODE_ENV === 'development' ? 10000 : 3, // 10000 en dev, 3 en prod
   message: {
     success: false,
     message: 'Demasiados cambios de contraseña. Intente nuevamente en 1 hora.',
@@ -141,14 +141,17 @@ router.get('/health', (req, res) => {
       },
       rateLimits: {
         login: process.env.NODE_ENV === 'development'
-          ? '50 intentos por 5 minutos (desarrollo)'
+          ? '10000 intentos por 5 minutos (desarrollo - límites muy altos)'
           : '5 intentos por 15 minutos (producción)',
         refresh: process.env.NODE_ENV === 'development'
-          ? '100 intentos por 5 minutos (desarrollo)'
+          ? '10000 intentos por 5 minutos (desarrollo - límites muy altos)'
           : '10 intentos por 5 minutos (producción)',
         changePassword: process.env.NODE_ENV === 'development'
-          ? '20 intentos por 1 hora (desarrollo)'
-          : '3 intentos por 1 hora (producción)'
+          ? '10000 intentos por 1 hora (desarrollo - límites muy altos)'
+          : '3 intentos por 1 hora (producción)',
+        global: process.env.NODE_ENV === 'development'
+          ? '1,000,000 requests por 15 minutos (desarrollo - límites muy altos)'
+          : '10000 requests por 15 minutos (producción)'
       },
       developmentFeatures: process.env.NODE_ENV === 'development' ? {
         clearRateLimit: 'POST /api/auth/clear-rate-limit'

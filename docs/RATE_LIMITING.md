@@ -6,11 +6,12 @@ El sistema SIVAC implementa rate limiting para proteger contra ataques de fuerza
 
 ## Configuración
 
-### Desarrollo
-- **Login**: 50 intentos por 5 minutos
-- **Refresh Token**: 100 intentos por 5 minutos  
-- **Cambio de Contraseña**: 20 intentos por 1 hora
-- **Rate Limiting Global**: 1000 requests por 15 minutos
+### Desarrollo (Límites muy altos para desarrollo sin restricciones)
+- **Login**: 10,000 intentos por 5 minutos
+- **Refresh Token**: 10,000 intentos por 5 minutos
+- **Cambio de Contraseña**: 10,000 intentos por 1 hora
+- **Rate Limiting Global**: 1,000,000 requests por 15 minutos
+- **Nota**: En desarrollo, el rate limiting se aplica solo a login, todas las demás rutas están exentas
 
 ### Producción
 - **Login**: 5 intentos por 15 minutos
@@ -84,10 +85,11 @@ Para modificar los límites, edita las variables de entorno:
 ```env
 # Rate limiting global
 RATE_LIMIT_WINDOW_MS=900000  # 15 minutos
-RATE_LIMIT_MAX_REQUESTS=100  # 100 requests
+RATE_LIMIT_MAX_REQUESTS=10000  # 10000 requests en desarrollo, 100 en producción
 
 # Los límites específicos se configuran en el código
-# backend/src/routes/auth.ts
+# backend/src/routes/auth.ts y backend/src/middleware/index.ts
+# En desarrollo: límites 100x más altos y rate limiting solo para login
 ```
 
 ## Monitoreo

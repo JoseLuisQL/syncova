@@ -45,7 +45,7 @@ export const setupMiddlewares = (app: Application): void => {
   // Rate limiting con configuración diferente para desarrollo
   const limiter = rateLimit({
     windowMs: config.rateLimit.windowMs,
-    max: config.env === 'development' ? config.rateLimit.maxRequests * 10 : config.rateLimit.maxRequests, // 10x más en desarrollo
+    max: config.env === 'development' ? config.rateLimit.maxRequests * 100 : config.rateLimit.maxRequests, // 100x más en desarrollo
     message: {
       success: false,
       message: 'Demasiadas solicitudes desde esta IP, intente nuevamente más tarde',
@@ -55,13 +55,15 @@ export const setupMiddlewares = (app: Application): void => {
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => {
-      // Saltar rate limiting para rutas de salud y en desarrollo para ciertas rutas
+      // En desarrollo, saltar rate limiting para casi todas las rutas excepto login
+      if (config.env === 'development') {
+        const loginRoutes = req.path.includes('/api/auth/login');
+        return !loginRoutes; // Solo aplicar rate limiting a login en desarrollo
+      }
+
+      // En producción, solo saltar para rutas de salud
       const healthRoutes = req.path === '/health' || req.path === '/api/health';
-      const devSkipRoutes = config.env === 'development' && (
-        req.path.includes('/api/auth/verify') ||
-        req.path.includes('/api/auth/refresh')
-      );
-      return healthRoutes || devSkipRoutes;
+      return healthRoutes;
     },
   });
 
