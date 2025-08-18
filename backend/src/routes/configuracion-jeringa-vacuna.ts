@@ -118,8 +118,19 @@ router.delete('/centro/:id', ConfiguracionJeringaVacunaController.deleteCentro);
 router.get('/efectiva/:vacunaId', ConfiguracionJeringaVacunaController.getConfiguracionEfectiva);
 
 /**
+ * @route GET /api/configuracion-jeringa-vacuna/calcular
+ * @desc Calcular jeringas necesarias para una cantidad de vacunas (GET)
+ * @access Public (TODO: Proteger con autenticación)
+ * @query {string} vacunaId - ID de la vacuna (requerido)
+ * @query {number} cantidadVacunas - Cantidad de vacunas (requerido)
+ * @query {string} [centroAcopioId] - ID del centro de acopio para configuración específica
+ * @query {boolean} [usarFallback=false] - Si usar fallback del sistema cuando no hay configuración
+ */
+router.get('/calcular', ConfiguracionJeringaVacunaController.calcularJeringasGet);
+
+/**
  * @route POST /api/configuracion-jeringa-vacuna/calcular
- * @desc Calcular jeringas necesarias para una cantidad de vacunas
+ * @desc Calcular jeringas necesarias para una cantidad de vacunas (POST)
  * @access Public (TODO: Proteger con autenticación)
  * @body {string} vacunaId - ID de la vacuna (requerido)
  * @body {number} cantidadVacunas - Cantidad de vacunas (requerido)

@@ -163,6 +163,62 @@ export class ValeController {
   }
 
   /**
+   * Diagnosticar estado de vale para reversión
+   * GET /api/vales/:id/diagnostico
+   */
+  static async diagnosticarVale(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      console.log(`🔍 [ValeController] Diagnosticando vale: ${id}`);
+
+      if (!validateUUID(id)) {
+        ResponseUtil.error(res, 'ID de vale inválido', 400);
+        return;
+      }
+
+      const result = await ValeService.diagnosticarEstadoVale(id);
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al diagnosticar vale', 404);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, 'Diagnóstico completado');
+    } catch (error) {
+      console.error('❌ [ValeController] Error en diagnosticarVale:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Limpiar estado inconsistente de reversión
+   * POST /api/vales/:id/limpiar-reversion
+   */
+  static async limpiarEstadoReversion(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      console.log(`🧹 [ValeController] Limpiando estado de reversión: ${id}`);
+
+      if (!validateUUID(id)) {
+        ResponseUtil.error(res, 'ID de vale inválido', 400);
+        return;
+      }
+
+      const result = await ValeService.limpiarEstadoReversion(id);
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al limpiar estado', 400);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, 'Estado de reversión limpiado exitosamente');
+    } catch (error) {
+      console.error('❌ [ValeController] Error en limpiarEstadoReversion:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
    * Revertir vale y restaurar stocks
    * POST /api/vales/:id/revertir
    */

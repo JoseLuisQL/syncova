@@ -647,6 +647,7 @@ export class ValeService {
 
   /**
    * Afectar stock de lotes de jeringas (calculado por configuración)
+   * Solo procesa jeringas si existe configuración explícita (sistema o centro específico)
    */
   private static async afectarStockJeringas(
     tx: any,
@@ -656,31 +657,28 @@ export class ValeService {
     usuarioId: string,
     centroAcopioId?: string
   ): Promise<StockAfectacion[]> {
-    // Obtener configuración efectiva de jeringas para esta vacuna
+    console.log(`🔍 [ValeService] Verificando configuración de jeringas para vacuna: ${vacunaId}`);
+
+    // Obtener configuración efectiva de jeringas para esta vacuna (SIN fallback automático)
     const configResult = await ConfiguracionJeringaVacunaService.calcularJeringasNecesarias(
       vacunaId,
       cantidadVacunas,
-      centroAcopioId
+      centroAcopioId,
+      false // NO usar fallback automático del sistema
     );
 
     if (!configResult.success || !configResult.data || configResult.data.length === 0) {
-      // Fallback al comportamiento anterior si no hay configuración
-      const vacuna = await tx.vacuna.findUnique({
-        where: { id: vacunaId },
-        select: { dosisPorFrasco: true }
-      });
-
-      if (!vacuna) return [];
-
-      // Usar configuración por defecto (1 jeringa por dosis)
-      const jeringasNecesarias = cantidadVacunas * vacuna.dosisPorFrasco;
-      return await this.afectarStockJeringasLegacy(tx, jeringasNecesarias, valeNumero, usuarioId, vacunaId);
+      console.log(`⚠️ [ValeService] No se encontró configuración de jeringas para vacuna ${vacunaId}. No se afectarán stocks de jeringas.`);
+      return []; // NO procesar jeringas si no hay configuración explícita
     }
 
+    console.log(`✅ [ValeService] Configuración encontrada: ${configResult.data.length} tipos de jeringas configuradas`);
     const stocksAfectados: StockAfectacion[] = [];
 
     // Procesar cada tipo de jeringa según la configuración
     for (const jeringaConfig of configResult.data) {
+      console.log(`🔄 [ValeService] Procesando jeringa: ${jeringaConfig.jeringaId}, cantidad: ${jeringaConfig.cantidad}, multiplicador: ${jeringaConfig.multiplicador}`);
+
       const stocksJeringa = await this.afectarStockJeringaEspecifica(
         tx,
         jeringaConfig.jeringaId,
@@ -693,6 +691,7 @@ export class ValeService {
       stocksAfectados.push(...stocksJeringa);
     }
 
+    console.log(`✅ [ValeService] Stocks de jeringas afectados: ${stocksAfectados.length} lotes`);
     return stocksAfectados;
   }
 
@@ -1249,6 +1248,96 @@ export class ValeService {
   }
 
   /**
+   * Diagnosticar estado de vale para reversión
+   */
+  static async diagnosticarEstadoVale(id: string): Promise<ServiceResult<any>> {
+    try {
+      const vale = await prisma.valeEntrega.findUnique({
+        where: { id },
+        select: { numero: true, estado: true }
+      });
+
+      if (!vale) {
+        return { success: false, error: 'Vale no encontrado' };
+      }
+
+      // Verificar movimientos originales
+      const movimientosOriginales = await prisma.kardex.findMany({
+        where: {
+          numeroDocumento: vale.numero,
+          documento: 'VALE_ENTREGA',
+          tipoMovimiento: TipoMovimientoKardex.salida
+        }
+      });
+
+      // Verificar reversiones existentes
+      const reversiones = await prisma.kardex.findMany({
+        where: {
+          numeroDocumento: `REVERSION-VALE-${vale.numero}`,
+          documento: 'REVERSION'
+        }
+      });
+
+      return {
+        success: true,
+        data: {
+          vale: vale,
+          movimientosOriginales: movimientosOriginales.length,
+          reversiones: reversiones.length,
+          puedeRevertir: movimientosOriginales.length > 0,
+          yaRevertido: reversiones.length > 0
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al diagnosticar vale'
+      };
+    }
+  }
+
+  /**
+   * Limpiar estado inconsistente de reversión (solo para casos especiales)
+   */
+  static async limpiarEstadoReversion(id: string): Promise<ServiceResult<{ message: string }>> {
+    try {
+      console.log(`🧹 [ValeService] Limpiando estado de reversión para vale: ${id}`);
+
+      const valeExistente = await prisma.valeEntrega.findUnique({
+        where: { id },
+        select: { numero: true, estado: true }
+      });
+
+      if (!valeExistente) {
+        return { success: false, error: 'Vale no encontrado' };
+      }
+
+      // Eliminar entradas de reversión huérfanas
+      const result = await prisma.kardex.deleteMany({
+        where: {
+          numeroDocumento: `REVERSION-VALE-${valeExistente.numero}`,
+          documento: 'REVERSION'
+        }
+      });
+
+      console.log(`✅ [ValeService] Eliminadas ${result.count} entradas de reversión huérfanas`);
+
+      return {
+        success: true,
+        data: {
+          message: `Estado de reversión limpiado. Eliminadas ${result.count} entradas huérfanas. Ahora puede intentar revertir el vale nuevamente.`
+        }
+      };
+    } catch (error) {
+      console.error('❌ [ValeService] Error al limpiar estado de reversión:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al limpiar estado'
+      };
+    }
+  }
+
+  /**
    * Revertir vale y restaurar stocks afectados
    */
   static async revertirVale(id: string): Promise<ServiceResult<{ message: string }>> {
@@ -1292,14 +1381,34 @@ export class ValeService {
 
       // Ejecutar reversión en transacción
       await prisma.$transaction(async (tx) => {
-        // PASO 1: Revertir stocks de vacunas afectados
-        const stocksVacunasAfectados = await tx.kardex.findMany({
+        // PASO 1: Verificar movimientos de stock pendientes de revertir
+        const movimientosPendientes = await tx.kardex.findMany({
           where: {
-            numeroDocumento: valeExistente.numero, // Corregido: usar número directo sin prefijo
+            numeroDocumento: valeExistente.numero,
             tipoMovimiento: TipoMovimientoKardex.salida,
-            tipo: 'vacuna'
+            documento: 'VALE_ENTREGA'
           }
         });
+
+        if (movimientosPendientes.length === 0) {
+          console.log(`⚠️ [ValeService] No hay movimientos de stock pendientes para revertir en vale: ${valeExistente.numero}`);
+          throw new Error(`El vale ${valeExistente.numero} no tiene movimientos de stock pendientes para revertir. Es posible que ya haya sido revertido.`);
+        }
+
+        console.log(`📋 [ValeService] Encontrados ${movimientosPendientes.length} movimientos de stock para revertir`);
+
+        // PASO 2: Revertir stocks de vacunas afectados
+        const stocksVacunasAfectados = await tx.kardex.findMany({
+          where: {
+            numeroDocumento: valeExistente.numero,
+            tipoMovimiento: TipoMovimientoKardex.salida,
+            tipo: 'vacuna',
+            documento: 'VALE_ENTREGA' // Solo movimientos originales del vale, no reversiones
+          },
+          orderBy: { createdAt: 'asc' } // Procesar en orden cronológico
+        });
+
+        console.log(`📋 [ValeService] Encontrados ${stocksVacunasAfectados.length} movimientos de vacunas para revertir`);
 
         for (const kardex of stocksVacunasAfectados) {
           // Obtener el estado actual del lote antes de la reversión
@@ -1315,12 +1424,14 @@ export class ValeService {
 
           const nuevaCantidad = loteActual.cantidadActual + kardex.cantidad;
 
+          console.log(`🔄 [ValeService] Revirtiendo vacuna - Lote: ${kardex.loteId}, Cantidad: +${kardex.cantidad}, Nuevo saldo: ${nuevaCantidad}`);
+
           // Restaurar stock del lote de vacuna
           await tx.loteVacuna.update({
             where: { id: kardex.loteId },
             data: {
               cantidadActual: nuevaCantidad,
-              estado: nuevaCantidad > 0 ? 'disponible' : 'agotado' // Corregido: actualizar estado
+              estado: nuevaCantidad > 0 ? 'disponible' : 'agotado'
             }
           });
 
@@ -1332,8 +1443,8 @@ export class ValeService {
               loteId: kardex.loteId,
               tipoMovimiento: TipoMovimientoKardex.ingreso,
               cantidad: kardex.cantidad,
-              saldoAnterior: loteActual.cantidadActual, // Corregido: saldo antes de la reversión
-              saldoActual: nuevaCantidad, // Corregido: saldo después de la reversión
+              saldoAnterior: loteActual.cantidadActual,
+              saldoActual: nuevaCantidad,
               documento: 'REVERSION',
               numeroDocumento: `REVERSION-VALE-${valeExistente.numero}`,
               observaciones: `Reversión de vale ${valeExistente.numero} - ${valeExistente.centroAcopio.nombre}`,
@@ -1343,14 +1454,18 @@ export class ValeService {
           });
         }
 
-        // PASO 2: Revertir stocks de jeringas afectados
+        // PASO 3: Revertir stocks de jeringas afectados
         const stocksJeringasAfectados = await tx.kardex.findMany({
           where: {
-            numeroDocumento: valeExistente.numero, // Corregido: usar número directo sin prefijo
+            numeroDocumento: valeExistente.numero,
             tipoMovimiento: TipoMovimientoKardex.salida,
-            tipo: 'jeringa'
-          }
+            tipo: 'jeringa',
+            documento: 'VALE_ENTREGA' // Solo movimientos originales del vale, no reversiones
+          },
+          orderBy: { createdAt: 'asc' } // Procesar en orden cronológico
         });
+
+        console.log(`📋 [ValeService] Encontrados ${stocksJeringasAfectados.length} movimientos de jeringas para revertir`);
 
         for (const kardex of stocksJeringasAfectados) {
           // Obtener el estado actual del lote antes de la reversión
@@ -1366,12 +1481,14 @@ export class ValeService {
 
           const nuevaCantidad = loteActual.cantidadActual + kardex.cantidad;
 
+          console.log(`🔄 [ValeService] Revirtiendo jeringa - Lote: ${kardex.loteId}, Cantidad: +${kardex.cantidad}, Nuevo saldo: ${nuevaCantidad}`);
+
           // Restaurar stock del lote de jeringa
           await tx.loteJeringa.update({
             where: { id: kardex.loteId },
             data: {
               cantidadActual: nuevaCantidad,
-              estado: nuevaCantidad > 0 ? 'disponible' : 'agotado' // Corregido: actualizar estado
+              estado: nuevaCantidad > 0 ? 'disponible' : 'agotado'
             }
           });
 
@@ -1383,8 +1500,8 @@ export class ValeService {
               loteId: kardex.loteId,
               tipoMovimiento: TipoMovimientoKardex.ingreso,
               cantidad: kardex.cantidad,
-              saldoAnterior: loteActual.cantidadActual, // Corregido: saldo antes de la reversión
-              saldoActual: nuevaCantidad, // Corregido: saldo después de la reversión
+              saldoAnterior: loteActual.cantidadActual,
+              saldoActual: nuevaCantidad,
               documento: 'REVERSION',
               numeroDocumento: `REVERSION-VALE-${valeExistente.numero}`,
               observaciones: `Reversión de vale ${valeExistente.numero} - ${valeExistente.centroAcopio.nombre}`,
@@ -1394,15 +1511,17 @@ export class ValeService {
           });
         }
 
-        // PASO 3: Eliminar detalles del vale
+        // PASO 4: Eliminar detalles del vale
         await tx.valeDetalle.deleteMany({
           where: { valeEntregaId: id }
         });
 
-        // PASO 4: Eliminar el vale
+        // PASO 5: Eliminar el vale
         await tx.valeEntrega.delete({
           where: { id }
         });
+
+        console.log(`✅ [ValeService] Reversión de stocks completada para vale: ${valeExistente.numero}`);
       }, {
         maxWait: 20000, // 20 segundos máximo de espera
         timeout: 60000, // 60 segundos de timeout
@@ -1813,7 +1932,8 @@ export class ValeService {
                     modificacion.vacunaId,
                     Math.abs(modificacion.diferencia),
                     valeExistente.numero,
-                    usuarioId
+                    usuarioId,
+                    valeExistente.centroAcopioId
                   );
                 }
               } catch (stockError) {
@@ -1973,79 +2093,102 @@ export class ValeService {
 
   /**
    * Restaurar stock de jeringas (para cuando disminuye la cantidad en vale)
+   * Solo restaura si existe configuración de jeringas para la vacuna
    */
   private static async restaurarStockJeringas(
     tx: any,
     vacunaId: string,
     cantidadVacunas: number,
     valeNumero: string,
-    usuarioId: string
+    usuarioId: string,
+    centroAcopioId?: string
   ): Promise<void> {
-    // Obtener información de la vacuna para calcular jeringas necesarias
-    const vacuna = await tx.vacuna.findUnique({
-      where: { id: vacunaId },
-      select: { dosisPorFrasco: true }
-    });
+    console.log(`🔍 [ValeService] Verificando configuración para restaurar jeringas - Vacuna: ${vacunaId}`);
 
-    if (!vacuna) return;
+    // Verificar si existe configuración de jeringas para esta vacuna
+    const configResult = await ConfiguracionJeringaVacunaService.calcularJeringasNecesarias(
+      vacunaId,
+      cantidadVacunas,
+      centroAcopioId,
+      false // NO usar fallback automático
+    );
 
-    const cantidadJeringas = cantidadVacunas * vacuna.dosisPorFrasco;
+    if (!configResult.success || !configResult.data || configResult.data.length === 0) {
+      console.log(`⚠️ [ValeService] No se encontró configuración de jeringas para vacuna ${vacunaId}. No se restaurarán stocks de jeringas.`);
+      return; // NO restaurar jeringas si no hay configuración explícita
+    }
 
-    // Obtener lotes de jeringas disponibles
-    const lotesJeringas = await tx.loteJeringa.findMany({
-      where: {
-        estado: { in: ['disponible', 'agotado'] }
-      },
-      orderBy: { fechaVencimiento: 'asc' }
-    });
+    console.log(`✅ [ValeService] Configuración encontrada. Restaurando stocks de jeringas para ${configResult.data.length} tipos de jeringas`);
 
-    let jeringasRestaurar = cantidadJeringas;
+    // Restaurar stocks según la configuración específica
+    for (const jeringaConfig of configResult.data) {
+      const cantidadARestaurar = jeringaConfig.cantidad;
 
-    for (const lote of lotesJeringas) {
-      if (jeringasRestaurar <= 0) break;
+      console.log(`🔄 [ValeService] Restaurando jeringa: ${jeringaConfig.jeringaId}, cantidad: ${cantidadARestaurar}`);
 
-      // Buscar el último movimiento de salida de este lote para este vale
-      const ultimoMovimiento = await tx.kardex.findFirst({
+      // Obtener lotes de esta jeringa específica
+      const lotesJeringa = await tx.loteJeringa.findMany({
         where: {
-          loteId: lote.id,
-          tipoMovimiento: TipoMovimientoKardex.salida,
-          numeroDocumento: valeNumero
+          jeringaId: jeringaConfig.jeringaId,
+          estado: { in: ['disponible', 'agotado'] }
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { fechaVencimiento: 'asc' }
       });
 
-      if (ultimoMovimiento) {
-        const cantidadARestaurar = Math.min(jeringasRestaurar, ultimoMovimiento.cantidad);
-        const nuevoSaldo = lote.cantidadActual + cantidadARestaurar;
+      let jeringasRestantes = cantidadARestaurar;
 
-        // Actualizar lote de jeringas
-        await tx.loteJeringa.update({
-          where: { id: lote.id },
-          data: {
-            cantidadActual: nuevoSaldo,
-            estado: nuevoSaldo > 0 ? 'disponible' : 'agotado'
-          }
-        });
+      for (const lote of lotesJeringa) {
+        if (jeringasRestantes <= 0) break;
 
-        // Registrar en kardex
-        await tx.kardex.create({
-          data: {
-            tipo: 'jeringa',
-            itemId: lote.id, // Para jeringas, el itemId es el loteId
+        // Buscar el último movimiento de salida de este lote para este vale
+        const ultimoMovimiento = await tx.kardex.findFirst({
+          where: {
             loteId: lote.id,
-            tipoMovimiento: TipoMovimientoKardex.ingreso,
-            cantidad: cantidadARestaurar,
-            saldoAnterior: lote.cantidadActual,
-            saldoActual: nuevoSaldo,
-            documento: 'VALE_ENTREGA_AJUSTE',
+            tipoMovimiento: TipoMovimientoKardex.salida,
             numeroDocumento: valeNumero,
-            observaciones: `Restauración por ajuste de vale ${valeNumero}`,
-            usuarioId,
-            fechaMovimiento: new Date()
-          }
+            tipo: 'jeringa'
+          },
+          orderBy: { createdAt: 'desc' }
         });
 
-        jeringasRestaurar -= cantidadARestaurar;
+        if (ultimoMovimiento) {
+          const cantidadARestaurarLote = Math.min(jeringasRestantes, ultimoMovimiento.cantidad);
+          const nuevoSaldo = lote.cantidadActual + cantidadARestaurarLote;
+
+          // Actualizar lote de jeringas
+          await tx.loteJeringa.update({
+            where: { id: lote.id },
+            data: {
+              cantidadActual: nuevoSaldo,
+              estado: nuevoSaldo > 0 ? 'disponible' : 'agotado'
+            }
+          });
+
+          // Registrar en kardex
+          await tx.kardex.create({
+            data: {
+              tipo: 'jeringa',
+              itemId: jeringaConfig.jeringaId,
+              loteId: lote.id,
+              tipoMovimiento: TipoMovimientoKardex.ingreso,
+              cantidad: cantidadARestaurarLote,
+              saldoAnterior: lote.cantidadActual,
+              saldoActual: nuevoSaldo,
+              documento: 'VALE_ENTREGA_AJUSTE',
+              numeroDocumento: valeNumero,
+              observaciones: `Restauración por ajuste de vale ${valeNumero} - Vacuna: ${vacunaId}`,
+              usuarioId,
+              fechaMovimiento: new Date()
+            }
+          });
+
+          jeringasRestantes -= cantidadARestaurarLote;
+          console.log(`✅ [ValeService] Restaurado lote ${lote.id}: +${cantidadARestaurarLote}, nuevo saldo: ${nuevoSaldo}`);
+        }
+      }
+
+      if (jeringasRestantes > 0) {
+        console.warn(`⚠️ [ValeService] No se pudo restaurar completamente la jeringa ${jeringaConfig.jeringaId}. Faltaron: ${jeringasRestantes}`);
       }
     }
   }

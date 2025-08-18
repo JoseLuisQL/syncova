@@ -762,6 +762,12 @@ export interface ConfiguracionCalculada {
 
 export interface JeringasCalculadas {
   jeringaId: string;
+  jeringa?: {
+    id: string;
+    tipo: string;
+    capacidad: string;
+    color: string;
+  };
   cantidad: number;
   multiplicador: number;
   prioridad: number;

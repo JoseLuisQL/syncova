@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
 import { ValeService } from './ValeService';
+import { ConfiguracionJeringaVacunaService } from './ConfiguracionJeringaVacunaService';
 import { ServiceResult } from '@/types';
 
 /**
@@ -94,7 +95,7 @@ class ValeExportService {
       this.agregarEncabezadoExcel(worksheet, vale, config);
 
       // Procesar y agregar datos
-      const datosParaExportar = this.procesarDatosParaExportacion(vale, config);
+      const datosParaExportar = await this.procesarDatosParaExportacion(vale, config);
       this.agregarDatosExcel(worksheet, datosParaExportar, config);
 
       // Aplicar estilos
@@ -182,7 +183,7 @@ class ValeExportService {
       this.agregarEncabezadoExcel(worksheet, valeCombinado, config);
 
       // Procesar y agregar datos combinados
-      const datosParaExportar = this.procesarDatosParaExportacion(valeCombinado, config);
+      const datosParaExportar = await this.procesarDatosParaExportacion(valeCombinado, config);
       this.agregarDatosExcel(worksheet, datosParaExportar, config);
 
       // Aplicar estilos
@@ -244,7 +245,7 @@ class ValeExportService {
       this.agregarEncabezadoPDF(doc, vale, config);
 
       // Procesar y agregar datos
-      const datosParaExportar = this.procesarDatosParaExportacion(vale, config);
+      const datosParaExportar = await this.procesarDatosParaExportacion(vale, config);
       this.agregarDatosPDF(doc, datosParaExportar, config);
 
       // Finalizar documento
@@ -531,10 +532,87 @@ class ValeExportService {
   }
 
   /**
+   * Verificar si existe configuración de jeringas para las vacunas del vale
+   */
+  private static async verificarConfiguracionJeringas(vale: any): Promise<boolean> {
+    try {
+      // Obtener todas las vacunas únicas del vale
+      const vacunasUnicas = [...new Set(vale.detalles.map((detalle: any) => detalle.vacunaId))] as string[];
+
+      // Verificar si al menos una vacuna tiene configuración de jeringas
+      for (const vacunaId of vacunasUnicas) {
+        const configResult = await ConfiguracionJeringaVacunaService.calcularJeringasNecesarias(
+          vacunaId,
+          1, // Cantidad mínima para verificar
+          vale.centroAcopioId,
+          false // NO usar fallback automático
+        );
+
+        if (configResult.success && configResult.data && configResult.data.length > 0) {
+          console.log(`✅ [ValeExportService] Configuración de jeringas encontrada para vacuna: ${vacunaId}`);
+          return true; // Al menos una vacuna tiene configuración
+        }
+      }
+
+      console.log(`⚠️ [ValeExportService] No se encontró configuración de jeringas para ninguna vacuna del vale`);
+      return false;
+    } catch (error) {
+      console.error('❌ [ValeExportService] Error al verificar configuración de jeringas:', error);
+      return false; // En caso de error, no incluir jeringas
+    }
+  }
+
+  /**
+   * Obtener configuración de jeringas para todas las vacunas del vale
+   */
+  private static async obtenerConfiguracionJeringasVale(vale: any): Promise<{ [vacunaId: string]: any[] }> {
+    try {
+      const configuraciones: { [vacunaId: string]: any[] } = {};
+
+      // Obtener vacunas únicas del vale con sus cantidades totales
+      const vacunasMap = new Map<string, number>();
+
+      vale.detalles.forEach((detalle: any) => {
+        const vacunaId = detalle.vacunaId;
+        const cantidadBase = Number(detalle.cantidadProgramada) || 0;
+        const cantidadAdicional = Number(detalle.cantidadAdicional) || 0;
+        const cantidadTotal = cantidadBase + cantidadAdicional;
+
+        if (vacunasMap.has(vacunaId)) {
+          vacunasMap.set(vacunaId, vacunasMap.get(vacunaId)! + cantidadTotal);
+        } else {
+          vacunasMap.set(vacunaId, cantidadTotal);
+        }
+      });
+
+      // Obtener configuración para cada vacuna
+      for (const [vacunaId, cantidad] of vacunasMap.entries()) {
+        const configResult = await ConfiguracionJeringaVacunaService.calcularJeringasNecesarias(
+          vacunaId,
+          cantidad,
+          vale.centroAcopioId,
+          false // NO usar fallback automático para exportación
+        );
+
+        if (configResult.success && configResult.data) {
+          configuraciones[vacunaId] = configResult.data;
+        } else {
+          configuraciones[vacunaId] = [];
+        }
+      }
+
+      return configuraciones;
+    } catch (error) {
+      console.error('❌ [ValeExportService] Error al obtener configuraciones de jeringas:', error);
+      return {};
+    }
+  }
+
+  /**
    * Procesar datos para exportación con estructura profesional
    */
-  private static procesarDatosParaExportacion(vale: any, config: ValeExportConfig) {
-    if (!vale.detalles) return { consolidado: [], establecimientos: [] };
+  private static async procesarDatosParaExportacion(vale: any, config: ValeExportConfig) {
+    if (!vale.detalles) return { consolidado: [], establecimientos: [], jeringasEstandar: [] };
 
     console.log('🔄 Procesando datos para exportación:', {
       totalDetalles: vale.detalles.length,
@@ -542,6 +620,14 @@ class ValeExportService {
       incluirEntregasAdicionales: config.incluirEntregasAdicionales,
       entregasAdicionalesSeleccionadas: config.entregasAdicionalesSeleccionadas
     });
+
+    // Verificar si existe configuración de jeringas para este vale
+    const tieneConfiguracionJeringas = await this.verificarConfiguracionJeringas(vale);
+    console.log(`🔍 [ValeExportService] Configuración de jeringas: ${tieneConfiguracionJeringas ? 'ENCONTRADA' : 'NO ENCONTRADA'}`);
+
+    // Obtener configuración de jeringas para todas las vacunas del vale
+    const configuracionJeringas = await this.obtenerConfiguracionJeringasVale(vale);
+    console.log(`📋 [ValeExportService] Configuraciones obtenidas:`, Object.keys(configuracionJeringas).length);
 
     // Debug: Analizar entregas adicionales disponibles en el vale
     const entregasAdicionalesEnVale = new Set<number>();
@@ -591,25 +677,27 @@ class ValeExportService {
         });
       }
 
-      // Procesar jeringas (si existen en el detalle)
-      if (detalle.jeringa) {
-        const jeringaId = detalle.jeringaId;
-        if (!estData.jeringas.has(jeringaId)) {
-          estData.jeringas.set(jeringaId, {
-            nombre: detalle.jeringa.nombre,
-            cantidad: 0
-          });
-        }
+      // Procesar jeringas SOLO si existe configuración para esta vacuna
+      const configJeringas = configuracionJeringas[vacunaId] || [];
+      if (tieneConfiguracionJeringas && configJeringas.length > 0) {
+        configJeringas.forEach((config: any) => {
+          const jeringaId = config.jeringaId;
+          if (!estData.jeringas.has(jeringaId)) {
+            estData.jeringas.set(jeringaId, {
+              nombre: `${config.jeringa?.tipo || 'Jeringa'} ${config.jeringa?.capacidad || ''}`.trim(),
+              cantidad: 0
+            });
+          }
+        });
       }
 
-      // Sumar cantidades según configuración
+      // Sumar cantidades según configuración de exportación
       let cantidadVacuna = 0;
-      let cantidadJeringa = 0;
 
       if (config.incluirEntregasBase) {
         const cantidadBase = Number(detalle.cantidadProgramada) || 0;
         cantidadVacuna += cantidadBase;
-        cantidadJeringa += Number(detalle.cantidadJeringaProgramada) || 0;
+        console.log(`📊 [ValeExportService] Entrega base - Vacuna: ${vacunaNombre}, Cantidad: ${cantidadBase}`);
       }
 
       // Debug detallado para entregas adicionales
@@ -632,41 +720,83 @@ class ValeExportService {
 
         if (estaSeleccionada && cantidadAdicional > 0) {
           cantidadVacuna += cantidadAdicional;
-          cantidadJeringa += Number(detalle.cantidadJeringaAdicional) || 0;
           console.log(`  ✅ Agregando ${cantidadAdicional} unidades adicionales de ${vacunaNombre} (entrega #${numeroEntrega})`);
         } else {
           console.log(`  ❌ No se incluye entrega adicional #${numeroEntrega} (${!estaSeleccionada ? 'no seleccionada' : 'cantidad 0'})`);
         }
       }
 
-      // Actualizar cantidades
+      // Actualizar cantidades de vacunas
+      console.log(`📊 [ValeExportService] Actualizando vacuna ${vacunaNombre}: +${cantidadVacuna} unidades`);
       estData.vacunas.get(vacunaId).cantidad += cantidadVacuna;
-      if (detalle.jeringa) {
-        estData.jeringas.get(detalle.jeringaId).cantidad += cantidadJeringa;
+
+      // Actualizar cantidades de jeringas según configuración específica
+      if (tieneConfiguracionJeringas && configJeringas.length > 0 && cantidadVacuna > 0) {
+        console.log(`💉 [ValeExportService] Calculando jeringas para ${cantidadVacuna} unidades de ${vacunaNombre}`);
+        configJeringas.forEach((configJeringa: any) => {
+          const jeringaId = configJeringa.jeringaId;
+          const cantidadJeringaEspecifica = Math.ceil(cantidadVacuna * configJeringa.multiplicador);
+
+          console.log(`  - Jeringa ${configJeringa.jeringa?.tipo}: ${cantidadJeringaEspecifica} unidades (${cantidadVacuna} × ${configJeringa.multiplicador})`);
+
+          if (estData.jeringas.has(jeringaId)) {
+            estData.jeringas.get(jeringaId).cantidad += cantidadJeringaEspecifica;
+          }
+        });
       }
 
-      // Actualizar consolidado
+      // Actualizar consolidado de vacunas
       if (!consolidadoMap.has(vacunaId)) {
         consolidadoMap.set(vacunaId, {
           nombre: vacunaNombre,
           cantidad: 0
         });
       }
+      const cantidadAnterior = consolidadoMap.get(vacunaId).cantidad;
       consolidadoMap.get(vacunaId).cantidad += cantidadVacuna;
+      console.log(`📈 [ValeExportService] Consolidado ${vacunaNombre}: ${cantidadAnterior} + ${cantidadVacuna} = ${consolidadoMap.get(vacunaId).cantidad}`);
     });
 
-    // CAMBIO PRINCIPAL: Usar todas las vacunas encontradas dinámicamente en lugar de lista fija
-    // Obtener todas las vacunas que realmente existen en los datos
+    // CAMBIO PRINCIPAL: Usar solo las vacunas que tienen cantidad > 0
+    // Obtener todas las vacunas que realmente tienen datos en el vale
     const vacunasEncontradas = Array.from(consolidadoMap.values())
+      .filter(v => v.cantidad > 0) // Solo vacunas con cantidad
       .map(v => v.nombre)
       .sort(); // Ordenar alfabéticamente
 
-    console.log(`📋 Procesando ${vacunasEncontradas.length} tipos de vacunas encontradas`);
+    console.log(`📋 Procesando ${vacunasEncontradas.length} tipos de vacunas con cantidad > 0`);
+
+    // Consolidar jeringas de todos los establecimientos
+    const jeringasConsolidadoMap = new Map<string, number>();
+    Array.from(establecimientosMap.values()).forEach(estData => {
+      Array.from(estData.jeringas.values()).forEach((jeringaData: any) => {
+        const nombre = jeringaData.nombre;
+        if (!jeringasConsolidadoMap.has(nombre)) {
+          jeringasConsolidadoMap.set(nombre, 0);
+        }
+        jeringasConsolidadoMap.set(nombre, jeringasConsolidadoMap.get(nombre)! + jeringaData.cantidad);
+      });
+    });
+
+    const jeringasEncontradas = Array.from(jeringasConsolidadoMap.entries())
+      .filter(([nombre, cantidad]) => cantidad > 0) // Solo jeringas con cantidad > 0
+      .map(([nombre, cantidad]) => nombre)
+      .sort();
+    console.log(`📋 Procesando ${jeringasEncontradas.length} tipos de jeringas con cantidad > 0`);
 
     // Generar estructura de consolidado usando TODAS las vacunas encontradas
     const consolidado = vacunasEncontradas.map((vacunaNombre, index) => {
-      const vacunaData = Array.from(consolidadoMap.values()).find(v => v.nombre === vacunaNombre);
-      const cantidad = vacunaData ? vacunaData.cantidad : 0;
+      // Buscar la vacuna en el consolidadoMap por nombre
+      let cantidad = 0;
+      for (const [vacunaId, vacunaData] of consolidadoMap.entries()) {
+        if (vacunaData.nombre === vacunaNombre) {
+          cantidad = vacunaData.cantidad;
+          break;
+        }
+      }
+
+      console.log(`📊 [ValeExportService] Consolidado - ${vacunaNombre}: ${cantidad} unidades`);
+
       return {
         numero: index + 1,
         biologico: vacunaNombre,
@@ -676,10 +806,17 @@ class ValeExportService {
 
     // Debug: Mostrar resumen del consolidado
     console.log('📊 Resumen del consolidado generado:');
+    console.log('📋 Datos del consolidadoMap:', Array.from(consolidadoMap.entries()));
+    console.log('📋 Vacunas encontradas:', vacunasEncontradas);
+    console.log('📋 Jeringas consolidadas:', jeringasConsolidadoMap);
+
     consolidado.forEach(item => {
-      if (item.cantidad > 0) {
-        console.log(`  ✅ ${item.biologico}: ${item.cantidad} unidades`);
-      }
+      console.log(`  📊 ${item.biologico}: ${item.cantidad} unidades (${item.cantidad > 0 ? '✅' : '❌'})`);
+    });
+
+    console.log('💉 Resumen de jeringas consolidadas:');
+    Array.from(jeringasConsolidadoMap.entries()).forEach(([nombre, cantidad]) => {
+      console.log(`  💉 ${nombre}: ${cantidad} unidades (${cantidad > 0 ? '✅' : '❌'})`);
     });
 
     // Generar estructura de establecimientos usando vacunas dinámicas
@@ -694,7 +831,7 @@ class ValeExportService {
         };
       });
 
-      const jeringas = jeringasEstandar.map(jeringaNombre => {
+      const jeringas = jeringasEncontradas.map(jeringaNombre => {
         const jeringaData = Array.from(estData.jeringas.values()).find((j: any) => j.nombre === jeringaNombre);
         return {
           nombre: jeringaNombre,
@@ -711,7 +848,18 @@ class ValeExportService {
       };
     });
 
-    return { consolidado, establecimientos, jeringasEstandar };
+    // Generar consolidado de jeringas (solo las que tienen cantidad > 0)
+    const jeringasConsolidado = jeringasEncontradas.map(nombre => ({
+      nombre,
+      cantidad: jeringasConsolidadoMap.get(nombre) || 0
+    })).filter(jeringa => jeringa.cantidad > 0);
+
+    return {
+      consolidado,
+      establecimientos,
+      jeringasConsolidado,
+      jeringasEstandar: jeringasEncontradas // Para compatibilidad con código existente
+    };
   }
 
   /**
@@ -1016,19 +1164,22 @@ class ValeExportService {
       };
       cellC.alignment = { horizontal: 'center', vertical: 'middle' };
 
-      // Jeringas (solo las primeras 5 filas)
-      if (index < datos.jeringasEstandar.length) {
+      // Jeringas consolidadas con cantidades reales
+      if (index < datos.jeringasConsolidado.length) {
+        const jeringaData = datos.jeringasConsolidado[index];
+
         const cellE = worksheet.getCell(`E${filaActual}`);
-        cellE.value = datos.jeringasEstandar[index];
+        cellE.value = jeringaData.nombre;
         cellE.font = { size: 10, name: 'Segoe UI', color: { argb: 'FF374151' } };
         cellE.alignment = { horizontal: 'left', vertical: 'middle' };
 
         const cellF = worksheet.getCell(`F${filaActual}`);
-        cellF.value = 0; // Por ahora 0, se puede calcular
+        cellF.value = jeringaData.cantidad;
         cellF.font = {
           size: 11,
           name: 'Segoe UI',
-          color: { argb: 'FF6B7280' }
+          bold: jeringaData.cantidad > 0,
+          color: { argb: jeringaData.cantidad > 0 ? 'FF059669' : 'FF6B7280' }
         };
         cellF.alignment = { horizontal: 'center', vertical: 'middle' };
       }

@@ -536,7 +536,63 @@ export class ConfiguracionJeringaVacunaController {
   }
 
   /**
-   * Calcular jeringas necesarias para una cantidad de vacunas
+   * Calcular jeringas necesarias para una cantidad de vacunas (GET)
+   * GET /api/configuracion-jeringa-vacuna/calcular
+   */
+  static async calcularJeringasGet(req: Request, res: Response): Promise<void> {
+    try {
+      const { vacunaId, cantidadVacunas, centroAcopioId, usarFallback } = req.query;
+
+      // Validaciones requeridas
+      const vacunaError = validateRequired(vacunaId, 'ID de vacuna');
+      if (vacunaError) {
+        errorResponse(res, vacunaError, 400);
+        return;
+      }
+
+      // Validar UUID de vacuna
+      if (!validateUUID(vacunaId as string)) {
+        errorResponse(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      // Validar cantidad
+      const cantidad = parseInt(cantidadVacunas as string, 10);
+      if (isNaN(cantidad) || cantidad <= 0) {
+        errorResponse(res, 'La cantidad de vacunas debe ser un número mayor a 0', 400);
+        return;
+      }
+
+      // Validar UUID de centro de acopio si se proporciona
+      if (centroAcopioId && !validateUUID(centroAcopioId as string)) {
+        errorResponse(res, 'ID de centro de acopio inválido', 400);
+        return;
+      }
+
+      // Determinar si usar fallback (por defecto NO para el modal)
+      const usarFallbackSistema = usarFallback === 'true';
+      console.log(`🔍 [ConfiguracionJeringaVacunaController] Usar fallback: ${usarFallbackSistema}`);
+
+      const result = await ConfiguracionJeringaVacunaService.calcularJeringasNecesarias(
+        vacunaId as string,
+        cantidad,
+        centroAcopioId as string,
+        usarFallbackSistema // Usar parámetro para controlar fallback
+      );
+
+      if (result.success) {
+        successResponse(res, result.data, result.message);
+      } else {
+        errorResponse(res, result.message || 'Error al calcular jeringas necesarias', 500);
+      }
+    } catch (error) {
+      console.error('Error en calcularJeringasGet:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Calcular jeringas necesarias para una cantidad de vacunas (POST)
    * POST /api/configuracion-jeringa-vacuna/calcular
    */
   static async calcularJeringas(req: Request, res: Response): Promise<void> {

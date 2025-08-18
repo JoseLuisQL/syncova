@@ -19,6 +19,7 @@ import {
 import { ValeEntrega, ValeDetalle } from '../../services/valesService';
 import { useVales } from '../../hooks/useVales';
 import { useToastContext } from '../../contexts/ToastContext';
+import { ConfiguracionJeringasService, JeringaCalculada } from '../../services/configuracionJeringasService';
 import ValesDataTest from './ValesDataTest';
 import ValeExportModal from './ValeExportModal';
 
@@ -92,12 +93,81 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
   const [isChangingState, setIsChangingState] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [configuracionJeringas, setConfiguracionJeringas] = useState<{ [vacunaId: string]: JeringaCalculada[] }>({});
+  const [isLoadingJeringas, setIsLoadingJeringas] = useState(false);
 
   // Constantes
   const meses = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
+
+  // Cargar configuración de jeringas cuando se abre el modal
+  useEffect(() => {
+    if (isOpen && vale) {
+      cargarConfiguracionJeringas();
+    }
+  }, [isOpen, vale]);
+
+  const cargarConfiguracionJeringas = async () => {
+    if (!vale || !vale.detalles) return;
+
+    setIsLoadingJeringas(true);
+    try {
+      console.log('🔍 [ValeDetalleModal] Cargando configuración de jeringas para vale:', vale.numero);
+
+      // Obtener vacunas únicas del vale con sus cantidades
+      const vacunasMap = new Map<string, number>();
+
+      vale.detalles.forEach(detalle => {
+        const vacunaId = detalle.vacunaId;
+        const cantidadBase = Number(detalle.cantidadProgramada) || 0;
+        const cantidadAdicional = Number(detalle.cantidadAdicional) || 0;
+        const cantidadTotal = cantidadBase + cantidadAdicional;
+
+        if (vacunasMap.has(vacunaId)) {
+          vacunasMap.set(vacunaId, vacunasMap.get(vacunaId)! + cantidadTotal);
+        } else {
+          vacunasMap.set(vacunaId, cantidadTotal);
+        }
+      });
+
+      const vacunas = Array.from(vacunasMap.entries()).map(([vacunaId, cantidad]) => ({
+        vacunaId,
+        cantidad
+      }));
+
+      console.log('📋 [ValeDetalleModal] Vacunas a procesar:', vacunas);
+
+      // Obtener configuración consolidada
+      const result = await ConfiguracionJeringasService.obtenerConfiguracionConsolidada(
+        vacunas,
+        vale.centroAcopioId
+      );
+
+      if (result.success) {
+        setConfiguracionJeringas(result.data);
+        console.log('✅ [ValeDetalleModal] Configuración de jeringas cargada:', result.data);
+
+        // Debug: Mostrar detalles de cada configuración
+        Object.entries(result.data).forEach(([vacunaId, configs]) => {
+          console.log(`📋 [ValeDetalleModal] Vacuna ${vacunaId}:`, configs);
+          configs.forEach((config: any, index: number) => {
+            console.log(`  ${index + 1}. Jeringa: ${config.jeringa?.tipo || 'Sin tipo'} ${config.jeringa?.capacidad || 'Sin capacidad'}`);
+            console.log(`     Cantidad: ${config.cantidad}, Multiplicador: ${config.multiplicador}, Origen: ${config.origen}`);
+          });
+        });
+      } else {
+        console.log('⚠️ [ValeDetalleModal] No se encontró configuración de jeringas');
+        setConfiguracionJeringas({});
+      }
+    } catch (error) {
+      console.error('❌ [ValeDetalleModal] Error al cargar configuración de jeringas:', error);
+      setConfiguracionJeringas({});
+    } finally {
+      setIsLoadingJeringas(false);
+    }
+  };
 
   // Función para formatear números de manera segura
   const formatNumber = (value: any): string => {
@@ -183,31 +253,77 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
         vacunaDetalle.entregasAdicionales.push(detalle);
       }
 
-      // Calcular jeringas necesarias con validación de números
-      const dosisPorFrasco = Number(detalle.vacuna?.dosisPorFrasco) || 1;
-      const jeringasNecesarias = cantidadTotal * dosisPorFrasco;
+      // Calcular jeringas según configuración real
+      const configJeringas = configuracionJeringas[vacId] || [];
 
-      // Simular jeringas por tipo (esto vendría del sistema de multiplicadores)
-      const jeringaSimulada = {
-        id: 'jeringa-1ml',
-        tipo: 'Jeringa autoretractil',
-        capacidad: '1ml',
-        color: 'Transparente'
-      };
+      console.log(`🔍 [ValeDetalleModal] Procesando vacuna ${detalle.vacuna?.nombre} (${vacId}):`, {
+        cantidadTotal,
+        configuracionesEncontradas: configJeringas.length,
+        configuraciones: configJeringas
+      });
 
-      if (!vacunaDetalle.jeringas[jeringaSimulada.id]) {
-        vacunaDetalle.jeringas[jeringaSimulada.id] = {
-          jeringa: jeringaSimulada,
-          cantidad: 0
-        };
+      if (configJeringas.length > 0) {
+        // Usar configuración real
+        configJeringas.forEach((config, index) => {
+          if (config.jeringa) {
+            const jeringaId = config.jeringa.id;
+            const cantidadJeringa = Math.ceil(cantidadTotal * config.multiplicador);
+
+            console.log(`  ✅ Configuración ${index + 1}: ${config.jeringa.tipo} ${config.jeringa.capacidad}`);
+            console.log(`     Cantidad calculada: ${cantidadJeringa} (${cantidadTotal} × ${config.multiplicador})`);
+
+            if (!vacunaDetalle.jeringas[jeringaId]) {
+              vacunaDetalle.jeringas[jeringaId] = {
+                jeringa: {
+                  id: config.jeringa.id,
+                  tipo: config.jeringa.tipo,
+                  capacidad: config.jeringa.capacidad,
+                  color: config.jeringa.color
+                },
+                cantidad: 0
+              };
+            }
+            vacunaDetalle.jeringas[jeringaId].cantidad += cantidadJeringa;
+          } else {
+            console.log(`  ⚠️ Configuración ${index + 1} sin información de jeringa:`, config);
+          }
+        });
+      } else {
+        // Si no hay configuración, no mostrar jeringas (según los nuevos requerimientos)
+        console.log(`⚠️ [ValeDetalleModal] No hay configuración de jeringas para vacuna: ${detalle.vacuna?.nombre} (${vacId})`);
       }
-      vacunaDetalle.jeringas[jeringaSimulada.id].cantidad += jeringasNecesarias;
     });
 
-    return Object.values(establecimientosMap).sort((a, b) => 
+    return Object.values(establecimientosMap).sort((a, b) =>
       a.establecimiento.nombre.localeCompare(b.establecimiento.nombre)
     );
-  }, [vale.detalles]);
+  }, [vale.detalles, configuracionJeringas]);
+
+  // Consolidado de jeringas basado en configuración real
+  const consolidadoJeringas = useMemo(() => {
+    const jeringasMap: { [jeringaId: string]: { jeringa: any; cantidad: number } } = {};
+
+    establecimientosDetalle.forEach(establecimiento => {
+      Object.values(establecimiento.vacunas).forEach(vacunaDetalle => {
+        Object.values(vacunaDetalle.jeringas).forEach(jeringaDetalle => {
+          const jeringaId = jeringaDetalle.jeringa.id;
+
+          if (!jeringasMap[jeringaId]) {
+            jeringasMap[jeringaId] = {
+              jeringa: jeringaDetalle.jeringa,
+              cantidad: 0
+            };
+          }
+
+          jeringasMap[jeringaId].cantidad += jeringaDetalle.cantidad;
+        });
+      });
+    });
+
+    return Object.values(jeringasMap).sort((a, b) =>
+      a.jeringa.tipo.localeCompare(b.jeringa.tipo)
+    );
+  }, [establecimientosDetalle]);
 
   // Consolidado general de vacunas
   const consolidadoVacunas = useMemo((): ConsolidadoVacuna[] => {
@@ -468,23 +584,57 @@ Esta acción:
               </div>
 
               {/* Jeringas Consolidado */}
-              <h4 className="text-md font-bold text-gray-900 mt-6 mb-3">Jeringas</h4>
+              <h4 className="text-md font-bold text-gray-900 mt-6 mb-3 flex items-center">
+                Jeringas
+                {isLoadingJeringas && (
+                  <Loader2 className="h-4 w-4 ml-2 animate-spin text-blue-600" />
+                )}
+              </h4>
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[400px] text-sm">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left font-semibold text-gray-900 min-w-[250px]">Tipo de Jeringa</th>
+                        <th className="px-6 py-3 text-center font-semibold text-gray-900 min-w-[100px]">Capacidad</th>
                         <th className="px-6 py-3 text-center font-semibold text-gray-900 min-w-[120px]">Cantidad Total</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      <tr className="hover:bg-gray-50">
-                        <td className="px-6 py-3 text-gray-900 font-semibold">Jeringa autoretractil 1cc 27 G x 1/2"</td>
-                        <td className="px-6 py-3 text-center font-bold text-green-600 text-lg">
-                          {consolidadoVacunas.reduce((total, item) => total + item.jeringasTotal, 0).toLocaleString()}
-                        </td>
-                      </tr>
+                      {consolidadoJeringas.length > 0 ? (
+                        consolidadoJeringas.map((item, index) => (
+                          <tr key={item.jeringa.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-3 text-gray-900 font-semibold">
+                              {item.jeringa.tipo}
+                            </td>
+                            <td className="px-6 py-3 text-center text-gray-700">
+                              {item.jeringa.capacidad}
+                            </td>
+                            <td className="px-6 py-3 text-center font-bold text-green-600 text-lg">
+                              {item.cantidad.toLocaleString()}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
+                            {isLoadingJeringas ? (
+                              <div className="flex items-center justify-center">
+                                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                                Cargando configuración de jeringas...
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center">
+                                <AlertTriangle className="h-8 w-8 text-amber-500 mb-2" />
+                                <span className="font-medium">No hay configuración de jeringas</span>
+                                <span className="text-sm text-gray-400 mt-1">
+                                  Las vacunas de este vale no tienen jeringas configuradas
+                                </span>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

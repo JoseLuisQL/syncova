@@ -505,7 +505,8 @@ export class ConfiguracionJeringaVacunaService {
    */
   static async getConfiguracionEfectiva(
     vacunaId: string,
-    centroAcopioId?: string
+    centroAcopioId?: string,
+    usarFallbackSistema: boolean = true
   ): Promise<ServiceResult<ConfiguracionCalculada[]>> {
     try {
       let configuraciones: ConfiguracionCalculada[] = [];
@@ -551,8 +552,8 @@ export class ConfiguracionJeringaVacunaService {
         }));
       }
 
-      // 3. Si no hay ninguna configuración, usar configuración del sistema (1:1)
-      if (configuraciones.length === 0) {
+      // 3. Si no hay ninguna configuración y se permite fallback, usar configuración del sistema (1:1)
+      if (configuraciones.length === 0 && usarFallbackSistema) {
         // Obtener la primera jeringa activa como fallback
         const jeringaFallback = await prisma.jeringa.findFirst({
           where: { estado: 'activo' },
@@ -565,7 +566,7 @@ export class ConfiguracionJeringaVacunaService {
             jeringaId: jeringaFallback.id,
             multiplicador: 1.0,
             prioridad: 1,
-            origen: 'defecto' as const,
+            origen: 'sistema' as const,
             configuracionId: 'sistema-fallback'
           }];
         }
@@ -588,11 +589,12 @@ export class ConfiguracionJeringaVacunaService {
   static async calcularJeringasNecesarias(
     vacunaId: string,
     cantidadVacunas: number,
-    centroAcopioId?: string
+    centroAcopioId?: string,
+    usarFallbackSistema: boolean = false
   ): Promise<ServiceResult<JeringasCalculadas[]>> {
     try {
-      // Obtener configuración efectiva
-      const configResult = await this.getConfiguracionEfectiva(vacunaId, centroAcopioId);
+      // Obtener configuración efectiva (sin fallback automático para stock management)
+      const configResult = await this.getConfiguracionEfectiva(vacunaId, centroAcopioId, usarFallbackSistema);
 
       if (!configResult.success || !configResult.data) {
         throw createError('No se pudo obtener la configuración efectiva', 500);
@@ -610,14 +612,40 @@ export class ConfiguracionJeringaVacunaService {
 
       const totalDosis = cantidadVacunas * vacuna.dosisPorFrasco;
 
-      // Calcular jeringas necesarias según configuración
-      const jeringasCalculadas: JeringasCalculadas[] = configResult.data.map(config => ({
-        jeringaId: config.jeringaId,
-        cantidad: Math.ceil(totalDosis * config.multiplicador),
-        multiplicador: config.multiplicador,
-        prioridad: config.prioridad,
-        origen: config.origen
-      }));
+      // Obtener información completa de las jeringas
+      const jeringasIds = configResult.data.map(config => config.jeringaId);
+      const jeringas = await prisma.jeringa.findMany({
+        where: {
+          id: { in: jeringasIds }
+        },
+        select: {
+          id: true,
+          tipo: true,
+          capacidad: true,
+          color: true
+        }
+      });
+
+      // Crear un mapa para acceso rápido a los datos de jeringas
+      const jeringasMap = new Map(jeringas.map(j => [j.id, j]));
+
+      // Calcular jeringas necesarias según configuración con información completa
+      const jeringasCalculadas: JeringasCalculadas[] = configResult.data.map(config => {
+        const jeringaInfo = jeringasMap.get(config.jeringaId);
+        return {
+          jeringaId: config.jeringaId,
+          jeringa: jeringaInfo ? {
+            id: jeringaInfo.id,
+            tipo: jeringaInfo.tipo,
+            capacidad: jeringaInfo.capacidad,
+            color: jeringaInfo.color
+          } : undefined,
+          cantidad: Math.ceil(totalDosis * config.multiplicador),
+          multiplicador: config.multiplicador,
+          prioridad: config.prioridad,
+          origen: config.origen
+        };
+      });
 
       return {
         success: true,

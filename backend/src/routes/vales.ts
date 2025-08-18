@@ -124,6 +124,24 @@ router.get('/:id', ValeController.getValeById);
 router.patch('/:id/estado', ValeController.cambiarEstado);
 
 /**
+ * @route GET /api/vales/:id/diagnostico
+ * @desc Diagnosticar estado de vale para reversión
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {string} id - ID del vale a diagnosticar
+ * @example GET /api/vales/uuid-del-vale/diagnostico
+ */
+router.get('/:id/diagnostico', ValeController.diagnosticarVale);
+
+/**
+ * @route POST /api/vales/:id/limpiar-reversion
+ * @desc Limpiar estado inconsistente de reversión
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {string} id - ID del vale a limpiar
+ * @example POST /api/vales/uuid-del-vale/limpiar-reversion
+ */
+router.post('/:id/limpiar-reversion', ValeController.limpiarEstadoReversion);
+
+/**
  * @route POST /api/vales/:id/revertir
  * @desc Revertir vale y restaurar stocks afectados
  * @access Public (TODO: Proteger con autenticación)
