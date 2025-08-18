@@ -4,6 +4,7 @@ import GestionLotes from './GestionLotes';
 import NuevoIngreso from './NuevoIngreso';
 import { useLotesJeringas } from '../../hooks/useLotesJeringas';
 import { useJeringas } from '../../hooks/useJeringas';
+import { useVacunas } from '../../hooks/useVacunas';
 import { CreateLoteJeringaDto, LoteJeringa } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 
@@ -35,19 +36,22 @@ const LotesJeringasPage: React.FC = () => {
   } = useLotesJeringas();
 
   const { jeringasActivas, loadJeringasActivas, isLoadingActivas: isLoadingJeringas } = useJeringas();
+  const { vacunasActivas, loadVacunasActivas, isLoadingActivas: isLoadingVacunas } = useVacunas();
 
-  // Cargar jeringas activas al montar el componente
+  // Cargar jeringas y vacunas activas al montar el componente
   React.useEffect(() => {
     loadJeringasActivas();
+    loadVacunasActivas();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Recargar jeringas activas cuando se abre el modal
+  // Recargar jeringas y vacunas activas cuando se abre el modal
   React.useEffect(() => {
     if (showNuevoIngreso) {
-      console.log('🔄 Modal abierto, recargando jeringas activas...');
+      console.log('🔄 Modal abierto, recargando jeringas y vacunas activas...');
       loadJeringasActivas();
+      loadVacunasActivas();
     }
-  }, [showNuevoIngreso, loadJeringasActivas]);
+  }, [showNuevoIngreso, loadJeringasActivas, loadVacunasActivas]);
 
   /**
    * Manejar creación de nuevo lote desde NuevoIngreso
@@ -134,6 +138,14 @@ const LotesJeringasPage: React.FC = () => {
     }
   };
 
+  /**
+   * Manejar aplicación de filtros
+   */
+  const handleApplyFilters = async (filters: any) => {
+    console.log('🔍 Aplicando filtros en LotesJeringasPage:', filters);
+    await applyFilters(filters);
+  };
+
   // Mostrar error si hay problemas de conexión
   if (error) {
     return (
@@ -204,6 +216,11 @@ const LotesJeringasPage: React.FC = () => {
         isDeleting={isDeleting}
         stats={stats}
         isLoadingStats={isLoadingStats}
+        vacunas={vacunasActivas}
+        jeringas={jeringasActivas}
+        onApplyFilters={handleApplyFilters}
+        isLoadingVacunas={isLoadingVacunas}
+        isLoadingJeringas={isLoadingJeringas}
       />
 
       {/* Modal de nuevo ingreso */}
@@ -211,10 +228,10 @@ const LotesJeringasPage: React.FC = () => {
         <NuevoIngreso
           onClose={() => setShowNuevoIngreso(false)}
           onSuccess={handleNuevoLote}
-          vacunas={[]} // No se usan para jeringas
+          vacunas={vacunasActivas} // Incluir vacunas para referencia en filtros
           jeringas={jeringasActivas}
           tipoFijo="jeringa" // Forzar tipo jeringa
-          isLoadingVacunas={false}
+          isLoadingVacunas={isLoadingVacunas}
           isLoadingJeringas={isLoadingJeringas}
         />
       )}

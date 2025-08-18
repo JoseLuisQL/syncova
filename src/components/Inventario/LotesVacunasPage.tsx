@@ -136,6 +136,14 @@ const LotesVacunasPage: React.FC = () => {
     }
   };
 
+  /**
+   * Manejar aplicación de filtros
+   */
+  const handleApplyFilters = async (filters: any) => {
+    console.log('🔍 Aplicando filtros en LotesVacunasPage:', filters);
+    await applyFilters(filters);
+  };
+
   // Mostrar error si hay problemas de conexión
   if (error) {
     return (
@@ -206,6 +214,11 @@ const LotesVacunasPage: React.FC = () => {
         isDeleting={isDeleting}
         stats={stats}
         isLoadingStats={isLoadingStats}
+        vacunas={vacunasActivas}
+        jeringas={[]}
+        onApplyFilters={handleApplyFilters}
+        isLoadingVacunas={isLoadingVacunas}
+        isLoadingJeringas={false}
       />
 
       {/* Modal de nuevo ingreso */}

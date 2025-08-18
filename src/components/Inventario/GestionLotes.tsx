@@ -20,7 +20,7 @@ import {
   RefreshCw,
   Loader2
 } from 'lucide-react';
-import { Lote, LoteJeringa, LoteVacunaStats, LoteJeringaStats } from '../../types';
+import { Lote, LoteJeringa, LoteVacunaStats, LoteJeringaStats, Vacuna, Jeringa } from '../../types';
 
 interface GestionLotesProps {
   lotes: (Lote | LoteJeringa)[];
@@ -32,6 +32,12 @@ interface GestionLotesProps {
   isDeleting?: boolean;
   stats?: LoteVacunaStats | LoteJeringaStats | null;
   isLoadingStats?: boolean;
+  // New props for enhanced filtering
+  vacunas?: Vacuna[];
+  jeringas?: Jeringa[];
+  onApplyFilters?: (filters: any) => void;
+  isLoadingVacunas?: boolean;
+  isLoadingJeringas?: boolean;
 }
 
 const GestionLotes: React.FC<GestionLotesProps> = ({
@@ -43,17 +49,29 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
   isUpdating = false,
   isDeleting = false,
   stats: externalStats,
-  isLoadingStats = false
+  isLoadingStats = false,
+  vacunas = [],
+  jeringas = [],
+  onApplyFilters,
+  isLoadingVacunas = false,
+  isLoadingJeringas = false
 }) => {
+  // Existing filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState<string>('todos');
   const [filterVencimiento, setFilterVencimiento] = useState<string>('todos');
+
+  // New filter states for enhanced filtering
+  const [filterVacunaId, setFilterVacunaId] = useState<string>('todos');
+  const [filterJeringaId, setFilterJeringaId] = useState<string>('todos');
+
+  // UI states
   const [showModal, setShowModal] = useState(false);
   const [editingLote, setEditingLote] = useState<Lote | LoteJeringa | null>(null);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [showDetails, setShowDetails] = useState<string | null>(null);
 
-  // Filtrar lotes
+  // Filtrar lotes (solo para visualización local, los filtros principales se aplican en el backend)
   const filteredLotes = lotes.filter(lote => {
     const matchesSearch = lote.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lote.numeroComprobante.toLowerCase().includes(searchTerm.toLowerCase());
@@ -76,7 +94,19 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
       }
     }
 
-    return matchesSearch && matchesEstado && matchesVencimiento;
+    // Enhanced filtering for vaccine/syringe types (local filtering for immediate UI feedback)
+    let matchesVacuna = true;
+    let matchesJeringa = true;
+
+    if (tipo === 'vacuna' && filterVacunaId !== 'todos') {
+      matchesVacuna = 'vacunaId' in lote && lote.vacunaId === filterVacunaId;
+    }
+
+    if (tipo === 'jeringa' && filterJeringaId !== 'todos') {
+      matchesJeringa = 'jeringaId' in lote && lote.jeringaId === filterJeringaId;
+    }
+
+    return matchesSearch && matchesEstado && matchesVencimiento && matchesVacuna && matchesJeringa;
   });
 
   // Usar estadísticas del backend o calcular localmente como fallback
@@ -114,6 +144,49 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
     }
     setShowModal(false);
     setEditingLote(null);
+  };
+
+  // Enhanced filtering functions
+  const handleApplyFilters = () => {
+    if (onApplyFilters) {
+      const filters: any = {};
+
+      if (searchTerm.trim()) {
+        filters.search = searchTerm.trim();
+      }
+
+      if (filterEstado !== 'todos') {
+        filters.estado = filterEstado;
+      }
+
+      if (filterVencimiento !== 'todos') {
+        filters.vencimiento = filterVencimiento;
+      }
+
+      if (tipo === 'vacuna' && filterVacunaId !== 'todos') {
+        filters.vacunaId = filterVacunaId;
+      }
+
+      if (tipo === 'jeringa' && filterJeringaId !== 'todos') {
+        filters.jeringaId = filterJeringaId;
+      }
+
+      console.log('🔍 Aplicando filtros:', filters);
+      onApplyFilters(filters);
+    }
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setFilterEstado('todos');
+    setFilterVencimiento('todos');
+    setFilterVacunaId('todos');
+    setFilterJeringaId('todos');
+
+    if (onApplyFilters) {
+      console.log('🧹 Limpiando filtros');
+      onApplyFilters({});
+    }
   };
 
   const getEstadoColor = (estado: string) => {
@@ -312,9 +385,16 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
       </div>
 
       {/* Filtros y búsqueda */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-2">
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <Filter className="h-5 w-5 mr-2" />
+          🔍 Filtros de Búsqueda
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+          {/* Búsqueda */}
+          <div className="lg:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
             <div className="relative">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               <input
@@ -326,34 +406,123 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
               />
             </div>
           </div>
-          
+
+          {/* Estado */}
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
             <select
               value={filterEstado}
               onChange={(e) => setFilterEstado(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="todos">Todos los estados</option>
-              <option value="disponible">Disponible</option>
-              <option value="agotado">Agotado</option>
-              {tipo === 'vacuna' && <option value="vencido">Vencido</option>}
+              <option value="todos">🔍 Todos los estados</option>
+              <option value="disponible">✅ Disponible</option>
+              <option value="agotado">⏰ Agotado</option>
+              {tipo === 'vacuna' && <option value="vencido">❌ Vencido</option>}
             </select>
           </div>
 
+          {/* Filtro de vencimiento para vacunas */}
           {tipo === 'vacuna' && (
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Vencimiento</label>
               <select
                 value={filterVencimiento}
                 onChange={(e) => setFilterVencimiento(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="todos">Todos los vencimientos</option>
-                <option value="vigente">Vigente (&gt;30 días)</option>
-                <option value="por_vencer">Por vencer (≤30 días)</option>
-                <option value="vencido">Vencido</option>
+                <option value="todos">🔍 Todos los vencimientos</option>
+                <option value="vigente">✅ Vigente (&gt;30 días)</option>
+                <option value="por_vencer">⚠️ Por vencer (≤30 días)</option>
+                <option value="vencido">❌ Vencido</option>
               </select>
             </div>
           )}
+
+          {/* Filtro por tipo de vacuna */}
+          {tipo === 'vacuna' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Vacuna</label>
+              <select
+                value={filterVacunaId}
+                onChange={(e) => setFilterVacunaId(e.target.value)}
+                disabled={isLoadingVacunas}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="todos">
+                  {isLoadingVacunas ? '⏳ Cargando...' : '🔍 Todas las vacunas'}
+                </option>
+                {vacunas.map((vacuna) => (
+                  <option key={vacuna.id} value={vacuna.id}>
+                    💉 {vacuna.nombre} - {vacuna.presentacion}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Filtros para jeringas */}
+          {tipo === 'jeringa' && (
+            <>
+              {/* Filtro por tipo de jeringa */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Jeringa</label>
+                <select
+                  value={filterJeringaId}
+                  onChange={(e) => setFilterJeringaId(e.target.value)}
+                  disabled={isLoadingJeringas}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="todos">
+                    {isLoadingJeringas ? '⏳ Cargando...' : '🔍 Todas las jeringas'}
+                  </option>
+                  {jeringas.map((jeringa) => (
+                    <option key={jeringa.id} value={jeringa.id}>
+                      🩹 {jeringa.tipo} - {jeringa.capacidad} ({jeringa.color})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Filtro por vacuna asociada (para jeringas) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Vacuna Asociada</label>
+                <select
+                  value={filterVacunaId}
+                  onChange={(e) => setFilterVacunaId(e.target.value)}
+                  disabled={isLoadingVacunas}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="todos">
+                    {isLoadingVacunas ? '⏳ Cargando...' : '🔍 Todas las vacunas'}
+                  </option>
+                  {vacunas.map((vacuna) => (
+                    <option key={vacuna.id} value={vacuna.id}>
+                      💉 {vacuna.nombre} - {vacuna.presentacion}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Botones de acción para filtros */}
+        <div className="flex items-center justify-center space-x-3 pt-4 border-t border-gray-200">
+          <button
+            onClick={handleApplyFilters}
+            className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Search className="h-4 w-4 mr-2" />
+            Aplicar Filtros
+          </button>
+          <button
+            onClick={handleClearFilters}
+            className="flex items-center px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Limpiar Filtros
+          </button>
         </div>
       </div>
 
