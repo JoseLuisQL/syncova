@@ -25,6 +25,36 @@ Crea funciones y triggers de PostgreSQL para automatización de procesos.
 npm run db:create-triggers
 ```
 
+### 3. `apply-tipo-vale-migration.js`
+Aplica la migración para agregar soporte de tipos de vale (tipo_vale enum y campo).
+
+**Uso:**
+```bash
+npm run db:migrate-tipo-vale
+```
+
+**Qué hace:**
+- Crea el enum `tipo_vale` con valores: `completo`, `solo_base`, `solo_adicionales`
+- Agrega la columna `tipo_vale` a la tabla `vales_entrega`
+- Agrega la columna `grupos_entregas_adicionales` para identificar únicamente vales de entregas adicionales
+- Actualiza el constraint único para permitir múltiples vales de entregas adicionales
+- Crea índices para optimizar consultas
+- Verifica que la migración se aplicó correctamente
+
+### 4. `test-multiple-vouchers.js`
+Prueba la funcionalidad de múltiples vales de entregas adicionales.
+
+**Uso:**
+```bash
+npm run test:multiple-vouchers
+```
+
+**Qué hace:**
+- Crea vales de diferentes tipos para verificar que el constraint único funciona correctamente
+- Prueba la creación de múltiples vales de entregas adicionales con diferentes grupos
+- Verifica que no se puedan crear vales duplicados
+- Limpia los datos de prueba automáticamente
+
 **Qué hace:**
 - Crea la función `actualizar_saldo_anterior_siguiente_mes()`
 - Crea el trigger `actualizar_saldo_anterior_trigger`
@@ -80,6 +110,8 @@ npm run db:seed          # Poblar base de datos con datos iniciales
 npm run db:setup         # Configuración completa inicial
 npm run db:migrate-entrega-base  # Solo migración de entrega_base
 npm run db:create-triggers       # Solo crear triggers y funciones
+npm run db:migrate-tipo-vale     # Solo migración de tipos de vale
+npm run test:multiple-vouchers   # Probar múltiples vales de entregas adicionales
 
 # Utilidades
 npm run db:generate      # Generar cliente Prisma

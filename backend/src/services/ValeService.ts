@@ -180,13 +180,14 @@ export class ValeService {
           throw createError(`Ya existen vales para los grupos de entregas adicionales: ${gruposYaGenerados.join(', ')} para ${centroAcopio.nombre} en ${data.mes}/${data.anio}`, 409);
         }
       } else {
-        // Lógica antigua para compatibilidad
+        // Lógica antigua para compatibilidad: verificar si ya existe un vale general de solo_adicionales
+        // Esto solo aplica cuando no se especifican grupos específicos
         if (tiposGenerados.includes(tipoVale)) {
           throw createError(`Ya existe un vale de entregas adicionales para ${centroAcopio.nombre} en ${data.mes}/${data.anio}`, 409);
         }
       }
     } else {
-      // Para otros tipos, mantener la validación original
+      // Para otros tipos (completo, solo_base), mantener la validación original
       if (tiposGenerados.includes(tipoVale)) {
         const tipoTexto = {
           'completo': 'completo',
@@ -227,6 +228,18 @@ export class ValeService {
       select: { numero: true }
     });
 
+    // También verificar números usados en kardex (para evitar reutilizar números de vales eliminados)
+    const numerosKardex = await prisma.kardex.findMany({
+      where: {
+        numeroDocumento: {
+          startsWith: `${centroAcopio.codigo}-${anio}-`
+        },
+        documento: 'VALE_ENTREGA'
+      },
+      select: { numeroDocumento: true },
+      distinct: ['numeroDocumento']
+    });
+
     let maxNumero = 0;
     const prefijo = `${centroAcopio.codigo}-${anio}-`;
 
@@ -241,18 +254,41 @@ export class ValeService {
       }
     }
 
+    // También verificar números en kardex
+    for (const kardex of numerosKardex) {
+      if (kardex.numeroDocumento.startsWith(prefijo)) {
+        const numeroStr = kardex.numeroDocumento.substring(prefijo.length);
+        const numero = parseInt(numeroStr, 10);
+        if (!isNaN(numero) && numero > maxNumero) {
+          maxNumero = numero;
+        }
+      }
+    }
+
     const siguienteNumero = maxNumero + 1;
 
     // Formato: CODIGO_CENTRO-AÑO-NUMERO_SECUENCIAL
     const numeroVale = `${prefijo}${siguienteNumero.toString().padStart(3, '0')}`;
 
-    // Verificar que no exista (doble verificación)
+    // Verificar que no exista en vales activos
     const valeExistente = await prisma.valeEntrega.findFirst({
       where: { numero: numeroVale }
     });
 
     if (valeExistente) {
-      throw createError(`El número de vale ${numeroVale} ya existe`, 409);
+      throw createError(`El número de vale ${numeroVale} ya existe en vales activos`, 409);
+    }
+
+    // Verificar que no exista en kardex
+    const kardexExistente = await prisma.kardex.findFirst({
+      where: {
+        numeroDocumento: numeroVale,
+        documento: 'VALE_ENTREGA'
+      }
+    });
+
+    if (kardexExistente) {
+      throw createError(`El número de vale ${numeroVale} ya fue usado anteriormente`, 409);
     }
 
     return numeroVale;
@@ -1106,6 +1142,14 @@ export class ValeService {
         }
 
         // PASO 4: Crear vale de entrega
+        // Generar identificador único para grupos de entregas adicionales
+        let gruposEntregasAdicionales: string | null = null;
+        if (tipoVale === 'solo_adicionales' && data.gruposEntregasSeleccionados && data.gruposEntregasSeleccionados.length > 0) {
+          // Ordenar los grupos para consistencia
+          const gruposOrdenados = [...data.gruposEntregasSeleccionados].sort((a, b) => a - b);
+          gruposEntregasAdicionales = gruposOrdenados.join(',');
+        }
+
         const vale = await tx.valeEntrega.create({
           data: {
             numero: numeroVale,
@@ -1114,6 +1158,7 @@ export class ValeService {
             anio: data.anio,
             estado: EstadoVale.generado,
             tipoVale: (data.tipoVale || 'completo') as any,
+            gruposEntregasAdicionales,
             usuarioId: usuarioIdFinal,
             observaciones: data.observaciones || null
           }
@@ -1531,6 +1576,55 @@ export class ValeService {
   }
 
   /**
+   * Validar integridad del vale antes de la reversión
+   */
+  private static async validarIntegridadVale(numeroVale: string, fechaGeneracion: Date): Promise<ServiceResult<boolean>> {
+    try {
+      // Verificar que no existan reversiones previas
+      const reversionesExistentes = await prisma.kardex.findMany({
+        where: {
+          numeroDocumento: `REVERSION-VALE-${numeroVale}`,
+          documento: 'REVERSION'
+        }
+      });
+
+      if (reversionesExistentes.length > 0) {
+        return {
+          success: false,
+          error: `El vale ${numeroVale} ya tiene reversiones registradas`
+        };
+      }
+
+      // Verificar que existen movimientos de salida para este vale
+      const movimientosSalida = await prisma.kardex.findMany({
+        where: {
+          numeroDocumento: numeroVale,
+          tipoMovimiento: TipoMovimientoKardex.salida,
+          documento: 'VALE_ENTREGA',
+          createdAt: {
+            gte: fechaGeneracion
+          }
+        }
+      });
+
+      if (movimientosSalida.length === 0) {
+        return {
+          success: false,
+          error: `No se encontraron movimientos de salida válidos para el vale ${numeroVale}`
+        };
+      }
+
+      return { success: true, data: true };
+    } catch (error) {
+      console.error(`Error validando integridad del vale ${numeroVale}:`, error);
+      return {
+        success: false,
+        error: 'Error interno validando integridad del vale'
+      };
+    }
+  }
+
+  /**
    * Revertir vale y restaurar stocks afectados
    */
   static async revertirVale(id: string): Promise<ServiceResult<{ message: string }>> {
@@ -1572,36 +1666,64 @@ export class ValeService {
         };
       }
 
+      // Validación adicional: verificar integridad del vale antes de la reversión
+      const validacionIntegridad = await this.validarIntegridadVale(valeExistente.numero, valeExistente.fechaGeneracion);
+      if (!validacionIntegridad.success) {
+        console.log(`❌ [ValeService] Fallo en validación de integridad: ${validacionIntegridad.error}`);
+        return {
+          success: false,
+          error: `Error de integridad: ${validacionIntegridad.error}`
+        };
+      }
+
       // Ejecutar reversión en transacción
       await prisma.$transaction(async (tx) => {
-        // PASO 1: Verificar movimientos de stock pendientes de revertir
-        const movimientosPendientes = await tx.kardex.findMany({
+        // PASO 1: Verificar que existen reversiones previas para evitar duplicados
+        const reversionesExistentes = await tx.kardex.findMany({
+          where: {
+            numeroDocumento: `REVERSION-VALE-${valeExistente.numero}`,
+            documento: 'REVERSION'
+          }
+        });
+
+        if (reversionesExistentes.length > 0) {
+          console.log(`⚠️ [ValeService] El vale ${valeExistente.numero} ya tiene reversiones registradas`);
+          throw new Error(`El vale ${valeExistente.numero} ya ha sido revertido previamente. No se puede revertir nuevamente.`);
+        }
+
+        // PASO 2: Obtener movimientos de stock que pertenecen ÚNICAMENTE a este vale actual
+        // Filtrar solo los movimientos que no tienen reversión correspondiente
+        const movimientosSalida = await tx.kardex.findMany({
           where: {
             numeroDocumento: valeExistente.numero,
             tipoMovimiento: TipoMovimientoKardex.salida,
             documento: 'VALE_ENTREGA'
-          }
+          },
+          orderBy: { createdAt: 'desc' } // Más recientes primero para identificar el vale actual
         });
 
-        if (movimientosPendientes.length === 0) {
-          console.log(`⚠️ [ValeService] No hay movimientos de stock pendientes para revertir en vale: ${valeExistente.numero}`);
-          throw new Error(`El vale ${valeExistente.numero} no tiene movimientos de stock pendientes para revertir. Es posible que ya haya sido revertido.`);
+        if (movimientosSalida.length === 0) {
+          console.log(`⚠️ [ValeService] No hay movimientos de stock para revertir en vale: ${valeExistente.numero}`);
+          throw new Error(`El vale ${valeExistente.numero} no tiene movimientos de stock para revertir.`);
         }
 
-        console.log(`📋 [ValeService] Encontrados ${movimientosPendientes.length} movimientos de stock para revertir`);
+        // PASO 3: Filtrar movimientos que pertenecen al vale actual (no a generaciones anteriores)
+        // Usamos la fecha de creación del vale como referencia
+        const movimientosValeActual = movimientosSalida.filter(mov =>
+          mov.createdAt >= valeExistente.fechaGeneracion
+        );
 
-        // PASO 2: Revertir stocks de vacunas afectados
-        const stocksVacunasAfectados = await tx.kardex.findMany({
-          where: {
-            numeroDocumento: valeExistente.numero,
-            tipoMovimiento: TipoMovimientoKardex.salida,
-            tipo: 'vacuna',
-            documento: 'VALE_ENTREGA' // Solo movimientos originales del vale, no reversiones
-          },
-          orderBy: { createdAt: 'asc' } // Procesar en orden cronológico
-        });
+        if (movimientosValeActual.length === 0) {
+          console.log(`⚠️ [ValeService] No hay movimientos del vale actual para revertir: ${valeExistente.numero}`);
+          throw new Error(`No se encontraron movimientos del vale actual para revertir. Es posible que ya haya sido revertido.`);
+        }
 
-        console.log(`📋 [ValeService] Encontrados ${stocksVacunasAfectados.length} movimientos de vacunas para revertir`);
+        console.log(`📋 [ValeService] Encontrados ${movimientosValeActual.length} movimientos del vale actual para revertir`);
+
+        // PASO 4: Revertir stocks de vacunas afectados (solo del vale actual)
+        const stocksVacunasAfectados = movimientosValeActual.filter(mov => mov.tipo === 'vacuna');
+
+        console.log(`📋 [ValeService] Encontrados ${stocksVacunasAfectados.length} movimientos de vacunas del vale actual para revertir`);
 
         for (const kardex of stocksVacunasAfectados) {
           // Obtener el estado actual del lote antes de la reversión
@@ -1617,7 +1739,7 @@ export class ValeService {
 
           const nuevaCantidad = loteActual.cantidadActual + kardex.cantidad;
 
-          console.log(`🔄 [ValeService] Revirtiendo vacuna - Lote: ${kardex.loteId}, Cantidad: +${kardex.cantidad}, Nuevo saldo: ${nuevaCantidad}`);
+          console.log(`🔄 [ValeService] Revirtiendo vacuna del vale actual - Lote: ${kardex.loteId}, Cantidad: +${kardex.cantidad}, Nuevo saldo: ${nuevaCantidad}`);
 
           // Restaurar stock del lote de vacuna
           await tx.loteVacuna.update({
@@ -1640,25 +1762,17 @@ export class ValeService {
               saldoActual: nuevaCantidad,
               documento: 'REVERSION',
               numeroDocumento: `REVERSION-VALE-${valeExistente.numero}`,
-              observaciones: `Reversión de vale ${valeExistente.numero} - ${valeExistente.centroAcopio.nombre}`,
+              observaciones: `Reversión de vale ${valeExistente.numero} - ${valeExistente.centroAcopio.nombre} (Vale actual)`,
               usuarioId: valeExistente.usuarioId,
               fechaMovimiento: new Date()
             }
           });
         }
 
-        // PASO 3: Revertir stocks de jeringas afectados
-        const stocksJeringasAfectados = await tx.kardex.findMany({
-          where: {
-            numeroDocumento: valeExistente.numero,
-            tipoMovimiento: TipoMovimientoKardex.salida,
-            tipo: 'jeringa',
-            documento: 'VALE_ENTREGA' // Solo movimientos originales del vale, no reversiones
-          },
-          orderBy: { createdAt: 'asc' } // Procesar en orden cronológico
-        });
+        // PASO 5: Revertir stocks de jeringas afectados (solo del vale actual)
+        const stocksJeringasAfectados = movimientosValeActual.filter(mov => mov.tipo === 'jeringa');
 
-        console.log(`📋 [ValeService] Encontrados ${stocksJeringasAfectados.length} movimientos de jeringas para revertir`);
+        console.log(`📋 [ValeService] Encontrados ${stocksJeringasAfectados.length} movimientos de jeringas del vale actual para revertir`);
 
         for (const kardex of stocksJeringasAfectados) {
           // Obtener el estado actual del lote antes de la reversión
@@ -1674,7 +1788,7 @@ export class ValeService {
 
           const nuevaCantidad = loteActual.cantidadActual + kardex.cantidad;
 
-          console.log(`🔄 [ValeService] Revirtiendo jeringa - Lote: ${kardex.loteId}, Cantidad: +${kardex.cantidad}, Nuevo saldo: ${nuevaCantidad}`);
+          console.log(`🔄 [ValeService] Revirtiendo jeringa del vale actual - Lote: ${kardex.loteId}, Cantidad: +${kardex.cantidad}, Nuevo saldo: ${nuevaCantidad}`);
 
           // Restaurar stock del lote de jeringa
           await tx.loteJeringa.update({
@@ -1697,19 +1811,19 @@ export class ValeService {
               saldoActual: nuevaCantidad,
               documento: 'REVERSION',
               numeroDocumento: `REVERSION-VALE-${valeExistente.numero}`,
-              observaciones: `Reversión de vale ${valeExistente.numero} - ${valeExistente.centroAcopio.nombre}`,
+              observaciones: `Reversión de vale ${valeExistente.numero} - ${valeExistente.centroAcopio.nombre} (Vale actual)`,
               usuarioId: valeExistente.usuarioId,
               fechaMovimiento: new Date()
             }
           });
         }
 
-        // PASO 4: Eliminar detalles del vale
+        // PASO 6: Eliminar detalles del vale
         await tx.valeDetalle.deleteMany({
           where: { valeEntregaId: id }
         });
 
-        // PASO 5: Eliminar el vale
+        // PASO 7: Eliminar el vale
         await tx.valeEntrega.delete({
           where: { id }
         });
@@ -2429,11 +2543,13 @@ export class ValeService {
           mes,
           anio
         },
-        include: {
+        select: {
+          id: true,
+          tipoVale: true,
           detalles: {
-            include: {
-              establecimiento: true,
-              vacuna: true
+            select: {
+              cantidadProgramada: true,
+              cantidadAdicional: true
             }
           }
         }
@@ -2446,30 +2562,35 @@ export class ValeService {
         };
       }
 
-      // Analizar cada vale para determinar su tipo basándose en su contenido
       const tiposGenerados: string[] = [];
 
+      // Analizar cada vale para determinar su tipo
       for (const vale of valesExistentes) {
-        // Verificar si tiene entregas base (cantidadProgramada > 0)
-        const tieneEntregasBase = vale.detalles.some(detalle => detalle.cantidadProgramada > 0);
-
-        // Verificar si tiene entregas adicionales (cantidadAdicional > 0)
-        const tieneEntregasAdicionales = vale.detalles.some(detalle => detalle.cantidadAdicional > 0);
-
-        if (tieneEntregasBase && tieneEntregasAdicionales) {
-          // Vale completo
-          if (!tiposGenerados.includes('completo')) {
-            tiposGenerados.push('completo');
+        // Primero intentar usar el campo tipoVale si existe
+        if (vale.tipoVale) {
+          if (!tiposGenerados.includes(vale.tipoVale)) {
+            tiposGenerados.push(vale.tipoVale);
           }
-        } else if (tieneEntregasBase && !tieneEntregasAdicionales) {
-          // Solo entregas base
-          if (!tiposGenerados.includes('solo_base')) {
-            tiposGenerados.push('solo_base');
-          }
-        } else if (!tieneEntregasBase && tieneEntregasAdicionales) {
-          // Solo entregas adicionales
-          if (!tiposGenerados.includes('solo_adicionales')) {
-            tiposGenerados.push('solo_adicionales');
+        } else {
+          // Fallback: analizar contenido para compatibilidad con vales antiguos
+          const tieneEntregasBase = vale.detalles.some(detalle => detalle.cantidadProgramada > 0);
+          const tieneEntregasAdicionales = vale.detalles.some(detalle => detalle.cantidadAdicional > 0);
+
+          if (tieneEntregasBase && tieneEntregasAdicionales) {
+            // Vale completo
+            if (!tiposGenerados.includes('completo')) {
+              tiposGenerados.push('completo');
+            }
+          } else if (tieneEntregasBase && !tieneEntregasAdicionales) {
+            // Solo entregas base
+            if (!tiposGenerados.includes('solo_base')) {
+              tiposGenerados.push('solo_base');
+            }
+          } else if (!tieneEntregasBase && tieneEntregasAdicionales) {
+            // Solo entregas adicionales
+            if (!tiposGenerados.includes('solo_adicionales')) {
+              tiposGenerados.push('solo_adicionales');
+            }
           }
         }
       }

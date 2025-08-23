@@ -358,6 +358,7 @@ model ValeEntrega {
   fechaGeneracion       DateTime      @default(now()) @map("fecha_generacion") @db.Timestamptz(6)
   estado                EstadoVale    @default(generado)
   tipoVale              TipoVale      @default(completo) @map("tipo_vale")
+  gruposEntregasAdicionales String?   @map("grupos_entregas_adicionales") @db.Text
   totalVacunas          Int           @default(0) @map("total_vacunas")
   totalEstablecimientos Int           @default(0) @map("total_establecimientos")
   usuarioId             String        @map("usuario_id") @db.Uuid
@@ -370,8 +371,8 @@ model ValeEntrega {
   usuario               Usuario         @relation(fields: [usuarioId], references: [id])
   detalles              ValeDetalle[]
 
-  // Permitir múltiples vales por período pero con diferentes tipos
-  @@unique([centroAcopioId, mes, anio, tipoVale], name: "uk_centro_periodo_tipo")
+  // Permitir múltiples vales por período pero con diferentes tipos y grupos
+  @@unique([centroAcopioId, mes, anio, tipoVale, gruposEntregasAdicionales], name: "uk_centro_periodo_tipo_grupos")
   @@map("vales_entrega")
 }
 

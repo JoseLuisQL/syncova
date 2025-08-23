@@ -259,6 +259,8 @@ export interface ValeEntrega {
   anio: number;
   fechaGeneracion: Date;
   estado: 'generado' | 'impreso' | 'entregado';
+  tipoVale?: 'completo' | 'solo_base' | 'solo_adicionales';
+  gruposEntregasAdicionales?: string;
   totalVacunas: number;
   totalEstablecimientos: number;
   usuarioId: string;
