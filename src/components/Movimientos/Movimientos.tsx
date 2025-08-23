@@ -28,6 +28,8 @@ import {
   Calculator,
   Loader2,
   Save,
+  Truck as TruckIcon,
+  AlertCircle,
   Receipt,
   Upload
 } from 'lucide-react';
@@ -166,7 +168,6 @@ const Movimientos: React.FC = () => {
     stockInicial: number;
     totalEntregas: number;
     stockDisponible: number;
-    porcentajeUtilizado: number;
     estado: 'bueno' | 'medio' | 'critico';
     lotes: Array<{
       id: string;
@@ -180,8 +181,34 @@ const Movimientos: React.FC = () => {
   // Estados para la interfaz
   const [selectedMovimiento, setSelectedMovimiento] = useState<MovimientoCalculado | null>(null);
   const [isLoadingStock, setIsLoadingStock] = useState(false);
+  const [stockError, setStockError] = useState<string | null>(null);
+  const [isUpdatingStock, setIsUpdatingStock] = useState(false); // Para mostrar cuando se actualiza en tiempo real
   const [showEntregasAdicionalesModal, setShowEntregasAdicionalesModal] = useState(false);
   const [movimientoParaEntregas, setMovimientoParaEntregas] = useState<MovimientoCalculado | null>(null);
+
+  // 🚀 Función auxiliar para actualizar stock en tiempo real con indicadores visuales
+  const updateStockInRealTime = async (showToastOnDeficit: boolean = true) => {
+    if (!selectedVacuna) return;
+
+    setIsUpdatingStock(true);
+    try {
+      const stock = await getStockDisponible(selectedVacuna, selectedMes, selectedAnio);
+      setStockInfo(stock);
+      setStockError(null);
+
+      // Mostrar notificación si hay déficit después del cambio
+      if (showToastOnDeficit && stock && stock.stockDisponible < 0) {
+        const vacunaNombre = vacunasActivas.find(v => v.id === selectedVacuna)?.nombre || 'Vacuna';
+        toast.warning(`⚠️ Déficit detectado • ${vacunaNombre} • ${meses[selectedMes - 1]} ${selectedAnio} • ${Math.abs(stock.stockDisponible).toLocaleString()} unidades`);
+      }
+    } catch (error: any) {
+      console.error('Error al actualizar stock disponible:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al actualizar stock';
+      setStockError(errorMessage);
+    } finally {
+      setIsUpdatingStock(false);
+    }
+  };
 
   // Estados para el sistema de edición profesional
   const [tempValues, setTempValues] = useState<{[key: string]: number}>({});
@@ -245,20 +272,33 @@ const Movimientos: React.FC = () => {
     const loadStock = async () => {
       if (selectedVacuna) {
         setIsLoadingStock(true);
+        setStockError(null);
         try {
           const stock = await getStockDisponible(selectedVacuna, selectedMes, selectedAnio);
           setStockInfo(stock);
-        } catch (error) {
+
+          // Mostrar notificación si hay déficit
+          if (stock && stock.stockDisponible < 0) {
+            const vacunaNombre = vacunasActivas.find(v => v.id === selectedVacuna)?.nombre || 'Vacuna';
+            toast.warning(`⚠️ Déficit detectado • ${vacunaNombre} • ${meses[selectedMes - 1]} ${selectedAnio} • ${Math.abs(stock.stockDisponible).toLocaleString()} unidades`);
+          }
+        } catch (error: any) {
           console.error('Error al cargar stock disponible:', error);
-          toast.error('Error al cargar stock disponible');
+          const errorMessage = error?.response?.data?.message || error?.message || 'Error al cargar stock disponible';
+          setStockError(errorMessage);
+          setStockInfo(null);
+          toast.error(`❌ Error al cargar stock • ${errorMessage}`);
         } finally {
           setIsLoadingStock(false);
         }
+      } else {
+        setStockInfo(null);
+        setStockError(null);
       }
     };
 
     loadStock();
-  }, [selectedVacuna, selectedMes, selectedAnio]); // Removido getStockDisponible y toast para evitar loop
+  }, [selectedVacuna, selectedMes, selectedAnio, vacunasActivas]); // Agregado vacunasActivas para las notificaciones
 
   // Limpiar timeouts al desmontar el componente
   useEffect(() => {
@@ -501,6 +541,11 @@ const Movimientos: React.FC = () => {
               ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
             };
             await loadMovimientos(filters);
+
+            // 🚀 NUEVA FUNCIONALIDAD: Actualizar Stock Disponible en tiempo real cuando cambia la entrega
+            if (campo === 'entrega') {
+              await updateStockInRealTime();
+            }
           }
         }, 500); // 500ms de delay para asegurar que el trigger se ejecute
       }
@@ -767,6 +812,9 @@ const Movimientos: React.FC = () => {
       // Toast de confirmación profesional con información de sincronización
       toast.success(`✅ Entrega adicional actualizada • Cantidad: ${value.toLocaleString()} • Sincronizado con planificación`);
 
+      // 🚀 NUEVA FUNCIONALIDAD: Actualizar Stock Disponible en tiempo real cuando cambia entrega adicional
+      await updateStockInRealTime();
+
     } catch (error: any) {
       console.error('Error al guardar entrega adicional:', error);
 
@@ -870,6 +918,9 @@ const Movimientos: React.FC = () => {
       await loadMovimientos(filters);
 
       toast.success(`✅ Entrega adicional creada • ${nombreEstablecimiento} • Entrega #${siguienteNumero} • Sincronizado con planificación`);
+
+      // 🚀 NUEVA FUNCIONALIDAD: Actualizar Stock Disponible en tiempo real cuando se crea entrega adicional
+      await updateStockInRealTime();
     } catch (error: any) {
       console.error('Error al agregar entrega adicional:', error);
 
@@ -923,6 +974,9 @@ const Movimientos: React.FC = () => {
       }
 
       toast.success('✅ Entrega adicional eliminada • Planificación actualizada automáticamente');
+
+      // 🚀 NUEVA FUNCIONALIDAD: Actualizar Stock Disponible en tiempo real cuando se elimina entrega adicional
+      await updateStockInRealTime();
     } catch (error: any) {
       console.error('Error al eliminar entrega adicional:', error);
 
@@ -1103,173 +1157,271 @@ const Movimientos: React.FC = () => {
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Calendar className="h-4 w-4 inline mr-1" />
-              Mes
+          <div className="space-y-1">
+            <label className="block text-sm font-semibold text-gray-700">
+              <Calendar className="h-4 w-4 inline mr-2 text-blue-600" />
+              Período de Análisis
             </label>
-            <select
-              value={selectedMes}
-              onChange={(e) => setSelectedMes(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              {meses.map((mes, index) => (
-                <option key={index + 1} value={index + 1}>
-                  📅 {mes}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Calendar className="h-4 w-4 inline mr-1" />
-              Año
-            </label>
-            <select
-              value={selectedAnio}
-              onChange={(e) => setSelectedAnio(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value={2024}>📅 2024</option>
-              <option value={2025}>📅 2025</option>
-              <option value={2026}>📅 2026</option>
-            </select>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Mes</label>
+                <select
+                  value={selectedMes}
+                  onChange={(e) => setSelectedMes(Number(e.target.value))}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm font-medium shadow-sm hover:border-gray-400 transition-colors"
+                >
+                  {meses.map((mes, index) => (
+                    <option key={index + 1} value={index + 1}>
+                      {mes}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Año</label>
+                <select
+                  value={selectedAnio}
+                  onChange={(e) => setSelectedAnio(Number(e.target.value))}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm font-medium shadow-sm hover:border-gray-400 transition-colors"
+                >
+                  <option value={2024}>2024</option>
+                  <option value={2025}>2025</option>
+                  <option value={2026}>2026</option>
+                </select>
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 mt-1 flex items-center">
+              <Target className="h-3 w-3 mr-1" />
+              Las entregas se calculan solo para el período seleccionado
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Stock Disponible */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div className="px-4 py-3">
-          <div className="flex items-center justify-between mb-3">
+      {/* Stock Disponible - Modernizado */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <Package className="h-4 w-4 text-emerald-600 mr-2" />
-              <span className="font-medium text-gray-900 text-sm">Stock Disponible</span>
-              {vacunaSeleccionada && (
-                <span className="ml-2 text-xs text-gray-500">
-                  - {vacunaSeleccionada.nombre}
-                </span>
-              )}
+              <div className="p-2 bg-emerald-50 rounded-lg mr-3">
+                <Package className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-base">Stock Disponible</h3>
+                {vacunaSeleccionada && (
+                  <p className="text-sm text-gray-600 mt-0.5">
+                    {vacunaSeleccionada.nombre} • {meses[selectedMes - 1]} {selectedAnio}
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="flex items-center space-x-1">
-              {isLoadingStock ? (
-                <Loader2 className="h-3 w-3 animate-spin text-blue-600" />
+            <div className="flex items-center space-x-2">
+              {isLoadingStock || isUpdatingStock ? (
+                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
               ) : (
-                <RefreshCw className="h-3 w-3 text-gray-400" />
+                <RefreshCw className="h-4 w-4 text-emerald-600" />
               )}
-              <span className="text-xs text-gray-500">
-                {isLoadingStock ? 'Cargando...' : 'Tiempo real'}
+              <span className="text-xs text-gray-500 font-medium">
+                {isLoadingStock ? 'Cargando...' :
+                 isUpdatingStock ? 'Actualizando...' :
+                 'En tiempo real'}
               </span>
             </div>
           </div>
 
           {stockInfo ? (
             <>
-              <div className="grid grid-cols-4 gap-3">
+              {/* Indicador de actualización en tiempo real */}
+              {isUpdatingStock && (
+                <div className="mb-3 flex items-center justify-center">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-center space-x-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                    <span className="text-sm text-blue-700 font-medium">Recalculando stock en tiempo real...</span>
+                  </div>
+                </div>
+              )}
+
+              <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 transition-opacity duration-300 ${isUpdatingStock ? 'opacity-75' : 'opacity-100'}`}>
                 {/* Stock Inicial */}
-                <div className="text-center">
-                  <div className="bg-blue-50 rounded-md p-2 border border-blue-200">
-                    <div className="text-lg font-bold text-blue-600">
-                      {stockInfo.stockInicial.toLocaleString()}
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-2xl font-bold text-blue-700">
+                        {stockInfo.stockInicial.toLocaleString()}
+                      </div>
+                      <div className="text-sm text-blue-600 font-medium mt-1">Stock Inicial</div>
+                      <div className="text-xs text-blue-500 mt-1">Total disponible</div>
                     </div>
-                    <div className="text-xs text-blue-700 font-medium">Inicial</div>
+                    <div className="p-2 bg-blue-200 rounded-lg">
+                      <Package className="h-6 w-6 text-blue-700" />
+                    </div>
                   </div>
                 </div>
 
                 {/* Total Entregas */}
-                <div className="text-center">
-                  <div className="bg-orange-50 rounded-md p-2 border border-orange-200">
-                    <div className="text-lg font-bold text-orange-600">
-                      {stockInfo.totalEntregas.toLocaleString()}
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-2xl font-bold text-orange-700">
+                        {stockInfo.totalEntregas.toLocaleString()}
+                      </div>
+                      <div className="text-sm text-orange-600 font-medium mt-1">Entregas del Mes</div>
+                      <div className="text-xs text-orange-500 mt-1">{meses[selectedMes - 1]} {selectedAnio}</div>
                     </div>
-                    <div className="text-xs text-orange-700 font-medium">Entregas</div>
+                    <div className="p-2 bg-orange-200 rounded-lg">
+                      <TruckIcon className="h-6 w-6 text-orange-700" />
+                    </div>
                   </div>
                 </div>
 
                 {/* Stock Disponible */}
-                <div className="text-center">
-                  <div className={`rounded-md p-2 border ${
-                    stockInfo.estado === 'bueno' ? 'bg-green-50 border-green-200' :
-                    stockInfo.estado === 'medio' ? 'bg-yellow-50 border-yellow-200' :
-                    'bg-red-50 border-red-200'
-                  }`}>
-                    <div className={`text-lg font-bold ${
-                      stockInfo.estado === 'bueno' ? 'text-green-600' :
-                      stockInfo.estado === 'medio' ? 'text-yellow-600' :
-                      'text-red-600'
+                <div className={`rounded-lg p-4 border ${
+                  stockInfo.stockDisponible < 0 ? 'bg-gradient-to-br from-red-50 to-red-100 border-red-200' :
+                  stockInfo.estado === 'bueno' ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200' :
+                  stockInfo.estado === 'medio' ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200' :
+                  'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className={`text-2xl font-bold ${
+                        stockInfo.stockDisponible < 0 ? 'text-red-700' :
+                        stockInfo.estado === 'bueno' ? 'text-green-700' :
+                        stockInfo.estado === 'medio' ? 'text-yellow-700' :
+                        'text-red-700'
+                      }`}>
+                        {stockInfo.stockDisponible.toLocaleString()}
+                      </div>
+                      <div className={`text-sm font-medium mt-1 ${
+                        stockInfo.stockDisponible < 0 ? 'text-red-600' :
+                        stockInfo.estado === 'bueno' ? 'text-green-600' :
+                        stockInfo.estado === 'medio' ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {stockInfo.stockDisponible < 0 ? 'Déficit' : 'Disponible'}
+                      </div>
+                      <div className={`text-xs mt-1 ${
+                        stockInfo.stockDisponible < 0 ? 'text-red-500' :
+                        stockInfo.estado === 'bueno' ? 'text-green-500' :
+                        stockInfo.estado === 'medio' ? 'text-yellow-500' :
+                        'text-red-500'
+                      }`}>
+                        {stockInfo.stockDisponible < 0 ? 'Entregas exceden stock' :
+                         stockInfo.estado === 'bueno' ? 'Stock saludable' :
+                         stockInfo.estado === 'medio' ? 'Stock moderado' :
+                         'Stock crítico'}
+                      </div>
+                    </div>
+                    <div className={`p-2 rounded-lg ${
+                      stockInfo.stockDisponible < 0 ? 'bg-red-200' :
+                      stockInfo.estado === 'bueno' ? 'bg-green-200' :
+                      stockInfo.estado === 'medio' ? 'bg-yellow-200' :
+                      'bg-red-200'
                     }`}>
-                      {stockInfo.stockDisponible.toLocaleString()}
+                      {stockInfo.stockDisponible < 0 ? (
+                        <AlertTriangle className="h-6 w-6 text-red-700" />
+                      ) : stockInfo.estado === 'bueno' ? (
+                        <CheckCircle className="h-6 w-6 text-green-700" />
+                      ) : stockInfo.estado === 'medio' ? (
+                        <AlertCircle className="h-6 w-6 text-yellow-700" />
+                      ) : (
+                        <AlertTriangle className="h-6 w-6 text-red-700" />
+                      )}
                     </div>
-                    <div className={`text-xs font-medium ${
-                      stockInfo.estado === 'bueno' ? 'text-green-700' :
-                      stockInfo.estado === 'medio' ? 'text-yellow-700' :
-                      'text-red-700'
-                    }`}>
-                      Disponible {stockInfo.estado === 'bueno' ? '✅' : stockInfo.estado === 'medio' ? '⚠️' : '🚨'}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Porcentaje Utilizado */}
-                <div className="text-center">
-                  <div className="bg-purple-50 rounded-md p-2 border border-purple-200">
-                    <div className="text-lg font-bold text-purple-600">
-                      {stockInfo.porcentajeUtilizado.toFixed(1)}%
-                    </div>
-                    <div className="text-xs text-purple-700 font-medium">Utilizado</div>
                   </div>
                 </div>
               </div>
 
-              {/* Barra de Progreso */}
-              <div className="mt-3">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium text-gray-600">Progreso de Utilización</span>
-                  <span className="text-xs text-gray-500">{stockInfo.porcentajeUtilizado.toFixed(1)}%</span>
+              {/* Información adicional para casos de déficit */}
+              {stockInfo.stockDisponible < 0 && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center">
+                    <AlertTriangle className="h-4 w-4 text-red-600 mr-2" />
+                    <div className="text-sm text-red-800">
+                      <span className="font-medium">Advertencia:</span> Las entregas del mes exceden el stock inicial en{' '}
+                      <span className="font-bold">{Math.abs(stockInfo.stockDisponible).toLocaleString()}</span> unidades.
+                    </div>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className={`h-2 rounded-full transition-all duration-500 ${
-                      stockInfo.porcentajeUtilizado <= 50 ? 'bg-green-500' :
-                      stockInfo.porcentajeUtilizado <= 80 ? 'bg-yellow-500' :
-                      'bg-red-500'
-                    }`}
-                    style={{ width: `${Math.min(100, stockInfo.porcentajeUtilizado)}%` }}
-                  ></div>
-                </div>
-              </div>
+              )}
 
               {/* Información de Lotes */}
               {stockInfo.lotes && stockInfo.lotes.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <div className="text-xs font-medium text-gray-600 mb-2">
-                    Lotes Disponibles ({stockInfo.lotes.length})
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-sm font-medium text-gray-700">
+                      Lotes Disponibles
+                    </div>
+                    <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                      {stockInfo.lotes.length} lote{stockInfo.lotes.length !== 1 ? 's' : ''}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {stockInfo.lotes.slice(0, 5).map((lote) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {stockInfo.lotes.slice(0, 6).map((lote) => (
                       <div
                         key={lote.id}
-                        className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+                        className="bg-gray-50 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 transition-colors"
                         title={`Lote ${lote.numero} - ${lote.cantidadActual} unidades - Vence: ${new Date(lote.fechaVencimiento).toLocaleDateString()}`}
                       >
-                        <span className="font-medium">{lote.numero}</span>
-                        <span className="ml-1 text-gray-500">({lote.cantidadActual})</span>
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm font-medium text-gray-900">{lote.numero}</div>
+                          <div className="text-xs text-gray-500">{lote.cantidadActual} unidades</div>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Vence: {new Date(lote.fechaVencimiento).toLocaleDateString()}
+                        </div>
                       </div>
                     ))}
-                    {stockInfo.lotes.length > 5 && (
-                      <div className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                        +{stockInfo.lotes.length - 5} más
+                    {stockInfo.lotes.length > 6 && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-center">
+                        <div className="text-sm text-blue-700 font-medium">
+                          +{stockInfo.lotes.length - 6} más
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
               )}
             </>
+          ) : stockError ? (
+            <div className="text-center py-8">
+              <div className="p-3 bg-red-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <AlertTriangle className="h-8 w-8 text-red-500" />
+              </div>
+              <div className="text-red-600 text-sm font-medium mb-1">
+                Error al cargar stock
+              </div>
+              <div className="text-red-500 text-xs mb-3">
+                {stockError}
+              </div>
+              <button
+                onClick={() => {
+                  if (selectedVacuna) {
+                    setStockError(null);
+                    setIsLoadingStock(true);
+                    getStockDisponible(selectedVacuna, selectedMes, selectedAnio)
+                      .then(setStockInfo)
+                      .catch((error: any) => {
+                        const errorMessage = error?.response?.data?.message || error?.message || 'Error al cargar stock disponible';
+                        setStockError(errorMessage);
+                      })
+                      .finally(() => setIsLoadingStock(false));
+                  }
+                }}
+                className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Reintentar
+              </button>
+            </div>
           ) : (
-            <div className="text-center py-4">
-              <div className="text-gray-500 text-sm">
-                {selectedVacuna ? 'Seleccione filtros para ver el stock disponible' : 'Seleccione una vacuna'}
+            <div className="text-center py-8">
+              <div className="p-3 bg-gray-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Package className="h-8 w-8 text-gray-400" />
+              </div>
+              <div className="text-gray-600 text-sm font-medium mb-1">
+                {selectedVacuna ? 'Cargando información de stock...' : 'Seleccione una vacuna'}
+              </div>
+              <div className="text-gray-500 text-xs">
+                {selectedVacuna ? 'Calculando stock disponible para el mes seleccionado' : 'Elija una vacuna para ver el stock disponible'}
               </div>
             </div>
           )}

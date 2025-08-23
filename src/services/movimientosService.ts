@@ -297,7 +297,6 @@ export class MovimientosService {
     stockInicial: number;
     totalEntregas: number;
     stockDisponible: number;
-    porcentajeUtilizado: number;
     estado: 'bueno' | 'medio' | 'critico';
     lotes: Array<{
       id: string;
@@ -314,7 +313,6 @@ export class MovimientosService {
         stockInicial: number;
         totalEntregas: number;
         stockDisponible: number;
-        porcentajeUtilizado: number;
         estado: 'bueno' | 'medio' | 'critico';
         lotes: Array<{
           id: string;

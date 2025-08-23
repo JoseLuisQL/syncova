@@ -1069,7 +1069,6 @@ export class MovimientosService {
     stockInicial: number;
     totalEntregas: number;
     stockDisponible: number;
-    porcentajeUtilizado: number;
     estado: 'bueno' | 'medio' | 'critico';
     lotes: Array<{
       id: string;
@@ -1106,29 +1105,25 @@ export class MovimientosService {
       // Calcular stock inicial (suma de todos los lotes)
       const stockInicial = lotes.reduce((sum, lote) => sum + lote.cantidadActual, 0);
 
-      // Obtener total de entregas hasta el mes/año especificado
+      // Obtener total de entregas SOLO para el mes/año especificado (no acumulativo)
       const totalEntregas = await prisma.movimientoVacuna.aggregate({
         where: {
           vacunaId,
-          OR: [
-            { anio: { lt: anio } },
-            { anio, mes: { lte: mes } }
-          ]
+          mes,
+          anio
         },
         _sum: {
           entrega: true
         }
       });
 
-      // Obtener entregas adicionales
+      // Obtener entregas adicionales SOLO para el mes/año especificado (no acumulativo)
       const entregasAdicionales = await prisma.entregaAdicional.aggregate({
         where: {
           movimientoVacuna: {
             vacunaId,
-            OR: [
-              { anio: { lt: anio } },
-              { anio, mes: { lte: mes } }
-            ]
+            mes,
+            anio
           }
         },
         _sum: {
@@ -1137,17 +1132,18 @@ export class MovimientosService {
       });
 
       const totalEntregasCalculado = (totalEntregas._sum.entrega || 0) + (entregasAdicionales._sum.cantidad || 0);
-      const stockDisponible = Math.max(0, stockInicial - totalEntregasCalculado);
-      const porcentajeUtilizado = stockInicial > 0 ? (totalEntregasCalculado / stockInicial) * 100 : 0;
+      const stockDisponible = stockInicial - totalEntregasCalculado; // Permitir valores negativos para mostrar advertencias
 
-      // Determinar estado del stock
+      // Determinar estado del stock basado en el stock disponible
       let estado: 'bueno' | 'medio' | 'critico';
-      if (porcentajeUtilizado <= 50) {
-        estado = 'bueno';
-      } else if (porcentajeUtilizado <= 80) {
+      if (stockDisponible < 0) {
+        estado = 'critico'; // Stock negativo = crítico
+      } else if (stockDisponible <= stockInicial * 0.2) { // Menos del 20% del stock inicial
+        estado = 'critico';
+      } else if (stockDisponible <= stockInicial * 0.5) { // Menos del 50% del stock inicial
         estado = 'medio';
       } else {
-        estado = 'critico';
+        estado = 'bueno';
       }
 
       return {
@@ -1156,7 +1152,6 @@ export class MovimientosService {
           stockInicial,
           totalEntregas: totalEntregasCalculado,
           stockDisponible,
-          porcentajeUtilizado: Math.round(porcentajeUtilizado * 100) / 100,
           estado,
           lotes: lotes.map(lote => ({
             id: lote.id,
