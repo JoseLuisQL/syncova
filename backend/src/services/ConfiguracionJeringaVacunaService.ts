@@ -630,8 +630,14 @@ export class ConfiguracionJeringaVacunaService {
       const jeringasMap = new Map(jeringas.map(j => [j.id, j]));
 
       // Calcular jeringas necesarias según configuración con información completa
+      // CORRECCIÓN: El multiplicador debe aplicarse a la cantidad de vacunas, no a las dosis totales
+      // Esto evita el bug donde se deducían 10x más jeringas de las necesarias
       const jeringasCalculadas: JeringasCalculadas[] = configResult.data.map(config => {
         const jeringaInfo = jeringasMap.get(config.jeringaId);
+        // Cálculo correcto: cantidadVacunas * multiplicador
+        // El multiplicador representa "jeringas por unidad de vacuna", no "jeringas por dosis"
+        const cantidadJeringas = Math.ceil(cantidadVacunas * config.multiplicador);
+
         return {
           jeringaId: config.jeringaId,
           jeringa: jeringaInfo ? {
@@ -640,7 +646,7 @@ export class ConfiguracionJeringaVacunaService {
             capacidad: jeringaInfo.capacidad,
             color: jeringaInfo.color
           } : undefined,
-          cantidad: Math.ceil(totalDosis * config.multiplicador),
+          cantidad: cantidadJeringas,
           multiplicador: config.multiplicador,
           prioridad: config.prioridad,
           origen: config.origen

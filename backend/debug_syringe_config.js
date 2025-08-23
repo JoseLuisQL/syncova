@@ -74,7 +74,8 @@ async function debugSyringeConfig() {
       if (configCentro.length > 0) {
         console.log(`   ✅ Configuración específica encontrada: ${configCentro.length} jeringas`);
         configCentro.forEach(config => {
-          const jeringasNecesarias = totalCantidad * vacuna.dosisPorFrasco * Number(config.multiplicador);
+          // CORRECCIÓN: El multiplicador debe aplicarse a la cantidad de vacunas, no a las dosis totales
+          const jeringasNecesarias = totalCantidad * Number(config.multiplicador);
           console.log(`      • ${config.jeringa.tipo}: ${jeringasNecesarias} unidades (multiplicador: ${config.multiplicador})`);
         });
       } else {

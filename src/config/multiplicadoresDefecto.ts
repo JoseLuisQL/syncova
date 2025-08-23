@@ -281,27 +281,31 @@ export const getJeringasUnicas = (): { tipo: string; capacidad: string }[] => {
 /**
  * Calcula las jeringas necesarias para una vacuna y cantidad específica
  * usando la configuración por defecto
+ * CORRECCIÓN: El multiplicador debe aplicarse a la cantidad de vacunas, no a las dosis totales
  */
 export const calcularJeringasDefecto = (
-  vacunaNombre: string, 
-  cantidadVacunas: number, 
+  vacunaNombre: string,
+  cantidadVacunas: number,
   dosisPorFrasco: number = 1
 ): { tipo: string; capacidad: string; cantidad: number }[] => {
   const config = getConfiguracionDefecto(vacunaNombre);
-  
+
   if (!config) {
-    // Si no hay configuración específica, usar jeringa estándar
+    // Si no hay configuración específica, usar jeringa estándar con ratio 1:1
+    // CORRECCIÓN: No multiplicar por dosisPorFrasco para jeringas
     return [{
       tipo: 'Jeringa autoretractil 1cc 25 G x 5/8"',
       capacidad: '1cc',
-      cantidad: cantidadVacunas * dosisPorFrasco
+      cantidad: cantidadVacunas
     }];
   }
 
   return config.jeringas.map(jeringa => ({
     tipo: jeringa.tipo,
     capacidad: jeringa.capacidad,
-    cantidad: cantidadVacunas * dosisPorFrasco * jeringa.multiplicador
+    // CORRECCIÓN: El multiplicador representa "jeringas por unidad de vacuna", no "jeringas por dosis"
+    // Por lo tanto, no debe multiplicarse por dosisPorFrasco
+    cantidad: cantidadVacunas * jeringa.multiplicador
   }));
 };
 

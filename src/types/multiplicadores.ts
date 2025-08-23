@@ -96,7 +96,7 @@ export interface CalculoJeringas {
       capacidad: string;
       color: string;
     };
-    cantidadNecesaria: number; // cantidadVacunas * dosisPorFrasco * multiplicador
+    cantidadNecesaria: number; // cantidadVacunas * multiplicador (CORRECCIÓN: no incluir dosisPorFrasco)
     multiplicador: number;
   }[];
   totalJeringas: number;
