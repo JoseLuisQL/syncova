@@ -48,6 +48,7 @@ import { useMovimientos } from '../../hooks/useMovimientos';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useVacunas } from '../../hooks/useVacunas';
 import { useToastContext } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useAutoSync } from '../../hooks/useAutoSync';
 import { debounce } from '../../utils/debounce';
 import {
@@ -103,6 +104,7 @@ const Movimientos: React.FC = () => {
   } = useVacunas();
 
   const { toast } = useToastContext();
+  const { user } = useAuth();
 
   // 🚀 Hook para sincronización automática en tiempo real
   const {
@@ -649,7 +651,7 @@ const Movimientos: React.FC = () => {
     }
   };
 
-  // Función para crear o actualizar movimiento con validaciones (actualizada para el nuevo sistema)
+  // Función para crear o actualizar movimiento con redistribución automática
   const handleActualizarCampoMovimiento = async (
     establecimientoId: string,
     campo: keyof UpdateMovimientoDto,
@@ -667,20 +669,43 @@ const Movimientos: React.FC = () => {
         throw new Error('Vacuna no seleccionada');
       }
 
-      // Buscar movimiento existente
+      // Buscar movimiento existente y establecimiento
       const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
+      const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
+      const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
 
       if (movimientoExistente && movimientoExistente.tieneMovimiento) {
         // Validar que no se modifique entrega si hay entregas adicionales
         if (campo === 'entrega' && movimientoExistente.entregasAdicionales && movimientoExistente.entregasAdicionales.length > 0) {
-          const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
-          toast.error(`🔒 Campo bloqueado • ${establecimiento?.nombre || 'Establecimiento'} • No se puede modificar entrega principal con entregas adicionales activas`);
+          toast.error(`🔒 Campo bloqueado • ${nombreEstablecimiento} • No se puede modificar entrega principal con entregas adicionales activas`);
           throw new Error('Campo bloqueado por entregas adicionales');
         }
 
-        // Actualizar movimiento existente
-        const updateData = { [campo]: valor };
+        // Mostrar feedback visual para redistribución automática
+        if (campo === 'entrega' && valor !== movimientoExistente.entrega) {
+          const diferencia = valor - movimientoExistente.entrega;
+          const tipoOperacion = diferencia > 0 ? 'incremento' : 'disminución';
+          const cantidadOperacion = Math.abs(diferencia);
+
+          toast.info(
+            'Redistribuyendo automáticamente',
+            `${nombreEstablecimiento} • ${tipoOperacion} de ${cantidadOperacion} unidades`,
+            { duration: 3000 }
+          );
+        }
+
+        // Actualizar movimiento existente (con redistribución automática en backend)
+        const updateData = { [campo]: valor, usuarioId: user?.id || 'system-auto' };
         await updateMovimiento(movimientoExistente.id, updateData);
+
+        // Mostrar mensaje de éxito para redistribución
+        if (campo === 'entrega' && valor !== movimientoExistente.entrega) {
+          toast.success(
+            'Redistribución completada',
+            `${nombreEstablecimiento} • Entregas redistribuidas automáticamente`,
+            { duration: 4000 }
+          );
+        }
 
         // 🚀 TRIGGER AUTOMÁTICO: Sincronizar vales si cambió la entrega
         if (campo === 'entrega') {
@@ -704,7 +729,7 @@ const Movimientos: React.FC = () => {
           salida: campo === 'salida' ? valor : 0,
           transSalida: campo === 'transSalida' ? valor : 0,
           entrega: campo === 'entrega' ? valor : 0,
-          usuarioId: 'temp-user-id' // TODO: Obtener del contexto de usuario
+          usuarioId: user?.id || 'system-auto'
         };
 
         await createMovimiento(createData);
@@ -717,22 +742,41 @@ const Movimientos: React.FC = () => {
     } catch (error: any) {
       console.error('Error al manejar movimiento:', error);
 
-      // Manejo específico de errores (solo si no son errores ya manejados)
-      if (!error.message?.includes('Valor negativo') &&
-          !error.message?.includes('Vacuna no seleccionada') &&
-          !error.message?.includes('Campo bloqueado')) {
-
-        const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
-        const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
-
+      // Manejo específico de errores de redistribución
+      if (error.message?.includes('No hay cantidades suficientes')) {
+        toast.error(
+          'Redistribución fallida',
+          `${nombreEstablecimiento} • ${error.message}`,
+          { duration: 6000 }
+        );
+      } else if (error.message?.includes('Campo bloqueado') ||
+                 error.message?.includes('Valor negativo') ||
+                 error.message?.includes('Vacuna no seleccionada')) {
+        // Errores ya manejados con toast específico
+      } else {
+        // Manejo genérico de errores
         if (error?.response?.status === 400) {
-          toast.error(`❌ Datos inválidos • ${nombreEstablecimiento} • ${error.response.data.message || 'Verifique los valores ingresados'}`);
+          const errorMsg = error.response.data.message || error.response.data.error || 'Verifique los valores ingresados';
+          toast.error(
+            'Datos inválidos',
+            `${nombreEstablecimiento} • ${errorMsg}`,
+            { duration: 5000 }
+          );
         } else if (error?.response?.status === 404) {
-          toast.error(`❌ No encontrado • ${nombreEstablecimiento} • Establecimiento o vacuna no válidos`);
+          toast.error(
+            'No encontrado',
+            `${nombreEstablecimiento} • Establecimiento o vacuna no válidos`
+          );
         } else if (error?.response?.status === 409) {
-          toast.error(`❌ Conflicto • ${nombreEstablecimiento} • Ya existe un movimiento para este período`);
+          toast.error(
+            'Conflicto',
+            `${nombreEstablecimiento} • Ya existe un movimiento para este período`
+          );
         } else {
-          toast.error(`❌ Error de conexión • ${nombreEstablecimiento} • Intente nuevamente`);
+          toast.error(
+            'Error de conexión',
+            `${nombreEstablecimiento} • Intente nuevamente`
+          );
         }
       }
 

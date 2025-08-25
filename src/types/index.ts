@@ -561,6 +561,7 @@ export interface UpdateMovimientoDto {
   entrega?: number;
   observaciones?: string;
   fechaMovimiento?: Date;
+  usuarioId?: string;
 }
 
 // Filtros para movimientos

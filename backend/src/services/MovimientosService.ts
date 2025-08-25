@@ -41,6 +41,7 @@ export interface UpdateMovimientoDto {
   entrega?: number;
   observaciones?: string;
   fechaMovimiento?: Date;
+  usuarioId?: string;
 }
 
 export interface CreateEntregaAdicionalDto {
@@ -369,13 +370,57 @@ export class MovimientosService {
   }
 
   /**
-   * Actualizar movimiento existente
+   * Validar si un string es un UUID válido
+   */
+  private static isValidUUID(uuid: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
+  }
+
+  /**
+   * Obtener un usuario válido del sistema para operaciones automáticas
+   */
+  private static async getSystemUser(): Promise<string> {
+    try {
+      // Buscar un usuario administrador activo
+      const adminUser = await prisma.usuario.findFirst({
+        where: {
+          rol: 'administrador',
+          estado: 'activo'
+        }
+      });
+
+      if (adminUser) {
+        return adminUser.id;
+      }
+
+      // Si no hay admin, buscar cualquier usuario activo
+      const anyUser = await prisma.usuario.findFirst({
+        where: { estado: 'activo' }
+      });
+
+      if (anyUser) {
+        return anyUser.id;
+      }
+
+      throw new Error('No se encontró ningún usuario válido en el sistema');
+    } catch (error) {
+      console.error('Error al obtener usuario del sistema:', error);
+      throw new Error('Error al obtener usuario del sistema');
+    }
+  }
+
+  /**
+   * Actualizar movimiento existente con redistribución automática
    */
   static async update(id: string, data: UpdateMovimientoDto): Promise<ServiceResult<IMovimientoVacuna>> {
     try {
       // Verificar que el movimiento existe
       const existingMovimiento = await prisma.movimientoVacuna.findUnique({
-        where: { id }
+        where: { id },
+        include: {
+          entregasAdicionales: true
+        }
       });
 
       if (!existingMovimiento) {
@@ -385,11 +430,41 @@ export class MovimientosService {
         };
       }
 
-      // Actualizar en transacción para incluir sincronización con planificación
+      // Asegurar que tenemos un usuarioId válido
+      if (data.usuarioId && !this.isValidUUID(data.usuarioId)) {
+        data.usuarioId = await this.getSystemUser();
+      } else if (!data.usuarioId) {
+        data.usuarioId = await this.getSystemUser();
+      }
+
+      // Validar que no se modifique entrega si hay entregas adicionales
+      if (data.entrega !== undefined &&
+          data.entrega !== existingMovimiento.entrega &&
+          existingMovimiento.entregasAdicionales &&
+          existingMovimiento.entregasAdicionales.length > 0) {
+        return {
+          success: false,
+          error: 'No se puede modificar entrega principal con entregas adicionales activas'
+        };
+      }
+
+      // Actualizar en transacción para incluir redistribución y sincronización
       const result = await prisma.$transaction(async (tx) => {
-        // Actualizar el movimiento
-        // El trigger de base de datos se encargará automáticamente de actualizar
-        // el saldo anterior del siguiente mes si es necesario
+        // REDISTRIBUCIÓN AUTOMÁTICA: Si cambió la entrega, redistribuir automáticamente
+        if (data.entrega !== undefined && data.entrega !== existingMovimiento.entrega) {
+          const redistribucionResult = await this.redistribuirEntregasAutomaticamente(
+            tx,
+            existingMovimiento,
+            data.entrega,
+            data.usuarioId!
+          );
+
+          if (!redistribucionResult.success) {
+            throw new Error(redistribucionResult.error);
+          }
+        }
+
+        // Actualizar el movimiento principal
         const movimiento = await tx.movimientoVacuna.update({
           where: { id },
           data: {
@@ -474,6 +549,252 @@ export class MovimientosService {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Error al eliminar movimiento'
+      };
+    }
+  }
+
+  /**
+   * 🚀 FUNCIONALIDAD AVANZADA: Redistribución automática de entregas
+   * Redistribuye automáticamente las entregas entre meses cuando se modifica una entrega
+   */
+  private static async redistribuirEntregasAutomaticamente(
+    tx: any,
+    movimientoOriginal: any,
+    nuevaEntrega: number,
+    usuarioId: string
+  ): Promise<ServiceResult<{ movimientosAfectados: number; redistribucion: string }>> {
+    try {
+      // Validaciones de entrada
+      if (nuevaEntrega < 0) {
+        throw new Error('La nueva entrega no puede ser negativa');
+      }
+
+      if (movimientoOriginal.anio > 2050) {
+        throw new Error('No se puede redistribuir entregas para años posteriores a 2050');
+      }
+
+      const entregaAnterior = movimientoOriginal.entrega;
+      const diferencia = nuevaEntrega - entregaAnterior;
+
+      console.log(`🔄 [Redistribución] Establecimiento: ${movimientoOriginal.establecimientoId}, Mes: ${movimientoOriginal.mes}/${movimientoOriginal.anio}`);
+      console.log(`🔄 [Redistribución] Entrega anterior: ${entregaAnterior}, Nueva entrega: ${nuevaEntrega}, Diferencia: ${diferencia}`);
+
+      if (diferencia === 0) {
+        return {
+          success: true,
+          data: { movimientosAfectados: 0, redistribucion: 'Sin cambios' }
+        };
+      }
+
+      // Validar límites razonables de redistribución
+      if (Math.abs(diferencia) > 10000) {
+        throw new Error(`La diferencia de redistribución (${Math.abs(diferencia)}) excede el límite máximo permitido (10,000 unidades)`);
+      }
+
+      if (diferencia > 0) {
+        // CASO 1: INCREMENTO - Descontar de meses siguientes
+        return await this.redistribuirIncremento(tx, movimientoOriginal, diferencia, usuarioId);
+      } else {
+        // CASO 2: DISMINUCIÓN - Trasladar al mes siguiente
+        return await this.redistribuirDisminucion(tx, movimientoOriginal, Math.abs(diferencia), usuarioId);
+      }
+    } catch (error) {
+      console.error('Error en redistribución automática:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error en redistribución automática'
+      };
+    }
+  }
+
+  /**
+   * Redistribuir incremento: descontar de meses siguientes secuencialmente
+   */
+  private static async redistribuirIncremento(
+    tx: any,
+    movimientoOriginal: any,
+    incremento: number,
+    usuarioId: string
+  ): Promise<ServiceResult<{ movimientosAfectados: number; redistribucion: string }>> {
+    try {
+      let incrementoRestante = incremento;
+      let movimientosAfectados = 0;
+      const redistribucionDetalle: string[] = [];
+
+      // Buscar movimientos de meses siguientes del mismo establecimiento y vacuna
+      const movimientosSiguientes = await tx.movimientoVacuna.findMany({
+        where: {
+          establecimientoId: movimientoOriginal.establecimientoId,
+          vacunaId: movimientoOriginal.vacunaId,
+          anio: {
+            gte: movimientoOriginal.anio
+          },
+          OR: [
+            {
+              anio: { gt: movimientoOriginal.anio }
+            },
+            {
+              anio: movimientoOriginal.anio,
+              mes: { gt: movimientoOriginal.mes }
+            }
+          ]
+        },
+        orderBy: [
+          { anio: 'asc' },
+          { mes: 'asc' }
+        ]
+      });
+
+      console.log(`🔍 [Redistribución] Encontrados ${movimientosSiguientes.length} movimientos siguientes`);
+
+      // Descontar secuencialmente
+      for (const movimiento of movimientosSiguientes) {
+        if (incrementoRestante <= 0) break;
+
+        const entregaDisponible = movimiento.entrega;
+        const descontar = Math.min(entregaDisponible, incrementoRestante);
+
+        if (descontar > 0) {
+          const nuevaEntrega = entregaDisponible - descontar;
+
+          await tx.movimientoVacuna.update({
+            where: { id: movimiento.id },
+            data: {
+              entrega: nuevaEntrega,
+              updatedAt: new Date()
+            }
+          });
+
+          // SINCRONIZACIÓN BIDIRECCIONAL: Actualizar planificación para el movimiento afectado
+          await this.sincronizarConPlanificacion(tx, movimiento, -descontar);
+
+          incrementoRestante -= descontar;
+          movimientosAfectados++;
+          redistribucionDetalle.push(`${movimiento.mes}/${movimiento.anio}: ${entregaDisponible} → ${nuevaEntrega} (-${descontar})`);
+
+          console.log(`✅ [Redistribución] Mes ${movimiento.mes}/${movimiento.anio}: ${entregaDisponible} → ${nuevaEntrega} (-${descontar})`);
+        }
+      }
+
+      // Validar que se pudo redistribuir completamente
+      if (incrementoRestante > 0) {
+        throw new Error(`No hay cantidades suficientes en los meses siguientes. Faltan ${incrementoRestante} unidades por redistribuir.`);
+      }
+
+      return {
+        success: true,
+        data: {
+          movimientosAfectados,
+          redistribucion: `Incremento de ${incremento} redistribuido: ${redistribucionDetalle.join(', ')}`
+        }
+      };
+    } catch (error) {
+      console.error('Error en redistribución de incremento:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error en redistribución de incremento'
+      };
+    }
+  }
+
+  /**
+   * Redistribuir disminución: trasladar al mes siguiente
+   */
+  private static async redistribuirDisminucion(
+    tx: any,
+    movimientoOriginal: any,
+    disminucion: number,
+    usuarioId: string
+  ): Promise<ServiceResult<{ movimientosAfectados: number; redistribucion: string }>> {
+    try {
+      // Calcular mes siguiente
+      let mesSiguiente = movimientoOriginal.mes + 1;
+      let anioSiguiente = movimientoOriginal.anio;
+
+      if (mesSiguiente > 12) {
+        mesSiguiente = 1;
+        anioSiguiente++;
+      }
+
+      // Validar que no se creen movimientos en años muy futuros
+      if (anioSiguiente > 2050) {
+        throw new Error(`No se puede trasladar entregas al año ${anioSiguiente}. Límite máximo: 2050`);
+      }
+
+      console.log(`🔄 [Redistribución] Trasladando ${disminucion} unidades al mes ${mesSiguiente}/${anioSiguiente}`);
+
+      // Buscar o crear movimiento del mes siguiente
+      let movimientoSiguiente = await tx.movimientoVacuna.findUnique({
+        where: {
+          uk_movimiento_establecimiento_vacuna_mes_anio: {
+            establecimientoId: movimientoOriginal.establecimientoId,
+            vacunaId: movimientoOriginal.vacunaId,
+            mes: mesSiguiente,
+            anio: anioSiguiente
+          }
+        }
+      });
+
+      if (movimientoSiguiente) {
+        // Actualizar movimiento existente
+        const nuevaEntrega = movimientoSiguiente.entrega + disminucion;
+
+        await tx.movimientoVacuna.update({
+          where: { id: movimientoSiguiente.id },
+          data: {
+            entrega: nuevaEntrega,
+            updatedAt: new Date()
+          }
+        });
+
+        // SINCRONIZACIÓN BIDIRECCIONAL: Actualizar planificación para el movimiento afectado
+        await this.sincronizarConPlanificacion(tx, movimientoSiguiente, disminucion);
+
+        console.log(`✅ [Redistribución] Mes ${mesSiguiente}/${anioSiguiente}: ${movimientoSiguiente.entrega} → ${nuevaEntrega} (+${disminucion})`);
+
+        return {
+          success: true,
+          data: {
+            movimientosAfectados: 1,
+            redistribucion: `Disminución de ${disminucion} trasladada al mes ${mesSiguiente}/${anioSiguiente}: ${movimientoSiguiente.entrega} → ${nuevaEntrega}`
+          }
+        };
+      } else {
+        // Crear nuevo movimiento
+        const nuevoMovimiento = await tx.movimientoVacuna.create({
+          data: {
+            establecimientoId: movimientoOriginal.establecimientoId,
+            vacunaId: movimientoOriginal.vacunaId,
+            mes: mesSiguiente,
+            anio: anioSiguiente,
+            saldoAnterior: 0,
+            transIngreso: 0,
+            salida: 0,
+            transSalida: 0,
+            entrega: disminucion,
+            usuarioId: usuarioId,
+            fechaMovimiento: new Date()
+          }
+        });
+
+        // SINCRONIZACIÓN BIDIRECCIONAL: Actualizar planificación para el nuevo movimiento
+        await this.sincronizarConPlanificacion(tx, nuevoMovimiento, disminucion);
+
+        console.log(`✅ [Redistribución] Creado nuevo movimiento para ${mesSiguiente}/${anioSiguiente} con entrega: ${disminucion}`);
+
+        return {
+          success: true,
+          data: {
+            movimientosAfectados: 1,
+            redistribucion: `Disminución de ${disminucion} trasladada creando nuevo movimiento para ${mesSiguiente}/${anioSiguiente}`
+          }
+        };
+      }
+    } catch (error) {
+      console.error('Error en redistribución de disminución:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error en redistribución de disminución'
       };
     }
   }
