@@ -1,18 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Plus,
-  Search,
-  Filter,
   Download,
-  FileText,
   Calendar,
   Building2,
   Package,
-  TrendingUp,
   AlertTriangle,
   Trash2,
   Eye,
-  MoreVertical,
   ChevronDown,
   ChevronRight,
   X,
@@ -1201,188 +1196,185 @@ const Movimientos: React.FC = () => {
         </div>
       )}
 
-      {/* Filtros */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-        {(isLoadingEstablecimientos || isLoadingActivas) && (
-          <div className="flex items-center justify-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-600 mr-2" />
-            <span className="text-gray-600">Cargando datos...</span>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Building2 className="h-4 w-4 inline mr-1" />
-              Centro de Acopio
-            </label>
-            <select
-              value={selectedCentroAcopio}
-              onChange={(e) => setSelectedCentroAcopio(e.target.value)}
-              disabled={isLoadingEstablecimientos}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-            >
-              <option value="todos">🌐 Todos los Centros de Acopio</option>
-              {centrosAcopio.map((centro) => {
-                const colores = coloresAcopio[centro.nombre as keyof typeof coloresAcopio] || coloresAcopio['DEFAULT'];
-                return (
-                  <option key={centro.id} value={centro.id}>
-                    {colores.icon} {centro.nombre}
-                  </option>
-                );
-              })}
-            </select>
+      {/* Panel de Filtros Compacto */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="bg-blue-100 rounded-lg p-2">
+                <Settings className="h-4 w-4 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">Filtros de Análisis</h3>
+            </div>
+            {(isLoadingEstablecimientos || isLoadingActivas) && (
+              <div className="flex items-center text-blue-600">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <span className="text-sm">Cargando...</span>
+              </div>
+            )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Package className="h-4 w-4 inline mr-1" />
-              Vacuna
-            </label>
-            <select
-              value={selectedVacuna}
-              onChange={(e) => setSelectedVacuna(e.target.value)}
-              disabled={isLoadingActivas}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-            >
-              {vacunasActivas.length === 0 && (
-                <option value="">Seleccione una vacuna</option>
-              )}
-              {vacunasActivas.map((vacuna) => (
-                <option key={vacuna.id} value={vacuna.id}>
-                  💉 {vacuna.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="block text-sm font-semibold text-gray-700">
-              <Calendar className="h-4 w-4 inline mr-2 text-blue-600" />
-              Período de Análisis
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Mes</label>
-                <select
-                  value={selectedMes}
-                  onChange={(e) => setSelectedMes(Number(e.target.value))}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm font-medium shadow-sm hover:border-gray-400 transition-colors"
-                >
-                  {meses.map((mes, index) => (
-                    <option key={index + 1} value={index + 1}>
-                      {mes}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Centro de Acopio */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Building2 className="h-4 w-4 inline mr-1 text-emerald-600" />
+                Centro de Acopio
+              </label>
+              <select
+                value={selectedCentroAcopio}
+                onChange={(e) => setSelectedCentroAcopio(e.target.value)}
+                disabled={isLoadingEstablecimientos}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white text-sm font-medium transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="todos">🌐 Todos los Centros</option>
+                {centrosAcopio.map((centro) => {
+                  const colores = coloresAcopio[centro.nombre as keyof typeof coloresAcopio] || coloresAcopio['DEFAULT'];
+                  return (
+                    <option key={centro.id} value={centro.id}>
+                      {colores.icon} {centro.nombre}
                     </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Año</label>
-                <select
-                  value={selectedAnio}
-                  onChange={(e) => setSelectedAnio(Number(e.target.value))}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm font-medium shadow-sm hover:border-gray-400 transition-colors"
-                >
-                  <option value={2024}>2024</option>
-                  <option value={2025}>2025</option>
-                  <option value={2026}>2026</option>
-                </select>
-              </div>
+                  );
+                })}
+              </select>
             </div>
-            <div className="text-xs text-gray-500 mt-1 flex items-center">
-              <Target className="h-3 w-3 mr-1" />
-              Las entregas se calculan solo para el período seleccionado
+
+            {/* Vacuna */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Package className="h-4 w-4 inline mr-1 text-purple-600" />
+                Vacuna
+              </label>
+              <select
+                value={selectedVacuna}
+                onChange={(e) => setSelectedVacuna(e.target.value)}
+                disabled={isLoadingActivas}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-sm font-medium transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                {vacunasActivas.length === 0 && (
+                  <option value="">Seleccione una vacuna</option>
+                )}
+                {vacunasActivas.map((vacuna) => (
+                  <option key={vacuna.id} value={vacuna.id}>
+                    💉 {vacuna.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Mes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Calendar className="h-4 w-4 inline mr-1 text-blue-600" />
+                Mes
+              </label>
+              <select
+                value={selectedMes}
+                onChange={(e) => setSelectedMes(Number(e.target.value))}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm font-medium transition-colors"
+              >
+                {meses.map((mes, index) => (
+                  <option key={index + 1} value={index + 1}>
+                    {mes}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Año */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Calendar className="h-4 w-4 inline mr-1 text-blue-600" />
+                Año
+              </label>
+              <select
+                value={selectedAnio}
+                onChange={(e) => setSelectedAnio(Number(e.target.value))}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm font-medium transition-colors"
+              >
+                <option value={2024}>2024</option>
+                <option value={2025}>2025</option>
+                <option value={2026}>2026</option>
+              </select>
             </div>
           </div>
+
+          {/* Estado Compacto */}
+          {selectedVacuna && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-700 font-medium">
+                    {datosTabla.length} establecimientos • {meses[selectedMes - 1]} {selectedAnio}
+                  </span>
+                </div>
+                <div className="text-gray-500">
+                  {selectedCentroAcopio === 'todos' ? 'Todos los centros' : centrosAcopio.find(c => c.id === selectedCentroAcopio)?.nombre}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Stock Disponible - Modernizado */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <div className="p-2 bg-emerald-50 rounded-lg mr-3">
-                <Package className="h-5 w-5 text-emerald-600" />
+      {/* Stock Disponible Compacto */}
+      {selectedVacuna && (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="bg-emerald-100 rounded-lg p-2">
+                  <Package className="h-4 w-4 text-emerald-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Stock Disponible</h3>
               </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 text-base">Stock Disponible</h3>
-                {vacunaSeleccionada && (
-                  <p className="text-sm text-gray-600 mt-0.5">
-                    {vacunaSeleccionada.nombre} • {meses[selectedMes - 1]} {selectedAnio}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              {isLoadingStock || isUpdatingStock ? (
-                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-              ) : (
-                <RefreshCw className="h-4 w-4 text-emerald-600" />
-              )}
-              <span className="text-xs text-gray-500 font-medium">
-                {isLoadingStock ? 'Cargando...' :
-                 isUpdatingStock ? 'Actualizando...' :
-                 'En tiempo real'}
-              </span>
-            </div>
-          </div>
-
-          {stockInfo ? (
-            <>
-              {/* Indicador de actualización en tiempo real */}
-              {isUpdatingStock && (
-                <div className="mb-3 flex items-center justify-center">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-center space-x-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                    <span className="text-sm text-blue-700 font-medium">Recalculando stock en tiempo real...</span>
-                  </div>
+              {(isLoadingStock || isUpdatingStock) && (
+                <div className="flex items-center text-blue-600">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <span className="text-sm">Actualizando...</span>
                 </div>
               )}
+            </div>
 
-              <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 transition-opacity duration-300 ${isUpdatingStock ? 'opacity-75' : 'opacity-100'}`}>
+            {stockInfo ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Stock Inicial */}
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-2xl font-bold text-blue-700">
+                      <div className="text-xl font-bold text-blue-700">
                         {stockInfo.stockInicial.toLocaleString()}
                       </div>
-                      <div className="text-sm text-blue-600 font-medium mt-1">Stock Inicial</div>
-                      <div className="text-xs text-blue-500 mt-1">Total disponible</div>
+                      <div className="text-sm text-blue-600 font-medium">Stock Inicial</div>
                     </div>
-                    <div className="p-2 bg-blue-200 rounded-lg">
-                      <Package className="h-6 w-6 text-blue-700" />
-                    </div>
+                    <Package className="h-5 w-5 text-blue-600" />
                   </div>
                 </div>
 
                 {/* Total Entregas */}
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-2xl font-bold text-orange-700">
+                      <div className="text-xl font-bold text-orange-700">
                         {stockInfo.totalEntregas.toLocaleString()}
                       </div>
-                      <div className="text-sm text-orange-600 font-medium mt-1">Entregas del Mes</div>
-                      <div className="text-xs text-orange-500 mt-1">{meses[selectedMes - 1]} {selectedAnio}</div>
+                      <div className="text-sm text-orange-600 font-medium">Entregas</div>
                     </div>
-                    <div className="p-2 bg-orange-200 rounded-lg">
-                      <TruckIcon className="h-6 w-6 text-orange-700" />
-                    </div>
+                    <TruckIcon className="h-5 w-5 text-orange-600" />
                   </div>
                 </div>
 
                 {/* Stock Disponible */}
                 <div className={`rounded-lg p-4 border ${
-                  stockInfo.stockDisponible < 0 ? 'bg-gradient-to-br from-red-50 to-red-100 border-red-200' :
-                  stockInfo.estado === 'bueno' ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200' :
-                  stockInfo.estado === 'medio' ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200' :
-                  'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+                  stockInfo.stockDisponible < 0 ? 'bg-red-50 border-red-200' :
+                  stockInfo.estado === 'bueno' ? 'bg-green-50 border-green-200' :
+                  stockInfo.estado === 'medio' ? 'bg-yellow-50 border-yellow-200' :
+                  'bg-red-50 border-red-200'
                 }`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className={`text-2xl font-bold ${
+                      <div className={`text-xl font-bold ${
                         stockInfo.stockDisponible < 0 ? 'text-red-700' :
                         stockInfo.estado === 'bueno' ? 'text-green-700' :
                         stockInfo.estado === 'medio' ? 'text-yellow-700' :
@@ -1390,7 +1382,7 @@ const Movimientos: React.FC = () => {
                       }`}>
                         {stockInfo.stockDisponible.toLocaleString()}
                       </div>
-                      <div className={`text-sm font-medium mt-1 ${
+                      <div className={`text-sm font-medium ${
                         stockInfo.stockDisponible < 0 ? 'text-red-600' :
                         stockInfo.estado === 'bueno' ? 'text-green-600' :
                         stockInfo.estado === 'medio' ? 'text-yellow-600' :
@@ -1398,167 +1390,53 @@ const Movimientos: React.FC = () => {
                       }`}>
                         {stockInfo.stockDisponible < 0 ? 'Déficit' : 'Disponible'}
                       </div>
-                      <div className={`text-xs mt-1 ${
-                        stockInfo.stockDisponible < 0 ? 'text-red-500' :
-                        stockInfo.estado === 'bueno' ? 'text-green-500' :
-                        stockInfo.estado === 'medio' ? 'text-yellow-500' :
-                        'text-red-500'
-                      }`}>
-                        {stockInfo.stockDisponible < 0 ? 'Entregas exceden stock' :
-                         stockInfo.estado === 'bueno' ? 'Stock saludable' :
-                         stockInfo.estado === 'medio' ? 'Stock moderado' :
-                         'Stock crítico'}
-                      </div>
                     </div>
-                    <div className={`p-2 rounded-lg ${
-                      stockInfo.stockDisponible < 0 ? 'bg-red-200' :
-                      stockInfo.estado === 'bueno' ? 'bg-green-200' :
-                      stockInfo.estado === 'medio' ? 'bg-yellow-200' :
-                      'bg-red-200'
-                    }`}>
-                      {stockInfo.stockDisponible < 0 ? (
-                        <AlertTriangle className="h-6 w-6 text-red-700" />
-                      ) : stockInfo.estado === 'bueno' ? (
-                        <CheckCircle className="h-6 w-6 text-green-700" />
-                      ) : stockInfo.estado === 'medio' ? (
-                        <AlertCircle className="h-6 w-6 text-yellow-700" />
-                      ) : (
-                        <AlertTriangle className="h-6 w-6 text-red-700" />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Información adicional para casos de déficit */}
-              {stockInfo.stockDisponible < 0 && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center">
-                    <AlertTriangle className="h-4 w-4 text-red-600 mr-2" />
-                    <div className="text-sm text-red-800">
-                      <span className="font-medium">Advertencia:</span> Las entregas del mes exceden el stock inicial en{' '}
-                      <span className="font-bold">{Math.abs(stockInfo.stockDisponible).toLocaleString()}</span> unidades.
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Información de Lotes */}
-              {stockInfo.lotes && stockInfo.lotes.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-sm font-medium text-gray-700">
-                      Lotes Disponibles
-                    </div>
-                    <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                      {stockInfo.lotes.length} lote{stockInfo.lotes.length !== 1 ? 's' : ''}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {stockInfo.lotes.slice(0, 6).map((lote) => (
-                      <div
-                        key={lote.id}
-                        className="bg-gray-50 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 transition-colors"
-                        title={`Lote ${lote.numero} - ${lote.cantidadActual} unidades - Vence: ${new Date(lote.fechaVencimiento).toLocaleDateString()}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="text-sm font-medium text-gray-900">{lote.numero}</div>
-                          <div className="text-xs text-gray-500">{lote.cantidadActual} unidades</div>
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          Vence: {new Date(lote.fechaVencimiento).toLocaleDateString()}
-                        </div>
-                      </div>
-                    ))}
-                    {stockInfo.lotes.length > 6 && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-center">
-                        <div className="text-sm text-blue-700 font-medium">
-                          +{stockInfo.lotes.length - 6} más
-                        </div>
-                      </div>
+                    {stockInfo.stockDisponible < 0 ? (
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                    ) : stockInfo.estado === 'bueno' ? (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    ) : stockInfo.estado === 'medio' ? (
+                      <AlertCircle className="h-5 w-5 text-yellow-600" />
+                    ) : (
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
                     )}
                   </div>
                 </div>
-              )}
-            </>
-          ) : stockError ? (
-            <div className="text-center py-8">
-              <div className="p-3 bg-red-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <AlertTriangle className="h-8 w-8 text-red-500" />
               </div>
-              <div className="text-red-600 text-sm font-medium mb-1">
-                Error al cargar stock
+            ) : stockError ? (
+              <div className="text-center py-6">
+                <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                <div className="text-red-600 text-sm font-medium mb-2">Error al cargar stock</div>
+                <button
+                  onClick={() => {
+                    if (selectedVacuna) {
+                      setStockError(null);
+                      setIsLoadingStock(true);
+                      getStockDisponible(selectedVacuna, selectedMes, selectedAnio)
+                        .then(setStockInfo)
+                        .catch((error: any) => {
+                          const errorMessage = error?.response?.data?.message || error?.message || 'Error al cargar stock disponible';
+                          setStockError(errorMessage);
+                        })
+                        .finally(() => setIsLoadingStock(false));
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Reintentar
+                </button>
               </div>
-              <div className="text-red-500 text-xs mb-3">
-                {stockError}
+            ) : (
+              <div className="text-center py-6">
+                <Package className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <div className="text-gray-600 text-sm">Cargando información de stock...</div>
               </div>
-              <button
-                onClick={() => {
-                  if (selectedVacuna) {
-                    setStockError(null);
-                    setIsLoadingStock(true);
-                    getStockDisponible(selectedVacuna, selectedMes, selectedAnio)
-                      .then(setStockInfo)
-                      .catch((error: any) => {
-                        const errorMessage = error?.response?.data?.message || error?.message || 'Error al cargar stock disponible';
-                        setStockError(errorMessage);
-                      })
-                      .finally(() => setIsLoadingStock(false));
-                  }
-                }}
-                className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Reintentar
-              </button>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <div className="p-3 bg-gray-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Package className="h-8 w-8 text-gray-400" />
-              </div>
-              <div className="text-gray-600 text-sm font-medium mb-1">
-                {selectedVacuna ? 'Cargando información de stock...' : 'Seleccione una vacuna'}
-              </div>
-              <div className="text-gray-500 text-xs">
-                {selectedVacuna ? 'Calculando stock disponible para el mes seleccionado' : 'Elija una vacuna para ver el stock disponible'}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Información del Filtro Activo */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="bg-blue-100 rounded-full p-2">
-              <Filter className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <h4 className="font-medium text-blue-900">Filtro Activo</h4>
-              <div className="flex items-center space-x-4 text-sm text-blue-700 mt-1">
-                <span>
-                  <Building2 className="h-4 w-4 inline mr-1" />
-                  {selectedCentroAcopio === 'todos' ? 'Todos los centros' :
-                    centrosAcopio.find(c => c.id === selectedCentroAcopio)?.nombre || 'Centro no encontrado'}
-                </span>
-                <span>
-                  <Package className="h-4 w-4 inline mr-1" />
-                  {vacunaSeleccionada?.nombre || 'No seleccionada'}
-                </span>
-                <span>
-                  <Calendar className="h-4 w-4 inline mr-1" />
-                  {meses[selectedMes - 1]} {selectedAnio}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-blue-600">Establecimientos</div>
-            <div className="text-lg font-bold text-blue-800">{datosTabla.length}</div>
-          </div>
-        </div>
-      </div>
+
 
       {/* Tabla de Movimientos */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
