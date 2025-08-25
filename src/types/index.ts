@@ -559,6 +559,7 @@ export interface UpdateMovimientoDto {
   salida?: number;
   transSalida?: number;
   entrega?: number;
+  entregaBase?: number;
   observaciones?: string;
   fechaMovimiento?: Date;
   usuarioId?: string;

@@ -464,6 +464,24 @@ export class MovimientosService {
           }
         }
 
+        // LÓGICA ESPECIAL: Si se actualiza entregaBase y hay entregas adicionales, recalcular entrega total
+        if (data.entregaBase !== undefined && existingMovimiento.entregasAdicionales.length > 0) {
+          // Actualizar primero la entrega base
+          await tx.movimientoVacuna.update({
+            where: { id },
+            data: {
+              entregaBase: data.entregaBase,
+              updatedAt: new Date()
+            }
+          });
+
+          // Recalcular entrega total (base + adicionales)
+          const entregaTotal = await this.calcularEntregaTotal(tx, id);
+
+          // Actualizar entrega total
+          data.entrega = entregaTotal;
+        }
+
         // Actualizar el movimiento principal
         const movimiento = await tx.movimientoVacuna.update({
           where: { id },
@@ -483,8 +501,9 @@ export class MovimientosService {
       });
 
       // 🚀 TRIGGER AUTOMÁTICO: Sincronizar vales en tiempo real
-      if (data.entrega !== undefined && data.entrega !== existingMovimiento.entrega) {
-        console.log(`🔔 [MovimientosService] TRIGGER: Entrega modificada - sincronizando vales automáticamente`);
+      if ((data.entrega !== undefined && data.entrega !== existingMovimiento.entrega) ||
+          (data.entregaBase !== undefined && data.entregaBase !== existingMovimiento.entregaBase)) {
+        console.log(`🔔 [MovimientosService] TRIGGER: Entrega/EntregaBase modificada - sincronizando vales automáticamente`);
         ValeService.onMovimientoActualizado(
           existingMovimiento.establecimientoId,
           existingMovimiento.vacunaId,

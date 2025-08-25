@@ -533,7 +533,7 @@ const Movimientos: React.FC = () => {
 
       // FUNCIONALIDAD NUEVA: Recargar datos automáticamente después de actualizar campos que afectan el stock
       // Esto asegura que los cambios en el saldo anterior del siguiente mes se reflejen inmediatamente
-      if (['saldoAnterior', 'transIngreso', 'salida', 'transSalida', 'entrega'].includes(campo)) {
+      if (['saldoAnterior', 'transIngreso', 'salida', 'transSalida', 'entrega', 'entregaBase'].includes(campo)) {
         // Recargar los datos con un pequeño delay para permitir que el trigger de base de datos se ejecute
         setTimeout(async () => {
           if (selectedVacuna) {
@@ -563,7 +563,8 @@ const Movimientos: React.FC = () => {
         'transIngreso': 'Trans. Ingreso',
         'salida': 'Salida',
         'transSalida': 'Trans. Salida',
-        'entrega': 'Entrega'
+        'entrega': 'Entrega',
+        'entregaBase': 'Entrega Base'
       }[campo] || campo;
 
       toast.error(
@@ -675,9 +676,10 @@ const Movimientos: React.FC = () => {
       const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
 
       if (movimientoExistente && movimientoExistente.tieneMovimiento) {
-        // Validar que no se modifique entrega si hay entregas adicionales
+        // Validar que no se modifique entrega directamente si hay entregas adicionales
+        // Pero permitir modificar entregaBase
         if (campo === 'entrega' && movimientoExistente.entregasAdicionales && movimientoExistente.entregasAdicionales.length > 0) {
-          toast.error(`🔒 Campo bloqueado • ${nombreEstablecimiento} • No se puede modificar entrega principal con entregas adicionales activas`);
+          toast.error(`🔒 Campo bloqueado • ${nombreEstablecimiento} • Use el campo de entrega base para modificar la entrega cuando hay entregas adicionales`);
           throw new Error('Campo bloqueado por entregas adicionales');
         }
 
@@ -707,8 +709,8 @@ const Movimientos: React.FC = () => {
           );
         }
 
-        // 🚀 TRIGGER AUTOMÁTICO: Sincronizar vales si cambió la entrega
-        if (campo === 'entrega') {
+        // 🚀 TRIGGER AUTOMÁTICO: Sincronizar vales si cambió la entrega o entrega base
+        if (campo === 'entrega' || campo === 'entregaBase') {
           onEntregaBaseChanged(establecimientoId, selectedVacuna, selectedMes, selectedAnio);
         }
       } else {
@@ -1915,73 +1917,98 @@ const Movimientos: React.FC = () => {
                             type="number"
                             min="0"
                             value={(() => {
-                              // LÓGICA AVANZADA: Mostrar entrega base cuando hay entregas adicionales
+                              // LÓGICA MEJORADA: Siempre mostrar valor editable
                               const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
                               if (tieneEntregasAdicionales) {
-                                // Mostrar entrega base (valor original de planificación)
-                                return movimiento.entregaBase ?? movimiento.entrega;
+                                // Con entregas adicionales, mostrar entrega base editable
+                                return getCurrentValue(movimiento.establecimientoId, 'entregaBase', movimiento.entregaBase ?? movimiento.entrega);
                               } else {
                                 // Sin entregas adicionales, mostrar valor normal (editable)
                                 return getCurrentValue(movimiento.establecimientoId, 'entrega', movimiento.entrega);
                               }
                             })()}
                             onChange={(e) => {
-                              if (!(movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0)) {
+                              const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
+                              if (tieneEntregasAdicionales) {
+                                // Editar entrega base cuando hay entregas adicionales
+                                handleTempValueChange(movimiento.establecimientoId, 'entregaBase', parseInt(e.target.value) || 0);
+                              } else {
+                                // Editar entrega normal cuando no hay entregas adicionales
                                 handleTempValueChange(movimiento.establecimientoId, 'entrega', parseInt(e.target.value) || 0);
                               }
                             }}
                             onBlur={() => {
-                              if (!(movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0)) {
+                              const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
+                              if (tieneEntregasAdicionales) {
+                                // Guardar cambios en entrega base
+                                handleFieldBlur(movimiento.establecimientoId, 'entregaBase');
+                              } else {
+                                // Guardar cambios en entrega normal
                                 handleFieldBlur(movimiento.establecimientoId, 'entrega');
                               }
                             }}
                             className={`w-20 px-3 py-2 text-center text-base font-semibold border-2 rounded-lg focus:outline-none focus:ring-3 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 tabular-nums ${
-                              movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0
-                                ? 'border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed'
-                                : hasPendingChange(movimiento.establecimientoId, 'entrega')
-                                  ? 'border-yellow-400 bg-yellow-50 focus:ring-green-300 focus:border-green-500 shadow-md ring-2 ring-yellow-200'
-                                  : 'border-green-300 bg-green-50 focus:ring-green-300 focus:border-green-500 hover:bg-green-100 hover:border-green-400'
+                              (() => {
+                                const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
+                                const fieldKey = tieneEntregasAdicionales ? 'entregaBase' : 'entrega';
+                                const hasPending = hasPendingChange(movimiento.establecimientoId, fieldKey);
+
+                                if (hasPending) {
+                                  return 'border-yellow-400 bg-yellow-50 focus:ring-green-300 focus:border-green-500 shadow-md ring-2 ring-yellow-200';
+                                } else {
+                                  return 'border-green-300 bg-green-50 focus:ring-green-300 focus:border-green-500 hover:bg-green-100 hover:border-green-400';
+                                }
+                              })()
                             }`}
-                            readOnly={movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0}
-                            title={
-                              movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0
-                                ? `Entrega base: ${movimiento.entregaBase ?? movimiento.entrega} (bloqueado por entregas adicionales)`
-                                : hasPendingChange(movimiento.establecimientoId, 'entrega')
-                                  ? 'Cambios pendientes - Se guardará automáticamente'
-                                  : 'Entrega base de planificación'
-                            }
+                            title={(() => {
+                              const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
+                              const fieldKey = tieneEntregasAdicionales ? 'entregaBase' : 'entrega';
+                              const hasPending = hasPendingChange(movimiento.establecimientoId, fieldKey);
+
+                              if (hasPending) {
+                                return 'Cambios pendientes - Se guardará automáticamente';
+                              } else if (tieneEntregasAdicionales) {
+                                return 'Entrega base (editable) - Valor original de planificación';
+                              } else {
+                                return 'Entrega base de planificación';
+                              }
+                            })()}
                             disabled={isCreating || isUpdating || isAutoSaving}
                             aria-label={`Entrega base para ${movimiento.establecimiento.nombre}`}
                           />
-                          {hasPendingChange(movimiento.establecimientoId, 'entrega') && (
-                            <div className="absolute -top-2 -right-2 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-sm border-2 border-white"
-                                 title="Cambios pendientes"></div>
-                          )}
+                          {(() => {
+                            const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
+                            const fieldKey = tieneEntregasAdicionales ? 'entregaBase' : 'entrega';
+                            return hasPendingChange(movimiento.establecimientoId, fieldKey) && (
+                              <div className="absolute -top-2 -right-2 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-sm border-2 border-white"
+                                   title="Cambios pendientes"></div>
+                            );
+                          })()}
                         </div>
                         {movimiento.entregasAdicionales?.map((entrega) => (
-                          <div key={entrega.id} className="flex items-center space-x-2 relative bg-orange-50 rounded-lg p-2 border border-orange-200">
+                          <div key={entrega.id} className="flex items-center space-x-1 relative bg-orange-50 rounded-lg px-2 py-1 border border-orange-200">
                             <input
                               type="number"
                               min="0"
                               value={getCurrentEntregaValue(entrega.id, entrega.cantidad)}
                               onChange={(e) => handleTempEntregaValueChange(entrega.id, parseInt(e.target.value) || 0)}
                               onBlur={() => handleEntregaFieldBlur(entrega.id)}
-                              className={`w-18 px-2 py-1 text-center text-sm font-semibold border-2 rounded-md focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 tabular-nums ${
+                              className={`w-20 px-3 py-2 text-center text-base font-semibold border-2 rounded-lg focus:outline-none focus:ring-3 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 tabular-nums ${
                                 hasPendingEntregaChange(entrega.id)
-                                  ? 'border-yellow-400 bg-yellow-50 focus:ring-orange-300 shadow-sm'
-                                  : 'border-orange-300 bg-white focus:ring-orange-300 hover:border-orange-400'
+                                  ? 'border-yellow-400 bg-yellow-50 focus:ring-orange-300 focus:border-orange-500 shadow-md ring-2 ring-yellow-200'
+                                  : 'border-orange-300 bg-white focus:ring-orange-300 focus:border-orange-500 hover:bg-orange-50 hover:border-orange-400'
                               }`}
                               title={hasPendingEntregaChange(entrega.id) ? 'Cambios pendientes - Se guardará automáticamente' : `Entrega adicional #${entrega.numeroEntrega}`}
                               disabled={isCreating || isUpdating || isProcessingEntrega}
                               aria-label={`Entrega adicional ${entrega.numeroEntrega}`}
                             />
                             {hasPendingEntregaChange(entrega.id) && (
-                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-sm border-2 border-white"
+                              <div className="absolute -top-2 -right-2 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-sm border-2 border-white"
                                    title="Cambios pendientes" aria-label="Cambios pendientes"></div>
                             )}
                             <button
                               onClick={() => handleEliminarEntregaAdicional(entrega.id)}
-                              className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md disabled:opacity-50 transition-colors duration-200"
+                              className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg disabled:opacity-50 transition-colors duration-200"
                               disabled={isCreating || isUpdating || isProcessingEntrega}
                               title="Eliminar entrega adicional"
                               aria-label={`Eliminar entrega adicional ${entrega.numeroEntrega}`}
