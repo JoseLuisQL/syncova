@@ -325,14 +325,15 @@ export const useMovimientos = () => {
     // LÓGICA AVANZADA: Calcular entrega base y total
     const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
     const entregaBase = tieneEntregasAdicionales
-      ? (movimiento.entregaBase ?? movimiento.entrega) // Usar entrega_base si existe, sino entrega
+      ? (movimiento.entregaBase ?? 0) // Usar entrega_base si existe, sino 0 para mostrar solo la base
       : movimiento.entrega; // Sin entregas adicionales, usar entrega normal
 
     const totalEntregasAdicionales = tieneEntregasAdicionales
       ? movimiento.entregasAdicionales.reduce((sum, ea) => sum + ea.cantidad, 0)
       : 0;
 
-    const entregaTotal = entregaBase + totalEntregasAdicionales;
+    // CORRECCIÓN: El backend ya calcula el total en el campo 'entrega' cuando hay entregas adicionales
+    const entregaTotal = movimiento.entrega; // Este campo ya contiene el total correcto del backend
 
     // El stock se calcula con la entrega total (base + adicionales)
     const stock = saldo + entregaTotal;

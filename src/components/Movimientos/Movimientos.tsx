@@ -916,7 +916,10 @@ const Movimientos: React.FC = () => {
   // Calcular totales generales
   const totalesGenerales = useMemo(() => {
     return datosTabla.reduce((totales, movimiento) => {
-      const entregasAdicionalesTotal = movimiento.entregasAdicionales?.reduce((sum, e) => sum + e.cantidad, 0) || 0;
+      // CORRECCIÓN FINAL: El backend ya actualiza el campo 'entrega' con el total (base + adicionales)
+      // cuando hay entregas adicionales, por lo que NO debemos sumar las adicionales nuevamente
+      const entregaTotal = movimiento.entrega; // Este campo ya contiene el total correcto del backend
+
       return {
         saldoAnterior: totales.saldoAnterior + movimiento.saldoAnterior,
         transIngreso: totales.transIngreso + movimiento.transIngreso,
@@ -924,7 +927,7 @@ const Movimientos: React.FC = () => {
         salida: totales.salida + movimiento.salida,
         transSalida: totales.transSalida + movimiento.transSalida,
         saldo: totales.saldo + movimiento.saldo,
-        entrega: totales.entrega + movimiento.entrega + entregasAdicionalesTotal,
+        entrega: totales.entrega + entregaTotal, // CORRECCIÓN: Usar directamente el campo entrega del backend
         stock: totales.stock + movimiento.stock,
       };
     }, {
@@ -2246,7 +2249,15 @@ const Movimientos: React.FC = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-gray-600">Entrega Principal</p>
-                      <p className="text-lg font-bold text-green-600">{movimientoParaEntregas.entrega} unidades</p>
+                      <p className="text-lg font-bold text-green-600">
+                        {(() => {
+                          // CORRECCIÓN: Mostrar entrega base (valor original de planificación)
+                          const tieneEntregasAdicionales = movimientoParaEntregas.entregasAdicionales && movimientoParaEntregas.entregasAdicionales.length > 0;
+                          return tieneEntregasAdicionales
+                            ? (movimientoParaEntregas.entregaBase ?? 0) // Mostrar solo la base original
+                            : movimientoParaEntregas.entrega;
+                        })()} unidades
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -2347,7 +2358,15 @@ const Movimientos: React.FC = () => {
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
                     <p className="text-sm text-blue-600">Entrega Principal</p>
-                    <p className="text-lg font-bold text-blue-800">{movimientoParaEntregas.entrega}</p>
+                    <p className="text-lg font-bold text-blue-800">
+                      {(() => {
+                        // CORRECCIÓN: Mostrar entrega base (valor original de planificación)
+                        const tieneEntregasAdicionales = movimientoParaEntregas.entregasAdicionales && movimientoParaEntregas.entregasAdicionales.length > 0;
+                        return tieneEntregasAdicionales
+                          ? (movimientoParaEntregas.entregaBase ?? 0) // Mostrar solo la base original
+                          : movimientoParaEntregas.entrega;
+                      })()}
+                    </p>
                   </div>
                   <div className="text-center">
                     <p className="text-sm text-blue-600">Entregas Adicionales</p>
@@ -2361,10 +2380,8 @@ const Movimientos: React.FC = () => {
                   <div className="text-center">
                     <p className="text-sm text-blue-600">Total General</p>
                     <p className="text-lg font-bold text-blue-800">
-                      {movimientoParaEntregas.entrega + (movimientoParaEntregas.entregasAdicionales?.reduce((sum, e) => {
-                        const currentValue = getCurrentEntregaValue(e.id, e.cantidad);
-                        return sum + currentValue;
-                      }, 0) || 0)}
+                      {/* CORRECCIÓN FINAL: El backend ya calcula el total en el campo 'entrega' */}
+                      {movimientoParaEntregas.entrega}
                     </p>
                   </div>
                 </div>
