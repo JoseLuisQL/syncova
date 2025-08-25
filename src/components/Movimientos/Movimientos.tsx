@@ -33,6 +33,7 @@ import {
   Receipt,
   Upload
 } from 'lucide-react';
+import './enhanced-table.css';
 import {
   Establecimiento,
   Vacuna,
@@ -1482,44 +1483,92 @@ const Movimientos: React.FC = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+        <div className="overflow-x-auto overflow-y-visible shadow-sm">
+          <table className="min-w-full divide-y divide-gray-300 bg-white" role="table" aria-label="Movimientos de Vacunas">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
+              <tr role="row">
+                <th
+                  className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[280px]"
+                  scope="col"
+                  aria-sort="none"
+                >
                   Establecimiento
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                <th
+                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[120px]"
+                  scope="col"
+                  aria-label="Saldo Anterior"
+                >
                   Saldo Anterior
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                <th
+                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[130px]"
+                  scope="col"
+                  aria-label="Transferencia Ingreso"
+                >
                   Trans. Ingreso
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                <th
+                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[120px]"
+                  scope="col"
+                  aria-label="Total Saldo"
+                >
                   Total Saldo
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                <th
+                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[100px]"
+                  scope="col"
+                  aria-label="Salida"
+                >
                   Salida
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                <th
+                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[130px]"
+                  scope="col"
+                  aria-label="Transferencia Salida"
+                >
                   Trans. Salida
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                <th
+                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[100px]"
+                  scope="col"
+                  aria-label="Saldo Final"
+                >
                   Saldo
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                <th
+                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[140px]"
+                  scope="col"
+                  aria-label="Entrega"
+                >
                   Entrega
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                <th
+                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[100px]"
+                  scope="col"
+                  aria-label="Stock Disponible"
+                >
                   Stock
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                <th
+                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[140px]"
+                  scope="col"
+                  aria-label="Promedio de Consumo"
+                >
                   Promedio Consumo
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                <th
+                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[130px]"
+                  scope="col"
+                  aria-label="Disponibilidad en Meses"
+                >
                   Disponibilidad
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th
+                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider min-w-[120px]"
+                  scope="col"
+                  aria-label="Acciones Disponibles"
+                >
                   Acciones
                 </th>
               </tr>
@@ -1544,43 +1593,88 @@ const Movimientos: React.FC = () => {
                 </tr>
               ) : (
                 <>
-                  {/* TOTALES ROW - Positioned immediately after headers */}
-                  <tr className="bg-gray-50 border-t-2 border-gray-300 border-b-2">
-                    <td className="px-6 py-4 text-sm font-bold text-gray-900 border-r border-gray-200">
-                      TOTALES ({datosTabla.length} establecimientos)
+                  {/* TOTALES ROW - Enhanced with better visual hierarchy */}
+                  <tr
+                    className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-4 border-blue-500 border-b-2 border-blue-300 sticky top-[73px] z-10 shadow-sm"
+                    role="row"
+                    aria-label="Fila de totales generales"
+                  >
+                    <td className="px-6 py-5 text-base font-bold text-gray-900 border-r border-blue-200">
+                      <div>
+                        <div className="text-base font-bold text-gray-900">TOTALES GENERALES</div>
+                        <div className="text-sm text-gray-600 font-medium">
+                          {datosTabla.length} establecimientos registrados
+                        </div>
+                      </div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                      {totalesGenerales.saldoAnterior.toLocaleString()}
+                    <td className="px-4 py-5 text-center border-r border-blue-200">
+                      <div className="text-lg font-bold text-blue-700 tabular-nums">
+                        {totalesGenerales.saldoAnterior.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">unidades</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                      {totalesGenerales.transIngreso.toLocaleString()}
+                    <td className="px-4 py-5 text-center border-r border-blue-200">
+                      <div className="text-lg font-bold text-green-700 tabular-nums">
+                        {totalesGenerales.transIngreso.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">ingresos</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-bold text-blue-600 border-r border-gray-200">
-                      {totalesGenerales.totalSaldo.toLocaleString()}
+                    <td className="px-4 py-5 text-center border-r border-blue-200">
+                      <div className="text-lg font-bold text-blue-700 tabular-nums bg-blue-100 px-3 py-1 rounded-lg">
+                        {totalesGenerales.totalSaldo.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium mt-1">total</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                      {totalesGenerales.salida.toLocaleString()}
+                    <td className="px-4 py-5 text-center border-r border-blue-200">
+                      <div className="text-lg font-bold text-orange-700 tabular-nums">
+                        {totalesGenerales.salida.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">salidas</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                      {totalesGenerales.transSalida.toLocaleString()}
+                    <td className="px-4 py-5 text-center border-r border-blue-200">
+                      <div className="text-lg font-bold text-purple-700 tabular-nums">
+                        {totalesGenerales.transSalida.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">transferencias</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-bold text-green-600 border-r border-gray-200">
-                      {totalesGenerales.saldo.toLocaleString()}
+                    <td className="px-4 py-5 text-center border-r border-blue-200">
+                      <div className="text-lg font-bold text-green-700 tabular-nums bg-green-100 px-3 py-1 rounded-lg">
+                        {totalesGenerales.saldo.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium mt-1">saldo final</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-bold text-emerald-600 border-r border-gray-200">
-                      {totalesGenerales.entrega.toLocaleString()}
+                    <td className="px-4 py-5 text-center border-r border-blue-200">
+                      <div className="text-lg font-bold text-emerald-700 tabular-nums bg-emerald-100 px-3 py-1 rounded-lg">
+                        {totalesGenerales.entrega.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium mt-1">entregas</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                      {totalesGenerales.stock.toLocaleString()}
+                    <td className="px-4 py-5 text-center border-r border-blue-200">
+                      <div className="text-lg font-bold text-indigo-700 tabular-nums">
+                        {totalesGenerales.stock.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">stock total</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                      -
+                    <td className="px-4 py-5 text-center border-r border-blue-200">
+                      <div className="text-sm font-medium text-gray-500">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100">
+                          N/A
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900 border-r border-gray-200">
-                      -
+                    <td className="px-4 py-5 text-center border-r border-blue-200">
+                      <div className="text-sm font-medium text-gray-500">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100">
+                          N/A
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-bold text-gray-900">
-                      -
+                    <td className="px-4 py-5 text-center">
+                      <div className="text-sm font-medium text-gray-500">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100">
+                          N/A
+                        </span>
+                      </div>
                     </td>
                   </tr>
 
@@ -1591,103 +1685,135 @@ const Movimientos: React.FC = () => {
                   const { colores, icono, centro } = estiloEstablecimiento;
 
                   return (
-                    <tr key={`${movimiento.establecimientoId}-${selectedVacuna}-${selectedMes}-${selectedAnio}`}
-                        className={`${colores.bg} hover:bg-gray-100 border-b ${colores.border}`}>
-                      <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200">
-                        <div className="flex items-center">
-                          <div className={`w-3 h-3 rounded-full mr-3 ${
-                            movimiento.tieneMovimiento ? 'bg-green-500' : 'bg-gray-300'
-                          }`}></div>
-                          <div>
-                            <div className={`text-sm font-medium ${colores.text} flex items-center`}>
-                              <span className="mr-2">{icono}</span>
-                              {movimiento.establecimiento.nombre}
+                    <tr
+                      key={`${movimiento.establecimientoId}-${selectedVacuna}-${selectedMes}-${selectedAnio}`}
+                      className={`${colores.bg} hover:bg-gray-50 hover:shadow-sm border-b border-gray-200 ${colores.border} transition-all duration-200 ease-in-out group`}
+                      role="row"
+                      aria-label={`Datos de ${movimiento.establecimiento.nombre}`}
+                    >
+                      <td className="px-6 py-5 whitespace-nowrap border-r border-gray-300" role="gridcell">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-4 h-4 rounded-full flex-shrink-0 transition-all duration-200 ${
+                            movimiento.tieneMovimiento
+                              ? 'bg-green-500 shadow-sm ring-2 ring-green-200'
+                              : 'bg-gray-300 ring-2 ring-gray-200'
+                          }`} aria-label={movimiento.tieneMovimiento ? 'Con movimiento' : 'Sin movimiento'}></div>
+                          <div className="min-w-0 flex-1">
+                            <div className={`text-base font-semibold ${colores.text} group-hover:text-gray-900 transition-colors duration-200`}>
+                              <span className="truncate">{movimiento.establecimiento.nombre}</span>
                             </div>
-                            <div className="text-sm opacity-75">{movimiento.establecimiento.codigo}</div>
+                            <div className="text-sm text-gray-500 font-medium mt-1">
+                              Código: {movimiento.establecimiento.codigo}
+                            </div>
                             {selectedCentroAcopio === 'todos' && (
-                              <div className="text-xs mt-1">
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colores.bg} ${colores.text} border ${colores.border}`}>
-                                  {colores.icon} {centro !== 'DEFAULT' ? centro : 'Regional'}
+                              <div className="mt-2">
+                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${colores.bg} ${colores.text} border ${colores.border} shadow-sm`}>
+                                  {centro !== 'DEFAULT' ? centro : 'Regional'}
                                 </span>
                               </div>
                             )}
                             {!movimiento.tieneMovimiento && (
-                              <div className="text-xs text-orange-600 font-medium mt-1">Sin movimiento</div>
+                              <div className="mt-2">
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-200">
+                                  Sin movimiento
+                                </span>
+                              </div>
                             )}
                           </div>
                         </div>
                       </td>
-                    <td className="px-4 py-4 text-center text-sm text-gray-900 border-r border-gray-200">
-                      {movimiento.saldoAnterior}
+                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                      <div className="text-lg font-bold text-blue-700 tabular-nums">
+                        {movimiento.saldoAnterior.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">unidades</div>
                     </td>
-                    <td className="px-4 py-4 text-center border-r border-gray-200 relative">
-                      <input
-                        type="number"
-                        min="0"
-                        value={getCurrentValue(movimiento.establecimientoId, 'transIngreso', movimiento.transIngreso)}
-                        onChange={(e) => handleTempValueChange(movimiento.establecimientoId, 'transIngreso', parseInt(e.target.value) || 0)}
-                        onBlur={() => handleFieldBlur(movimiento.establecimientoId, 'transIngreso')}
-                        className={`w-16 px-2 py-1 text-center text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                          hasPendingChange(movimiento.establecimientoId, 'transIngreso')
-                            ? 'border-yellow-400 bg-yellow-50'
-                            : 'border-blue-300 bg-blue-50'
-                        }`}
-                        title={hasPendingChange(movimiento.establecimientoId, 'transIngreso') ? 'Cambios pendientes - Se guardará automáticamente' : 'Campo editable - Trans. Ingreso'}
-                        disabled={isCreating || isUpdating || isAutoSaving}
-                      />
-                      {hasPendingChange(movimiento.establecimientoId, 'transIngreso') && (
-                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"
-                             title="Cambios pendientes"></div>
-                      )}
+                    <td className="px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
+                      <div className="relative inline-block">
+                        <input
+                          type="number"
+                          min="0"
+                          value={getCurrentValue(movimiento.establecimientoId, 'transIngreso', movimiento.transIngreso)}
+                          onChange={(e) => handleTempValueChange(movimiento.establecimientoId, 'transIngreso', parseInt(e.target.value) || 0)}
+                          onBlur={() => handleFieldBlur(movimiento.establecimientoId, 'transIngreso')}
+                          className={`w-20 px-3 py-2 text-center text-base font-semibold border-2 rounded-lg focus:outline-none focus:ring-3 focus:ring-blue-300 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 tabular-nums ${
+                            hasPendingChange(movimiento.establecimientoId, 'transIngreso')
+                              ? 'border-yellow-400 bg-yellow-50 shadow-md ring-2 ring-yellow-200'
+                              : 'border-blue-300 bg-blue-50 hover:bg-blue-100 hover:border-blue-400'
+                          }`}
+                          title={hasPendingChange(movimiento.establecimientoId, 'transIngreso') ? 'Cambios pendientes - Se guardará automáticamente' : 'Campo editable - Trans. Ingreso'}
+                          disabled={isCreating || isUpdating || isAutoSaving}
+                          aria-label={`Transferencia ingreso para ${movimiento.establecimiento.nombre}`}
+                        />
+                        {hasPendingChange(movimiento.establecimientoId, 'transIngreso') && (
+                          <div className="absolute -top-2 -right-2 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-sm border-2 border-white"
+                               title="Cambios pendientes" aria-label="Cambios pendientes"></div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium mt-1">ingresos</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm text-gray-900 border-r border-gray-200">
-                      <span className="font-medium text-blue-600">{movimiento.totalSaldo}</span>
+                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                      <div className="text-lg font-bold text-blue-700 tabular-nums bg-blue-100 px-3 py-2 rounded-lg inline-block shadow-sm">
+                        {movimiento.totalSaldo.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium mt-1">total</div>
                     </td>
-                    <td className="px-4 py-4 text-center border-r border-gray-200 relative">
-                      <input
-                        type="number"
-                        min="0"
-                        value={getCurrentValue(movimiento.establecimientoId, 'salida', movimiento.salida)}
-                        onChange={(e) => handleTempValueChange(movimiento.establecimientoId, 'salida', parseInt(e.target.value) || 0)}
-                        onBlur={() => handleFieldBlur(movimiento.establecimientoId, 'salida')}
-                        className={`w-16 px-2 py-1 text-center text-sm border rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                          hasPendingChange(movimiento.establecimientoId, 'salida')
-                            ? 'border-yellow-400 bg-yellow-50'
-                            : 'border-orange-300 bg-orange-50'
-                        }`}
-                        title={hasPendingChange(movimiento.establecimientoId, 'salida') ? 'Cambios pendientes - Se guardará automáticamente' : 'Campo editable - Salida'}
-                        disabled={isCreating || isUpdating || isAutoSaving}
-                      />
-                      {hasPendingChange(movimiento.establecimientoId, 'salida') && (
-                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"
-                             title="Cambios pendientes"></div>
-                      )}
+                    <td className="px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
+                      <div className="relative inline-block">
+                        <input
+                          type="number"
+                          min="0"
+                          value={getCurrentValue(movimiento.establecimientoId, 'salida', movimiento.salida)}
+                          onChange={(e) => handleTempValueChange(movimiento.establecimientoId, 'salida', parseInt(e.target.value) || 0)}
+                          onBlur={() => handleFieldBlur(movimiento.establecimientoId, 'salida')}
+                          className={`w-20 px-3 py-2 text-center text-base font-semibold border-2 rounded-lg focus:outline-none focus:ring-3 focus:ring-orange-300 focus:border-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 tabular-nums ${
+                            hasPendingChange(movimiento.establecimientoId, 'salida')
+                              ? 'border-yellow-400 bg-yellow-50 shadow-md ring-2 ring-yellow-200'
+                              : 'border-orange-300 bg-orange-50 hover:bg-orange-100 hover:border-orange-400'
+                          }`}
+                          title={hasPendingChange(movimiento.establecimientoId, 'salida') ? 'Cambios pendientes - Se guardará automáticamente' : 'Campo editable - Salida'}
+                          disabled={isCreating || isUpdating || isAutoSaving}
+                          aria-label={`Salida para ${movimiento.establecimiento.nombre}`}
+                        />
+                        {hasPendingChange(movimiento.establecimientoId, 'salida') && (
+                          <div className="absolute -top-2 -right-2 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-sm border-2 border-white"
+                               title="Cambios pendientes" aria-label="Cambios pendientes"></div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium mt-1">salidas</div>
                     </td>
-                    <td className="px-4 py-4 text-center border-r border-gray-200 relative">
-                      <input
-                        type="number"
-                        min="0"
-                        value={getCurrentValue(movimiento.establecimientoId, 'transSalida', movimiento.transSalida)}
-                        onChange={(e) => handleTempValueChange(movimiento.establecimientoId, 'transSalida', parseInt(e.target.value) || 0)}
-                        onBlur={() => handleFieldBlur(movimiento.establecimientoId, 'transSalida')}
-                        className={`w-16 px-2 py-1 text-center text-sm border rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                          hasPendingChange(movimiento.establecimientoId, 'transSalida')
-                            ? 'border-yellow-400 bg-yellow-50'
-                            : 'border-purple-300 bg-purple-50'
-                        }`}
-                        title={hasPendingChange(movimiento.establecimientoId, 'transSalida') ? 'Cambios pendientes - Se guardará automáticamente' : 'Campo editable - Trans. Salida'}
-                        disabled={isCreating || isUpdating || isAutoSaving}
-                      />
-                      {hasPendingChange(movimiento.establecimientoId, 'transSalida') && (
-                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"
-                             title="Cambios pendientes"></div>
-                      )}
+                    <td className="px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
+                      <div className="relative inline-block">
+                        <input
+                          type="number"
+                          min="0"
+                          value={getCurrentValue(movimiento.establecimientoId, 'transSalida', movimiento.transSalida)}
+                          onChange={(e) => handleTempValueChange(movimiento.establecimientoId, 'transSalida', parseInt(e.target.value) || 0)}
+                          onBlur={() => handleFieldBlur(movimiento.establecimientoId, 'transSalida')}
+                          className={`w-20 px-3 py-2 text-center text-base font-semibold border-2 rounded-lg focus:outline-none focus:ring-3 focus:ring-purple-300 focus:border-purple-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 tabular-nums ${
+                            hasPendingChange(movimiento.establecimientoId, 'transSalida')
+                              ? 'border-yellow-400 bg-yellow-50 shadow-md ring-2 ring-yellow-200'
+                              : 'border-purple-300 bg-purple-50 hover:bg-purple-100 hover:border-purple-400'
+                          }`}
+                          title={hasPendingChange(movimiento.establecimientoId, 'transSalida') ? 'Cambios pendientes - Se guardará automáticamente' : 'Campo editable - Trans. Salida'}
+                          disabled={isCreating || isUpdating || isAutoSaving}
+                          aria-label={`Transferencia salida para ${movimiento.establecimiento.nombre}`}
+                        />
+                        {hasPendingChange(movimiento.establecimientoId, 'transSalida') && (
+                          <div className="absolute -top-2 -right-2 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-sm border-2 border-white"
+                               title="Cambios pendientes" aria-label="Cambios pendientes"></div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium mt-1">transferencias</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm text-gray-900 border-r border-gray-200">
-                      <span className="font-medium text-green-600">{movimiento.saldo}</span>
+                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                      <div className="text-lg font-bold text-green-700 tabular-nums bg-green-100 px-3 py-2 rounded-lg inline-block shadow-sm">
+                        {movimiento.saldo.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium mt-1">saldo final</div>
                     </td>
-                    <td className="px-4 py-4 text-center border-r border-gray-200 relative">
-                      <div className="flex items-center justify-center space-x-2">
+                    <td className="px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
+                      <div className="flex items-center justify-center space-x-2 flex-wrap gap-2">
                         <div className="relative">
                           <input
                             type="number"
@@ -1713,12 +1839,12 @@ const Movimientos: React.FC = () => {
                                 handleFieldBlur(movimiento.establecimientoId, 'entrega');
                               }
                             }}
-                            className={`w-16 px-2 py-1 text-center text-sm border rounded focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                            className={`w-20 px-3 py-2 text-center text-base font-semibold border-2 rounded-lg focus:outline-none focus:ring-3 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 tabular-nums ${
                               movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0
                                 ? 'border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed'
                                 : hasPendingChange(movimiento.establecimientoId, 'entrega')
-                                  ? 'border-yellow-400 bg-yellow-50 focus:ring-green-500 focus:border-transparent'
-                                  : 'border-green-300 bg-green-50 focus:ring-green-500 focus:border-transparent'
+                                  ? 'border-yellow-400 bg-yellow-50 focus:ring-green-300 focus:border-green-500 shadow-md ring-2 ring-yellow-200'
+                                  : 'border-green-300 bg-green-50 focus:ring-green-300 focus:border-green-500 hover:bg-green-100 hover:border-green-400'
                             }`}
                             readOnly={movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0}
                             title={
@@ -1729,80 +1855,100 @@ const Movimientos: React.FC = () => {
                                   : 'Entrega base de planificación'
                             }
                             disabled={isCreating || isUpdating || isAutoSaving}
+                            aria-label={`Entrega base para ${movimiento.establecimiento.nombre}`}
                           />
                           {hasPendingChange(movimiento.establecimientoId, 'entrega') && (
-                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"
+                            <div className="absolute -top-2 -right-2 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-sm border-2 border-white"
                                  title="Cambios pendientes"></div>
                           )}
                         </div>
                         {movimiento.entregasAdicionales?.map((entrega) => (
-                          <div key={entrega.id} className="flex items-center space-x-1 relative">
+                          <div key={entrega.id} className="flex items-center space-x-2 relative bg-orange-50 rounded-lg p-2 border border-orange-200">
                             <input
                               type="number"
                               min="0"
                               value={getCurrentEntregaValue(entrega.id, entrega.cantidad)}
                               onChange={(e) => handleTempEntregaValueChange(entrega.id, parseInt(e.target.value) || 0)}
                               onBlur={() => handleEntregaFieldBlur(entrega.id)}
-                              className={`w-16 px-2 py-1 text-center text-sm border rounded focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                              className={`w-18 px-2 py-1 text-center text-sm font-semibold border-2 rounded-md focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 tabular-nums ${
                                 hasPendingEntregaChange(entrega.id)
-                                  ? 'border-yellow-400 bg-yellow-50 focus:ring-orange-500'
-                                  : 'border-orange-300 bg-orange-50 focus:ring-orange-500'
+                                  ? 'border-yellow-400 bg-yellow-50 focus:ring-orange-300 shadow-sm'
+                                  : 'border-orange-300 bg-white focus:ring-orange-300 hover:border-orange-400'
                               }`}
                               title={hasPendingEntregaChange(entrega.id) ? 'Cambios pendientes - Se guardará automáticamente' : `Entrega adicional #${entrega.numeroEntrega}`}
                               disabled={isCreating || isUpdating || isProcessingEntrega}
+                              aria-label={`Entrega adicional ${entrega.numeroEntrega}`}
                             />
                             {hasPendingEntregaChange(entrega.id) && (
-                              <div className="absolute -top-1 -right-8 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"
-                                   title="Cambios pendientes"></div>
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-sm border-2 border-white"
+                                   title="Cambios pendientes" aria-label="Cambios pendientes"></div>
                             )}
                             <button
                               onClick={() => handleEliminarEntregaAdicional(entrega.id)}
-                              className="p-1 text-red-500 hover:text-red-700 disabled:opacity-50"
+                              className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md disabled:opacity-50 transition-colors duration-200"
                               disabled={isCreating || isUpdating || isProcessingEntrega}
                               title="Eliminar entrega adicional"
+                              aria-label={`Eliminar entrega adicional ${entrega.numeroEntrega}`}
                             >
                               {isProcessingEntrega ? (
-                                <Loader2 className="h-3 w-3 animate-spin" />
+                                <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
-                                <X className="h-3 w-3" />
+                                <X className="h-4 w-4" />
                               )}
                             </button>
                           </div>
                         ))}
                         <button
                           onClick={() => handleAgregarEntregaAdicional(movimiento.establecimientoId)}
-                          className="p-1 text-blue-500 hover:text-blue-700 disabled:opacity-50"
+                          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg disabled:opacity-50 transition-colors duration-200 border-2 border-dashed border-blue-300 hover:border-blue-400"
                           title="Agregar entrega adicional"
                           disabled={isCreating || isUpdating}
+                          aria-label="Agregar nueva entrega adicional"
                         >
-                          <Plus className="h-4 w-4" />
+                          <Plus className="h-5 w-5" />
                         </button>
                       </div>
+                      <div className="text-xs text-gray-500 font-medium mt-1">entregas</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm text-gray-900 border-r border-gray-200">
-                      {movimiento.stock}
+                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                      <div className="text-lg font-bold text-indigo-700 tabular-nums">
+                        {movimiento.stock.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">stock</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm text-gray-900 border-r border-gray-200">
-                      {movimiento.promedioConsumo}
+                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                      <div className="text-lg font-bold text-yellow-700 tabular-nums">
+                        {movimiento.promedioConsumo.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500 font-medium">promedio</div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm text-gray-900 border-r border-gray-200">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        movimiento.disponibilidad >= 2 ? 'bg-green-100 text-green-800' :
-                        movimiento.disponibilidad >= 1 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
+                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                      <div className={`inline-flex flex-col items-center px-4 py-2 rounded-xl font-bold shadow-sm border-2 transition-all duration-200 ${
+                        movimiento.disponibilidad >= 2
+                          ? 'bg-green-100 text-green-800 border-green-300' :
+                        movimiento.disponibilidad >= 1
+                          ? 'bg-yellow-100 text-yellow-800 border-yellow-300' :
+                        'bg-red-100 text-red-800 border-red-300'
                       }`}>
-                        {movimiento.disponibilidad.toFixed(1)}
-                      </span>
+                        <span className="text-lg font-bold tabular-nums">
+                          {movimiento.disponibilidad.toFixed(1)}
+                        </span>
+                        <span className="text-xs font-medium">
+                          {movimiento.disponibilidad >= 2 ? 'meses' : movimiento.disponibilidad >= 1 ? 'mes' : 'crítico'}
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-4 py-4 text-center text-sm font-medium">
-                      <div className="flex items-center justify-center space-x-2">
+                    <td className="px-4 py-5 text-center" role="gridcell">
+                      <div className="flex items-center justify-center space-x-3">
                         <button
                           onClick={() => setSelectedMovimiento(movimiento)}
-                          className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
-                          title="Ver detalle"
+                          className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 border border-blue-300 rounded-lg hover:bg-blue-200 hover:border-blue-400 focus:outline-none focus:ring-3 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                          title="Ver detalle completo del movimiento"
                           disabled={isLoading}
+                          aria-label={`Ver detalle de ${movimiento.establecimiento.nombre}`}
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-4 w-4 mr-1" />
+                          <span className="hidden sm:inline">Detalle</span>
                         </button>
                         {movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0 && (
                           <button
@@ -1810,11 +1956,13 @@ const Movimientos: React.FC = () => {
                               setMovimientoParaEntregas(movimiento);
                               setShowEntregasAdicionalesModal(true);
                             }}
-                            className="text-orange-600 hover:text-orange-900 disabled:opacity-50"
+                            className="inline-flex items-center px-3 py-2 text-sm font-medium text-orange-700 bg-orange-100 border border-orange-300 rounded-lg hover:bg-orange-200 hover:border-orange-400 focus:outline-none focus:ring-3 focus:ring-orange-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
                             title="Gestionar entregas adicionales"
                             disabled={isLoading}
+                            aria-label={`Gestionar entregas adicionales de ${movimiento.establecimiento.nombre}`}
                           >
-                            <Zap className="h-4 w-4" />
+                            <Zap className="h-4 w-4 mr-1" />
+                            <span className="hidden sm:inline">Entregas</span>
                           </button>
                         )}
                       </div>

@@ -1,0 +1,310 @@
+/* Enhanced Data Table Styles for Movimientos */
+
+/* Smooth transitions for all interactive elements */
+.transition-smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced table container with better shadows */
+.enhanced-table-container {
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.enhanced-table-container:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Sticky header with enhanced gradient */
+.enhanced-table-header {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 2px solid #d1d5db;
+}
+
+/* Enhanced header cells */
+.enhanced-header-cell {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-right: 1px solid #d1d5db;
+  min-width: 120px;
+  white-space: nowrap;
+}
+
+.enhanced-header-cell:last-child {
+  border-right: none;
+}
+
+/* Enhanced data rows */
+.enhanced-data-row {
+  border-bottom: 1px solid #e5e7eb;
+  transition: all 0.2s ease-in-out;
+}
+
+.enhanced-data-row:hover {
+  background-color: #f9fafb;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Enhanced data cells */
+.enhanced-data-cell {
+  padding: 1.25rem 1rem;
+  text-align: center;
+  border-right: 1px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.enhanced-data-cell:last-child {
+  border-right: none;
+}
+
+/* Numeric data styling */
+.numeric-display {
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.numeric-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Enhanced input fields */
+.enhanced-input {
+  width: 5rem;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid;
+  border-radius: 0.5rem;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.2s ease-in-out;
+}
+
+.enhanced-input:focus {
+  outline: none;
+  ring: 3px;
+  transform: scale(1.02);
+}
+
+.enhanced-input:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Status indicators */
+.status-indicator {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.2s ease-in-out;
+}
+
+.status-indicator.active {
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.status-indicator.inactive {
+  background-color: #d1d5db;
+  box-shadow: 0 0 0 2px rgba(209, 213, 219, 0.2);
+}
+
+/* Enhanced badges */
+.enhanced-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 2px solid;
+  transition: all 0.2s ease-in-out;
+}
+
+.enhanced-badge.success {
+  background-color: #dcfce7;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.enhanced-badge.warning {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.enhanced-badge.danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+/* Enhanced action buttons */
+.enhanced-action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.enhanced-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.enhanced-action-btn:focus {
+  outline: none;
+  ring: 3px;
+}
+
+.enhanced-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Totals row styling */
+.totals-row {
+  background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+  border-top: 4px solid #3b82f6;
+  border-bottom: 2px solid #93c5fd;
+  position: sticky;
+  top: 73px;
+  z-index: 10;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .enhanced-header-cell,
+  .enhanced-data-cell {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .numeric-display {
+    font-size: 1rem;
+  }
+  
+  .enhanced-input {
+    width: 4rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .enhanced-header-cell,
+  .enhanced-data-cell {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .numeric-display {
+    font-size: 0.875rem;
+  }
+  
+  .enhanced-input {
+    width: 3.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .enhanced-action-btn {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .transition-smooth,
+  .enhanced-data-row,
+  .enhanced-input,
+  .enhanced-action-btn,
+  .status-indicator,
+  .enhanced-badge {
+    transition: none;
+  }
+  
+  .enhanced-data-row:hover {
+    transform: none;
+  }
+  
+  .enhanced-action-btn:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .enhanced-table-container {
+    border: 2px solid #000;
+  }
+  
+  .enhanced-header-cell,
+  .enhanced-data-cell {
+    border-right: 2px solid #000;
+  }
+  
+  .enhanced-data-row {
+    border-bottom: 2px solid #000;
+  }
+}
+
+/* Focus indicators for keyboard navigation */
+.enhanced-input:focus,
+.enhanced-action-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .enhanced-table-container {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .enhanced-data-row:hover {
+    background-color: transparent;
+    transform: none;
+  }
+  
+  .enhanced-action-btn {
+    display: none;
+  }
+}
