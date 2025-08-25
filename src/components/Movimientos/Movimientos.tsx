@@ -824,20 +824,50 @@ const Movimientos: React.FC = () => {
         delete entregasDebounceTimeouts.current[key];
       }
 
-      // Actualizar en el backend
-      await updateEntregaAdicional(entregaId, { cantidad: value });
-
-      // 🚀 TRIGGER AUTOMÁTICO: Sincronizar vales cuando cambia entrega adicional
-      // Buscar el movimiento asociado para obtener los datos necesarios
+      // Buscar el movimiento asociado y entrega adicional actual
       const movimientoAsociado = movimientos.find(m =>
         m.entregasAdicionales?.some(e => e.id === entregaId)
       );
+      const entregaAdicionalActual = movimientoAsociado?.entregasAdicionales?.find(e => e.id === entregaId);
+
+      if (movimientoAsociado && entregaAdicionalActual) {
+        const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
+        const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+
+        // Mostrar feedback visual para redistribución automática
+        if (value !== entregaAdicionalActual.cantidad) {
+          const diferencia = value - entregaAdicionalActual.cantidad;
+          const tipoOperacion = diferencia > 0 ? 'incremento' : 'disminución';
+          const cantidadOperacion = Math.abs(diferencia);
+
+          toast.info(
+            'Redistribuyendo automáticamente',
+            `${nombreEstablecimiento} • Entrega adicional • ${tipoOperacion} de ${cantidadOperacion} unidades`,
+            { duration: 3000 }
+          );
+        }
+      }
+
+      // Actualizar en el backend (con redistribución automática)
+      await updateEntregaAdicional(entregaId, { cantidad: value });
+
+      // 🚀 TRIGGER AUTOMÁTICO: Sincronizar vales cuando cambia entrega adicional
       if (movimientoAsociado) {
         onEntregaAdicionalChanged(
           movimientoAsociado.establecimientoId,
           movimientoAsociado.vacunaId,
           movimientoAsociado.mes,
           movimientoAsociado.anio
+        );
+
+        // Mostrar mensaje de éxito para redistribución
+        const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
+        const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+
+        toast.success(
+          'Redistribución completada',
+          `${nombreEstablecimiento} • Entrega adicional actualizada • Entregas redistribuidas automáticamente`,
+          { duration: 4000 }
         );
       }
 
@@ -853,9 +883,6 @@ const Movimientos: React.FC = () => {
         delete newPending[key];
         return newPending;
       });
-
-      // Toast de confirmación profesional con información de sincronización
-      toast.success(`✅ Entrega adicional actualizada • Cantidad: ${value.toLocaleString()} • Sincronizado con planificación`);
 
       // 🚀 NUEVA FUNCIONALIDAD: Actualizar Stock Disponible en tiempo real cuando cambia entrega adicional
       await updateStockInRealTime();
@@ -1001,10 +1028,25 @@ const Movimientos: React.FC = () => {
         return;
       }
 
-      // Buscar el movimiento asociado antes de eliminar
+      // Buscar el movimiento asociado y entrega adicional antes de eliminar
       const movimientoAsociado = movimientos.find(m =>
         m.entregasAdicionales?.some(e => e.id === entregaId)
       );
+      const entregaAdicionalActual = movimientoAsociado?.entregasAdicionales?.find(e => e.id === entregaId);
+
+      if (movimientoAsociado && entregaAdicionalActual) {
+        const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
+        const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+
+        // Mostrar feedback visual para redistribución automática al eliminar
+        if (entregaAdicionalActual.cantidad > 0) {
+          toast.info(
+            'Redistribuyendo automáticamente',
+            `${nombreEstablecimiento} • Eliminando entrega adicional • Trasladando ${entregaAdicionalActual.cantidad} unidades`,
+            { duration: 3000 }
+          );
+        }
+      }
 
       await deleteEntregaAdicional(entregaId);
 
@@ -1016,9 +1058,16 @@ const Movimientos: React.FC = () => {
           movimientoAsociado.mes,
           movimientoAsociado.anio
         );
-      }
 
-      toast.success('✅ Entrega adicional eliminada • Planificación actualizada automáticamente');
+        const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
+        const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+
+        toast.success(
+          'Redistribución completada',
+          `${nombreEstablecimiento} • Entrega adicional eliminada • Entregas redistribuidas automáticamente`,
+          { duration: 4000 }
+        );
+      }
 
       // 🚀 NUEVA FUNCIONALIDAD: Actualizar Stock Disponible en tiempo real cuando se elimina entrega adicional
       await updateStockInRealTime();

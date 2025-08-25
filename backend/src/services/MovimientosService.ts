@@ -947,10 +947,32 @@ export class MovimientosService {
   }
 
   /**
-   * FUNCIONALIDAD CLAVE: Crear entrega adicional
+   * FUNCIONALIDAD CLAVE: Crear entrega adicional con redistribución automática
    */
   static async createEntregaAdicional(data: CreateEntregaAdicionalDto): Promise<ServiceResult<IEntregaAdicional>> {
     try {
+      // Validaciones de entrada para entregas adicionales
+      if (data.cantidad < 0) {
+        return {
+          success: false,
+          error: 'La cantidad de entrega adicional no puede ser negativa'
+        };
+      }
+
+      if (data.cantidad > 100000) {
+        return {
+          success: false,
+          error: 'La cantidad de entrega adicional excede el límite máximo permitido (100,000 unidades)'
+        };
+      }
+
+      if (data.numeroEntrega < 1 || data.numeroEntrega > 99) {
+        return {
+          success: false,
+          error: 'El número de entrega debe estar entre 1 y 99'
+        };
+      }
+
       // Verificar que el movimiento existe
       const movimiento = await prisma.movimientoVacuna.findUnique({
         where: { id: data.movimientoVacunaId },
@@ -978,12 +1000,29 @@ export class MovimientosService {
         };
       }
 
-      // Crear la entrega adicional en transacción
+      // Crear la entrega adicional en transacción con redistribución automática
       const result = await prisma.$transaction(async (tx) => {
-        // PASO 1: Manejar entrega base (preservar valor original)
+        // PASO 1: REDISTRIBUCIÓN AUTOMÁTICA para nueva entrega adicional
+        if (data.cantidad > 0) {
+          const usuarioId = data.usuarioId || await this.getSystemUser();
+          const nuevaEntregaTotal = movimiento.entrega + data.cantidad;
+
+          const redistribucionResult = await this.redistribuirEntregasAutomaticamente(
+            tx,
+            movimiento,
+            nuevaEntregaTotal,
+            usuarioId
+          );
+
+          if (!redistribucionResult.success) {
+            throw new Error(redistribucionResult.error);
+          }
+        }
+
+        // PASO 2: Manejar entrega base (preservar valor original)
         await this.manejarEntregaBase(tx, data.movimientoVacunaId, movimiento);
 
-        // PASO 2: Crear entrega adicional
+        // PASO 3: Crear entrega adicional
         const entregaAdicional = await tx.entregaAdicional.create({
           data: {
             movimientoVacunaId: data.movimientoVacunaId,
@@ -995,7 +1034,7 @@ export class MovimientosService {
           }
         });
 
-        // PASO 3: Calcular y actualizar entrega total (base + adicionales)
+        // PASO 4: Calcular y actualizar entrega total (base + adicionales)
         const entregaTotal = await this.calcularEntregaTotal(tx, data.movimientoVacunaId);
 
         await tx.movimientoVacuna.update({
@@ -1006,7 +1045,7 @@ export class MovimientosService {
           }
         });
 
-        // PASO 4: SINCRONIZACIÓN AUTOMÁTICA: Actualizar planificación anual
+        // PASO 5: SINCRONIZACIÓN AUTOMÁTICA: Actualizar planificación anual
         // Solo sincronizar la diferencia de la entrega adicional
         await this.sincronizarConPlanificacion(tx, movimiento, data.cantidad);
 
@@ -1031,7 +1070,7 @@ export class MovimientosService {
   }
 
   /**
-   * Actualizar entrega adicional
+   * Actualizar entrega adicional con redistribución automática
    */
   static async updateEntregaAdicional(
     id: string,
@@ -1039,6 +1078,21 @@ export class MovimientosService {
     motivo?: string
   ): Promise<ServiceResult<IEntregaAdicional>> {
     try {
+      // Validaciones de entrada para entregas adicionales
+      if (cantidad < 0) {
+        return {
+          success: false,
+          error: 'La cantidad de entrega adicional no puede ser negativa'
+        };
+      }
+
+      if (cantidad > 100000) {
+        return {
+          success: false,
+          error: 'La cantidad de entrega adicional excede el límite máximo permitido (100,000 unidades)'
+        };
+      }
+
       // Obtener entrega adicional existente
       const entregaExistente = await prisma.entregaAdicional.findUnique({
         where: { id },
@@ -1056,9 +1110,24 @@ export class MovimientosService {
 
       const diferenciaCantidad = cantidad - entregaExistente.cantidad;
 
-      // Actualizar en transacción
+      // Actualizar en transacción con redistribución automática
       const result = await prisma.$transaction(async (tx) => {
-        // PASO 1: Actualizar entrega adicional
+        // PASO 1: REDISTRIBUCIÓN AUTOMÁTICA para entregas adicionales
+        if (diferenciaCantidad !== 0) {
+          const usuarioId = await this.getSystemUser();
+          const redistribucionResult = await this.redistribuirEntregasAutomaticamente(
+            tx,
+            entregaExistente.movimientoVacuna,
+            entregaExistente.movimientoVacuna.entrega + diferenciaCantidad,
+            usuarioId
+          );
+
+          if (!redistribucionResult.success) {
+            throw new Error(redistribucionResult.error);
+          }
+        }
+
+        // PASO 2: Actualizar entrega adicional
         const entregaActualizada = await tx.entregaAdicional.update({
           where: { id },
           data: {
@@ -1067,7 +1136,7 @@ export class MovimientosService {
           }
         });
 
-        // PASO 2: Recalcular entrega total (base + adicionales)
+        // PASO 3: Recalcular entrega total (base + adicionales)
         const entregaTotal = await this.calcularEntregaTotal(tx, entregaExistente.movimientoVacunaId);
 
         await tx.movimientoVacuna.update({
@@ -1078,7 +1147,7 @@ export class MovimientosService {
           }
         });
 
-        // PASO 3: SINCRONIZACIÓN AUTOMÁTICA: Actualizar planificación anual
+        // PASO 4: SINCRONIZACIÓN AUTOMÁTICA: Actualizar planificación anual
         // Solo sincronizar la diferencia
         if (diferenciaCantidad !== 0) {
           await this.sincronizarConPlanificacion(tx, entregaExistente.movimientoVacuna, diferenciaCantidad);
@@ -1107,7 +1176,7 @@ export class MovimientosService {
   }
 
   /**
-   * Eliminar entrega adicional
+   * Eliminar entrega adicional con redistribución automática
    */
   static async deleteEntregaAdicional(id: string): Promise<ServiceResult<void>> {
     try {
@@ -1126,22 +1195,39 @@ export class MovimientosService {
         };
       }
 
-      // Eliminar en transacción
+      // Eliminar en transacción con redistribución automática
       await prisma.$transaction(async (tx) => {
-        // PASO 1: Eliminar entrega adicional
+        // PASO 1: REDISTRIBUCIÓN AUTOMÁTICA para eliminación de entrega adicional
+        if (entregaExistente.cantidad > 0) {
+          const usuarioId = await this.getSystemUser();
+          const nuevaEntregaTotal = entregaExistente.movimientoVacuna.entrega - entregaExistente.cantidad;
+
+          const redistribucionResult = await this.redistribuirEntregasAutomaticamente(
+            tx,
+            entregaExistente.movimientoVacuna,
+            nuevaEntregaTotal,
+            usuarioId
+          );
+
+          if (!redistribucionResult.success) {
+            throw new Error(redistribucionResult.error);
+          }
+        }
+
+        // PASO 2: Eliminar entrega adicional
         await tx.entregaAdicional.delete({
           where: { id }
         });
 
-        // PASO 2: Recalcular entrega total después de eliminar
+        // PASO 3: Recalcular entrega total después de eliminar
         const entregaTotal = await this.calcularEntregaTotal(tx, entregaExistente.movimientoVacunaId);
 
-        // PASO 3: Verificar si quedan entregas adicionales
+        // PASO 4: Verificar si quedan entregas adicionales
         const entregasRestantes = await tx.entregaAdicional.count({
           where: { movimientoVacunaId: entregaExistente.movimientoVacunaId }
         });
 
-        // PASO 4: Actualizar movimiento
+        // PASO 5: Actualizar movimiento
         const updateData: any = {
           entrega: entregaTotal,
           updatedAt: new Date()
@@ -1157,7 +1243,7 @@ export class MovimientosService {
           data: updateData
         });
 
-        // PASO 5: SINCRONIZACIÓN AUTOMÁTICA: Actualizar planificación anual
+        // PASO 6: SINCRONIZACIÓN AUTOMÁTICA: Actualizar planificación anual
         await this.sincronizarConPlanificacion(tx, entregaExistente.movimientoVacuna, -entregaExistente.cantidad);
       });
 
