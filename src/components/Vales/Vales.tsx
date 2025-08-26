@@ -19,7 +19,8 @@ import {
   FileSpreadsheet,
   Target,
   Layers,
-  Hash
+  Hash,
+  Calendar
 } from 'lucide-react';
 import { ValeEntrega, ValesService, ValeTypeSelectionConfig } from '../../services/valesService';
 import { useVales } from '../../hooks/useVales';
@@ -27,7 +28,6 @@ import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useVacunas } from '../../hooks/useVacunas';
 import { useToastContext } from '../../contexts/ToastContext';
 import ValeDetalleModal from './ValeDetalleModal';
-import GenerarValeModal from './GenerarValeModal';
 import ValesConnectionTest from './ValesConnectionTest';
 import ValeExportModal from './ValeExportModal';
 import ConfirmacionModal from './ConfirmacionModal';
@@ -281,7 +281,6 @@ const Vales: React.FC<ValesProps> = ({
   const [selectedEstado, setSelectedEstado] = useState<string>('todos');
 
   // Estados para modales
-  const [showGenerarModal, setShowGenerarModal] = useState<boolean>(false);
   const [showDetalleModal, setShowDetalleModal] = useState<boolean>(false);
   const [valeSeleccionado, setValeSeleccionado] = useState<ValeEntrega | null>(null);
   const [showDiagnostico, setShowDiagnostico] = useState<boolean>(false);
@@ -528,17 +527,7 @@ const Vales: React.FC<ValesProps> = ({
     executeGenerarVale(config);
   };
 
-  const handleAbrirGenerarModal = () => {
-    if (!selectedCentroAcopio || selectedCentroAcopio === 'todos') {
-      toast.error(
-        'Centro de acopio requerido',
-        'Debe seleccionar un centro de acopio específico para generar un vale.',
-        { duration: 4000 }
-      );
-      return;
-    }
-    setShowGenerarModal(true);
-  };
+
 
   const handleValeGenerado = async () => {
     // Recargar vales después de generar uno nuevo con actualización automática
@@ -1337,15 +1326,7 @@ const Vales: React.FC<ValesProps> = ({
 
               {/* Secondary Actions */}
               <div className="flex items-center space-x-2">
-                <button
-                  onClick={handleAbrirGenerarModal}
-                  disabled={selectedCentroAcopio === 'todos' || isGenerating || generandoVale}
-                  className="flex-1 sm:flex-none px-3 sm:px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2 shadow-md text-sm"
-                  title="Vista previa antes de generar"
-                >
-                  <Eye className="h-4 w-4" />
-                  <span className="hidden sm:inline">Vista Previa</span>
-                </button>
+
 
                 <button
                   onClick={handleSincronizacionAutomatica}
@@ -1388,72 +1369,19 @@ const Vales: React.FC<ValesProps> = ({
 
       {/* Main Content Area */}
       <section className={`${onClose ? 'w-full px-4 sm:px-6' : 'max-w-7xl mx-auto px-4 sm:px-6'} py-4 sm:py-6`} role="region" aria-label="Contenido principal de gestión de vales">
-        {/* Key Performance Indicators */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          {/* Total Vouchers - Primary Metric */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">Total Vales</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{estadisticas.totalVales}</p>
-                <p className="text-xs text-gray-500 mt-1">Vales generados</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <Receipt className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          {/* Total Vaccines - Secondary Metric */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">Vacunas</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{estadisticas.totalVacunas.toLocaleString()}</p>
-                <p className="text-xs text-gray-500 mt-1">Total distribuidas</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                <Package className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          {/* Centers - Tertiary Metric */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">Centros</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{estadisticas.centrosUnicos}</p>
-                <p className="text-xs text-gray-500 mt-1">Centros atendidos</p>
-              </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-          </div>
-
-          {/* Delivery Status - Important Metric */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">Entregados</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{estadisticas.porcentajeEntregados}%</p>
-                <p className="text-xs text-gray-500 mt-1">Tasa de entrega</p>
-              </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-orange-600" />
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Professional Filters Panel */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-8">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
           <div className="px-6 py-4 border-b border-gray-100">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Filtros de Búsqueda</h3>
-                <p className="text-sm text-gray-600 mt-1">Configure los criterios para mostrar los vales deseados</p>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Search className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Filtros de Búsqueda</h3>
+                  <p className="text-sm text-gray-600">Configure los criterios para mostrar los vales</p>
+                </div>
               </div>
               <button
                 onClick={() => loadVales({
@@ -1465,7 +1393,7 @@ const Vales: React.FC<ValesProps> = ({
                   limit: 100
                 })}
                 disabled={isLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center space-x-2 shadow-md"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center space-x-2 shadow-sm"
               >
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 <span>Actualizar</span>
@@ -1474,59 +1402,66 @@ const Vales: React.FC<ValesProps> = ({
           </div>
 
           <div className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
               {/* Centro de Acopio - Priority 1 */}
               <div className="lg:col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Centro de Acopio *
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
+                  <Building2 className="h-4 w-4 text-gray-500" />
+                  <span>Centro de Acopio</span>
+                  <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={selectedCentroAcopio}
                   onChange={(e) => setSelectedCentroAcopio(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white shadow-sm"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-sm"
                 >
-                  <option value="todos">📍 Todos los centros de acopio</option>
+                  <option value="todos">Todos los centros de acopio</option>
                   {centrosAcopio.map(centro => (
                     <option key={centro.id} value={centro.id}>
-                      🏢 {centro.nombre}
+                      {centro.nombre}
                     </option>
                   ))}
                 </select>
                 {selectedCentroAcopio === 'todos' && (
-                  <p className="text-xs text-amber-600 mt-1">⚠️ Seleccione un centro específico para generar vales</p>
+                  <p className="text-xs text-amber-600 mt-1 flex items-center space-x-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    <span>Seleccione un centro específico para generar vales</span>
+                  </p>
                 )}
               </div>
 
               {/* Período - Priority 2 */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Mes
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span>Mes</span>
                 </label>
                 <select
                   value={selectedMes}
                   onChange={(e) => setSelectedMes(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white shadow-sm"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-sm"
                 >
                   {meses.map((mes, index) => (
                     <option key={index + 1} value={index + 1}>
-                      📅 {mes}
+                      {mes}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Año
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span>Año</span>
                 </label>
                 <select
                   value={selectedAnio}
                   onChange={(e) => setSelectedAnio(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white shadow-sm"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-sm"
                 >
                   {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
                     <option key={year} value={year}>
-                      📆 {year}
+                      {year}
                     </option>
                   ))}
                 </select>
@@ -1534,19 +1469,18 @@ const Vales: React.FC<ValesProps> = ({
 
               {/* Estado - Priority 3 */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Estado
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
+                  <Target className="h-4 w-4 text-gray-500" />
+                  <span>Estado</span>
                 </label>
                 <select
                   value={selectedEstado}
                   onChange={(e) => setSelectedEstado(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white shadow-sm"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-sm"
                 >
                   {estadosVale.map(estado => (
                     <option key={estado.value} value={estado.value}>
-                      {estado.value === 'todos' ? '📋' :
-                       estado.value === 'generado' ? '🔵' :
-                       estado.value === 'impreso' ? '🟡' : '🟢'} {estado.label}
+                      {estado.label}
                     </option>
                   ))}
                 </select>
@@ -1554,23 +1488,24 @@ const Vales: React.FC<ValesProps> = ({
             </div>
 
             {/* Search Bar - Full Width */}
-            <div className="mt-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Búsqueda Avanzada
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
+                <Search className="h-4 w-4 text-gray-500" />
+                <span>Búsqueda</span>
               </label>
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="🔍 Buscar por número de vale, centro de acopio u observaciones..."
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white shadow-sm text-sm"
+                  placeholder="Buscar por número de vale, centro de acopio u observaciones..."
+                  className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white text-sm"
                 />
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -1584,26 +1519,32 @@ const Vales: React.FC<ValesProps> = ({
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">
-                  📋 Vales de Entrega - {meses[selectedMes - 1]} {selectedAnio}
-                </h3>
-                <div className="flex items-center space-x-4 mt-2">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-semibold">{valesFiltrados.length}</span> vales encontrados
-                  </p>
-                  {selectedCentroAcopio !== 'todos' && centroAcopioSeleccionado && (
-                    <p className="text-sm text-blue-600 font-medium">
-                      🏢 {centroAcopioSeleccionado.nombre}
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <FileText className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Vales de Entrega - {meses[selectedMes - 1]} {selectedAnio}
+                  </h3>
+                  <div className="flex items-center space-x-4 mt-1">
+                    <p className="text-sm text-gray-600">
+                      <span className="font-semibold">{valesFiltrados.length}</span> vales encontrados
                     </p>
-                  )}
+                    {selectedCentroAcopio !== 'todos' && centroAcopioSeleccionado && (
+                      <div className="flex items-center space-x-1 text-sm text-blue-600 font-medium">
+                        <Building2 className="h-3 w-3" />
+                        <span>{centroAcopioSeleccionado.nombre}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                 {/* Loading Indicator */}
                 {(isLoading || generandoVale || actualizandoTabla) && (
-                  <div className="flex items-center bg-blue-50 px-3 py-2 rounded-lg">
+                  <div className="flex items-center bg-blue-50 px-3 py-2 rounded-lg border border-blue-100">
                     <Loader2 className="h-4 w-4 animate-spin mr-2 text-blue-600" />
                     <span className="text-sm font-medium text-blue-700">
                       {generandoVale ? 'Generando vale...' :
@@ -1612,18 +1553,18 @@ const Vales: React.FC<ValesProps> = ({
                   </div>
                 )}
 
-                {/* Global Action Buttons - Moved Here */}
+                {/* Global Action Buttons */}
                 {valesFiltrados.length > 0 && (
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={handleVerDetalleGlobal}
                       disabled={procesandoAccion || isLoading}
-                      className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-md hover:shadow-lg transform hover:scale-105 font-medium text-sm"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-sm font-medium text-sm"
                       title="Ver detalle completo de todos los vales filtrados"
                     >
                       <Eye className="h-4 w-4" />
-                      <span className="hidden sm:inline">Ver Detalle</span>
-                      <span className="bg-blue-500 text-blue-100 px-2 py-1 rounded-full text-xs font-bold">
+                      <span className="hidden sm:inline">Ver Detalle Completo</span>
+                      <span className="bg-blue-500 text-blue-100 px-2 py-1 rounded-full text-xs font-semibold">
                         {valesFiltrados.length}
                       </span>
                     </button>
@@ -1631,12 +1572,12 @@ const Vales: React.FC<ValesProps> = ({
                     <button
                       onClick={handleExportarGlobal}
                       disabled={procesandoAccion || isLoading}
-                      className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-md hover:shadow-lg transform hover:scale-105 font-medium text-sm"
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-sm font-medium text-sm"
                       title="Exportar todos los vales filtrados en un archivo completo"
                     >
                       <FileSpreadsheet className="h-4 w-4" />
-                      <span className="hidden sm:inline">Exportar</span>
-                      <span className="bg-green-500 text-green-100 px-2 py-1 rounded-full text-xs font-bold">
+                      <span className="hidden sm:inline">Exportar Vale Completo</span>
+                      <span className="bg-green-500 text-green-100 px-2 py-1 rounded-full text-xs font-semibold">
                         {valesFiltrados.length}
                       </span>
                     </button>
@@ -1650,29 +1591,29 @@ const Vales: React.FC<ValesProps> = ({
             <table className={`w-full ${onClose ? 'min-w-[1400px]' : 'min-w-[1200px]'} transition-opacity duration-300 ${actualizandoTabla ? 'opacity-75' : 'opacity-100'}`}>
               <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
-                  <th className={`px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-32' : 'w-28'}`}>
-                    📄 Vale
+                  <th className={`px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-32' : 'w-28'}`}>
+                    Vale
                   </th>
-                  <th className={`px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-64' : 'w-48'}`}>
-                    🏢 Centro de Acopio
+                  <th className={`px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-64' : 'w-48'}`}>
+                    Centro de Acopio
                   </th>
-                  <th className={`px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-40' : 'w-32'}`}>
-                    📅 Fecha
+                  <th className={`px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-40' : 'w-32'}`}>
+                    Fecha
                   </th>
-                  <th className={`px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider border-b border-gray-200 bg-blue-50 ${onClose ? 'w-36' : 'w-32'}`}>
-                    🔵 Estado
+                  <th className={`px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider border-b border-gray-200 bg-blue-50 ${onClose ? 'w-36' : 'w-32'}`}>
+                    Estado
                   </th>
-                  <th className={`px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-56' : 'w-48'}`}>
-                    📦 Tipos de Entrega
+                  <th className={`px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-56' : 'w-48'}`}>
+                    Tipos de Entrega
                   </th>
-                  <th className={`px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-56' : 'w-48'}`}>
-                    📊 Resumen
+                  <th className={`px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-56' : 'w-48'}`}>
+                    Resumen
                   </th>
-                  <th className={`px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-48' : 'w-40'}`}>
-                    👤 Usuario
+                  <th className={`px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-48' : 'w-40'}`}>
+                    Usuario
                   </th>
-                  <th className={`px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-64' : 'w-56'}`}>
-                    ⚙️ Acciones
+                  <th className={`px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-64' : 'w-56'}`}>
+                    Acciones
                   </th>
                 </tr>
               </thead>
@@ -1688,7 +1629,7 @@ const Vales: React.FC<ValesProps> = ({
                             </div>
                             <div>
                               <p className="text-lg font-semibold text-gray-700">
-                                🔄 Cargando vales...
+                                Cargando vales...
                               </p>
                               <p className="text-gray-500 text-sm mt-2">
                                 Por favor espere mientras obtenemos la información
@@ -1702,47 +1643,52 @@ const Vales: React.FC<ValesProps> = ({
                             </div>
                             <div>
                               <p className="text-lg font-semibold text-gray-700">
-                                📋 No hay vales generados
+                                No hay vales generados
                               </p>
                               <p className="text-gray-500 text-sm mt-2">
                                 {selectedCentroAcopio === 'todos'
-                                  ? '⚠️ Seleccione un centro de acopio específico para ver o generar vales'
+                                  ? 'Seleccione un centro de acopio específico para ver o generar vales'
                                   : `No se encontraron vales para ${meses[selectedMes - 1]} ${selectedAnio}`
                                 }
                               </p>
                             </div>
                             {vales.length === 0 && (
-                              <div className="flex flex-col sm:flex-row gap-3">
-                                <button
-                                  onClick={() => setShowDiagnostico(true)}
-                                  className="px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all duration-200 text-sm font-medium flex items-center space-x-2 shadow-md"
-                                >
-                                  <Settings className="h-4 w-4" />
-                                  <span>Diagnóstico del Sistema</span>
-                                </button>
-                                {selectedCentroAcopio !== 'todos' && (
+                              <div className="flex flex-col items-center space-y-4">
+                                {selectedCentroAcopio !== 'todos' ? (
                                   <>
                                     <button
                                       onClick={handleGenerarValeDirecto}
                                       disabled={isGenerating || generandoVale}
-                                      className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 text-sm font-medium disabled:opacity-50 flex items-center space-x-2 shadow-md"
+                                      className="px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 text-base font-semibold disabled:opacity-50 flex items-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-105"
                                     >
                                       {(isGenerating || generandoVale) ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <Loader2 className="h-5 w-5 animate-spin" />
                                       ) : (
-                                        <Plus className="h-4 w-4" />
+                                        <Plus className="h-5 w-5" />
                                       )}
-                                      <span>{(isGenerating || generandoVale) ? 'Generando...' : 'Generar Primer Vale'}</span>
+                                      <span>{(isGenerating || generandoVale) ? 'Generando Vale...' : 'Generar Primer Vale'}</span>
                                     </button>
                                     <button
-                                      onClick={handleAbrirGenerarModal}
-                                      disabled={isGenerating || generandoVale}
-                                      className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm font-medium disabled:opacity-50 flex items-center space-x-2 shadow-md"
+                                      onClick={() => setShowDiagnostico(true)}
+                                      className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium flex items-center space-x-2"
                                     >
-                                      <Eye className="h-4 w-4" />
-                                      <span>Vista Previa</span>
+                                      <Settings className="h-4 w-4" />
+                                      <span>Diagnóstico del Sistema</span>
                                     </button>
                                   </>
+                                ) : (
+                                  <div className="text-center">
+                                    <p className="text-sm text-gray-500 mb-4">
+                                      Para generar vales, primero seleccione un centro de acopio específico en los filtros
+                                    </p>
+                                    <button
+                                      onClick={() => setShowDiagnostico(true)}
+                                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center space-x-2 mx-auto"
+                                    >
+                                      <Settings className="h-4 w-4" />
+                                      <span>Diagnóstico del Sistema</span>
+                                    </button>
+                                  </div>
                                 )}
                               </div>
                             )}
@@ -1908,16 +1854,6 @@ const Vales: React.FC<ValesProps> = ({
 
 
       {/* Modales */}
-      <GenerarValeModal
-        isOpen={showGenerarModal}
-        onClose={() => setShowGenerarModal(false)}
-        centroAcopioId={selectedCentroAcopio}
-        centroAcopioNombre={centroAcopioSeleccionado?.nombre || ''}
-        mes={selectedMes}
-        anio={selectedAnio}
-        onValeGenerado={handleValeGenerado}
-      />
-
       {valeSeleccionado && (
         <ValeDetalleModal
           vale={valeSeleccionado}
@@ -2187,6 +2123,39 @@ const Vales: React.FC<ValesProps> = ({
             esExportacionGlobal={true}
           />
         </>
+      )}
+
+      {/* Global Action Bar - Bottom */}
+      {valesFiltrados.length > 0 && (
+        <div className="bg-white border-t border-gray-200 shadow-lg">
+          <div className={`${onClose ? 'w-full px-4 sm:px-6' : 'max-w-7xl mx-auto px-4 sm:px-6'} py-4`}>
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+              <div className="text-sm text-gray-600 text-center sm:text-left">
+                <span className="font-semibold">{valesFiltrados.length}</span> vales seleccionados
+              </div>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={handleVerDetalleGlobal}
+                  disabled={procesandoAccion || isLoading}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-md font-medium"
+                  title="Ver detalle completo de todos los vales filtrados"
+                >
+                  <Eye className="h-4 w-4" />
+                  <span>Ver Detalle Completo</span>
+                </button>
+                <button
+                  onClick={handleExportarGlobal}
+                  disabled={procesandoAccion || isLoading}
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-md font-medium"
+                  title="Exportar todos los vales filtrados en un archivo completo"
+                >
+                  <FileSpreadsheet className="h-4 w-4" />
+                  <span>Exportar Vale Completo</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );
