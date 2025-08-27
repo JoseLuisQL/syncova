@@ -2239,4 +2239,45 @@ export class PlanificacionService {
       };
     }
   }
+
+  /**
+   * Verificar si existe planificación para un establecimiento específico
+   */
+  static async verificarExistenciaPlanificacion(
+    establecimientoId: string,
+    vacunaId: string,
+    anio: number
+  ): Promise<ServiceResult<{ existe: boolean; planificacionId?: string; metaAnual: number }>> {
+    try {
+      const planificacion = await prisma.planificacionAnual.findUnique({
+        where: {
+          uk_planificacion_establecimiento_vacuna_anio: {
+            establecimientoId,
+            vacunaId,
+            anio
+          }
+        },
+        select: {
+          id: true,
+          metaAnual: true,
+          distribucionMensual: true
+        }
+      });
+
+      return {
+        success: true,
+        data: {
+          existe: !!planificacion,
+          planificacionId: planificacion?.id,
+          metaAnual: planificacion?.metaAnual || 0
+        }
+      };
+    } catch (error) {
+      console.error('Error al verificar existencia de planificación:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al verificar planificación'
+      };
+    }
+  }
 }

@@ -143,4 +143,14 @@ router.post('/importar/masivo/anio/:anio',
  */
 router.post('/:id/sincronizar-movimientos', PlanificacionController.sincronizarConMovimientos);
 
+/**
+ * @route GET /api/planificacion/verificar/:establecimientoId/:vacunaId/:anio
+ * @desc Verificar existencia de planificación para un establecimiento específico
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {string} establecimientoId - ID del establecimiento
+ * @param {string} vacunaId - ID de la vacuna
+ * @param {number} anio - Año de planificación
+ */
+router.get('/verificar/:establecimientoId/:vacunaId/:anio', PlanificacionController.verificarExistenciaPlanificacion);
+
 export default router;

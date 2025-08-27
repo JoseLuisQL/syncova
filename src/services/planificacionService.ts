@@ -465,4 +465,37 @@ export class PlanificacionService {
       throw handleApiError(error as AxiosError);
     }
   }
+
+  /**
+   * Verificar existencia de planificación para un establecimiento específico
+   */
+  static async verificarExistenciaPlanificacion(
+    establecimientoId: string,
+    vacunaId: string,
+    anio: number
+  ): Promise<{
+    existe: boolean;
+    planificacionId?: string;
+    metaAnual: number;
+  }> {
+    try {
+      logger.debug('Verificando existencia de planificación:', { establecimientoId, vacunaId, anio });
+
+      const response = await apiClient.get<ApiResponse<{
+        existe: boolean;
+        planificacionId?: string;
+        metaAnual: number;
+      }>>(`${this.BASE_PATH}/verificar/${establecimientoId}/${vacunaId}/${anio}`);
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.error || 'Error al verificar planificación');
+      }
+
+      logger.debug('Verificación de planificación exitosa:', response.data.data);
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al verificar existencia de planificación:', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
 }

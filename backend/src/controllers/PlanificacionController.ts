@@ -671,4 +671,46 @@ export class PlanificacionController {
       errorResponse(res, 'Error interno del servidor', 500);
     }
   }
+
+  /**
+   * Verificar existencia de planificación para un establecimiento
+   * GET /api/planificacion/verificar/:establecimientoId/:vacunaId/:anio
+   */
+  static async verificarExistenciaPlanificacion(req: Request, res: Response): Promise<void> {
+    try {
+      const { establecimientoId, vacunaId, anio } = req.params;
+
+      if (!validateUUID(establecimientoId)) {
+        errorResponse(res, 'ID de establecimiento inválido', 400);
+        return;
+      }
+
+      if (!validateUUID(vacunaId)) {
+        errorResponse(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      const result = await PlanificacionService.verificarExistenciaPlanificacion(
+        establecimientoId,
+        vacunaId,
+        anioNum
+      );
+
+      if (!result.success) {
+        errorResponse(res, result.error || 'Error al verificar planificación', 500);
+        return;
+      }
+
+      successResponse(res, result.data, 'Verificación de planificación completada');
+    } catch (error) {
+      console.error('Error en PlanificacionController.verificarExistenciaPlanificacion:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
 }

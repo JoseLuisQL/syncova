@@ -430,6 +430,8 @@ export class MovimientosService {
         };
       }
 
+
+
       // Asegurar que tenemos un usuarioId válido
       if (data.usuarioId && !this.isValidUUID(data.usuarioId)) {
         data.usuarioId = await this.getSystemUser();
@@ -1007,6 +1009,24 @@ export class MovimientosService {
         };
       }
 
+      // VALIDACIÓN DE PLANIFICACIÓN: Verificar que exista planificación para este establecimiento
+      const planificacionExistente = await prisma.planificacionAnual.findUnique({
+        where: {
+          uk_planificacion_establecimiento_vacuna_anio: {
+            establecimientoId: movimiento.establecimientoId,
+            vacunaId: movimiento.vacunaId,
+            anio: movimiento.anio
+          }
+        }
+      });
+
+      if (!planificacionExistente) {
+        return {
+          success: false,
+          error: `Este establecimiento no tiene planificación programada para ${movimiento.anio}. Debe crear una planificación primero desde el módulo de Planificación antes de asignar entregas.`
+        };
+      }
+
       // Verificar que el número de entrega no existe
       const entregaExistente = movimiento.entregasAdicionales.find(
         e => e.numeroEntrega === data.numeroEntrega
@@ -1124,6 +1144,24 @@ export class MovimientosService {
         return {
           success: false,
           error: 'Entrega adicional no encontrada'
+        };
+      }
+
+      // VALIDACIÓN DE PLANIFICACIÓN: Verificar que exista planificación para este establecimiento
+      const planificacionExistente = await prisma.planificacionAnual.findUnique({
+        where: {
+          uk_planificacion_establecimiento_vacuna_anio: {
+            establecimientoId: entregaExistente.movimientoVacuna.establecimientoId,
+            vacunaId: entregaExistente.movimientoVacuna.vacunaId,
+            anio: entregaExistente.movimientoVacuna.anio
+          }
+        }
+      });
+
+      if (!planificacionExistente) {
+        return {
+          success: false,
+          error: `Este establecimiento no tiene planificación programada para ${entregaExistente.movimientoVacuna.anio}. Debe crear una planificación primero desde el módulo de Planificación antes de asignar entregas.`
         };
       }
 

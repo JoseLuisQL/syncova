@@ -46,6 +46,7 @@ import { useToastContext } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAutoSync } from '../../hooks/useAutoSync';
 import { debounce } from '../../utils/debounce';
+import { PlanificacionService } from '../../services/planificacionService';
 import {
   ordenarEstablecimientos,
   getEstiloEstablecimiento,
@@ -445,8 +446,49 @@ const Movimientos: React.FC = () => {
   const coloresAcopio = COLORES_CENTROS_ACOPIO;
 
   // Función para manejar cambios temporales (onChange)
-  const handleTempValueChange = (establecimientoId: string, campo: string, newValue: number) => {
+  const handleTempValueChange = async (establecimientoId: string, campo: string, newValue: number) => {
     const key = getFieldKey(establecimientoId, campo);
+
+    // VALIDACIÓN DE PLANIFICACIÓN: Solo validar cuando se modifica el campo 'entrega'
+    if (campo === 'entrega' && newValue > 0) {
+      try {
+        const verificacion = await PlanificacionService.verificarExistenciaPlanificacion(
+          establecimientoId,
+          selectedVacuna!,
+          selectedAnio
+        );
+
+        if (!verificacion.existe) {
+          const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
+          const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+
+          toast.error(
+            'No se puede asignar cantidad',
+            `Este establecimiento no tiene planificación programada para ${selectedAnio}. Debe crear una planificación primero desde el módulo de Planificación.`,
+            { duration: 6000 }
+          );
+
+          // Revertir el valor temporal inmediatamente
+          setTempValues(prev => {
+            const newTemp = { ...prev };
+            delete newTemp[key];
+            return newTemp;
+          });
+
+          setPendingChanges(prev => {
+            const newPending = { ...prev };
+            delete newPending[key];
+            return newPending;
+          });
+
+          return;
+        }
+      } catch (error) {
+        console.error('Error al verificar planificación:', error);
+        toast.error('Error de validación', 'No se pudo verificar la planificación. Intente nuevamente.');
+        return;
+      }
+    }
 
     // Actualizar valor temporal
     setTempValues(prev => ({
@@ -783,8 +825,51 @@ const Movimientos: React.FC = () => {
   };
 
   // Funciones profesionales para entregas adicionales
-  const handleTempEntregaValueChange = (entregaId: string, newValue: number) => {
+  const handleTempEntregaValueChange = async (entregaId: string, newValue: number) => {
     const key = getEntregaFieldKey(entregaId);
+
+    // Buscar el movimiento asociado para validar planificación
+    const movimientoAsociado = movimientos.find(m =>
+      m.entregasAdicionales?.some(e => e.id === entregaId)
+    );
+
+    if (movimientoAsociado && newValue > 0) {
+      try {
+        // VALIDACIÓN DE PLANIFICACIÓN: Verificar que exista planificación antes de permitir el cambio
+        const verificacion = await PlanificacionService.verificarExistenciaPlanificacion(
+          movimientoAsociado.establecimientoId,
+          movimientoAsociado.vacunaId,
+          movimientoAsociado.anio
+        );
+
+        if (!verificacion.existe) {
+          toast.error(
+            'No se puede asignar cantidad',
+            `Este establecimiento no tiene planificación programada para ${movimientoAsociado.anio}. Debe crear una planificación primero desde el módulo de Planificación.`,
+            { duration: 6000 }
+          );
+
+          // Revertir el valor temporal inmediatamente
+          setTempEntregasValues(prev => {
+            const newTemp = { ...prev };
+            delete newTemp[key];
+            return newTemp;
+          });
+
+          setPendingEntregasChanges(prev => {
+            const newPending = { ...prev };
+            delete newPending[key];
+            return newPending;
+          });
+
+          return;
+        }
+      } catch (error) {
+        console.error('Error al verificar planificación:', error);
+        toast.error('Error de validación', 'No se pudo verificar la planificación. Intente nuevamente.');
+        return;
+      }
+    }
 
     // Actualizar valor temporal
     setTempEntregasValues(prev => ({
