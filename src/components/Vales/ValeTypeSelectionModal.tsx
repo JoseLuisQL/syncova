@@ -41,7 +41,7 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
   const [gruposGenerados, setGruposGenerados] = useState<number[]>([]);
   const [tiposGenerados, setTiposGenerados] = useState<string[]>([]);
   const [config, setConfig] = useState<ValeTypeSelectionConfig>({
-    tipoVale: 'completo',
+    tipoVale: 'solo_base',
     entregasAdicionalesSeleccionadas: [],
     gruposEntregasSeleccionados: []
   });
@@ -148,7 +148,7 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
     }
   };
 
-  const handleTipoValeChange = (tipo: 'completo' | 'solo_base' | 'solo_adicionales') => {
+  const handleTipoValeChange = (tipo: 'solo_base' | 'solo_adicionales') => {
     // Validaciones específicas por tipo
     if (tipo === 'solo_adicionales') {
       if (getGruposDisponibles().length === 0) {
@@ -253,7 +253,6 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
 
   const getTipoValeDescription = (tipo: string) => {
     const baseDescription = {
-      'completo': 'Incluye todas las entregas base programadas y todas las entregas adicionales',
       'solo_base': 'Solo incluye las entregas base programadas en la planificación anual',
       'solo_adicionales': 'Solo incluye las entregas adicionales seleccionadas'
     }[tipo] || '';
@@ -279,10 +278,6 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
   const getOpcionesDisponibles = () => {
     const opciones = [];
 
-    // Si ya hay vales específicos, no permitir vale completo
-    if (!tiposGenerados.includes('completo') && tiposGenerados.length === 0) {
-      opciones.push('completo');
-    }
     if (!tiposGenerados.includes('solo_base')) {
       opciones.push('solo_base');
     }
@@ -372,48 +367,6 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
               {/* Opciones de tipo de vale */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Tipo de Vale</h3>
-                
-                {/* Vale Completo */}
-                <div
-                  className={`border-2 rounded-lg p-4 transition-all ${
-                    tiposGenerados.includes('completo') || tiposGenerados.length > 0
-                      ? 'border-gray-300 bg-gray-100 cursor-not-allowed opacity-60'
-                      : config.tipoVale === 'completo'
-                        ? 'border-blue-500 bg-blue-50 cursor-pointer'
-                        : 'border-gray-200 hover:border-gray-300 cursor-pointer'
-                  }`}
-                  onClick={() => !tiposGenerados.includes('completo') && tiposGenerados.length === 0 && handleTipoValeChange('completo')}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                        config.tipoVale === 'completo' && !tiposGenerados.includes('completo') && tiposGenerados.length === 0
-                          ? 'border-blue-500 bg-blue-500'
-                          : 'border-gray-300'
-                      }`}>
-                        {config.tipoVale === 'completo' && !tiposGenerados.includes('completo') && tiposGenerados.length === 0 && (
-                          <div className="w-full h-full rounded-full bg-white scale-50"></div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h4 className={`font-semibold ${tiposGenerados.includes('completo') || tiposGenerados.length > 0 ? 'text-gray-500' : 'text-gray-900'}`}>
-                            Vale Completo
-                          </h4>
-                          {(tiposGenerados.includes('completo') || tiposGenerados.length > 0) && (
-                            <span className="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded-full">
-                              Ya generado
-                            </span>
-                          )}
-                        </div>
-                        <p className={`text-sm ${tiposGenerados.includes('completo') || tiposGenerados.length > 0 ? 'text-gray-500' : 'text-gray-600'}`}>
-                          {getTipoValeDescription('completo')}
-                        </p>
-                      </div>
-                    </div>
-                    <Package className={`h-5 w-5 ${!isTipoDisponible('completo') ? 'text-gray-400' : 'text-gray-400'}`} />
-                  </div>
-                </div>
 
                 {/* Solo Entregas Base */}
                 <div
@@ -525,8 +478,7 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
                     <div className="flex flex-wrap justify-center gap-2">
                       {tiposGenerados.map(tipo => (
                         <span key={tipo} className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full">
-                          {tipo === 'completo' ? 'Vale Completo' :
-                           tipo === 'solo_base' ? 'Solo Base' :
+                          {tipo === 'solo_base' ? 'Solo Base' :
                            'Solo Adicionales'}
                         </span>
                       ))}

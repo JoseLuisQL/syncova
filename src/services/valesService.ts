@@ -61,7 +61,7 @@ export interface GenerarValeDto {
   usuarioId: string;
   observaciones?: string;
   afectarStock?: boolean;
-  tipoVale?: 'completo' | 'solo_base' | 'solo_adicionales';
+  tipoVale?: 'solo_base' | 'solo_adicionales';
   entregasAdicionalesSeleccionadas?: string[]; // IDs de entregas adicionales específicas (compatibilidad)
   gruposEntregasSeleccionados?: number[]; // Números de grupos de entregas adicionales
 }
@@ -118,7 +118,7 @@ export interface GrupoEntregaAdicional {
 }
 
 export interface ValeTypeSelectionConfig {
-  tipoVale: 'completo' | 'solo_base' | 'solo_adicionales';
+  tipoVale: 'solo_base' | 'solo_adicionales';
   entregasAdicionalesSeleccionadas: string[]; // Mantener para compatibilidad
   gruposEntregasSeleccionados: number[]; // Nuevos grupos por número
 }

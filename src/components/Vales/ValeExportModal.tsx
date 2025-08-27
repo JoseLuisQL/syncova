@@ -24,6 +24,7 @@ interface ValeExportModalProps {
   // Nuevas props para exportación global
   valesOriginales?: ValeEntrega[]; // Lista de vales originales para exportación global
   esExportacionGlobal?: boolean; // Flag para indicar si es exportación global
+  esExportacionIndividual?: boolean; // Flag para indicar si es exportación individual desde tabla
 }
 
 // Usar la interfaz del servicio con formatoExportacion opcional para el estado local
@@ -36,15 +37,16 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
   isOpen,
   onClose,
   valesOriginales = [],
-  esExportacionGlobal = false
+  esExportacionGlobal = false,
+  esExportacionIndividual = false
 }) => {
   const { toast } = useToastContext();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState((esExportacionGlobal || esExportacionIndividual) ? 2 : 1);
   const [isExporting, setIsExporting] = useState(false);
   
   const [config, setConfig] = useState<LocalExportConfig>({
     incluirEntregasBase: true,
-    incluirEntregasAdicionales: esExportacionGlobal, // Auto-activar para exportación global
+    incluirEntregasAdicionales: esExportacionGlobal || esExportacionIndividual, // Auto-activar para exportaciones desde tabla
     entregasAdicionalesSeleccionadas: [],
     responsableRecojo: `${vale.usuario.nombres} ${vale.usuario.apellidos}`,
     formatoExportacion: null
@@ -60,13 +62,13 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
       // Para exportación individual, analizar solo el vale actual
       return ValeExportService.obtenerEntregasAdicionalesDisponibles(vale);
     }
-  }, [vale, esExportacionGlobal, valesOriginales]);
+  }, [vale, esExportacionGlobal, esExportacionIndividual, valesOriginales]);
 
-  // Auto-seleccionar todas las entregas adicionales para exportación global
+  // Auto-seleccionar todas las entregas adicionales para exportaciones desde tabla
   React.useEffect(() => {
-    if (esExportacionGlobal && entregasAdicionalesDisponibles.length > 0) {
+    if ((esExportacionGlobal || esExportacionIndividual) && entregasAdicionalesDisponibles.length > 0) {
       const todasLasEntregas = entregasAdicionalesDisponibles.map(e => e.numero);
-      console.log('🔄 Auto-seleccionando entregas adicionales para exportación global:', todasLasEntregas);
+      console.log('🔄 Auto-seleccionando entregas adicionales para exportación desde tabla:', todasLasEntregas);
 
       setConfig(prev => ({
         ...prev,
@@ -74,7 +76,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
         entregasAdicionalesSeleccionadas: todasLasEntregas
       }));
     }
-  }, [esExportacionGlobal, entregasAdicionalesDisponibles]);
+  }, [esExportacionGlobal, esExportacionIndividual, entregasAdicionalesDisponibles]);
 
   // Calcular estadísticas basadas en la configuración usando el servicio
   const estadisticas = useMemo(() => {
@@ -91,7 +93,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
       // Para exportación individual, calcular estadísticas del vale actual
       return ValeExportService.calcularEstadisticas(vale, configParaStats);
     }
-  }, [vale, esExportacionGlobal, valesOriginales, config.incluirEntregasBase, config.incluirEntregasAdicionales, config.entregasAdicionalesSeleccionadas]);
+  }, [vale, esExportacionGlobal, esExportacionIndividual, valesOriginales, config.incluirEntregasBase, config.incluirEntregasAdicionales, config.entregasAdicionalesSeleccionadas]);
 
   const handleNext = () => {
     if (currentStep === 1) {
@@ -123,6 +125,10 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
   };
 
   const handleBack = () => {
+    // Si es exportación desde tabla, no permitir volver al paso 1
+    if ((esExportacionGlobal || esExportacionIndividual) && currentStep === 2) {
+      return;
+    }
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
@@ -260,7 +266,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">
-                {esExportacionGlobal ? 'Exportar Vales Combinados' : 'Exportar Vale de Entrega'}
+                {esExportacionGlobal ? 'Exportar Vales Combinados' : esExportacionIndividual ? `Exportar Vale "${vale.numero}"` : 'Exportar Vale de Entrega'}
               </h2>
               <p className="text-sm text-gray-600">
                 {esExportacionGlobal
@@ -313,8 +319,8 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* Paso 1: Selección de Contenido */}
-          {currentStep === 1 && (
+          {/* Paso 1: Selección de Contenido (Solo para exportación individual) */}
+          {currentStep === 1 && !esExportacionGlobal && (
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -486,6 +492,26 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
           {/* Paso 2: Configuración del Responsable */}
           {currentStep === 2 && (
             <div className="space-y-6">
+              {/* Mensaje especial para exportaciones desde tabla */}
+              {(esExportacionGlobal || esExportacionIndividual) && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-green-900">
+                        Contenido de exportación seleccionado
+                      </h4>
+                      <p className="text-sm text-green-800 mt-1">
+                        {esExportacionGlobal
+                          ? `Se exportarán ${valesOriginales.length} vale${valesOriginales.length !== 1 ? 's' : ''} seleccionados con todas las entregas disponibles.`
+                          : `Se exportará el vale "${vale.numero}" con todas las entregas disponibles.`
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Responsable de Recojo
@@ -629,12 +655,12 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
         <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-600">
-              Paso {currentStep} de 3
+              Paso {(esExportacionGlobal || esExportacionIndividual) ? currentStep - 1 : currentStep} de {(esExportacionGlobal || esExportacionIndividual) ? 2 : 3}
             </span>
           </div>
           
           <div className="flex items-center space-x-3">
-            {currentStep > 1 && (
+            {currentStep > 1 && !((esExportacionGlobal || esExportacionIndividual) && currentStep === 2) && (
               <button
                 onClick={handleBack}
                 disabled={isExporting}

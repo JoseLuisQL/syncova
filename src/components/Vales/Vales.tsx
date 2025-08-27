@@ -107,11 +107,6 @@ const DeliveryTypeIdentifiers: React.FC<{ vale: ValeEntrega }> = ({ vale }) => {
   if (deliveryTypes.length === 0) {
     // Fallback al sistema legacy si no hay detalles
     const tipoInfo = {
-      'completo': {
-        texto: 'Completo',
-        color: 'bg-blue-100 text-blue-800',
-        icon: <Package className="h-3 w-3" />
-      },
       'solo_base': {
         texto: 'Base',
         color: 'bg-green-100 text-green-800',
@@ -122,10 +117,10 @@ const DeliveryTypeIdentifiers: React.FC<{ vale: ValeEntrega }> = ({ vale }) => {
         color: 'bg-orange-100 text-orange-800',
         icon: <Plus className="h-3 w-3" />
       }
-    }[vale.tipoVale || 'completo'] || {
-      texto: 'Completo',
-      color: 'bg-gray-100 text-gray-800',
-      icon: <Package className="h-3 w-3" />
+    }[vale.tipoVale || 'solo_base'] || {
+      texto: 'Base',
+      color: 'bg-green-100 text-green-800',
+      icon: <CheckCircle className="h-3 w-3" />
     };
 
     return (
@@ -315,8 +310,46 @@ const Vales: React.FC<ValesProps> = ({
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
   const [valeParaExportar, setValeParaExportar] = useState<ValeEntrega | null>(null);
 
+  // Estados para selección múltiple profesional
+  const [selectedVales, setSelectedVales] = useState<Set<string>>(new Set());
+  const [selectAllMode, setSelectAllMode] = useState<boolean>(false);
+
   // Ref para detectar cuando termina la generación
   const wasGeneratingRef = useRef<boolean>(false);
+
+  // Funciones para selección múltiple profesional
+  const handleSelectVale = (valeId: string, checked: boolean) => {
+    setSelectedVales(prev => {
+      const newSelection = new Set(prev);
+      if (checked) {
+        newSelection.add(valeId);
+      } else {
+        newSelection.delete(valeId);
+      }
+      return newSelection;
+    });
+  };
+
+  // Funciones temporales que serán redefinidas después de declarar valesFiltrados
+  const handleSelectAllVales = (checked: boolean) => {
+    // Esta función será redefinida después de declarar valesFiltrados
+    console.warn('handleSelectAllVales called before valesFiltrados initialization');
+  };
+
+  const handleClearSelection = () => {
+    setSelectedVales(new Set());
+    setSelectAllMode(false);
+    toast.info('Selección limpiada', 'Se han deseleccionado todos los vales.', { duration: 2000 });
+  };
+
+  // Función para seleccionar/deseleccionar con teclado (Ctrl+A)
+  const handleKeyDown = (event: KeyboardEvent) => {
+    // Esta función será redefinida después de declarar valesFiltrados
+    console.warn('handleKeyDown called before valesFiltrados initialization');
+  };
+
+  // Variables temporales para evitar error de inicialización
+  const selectedValesCount = selectedVales.size;
 
   // Constantes
   const meses = [
@@ -364,6 +397,10 @@ const Vales: React.FC<ValesProps> = ({
 
       console.log('🔄 Cargando vales con filtros:', filters);
       loadVales(filters);
+
+      // Limpiar selección cuando cambian los filtros
+      setSelectedVales(new Set());
+      setSelectAllMode(false);
     }, searchTerm ? 500 : 0);
 
     return () => clearTimeout(timeoutId);
@@ -406,6 +443,43 @@ const Vales: React.FC<ValesProps> = ({
       return true;
     });
   }, [vales, searchTerm]);
+
+  // Variables que dependen de valesFiltrados - después de su declaración
+  const isAllSelected = valesFiltrados.length > 0 && selectedVales.size === valesFiltrados.length;
+  const isIndeterminate = selectedVales.size > 0 && selectedVales.size < valesFiltrados.length;
+
+  // Redefinir funciones que dependen de valesFiltrados - después de su declaración
+  const handleSelectAllValesFinal = (checked: boolean) => {
+    if (checked) {
+      const allIds = new Set(valesFiltrados.map(vale => vale.id));
+      setSelectedVales(allIds);
+      setSelectAllMode(true);
+    } else {
+      setSelectedVales(new Set());
+      setSelectAllMode(false);
+    }
+  };
+
+  const handleKeyDownFinal = (event: KeyboardEvent) => {
+    if (event.ctrlKey && event.key === 'a' && valesFiltrados.length > 0) {
+      event.preventDefault();
+      const shouldSelectAll = selectedVales.size !== valesFiltrados.length;
+      handleSelectAllValesFinal(shouldSelectAll);
+      toast.info(
+        shouldSelectAll ? 'Todos seleccionados' : 'Selección limpiada',
+        shouldSelectAll
+          ? `Se han seleccionado ${valesFiltrados.length} vales.`
+          : 'Se han deseleccionado todos los vales.',
+        { duration: 2000 }
+      );
+    }
+  };
+
+  // Agregar listener para atajos de teclado - después de declarar valesFiltrados
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDownFinal);
+    return () => document.removeEventListener('keydown', handleKeyDownFinal);
+  }, [valesFiltrados, selectedVales]);
 
   // Estadísticas calculadas
   const estadisticas = useMemo(() => {
@@ -1070,32 +1144,31 @@ const Vales: React.FC<ValesProps> = ({
   // ========================================
 
   /**
-   * Combina todos los vales filtrados en un solo vale virtual para mostrar detalle completo
-   * CORREGIDO: Ahora agrega correctamente las cantidades de vacunas por tipo
+   * Combina vales específicos seleccionados en un solo vale virtual para mostrar detalle completo
    */
-  const combinarValesParaDetalle = (): ValeEntrega | null => {
-    if (valesFiltrados.length === 0) {
+  const combinarValesSeleccionados = (valesSeleccionados: ValeEntrega[]): ValeEntrega | null => {
+    if (valesSeleccionados.length === 0) {
       return null;
     }
 
     // Si solo hay un vale, retornarlo directamente
-    if (valesFiltrados.length === 1) {
-      return valesFiltrados[0];
+    if (valesSeleccionados.length === 1) {
+      return valesSeleccionados[0];
     }
 
-    console.log('🔄 Combinando', valesFiltrados.length, 'vales para exportación global');
+    console.log('🔄 Combinando', valesSeleccionados.length, 'vales seleccionados para detalle');
 
     // Combinar múltiples vales con agregación correcta
-    const primerVale = valesFiltrados[0];
+    const primerVale = valesSeleccionados[0];
     let totalVacunasCombinado = 0;
     const establecimientosSet = new Set<string>();
 
     // Mapas para agregar datos por establecimiento y vacuna
     const detallesCombinados = new Map<string, any>();
 
-    // Procesar todos los vales
-    valesFiltrados.forEach((vale, valeIndex) => {
-      console.log(`📋 Procesando vale ${valeIndex + 1}/${valesFiltrados.length}: ${vale.numero}`);
+    // Procesar todos los vales seleccionados
+    valesSeleccionados.forEach((vale, valeIndex) => {
+      console.log(`📋 Procesando vale seleccionado ${valeIndex + 1}/${valesSeleccionados.length}: ${vale.numero}`);
 
       if (vale.detalles) {
         totalVacunasCombinado += vale.totalVacunas;
@@ -1146,8 +1219,8 @@ const Vales: React.FC<ValesProps> = ({
     // Convertir el mapa a array de detalles
     const detallesFinales = Array.from(detallesCombinados.values());
 
-    console.log('📊 Resumen de combinación:');
-    console.log(`  - Vales combinados: ${valesFiltrados.length}`);
+    console.log('📊 Resumen de combinación de vales seleccionados:');
+    console.log(`  - Vales combinados: ${valesSeleccionados.length}`);
     console.log(`  - Detalles únicos: ${detallesFinales.length}`);
     console.log(`  - Total vacunas: ${totalVacunasCombinado}`);
     console.log(`  - Establecimientos únicos: ${establecimientosSet.size}`);
@@ -1155,72 +1228,108 @@ const Vales: React.FC<ValesProps> = ({
     // Crear vale combinado usando la estructura del primer vale como base
     const valeCombinado: ValeEntrega = {
       ...primerVale,
-      numero: `COMBINADO-${valesFiltrados.length}-VALES`,
+      numero: valesSeleccionados.length === 1
+        ? primerVale.numero
+        : `COMBINADO-${valesSeleccionados.length}-VALES`,
       detalles: detallesFinales,
       totalVacunas: totalVacunasCombinado,
       totalEstablecimientos: establecimientosSet.size,
-      observaciones: `Vale combinado de ${valesFiltrados.length} vales de entrega del período ${selectedMes}/${selectedAnio}. Cantidades agregadas por tipo de vacuna y establecimiento.`
+      observaciones: valesSeleccionados.length === 1
+        ? primerVale.observaciones
+        : `Vale combinado de ${valesSeleccionados.length} vales seleccionados del período ${selectedMes}/${selectedAnio}. Cantidades agregadas por tipo de vacuna y establecimiento.`
     };
 
     return valeCombinado;
   };
 
   /**
-   * Maneja la apertura del modal de detalle global
+   * Combina todos los vales filtrados en un solo vale virtual para mostrar detalle completo (legacy)
+   * CORREGIDO: Ahora agrega correctamente las cantidades de vacunas por tipo
+   */
+  const combinarValesParaDetalle = (): ValeEntrega | null => {
+    return combinarValesSeleccionados(valesFiltrados);
+  };
+
+  /**
+   * Maneja la apertura del modal de detalle global con selección múltiple
    */
   const handleVerDetalleGlobal = () => {
-    if (valesFiltrados.length === 0) {
+    if (selectedValesCount === 0) {
       toast.error(
-        'Sin vales disponibles',
-        'No hay vales generados para mostrar el detalle completo.',
+        'Selección requerida',
+        'Por favor selecciona al menos un vale para ver el detalle.',
         { duration: 4000 }
       );
       return;
     }
 
-    const valeCombinado = combinarValesParaDetalle();
+    const selectedValesList = valesFiltrados.filter(vale => selectedVales.has(vale.id));
+
+    if (selectedValesList.length === 0) {
+      toast.error(
+        'Error de selección',
+        'Los vales seleccionados no están disponibles.',
+        { duration: 4000 }
+      );
+      return;
+    }
+
+    const valeCombinado = combinarValesSeleccionados(selectedValesList);
     if (valeCombinado) {
       setValeGlobalCombinado(valeCombinado);
       setShowGlobalDetalleModal(true);
     } else {
       toast.error(
         'Error al combinar vales',
-        'No se pudo generar el detalle completo de los vales.',
+        'No se pudo generar el detalle completo de los vales seleccionados.',
         { duration: 4000 }
       );
     }
   };
 
   /**
-   * Maneja la apertura del modal de exportación global
-   * CORREGIDO: Ahora usa el primer vale como base para el modal de exportación
+   * Maneja la apertura del modal de exportación global con selección múltiple
    */
   const handleExportarGlobal = () => {
-    if (valesFiltrados.length === 0) {
+    if (selectedValesCount === 0) {
       toast.error(
-        'Sin vales disponibles',
-        'No hay vales generados para exportar.',
+        'Selección requerida',
+        'Por favor selecciona al menos un vale para exportar.',
         { duration: 4000 }
       );
       return;
     }
 
-    // Para la exportación global, usamos el primer vale como base para el modal
-    // El modal mostrará las opciones de exportación y luego procesaremos todos los vales
-    const valeBase = valesFiltrados[0];
+    const selectedValesList = valesFiltrados.filter(vale => selectedVales.has(vale.id));
+
+    if (selectedValesList.length === 0) {
+      toast.error(
+        'Error de selección',
+        'Los vales seleccionados no están disponibles.',
+        { duration: 4000 }
+      );
+      return;
+    }
+
+    // Para la exportación, usamos el primer vale seleccionado como base
+    const valeBase = selectedValesList[0];
 
     // Crear un vale virtual que represente la combinación para el modal
     const valeParaModal: ValeEntrega = {
       ...valeBase,
-      numero: `GLOBAL-${valesFiltrados.length}-VALES`,
-      observaciones: `Exportación global de ${valesFiltrados.length} vales del período ${selectedMes}/${selectedAnio}`,
-      totalVacunas: valesFiltrados.reduce((total, vale) => total + vale.totalVacunas, 0),
-      totalEstablecimientos: new Set(valesFiltrados.flatMap(vale =>
+      numero: selectedValesCount === 1
+        ? valeBase.numero
+        : `MULTI-${selectedValesCount}-VALES`,
+      observaciones: selectedValesCount === 1
+        ? valeBase.observaciones
+        : `Exportación múltiple de ${selectedValesCount} vales del período ${selectedMes}/${selectedAnio}`,
+      totalVacunas: selectedValesList.reduce((total, vale) => total + vale.totalVacunas, 0),
+      totalEstablecimientos: new Set(selectedValesList.flatMap(vale =>
         vale.detalles?.map(d => d.establecimientoId) || []
       )).size
     };
 
-    console.log('🚀 Abriendo modal de exportación global para', valesFiltrados.length, 'vales');
+    console.log('🚀 Abriendo modal de exportación múltiple para', selectedValesCount, 'vales seleccionados');
     setValeGlobalCombinado(valeParaModal);
     setShowGlobalExportModal(true);
   };
@@ -1255,12 +1364,6 @@ const Vales: React.FC<ValesProps> = ({
   // Función legacy para compatibilidad con tipos de vale básicos
   const getTipoValeInfo = (tipoVale: string) => {
     switch (tipoVale) {
-      case 'completo':
-        return {
-          texto: 'Completo',
-          color: 'bg-blue-100 text-blue-800',
-          icon: <Package className="h-3 w-3" />
-        };
       case 'solo_base':
         return {
           texto: 'Base',
@@ -1275,9 +1378,9 @@ const Vales: React.FC<ValesProps> = ({
         };
       default:
         return {
-          texto: 'Completo',
-          color: 'bg-gray-100 text-gray-800',
-          icon: <Package className="h-3 w-3" />
+          texto: 'Base',
+          color: 'bg-green-100 text-green-800',
+          icon: <CheckCircle className="h-3 w-3" />
         };
     }
   };
@@ -1379,8 +1482,23 @@ const Vales: React.FC<ValesProps> = ({
                   <Search className="h-4 w-4 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Filtros de Búsqueda</h3>
-                  <p className="text-sm text-gray-600">Configure los criterios para mostrar los vales</p>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Filtros de Búsqueda
+                    {selectedValesCount > 0 && (
+                      <span className="ml-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        {selectedValesCount} seleccionado{selectedValesCount !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Configure los criterios para mostrar los vales
+                    {selectedValesCount > 0 && (
+                      <span className="text-indigo-600 font-medium">
+                        • Manteniendo selección actual
+                      </span>
+                    )}
+                  </p>
                 </div>
               </div>
               <button
@@ -1555,32 +1673,66 @@ const Vales: React.FC<ValesProps> = ({
 
                 {/* Global Action Buttons */}
                 {valesFiltrados.length > 0 && (
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={handleVerDetalleGlobal}
-                      disabled={procesandoAccion || isLoading}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-sm font-medium text-sm"
-                      title="Ver detalle completo de todos los vales filtrados"
-                    >
-                      <Eye className="h-4 w-4" />
-                      <span className="hidden sm:inline">Ver Detalle Completo</span>
-                      <span className="bg-blue-500 text-blue-100 px-2 py-1 rounded-full text-xs font-semibold">
-                        {valesFiltrados.length}
-                      </span>
-                    </button>
+                  <div className="flex items-center space-x-3">
+                    {/* Indicador de selección */}
+                    {selectedValesCount > 0 && (
+                      <div className="flex items-center space-x-2 bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-2">
+                        <div className="flex items-center space-x-1 text-indigo-700">
+                          <CheckCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">
+                            {selectedValesCount} vale{selectedValesCount !== 1 ? 's' : ''} seleccionado{selectedValesCount !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <button
+                          onClick={handleClearSelection}
+                          className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-100 rounded p-1 transition-colors"
+                          title="Limpiar selección"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    )}
 
-                    <button
-                      onClick={handleExportarGlobal}
-                      disabled={procesandoAccion || isLoading}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-sm font-medium text-sm"
-                      title="Exportar todos los vales filtrados en un archivo completo"
-                    >
-                      <FileSpreadsheet className="h-4 w-4" />
-                      <span className="hidden sm:inline">Exportar Vale Completo</span>
-                      <span className="bg-green-500 text-green-100 px-2 py-1 rounded-full text-xs font-semibold">
-                        {valesFiltrados.length}
-                      </span>
-                    </button>
+                    {/* Botones de acción */}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={handleVerDetalleGlobal}
+                        disabled={procesandoAccion || isLoading || selectedValesCount === 0}
+                        className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-sm font-medium text-sm ${
+                          selectedValesCount === 0
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md transform hover:scale-105'
+                        }`}
+                        title={selectedValesCount === 0 ? 'Selecciona al menos un vale para ver el detalle' : 'Ver detalle completo de los vales seleccionados'}
+                      >
+                        <Eye className="h-4 w-4" />
+                        <span className="hidden sm:inline">Ver Detalle</span>
+                        {selectedValesCount > 0 && (
+                          <span className="bg-blue-500 text-blue-100 px-2 py-1 rounded-full text-xs font-semibold">
+                            {selectedValesCount}
+                          </span>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={handleExportarGlobal}
+                        disabled={procesandoAccion || isLoading || selectedValesCount === 0}
+                        className={`px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-sm font-medium text-sm ${
+                          selectedValesCount === 0
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-green-600 text-white hover:bg-green-700 hover:shadow-md transform hover:scale-105'
+                        }`}
+                        title={selectedValesCount === 0 ? 'Selecciona al menos un vale para exportar' : 'Exportar vales seleccionados'}
+                      >
+                        <FileSpreadsheet className="h-4 w-4" />
+                        <span className="hidden sm:inline">Exportar</span>
+                        {selectedValesCount > 0 && (
+                          <span className="bg-green-500 text-green-100 px-2 py-1 rounded-full text-xs font-semibold">
+                            {selectedValesCount}
+                          </span>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1591,6 +1743,21 @@ const Vales: React.FC<ValesProps> = ({
             <table className={`w-full ${onClose ? 'min-w-[1400px]' : 'min-w-[1200px]'} transition-opacity duration-300 ${actualizandoTabla ? 'opacity-75' : 'opacity-100'}`}>
               <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
+                  {/* Columna de selección */}
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200 w-16">
+                    <div className="flex items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={isAllSelected}
+                        ref={(el) => {
+                          if (el) el.indeterminate = isIndeterminate;
+                        }}
+                        onChange={(e) => handleSelectAllValesFinal(e.target.checked)}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition-colors"
+                        title={isAllSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}
+                      />
+                    </div>
+                  </th>
                   <th className={`px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-gray-200 ${onClose ? 'w-32' : 'w-28'}`}>
                     Vale
                   </th>
@@ -1620,7 +1787,7 @@ const Vales: React.FC<ValesProps> = ({
               <tbody className="bg-white divide-y divide-gray-200">
                 {valesFiltrados.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-16 text-center">
+                    <td colSpan={9} className="px-6 py-16 text-center">
                       <div className="flex flex-col items-center space-y-6">
                         {isLoading ? (
                           <>
@@ -1699,7 +1866,19 @@ const Vales: React.FC<ValesProps> = ({
                   </tr>
                 ) : (
                   valesFiltrados.map((vale) => (
-                    <tr key={vale.id} className="hover:bg-blue-50 transition-all duration-200 border-b border-gray-100">
+                    <tr key={vale.id} className={`transition-all duration-200 border-b border-gray-100 ${
+                      selectedVales.has(vale.id) ? 'bg-indigo-50 hover:bg-indigo-100' : 'hover:bg-blue-50'
+                    }`}>
+                      {/* Columna de selección */}
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedVales.has(vale.id)}
+                          onChange={(e) => handleSelectVale(vale.id, e.target.checked)}
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition-colors"
+                          title={selectedVales.has(vale.id) ? 'Deseleccionar este vale' : 'Seleccionar este vale'}
+                        />
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
@@ -1871,6 +2050,7 @@ const Vales: React.FC<ValesProps> = ({
           vale={valeParaExportar}
           isOpen={showExportModal}
           onClose={handleCerrarExportModal}
+          esExportacionIndividual={true}
         />
       )}
 
@@ -2119,7 +2299,7 @@ const Vales: React.FC<ValesProps> = ({
             vale={valeGlobalCombinado}
             isOpen={showGlobalExportModal}
             onClose={handleCerrarModalesGlobales}
-            valesOriginales={valesFiltrados}
+            valesOriginales={valesFiltrados.filter(vale => selectedVales.has(vale.id))}
             esExportacionGlobal={true}
           />
         </>
@@ -2131,26 +2311,49 @@ const Vales: React.FC<ValesProps> = ({
           <div className={`${onClose ? 'w-full px-4 sm:px-6' : 'max-w-7xl mx-auto px-4 sm:px-6'} py-4`}>
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
               <div className="text-sm text-gray-600 text-center sm:text-left">
-                <span className="font-semibold">{valesFiltrados.length}</span> vales seleccionados
+                <span className="font-semibold">{valesFiltrados.length}</span> vales disponibles
+                {selectedValesCount > 0 && (
+                  <span className="text-indigo-600 font-semibold">
+                    • {selectedValesCount} seleccionado{selectedValesCount !== 1 ? 's' : ''}
+                  </span>
+                )}
               </div>
               <div className="flex items-center space-x-3">
                 <button
                   onClick={handleVerDetalleGlobal}
-                  disabled={procesandoAccion || isLoading}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-md font-medium"
-                  title="Ver detalle completo de todos los vales filtrados"
+                  disabled={procesandoAccion || isLoading || selectedValesCount === 0}
+                  className={`px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-md font-medium ${
+                    selectedValesCount === 0
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg transform hover:scale-105'
+                  }`}
+                  title={selectedValesCount === 0 ? 'Selecciona vales para ver el detalle' : 'Ver detalle completo de los vales seleccionados'}
                 >
                   <Eye className="h-4 w-4" />
                   <span>Ver Detalle Completo</span>
+                  {selectedValesCount > 0 && (
+                    <span className="bg-blue-500 text-blue-100 px-2 py-1 rounded-full text-xs font-semibold">
+                      {selectedValesCount}
+                    </span>
+                  )}
                 </button>
                 <button
                   onClick={handleExportarGlobal}
-                  disabled={procesandoAccion || isLoading}
-                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-md font-medium"
-                  title="Exportar todos los vales filtrados en un archivo completo"
+                  disabled={procesandoAccion || isLoading || selectedValesCount === 0}
+                  className={`px-6 py-3 rounded-lg transition-all duration-200 flex items-center space-x-2 shadow-md font-medium ${
+                    selectedValesCount === 0
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-green-600 text-white hover:bg-green-700 hover:shadow-lg transform hover:scale-105'
+                  }`}
+                  title={selectedValesCount === 0 ? 'Selecciona vales para exportar' : 'Exportar vales seleccionados'}
                 >
                   <FileSpreadsheet className="h-4 w-4" />
-                  <span>Exportar Vale Completo</span>
+                  <span>Exportar Vales</span>
+                  {selectedValesCount > 0 && (
+                    <span className="bg-green-500 text-green-100 px-2 py-1 rounded-full text-xs font-semibold">
+                      {selectedValesCount}
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
