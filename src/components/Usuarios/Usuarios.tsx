@@ -2,39 +2,33 @@ import React, { useState, useEffect } from 'react';
 import {
   Plus,
   Search,
-  Filter,
   Edit,
   Trash2,
   User,
   Users as UsersIcon,
   Shield,
   Key,
-  Mail,
-  Phone,
-  Calendar,
-  Clock,
   CheckCircle,
   XCircle,
   Eye,
   EyeOff,
   Download,
-  Upload,
   Settings,
   UserPlus,
   UserCheck,
-  UserX,
   Building2,
   Activity,
   AlertTriangle,
-  MoreVertical,
-  Lock,
-  Unlock,
   RefreshCw,
-  FileText,
   BarChart3,
+  Loader2,
+  FolderOpen,
+  Database,
+  FileText,
+  Clock,
+  Calendar,
   PieChart,
-  TrendingUp,
-  Loader2
+  TrendingUp
 } from 'lucide-react';
 import { Usuario, Establecimiento, CreateUsuarioDto, UpdateUsuarioDto, ChangePasswordDto } from '../../types';
 import { useUsuarios } from '../../hooks/useUsuarios';
@@ -42,9 +36,73 @@ import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useToastContext } from '../../contexts/ToastContext';
 import { logger } from '../../utils/debug';
 
+// Configuración de secciones organizadas jerárquicamente
+interface SectionConfig {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  path: string;
+  category: 'gestion' | 'permisos' | 'auditoria';
+  description?: string;
+}
+
+const USER_SECTIONS: SectionConfig[] = [
+  // Sección Gestión
+  { 
+    id: 'usuarios', 
+    label: 'Gestión de Usuarios', 
+    icon: UsersIcon, 
+    path: '/usuarios/usuarios', 
+    category: 'gestion',
+    description: 'Administración de usuarios del sistema'
+  },
+  { 
+    id: 'roles', 
+    label: 'Roles y Perfiles', 
+    icon: Shield, 
+    path: '/usuarios/roles', 
+    category: 'gestion',
+    description: 'Configuración de roles de usuario'
+  },
+  
+  // Sección Permisos
+  { 
+    id: 'permisos', 
+    label: 'Gestión de Permisos', 
+    icon: Key, 
+    path: '/usuarios/permisos', 
+    category: 'permisos',
+    description: 'Control de acceso por módulos'
+  },
+  
+  // Sección Auditoría
+  { 
+    id: 'auditoria', 
+    label: 'Registro de Actividad', 
+    icon: Activity, 
+    path: '/usuarios/auditoria', 
+    category: 'auditoria',
+    description: 'Trazabilidad y logs del sistema'
+  },
+  { 
+    id: 'reportes', 
+    label: 'Reportes de Usuario', 
+    icon: BarChart3, 
+    path: '/usuarios/reportes', 
+    category: 'auditoria',
+    description: 'Análisis y estadísticas'
+  }
+];
+
+const CATEGORY_CONFIG = {
+  gestion: { label: 'Gestión de Usuarios', icon: FolderOpen, color: 'blue' },
+  permisos: { label: 'Control de Acceso', icon: Database, color: 'emerald' },
+  auditoria: { label: 'Auditoría y Reportes', icon: FileText, color: 'purple' }
+};
+
 const Usuarios: React.FC = () => {
   // Estados locales
-  const [activeTab, setActiveTab] = useState<'gestion' | 'roles' | 'permisos' | 'auditoria' | 'reportes'>('gestion');
+  const [activeSection, setActiveSection] = useState<string>('usuarios');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRol, setFilterRol] = useState<string>('todos');
   const [filterEstado, setFilterEstado] = useState<string>('todos');
@@ -60,7 +118,6 @@ const Usuarios: React.FC = () => {
     usuarios,
     pagination,
     isLoading,
-    error,
     createUsuario,
     updateUsuario,
     deleteUsuario,
@@ -72,7 +129,6 @@ const Usuarios: React.FC = () => {
     refresh,
     isCreating,
     isUpdating,
-    isDeleting,
     createError,
     updateError,
     deleteError,
@@ -83,13 +139,14 @@ const Usuarios: React.FC = () => {
   const { establecimientos, loadEstablecimientos } = useEstablecimientos();
   const { toast } = useToastContext();
 
-  const tabs = [
-    { id: 'gestion', label: 'Gestión de Usuarios', icon: UsersIcon },
-    { id: 'roles', label: 'Roles y Perfiles', icon: Shield },
-    { id: 'permisos', label: 'Permisos', icon: Key },
-    { id: 'auditoria', label: 'Auditoría', icon: Activity },
-    { id: 'reportes', label: 'Reportes', icon: BarChart3 },
-  ];
+  // Agrupar secciones por categoría
+  const sectionsByCategory = USER_SECTIONS.reduce((acc, section) => {
+    if (!acc[section.category]) {
+      acc[section.category] = [];
+    }
+    acc[section.category].push(section);
+    return acc;
+  }, {} as Record<string, SectionConfig[]>);
 
   // Efectos para manejar filtros
   useEffect(() => {
@@ -312,128 +369,158 @@ const Usuarios: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Gestión de Usuarios</h2>
-          <p className="text-gray-600 mt-1">Administre usuarios, roles, permisos y auditoría del sistema</p>
-        </div>
-        <div className="flex space-x-3">
-          <button
-            onClick={refresh}
-            disabled={isLoading}
-            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
-            title="Actualizar datos"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            Actualizar
-          </button>
-          <button
-            onClick={() => alert('Exportando usuarios...')}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
-          </button>
-          <button
-            onClick={() => alert('Importando usuarios...')}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Importar
-          </button>
-          <button
-            onClick={() => {
-              setEditingUser(null);
-              setShowModal(true);
-            }}
-            disabled={isCreating}
-            className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
-          >
-            {isCreating ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <UserPlus className="h-4 w-4 mr-2" />
-            )}
-            Nuevo Usuario
-          </button>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Header Premium */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-full px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
+                <UsersIcon className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
+                <p className="text-gray-600 mt-1">Administración integral de usuarios y permisos</p>
+              </div>
+            </div>
+            <div className="flex space-x-3">
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                onClick={refresh}
+                disabled={isLoading}
+                className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+                title="Actualizar datos"
               >
-                <Icon className="h-4 w-4 mr-2" />
-                {tab.label}
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Actualizar
               </button>
-            );
-          })}
-        </nav>
+              <button
+                onClick={() => alert('Exportando usuarios...')}
+                className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exportar
+              </button>
+              <button 
+                onClick={() => {
+                  setEditingUser(null);
+                  setShowModal(true);
+                }}
+                disabled={isCreating}
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50"
+              >
+                {isCreating ? (
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <UserPlus className="h-5 w-5 mr-2" />
+                )}
+                Nuevo Usuario
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Content */}
-      {activeTab === 'gestion' && (
-        <GestionUsuariosTab
-          usuarios={filteredUsers}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          filterRol={filterRol}
-          setFilterRol={setFilterRol}
-          filterEstado={filterEstado}
-          setFilterEstado={setFilterEstado}
-          selectedUsers={selectedUsers}
-          handleSelectUser={handleSelectUser}
-          handleSelectAll={handleSelectAll}
-          handleEdit={handleEdit}
-          handleDelete={handleDelete}
-          handleToggleEstado={handleToggleEstado}
-          handleBulkAction={handleBulkAction}
-          getRolLabel={getRolLabel}
-          getRolColor={getRolColor}
-          getEstablecimientoNombre={getEstablecimientoNombre}
-          setShowPasswordModal={setShowPasswordModal}
-          setSelectedUser={setSelectedUser}
-          setShowPermisosModal={setShowPermisosModal}
-          roles={roles}
-          isLoading={isLoading}
-          isDeleting={isDeleting}
-          pagination={pagination}
-          changePage={changePage}
-        />
-      )}
-      
-      {activeTab === 'roles' && (
-        <RolesTab roles={roles} usuarios={usuarios} />
-      )}
-      
-      {activeTab === 'permisos' && (
-        <PermisosTab />
-      )}
-      
-      {activeTab === 'auditoria' && (
-        <AuditoriaTab usuarios={usuarios} />
-      )}
-      
-      {activeTab === 'reportes' && (
-        <ReportesUsuariosTab usuarios={usuarios} roles={roles} />
-      )}
+      {/* Navigation Premium */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-full px-6">
+          <div className="grid grid-cols-3 gap-1">
+            {Object.entries(sectionsByCategory).map(([categoryKey, sections]) => {
+              const category = CATEGORY_CONFIG[categoryKey as keyof typeof CATEGORY_CONFIG];
+              const CategoryIcon = category.icon;
+              
+              return (
+                <div key={categoryKey} className="relative group">
+                  {/* Category Header */}
+                  <div className={`flex items-center justify-center py-4 border-b-4 border-${category.color}-500 bg-${category.color}-50`}>
+                    <CategoryIcon className={`h-5 w-5 text-${category.color}-600 mr-2`} />
+                    <span className={`font-semibold text-${category.color}-800`}>{category.label}</span>
+                  </div>
+                  
+                  {/* Section Buttons */}
+                  <div className="bg-white">
+                    {sections.map((section) => {
+                      const Icon = section.icon;
+                      const isActive = activeSection === section.id;
+                      
+                      return (
+                        <button
+                          key={section.id}
+                          onClick={() => setActiveSection(section.id)}
+                          className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                            isActive ? `bg-${category.color}-50 border-l-4 border-l-${category.color}-500` : ''
+                          }`}
+                        >
+                          <Icon className={`h-4 w-4 mr-3 ${isActive ? `text-${category.color}-600` : 'text-gray-500'}`} />
+                          <div className="flex-1">
+                            <div className={`font-medium text-sm ${isActive ? `text-${category.color}-800` : 'text-gray-900'}`}>
+                              {section.label}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">{section.description}</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Content Area Premium */}
+      <div className="max-w-full px-6 py-6">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          {activeSection === 'usuarios' && (
+            <GestionUsuariosTab
+              usuarios={filteredUsers}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filterRol={filterRol}
+              setFilterRol={setFilterRol}
+              filterEstado={filterEstado}
+              setFilterEstado={setFilterEstado}
+              selectedUsers={selectedUsers}
+              handleSelectUser={handleSelectUser}
+              handleSelectAll={handleSelectAll}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+              handleToggleEstado={handleToggleEstado}
+              handleBulkAction={handleBulkAction}
+              getRolLabel={getRolLabel}
+              getRolColor={getRolColor}
+              getEstablecimientoNombre={getEstablecimientoNombre}
+              setShowPasswordModal={setShowPasswordModal}
+              setSelectedUser={setSelectedUser}
+              setShowPermisosModal={setShowPermisosModal}
+              roles={roles}
+              isLoading={isLoading}
+              pagination={pagination}
+              changePage={changePage}
+            />
+          )}
+          
+          {activeSection === 'roles' && (
+            <RolesTab roles={roles} usuarios={usuarios} />
+          )}
+          
+          {activeSection === 'permisos' && (
+            <PermisosTab />
+          )}
+          
+          {activeSection === 'auditoria' && (
+            <AuditoriaTab usuarios={usuarios} />
+          )}
+          
+          {activeSection === 'reportes' && (
+            <ReportesUsuariosTab usuarios={usuarios} roles={roles} />
+          )}
+        </div>
+      </div>
 
       {/* Modal Usuario */}
       {showModal && (
@@ -459,7 +546,7 @@ const Usuarios: React.FC = () => {
             setSelectedUser(null);
           }}
           onSubmit={handlePasswordChange}
-          isLoading={passwordApi.loading}
+          isLoading={false}
         />
       )}
 
@@ -471,7 +558,7 @@ const Usuarios: React.FC = () => {
             setShowPermisosModal(false);
             setSelectedUser(null);
           }}
-          onSubmit={(permisos) => {
+          onSubmit={() => {
             alert(`Permisos actualizados para ${selectedUser.nombres}`);
             setShowPermisosModal(false);
             setSelectedUser(null);
@@ -506,7 +593,6 @@ interface GestionUsuariosTabProps {
   setShowPermisosModal: (show: boolean) => void;
   roles: any[];
   isLoading: boolean;
-  isDeleting: boolean;
   pagination: any;
   changePage: (page: number) => void;
 }
@@ -534,97 +620,74 @@ const GestionUsuariosTab: React.FC<GestionUsuariosTabProps> = ({
   setShowPermisosModal,
   roles,
   isLoading,
-  isDeleting,
   pagination,
   changePage,
 }) => {
   return (
-    <div className="space-y-6">
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <UsersIcon className="h-6 w-6 text-blue-600" />
+    <div className="p-6 space-y-6">
+      {/* Stats Resumidas */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm">Total Usuarios</p>
+              <p className="text-2xl font-bold">{usuarios.length}</p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Usuarios</p>
-              <p className="text-2xl font-bold text-gray-900">{usuarios.length}</p>
-            </div>
+            <UsersIcon className="h-8 w-8 text-blue-200" />
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <UserCheck className="h-6 w-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Usuarios Activos</p>
-              <p className="text-2xl font-bold text-gray-900">
+        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-4 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-emerald-100 text-sm">Usuarios Activos</p>
+              <p className="text-2xl font-bold">
                 {usuarios.filter(u => u.estado === 'activo').length}
               </p>
             </div>
+            <UserCheck className="h-8 w-8 text-emerald-200" />
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <Clock className="h-6 w-6 text-yellow-600" />
+        <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-100 text-sm">Roles Disponibles</p>
+              <p className="text-2xl font-bold">{roles.length}</p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Conectados Hoy</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {usuarios.filter(u => u.ultimoAcceso && 
-                  new Date(u.ultimoAcceso).toDateString() === new Date().toDateString()).length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Shield className="h-6 w-6 text-purple-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Roles Activos</p>
-              <p className="text-2xl font-bold text-gray-900">{roles.length}</p>
-            </div>
+            <Shield className="h-8 w-8 text-purple-200" />
           </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      {/* Filters Premium */}
+      <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar por nombre, email o usuario..."
+                placeholder="Buscar usuarios por nombre, email o usuario..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
               />
             </div>
           </div>
-          <div className="lg:w-48">
+          <div className="flex gap-3">
             <select
               value={filterRol}
               onChange={(e) => setFilterRol(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm min-w-[160px]"
             >
               <option value="todos">Todos los roles</option>
               {roles.map((rol) => (
                 <option key={rol.id} value={rol.id}>{rol.nombre}</option>
               ))}
             </select>
-          </div>
-          <div className="lg:w-48">
             <select
               value={filterEstado}
               onChange={(e) => setFilterEstado(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm min-w-[160px]"
             >
               <option value="todos">Todos los estados</option>
               <option value="activo">Activos</option>
@@ -634,29 +697,34 @@ const GestionUsuariosTab: React.FC<GestionUsuariosTabProps> = ({
         </div>
       </div>
 
-      {/* Bulk Actions */}
+      {/* Bulk Actions Premium */}
       {selectedUsers.length > 0 && (
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+        <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-purple-800 font-medium">
-              {selectedUsers.length} usuario(s) seleccionado(s)
-            </span>
+            <div className="flex items-center space-x-3">
+              <div className="bg-blue-600 p-2 rounded-lg">
+                <UserCheck className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-blue-900 font-semibold">
+                {selectedUsers.length} usuario{selectedUsers.length !== 1 ? 's' : ''} seleccionado{selectedUsers.length !== 1 ? 's' : ''}
+              </span>
+            </div>
             <div className="flex space-x-2">
               <button
                 onClick={() => handleBulkAction('activar')}
-                className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors"
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-700 transition-colors shadow-sm"
               >
                 Activar
               </button>
               <button
                 onClick={() => handleBulkAction('desactivar')}
-                className="px-3 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700 transition-colors"
+                className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700 transition-colors shadow-sm"
               >
                 Desactivar
               </button>
               <button
                 onClick={() => handleBulkAction('eliminar')}
-                className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors shadow-sm"
               >
                 Eliminar
               </button>
@@ -665,8 +733,8 @@ const GestionUsuariosTab: React.FC<GestionUsuariosTabProps> = ({
         </div>
       )}
 
-      {/* Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      {/* Table Premium */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -679,22 +747,16 @@ const GestionUsuariosTab: React.FC<GestionUsuariosTabProps> = ({
                     className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                   />
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider bg-gray-100">
                   Usuario
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rol
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider bg-gray-100">
+                  Rol & Establecimiento
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Establecimiento
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider bg-gray-100">
+                  Estado & Acceso
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Último Acceso
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider bg-gray-100">
                   Acciones
                 </th>
               </tr>
@@ -711,124 +773,128 @@ const GestionUsuariosTab: React.FC<GestionUsuariosTabProps> = ({
                 </tr>
               ) : usuarios.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center">
+                  <td colSpan={5} className="px-6 py-12 text-center">
                     <div className="text-gray-500">
                       <UsersIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p>No se encontraron usuarios</p>
+                      <p className="text-lg font-medium text-gray-900 mb-2">No se encontraron usuarios</p>
+                      <p className="text-gray-500">Intenta ajustar los filtros o crear un nuevo usuario</p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 usuarios.map((usuario) => (
-                  <tr key={usuario.id} className="hover:bg-gray-50">
+                  <tr key={usuario.id} className="hover:bg-blue-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <input
                         type="checkbox"
                         checked={selectedUsers.includes(usuario.id)}
                         onChange={() => handleSelectUser(usuario.id)}
-                        className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                     </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                          <User className="h-5 w-5 text-purple-600" />
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-12 w-12">
+                          <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center shadow-sm">
+                            <User className="h-6 w-6 text-white" />
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-semibold text-gray-900">
+                            {usuario.nombres} {usuario.apellidos}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {usuario.email}
+                          </div>
+                          <div className="text-xs text-gray-400 font-mono">
+                            @{usuario.usuario}
+                          </div>
                         </div>
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {usuario.nombres} {usuario.apellidos}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {usuario.email}
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          @{usuario.usuario}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="space-y-2">
+                        <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getRolColor(usuario.rol)}`}>
+                          {getRolLabel(usuario.rol)}
+                        </span>
+                        <div className="text-xs text-gray-600">
+                          <Building2 className="h-3 w-3 inline mr-1" />
+                          {getEstablecimientoNombre(usuario.establecimientoId)}
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRolColor(usuario.rol)}`}>
-                      {getRolLabel(usuario.rol)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {getEstablecimientoNombre(usuario.establecimientoId)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {usuario.ultimoAcceso ? (
-                      <div>
-                        <div>{usuario.ultimoAcceso.toLocaleDateString()}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => handleToggleEstado(usuario.id)}
+                          className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+                            usuario.estado === 'activo' 
+                              ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' 
+                              : 'bg-red-100 text-red-800 hover:bg-red-200'
+                          }`}
+                        >
+                          {usuario.estado === 'activo' ? (
+                            <>
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Activo
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Inactivo
+                            </>
+                          )}
+                        </button>
                         <div className="text-xs text-gray-500">
-                          {usuario.ultimoAcceso.toLocaleTimeString()}
+                          {usuario.ultimoAcceso ? (
+                            <div className="flex items-center">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {usuario.ultimoAcceso.toLocaleDateString()}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">Sin acceso</span>
+                          )}
                         </div>
                       </div>
-                    ) : (
-                      <span className="text-gray-400">Nunca</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => handleToggleEstado(usuario.id)}
-                      className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${
-                        usuario.estado === 'activo' 
-                          ? 'bg-green-100 text-green-800 hover:bg-green-200' 
-                          : 'bg-red-100 text-red-800 hover:bg-red-200'
-                      } transition-colors`}
-                    >
-                      {usuario.estado === 'activo' ? (
-                        <>
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Activo
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className="h-3 w-3 mr-1" />
-                          Inactivo
-                        </>
-                      )}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end space-x-2">
-                      <button
-                        onClick={() => handleEdit(usuario)}
-                        className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded"
-                        title="Editar usuario"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedUser(usuario);
-                          setShowPasswordModal(true);
-                        }}
-                        className="text-yellow-600 hover:text-yellow-900 p-1 hover:bg-yellow-50 rounded"
-                        title="Cambiar contraseña"
-                      >
-                        <Key className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedUser(usuario);
-                          setShowPermisosModal(true);
-                        }}
-                        className="text-purple-600 hover:text-purple-900 p-1 hover:bg-purple-50 rounded"
-                        title="Gestionar permisos"
-                      >
-                        <Shield className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(usuario.id)}
-                        className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
-                        title="Eliminar usuario"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end space-x-1">
+                        <button
+                          onClick={() => handleEdit(usuario)}
+                          className="inline-flex items-center p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Editar usuario"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedUser(usuario);
+                            setShowPasswordModal(true);
+                          }}
+                          className="inline-flex items-center p-2 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-lg transition-colors"
+                          title="Cambiar contraseña"
+                        >
+                          <Key className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedUser(usuario);
+                            setShowPermisosModal(true);
+                          }}
+                          className="inline-flex items-center p-2 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-lg transition-colors"
+                          title="Gestionar permisos"
+                        >
+                          <Shield className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(usuario.id)}
+                          className="inline-flex items-center p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Eliminar usuario"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
                 </tr>
                 ))
               )}
@@ -889,7 +955,7 @@ const GestionUsuariosTab: React.FC<GestionUsuariosTabProps> = ({
 };
 
 // Tab de Roles
-const RolesTab: React.FC<{ roles: any[], usuarios: Usuario[] }> = ({ roles, usuarios }) => {
+const RolesTab: React.FC<{ roles: any[], usuarios: Usuario[] }> = ({ roles }) => {
   return (
     <div className="space-y-6">
       {/* Stats de Roles */}
