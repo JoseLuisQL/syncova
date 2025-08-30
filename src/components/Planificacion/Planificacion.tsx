@@ -25,7 +25,9 @@ import {
   Eye,
   Filter,
   Search,
-  Loader2
+  Loader2,
+  FolderOpen,
+  Database
 } from 'lucide-react';
 import {
   Establecimiento,
@@ -51,16 +53,69 @@ import ImportarModal from './ImportarModal';
 import { PlanificacionService } from '../../services/planificacionService';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 
+// Configuración de secciones organizadas jerárquicamente
+interface SectionConfig {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  path: string;
+  category: 'planificacion' | 'importacion' | 'analisis';
+  description?: string;
+}
+
+const PLANNING_SECTIONS: SectionConfig[] = [
+  // Sección Planificación
+  { 
+    id: 'programacion', 
+    label: 'Programación por Vacuna', 
+    icon: Package, 
+    path: '/planificacion/programacion', 
+    category: 'planificacion',
+    description: 'Gestión anual de metas por vacuna'
+  },
+  { 
+    id: 'distribucion', 
+    label: 'Distribución Automática', 
+    icon: Calculator, 
+    path: '/planificacion/distribucion', 
+    category: 'planificacion',
+    description: 'Criterios inteligentes de distribución'
+  },
+  
+  // Sección Importación
+  { 
+    id: 'importar', 
+    label: 'Importar Programación', 
+    icon: Upload, 
+    path: '/planificacion/importar', 
+    category: 'importacion',
+    description: 'Carga masiva desde Excel'
+  },
+  
+  // Sección Análisis
+  { 
+    id: 'reportes', 
+    label: 'Reportes y Análisis', 
+    icon: BarChart3, 
+    path: '/planificacion/reportes', 
+    category: 'analisis',
+    description: 'Análisis estadístico y reportes'
+  }
+];
+
+const CATEGORY_CONFIG = {
+  planificacion: { label: 'Planificación', icon: FolderOpen, color: 'blue' },
+  importacion: { label: 'Importación', icon: Database, color: 'emerald' },
+  analisis: { label: 'Análisis', icon: BarChart3, color: 'purple' }
+};
+
 const Planificacion: React.FC = () => {
   const { navigateToModule } = useAppNavigation();
   const { currentSubModule } = useCurrentRoute();
   const [selectedAnio, setSelectedAnio] = useState<number>(2025);
   const [selectedCentroAcopio, setSelectedCentroAcopio] = useState<string>('todos');
   const [selectedVacuna, setSelectedVacuna] = useState<string>('');
-  const [showModalPlan, setShowModalPlan] = useState(false);
-  const [showModalDistribucion, setShowModalDistribucion] = useState(false);
   const [showModalImportar, setShowModalImportar] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<PlanificacionAnual | null>(null);
   const [planificacionesPorVacuna, setPlanificacionesPorVacuna] = useState<PlanificacionConRelaciones[]>([]);
 
   // Estado para manejar valores temporales durante la edición
@@ -113,12 +168,14 @@ const Planificacion: React.FC = () => {
   } = useEstablecimientos({ limit: 1000 }); // Cargar hasta 1000 establecimientos para planificaciones
   const { vacunas, loadVacunasActivas, isLoading: isLoadingVacunas } = useVacunas();
 
-  const tabs = [
-    { id: 'programacion', label: 'Programación por Vacuna', icon: Package, path: '/planificacion/programacion' },
-    { id: 'importar', label: 'Importar Programación', icon: Upload, path: '/planificacion/importar' },
-    { id: 'distribucion', label: 'Distribución Automática', icon: Calculator, path: '/planificacion/distribucion' },
-    { id: 'reportes', label: 'Reportes y Análisis', icon: BarChart3, path: '/planificacion/reportes' },
-  ];
+  // Agrupar secciones por categoría
+  const sectionsByCategory = PLANNING_SECTIONS.reduce((acc, section) => {
+    if (!acc[section.category]) {
+      acc[section.category] = [];
+    }
+    acc[section.category].push(section);
+    return acc;
+  }, {} as Record<string, SectionConfig[]>);
 
   // Obtener establecimientos según el filtro seleccionado con ordenamiento profesional
   const getEstablecimientosFiltrados = () => {
@@ -729,127 +786,161 @@ const Planificacion: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Planificación y Programación de Vacunas</h2>
-          <p className="text-gray-600 mt-1">Gestión de programación anual por vacuna y distribución mensual</p>
-        </div>
-        <div className="flex space-x-3">
-          <button
-            onClick={handleImportarPorVacuna}
-            disabled={isImporting}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {isImporting ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Upload className="h-4 w-4 mr-2" />
-            )}
-            Importar por Vacuna
-          </button>
-          <button
-            onClick={handleExportarExcel}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Exportar a Excel
-          </button>
-          <button
-            onClick={refresh}
-            disabled={isLoading}
-            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            Actualizar
-          </button>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = currentSubModule === tab.id || (!currentSubModule && tab.id === 'programacion');
-            return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Header Premium */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-full px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
+                <Calendar className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Planificación</h1>
+                <p className="text-gray-600">Gestión integral de programación de vacunas</p>
+              </div>
+            </div>
+            <div className="flex space-x-3">
               <button
-                key={tab.id}
-                onClick={() => navigateToModule('planificacion', tab.id)}
-                className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
-                  isActive
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                onClick={handleImportarPorVacuna}
+                disabled={isImporting}
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:from-emerald-400 disabled:to-emerald-500 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-lg"
               >
-                <Icon className="h-4 w-4 mr-2" />
-                {tab.label}
+                {isImporting ? (
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <Upload className="h-5 w-5 mr-2" />
+                )}
+                Importar Avanzado
               </button>
-            );
-          })}
-        </nav>
+              <button
+                onClick={refresh}
+                disabled={isLoading}
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-lg"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-5 w-5 mr-2" />
+                )}
+                Actualizar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Routes Content */}
-      <Routes>
-        <Route path="/" element={<Navigate to="programacion" replace />} />
-        <Route
-          path="programacion"
-          element={
-            <ProgramacionPorVacunaTab
-              selectedAnio={selectedAnio}
-              setSelectedAnio={setSelectedAnio}
-              selectedCentroAcopio={selectedCentroAcopio}
-              setSelectedCentroAcopio={setSelectedCentroAcopio}
-              selectedVacuna={selectedVacuna}
-              setSelectedVacuna={setSelectedVacuna}
-              centrosAcopio={centrosAcopio}
-              vacunas={vacunas}
-              datosVacuna={datosVacuna}
-              mesesCortos={mesesCortos}
-              handleActualizarDistribucion={handleActualizarDistribucion}
-              calcularTotalMes={calcularTotalMes}
-              calcularTotalGeneral={calcularTotalGeneral}
-              getCentroAcopioTexto={getCentroAcopioTexto}
-              isLoading={isLoading}
-              isUpdating={isUpdating}
-              establecimientos={establecimientos}
-              handleGuardarProgramacion={handleGuardarProgramacion}
-              loadPlanificacionesPorVacuna={loadPlanificacionesPorVacuna}
-              getCurrentValue={getCurrentValue}
-              hasPendingChange={hasPendingChange}
-              handleTempValueChange={handleTempValueChange}
-              handleFieldBlur={handleFieldBlur}
-              handleSaveAllPendingChanges={handleSaveAllPendingChanges}
-              pendingChanges={pendingChanges}
-              handleSincronizarConMovimientos={handleSincronizarConMovimientos}
+      {/* Navigation Premium */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-full px-6">
+          <div className="grid grid-cols-3 gap-1">
+            {Object.entries(sectionsByCategory).map(([categoryKey, sections]) => {
+              const category = CATEGORY_CONFIG[categoryKey as keyof typeof CATEGORY_CONFIG];
+              const CategoryIcon = category.icon;
+              
+              return (
+                <div key={categoryKey} className="relative group">
+                  {/* Category Header */}
+                  <div className={`flex items-center justify-center py-4 border-b-4 border-${category.color}-500 bg-${category.color}-50`}>
+                    <CategoryIcon className={`h-5 w-5 text-${category.color}-600 mr-2`} />
+                    <span className={`font-semibold text-${category.color}-800`}>{category.label}</span>
+                  </div>
+                  
+                  {/* Section Buttons */}
+                  <div className="bg-white">
+                    {sections.map((section) => {
+                      const Icon = section.icon;
+                      const isActive = currentSubModule === section.id || (!currentSubModule && section.id === 'programacion');
+                      
+                      return (
+                        <button
+                          key={section.id}
+                          onClick={() => navigateToModule('planificacion', section.id)}
+                          className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                            isActive ? `bg-${category.color}-50 border-l-4 border-l-${category.color}-500` : ''
+                          }`}
+                        >
+                          <Icon className={`h-4 w-4 mr-3 ${isActive ? `text-${category.color}-600` : 'text-gray-500'}`} />
+                          <div className="flex-1">
+                            <div className={`font-medium text-sm ${isActive ? `text-${category.color}-800` : 'text-gray-900'}`}>
+                              {section.label}
+                            </div>
+                            {section.description && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                {section.description}
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Content Area Premium */}
+      <div className="max-w-full px-6 py-6">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <Routes>
+            <Route path="/" element={<Navigate to="programacion" replace />} />
+            <Route
+              path="programacion"
+              element={
+                <ProgramacionPorVacunaTab
+                  selectedAnio={selectedAnio}
+                  setSelectedAnio={setSelectedAnio}
+                  selectedCentroAcopio={selectedCentroAcopio}
+                  setSelectedCentroAcopio={setSelectedCentroAcopio}
+                  selectedVacuna={selectedVacuna}
+                  setSelectedVacuna={setSelectedVacuna}
+                  centrosAcopio={centrosAcopio}
+                  vacunas={vacunas}
+                  datosVacuna={datosVacuna}
+                  mesesCortos={mesesCortos}
+                  handleActualizarDistribucion={handleActualizarDistribucion}
+                  calcularTotalMes={calcularTotalMes}
+                  calcularTotalGeneral={calcularTotalGeneral}
+                  getCentroAcopioTexto={getCentroAcopioTexto}
+                  isLoading={isLoading}
+                  isUpdating={isUpdating}
+                  establecimientos={establecimientos}
+                  handleGuardarProgramacion={handleGuardarProgramacion}
+                  loadPlanificacionesPorVacuna={loadPlanificacionesPorVacuna}
+                  getCurrentValue={getCurrentValue}
+                  hasPendingChange={hasPendingChange}
+                  handleTempValueChange={handleTempValueChange}
+                  handleFieldBlur={handleFieldBlur}
+                  handleSaveAllPendingChanges={handleSaveAllPendingChanges}
+                  pendingChanges={pendingChanges}
+                  handleSincronizarConMovimientos={handleSincronizarConMovimientos}
+                />
+              }
             />
-          }
-        />
-        <Route
-          path="importar"
-          element={<ImportarPorVacunaTab onImportar={handleImportarPorVacuna} />}
-        />
-        <Route
-          path="distribucion"
-          element={
-            <DistribucionAutomaticaTab
-              vacunas={vacunas}
-              onGenerar={generarDistribucionAutomatica}
-              isGenerating={isGeneratingDistribution}
+            <Route
+              path="importar"
+              element={<ImportarPorVacunaTab onImportar={handleImportarPorVacuna} />}
             />
-          }
-        />
-        <Route
-          path="reportes"
-          element={<ReportesTab stats={stats} isLoadingStats={isLoadingStats} />}
-        />
-      </Routes>
+            <Route
+              path="distribucion"
+              element={
+                <DistribucionAutomaticaTab
+                  vacunas={vacunas}
+                  onGenerar={generarDistribucionAutomatica}
+                  isGenerating={isGeneratingDistribution}
+                />
+              }
+            />
+            <Route
+              path="reportes"
+              element={<ReportesTab stats={stats} isLoadingStats={isLoadingStats} />}
+            />
+          </Routes>
+        </div>
+      </div>
 
       {/* Modal Importar Avanzado */}
       <ImportarModal
@@ -929,16 +1020,20 @@ const ProgramacionPorVacunaTab: React.FC<ProgramacionPorVacunaTabProps> = ({
   const vacunaSeleccionada = vacunas.find(v => v.id === selectedVacuna);
 
   return (
-    <div className="space-y-6">
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Centro de Acopio</label>
+    <div className="space-y-6 p-6">
+      {/* Filters Premium */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <Filter className="h-5 w-5 mr-2 text-blue-600" />
+          Filtros de Programación
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Centro de Acopio</label>
             <select
               value={selectedCentroAcopio}
               onChange={(e) => setSelectedCentroAcopio(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all hover:border-blue-400"
             >
               <option value="todos">🌐 Todos los Centros de Acopio</option>
               {centrosAcopio.map((centro) => (
@@ -948,12 +1043,12 @@ const ProgramacionPorVacunaTab: React.FC<ProgramacionPorVacunaTabProps> = ({
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Vacuna</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Vacuna</label>
             <select
               value={selectedVacuna}
               onChange={(e) => setSelectedVacuna(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all hover:border-blue-400"
             >
               {vacunas.map((vacuna) => (
                 <option key={vacuna.id} value={vacuna.id}>
@@ -962,12 +1057,12 @@ const ProgramacionPorVacunaTab: React.FC<ProgramacionPorVacunaTabProps> = ({
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Año</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Año</label>
             <select
               value={selectedAnio}
               onChange={(e) => setSelectedAnio(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all hover:border-blue-400"
             >
               <option value={2025}>📅 2025</option>
               <option value={2026}>📅 2026</option>
@@ -977,49 +1072,27 @@ const ProgramacionPorVacunaTab: React.FC<ProgramacionPorVacunaTabProps> = ({
         </div>
       </div>
 
-      {/* Header de la Programación */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-bold">
-              📝 Asignación de Población - {vacunaSeleccionada?.nombre.toUpperCase()} {selectedAnio}
-            </h3>
-            <p className="text-blue-100 mt-1">
-              {getCentroAcopioTexto()} - {vacunaSeleccionada?.presentacion} - {vacunaSeleccionada?.dosisPorFrasco} dosis por frasco
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold">{calcularTotalGeneral().toLocaleString()}</div>
-            <div className="text-blue-100">Total Programado</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Información del filtro activo */}
-      {selectedCentroAcopio !== 'todos' && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <div className="flex items-center">
-            <Building2 className="h-5 w-5 text-blue-600 mr-2" />
-            <span className="text-blue-800 font-medium">
-              Mostrando programación para: {centrosAcopio.find(c => c.id === selectedCentroAcopio)?.nombre}
-            </span>
-            <span className="ml-2 text-blue-600 text-sm">
-              ({datosVacuna?.establecimientos.length || 0} establecimientos)
-            </span>
-          </div>
-        </div>
-      )}
-
-      {selectedCentroAcopio === 'todos' && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-          <div className="flex items-center">
-            <Package className="h-5 w-5 text-green-600 mr-2" />
-            <span className="text-green-800 font-medium">
-              Mostrando programación consolidada de todos los centros de acopio
-            </span>
-            <span className="ml-2 text-green-600 text-sm">
-              ({datosVacuna?.establecimientos.length || 0} establecimientos totales)
-            </span>
+      {/* Header de la Programación - Simplificado */}
+      {vacunaSeleccionada && (
+        <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-xl p-6 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-white/20 p-3 rounded-xl">
+                <Package className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold">
+                  {vacunaSeleccionada.nombre} - {selectedAnio}
+                </h3>
+                <p className="text-blue-100 text-sm">
+                  {getCentroAcopioTexto()} • {datosVacuna?.establecimientos.length || 0} establecimientos
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold">{calcularTotalGeneral().toLocaleString()}</div>
+              <div className="text-blue-100 text-sm">Total Programado</div>
+            </div>
           </div>
         </div>
       )}
@@ -1048,95 +1121,118 @@ const ProgramacionPorVacunaTab: React.FC<ProgramacionPorVacunaTabProps> = ({
         </div>
       )}
 
-      {/* Tabla de Programación */}
+      {/* Tabla de Programación Premium */}
       {datosVacuna && (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-lg">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
             <table className="min-w-full">
-            <thead className="bg-blue-600 text-white">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-bold uppercase tracking-wider border-r border-blue-500">
-                  🏥 Establecimiento
-                </th>
-                {mesesCortos.map((mes, index) => (
-                  <th key={index} className="px-3 py-3 text-center text-sm font-bold uppercase tracking-wider border-r border-blue-500">
-                    {mes}
+              <thead className="bg-gradient-to-r from-slate-800 to-slate-900 text-white">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider border-r border-slate-700">
+                    <div className="flex items-center">
+                      <Building2 className="h-4 w-4 mr-2" />
+                      Establecimiento
+                    </div>
                   </th>
-                ))}
-                <th className="px-4 py-3 text-center text-sm font-bold uppercase tracking-wider bg-blue-700">
-                  TOTAL
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Fila Total DISA */}
-              <tr className="bg-green-100 font-bold border-b-2 border-green-300">
-                <td className="px-4 py-3 text-sm font-bold text-green-800 border-r border-gray-200">
-                  📊 TOTAL DISA
-                </td>
-                {mesesCortos.map((_, mesIndex) => (
-                  <td key={mesIndex} className="px-3 py-3 text-center text-sm font-bold text-green-800 border-r border-gray-200">
-                    {calcularTotalMes(mesIndex)}
+                  {mesesCortos.map((mes, index) => (
+                    <th key={index} className="px-3 py-4 text-center text-sm font-bold uppercase tracking-wider border-r border-slate-700">
+                      {mes}
+                    </th>
+                  ))}
+                  <th className="px-6 py-4 text-center text-sm font-bold uppercase tracking-wider bg-slate-900">
+                    <div className="flex items-center justify-center">
+                      <Calculator className="h-4 w-4 mr-2" />
+                      TOTAL
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* Fila Total DISA Premium */}
+                <tr className="bg-gradient-to-r from-emerald-100 to-green-100 font-bold border-b-2 border-emerald-300">
+                  <td className="px-6 py-4 text-sm font-bold text-emerald-900 border-r border-emerald-200">
+                    <div className="flex items-center">
+                      <BarChart3 className="h-4 w-4 mr-2 text-emerald-700" />
+                      TOTAL DISA
+                    </div>
                   </td>
-                ))}
-                <td className="px-4 py-3 text-center text-sm font-bold text-green-800 bg-green-200">
-                  {calcularTotalGeneral()}
-                </td>
-              </tr>
-
-              {/* Filas de establecimientos con colores por centro de acopio */}
-              {datosVacuna?.establecimientos.map((estData: any, estIndex: number) => {
-                // Obtener estilo profesional basado en centro de acopio
-                const estiloEstablecimiento = getEstiloEstablecimiento(estData.establecimiento);
-                const { colores, icono, centro } = estiloEstablecimiento;
-
-                return (
-                  <tr key={estIndex} className={`${colores.bg} hover:bg-gray-100 border-b border-gray-200 ${colores.border}`}>
-                    <td className={`px-4 py-3 text-sm font-medium ${colores.text} border-r border-gray-200`}>
-                      <div className="flex items-center">
-                        <span className="mr-2">{icono}</span>
-                        <div>
-                          <div className="font-medium">{estData.establecimiento.nombre}</div>
-                          {selectedCentroAcopio === 'todos' && (
-                            <div className="text-xs opacity-75">
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colores.bg} ${colores.text} border ${colores.border}`}>
-                                {colores.icon} {centro !== 'DEFAULT' ? centro : 'Regional'}
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                  {mesesCortos.map((_, mesIndex) => (
+                    <td key={mesIndex} className="px-3 py-4 text-center text-sm font-bold text-emerald-900 border-r border-emerald-200">
+                      <div className="bg-white rounded-lg px-2 py-1 shadow-sm">
+                        {calcularTotalMes(mesIndex).toLocaleString()}
                       </div>
                     </td>
-                    {estData.distribucionMensual.map((valor: number, mesIndex: number) => {
-                      const currentValue = getCurrentValue(estIndex, mesIndex, valor);
-                      const isPending = hasPendingChange(estIndex, mesIndex);
+                  ))}
+                  <td className="px-6 py-4 text-center text-sm font-bold text-emerald-900 bg-gradient-to-r from-emerald-200 to-green-200">
+                    <div className="bg-white rounded-lg px-3 py-2 shadow-md text-lg">
+                      {calcularTotalGeneral().toLocaleString()}
+                    </div>
+                  </td>
+                </tr>
 
-                      return (
-                        <td key={mesIndex} className="px-2 py-2 text-center border-r border-gray-200 relative">
-                          <input
-                            type="number"
-                            min="0"
-                            value={currentValue}
-                            onChange={(e) => handleTempValueChange(estIndex, mesIndex, parseInt(e.target.value) || 0)}
-                            onBlur={() => handleFieldBlur(estIndex, mesIndex)}
-                            disabled={isUpdating}
-                            className={`w-12 px-1 py-1 text-center text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                              isPending
-                                ? 'border-yellow-400 bg-yellow-50'
-                                : 'border-gray-300'
-                            }`}
-                            title={isPending ? 'Cambios pendientes - Se guardará automáticamente' : ''}
-                          />
-                          {isPending && (
-                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"
-                                 title="Cambios pendientes"></div>
-                          )}
-                        </td>
-                      );
-                    })}
-                    <td className="px-4 py-3 text-center text-sm font-bold bg-gray-100 border-l-2 border-gray-300">
-                      {estData.total}
-                    </td>
+                {/* Filas de establecimientos con diseño premium */}
+                {datosVacuna?.establecimientos.map((estData: any, estIndex: number) => {
+                  // Obtener estilo profesional basado en centro de acopio
+                  const estiloEstablecimiento = getEstiloEstablecimiento(estData.establecimiento);
+                  const { colores, icono, centro } = estiloEstablecimiento;
+
+                  return (
+                    <tr key={estIndex} className={`${colores.bg} hover:bg-slate-50 border-b border-gray-100 transition-colors duration-200`}>
+                      <td className={`px-6 py-4 text-sm font-medium ${colores.text} border-r border-gray-100`}>
+                        <div className="flex items-center space-x-3">
+                          <div className={`p-2 rounded-lg ${colores.bg} ${colores.border} border`}>
+                            <span className="text-lg">{icono}</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-gray-900 truncate">
+                              {estData.establecimiento.nombre}
+                            </div>
+                            {selectedCentroAcopio === 'todos' && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colores.bg} ${colores.text} border ${colores.border}`}>
+                                  {centro !== 'DEFAULT' ? centro : 'Regional'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      {estData.distribucionMensual.map((valor: number, mesIndex: number) => {
+                        const currentValue = getCurrentValue(estIndex, mesIndex, valor);
+                        const isPending = hasPendingChange(estIndex, mesIndex);
+
+                        return (
+                          <td key={mesIndex} className="px-3 py-4 text-center border-r border-gray-100 relative">
+                            <div className="relative">
+                              <input
+                                type="number"
+                                min="0"
+                                value={currentValue}
+                                onChange={(e) => handleTempValueChange(estIndex, mesIndex, parseInt(e.target.value) || 0)}
+                                onBlur={() => handleFieldBlur(estIndex, mesIndex)}
+                                disabled={isUpdating}
+                                className={`w-16 px-2 py-2 text-center text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-all ${
+                                  isPending
+                                    ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-200'
+                                    : 'border-gray-300 hover:border-blue-400'
+                                }`}
+                                title={isPending ? 'Cambios pendientes - Se guardará automáticamente' : ''}
+                              />
+                              {isPending && (
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse shadow-sm"
+                                     title="Cambios pendientes">
+                                  <div className="w-full h-full bg-amber-400 rounded-full animate-ping"></div>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        );
+                      })}
+                      <td className="px-6 py-4 text-center text-sm font-bold bg-gradient-to-r from-slate-100 to-gray-100 border-l-2 border-slate-300">
+                        <div className="bg-white rounded-lg px-3 py-2 shadow-sm font-bold text-gray-900">
+                          {estData.total.toLocaleString()}
+                        </div>
+                      </td>
                   </tr>
                 );
               })}
@@ -1146,123 +1242,97 @@ const ProgramacionPorVacunaTab: React.FC<ProgramacionPorVacunaTabProps> = ({
       </div>
       )}
 
-      {/* Acciones */}
+      {/* Acciones Premium */}
       {datosVacuna && (
-      <>
-      <div className="flex justify-between items-center bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex space-x-4">
-          <button
-            onClick={handleGuardarProgramacion}
-            disabled={isUpdating || isLoading}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {isUpdating ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4 mr-2" />
-            )}
-            {isUpdating ? 'Guardando...' : 'Guardar Programación'}
-          </button>
-          <button
-            onClick={loadPlanificacionesPorVacuna}
-            disabled={isLoading}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            {isLoading ? 'Cargando...' : 'Recalcular Totales'}
-          </button>
-          <button
-            onClick={handleSincronizarConMovimientos}
-            disabled={isLoading || isUpdating || !datosVacuna}
-            className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-purple-400 disabled:cursor-not-allowed transition-colors"
-            title="Sincronizar entregas con módulo de movimientos"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            Sincronizar Movimientos
-          </button>
-          {Object.keys(pendingChanges).length > 0 && (
-            <button
-              onClick={handleSaveAllPendingChanges}
-              disabled={isUpdating}
-              className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:bg-yellow-400 disabled:cursor-not-allowed transition-colors"
-            >
-              {isUpdating ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
+        <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-gray-200 p-6 shadow-sm">
+          <div className="flex flex-wrap gap-4 justify-between items-center">
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={handleGuardarProgramacion}
+                disabled={isUpdating || isLoading}
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl hover:from-emerald-700 hover:to-green-700 disabled:from-emerald-400 disabled:to-green-400 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none"
+              >
+                {isUpdating ? (
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-5 w-5 mr-2" />
+                )}
+                {isUpdating ? 'Guardando...' : 'Guardar Programación'}
+              </button>
+              <button
+                onClick={loadPlanificacionesPorVacuna}
+                disabled={isLoading}
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 disabled:from-blue-400 disabled:to-indigo-400 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-5 w-5 mr-2" />
+                )}
+                {isLoading ? 'Cargando...' : 'Recalcular'}
+              </button>
+              <button
+                onClick={handleSincronizarConMovimientos}
+                disabled={isLoading || isUpdating || !datosVacuna}
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-xl hover:from-purple-700 hover:to-violet-700 disabled:from-purple-400 disabled:to-violet-400 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none"
+                title="Sincronizar entregas con módulo de movimientos"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-5 w-5 mr-2" />
+                )}
+                Sincronizar
+              </button>
+              {Object.keys(pendingChanges).length > 0 && (
+                <button
+                  onClick={handleSaveAllPendingChanges}
+                  disabled={isUpdating}
+                  className="flex items-center px-6 py-3 bg-gradient-to-r from-amber-600 to-yellow-600 text-white rounded-xl hover:from-amber-700 hover:to-yellow-700 disabled:from-amber-400 disabled:to-yellow-400 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none"
+                >
+                  {isUpdating ? (
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-5 w-5 mr-2" />
+                  )}
+                  Guardar Pendientes ({Object.keys(pendingChanges).length})
+                </button>
               )}
-              Guardar Cambios Pendientes ({Object.keys(pendingChanges).length})
-            </button>
-          )}
-        </div>
-        <div className="text-sm text-gray-600">
-          {Object.keys(pendingChanges).length > 0 ? (
-            <div className="flex items-center text-yellow-600">
-              <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse mr-2"></div>
-              {Object.keys(pendingChanges).length} cambio(s) pendiente(s) - Se guardarán automáticamente
             </div>
-          ) : isLoading ? (
-            'Cargando datos...'
-          ) : (
-            `Última actualización: ${new Date().toLocaleString()}`
-          )}
-        </div>
-      </div>
-
-      {/* Leyenda */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <h4 className="font-medium text-gray-900 mb-3">Leyenda de Colores y Filtros</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <h5 className="font-medium text-gray-800">Tipos de Establecimientos:</h5>
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-green-100 border border-green-200 rounded mr-2"></div>
-              <span className="text-sm text-gray-600">🏥 Hospitales y Centros de Salud</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-orange-100 border border-orange-200 rounded mr-2"></div>
-              <span className="text-sm text-gray-600">🏪 Puestos de Salud</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-green-200 border border-green-300 rounded mr-2"></div>
-              <span className="text-sm text-gray-600">📊 Total DISA (Consolidado)</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <h5 className="font-medium text-gray-800">Opciones de Filtro:</h5>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-600">🌐 <strong>Todos los Acopios:</strong> Muestra todos los establecimientos</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-600">🏢 <strong>Acopio Individual:</strong> Muestra solo establecimientos del acopio seleccionado</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <h5 className="font-medium text-gray-800">Edición Inteligente:</h5>
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-yellow-100 border border-yellow-400 rounded mr-2"></div>
-              <span className="text-sm text-gray-600">📝 <strong>Campos con cambios pendientes</strong></span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-2 h-2 bg-yellow-400 rounded-full mr-3"></div>
-              <span className="text-sm text-gray-600">⏱️ <strong>Auto-guardado:</strong> 2 segundos después de escribir</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm text-gray-600 ml-5">💡 <strong>Tip:</strong> Los cambios se guardan al salir del campo o automáticamente</span>
+            <div className="text-sm text-gray-600 min-w-0">
+              {Object.keys(pendingChanges).length > 0 ? (
+                <div className="flex items-center text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
+                  <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse mr-2"></div>
+                  <span className="font-medium">{Object.keys(pendingChanges).length} cambio(s) pendiente(s)</span>
+                </div>
+              ) : (
+                <div className="flex items-center text-green-600 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <span className="font-medium">Todo guardado</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
-      </>
       )}
+
+      {/* Leyenda Simplificada */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-4">
+        <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+          <div className="flex items-center">
+            <div className="w-3 h-3 bg-amber-400 rounded-full mr-2 animate-pulse"></div>
+            <span className="text-gray-700"><strong>Campos editándose:</strong> Auto-guardado en 2s</span>
+          </div>
+          <div className="flex items-center">
+            <BarChart3 className="h-4 w-4 text-emerald-600 mr-2" />
+            <span className="text-gray-700"><strong>Total DISA:</strong> Suma consolidada</span>
+          </div>
+          <div className="flex items-center">
+            <Building2 className="h-4 w-4 text-blue-600 mr-2" />
+            <span className="text-gray-700"><strong>Establecimientos:</strong> Por centro de acopio</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
