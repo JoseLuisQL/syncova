@@ -193,49 +193,55 @@ const GestionVacunas: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium text-gray-900">Catálogo de Vacunas</h3>
-          <p className="text-gray-600">Gestione el catálogo completo de vacunas del sistema</p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={async () => {
-              await refresh();
-              if (!error) {
-                toast.info(
-                  'Datos actualizados',
-                  'La lista de vacunas ha sido actualizada exitosamente.',
-                  { duration: 3000 }
-                );
-              }
-            }}
-            disabled={isLoading}
-            className="flex items-center px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-            title="Actualizar"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
-          <button
-            onClick={handleCreate}
-            disabled={isCreating}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50"
-          >
-            {isCreating ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4 mr-2" />
-            )}
-            Nueva Vacuna
-          </button>
+    <div className="min-h-screen bg-white">
+      {/* Header Premium */}
+      <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 px-6 py-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
+              <Package className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Catálogo de Vacunas</h1>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={async () => {
+                await refresh();
+                if (!error) {
+                  toast.info(
+                    'Datos actualizados',
+                    'La lista de vacunas ha sido actualizada exitosamente.',
+                    { duration: 3000 }
+                  );
+                }
+              }}
+              disabled={isLoading}
+              className="flex items-center px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 disabled:opacity-50"
+              title="Actualizar datos"
+            >
+              <RefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
+            <button
+              onClick={handleCreate}
+              disabled={isCreating}
+              className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+            >
+              {isCreating ? (
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              ) : (
+                <Plus className="h-5 w-5 mr-2" />
+              )}
+              Nueva Vacuna
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Filtros */}
-      <div className="bg-white p-4 rounded-lg border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Filtros Premium */}
+      <div className="bg-white mx-6 mt-6 p-6 rounded-xl border border-gray-200 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Buscar
@@ -298,155 +304,204 @@ const GestionVacunas: React.FC = () => {
         </div>
       )}
 
-      {/* Loading State */}
-      {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="ml-2 text-gray-600">Cargando vacunas...</span>
-        </div>
-      )}
+            {/* Content Area */}
+      <div className="mx-6 mt-6">
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-16 bg-white rounded-xl border border-gray-200">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <span className="ml-3 text-gray-600 font-medium">Cargando vacunas...</span>
+          </div>
+        )}
 
-      {/* Vacunas Grid */}
-      {!isLoading && !error && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {vacunas.map((vacuna) => {
-            const stockInfo = getStockInfo(vacuna);
+        {/* Table Premium */}
+        {!isLoading && !error && (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Vacuna
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Tipo & Presentación
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Stock Total
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Lotes Activos
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {vacunas.map((vacuna, index) => {
+                    const stockInfo = getStockInfo(vacuna);
+                    const isExpanded = showDetails === vacuna.id;
 
-            return (
-              <div key={vacuna.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Package className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div className="ml-3">
-                      <h4 className="text-lg font-semibold text-gray-900">{vacuna.nombre}</h4>
-                      <p className="text-sm text-gray-600">{vacuna.tipo}</p>
-                    </div>
-                  </div>
-                  <div className="flex space-x-1">
-                    <button
-                      onClick={() => setShowDetails(showDetails === vacuna.id ? null : vacuna.id)}
-                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                      title="Ver detalles"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(vacuna)}
-                      disabled={isUpdating}
-                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-50"
-                      title="Editar"
-                    >
-                      {isUpdating ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Edit className="h-4 w-4" />
-                      )}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(vacuna.id)}
-                      disabled={isDeleting}
-                      className="p-1 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                      title="Eliminar"
-                    >
-                      {isDeleting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Presentación:</span>
-                  <span className="text-sm font-medium text-gray-900">{vacuna.presentacion}</span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Dosis por frasco:</span>
-                  <span className="text-sm font-medium text-gray-900">{vacuna.dosisPorFrasco}</span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Stock total:</span>
-                  <span className={`text-sm font-bold ${
-                    stockInfo.stockTotal > 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {stockInfo.stockTotal.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-100">
-                  <div className="text-center">
-                    <div className="text-xs text-gray-500">Activos</div>
-                    <div className="text-sm font-medium text-green-600">{stockInfo.lotesActivos}</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs text-gray-500">Por vencer</div>
-                    <div className="text-sm font-medium text-yellow-600">{stockInfo.lotesPorVencer}</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs text-gray-500">Vencidos</div>
-                    <div className="text-sm font-medium text-red-600">{stockInfo.lotesVencidos}</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-2">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    vacuna.estado === 'activo' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {vacuna.estado === 'activo' ? 'Activo' : 'Inactivo'}
-                  </span>
-                  
-                  {stockInfo.lotesPorVencer > 0 && (
-                    <div className="flex items-center text-yellow-600">
-                      <AlertTriangle className="h-4 w-4 mr-1" />
-                      <span className="text-xs">Próximo a vencer</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Detalles expandibles */}
-              {showDetails === vacuna.id && (
-                <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
-                  <div className="text-sm">
-                    <span className="text-gray-600">Temperatura:</span>
-                    <span className="ml-2 text-gray-900">{vacuna.temperaturaAlmacenamiento}</span>
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-gray-600">Vida útil:</span>
-                    <span className="ml-2 text-gray-900">{Math.round(vacuna.tiempoVidaUtil / 365)} años</span>
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-gray-600">Creado:</span>
-                    <span className="ml-2 text-gray-900">{vacuna.createdAt.toLocaleDateString()}</span>
-                  </div>
-                  {vacuna._count && (
-                    <div className="mt-2 pt-2 border-t border-gray-100">
-                      <div className="text-xs text-gray-500 space-y-1">
-                        <div>Lotes: {vacuna._count.lotes}</div>
-                        <div>Planificaciones: {vacuna._count.planificaciones}</div>
-                        <div>Movimientos: {vacuna._count.movimientos}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    return (
+                      <React.Fragment key={vacuna.id}>
+                        <tr className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10">
+                                <div className="h-10 w-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                                  <Package className="h-5 w-5 text-white" />
+                                </div>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-semibold text-gray-900">{vacuna.nombre}</div>
+                                <div className="text-sm text-gray-500">{vacuna.dosisPorFrasco} dosis/frasco</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 font-medium">{vacuna.tipo}</div>
+                            <div className="text-sm text-gray-500">{vacuna.presentacion}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className={`text-lg font-bold ${
+                              stockInfo.stockTotal > 0 ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {stockInfo.stockTotal.toLocaleString()}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <div className="grid grid-cols-3 gap-2 text-xs">
+                              <div className="text-center">
+                                <div className="text-green-600 font-semibold">{stockInfo.lotesActivos}</div>
+                                <div className="text-gray-500">Activos</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-yellow-600 font-semibold">{stockInfo.lotesPorVencer}</div>
+                                <div className="text-gray-500">Por vencer</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-red-600 font-semibold">{stockInfo.lotesVencidos}</div>
+                                <div className="text-gray-500">Vencidos</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                              vacuna.estado === 'activo' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {vacuna.estado === 'activo' ? 'Activo' : 'Inactivo'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <div className="flex items-center justify-center space-x-3">
+                              <button
+                                onClick={() => setShowDetails(isExpanded ? null : vacuna.id)}
+                                className="text-gray-400 hover:text-blue-600 transition-colors"
+                                title="Ver detalles"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleEdit(vacuna)}
+                                disabled={isUpdating}
+                                className="text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-50"
+                                title="Editar"
+                              >
+                                {isUpdating ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Edit className="h-4 w-4" />
+                                )}
+                              </button>
+                              <button
+                                onClick={() => handleDelete(vacuna.id)}
+                                disabled={isDeleting}
+                                className="text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                title="Eliminar"
+                              >
+                                {isDeleting ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        
+                        {/* Detalles expandibles */}
+                        {isExpanded && (
+                          <tr>
+                            <td colSpan={6} className="px-6 py-4 bg-blue-50 border-l-4 border-blue-500">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                  <h4 className="font-semibold text-gray-900 mb-2">Información Técnica</h4>
+                                  <div className="space-y-2 text-sm">
+                                    <div>
+                                      <span className="text-gray-600">Temperatura:</span>
+                                      <span className="ml-2 text-gray-900 font-medium">{vacuna.temperaturaAlmacenamiento}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-gray-600">Vida útil:</span>
+                                      <span className="ml-2 text-gray-900 font-medium">{Math.round(vacuna.tiempoVidaUtil / 365)} años</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-gray-900 mb-2">Datos del Sistema</h4>
+                                  <div className="space-y-2 text-sm">
+                                    <div>
+                                      <span className="text-gray-600">Creado:</span>
+                                      <span className="ml-2 text-gray-900 font-medium">{vacuna.createdAt.toLocaleDateString()}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-gray-600">ID:</span>
+                                      <span className="ml-2 text-gray-500 font-mono text-xs">{vacuna.id}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                {vacuna._count && (
+                                  <div>
+                                    <h4 className="font-semibold text-gray-900 mb-2">Estadísticas</h4>
+                                    <div className="space-y-2 text-sm">
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Lotes:</span>
+                                        <span className="text-gray-900 font-medium">{vacuna._count.lotes}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Planificaciones:</span>
+                                        <span className="text-gray-900 font-medium">{vacuna._count.planificaciones}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Movimientos:</span>
+                                        <span className="text-gray-900 font-medium">{vacuna._count.movimientos}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          );
-        })}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
-      {/* Paginación */}
+      {/* Paginación Premium */}
       {!isLoading && !error && pagination.totalPages > 1 && (
-        <div className="bg-white px-4 py-3 border border-gray-200 rounded-lg">
+        <div className="bg-white mx-6 mt-6 px-6 py-4 border border-gray-200 rounded-xl shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex-1 flex justify-between sm:hidden">
               <button

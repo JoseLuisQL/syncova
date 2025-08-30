@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, GitBranch, Network, Building, MapPin, Phone, User, MoreVertical, AlertCircle, Loader2, Wifi, WifiOff, Settings, Bug } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, GitBranch, Network, Building, AlertCircle, Loader2, Activity, Users, Shield } from 'lucide-react';
 import { Microred, CreateMicroredDto, UpdateMicroredDto } from '../../types';
 import { useMicroredes } from '../../hooks/useMicroredes';
 import { useRedes } from '../../hooks/useRedes';
 import { useToastContext } from '../../contexts/ToastContext';
-import { checkBackendConnection, logger } from '../../utils/debug';
+import { logger } from '../../utils/debug';
 import { validateMicrored, sanitizeInput } from '../../utils/validation';
 
 interface MicroredesProps {
@@ -24,7 +24,6 @@ const Microredes: React.FC<MicroredesProps> = ({
   const [filterRedId, setFilterRedId] = useState<string>('');
   const [showModal, setShowModal] = useState(false);
   const [editingMicrored, setEditingMicrored] = useState<Microred | null>(null);
-  const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
 
   // Hook personalizado para gestión de microredes
   const {
@@ -55,26 +54,15 @@ const Microredes: React.FC<MicroredesProps> = ({
     }
   }, [selectedRedId]);
 
-  // Verificar conexión con backend
-  useEffect(() => {
-    const verifyConnection = async () => {
-      try {
-        const connected = await checkBackendConnection();
-        setBackendConnected(connected);
-        logger.info(`Estado de conexión con backend: ${connected ? 'Conectado' : 'Desconectado'}`);
-      } catch (error) {
-        setBackendConnected(false);
-        logger.error('Error al verificar conexión con backend', error);
-      }
+  // Obtener estadísticas
+  const getStats = () => {
+    return {
+      total: total,
+      activas: microredes.filter(m => m.estado === 'activo').length,
+      inactivas: microredes.filter(m => m.estado === 'inactivo').length,
+      conCentros: microredes.filter(m => (m._count?.centrosAcopio || 0) > 0).length
     };
-
-    verifyConnection();
-
-    // Verificar conexión cada 30 segundos
-    const interval = setInterval(verifyConnection, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
+  };
 
   // Aplicar filtros cuando cambien los valores (con debounce para búsqueda)
   React.useEffect(() => {
@@ -199,39 +187,13 @@ const Microredes: React.FC<MicroredesProps> = ({
     setFilters({ ...filters, page });
   };
 
-  // Si no hay conexión con el backend, mostrar mensaje de error
-  if (backendConnected === false) {
-    return (
-      <div className="space-y-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
-          <WifiOff className="h-16 w-16 text-red-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-red-800 mb-2">
-            Sin conexión con el servidor
-          </h3>
-          <p className="text-red-600 mb-4">
-            No se puede conectar con el backend. Verifique que el servidor esté funcionando en el puerto 3001.
-          </p>
-          <div className="space-y-2 text-sm text-red-500">
-            <p>• Verifique que el backend esté iniciado: <code>npm run dev</code></p>
-            <p>• URL del backend: <code>http://localhost:3001</code></p>
-            <p>• Verifique la configuración de CORS</p>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const stats = getStats();
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       {/* Error Alert */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-center">
             <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
             <span className="text-red-800">{error}</span>
@@ -239,86 +201,120 @@ const Microredes: React.FC<MicroredesProps> = ({
         </div>
       )}
 
-      {/* Header */}
+      {/* Header Premium */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            Gestión de Microredes
-            {selectedRedNombre && (
-              <span className="text-base font-normal text-gray-600 ml-2">
-                - Red: {selectedRedNombre}
-              </span>
-            )}
-          </h2>
-          <p className="text-gray-600 mt-1">
-            Administre las microredes del sistema
-            {total > 0 && (
-              <span className="ml-2 text-sm">
-                ({total} microred{total !== 1 ? 'es' : ''})
-              </span>
-            )}
-          </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          {/* Indicador de conexión */}
-          <div className="flex items-center px-2 py-1 rounded-lg text-xs">
-            {backendConnected === null ? (
-              <Loader2 className="h-3 w-3 animate-spin text-gray-400 mr-1" />
-            ) : backendConnected ? (
-              <Wifi className="h-3 w-3 text-green-500 mr-1" />
-            ) : (
-              <WifiOff className="h-3 w-3 text-red-500 mr-1" />
-            )}
-            <span className={`${
-              backendConnected === null ? 'text-gray-500' :
-              backendConnected ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {backendConnected === null ? 'Verificando...' :
-               backendConnected ? 'Conectado' : 'Desconectado'}
-            </span>
+        <div className="flex items-center space-x-4">
+          <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-3 rounded-xl shadow-lg">
+            <GitBranch className="h-6 w-6 text-white" />
           </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">
+              Microredes
+              {selectedRedNombre && (
+                <span className="text-base font-normal text-gray-600 ml-2">
+                  - Red: {selectedRedNombre}
+                </span>
+              )}
+            </h2>
+            <p className="text-gray-600">
+              Gestión de agrupaciones territoriales
+              {stats.total > 0 && (
+                <span className="ml-2 text-sm font-medium text-purple-600">
+                  ({stats.total} microred{stats.total !== 1 ? 'es' : ''})
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          disabled={loading}
+          className="flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50"
+        >
+          {loading ? (
+            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+          ) : (
+            <Plus className="h-5 w-5 mr-2" />
+          )}
+          Nueva Microred
+        </button>
+      </div>
 
-          <button
-            onClick={handleRefresh}
-            disabled={loading || backendConnected === false}
-            className="flex items-center px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-          >
-            <Loader2 className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Actualizar
-          </button>
-          <button
-            onClick={() => setShowModal(true)}
-            disabled={loading || backendConnected === false}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Microred
-          </button>
+      {/* Stats Cards Premium */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-600 text-sm font-medium">Total Microredes</p>
+              <p className="text-2xl font-bold text-purple-800">{stats.total}</p>
+            </div>
+            <div className="bg-purple-500 p-3 rounded-lg">
+              <GitBranch className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border border-emerald-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-emerald-600 text-sm font-medium">Activas</p>
+              <p className="text-2xl font-bold text-emerald-800">{stats.activas}</p>
+            </div>
+            <div className="bg-emerald-500 p-3 rounded-lg">
+              <Activity className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-6 border border-amber-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-amber-600 text-sm font-medium">Con Centros</p>
+              <p className="text-2xl font-bold text-amber-800">{stats.conCentros}</p>
+            </div>
+            <div className="bg-amber-500 p-3 rounded-lg">
+              <Building className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border border-red-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-red-600 text-sm font-medium">Inactivas</p>
+              <p className="text-2xl font-bold text-red-800">{stats.inactivas}</p>
+            </div>
+            <div className="bg-red-500 p-3 rounded-lg">
+              <Shield className="h-6 w-6 text-white" />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
+      {/* Filters Premium */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Buscar microredes</label>
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Buscar por nombre, código o descripción..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
           </div>
-          <div className="sm:w-48">
+          <div className="lg:w-48">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Red</label>
             <select
               value={filterRedId}
               onChange={(e) => setFilterRedId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
             >
-              <option value="">Todas las redes</option>
+              <option value="">Todas</option>
               {redes.map((red) => (
                 <option key={red.id} value={red.id}>
                   {red.nombre}
@@ -326,57 +322,17 @@ const Microredes: React.FC<MicroredesProps> = ({
               ))}
             </select>
           </div>
-          <div className="sm:w-48">
+          <div className="lg:w-48">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
             <select
               value={filterEstado}
               onChange={(e) => setFilterEstado(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
             >
-              <option value="todos">Todos los estados</option>
+              <option value="todos">Todos</option>
               <option value="activo">Activos</option>
               <option value="inactivo">Inactivos</option>
             </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <GitBranch className="h-6 w-6 text-purple-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Microredes</p>
-              <p className="text-2xl font-bold text-gray-900">{total}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <GitBranch className="h-6 w-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Microredes Activas</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {microredes.filter(m => m.estado === 'activo').length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-gray-100 rounded-lg">
-              <GitBranch className="h-6 w-6 text-gray-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Microredes Inactivas</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {microredes.filter(m => m.estado === 'inactivo').length}
-              </p>
-            </div>
           </div>
         </div>
       </div>

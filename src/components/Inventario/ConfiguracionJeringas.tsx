@@ -762,10 +762,10 @@ const ConfiguracionJeringas: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-white">
       {/* Notificaciones */}
       {notification && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-md ${
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-xl max-w-md ${
           notification.type === 'success' ? 'bg-green-50 border border-green-200' :
           notification.type === 'error' ? 'bg-red-50 border border-red-200' :
           'bg-blue-50 border border-blue-200'
@@ -791,32 +791,32 @@ const ConfiguracionJeringas: React.FC = () => {
         </div>
       )}
 
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Link className="h-6 w-6 text-blue-600" />
+      {/* Header Premium */}
+      <div className="bg-gradient-to-r from-amber-50 to-amber-100 border-b border-amber-200 px-6 py-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="bg-amber-600 p-3 rounded-xl shadow-lg">
+              <Settings className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Configuración Jeringa-Vacuna
-              </h1>
-              <p className="text-gray-600">
-                Configure los multiplicadores para el cálculo automático de jeringas por vacuna
-              </p>
+              <h1 className="text-2xl font-bold text-gray-900">Configuración</h1>
             </div>
           </div>
-
           <button
             onClick={() => setShowHelp(true)}
-            className="flex items-center gap-2 px-4 py-2 text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-200 shadow-lg hover:shadow-xl"
             title="Ver ayuda y documentación"
           >
-            <HelpCircle className="h-4 w-4" />
+            <HelpCircle className="h-5 w-5" />
             Ayuda
           </button>
         </div>
+      </div>
+
+      {/* Content Container Premium */}
+      <div className="max-w-full px-6 py-6">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <div className="p-6">
 
         {/* Loading indicator para datos iniciales */}
         {isLoadingData && (
@@ -858,55 +858,57 @@ const ConfiguracionJeringas: React.FC = () => {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
+            {/* Tabs Premium */}
+            <div className="grid grid-cols-2 gap-1 mb-6">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
 
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`group inline-flex items-center py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    isActive
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Icon className={`mr-2 h-4 w-4 ${
-                    isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
-                  }`} />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center justify-center py-4 px-6 rounded-xl transition-all duration-200 ${
+                      isActive
+                        ? 'bg-amber-100 border-2 border-amber-500 text-amber-800'
+                        : 'bg-gray-50 border-2 border-gray-200 text-gray-600 hover:bg-gray-100 hover:border-gray-300'
+                    }`}
+                  >
+                    <Icon className={`mr-3 h-5 w-5 ${
+                      isActive ? 'text-amber-600' : 'text-gray-500'
+                    }`} />
+                    <div className="text-left">
+                      <div className={`font-semibold text-sm ${
+                        isActive ? 'text-amber-800' : 'text-gray-700'
+                      }`}>
+                        {tab.label}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {tab.description}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
 
-        {/* Tab description */}
-        <div className="mt-4">
-          <p className="text-sm text-gray-600">
-            {tabs.find(tab => tab.id === activeTab)?.description}
-          </p>
+            {/* Estadísticas de configuración */}
+            <EstadisticasConfiguracion
+              onNotification={showNotification}
+            />
+
+            {/* Calculadora de jeringas */}
+            <CalculadoraJeringas
+              vacunas={vacunas}
+              centrosAcopio={centrosAcopio}
+              onNotification={showNotification}
+            />
+
+            {/* Tab content */}
+            {renderTabContent()}
+          </div>
         </div>
       </div>
-
-      {/* Estadísticas de configuración */}
-      <EstadisticasConfiguracion
-        onNotification={showNotification}
-      />
-
-      {/* Calculadora de jeringas */}
-      <CalculadoraJeringas
-        vacunas={vacunas}
-        centrosAcopio={centrosAcopio}
-        onNotification={showNotification}
-      />
-
-      {/* Tab content */}
-      {renderTabContent()}
 
       {/* Modal para crear/editar configuración */}
       <ConfiguracionModal

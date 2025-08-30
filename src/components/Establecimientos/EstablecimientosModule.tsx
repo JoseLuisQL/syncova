@@ -6,7 +6,10 @@ import {
   Building2,
   Building,
   Home,
-  ChevronRight
+  ChevronRight,
+  Plus,
+  FolderOpen,
+  Settings
 } from 'lucide-react';
 import Establecimientos from './Establecimientos';
 import Redes from '../Redes/Redes';
@@ -104,40 +107,71 @@ const EstablecimientosModule: React.FC = () => {
     navigateToModule('establecimientos', 'establecimientos', params);
   };
 
-  const tabs = [
-    {
-      id: 'redes',
-      label: 'Redes',
-      icon: <Network className="w-5 h-5" />,
-      description: 'Gestión de redes de salud',
-      path: '/establecimientos/redes'
-    },
-    {
-      id: 'microredes',
-      label: 'Microredes',
-      icon: <GitBranch className="w-5 h-5" />,
-      description: 'Gestión de microredes',
-      path: '/establecimientos/microredes'
-    },
-    {
-      id: 'centros-acopio',
-      label: 'Centros de Acopio',
-      icon: <Building2 className="w-5 h-5" />,
-      description: 'Gestión de centros de acopio',
-      path: '/establecimientos/centros-acopio'
-    },
-    {
-      id: 'establecimientos',
-      label: 'Establecimientos',
-      icon: <Building className="w-5 h-5" />,
-      description: 'Gestión de establecimientos de salud',
-      path: '/establecimientos/establecimientos'
+// Configuración de secciones organizadas jerárquicamente
+interface SectionConfig {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  path: string;
+  category: 'estructura' | 'gestion';
+  description?: string;
+}
+
+const ESTABLISHMENT_SECTIONS: SectionConfig[] = [
+  // Sección Estructura
+  { 
+    id: 'redes', 
+    label: 'Redes', 
+    icon: Network, 
+    path: '/establecimientos/redes', 
+    category: 'estructura',
+    description: 'Redes de salud'
+  },
+  { 
+    id: 'microredes', 
+    label: 'Microredes', 
+    icon: GitBranch, 
+    path: '/establecimientos/microredes', 
+    category: 'estructura',
+    description: 'Agrupaciones territoriales'
+  },
+  
+  // Sección Gestión
+  { 
+    id: 'centros-acopio', 
+    label: 'Centros de Acopio', 
+    icon: Building2, 
+    path: '/establecimientos/centros-acopio', 
+    category: 'gestion',
+    description: 'Puntos de distribución'
+  },
+  { 
+    id: 'establecimientos', 
+    label: 'Establecimientos', 
+    icon: Building, 
+    path: '/establecimientos/establecimientos', 
+    category: 'gestion',
+    description: 'Centros de atención'
+  }
+];
+
+const CATEGORY_CONFIG = {
+  estructura: { label: 'Estructura Organizacional', icon: FolderOpen, color: 'blue' },
+  gestion: { label: 'Gestión Operativa', icon: Settings, color: 'emerald' }
+};
+
+  // Agrupar secciones por categoría
+  const sectionsByCategory = ESTABLISHMENT_SECTIONS.reduce((acc, section) => {
+    if (!acc[section.category]) {
+      acc[section.category] = [];
     }
-  ];
+    acc[section.category].push(section);
+    return acc;
+  }, {} as Record<string, SectionConfig[]>);
 
   const getCurrentBreadcrumb = () => {
     // Encontrar el tab actual basado en currentSubModule
-    const currentTabData = tabs.find(tab => tab.id === currentSubModule) || tabs[0];
+    const currentTabData = ESTABLISHMENT_SECTIONS.find(tab => tab.id === currentSubModule) || ESTABLISHMENT_SECTIONS[0];
     const breadcrumbItems = [];
 
     // Always start with the module home
@@ -169,7 +203,7 @@ const EstablecimientosModule: React.FC = () => {
         <div className="flex items-center">
           <ChevronRight className="w-4 h-4 text-gray-400" />
           <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2 flex items-center">
-            {React.cloneElement(currentTabData.icon, { className: 'w-4 h-4 mr-2' })}
+            <currentTabData.icon className="w-4 h-4 mr-2" />
             {currentTabData.label}
           </span>
         </div>
@@ -177,7 +211,7 @@ const EstablecimientosModule: React.FC = () => {
     );
 
     // Add navigation context if available
-    const currentTabIndex = tabs.findIndex(tab => tab.id === currentSubModule);
+    const currentTabIndex = ESTABLISHMENT_SECTIONS.findIndex(tab => tab.id === currentSubModule);
 
     if (navigationState.selectedRedNombre && currentTabIndex >= 1) {
       breadcrumbItems.splice(-1, 0,
@@ -237,127 +271,115 @@ const EstablecimientosModule: React.FC = () => {
   };
 
   return (
-    <div className="w-full">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Módulo de Establecimientos
-        </h1>
-        <p className="text-gray-600 mb-4">
-          Gestión integral de la estructura jerárquica de salud: redes, microredes, centros de acopio y establecimientos.
-        </p>
-
-        {/* Breadcrumbs */}
-        {getCurrentBreadcrumb()}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Header Premium */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-full px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
+                <Building2 className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Establecimientos</h1>
+                <p className="text-gray-600">Gestión integral de la estructura de salud</p>
+              </div>
+            </div>
+            {/* Breadcrumbs */}
+            <div className="hidden md:block">
+              {getCurrentBreadcrumb()}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex" aria-label="Tabs">
-            {tabs.map((tab) => {
-              const isActive = currentSubModule === tab.id || (!currentSubModule && tab.id === 'redes');
+      {/* Navigation Premium */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-full px-6">
+          <div className="grid grid-cols-2 gap-1">
+            {Object.entries(sectionsByCategory).map(([categoryKey, sections]) => {
+              const category = CATEGORY_CONFIG[categoryKey as keyof typeof CATEGORY_CONFIG];
+              const CategoryIcon = category.icon;
+              
               return (
-                <button
-                  key={tab.id}
-                  onClick={() => navigateToModule('establecimientos', tab.id)}
-                  className={`w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm ${
-                    isActive
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                  aria-current={isActive ? 'page' : undefined}
-                >
-                  <div className="flex flex-col items-center">
-                    <div className="mb-2">
-                      {React.cloneElement(tab.icon, {
-                        className: `w-6 h-6 ${isActive ? 'text-blue-600' : 'text-gray-400'}`
-                      })}
-                    </div>
-                    <div className="font-medium">{tab.label}</div>
-                    <div className="text-xs text-gray-500 mt-1">{tab.description}</div>
+                <div key={categoryKey} className="relative group">
+                  {/* Category Header */}
+                  <div className={`flex items-center justify-center py-4 border-b-4 border-${category.color}-500 bg-${category.color}-50`}>
+                    <CategoryIcon className={`h-5 w-5 text-${category.color}-600 mr-2`} />
+                    <span className={`font-semibold text-${category.color}-800`}>{category.label}</span>
                   </div>
-                </button>
+                  
+                  {/* Section Buttons */}
+                  <div className="bg-white">
+                    {sections.map((section) => {
+                      const Icon = section.icon;
+                      const isActive = currentSubModule === section.id || (!currentSubModule && section.id === 'redes');
+                      
+                      return (
+                        <button
+                          key={section.id}
+                          onClick={() => navigateToModule('establecimientos', section.id)}
+                          className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                            isActive ? `bg-${category.color}-50 border-l-4 border-l-${category.color}-500` : ''
+                          }`}
+                        >
+                          <Icon className={`h-4 w-4 mr-3 ${isActive ? `text-${category.color}-600` : 'text-gray-500'}`} />
+                          <div className="flex-1">
+                            <div className={`font-medium text-sm ${isActive ? `text-${category.color}-800` : 'text-gray-900'}`}>
+                              {section.label}
+                            </div>
+                            <div className="text-xs text-gray-500">{section.description}</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
-          </nav>
+          </div>
         </div>
       </div>
 
-      {/* Routes Content */}
-      <Routes>
-        <Route path="/" element={<Navigate to="redes" replace />} />
-        <Route
-          path="redes"
-          element={<Redes onNavigateToMicroredes={handleNavigateToMicroredes} />}
-        />
-        <Route
-          path="microredes"
-          element={
-            <Microredes
-              selectedRedId={navigationState.selectedRedId}
-              selectedRedNombre={navigationState.selectedRedNombre}
-              onNavigateToCentrosAcopio={handleNavigateToCentrosAcopio}
+      {/* Content Area Premium */}
+      <div className="max-w-full px-6 py-6">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <Routes>
+            <Route path="/" element={<Navigate to="redes" replace />} />
+            <Route
+              path="redes"
+              element={<Redes onNavigateToMicroredes={handleNavigateToMicroredes} />}
             />
-          }
-        />
-        <Route
-          path="centros-acopio"
-          element={
-            <CentrosAcopio
-              selectedMicroredId={navigationState.selectedMicroredId}
-              selectedMicroredNombre={navigationState.selectedMicroredNombre}
-              onNavigateToEstablecimientos={handleNavigateToEstablecimientos}
+            <Route
+              path="microredes"
+              element={
+                <Microredes
+                  selectedRedId={navigationState.selectedRedId}
+                  selectedRedNombre={navigationState.selectedRedNombre}
+                  onNavigateToCentrosAcopio={handleNavigateToCentrosAcopio}
+                />
+              }
             />
-          }
-        />
-        <Route
-          path="establecimientos"
-          element={
-            <Establecimientos
-              selectedCentroAcopioId={navigationState.selectedCentroAcopioId}
-              selectedCentroAcopioNombre={navigationState.selectedCentroAcopioNombre}
+            <Route
+              path="centros-acopio"
+              element={
+                <CentrosAcopio
+                  selectedMicroredId={navigationState.selectedMicroredId}
+                  selectedMicroredNombre={navigationState.selectedMicroredNombre}
+                  onNavigateToEstablecimientos={handleNavigateToEstablecimientos}
+                />
+              }
             />
-          }
-        />
-      </Routes>
-
-      {/* Information Panel */}
-      <div className="bg-gray-50 rounded-lg p-6 mt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Información del Módulo
-        </h3>
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
-            <Network className="w-4 h-4 mr-2" />
-            Redes de Salud
-          </span>
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 border border-purple-200">
-            <GitBranch className="w-4 h-4 mr-2" />
-            Microredes
-          </span>
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-200">
-            <Building2 className="w-4 h-4 mr-2" />
-            Centros de Acopio
-          </span>
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 border border-red-200">
-            <Building className="w-4 h-4 mr-2" />
-            Establecimientos
-          </span>
-        </div>
-
-        <div className="text-sm text-gray-600 space-y-2">
-          <p><strong>Estructura Jerárquica:</strong></p>
-          <ul className="list-disc list-inside space-y-1 ml-4">
-            <li><strong>Redes:</strong> Organizan los servicios de salud a nivel regional</li>
-            <li><strong>Microredes:</strong> Agrupan establecimientos por proximidad geográfica</li>
-            <li><strong>Centros de Acopio:</strong> Puntos estratégicos para distribución de insumos</li>
-            <li><strong>Establecimientos:</strong> Centros de salud, puestos de salud y hospitales</li>
-          </ul>
-          <p className="mt-4">
-            <strong>Flujo de Trabajo:</strong> Cree primero las redes, luego las microredes, después los centros de acopio y finalmente los establecimientos.
-          </p>
+            <Route
+              path="establecimientos"
+              element={
+                <Establecimientos
+                  selectedCentroAcopioId={navigationState.selectedCentroAcopioId}
+                  selectedCentroAcopioNombre={navigationState.selectedCentroAcopioNombre}
+                />
+              }
+            />
+          </Routes>
         </div>
       </div>
     </div>

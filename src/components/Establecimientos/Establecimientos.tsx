@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Building2, MapPin, Phone, User, MoreVertical, AlertCircle, Loader2, Wifi, WifiOff, Settings, Bug } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Building2, MapPin, Phone, User, AlertCircle, Loader2, Building, Activity, Users } from 'lucide-react';
 import { Establecimiento, CreateEstablecimientoDto, UpdateEstablecimientoDto } from '../../types';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useToastContext } from '../../contexts/ToastContext';
-import { checkBackendConnection, logger } from '../../utils/debug';
-import TestConnection from '../TestConnection';
-import DebugPanel from '../DebugPanel';
+import { logger } from '../../utils/debug';
 import CascadingSelector from '../common/CascadingSelector';
 
-const Establecimientos: React.FC = () => {
+interface EstablecimientosProps {
+  selectedCentroAcopioId?: string;
+  selectedCentroAcopioNombre?: string;
+}
+
+const Establecimientos: React.FC<EstablecimientosProps> = ({
+  selectedCentroAcopioId,
+  selectedCentroAcopioNombre
+}) => {
   // Estados locales para UI
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTipo, setFilterTipo] = useState<string>('todos');
   const [filterEstado, setFilterEstado] = useState<string>('todos');
   const [showModal, setShowModal] = useState(false);
   const [editingEstablecimiento, setEditingEstablecimiento] = useState<Establecimiento | null>(null);
-  const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
-  const [showTestConnection, setShowTestConnection] = useState(false);
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   // Hook personalizado para gestión de establecimientos
   const {
@@ -43,27 +46,6 @@ const Establecimientos: React.FC = () => {
 
   // Hook para toast notifications
   const { toast } = useToastContext();
-
-  // Verificar conexión con backend
-  useEffect(() => {
-    const verifyConnection = async () => {
-      try {
-        const connected = await checkBackendConnection();
-        setBackendConnected(connected);
-        logger.info(`Estado de conexión con backend: ${connected ? 'Conectado' : 'Desconectado'}`);
-      } catch (error) {
-        setBackendConnected(false);
-        logger.error('Error al verificar conexión con backend', error);
-      }
-    };
-
-    verifyConnection();
-
-    // Verificar conexión cada 30 segundos
-    const interval = setInterval(verifyConnection, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   // Aplicar filtros cuando cambien los valores (con debounce para búsqueda)
   React.useEffect(() => {
@@ -192,39 +174,25 @@ const Establecimientos: React.FC = () => {
     }
   };
 
-  // Si no hay conexión con el backend, mostrar mensaje de error
-  if (backendConnected === false) {
-    return (
-      <div className="space-y-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
-          <WifiOff className="h-16 w-16 text-red-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-red-800 mb-2">
-            Sin conexión con el servidor
-          </h3>
-          <p className="text-red-600 mb-4">
-            No se puede conectar con el backend. Verifique que el servidor esté funcionando en el puerto 3001.
-          </p>
-          <div className="space-y-2 text-sm text-red-500">
-            <p>• Verifique que el backend esté iniciado: <code>npm run dev</code></p>
-            <p>• URL del backend: <code>http://localhost:3001</code></p>
-            <p>• Verifique la configuración de CORS</p>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Obtener estadísticas filtradas
+  const getStats = () => {
+    return {
+      centrosAcopio: centrosAcopio.length,
+      centrosSalud: establecimientos.filter(e => e.tipo === 'centro_salud').length,
+      puestosSalud: establecimientos.filter(e => e.tipo === 'puesto_salud').length,
+      hospitales: establecimientos.filter(e => e.tipo === 'hospital').length,
+      total: pagination.total,
+      activos: establecimientos.filter(e => e.estado === 'activo').length
+    };
+  };
+
+  const stats = getStats();
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       {/* Error Alert */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-center">
             <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
             <span className="text-red-800">{error}</span>
@@ -232,112 +200,126 @@ const Establecimientos: React.FC = () => {
         </div>
       )}
 
-      {/* Header */}
+      {/* Header Premium */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Gestión de Establecimientos</h2>
-          <p className="text-gray-600 mt-1">
-            Administre centros de acopio y establecimientos de salud
-            {pagination.total > 0 && (
-              <span className="ml-2 text-sm">
-                ({pagination.total} establecimiento{pagination.total !== 1 ? 's' : ''})
-              </span>
-            )}
-          </p>
-          {/* Botones de desarrollo */}
-          {import.meta.env.VITE_ENVIRONMENT === 'development' && (
-            <div className="mt-2 space-x-2">
-              <button
-                onClick={() => setShowTestConnection(true)}
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
-              >
-                Probar conexión
-              </button>
-              <button
-                onClick={() => setShowDebugPanel(!showDebugPanel)}
-                className="text-xs text-green-600 hover:text-green-800 underline"
-              >
-                {showDebugPanel ? 'Ocultar' : 'Mostrar'} debug
-              </button>
-            </div>
-          )}
-        </div>
-        <div className="flex items-center space-x-2">
-          {/* Indicador de conexión */}
-          <div className="flex items-center px-2 py-1 rounded-lg text-xs">
-            {backendConnected === null ? (
-              <Loader2 className="h-3 w-3 animate-spin text-gray-400 mr-1" />
-            ) : backendConnected ? (
-              <Wifi className="h-3 w-3 text-green-500 mr-1" />
-            ) : (
-              <WifiOff className="h-3 w-3 text-red-500 mr-1" />
-            )}
-            <span className={`${
-              backendConnected === null ? 'text-gray-500' :
-              backendConnected ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {backendConnected === null ? 'Verificando...' :
-               backendConnected ? 'Conectado' : 'Desconectado'}
-            </span>
+        <div className="flex items-center space-x-4">
+          <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-3 rounded-xl shadow-lg">
+            <Building2 className="h-6 w-6 text-white" />
           </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Establecimientos de Salud</h2>
+            <p className="text-gray-600">
+              {selectedCentroAcopioNombre ? `Centro: ${selectedCentroAcopioNombre}` : 'Gestión integral de establecimientos'}
+              {stats.total > 0 && (
+                <span className="ml-2 text-sm font-medium text-emerald-600">
+                  ({stats.total} establecimiento{stats.total !== 1 ? 's' : ''})
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          disabled={isCreating}
+          className="flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50"
+        >
+          {isCreating ? (
+            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+          ) : (
+            <Plus className="h-5 w-5 mr-2" />
+          )}
+          Nuevo Establecimiento
+        </button>
+      </div>
 
-          <button
-            onClick={handleRefresh}
-            disabled={isLoading || backendConnected === false}
-            className="flex items-center px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-          >
-            <Loader2 className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Actualizar
-          </button>
-          <button
-            onClick={() => setShowModal(true)}
-            disabled={isCreating || backendConnected === false}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isCreating ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4 mr-2" />
-            )}
-            Nuevo Establecimiento
-          </button>
+      {/* Stats Cards Premium */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-600 text-sm font-medium">Centros de Salud</p>
+              <p className="text-2xl font-bold text-blue-800">{stats.centrosSalud}</p>
+            </div>
+            <div className="bg-blue-500 p-3 rounded-lg">
+              <Building className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-600 text-sm font-medium">Puestos de Salud</p>
+              <p className="text-2xl font-bold text-orange-800">{stats.puestosSalud}</p>
+            </div>
+            <div className="bg-orange-500 p-3 rounded-lg">
+              <Building2 className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-600 text-sm font-medium">Hospitales</p>
+              <p className="text-2xl font-bold text-purple-800">{stats.hospitales}</p>
+            </div>
+            <div className="bg-purple-500 p-3 rounded-lg">
+              <Activity className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border border-emerald-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-emerald-600 text-sm font-medium">Activos</p>
+              <p className="text-2xl font-bold text-emerald-800">{stats.activos}</p>
+            </div>
+            <div className="bg-emerald-500 p-3 rounded-lg">
+              <Users className="h-6 w-6 text-white" />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
+      {/* Filters Premium */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Buscar establecimientos</label>
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Buscar por nombre, código o responsable..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
             </div>
           </div>
-          <div className="sm:w-48">
+          <div className="lg:w-48">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
             <select
               value={filterTipo}
               onChange={(e) => setFilterTipo(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
-              <option value="todos">Todos los tipos</option>
-              <option value="centro_acopio">Centro de Acopio</option>
+              <option value="todos">Todos</option>
               <option value="centro_salud">Centro de Salud</option>
               <option value="puesto_salud">Puesto de Salud</option>
+              <option value="hospital">Hospital</option>
             </select>
           </div>
-          <div className="sm:w-48">
+          <div className="lg:w-48">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
             <select
               value={filterEstado}
               onChange={(e) => setFilterEstado(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
-              <option value="todos">Todos los estados</option>
+              <option value="todos">Todos</option>
               <option value="activo">Activos</option>
               <option value="inactivo">Inactivos</option>
             </select>
@@ -345,63 +327,13 @@ const Establecimientos: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Centros de Acopio</p>
-              <p className="text-2xl font-bold text-gray-900">{centrosAcopio.length}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Centros de Salud</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {establecimientos.filter(e => e.tipo === 'centro_salud').length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-orange-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Puestos de Salud</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {establecimientos.filter(e => e.tipo === 'puesto_salud').length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-gray-100 rounded-lg">
-              <Building2 className="h-6 w-6 text-gray-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total</p>
-              <p className="text-2xl font-bold text-gray-900">{pagination.total}</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+
+      {/* Table Premium */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
             <span className="ml-2 text-gray-600">Cargando establecimientos...</span>
           </div>
         ) : (
@@ -409,25 +341,22 @@ const Establecimientos: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Establecimiento
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Tipo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estructura Jerárquica
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Responsable
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Contacto
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -435,7 +364,7 @@ const Establecimientos: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {establecimientos.length === 0 && !isLoading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                     <Building2 className="h-12 w-12 mx-auto text-gray-300 mb-4" />
                     <p className="text-lg font-medium">No se encontraron establecimientos</p>
                     <p className="text-sm">Intente ajustar los filtros de búsqueda</p>
@@ -443,85 +372,64 @@ const Establecimientos: React.FC = () => {
                 </tr>
               ) : (
                 establecimientos.map((establecimiento) => {
-                  // Usar la relación centroAcopio del backend si está disponible
-                  const centroAcopio = establecimiento.centroAcopio ||
-                    (establecimiento.centroAcopioId
-                      ? centrosAcopio.find(c => c.id === establecimiento.centroAcopioId)
-                      : null);
-
-                  // Obtener información jerárquica
-                  const microred = centroAcopio?.microred;
-                  const red = microred?.red;
                 
                 return (
-                  <tr key={establecimiento.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <tr key={establecimiento.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <Building2 className="h-5 w-5 text-gray-500" />
+                        <div className="flex-shrink-0 h-12 w-12">
+                          <div className={`h-12 w-12 rounded-xl ${getTipoColor(establecimiento.tipo)} flex items-center justify-center`}>
+                            <Building2 className="h-6 w-6" />
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-semibold text-gray-900">
                             {establecimiento.nombre}
                           </div>
-                          <div className="text-sm text-gray-500">{establecimiento.codigo}</div>
+                          <div className="text-sm text-gray-500 font-medium">{establecimiento.codigo}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTipoColor(establecimiento.tipo)}`}>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getTipoColor(establecimiento.tipo)}`}>
                         {getTipoLabel(establecimiento.tipo)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      {centroAcopio ? (
-                        <div className="space-y-1">
-                          <div className="font-medium">{centroAcopio.nombre}</div>
-                          {microred && (
-                            <div className="text-xs text-gray-500">
-                              {microred.red?.nombre} → {microred.nombre}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">Sin asignar</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div className="flex items-center">
                         <User className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">{establecimiento.responsable}</span>
+                        <span className="text-sm font-medium text-gray-900">{establecimiento.responsable}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        <div className="flex items-center mb-1">
-                          <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                          {establecimiento.telefono}
-                        </div>
-                        <div className="flex items-center">
+                    <td className="px-6 py-4">
+                      <div className="space-y-1">
+                        {establecimiento.telefono && (
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Phone className="h-4 w-4 text-gray-400 mr-2" />
+                            {establecimiento.telefono}
+                          </div>
+                        )}
+                        <div className="flex items-center text-sm text-gray-600">
                           <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                           <span className="truncate max-w-xs">{establecimiento.direccion}</span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
                         establecimiento.estado === 'activo' 
-                          ? 'bg-green-100 text-green-800' 
+                          ? 'bg-emerald-100 text-emerald-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
                         {establecimiento.estado === 'activo' ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-2">
                         <button
                           onClick={() => handleEdit(establecimiento)}
                           disabled={isUpdating}
-                          className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded disabled:opacity-50"
+                          className="inline-flex items-center px-3 py-2 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
                         >
                           {isUpdating ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -532,7 +440,7 @@ const Establecimientos: React.FC = () => {
                         <button
                           onClick={() => handleDelete(establecimiento.id, establecimiento.nombre)}
                           disabled={isDeleting}
-                          className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded disabled:opacity-50"
+                          className="inline-flex items-center px-3 py-2 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
                           title="Eliminar establecimiento"
                         >
                           {isDeleting ? (
@@ -552,22 +460,22 @@ const Establecimientos: React.FC = () => {
         </div>
         )}
 
-        {/* Paginación */}
+        {/* Paginación Premium */}
         {pagination.totalPages > 1 && (
-          <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+          <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex-1 flex justify-between sm:hidden">
                 <button
                   onClick={() => changePage(pagination.page - 1)}
                   disabled={pagination.page <= 1}
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Anterior
                 </button>
                 <button
                   onClick={() => changePage(pagination.page + 1)}
                   disabled={pagination.page >= pagination.totalPages}
-                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Siguiente
                 </button>
@@ -576,23 +484,23 @@ const Establecimientos: React.FC = () => {
                 <div>
                   <p className="text-sm text-gray-700">
                     Mostrando{' '}
-                    <span className="font-medium">
+                    <span className="font-semibold text-emerald-600">
                       {((pagination.page - 1) * pagination.limit) + 1}
                     </span>{' '}
                     a{' '}
-                    <span className="font-medium">
+                    <span className="font-semibold text-emerald-600">
                       {Math.min(pagination.page * pagination.limit, pagination.total)}
                     </span>{' '}
                     de{' '}
-                    <span className="font-medium">{pagination.total}</span> resultados
+                    <span className="font-semibold text-emerald-600">{pagination.total}</span> resultados
                   </p>
                 </div>
                 <div>
-                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                  <nav className="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
                     <button
                       onClick={() => changePage(pagination.page - 1)}
                       disabled={pagination.page <= 1}
-                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center px-3 py-2 rounded-l-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Anterior
                     </button>
@@ -602,9 +510,9 @@ const Establecimientos: React.FC = () => {
                         <button
                           key={pageNum}
                           onClick={() => changePage(pageNum)}
-                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors ${
                             pageNum === pagination.page
-                              ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                              ? 'z-10 bg-emerald-50 border-emerald-500 text-emerald-600'
                               : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                           }`}
                         >
@@ -615,7 +523,7 @@ const Establecimientos: React.FC = () => {
                     <button
                       onClick={() => changePage(pagination.page + 1)}
                       disabled={pagination.page >= pagination.totalPages}
-                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center px-3 py-2 rounded-r-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Siguiente
                     </button>
@@ -639,17 +547,6 @@ const Establecimientos: React.FC = () => {
           isLoading={isCreating || isUpdating}
         />
       )}
-
-      {/* Test Connection Modal */}
-      {showTestConnection && (
-        <TestConnection onClose={() => setShowTestConnection(false)} />
-      )}
-
-      {/* Debug Panel */}
-      <DebugPanel
-        isVisible={showDebugPanel}
-        onClose={() => setShowDebugPanel(false)}
-      />
     </div>
   );
 };
@@ -740,12 +637,22 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full m-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            {establecimiento ? 'Editar Establecimiento' : 'Nuevo Establecimiento'}
-          </h2>
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-3 rounded-xl shadow-lg">
+              <Building2 className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">
+                {establecimiento ? 'Editar Establecimiento' : 'Nuevo Establecimiento'}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {establecimiento ? 'Actualizar información del establecimiento' : 'Crear un nuevo establecimiento de salud'}
+              </p>
+            </div>
+          </div>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -933,21 +840,21 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
               </div>
             </div>
             
-            <div className="flex justify-end space-x-3 pt-4 border-t">
+            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 text-gray-700 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-medium"
               >
                 {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {establecimiento ? 'Actualizar' : 'Crear'}
+                {establecimiento ? 'Actualizar Establecimiento' : 'Crear Establecimiento'}
               </button>
             </div>
           </form>

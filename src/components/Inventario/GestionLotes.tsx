@@ -68,8 +68,6 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
   // UI states
   const [showModal, setShowModal] = useState(false);
   const [editingLote, setEditingLote] = useState<Lote | LoteJeringa | null>(null);
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
-  const [showDetails, setShowDetails] = useState<string | null>(null);
 
   // Filtrar lotes (solo para visualización local, los filtros principales se aplican en el backend)
   const filteredLotes = lotes.filter(lote => {
@@ -251,20 +249,11 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
               ) : (
                 <Syringe className="h-6 w-6 text-purple-600 mr-3" />
               )}
-              Gestión de Lotes - {tipo === 'vacuna' ? 'Vacunas' : 'Jeringas'}
+              Lotes de {tipo === 'vacuna' ? 'Vacunas' : 'Jeringas'}
             </h3>
-            <p className="text-gray-600 mt-1">
-              Control detallado de todos los lotes de {tipo === 'vacuna' ? 'vacunas' : 'jeringas'} en el sistema
-            </p>
           </div>
           <div className="flex space-x-3">
-            <button
-              onClick={() => setViewMode(viewMode === 'cards' ? 'table' : 'cards')}
-              className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              <BarChart3 className="h-4 w-4 mr-2" />
-              {viewMode === 'cards' ? 'Vista Tabla' : 'Vista Tarjetas'}
-            </button>
+
             <button className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               <Download className="h-4 w-4 mr-2" />
               Exportar
@@ -526,9 +515,9 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
         </div>
       </div>
 
-      {/* Contenido principal */}
+      {/* Contenido principal - Solo Vista de Tabla Profesional */}
       {isLoading && lotes.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center shadow-sm">
           <Loader2 className="h-16 w-16 text-gray-400 mx-auto mb-4 animate-spin" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             Cargando lotes...
@@ -537,22 +526,6 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
             Por favor espere mientras se cargan los datos
           </p>
         </div>
-      ) : viewMode === 'cards' ? (
-        <LotesCardView
-          lotes={filteredLotes}
-          tipo={tipo}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          showDetails={showDetails}
-          setShowDetails={setShowDetails}
-          getProductName={getProductName}
-          getEstadoColor={getEstadoColor}
-          getEstadoIcon={getEstadoIcon}
-          getDaysToExpire={getDaysToExpire}
-          getVencimientoColor={getVencimientoColor}
-          isUpdating={isUpdating}
-          isDeleting={isDeleting}
-        />
       ) : (
         <LotesTableView
           lotes={filteredLotes}
@@ -569,14 +542,18 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
         />
       )}
 
-      {filteredLotes.length === 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-          {tipo === 'vacuna' ? (
-            <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          ) : (
-            <Syringe className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          )}
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+      {filteredLotes.length === 0 && !isLoading && (
+        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center shadow-sm">
+          <div className={`bg-gradient-to-r ${
+            tipo === 'vacuna' ? 'from-blue-100 to-blue-50' : 'from-emerald-100 to-emerald-50'
+          } p-6 rounded-2xl inline-block mb-4`}>
+            {tipo === 'vacuna' ? (
+              <Package className="h-16 w-16 text-blue-600" />
+            ) : (
+              <Syringe className="h-16 w-16 text-emerald-600" />
+            )}
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
             No se encontraron lotes
           </h3>
           <p className="text-gray-600 mb-6">
@@ -586,7 +563,9 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
             }
           </p>
           {(!searchTerm && filterEstado === 'todos' && filterVencimiento === 'todos') && (
-            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button className={`px-6 py-3 bg-gradient-to-r ${
+              tipo === 'vacuna' ? 'from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800' : 'from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800'
+            } text-white rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl`}>
               <Plus className="h-5 w-5 inline mr-2" />
               Registrar Primer Lote
             </button>
@@ -821,116 +800,136 @@ const LotesTableView: React.FC<LotesTableViewProps> = ({
   isDeleting = false,
 }) => {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Lote
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {tipo === 'vacuna' ? '💉 Lote' : '🩹 Lote'}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Producto
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Stock
+              <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Stock Actual/Initial
               </th>
               {tipo === 'vacuna' && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Vencimiento
                 </th>
               )}
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Comprobante
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Estado
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Acciones
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {lotes.map((lote) => {
+            {lotes.map((lote, index) => {
               const EstadoIcon = getEstadoIcon(lote.estado);
               const daysToExpire = 'fechaVencimiento' in lote ? getDaysToExpire(lote.fechaVencimiento) : null;
               const productName = getProductName(lote);
+              const bgColor = tipo === 'vacuna' ? 'blue' : 'emerald';
               
               return (
-                <tr key={lote.id} className="hover:bg-gray-50">
+                <tr key={lote.id} className={`hover:bg-${bgColor}-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className={`flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center ${
-                        tipo === 'vacuna' ? 'bg-blue-100' : 'bg-purple-100'
-                      }`}>
+                      <div className={`flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center bg-gradient-to-r ${
+                        tipo === 'vacuna' ? 'from-blue-500 to-blue-600' : 'from-emerald-500 to-emerald-600'
+                      } shadow-md`}>
                         {tipo === 'vacuna' ? (
-                          <Package className={`h-5 w-5 ${tipo === 'vacuna' ? 'text-blue-600' : 'text-purple-600'}`} />
+                          <Package className="h-5 w-5 text-white" />
                         ) : (
-                          <Syringe className={`h-5 w-5 ${tipo === 'vacuna' ? 'text-blue-600' : 'text-purple-600'}`} />
+                          <Syringe className="h-5 w-5 text-white" />
                         )}
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{lote.numero}</div>
-                        <div className="text-sm text-gray-500">{lote.fechaIngreso.toLocaleDateString()}</div>
+                        <div className="text-sm font-semibold text-gray-900">{lote.numero}</div>
+                        <div className="text-sm text-gray-500">Ingreso: {lote.fechaIngreso.toLocaleDateString()}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {productName}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {lote.cantidadActual.toLocaleString()} / {lote.cantidadInicial.toLocaleString()}
+                    <div className="text-sm font-medium text-gray-900">{productName}</div>
+                    <div className="text-sm text-gray-500">{lote.formaIngreso}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <div className="text-lg font-bold text-gray-900">
+                      {lote.cantidadActual.toLocaleString()}
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div className="text-sm text-gray-500 mb-2">
+                      de {lote.cantidadInicial.toLocaleString()}
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        className={`h-1.5 rounded-full ${
+                        className={`h-2 rounded-full transition-all duration-300 ${
                           lote.cantidadActual === 0 ? 'bg-red-500' :
                           lote.cantidadActual < lote.cantidadInicial * 0.2 ? 'bg-yellow-500' :
                           'bg-green-500'
                         }`}
-                        style={{ width: `${Math.max((lote.cantidadActual / lote.cantidadInicial) * 100, 2)}%` }}
+                        style={{ width: `${Math.max((lote.cantidadActual / lote.cantidadInicial) * 100, 3)}%` }}
                       ></div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {Math.round((lote.cantidadActual / lote.cantidadInicial) * 100)}%
                     </div>
                   </td>
                   {tipo === 'vacuna' && 'fechaVencimiento' in lote && (
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{lote.fechaVencimiento.toLocaleDateString()}</div>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="text-sm font-medium text-gray-900">{lote.fechaVencimiento.toLocaleDateString()}</div>
                       {daysToExpire !== null && (
-                        <div className={`text-xs font-medium ${getVencimientoColor(daysToExpire)}`}>
+                        <div className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
+                          daysToExpire <= 0 ? 'bg-red-100 text-red-800' :
+                          daysToExpire <= 30 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
                           {daysToExpire > 0 ? `${daysToExpire} días` : 'Vencido'}
                         </div>
                       )}
                     </td>
                   )}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{lote.comprobanteClase}</div>
+                    <div className="text-sm font-medium text-gray-900">{lote.comprobanteClase}</div>
                     <div className="text-sm text-gray-500">{lote.numeroComprobante}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <EstadoIcon className="h-4 w-4 mr-2" />
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border ${getEstadoColor(lote.estado)}`}>
-                        {lote.estado.charAt(0).toUpperCase() + lote.estado.slice(1)}
-                      </span>
-                    </div>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <span className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full ${getEstadoColor(lote.estado)}`}>
+                      <EstadoIcon className="h-3 w-3 mr-1" />
+                      {lote.estado.charAt(0).toUpperCase() + lote.estado.slice(1)}
+                    </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end space-x-2">
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <div className="flex items-center justify-center space-x-3">
                       <button
                         onClick={() => onEdit(lote)}
-                        className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded"
+                        disabled={isUpdating}
+                        className={`text-gray-400 hover:text-${bgColor}-600 transition-colors p-2 hover:bg-${bgColor}-50 rounded-lg disabled:opacity-50`}
                         title="Editar"
                       >
-                        <Edit className="h-4 w-4" />
+                        {isUpdating ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Edit className="h-4 w-4" />
+                        )}
                       </button>
                       <button
                         onClick={() => onDelete(lote.id)}
-                        className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
+                        disabled={isDeleting}
+                        className="text-gray-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg disabled:opacity-50"
                         title="Eliminar"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {isDeleting ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                   </td>

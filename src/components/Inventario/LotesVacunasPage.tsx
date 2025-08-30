@@ -147,17 +147,30 @@ const LotesVacunasPage: React.FC = () => {
   // Mostrar error si hay problemas de conexión
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Error al cargar los datos</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={refresh}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Reintentar
-          </button>
+      <div className="min-h-screen bg-white">
+        <div className="bg-gradient-to-r from-red-50 to-red-100 border-b border-red-200 px-6 py-6">
+          <div className="flex items-center space-x-4">
+            <div className="bg-red-600 p-3 rounded-xl shadow-lg">
+              <AlertCircle className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Lotes de Vacunas</h1>
+              <p className="text-red-600 mt-1">Error al cargar los datos</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center bg-white p-8 rounded-xl border border-gray-200 shadow-lg max-w-md">
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Error al cargar los datos</h3>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={refresh}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg"
+            >
+              Reintentar
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -166,60 +179,77 @@ const LotesVacunasPage: React.FC = () => {
   // Mostrar loading inicial
   if (isLoading && lotes.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Cargando lotes de vacunas...</p>
+      <div className="min-h-screen bg-white">
+        <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 px-6 py-6">
+          <div className="flex items-center space-x-4">
+            <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
+              <Package className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Lotes de Vacunas</h1>
+              <p className="text-blue-600 mt-1">Cargando información...</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center bg-white p-8 rounded-xl border border-gray-200 shadow-lg">
+            <Loader2 className="h-12 w-12 text-blue-600 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600 font-medium">Cargando lotes de vacunas...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header con botón de nuevo lote */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-            <Package className="h-7 w-7 text-blue-600 mr-3" />
-            Lotes de Vacunas
-          </h2>
-          <p className="text-gray-600 mt-1">
-            Gestión completa de lotes de vacunas en el sistema
-          </p>
+    <div className="min-h-screen bg-white">
+      {/* Header Premium */}
+      <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 px-6 py-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
+              <Package className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Lotes de Vacunas</h1>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowNuevoIngreso(true)}
+            disabled={isCreating}
+            className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCreating ? (
+              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+            ) : (
+              <Plus className="h-5 w-5 mr-2" />
+            )}
+            Nuevo Lote
+          </button>
         </div>
-        
-        <button
-          onClick={() => setShowNuevoIngreso(true)}
-          disabled={isCreating}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
-        >
-          {isCreating ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Plus className="h-4 w-4 mr-2" />
-          )}
-          Nuevo Lote
-        </button>
       </div>
 
-      {/* Componente principal de gestión */}
-      <GestionLotes
-        lotes={lotes}
-        onUpdate={handleUpdateLote}
-        onDelete={handleDeleteLote}
-        tipo="vacuna"
-        isLoading={isLoading}
-        isUpdating={isUpdating}
-        isDeleting={isDeleting}
-        stats={stats}
-        isLoadingStats={isLoadingStats}
-        vacunas={vacunasActivas}
-        jeringas={[]}
-        onApplyFilters={handleApplyFilters}
-        isLoadingVacunas={isLoadingVacunas}
-        isLoadingJeringas={false}
-      />
+      {/* Content Area Premium */}
+      <div className="max-w-full px-6 py-6">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <GestionLotes
+            lotes={lotes}
+            onUpdate={handleUpdateLote}
+            onDelete={handleDeleteLote}
+            tipo="vacuna"
+            isLoading={isLoading}
+            isUpdating={isUpdating}
+            isDeleting={isDeleting}
+            stats={stats}
+            isLoadingStats={isLoadingStats}
+            vacunas={vacunasActivas}
+            jeringas={[]}
+            onApplyFilters={handleApplyFilters}
+            isLoadingVacunas={isLoadingVacunas}
+            isLoadingJeringas={false}
+          />
+        </div>
+      </div>
 
       {/* Modal de nuevo ingreso */}
       {showNuevoIngreso && (
