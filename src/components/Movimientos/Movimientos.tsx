@@ -1170,74 +1170,86 @@ const Movimientos: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Movimientos de Vacunas</h1>
-          <p className="text-gray-600">Gestión de entregas y movimientos de vacunas por establecimiento</p>
-        </div>
-        <div className="flex items-center space-x-3">
-          {pendingChangesCount > 0 && (
-            <button
-              onClick={handleSaveAllPendingChanges}
-              disabled={isAutoSaving}
-              className="flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title={`Guardar ${pendingChangesCount} cambio(s) pendiente(s)`}
-            >
-              <Save className={`h-4 w-4 mr-2 ${isAutoSaving ? 'animate-spin' : ''}`} />
-              Guardar Cambios ({pendingChangesCount})
-            </button>
-          )}
-          <button
-            onClick={() => setShowValesModal(true)}
-            disabled={!selectedVacuna || selectedCentroAcopio === 'todos'}
-            className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title={selectedCentroAcopio === 'todos' ? 'Seleccione un centro de acopio específico' : 'Ver vales de entrega para este centro de acopio'}
-          >
-            <Receipt className="h-4 w-4 mr-2" />
-            Vales por Acopio
-          </button>
-          <button
-            onClick={() => {
-              if (selectedVacuna) {
-                const filters = {
-                  vacunaId: selectedVacuna,
-                  mes: selectedMes,
-                  anio: selectedAnio,
-                  ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
-                };
-                loadMovimientos(filters);
-                const vacunaNombre = vacunaSeleccionada?.nombre || 'vacuna seleccionada';
-                const mesNombre = meses[selectedMes - 1];
-                toast.success(`🔄 Datos actualizados • ${vacunaNombre} • ${mesNombre} ${selectedAnio}`);
-              } else {
-                toast.warning('⚠️ Seleccione una vacuna para actualizar los datos');
-              }
-            }}
-            disabled={isLoading || !selectedVacuna}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Actualizar
-          </button>
-          <button
-            onClick={() => setShowImportarModal(true)}
-            className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-            title="Importar movimientos desde Excel"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Importar Movimientos
-          </button>
-          <button
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            title="Funcionalidad de exportación en desarrollo"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Header Premium */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-full px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-3 rounded-xl shadow-lg">
+                <BarChart3 className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Movimientos de Vacunas</h1>
+                <p className="text-gray-600">Gestión de entregas y movimientos de vacunas por establecimiento</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              {pendingChangesCount > 0 && (
+                <button
+                  onClick={handleSaveAllPendingChanges}
+                  disabled={isAutoSaving}
+                  className="flex items-center px-4 py-2.5 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white rounded-xl hover:from-yellow-700 hover:to-yellow-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  title={`Guardar ${pendingChangesCount} cambio(s) pendiente(s)`}
+                >
+                  <Save className={`h-4 w-4 mr-2 ${isAutoSaving ? 'animate-spin' : ''}`} />
+                  Guardar Cambios ({pendingChangesCount})
+                </button>
+              )}
+              <button
+                onClick={() => setShowValesModal(true)}
+                disabled={!selectedVacuna || selectedCentroAcopio === 'todos'}
+                className="flex items-center px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                title={selectedCentroAcopio === 'todos' ? 'Seleccione un centro de acopio específico' : 'Ver vales de entrega para este centro de acopio'}
+              >
+                <Receipt className="h-4 w-4 mr-2" />
+                Vales por Acopio
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedVacuna) {
+                    const filters = {
+                      vacunaId: selectedVacuna,
+                      mes: selectedMes,
+                      anio: selectedAnio,
+                      ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
+                    };
+                    loadMovimientos(filters);
+                    const vacunaNombre = vacunaSeleccionada?.nombre || 'vacuna seleccionada';
+                    const mesNombre = meses[selectedMes - 1];
+                    toast.success(`🔄 Datos actualizados • ${vacunaNombre} • ${mesNombre} ${selectedAnio}`);
+                  } else {
+                    toast.warning('⚠️ Seleccione una vacuna para actualizar los datos');
+                  }
+                }}
+                disabled={isLoading || !selectedVacuna}
+                className="flex items-center px-4 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Actualizar
+              </button>
+              <button
+                onClick={() => setShowImportarModal(true)}
+                className="flex items-center px-4 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                title="Importar movimientos desde Excel"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Importar Movimientos
+              </button>
+              <button
+                className="flex items-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                title="Funcionalidad de exportación en desarrollo"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exportar
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Content Area Premium */}
+      <div className="max-w-full px-6 py-6 space-y-6">
 
       {/* Mensajes de estado */}
       {error && (
@@ -1281,268 +1293,297 @@ const Movimientos: React.FC = () => {
         </div>
       )}
 
-      {/* Panel de Filtros Compacto */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="bg-blue-100 rounded-lg p-2">
-                <Settings className="h-4 w-4 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">Filtros de Análisis</h3>
-            </div>
-            {(isLoadingEstablecimientos || isLoadingActivas) && (
-              <div className="flex items-center text-blue-600">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                <span className="text-sm">Cargando...</span>
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Centro de Acopio */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Building2 className="h-4 w-4 inline mr-1 text-emerald-600" />
-                Centro de Acopio
-              </label>
-              <select
-                value={selectedCentroAcopio}
-                onChange={(e) => setSelectedCentroAcopio(e.target.value)}
-                disabled={isLoadingEstablecimientos}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white text-sm font-medium transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-              >
-                <option value="todos">🌐 Todos los Centros</option>
-                {centrosAcopio.map((centro) => {
-                  const colores = coloresAcopio[centro.nombre as keyof typeof coloresAcopio] || coloresAcopio['DEFAULT'];
-                  return (
-                    <option key={centro.id} value={centro.id}>
-                      {colores.icon} {centro.nombre}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            {/* Vacuna */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Package className="h-4 w-4 inline mr-1 text-purple-600" />
-                Vacuna
-              </label>
-              <select
-                value={selectedVacuna}
-                onChange={(e) => setSelectedVacuna(e.target.value)}
-                disabled={isLoadingActivas}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-sm font-medium transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-              >
-                {vacunasActivas.length === 0 && (
-                  <option value="">Seleccione una vacuna</option>
-                )}
-                {vacunasActivas.map((vacuna) => (
-                  <option key={vacuna.id} value={vacuna.id}>
-                    💉 {vacuna.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Mes */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Calendar className="h-4 w-4 inline mr-1 text-blue-600" />
-                Mes
-              </label>
-              <select
-                value={selectedMes}
-                onChange={(e) => setSelectedMes(Number(e.target.value))}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm font-medium transition-colors"
-              >
-                {meses.map((mes, index) => (
-                  <option key={index + 1} value={index + 1}>
-                    {mes}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Año */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Calendar className="h-4 w-4 inline mr-1 text-blue-600" />
-                Año
-              </label>
-              <select
-                value={selectedAnio}
-                onChange={(e) => setSelectedAnio(Number(e.target.value))}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm font-medium transition-colors"
-              >
-                <option value={2024}>2024</option>
-                <option value={2025}>2025</option>
-                <option value={2026}>2026</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Estado Compacto */}
-          {selectedVacuna && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-700 font-medium">
-                    {datosTabla.length} establecimientos • {meses[selectedMes - 1]} {selectedAnio}
-                  </span>
-                </div>
-                <div className="text-gray-500">
-                  {selectedCentroAcopio === 'todos' ? 'Todos los centros' : centrosAcopio.find(c => c.id === selectedCentroAcopio)?.nombre}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Stock Disponible Compacto */}
-      {selectedVacuna && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between mb-4">
+        {/* Panel de Filtros Premium */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="bg-emerald-100 rounded-lg p-2">
-                  <Package className="h-4 w-4 text-emerald-600" />
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-2.5 rounded-xl shadow-lg">
+                  <Settings className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">Stock Disponible</h3>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Filtros de Análisis</h3>
+                  <p className="text-sm text-gray-600">Configura los parámetros de consulta</p>
+                </div>
               </div>
-              {(isLoadingStock || isUpdatingStock) && (
+              {(isLoadingEstablecimientos || isLoadingActivas) && (
                 <div className="flex items-center text-blue-600">
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  <span className="text-sm">Actualizando...</span>
+                  <span className="text-sm font-medium">Cargando...</span>
                 </div>
               )}
             </div>
+          </div>
 
-            {stockInfo ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Stock Inicial */}
-                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-xl font-bold text-blue-700">
-                        {stockInfo.stockInicial.toLocaleString()}
-                      </div>
-                      <div className="text-sm text-blue-600 font-medium">Stock Inicial</div>
-                    </div>
-                    <Package className="h-5 w-5 text-blue-600" />
-                  </div>
-                </div>
-
-                {/* Total Entregas */}
-                <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-xl font-bold text-orange-700">
-                        {stockInfo.totalEntregas.toLocaleString()}
-                      </div>
-                      <div className="text-sm text-orange-600 font-medium">Entregas</div>
-                    </div>
-                    <TruckIcon className="h-5 w-5 text-orange-600" />
-                  </div>
-                </div>
-
-                {/* Stock Disponible */}
-                <div className={`rounded-lg p-4 border ${
-                  stockInfo.stockDisponible < 0 ? 'bg-red-50 border-red-200' :
-                  stockInfo.estado === 'bueno' ? 'bg-green-50 border-green-200' :
-                  stockInfo.estado === 'medio' ? 'bg-yellow-50 border-yellow-200' :
-                  'bg-red-50 border-red-200'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className={`text-xl font-bold ${
-                        stockInfo.stockDisponible < 0 ? 'text-red-700' :
-                        stockInfo.estado === 'bueno' ? 'text-green-700' :
-                        stockInfo.estado === 'medio' ? 'text-yellow-700' :
-                        'text-red-700'
-                      }`}>
-                        {stockInfo.stockDisponible.toLocaleString()}
-                      </div>
-                      <div className={`text-sm font-medium ${
-                        stockInfo.stockDisponible < 0 ? 'text-red-600' :
-                        stockInfo.estado === 'bueno' ? 'text-green-600' :
-                        stockInfo.estado === 'medio' ? 'text-yellow-600' :
-                        'text-red-600'
-                      }`}>
-                        {stockInfo.stockDisponible < 0 ? 'Déficit' : 'Disponible'}
-                      </div>
-                    </div>
-                    {stockInfo.stockDisponible < 0 ? (
-                      <AlertTriangle className="h-5 w-5 text-red-600" />
-                    ) : stockInfo.estado === 'bueno' ? (
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                    ) : stockInfo.estado === 'medio' ? (
-                      <AlertCircle className="h-5 w-5 text-yellow-600" />
-                    ) : (
-                      <AlertTriangle className="h-5 w-5 text-red-600" />
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : stockError ? (
-              <div className="text-center py-6">
-                <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                <div className="text-red-600 text-sm font-medium mb-2">Error al cargar stock</div>
-                <button
-                  onClick={() => {
-                    if (selectedVacuna) {
-                      setStockError(null);
-                      setIsLoadingStock(true);
-                      getStockDisponible(selectedVacuna, selectedMes, selectedAnio)
-                        .then(setStockInfo)
-                        .catch((error: any) => {
-                          const errorMessage = error?.response?.data?.message || error?.message || 'Error al cargar stock disponible';
-                          setStockError(errorMessage);
-                        })
-                        .finally(() => setIsLoadingStock(false));
-                    }
-                  }}
-                  className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+          <div className="px-6 py-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {/* Centro de Acopio */}
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-800">
+                  <Building2 className="h-4 w-4 mr-2 text-emerald-600" />
+                  Centro de Acopio
+                </label>
+                <select
+                  value={selectedCentroAcopio}
+                  onChange={(e) => setSelectedCentroAcopio(e.target.value)}
+                  disabled={isLoadingEstablecimientos}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white text-sm font-medium transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed hover:border-emerald-300"
                 >
-                  Reintentar
-                </button>
+                  <option value="todos">🌐 Todos los Centros</option>
+                  {centrosAcopio.map((centro) => {
+                    const colores = coloresAcopio[centro.nombre as keyof typeof coloresAcopio] || coloresAcopio['DEFAULT'];
+                    return (
+                      <option key={centro.id} value={centro.id}>
+                        {colores.icon} {centro.nombre}
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
-            ) : (
-              <div className="text-center py-6">
-                <Package className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <div className="text-gray-600 text-sm">Cargando información de stock...</div>
+
+              {/* Vacuna */}
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-800">
+                  <Package className="h-4 w-4 mr-2 text-purple-600" />
+                  Vacuna
+                </label>
+                <select
+                  value={selectedVacuna}
+                  onChange={(e) => setSelectedVacuna(e.target.value)}
+                  disabled={isLoadingActivas}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-sm font-medium transition-all duration-200 disabled:bg-gray-50 disabled:cursor-not-allowed hover:border-purple-300"
+                >
+                  {vacunasActivas.length === 0 && (
+                    <option value="">Seleccione una vacuna</option>
+                  )}
+                  {vacunasActivas.map((vacuna) => (
+                    <option key={vacuna.id} value={vacuna.id}>
+                      💉 {vacuna.nombre}
+                    </option>
+                  ))}
+                </select>
               </div>
-            )}
-          </div>
-        </div>
-      )}
 
+              {/* Mes */}
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-800">
+                  <Calendar className="h-4 w-4 mr-2 text-blue-600" />
+                  Período
+                </label>
+                <select
+                  value={selectedMes}
+                  onChange={(e) => setSelectedMes(Number(e.target.value))}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm font-medium transition-all duration-200 hover:border-blue-300"
+                >
+                  {meses.map((mes, index) => (
+                    <option key={index + 1} value={index + 1}>
+                      {mes}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-
-      {/* Tabla de Movimientos */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Movimientos de Vacunas - {meses[selectedMes - 1]} {selectedAnio}
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                {datosTabla.length} establecimientos • Total entregas: {totalesGenerales.entrega.toLocaleString()}
-              </p>
+              {/* Año */}
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-800">
+                  <Calendar className="h-4 w-4 mr-2 text-indigo-600" />
+                  Año
+                </label>
+                <select
+                  value={selectedAnio}
+                  onChange={(e) => setSelectedAnio(Number(e.target.value))}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm font-medium transition-all duration-200 hover:border-indigo-300"
+                >
+                  <option value={2024}>2024</option>
+                  <option value={2025}>2025</option>
+                  <option value={2026}>2026</option>
+                </select>
+              </div>
             </div>
-            {isLoading && (
-              <div className="flex items-center text-blue-600">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                <span className="text-sm">Cargando...</span>
+
+            {/* Estado de Selección Premium */}
+            {selectedVacuna && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-green-600 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-semibold text-gray-800">
+                      {datosTabla.length} establecimientos • {meses[selectedMes - 1]} {selectedAnio}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-600 font-medium">
+                    {selectedCentroAcopio === 'todos' ? 'Todos los centros' : centrosAcopio.find(c => c.id === selectedCentroAcopio)?.nombre}
+                  </div>
+                </div>
               </div>
             )}
           </div>
         </div>
+
+        {/* Stock Disponible Premium */}
+        {selectedVacuna && (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden">
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 p-2.5 rounded-xl shadow-lg">
+                    <Package className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Stock Disponible</h3>
+                    <p className="text-sm text-gray-600">Resumen de disponibilidad actual</p>
+                  </div>
+                </div>
+                {(isLoadingStock || isUpdatingStock) && (
+                  <div className="flex items-center text-blue-600">
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <span className="text-sm font-medium">Actualizando...</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="px-6 py-6">
+
+              {stockInfo ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Stock Inicial Premium */}
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-blue-800">
+                          {stockInfo.stockInicial.toLocaleString()}
+                        </div>
+                        <div className="text-sm text-blue-600 font-semibold mt-1">Stock Inicial</div>
+                      </div>
+                      <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
+                        <Package className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Total Entregas Premium */}
+                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border-2 border-orange-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-orange-800">
+                          {stockInfo.totalEntregas.toLocaleString()}
+                        </div>
+                        <div className="text-sm text-orange-600 font-semibold mt-1">Entregas</div>
+                      </div>
+                      <div className="bg-orange-600 p-3 rounded-xl shadow-lg">
+                        <TruckIcon className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stock Disponible Premium */}
+                  <div className={`rounded-xl p-6 border-2 shadow-sm hover:shadow-md transition-all duration-200 ${
+                    stockInfo.stockDisponible < 0 ? 'bg-gradient-to-br from-red-50 to-red-100 border-red-200' :
+                    stockInfo.estado === 'bueno' ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200' :
+                    stockInfo.estado === 'medio' ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200' :
+                    'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className={`text-2xl font-bold ${
+                          stockInfo.stockDisponible < 0 ? 'text-red-800' :
+                          stockInfo.estado === 'bueno' ? 'text-green-800' :
+                          stockInfo.estado === 'medio' ? 'text-yellow-800' :
+                          'text-red-800'
+                        }`}>
+                          {stockInfo.stockDisponible.toLocaleString()}
+                        </div>
+                        <div className={`text-sm font-semibold mt-1 ${
+                          stockInfo.stockDisponible < 0 ? 'text-red-600' :
+                          stockInfo.estado === 'bueno' ? 'text-green-600' :
+                          stockInfo.estado === 'medio' ? 'text-yellow-600' :
+                          'text-red-600'
+                        }`}>
+                          {stockInfo.stockDisponible < 0 ? 'Déficit' : 'Disponible'}
+                        </div>
+                      </div>
+                      <div className={`p-3 rounded-xl shadow-lg ${
+                        stockInfo.stockDisponible < 0 ? 'bg-red-600' :
+                        stockInfo.estado === 'bueno' ? 'bg-green-600' :
+                        stockInfo.estado === 'medio' ? 'bg-yellow-600' :
+                        'bg-red-600'
+                      }`}>
+                        {stockInfo.stockDisponible < 0 ? (
+                          <AlertTriangle className="h-6 w-6 text-white" />
+                        ) : stockInfo.estado === 'bueno' ? (
+                          <CheckCircle className="h-6 w-6 text-white" />
+                        ) : stockInfo.estado === 'medio' ? (
+                          <AlertCircle className="h-6 w-6 text-white" />
+                        ) : (
+                          <AlertTriangle className="h-6 w-6 text-white" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : stockError ? (
+                <div className="text-center py-8">
+                  <div className="bg-red-100 p-4 rounded-xl inline-block mb-4">
+                    <AlertTriangle className="h-8 w-8 text-red-500 mx-auto" />
+                  </div>
+                  <div className="text-red-700 text-sm font-semibold mb-3">Error al cargar stock</div>
+                  <button
+                    onClick={() => {
+                      if (selectedVacuna) {
+                        setStockError(null);
+                        setIsLoadingStock(true);
+                        getStockDisponible(selectedVacuna, selectedMes, selectedAnio)
+                          .then(setStockInfo)
+                          .catch((error: any) => {
+                            const errorMessage = error?.response?.data?.message || error?.message || 'Error al cargar stock disponible';
+                            setStockError(errorMessage);
+                          })
+                          .finally(() => setIsLoadingStock(false));
+                      }
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    Reintentar
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="bg-gray-100 p-4 rounded-xl inline-block mb-4">
+                    <Package className="h-8 w-8 text-gray-400 mx-auto" />
+                  </div>
+                  <div className="text-gray-600 text-sm font-medium">Cargando información de stock...</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Tabla de Movimientos Premium */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 p-2.5 rounded-xl shadow-lg">
+                  <BarChart3 className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">
+                    Movimientos de Vacunas - {meses[selectedMes - 1]} {selectedAnio}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {datosTabla.length} establecimientos • Total entregas: {totalesGenerales.entrega.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              {isLoading && (
+                <div className="flex items-center text-blue-600">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <span className="text-sm font-medium">Cargando...</span>
+                </div>
+              )}
+            </div>
+          </div>
 
         <div className="overflow-x-auto overflow-y-visible shadow-sm">
           <table className="min-w-full divide-y divide-gray-300 bg-white" role="table" aria-label="Movimientos de Vacunas">
@@ -2447,6 +2488,7 @@ const Movimientos: React.FC = () => {
           isImportingExcel={isImportingExcel}
         />
       )}
+      </div>
     </div>
   );
 };
