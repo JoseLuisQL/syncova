@@ -295,7 +295,13 @@ export const ROUTES = {
   },
   KARDEX: '/kardex',
   REPORTES: '/reportes',
-  ALERTAS: '/alertas',
+  ALERTAS: {
+    ROOT: '/alertas',
+    DASHBOARD: '/alertas/dashboard',
+    ALERTAS: '/alertas/alertas',
+    REPORTES: '/alertas/reportes',
+    CONFIGURACION: '/alertas/configuracion'
+  },
   USUARIOS: '/usuarios',
   CONFIGURACION: '/configuracion',
   DEBUG: '/debug'

@@ -10,7 +10,7 @@ import Movimientos from '../Movimientos/Movimientos';
 import Planificacion from '../Planificacion/Planificacion';
 import Kardex from '../Kardex/Kardex';
 import Reportes from '../Reportes/Reportes';
-import Alertas from '../Alertas/Alertas';
+import AlertasModule from '../Alertas/AlertasModule';
 import Usuarios from '../Usuarios/Usuarios';
 import Configuracion from '../Configuracion/Configuracion';
 import VacunasDebug from '../Debug/VacunasDebug';
@@ -94,12 +94,12 @@ const AppRoutes: React.FC = () => {
         } 
       />
       
-      {/* Alertas */}
+      {/* Alertas - con rutas anidadas */}
       <Route 
-        path="/alertas" 
+        path="/alertas/*" 
         element={
           <ProtectedRoute>
-            <Alertas />
+            <AlertasModule />
           </ProtectedRoute>
         } 
       />
