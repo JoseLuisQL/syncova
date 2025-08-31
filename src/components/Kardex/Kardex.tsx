@@ -6,7 +6,6 @@ import {
   Download,
   Calendar,
   Package,
-  Building2,
   ArrowUpCircle,
   ArrowDownCircle,
   RefreshCw,
@@ -19,10 +18,7 @@ import {
   Printer,
   BarChart3,
   Activity,
-  Layers,
   Archive,
-  Plus,
-  Minus,
   ArrowRightLeft,
   Settings,
   Loader2,
@@ -32,15 +28,70 @@ import {
   Building,
   Syringe,
   Shield,
-  User,
-  MapPin
+  User
 } from 'lucide-react';
-import { Establecimiento, Vacuna, Lote, Jeringa, Kardex as KardexType } from '../../types';
+import { Establecimiento, Vacuna, Jeringa } from '../../types';
 import { KardexService, DeliveryBreakdown } from '../../services/KardexService';
 import { useKardexData } from '../../hooks/useKardexData';
 
+// Configuración de secciones organizadas jerárquicamente
+interface SectionConfig {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  path: string;
+  category: 'operaciones' | 'analisis' | 'auditoria';
+  description?: string;
+}
+
+const KARDEX_SECTIONS: SectionConfig[] = [
+  // Sección Operaciones
+  { 
+    id: 'movimientos', 
+    label: 'Movimientos', 
+    icon: BookOpen, 
+    path: '/kardex/movimientos', 
+    category: 'operaciones',
+    description: 'Registro de movimientos de inventario'
+  },
+  { 
+    id: 'consultas', 
+    label: 'Consultas Avanzadas', 
+    icon: Search, 
+    path: '/kardex/consultas', 
+    category: 'operaciones',
+    description: 'Búsquedas especializadas'
+  },
+  
+  // Sección Análisis
+  { 
+    id: 'reportes', 
+    label: 'Reportes', 
+    icon: BarChart3, 
+    path: '/kardex/reportes', 
+    category: 'analisis',
+    description: 'Reportes detallados'
+  },
+  
+  // Sección Auditoría
+  { 
+    id: 'auditoria', 
+    label: 'Auditoría', 
+    icon: Activity, 
+    path: '/kardex/auditoria', 
+    category: 'auditoria',
+    description: 'Trazabilidad y control'
+  }
+];
+
+const CATEGORY_CONFIG = {
+  operaciones: { label: 'Operaciones', icon: Archive, color: 'blue' },
+  analisis: { label: 'Análisis', icon: TrendingUp, color: 'emerald' },
+  auditoria: { label: 'Auditoría', icon: Shield, color: 'purple' }
+};
+
 const Kardex: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'movimientos' | 'consultas' | 'reportes' | 'auditoria'>('movimientos');
+  const [activeSection, setActiveSection] = useState<string>('movimientos');
 
   // Usar el hook personalizado para manejar los datos del kardex
   const {
@@ -61,11 +112,8 @@ const Kardex: React.FC = () => {
     errorEstadisticas,
     errorFiltros,
     filtros,
-    cargarMovimientos,
-    cargarEstadisticas,
     cargarLotes,
     actualizarFiltros,
-    limpiarFiltros,
     cambiarPagina,
     cambiarItemsPorPagina,
     irAPrimeraPagina,
@@ -78,7 +126,6 @@ const Kardex: React.FC = () => {
   const [selectedTipo, setSelectedTipo] = useState<'vacuna' | 'jeringa' | 'todos'>('todos');
   const [selectedItem, setSelectedItem] = useState<string>('todos');
   const [selectedLote, setSelectedLote] = useState<string>('todos');
-  const [selectedEstablecimiento, setSelectedEstablecimiento] = useState<string>('todos');
   const [fechaInicio, setFechaInicio] = useState<string>('');
   const [fechaFin, setFechaFin] = useState<string>('');
   const [tipoMovimiento, setTipoMovimiento] = useState<string>('todos');
@@ -124,19 +171,14 @@ const Kardex: React.FC = () => {
 
   // Cargar lotes cuando cambie el tipo o item seleccionado
   useEffect(() => {
-    if (selectedItem !== 'todos') {
-      cargarLotes(selectedTipo, selectedItem);
+    if (selectedItem !== 'todos' && selectedTipo !== 'todos') {
+      cargarLotes(selectedTipo as 'vacuna' | 'jeringa', selectedItem);
     }
   }, [selectedTipo, selectedItem, cargarLotes]);
 
   // Removed automatic filter execution - filters now only execute when "Apply Filters" button is clicked
 
-  const tabs = [
-    { id: 'movimientos', label: 'Movimientos de Kardex', icon: BookOpen },
-    { id: 'consultas', label: 'Consultas Avanzadas', icon: Search },
-    { id: 'reportes', label: 'Reportes Detallados', icon: BarChart3 },
-    { id: 'auditoria', label: 'Auditoría y Trazabilidad', icon: Activity },
-  ];
+
   // Funciones helper para obtener nombres de los datos relacionados
   const getItemNombre = (tipo: string, itemId: string) => {
     if (tipo === 'vacuna') {
@@ -209,169 +251,216 @@ const Kardex: React.FC = () => {
     );
   }
 
+  // Agrupar secciones por categoría
+  const sectionsByCategory = KARDEX_SECTIONS.reduce((acc, section) => {
+    if (!acc[section.category]) {
+      acc[section.category] = [];
+    }
+    acc[section.category].push(section);
+    return acc;
+  }, {} as Record<string, SectionConfig[]>);
+
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Mostrar errores si existen */}
       {(error || errorEstadisticas || errorFiltros) && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
-            <div className="flex-1">
-              <h3 className="text-sm font-medium text-red-800">Error al cargar datos</h3>
-              <div className="mt-1 text-sm text-red-700">
-                {error && <p>• Movimientos: {error}</p>}
-                {errorEstadisticas && <p>• Estadísticas: {errorEstadisticas}</p>}
-                {errorFiltros && <p>• Filtros: {errorFiltros}</p>}
-              </div>
-              <div className="mt-3 flex space-x-3">
-                <button
-                  onClick={limpiarErrores}
-                  className="text-sm text-red-600 hover:text-red-800 underline"
-                >
-                  Cerrar
-                </button>
-                <button
-                  onClick={refrescarTodo}
-                  className="text-sm text-red-600 hover:text-red-800 underline"
-                >
-                  Reintentar
-                </button>
+        <div className="mx-6 mt-6">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center">
+              <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-red-800">Error al cargar datos</h3>
+                <div className="mt-1 text-sm text-red-700">
+                  {error && <p>• Movimientos: {error}</p>}
+                  {errorEstadisticas && <p>• Estadísticas: {errorEstadisticas}</p>}
+                  {errorFiltros && <p>• Filtros: {errorFiltros}</p>}
+                </div>
+                <div className="mt-3 flex space-x-3">
+                  <button
+                    onClick={limpiarErrores}
+                    className="text-sm text-red-600 hover:text-red-800 underline"
+                  >
+                    Cerrar
+                  </button>
+                  <button
+                    onClick={refrescarTodo}
+                    className="text-sm text-red-600 hover:text-red-800 underline"
+                  >
+                    Reintentar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <div className="flex items-center space-x-3">
-            <h2 className="text-xl font-semibold text-gray-900">Sistema de Kardex</h2>
-            {/* Indicador de estado de conexión */}
-            <div className="flex items-center space-x-2">
-              {loading || loadingEstadisticas || loadingFiltros ? (
-                <div className="flex items-center text-blue-600">
-                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                  <span className="text-xs">Sincronizando...</span>
+      {/* Header Premium */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-full px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-3 rounded-xl shadow-lg">
+                <BookOpen className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Sistema de Kardex</h1>
+                <p className="text-gray-600">Control detallado de movimientos y trazabilidad</p>
+                {/* Indicador de estado de conexión */}
+                <div className="flex items-center space-x-2 mt-1">
+                  {loading || loadingEstadisticas || loadingFiltros ? (
+                    <div className="flex items-center text-blue-600">
+                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      <span className="text-xs">Sincronizando...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center text-green-600">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      <span className="text-xs">Conectado</span>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="flex items-center text-green-600">
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  <span className="text-xs">Conectado</span>
-                </div>
-              )}
+              </div>
             </div>
-          </div>
-          <p className="text-gray-600 mt-1">Control detallado de movimientos y trazabilidad de inventario</p>
-          <div className="mt-2 text-sm text-gray-500">
-            Última actualización: {new Date().toLocaleString()}
-          </div>
-        </div>
-        <div className="flex space-x-3">
-          <button
-            onClick={handleRefresh}
-            disabled={loading || loadingEstadisticas || loadingFiltros}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Actualizar datos del servidor"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${(loading || loadingEstadisticas || loadingFiltros) ? 'animate-spin' : ''}`} />
-            Actualizar
-          </button>
-          <button
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            title="Exportar datos a Excel"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Exportar Excel
-          </button>
-          <button
-            className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            title="Imprimir reporte"
-          >
-            <Printer className="h-4 w-4 mr-2" />
-            Imprimir
-          </button>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
+            <div className="flex space-x-3">
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                onClick={handleRefresh}
+                disabled={loading || loadingEstadisticas || loadingFiltros}
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                title="Actualizar datos del servidor"
               >
-                <Icon className="h-4 w-4 mr-2" />
-                {tab.label}
+                <RefreshCw className={`h-4 w-4 mr-2 ${(loading || loadingEstadisticas || loadingFiltros) ? 'animate-spin' : ''}`} />
+                Actualizar
               </button>
-            );
-          })}
-        </nav>
+              <button
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                title="Exportar datos a Excel"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Exportar
+              </button>
+              <button
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                title="Imprimir reporte"
+              >
+                <Printer className="h-4 w-4 mr-2" />
+                Imprimir
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Content */}
-      {activeTab === 'movimientos' && (
-        <MovimientosKardexTab
-          selectedTipo={selectedTipo}
-          setSelectedTipo={setSelectedTipo}
-          selectedItem={selectedItem}
-          setSelectedItem={setSelectedItem}
-          selectedLote={selectedLote}
-          setSelectedLote={setSelectedLote}
-          fechaInicio={fechaInicio}
-          setFechaInicio={setFechaInicio}
-          fechaFin={fechaFin}
-          setFechaFin={setFechaFin}
-          tipoMovimiento={tipoMovimiento}
-          setTipoMovimiento={setTipoMovimiento}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          movimientos={movimientos}
-          estadisticas={estadisticas}
-          total={total}
-          vacunas={vacunas}
-          jeringas={jeringas}
-          establecimientos={establecimientos}
-          lotes={lotes}
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-          totalPages={totalPages}
-          loading={loading}
-          loadingEstadisticas={loadingEstadisticas}
-          loadingFiltros={loadingFiltros}
-          getItemNombre={getItemNombre}
-          getLoteNumero={getLoteNumero}
-          getEstablecimientoNombre={getEstablecimientoNombre}
-          getTipoMovimientoIcon={getTipoMovimientoIcon}
-          getTipoMovimientoColor={getTipoMovimientoColor}
-          onLimpiarFiltros={handleLimpiarFiltros}
-          onAplicarFiltros={aplicarFiltros}
-          onCambiarPagina={cambiarPagina}
-          onCambiarItemsPorPagina={cambiarItemsPorPagina}
-          onIrAPrimeraPagina={irAPrimeraPagina}
-          onIrAUltimaPagina={irAUltimaPagina}
-        />
-      )}
+      {/* Navigation Premium */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-full px-6">
+          <div className="grid grid-cols-3 gap-1">
+            {Object.entries(sectionsByCategory).map(([categoryKey, sections]) => {
+              const category = CATEGORY_CONFIG[categoryKey as keyof typeof CATEGORY_CONFIG];
+              const CategoryIcon = category.icon;
+              
+              return (
+                <div key={categoryKey} className="relative group">
+                  {/* Category Header */}
+                  <div className={`flex items-center justify-center py-4 border-b-4 border-${category.color}-500 bg-${category.color}-50`}>
+                    <CategoryIcon className={`h-5 w-5 text-${category.color}-600 mr-2`} />
+                    <span className={`font-semibold text-${category.color}-800`}>{category.label}</span>
+                  </div>
+                  
+                  {/* Section Buttons */}
+                  <div className="bg-white">
+                    {sections.map((section) => {
+                      const Icon = section.icon;
+                      const isActive = activeSection === section.id;
+                      
+                      return (
+                        <button
+                          key={section.id}
+                          onClick={() => setActiveSection(section.id)}
+                          className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+                            isActive ? `bg-${category.color}-50 border-l-4 border-l-${category.color}-500` : ''
+                          }`}
+                        >
+                          <Icon className={`h-4 w-4 mr-3 ${isActive ? `text-${category.color}-600` : 'text-gray-500'}`} />
+                          <div className="flex-1">
+                            <div className={`font-medium text-sm ${isActive ? `text-${category.color}-800` : 'text-gray-900'}`}>
+                              {section.label}
+                            </div>
+                            {section.description && (
+                              <div className="text-xs text-gray-500 mt-0.5">
+                                {section.description}
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
-      {activeTab === 'consultas' && (
-        <ConsultasAvanzadasTab />
-      )}
+      {/* Content Area Premium */}
+      <div className="max-w-full px-6 py-6">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          {activeSection === 'movimientos' && (
+            <MovimientosKardexTab
+              selectedTipo={selectedTipo}
+              setSelectedTipo={setSelectedTipo}
+              selectedItem={selectedItem}
+              setSelectedItem={setSelectedItem}
+              selectedLote={selectedLote}
+              setSelectedLote={setSelectedLote}
+              fechaInicio={fechaInicio}
+              setFechaInicio={setFechaInicio}
+              fechaFin={fechaFin}
+              setFechaFin={setFechaFin}
+              tipoMovimiento={tipoMovimiento}
+              setTipoMovimiento={setTipoMovimiento}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              movimientos={movimientos}
+              estadisticas={estadisticas}
+              total={total}
+              vacunas={vacunas}
+              jeringas={jeringas}
+              lotes={lotes}
+              currentPage={currentPage}
+              itemsPerPage={itemsPerPage}
+              totalPages={totalPages}
+              loading={loading}
+              loadingEstadisticas={loadingEstadisticas}
+              loadingFiltros={loadingFiltros}
+              getItemNombre={getItemNombre}
+              getLoteNumero={getLoteNumero}
+              getEstablecimientoNombre={getEstablecimientoNombre}
+              getTipoMovimientoIcon={getTipoMovimientoIcon}
+              getTipoMovimientoColor={getTipoMovimientoColor}
+              onLimpiarFiltros={handleLimpiarFiltros}
+              onAplicarFiltros={aplicarFiltros}
+              onCambiarPagina={cambiarPagina}
+              onCambiarItemsPorPagina={cambiarItemsPorPagina}
+              onIrAPrimeraPagina={irAPrimeraPagina}
+              onIrAUltimaPagina={irAUltimaPagina}
+            />
+          )}
 
-      {activeTab === 'reportes' && (
-        <ReportesDetalladosTab />
-      )}
+          {activeSection === 'consultas' && (
+            <ConsultasAvanzadasTab />
+          )}
 
-      {activeTab === 'auditoria' && (
-        <AuditoriaTab />
-      )}
+          {activeSection === 'reportes' && (
+            <ReportesDetalladosTab />
+          )}
+
+          {activeSection === 'auditoria' && (
+            <AuditoriaTab />
+          )}
+        </div>
+      </div>
     </div>
   );
 };
@@ -1033,7 +1122,6 @@ interface MovimientosKardexTabProps {
   total: number;
   vacunas: Vacuna[];
   jeringas: Jeringa[];
-  establecimientos: Establecimiento[];
   lotes: any[];
   // Datos de paginación
   currentPage: number;
@@ -1078,7 +1166,6 @@ const MovimientosKardexTab: React.FC<MovimientosKardexTabProps> = ({
   total,
   vacunas,
   jeringas,
-  establecimientos,
   lotes,
   currentPage,
   itemsPerPage,
@@ -1122,31 +1209,37 @@ const MovimientosKardexTab: React.FC<MovimientosKardexTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Filtros */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">🔍 Filtros de Búsqueda</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Item</label>
+      {/* Filtros Premium */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 shadow-sm">
+        <div className="flex items-center mb-6">
+          <div className="bg-blue-600 p-2 rounded-lg mr-3">
+            <Filter className="h-5 w-5 text-white" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">Filtros de Búsqueda</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Tipo de Item</label>
             <select
               value={selectedTipo}
               onChange={(e) => setSelectedTipo(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-200"
             >
-              <option value="todos">🔍 Todos los tipos</option>
-              <option value="vacuna">💉 Vacunas</option>
-              <option value="jeringa">🩹 Jeringas</option>
+              <option value="todos">Todos los tipos</option>
+              <option value="vacuna">Vacunas</option>
+              <option value="jeringa">Jeringas</option>
             </select>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">
               {selectedTipo === 'vacuna' ? 'Vacuna' : 'Jeringa'}
             </label>
             <select
               value={selectedItem}
               onChange={(e) => setSelectedItem(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 disabled:bg-gray-50"
               disabled={loadingFiltros}
             >
               <option value="todos">Todos los items</option>
@@ -1165,16 +1258,15 @@ const MovimientosKardexTab: React.FC<MovimientosKardexTabProps> = ({
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Lote</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Lote</label>
             <select
               value={selectedLote}
               onChange={(e) => setSelectedLote(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 disabled:bg-gray-50"
               disabled={loadingFiltros}
             >
               <option value="todos">Todos los lotes</option>
-              {/* Los lotes se obtienen dinámicamente según el item seleccionado */}
               {lotes && lotes.length > 0 && lotes.map((lote: any) => (
                 <option key={lote.id} value={lote.id}>
                   {lote.numero}
@@ -1183,145 +1275,159 @@ const MovimientosKardexTab: React.FC<MovimientosKardexTabProps> = ({
             </select>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Movimiento</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Tipo de Movimiento</label>
             <select
               value={tipoMovimiento}
               onChange={(e) => setTipoMovimiento(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-200"
             >
               <option value="todos">Todos los movimientos</option>
-              <option value="ingreso">⬆️ Ingresos</option>
-              <option value="salida">⬇️ Salidas</option>
-              <option value="transferencia">↔️ Transferencias</option>
-              <option value="ajuste">⚙️ Ajustes</option>
+              <option value="ingreso">Ingresos</option>
+              <option value="salida">Salidas</option>
+              <option value="transferencia">Transferencias</option>
+              <option value="ajuste">Ajustes</option>
             </select>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Inicio</label>
-            <input
-              type="date"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Fin</label>
-            <input
-              type="date"
-              value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Fecha Inicio</label>
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Calendar className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" />
+              <input
+                type="date"
+                value={fechaInicio}
+                onChange={(e) => setFechaInicio(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-200"
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Fecha Fin</label>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" />
+              <input
+                type="date"
+                value={fechaFin}
+                onChange={(e) => setFechaFin(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-200"
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Búsqueda General</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Buscar por documento, observaciones..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-200"
               />
             </div>
           </div>
+        </div>
 
-          {/* Botones de acción para filtros */}
-          <div className="flex items-center justify-center space-x-3 pt-4 border-t border-gray-200">
-            <button
-              onClick={onAplicarFiltros}
-              className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Search className="h-4 w-4 mr-2" />
-              Aplicar Filtros Ahora
-            </button>
-            <button
-              onClick={onLimpiarFiltros}
-              className="flex items-center px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Limpiar Todo
-            </button>
-          </div>
+        {/* Botones de acción premium */}
+        <div className="flex items-center justify-center space-x-4 pt-6 border-t border-blue-200">
+          <button
+            onClick={onAplicarFiltros}
+            className="flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          >
+            <Search className="h-4 w-4 mr-2" />
+            Aplicar Filtros
+          </button>
+          <button
+            onClick={onLimpiarFiltros}
+            className="flex items-center px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Limpiar Filtros
+          </button>
         </div>
       </div>
 
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              {loadingEstadisticas ? (
-                <Loader2 className="h-6 w-6 text-green-600 animate-spin" />
-              ) : (
-                <ArrowUpCircle className="h-6 w-6 text-green-600" />
-              )}
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Ingresos</p>
-              <p className="text-2xl font-bold text-green-600">
+      {/* Estadísticas Premium */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg">
+                  {loadingEstadisticas ? (
+                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                  ) : (
+                    <ArrowUpCircle className="h-6 w-6 text-white" />
+                  )}
+                </div>
+              </div>
+              <p className="text-sm font-semibold text-green-700 mb-1">Total Ingresos</p>
+              <p className="text-3xl font-bold text-green-600">
                 {loadingEstadisticas ? '...' : totalIngresos.toLocaleString()}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-red-100 rounded-lg">
-              {loadingEstadisticas ? (
-                <Loader2 className="h-6 w-6 text-red-600 animate-spin" />
-              ) : (
-                <ArrowDownCircle className="h-6 w-6 text-red-600" />
-              )}
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Salidas</p>
-              <p className="text-2xl font-bold text-red-600">
+        <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-xl border border-red-200 p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg">
+                  {loadingEstadisticas ? (
+                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                  ) : (
+                    <ArrowDownCircle className="h-6 w-6 text-white" />
+                  )}
+                </div>
+              </div>
+              <p className="text-sm font-semibold text-red-700 mb-1">Total Salidas</p>
+              <p className="text-3xl font-bold text-red-600">
                 {loadingEstadisticas ? '...' : totalSalidas.toLocaleString()}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              {loadingEstadisticas ? (
-                <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
-              ) : (
-                <ArrowRightLeft className="h-6 w-6 text-blue-600" />
-              )}
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Transferencias</p>
-              <p className="text-2xl font-bold text-blue-600">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                  {loadingEstadisticas ? (
+                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                  ) : (
+                    <ArrowRightLeft className="h-6 w-6 text-white" />
+                  )}
+                </div>
+              </div>
+              <p className="text-sm font-semibold text-blue-700 mb-1">Transferencias</p>
+              <p className="text-3xl font-bold text-blue-600">
                 {loadingEstadisticas ? '...' : totalTransferencias.toLocaleString()}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              {loadingEstadisticas ? (
-                <Loader2 className="h-6 w-6 text-purple-600 animate-spin" />
-              ) : (
-                <Package className="h-6 w-6 text-purple-600" />
-              )}
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Saldo Actual</p>
-              <p className="text-2xl font-bold text-purple-600">
+        <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl border border-purple-200 p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                  {loadingEstadisticas ? (
+                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                  ) : (
+                    <Package className="h-6 w-6 text-white" />
+                  )}
+                </div>
+              </div>
+              <p className="text-sm font-semibold text-purple-700 mb-1">Saldo Total</p>
+              <p className="text-3xl font-bold text-purple-600">
                 {loadingEstadisticas ? '...' : saldoActual.toLocaleString()}
               </p>
             </div>
@@ -1329,74 +1435,62 @@ const MovimientosKardexTab: React.FC<MovimientosKardexTabProps> = ({
         </div>
       </div>
 
-      {/* Tabla de Movimientos */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+      {/* Tabla de Movimientos Premium */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-lg">
+        <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">📋 Movimientos de Kardex</h3>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <div className="bg-blue-600 p-2 rounded-lg mr-3">
+                <FileText className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Movimientos de Kardex</h3>
+                <p className="text-sm text-gray-600">
+                  {total.toLocaleString()} registros encontrados
+                  {(selectedTipo !== 'todos' || selectedItem !== 'todos' || selectedLote !== 'todos' ||
+                    tipoMovimiento !== 'todos' || searchTerm || fechaInicio || fechaFin) && (
+                    <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <Filter className="h-3 w-3 mr-1" />
+                      Filtrado
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
               {loading && (
                 <div className="flex items-center text-blue-600">
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   <span className="text-sm">Cargando...</span>
                 </div>
               )}
-              <div className="text-sm text-gray-600">
-                {total} movimientos encontrados
-              </div>
-              {/* Indicador de filtros activos */}
-              {(selectedTipo !== 'todos' || selectedItem !== 'todos' || selectedLote !== 'todos' ||
-                tipoMovimiento !== 'todos' || searchTerm || fechaInicio || fechaFin) && (
-                <div className="flex items-center text-orange-600 bg-orange-50 px-2 py-1 rounded">
-                  <Filter className="h-3 w-3 mr-1" />
-                  <span className="text-xs">Filtros activos</span>
-                </div>
-              )}
-              <button
-                onClick={onLimpiarFiltros}
-                className="text-sm text-blue-600 hover:text-blue-800 underline"
-              >
-                Limpiar filtros
-              </button>
             </div>
           </div>
         </div>
         
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gradient-to-r from-gray-50 to-blue-50">
               <tr>
-                <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
-                  #
+                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Fecha
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Fecha y Hora
+                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Movimiento
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tipo Movimiento
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Item / Lote
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Documento
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Cantidad
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Saldo Anterior
+                <th className="px-4 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Saldo
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Saldo Actual
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Origen / Destino
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Observaciones
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -1404,7 +1498,7 @@ const MovimientosKardexTab: React.FC<MovimientosKardexTabProps> = ({
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={11} className="px-6 py-12 text-center">
+                  <td colSpan={7} className="px-6 py-16 text-center">
                     <div className="flex items-center justify-center">
                       <Loader2 className="h-8 w-8 animate-spin text-blue-600 mr-3" />
                       <span className="text-gray-600">Cargando movimientos...</span>
@@ -1413,7 +1507,7 @@ const MovimientosKardexTab: React.FC<MovimientosKardexTabProps> = ({
                 </tr>
               ) : movimientos.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="px-6 py-12 text-center">
+                  <td colSpan={7} className="px-6 py-16 text-center">
                     <div className="text-gray-500">
                       <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                       <p>No se encontraron movimientos con los filtros aplicados</p>
@@ -1421,91 +1515,72 @@ const MovimientosKardexTab: React.FC<MovimientosKardexTabProps> = ({
                   </td>
                 </tr>
               ) : (
-                movimientos && movimientos.length > 0 ? movimientos.map((movimiento: any, index: number) => {
+                movimientos && movimientos.length > 0 ? movimientos.map((movimiento: any) => {
                   const TipoIcon = getTipoMovimientoIcon(movimiento.tipoMovimiento);
                   const colorClass = getTipoMovimientoColor(movimiento.tipoMovimiento);
 
-                  // Calculate row number based on current page and items per page
-                  const rowNumber = (currentPage - 1) * itemsPerPage + index + 1;
-
                   return (
-                    <tr key={movimiento.id} className="hover:bg-gray-50">
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 text-right font-medium w-16">
-                        {rowNumber}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div>
+                    <tr key={movimiento.id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
                           <div className="font-medium">
-                            {new Date(movimiento.fechaMovimiento).toLocaleDateString()}
+                            {new Date(movimiento.fechaMovimiento).toLocaleDateString('es-ES')}
                           </div>
-                          <div className="text-gray-500">
-                            {new Date(movimiento.fechaMovimiento).toLocaleTimeString()}
+                          <div className="text-xs text-gray-500">
+                            {new Date(movimiento.fechaMovimiento).toLocaleTimeString('es-ES', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${colorClass}`}>
                           <TipoIcon className="h-3 w-3 mr-1" />
                           {movimiento.tipoMovimiento.charAt(0).toUpperCase() + movimiento.tipoMovimiento.slice(1)}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div>
-                          <div className="font-medium">
+                      <td className="px-4 py-4">
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-900">
                             {movimiento.item?.nombre || getItemNombre(movimiento.tipo, movimiento.itemId)}
                           </div>
-                          <div className="text-gray-500">
-                            Lote: {getLoteNumero(movimiento)}
+                          <div className="text-xs text-gray-500">
+                            {getLoteNumero(movimiento)}
                           </div>
                         </div>
                       </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div>
-                        <div className="font-medium">{movimiento.documento}</div>
-                        <div className="text-gray-500">{movimiento.numeroDocumento}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className={`text-sm font-bold ${
-                        movimiento.cantidad > 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {movimiento.cantidad > 0 ? '+' : ''}{movimiento.cantidad.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
-                      {movimiento.saldoAnterior.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm font-bold text-blue-600">
-                        {movimiento.saldoActual.toLocaleString()}
-                      </span>
-                    </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div>
-                          {movimiento.establecimientoOrigen && (
-                            <div className="text-red-600">
-                              ← {movimiento.establecimientoOrigen.nombre || getEstablecimientoNombre(movimiento.establecimientoOrigenId)}
-                            </div>
-                          )}
-                          {movimiento.establecimientoDestino && (
-                            <div className="text-green-600">
-                              → {movimiento.establecimientoDestino.nombre || getEstablecimientoNombre(movimiento.establecimientoDestinoId)}
-                            </div>
-                          )}
+                      <td className="px-4 py-4">
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-900">{movimiento.documento}</div>
+                          <div className="text-xs text-gray-500 font-mono">{movimiento.numeroDocumento}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        <div className="max-w-xs truncate" title={movimiento.observaciones}>
-                          {movimiento.observaciones || '-'}
+                      <td className="px-4 py-4 whitespace-nowrap text-center">
+                        <div className="flex flex-col items-center">
+                          <span className={`text-sm font-bold ${
+                            movimiento.cantidad > 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {movimiento.cantidad > 0 ? '+' : ''}{movimiento.cantidad.toLocaleString()}
+                          </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                      <td className="px-4 py-4 whitespace-nowrap text-center">
+                        <div className="text-sm">
+                          <div className="text-gray-500 text-xs">Anterior:</div>
+                          <div className="font-medium text-gray-900">{movimiento.saldoAnterior.toLocaleString()}</div>
+                          <div className="text-blue-600 text-xs">Actual:</div>
+                          <div className="font-bold text-blue-600">{movimiento.saldoActual.toLocaleString()}</div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-center">
                         <button
                           onClick={() => handleViewDetails(movimiento)}
-                          className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Ver detalles del movimiento"
+                          className="inline-flex items-center px-3 py-2 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-colors duration-150"
+                          title="Ver detalles completos"
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-3 w-3 mr-1" />
+                          Detalles
                         </button>
                       </td>
                     </tr>
