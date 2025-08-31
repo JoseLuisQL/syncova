@@ -84,9 +84,9 @@ const AppRoutes: React.FC = () => {
         } 
       />
       
-      {/* Reportes */}
+      {/* Reportes - con rutas anidadas */}
       <Route 
-        path="/reportes" 
+        path="/reportes/*" 
         element={
           <ProtectedRoute>
             <Reportes />
