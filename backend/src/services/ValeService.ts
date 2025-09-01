@@ -684,7 +684,7 @@ export class ValeService {
 
   /**
    * Afectar stock de lotes de jeringas (calculado por configuración)
-   * SIEMPRE procesa jeringas usando configuración específica o fallback garantizado
+   * SOLO procesa jeringas si existe configuración específica real
    */
   private static async afectarStockJeringas(
     tx: any,
@@ -707,42 +707,25 @@ export class ValeService {
       return [];
     }
 
-    const totalDosis = cantidadVacunas * vacuna.dosisPorFrasco;
-    console.log(`📊 [ValeService] Vacuna: ${vacuna.nombre}, Cantidad: ${cantidadVacunas}, Dosis totales: ${totalDosis}`);
+    console.log(`📊 [ValeService] Vacuna: ${vacuna.nombre}, Cantidad: ${cantidadVacunas}`);
 
-    // Intentar obtener configuración específica primero
-    let configResult = await ConfiguracionJeringaVacunaService.calcularJeringasNecesarias(
+    // VALIDACIÓN CRÍTICA: Solo procesar si existe configuración específica real
+    // NO usar fallbacks automáticos que creen movimientos artificiales
+    const configResult = await ConfiguracionJeringaVacunaService.calcularJeringasNecesarias(
       vacunaId,
       cantidadVacunas,
       centroAcopioId,
-      false // Sin fallback inicialmente
+      false // NUNCA usar fallback automático
     );
 
-    // Si no hay configuración específica, usar fallback del sistema
+    // Si no hay configuración específica, NO afectar stock de jeringas
     if (!configResult.success || !configResult.data || configResult.data.length === 0) {
-      console.log(`⚠️ [ValeService] No se encontró configuración específica para ${vacuna.nombre}. Usando fallback del sistema...`);
-
-      configResult = await ConfiguracionJeringaVacunaService.calcularJeringasNecesarias(
-        vacunaId,
-        cantidadVacunas,
-        centroAcopioId,
-        true // Con fallback del sistema
-      );
+      console.log(`⚠️ [ValeService] No se encontró configuración específica de jeringas para ${vacuna.nombre}.`);
+      console.log(`✅ [ValeService] CORRECTO: No se afectará stock de jeringas sin configuración específica.`);
+      return []; // Retornar vacío - NO crear movimientos artificiales
     }
 
-    // Si aún no hay configuración, usar fallback garantizado
-    if (!configResult.success || !configResult.data || configResult.data.length === 0) {
-      console.log(`⚠️ [ValeService] Fallback del sistema falló para ${vacuna.nombre}. Usando fallback garantizado...`);
-      configResult = await this.obtenerConfiguracionJeringasGarantizada(tx, totalDosis, vacuna.nombre);
-    }
-
-    // Verificar si finalmente tenemos configuración válida
-    if (!configResult.success || !configResult.data || configResult.data.length === 0) {
-      console.log(`❌ [ValeService] CRÍTICO: No se pudo obtener ninguna configuración de jeringas para ${vacuna.nombre}. Esto no debería ocurrir.`);
-      return [];
-    }
-
-    console.log(`✅ [ValeService] Configuración obtenida para ${vacuna.nombre}: ${configResult.data.length} tipos de jeringas`);
+    console.log(`✅ [ValeService] Configuración específica encontrada para ${vacuna.nombre}: ${configResult.data.length} tipos de jeringas`);
     const stocksAfectados: StockAfectacion[] = [];
 
     // Procesar cada tipo de jeringa según la configuración
@@ -861,213 +844,9 @@ export class ValeService {
     return stocksAfectados;
   }
 
-  /**
-   * Obtener configuración de jeringas por defecto cuando no existe configuración específica
-   * Usa un ratio 1:1 con las jeringas disponibles en stock
-   */
-  private static async obtenerConfiguracionJeringasPorDefecto(
-    tx: any,
-    cantidadVacunas: number
-  ): Promise<{ success: boolean; data: any[] }> {
-    try {
-      console.log(`🔧 [ValeService] Generando configuración por defecto para ${cantidadVacunas} vacunas`);
 
-      // Obtener jeringas disponibles en stock
-      const jeringasDisponibles = await tx.jeringa.findMany({
-        where: {
-          estado: 'activo',
-          lotes: {
-            some: {
-              estado: 'disponible',
-              cantidadActual: { gt: 0 }
-            }
-          }
-        },
-        include: {
-          lotes: {
-            where: {
-              estado: 'disponible',
-              cantidadActual: { gt: 0 }
-            },
-            select: {
-              cantidadActual: true
-            }
-          }
-        },
-        take: 3 // Limitar a 3 tipos de jeringas para evitar exceso
-      });
 
-      if (jeringasDisponibles.length === 0) {
-        console.log(`⚠️ [ValeService] No hay jeringas disponibles en stock para configuración por defecto`);
-        return { success: false, data: [] };
-      }
 
-      // Crear configuración por defecto con ratio 1:1
-      const configuracionDefecto = jeringasDisponibles.map(jeringa => {
-        const stockTotal = jeringa.lotes.reduce((sum, lote) => sum + lote.cantidadActual, 0);
-        const cantidadNecesaria = Math.min(cantidadVacunas, stockTotal); // No exceder el stock disponible
-
-        console.log(`🔧 [ValeService] Configuración por defecto: ${jeringa.tipo} ${jeringa.capacidad} - ${cantidadNecesaria} unidades (stock: ${stockTotal})`);
-
-        return {
-          jeringaId: jeringa.id,
-          cantidad: cantidadNecesaria,
-          multiplicador: 1 // Ratio 1:1 por defecto
-        };
-      }).filter(config => config.cantidad > 0); // Solo incluir si hay cantidad disponible
-
-      console.log(`✅ [ValeService] Configuración por defecto generada: ${configuracionDefecto.length} tipos de jeringas`);
-
-      return {
-        success: true,
-        data: configuracionDefecto
-      };
-    } catch (error) {
-      console.error(`❌ [ValeService] Error generando configuración por defecto:`, error);
-      return { success: false, data: [] };
-    }
-  }
-
-  /**
-   * Obtener configuración de jeringas garantizada - NUNCA falla
-   * Usa la primera jeringa disponible con ratio 1:1 si todo lo demás falla
-   */
-  private static async obtenerConfiguracionJeringasGarantizada(
-    tx: any,
-    totalDosis: number,
-    vacunaNombre: string
-  ): Promise<{ success: boolean; data: any[] }> {
-    try {
-      console.log(`🚨 [ValeService] Generando configuración GARANTIZADA para ${totalDosis} dosis de ${vacunaNombre}`);
-
-      // Obtener la primera jeringa disponible con stock
-      const jeringaDisponible = await tx.jeringa.findFirst({
-        where: {
-          estado: 'activo',
-          lotes: {
-            some: {
-              estado: 'disponible',
-              cantidadActual: { gt: 0 }
-            }
-          }
-        },
-        include: {
-          lotes: {
-            where: {
-              estado: 'disponible',
-              cantidadActual: { gt: 0 }
-            },
-            select: {
-              cantidadActual: true
-            }
-          }
-        }
-      });
-
-      if (!jeringaDisponible) {
-        console.log(`❌ [ValeService] CRÍTICO: No hay ninguna jeringa disponible en el sistema`);
-        return { success: false, data: [] };
-      }
-
-      const stockTotal = jeringaDisponible.lotes.reduce((sum, lote) => sum + lote.cantidadActual, 0);
-      const cantidadNecesaria = Math.min(totalDosis, stockTotal);
-
-      console.log(`🚨 [ValeService] Configuración garantizada: ${jeringaDisponible.tipo} ${jeringaDisponible.capacidad} - ${cantidadNecesaria} unidades (stock: ${stockTotal})`);
-
-      const configuracionGarantizada = [{
-        jeringaId: jeringaDisponible.id,
-        cantidad: cantidadNecesaria,
-        multiplicador: 1 // Ratio 1:1 garantizado
-      }];
-
-      return {
-        success: true,
-        data: configuracionGarantizada
-      };
-    } catch (error) {
-      console.error('Error generando configuración garantizada:', error);
-      return { success: false, data: [] };
-    }
-  }
-
-  /**
-   * Método legacy para compatibilidad con el comportamiento anterior
-   */
-  private static async afectarStockJeringasLegacy(
-    tx: any,
-    jeringasNecesarias: number,
-    valeNumero: string,
-    usuarioId: string,
-    vacunaId: string
-  ): Promise<StockAfectacion[]> {
-    // Obtener lotes de jeringas disponibles (FIFO) - cualquier jeringa
-    const lotesJeringas = await tx.loteJeringa.findMany({
-      where: {
-        estado: 'disponible',
-        cantidadActual: { gt: 0 }
-      },
-      orderBy: [
-        { fechaVencimiento: 'asc' },
-        { fechaIngreso: 'asc' }
-      ]
-    });
-
-    const stocksAfectados: StockAfectacion[] = [];
-    let jeringasRestantes = jeringasNecesarias;
-
-    for (const lote of lotesJeringas) {
-      if (jeringasRestantes <= 0) break;
-
-      const cantidadAfectar = Math.min(lote.cantidadActual, jeringasRestantes);
-      const saldoAnterior = lote.cantidadActual;
-      const saldoNuevo = saldoAnterior - cantidadAfectar;
-
-      // Actualizar lote de jeringas
-      await tx.loteJeringa.update({
-        where: { id: lote.id },
-        data: {
-          cantidadActual: saldoNuevo,
-          estado: saldoNuevo === 0 ? 'agotado' : 'disponible'
-        }
-      });
-
-      // Registrar en kardex
-      await tx.kardex.create({
-        data: {
-          tipo: 'jeringa',
-          itemId: lote.jeringaId,
-          loteId: lote.id,
-          tipoMovimiento: TipoMovimientoKardex.salida,
-          cantidad: cantidadAfectar,
-          saldoAnterior,
-          saldoActual: saldoNuevo,
-          documento: 'VALE_ENTREGA',
-          numeroDocumento: valeNumero,
-          observaciones: `Salida por vale de entrega ${valeNumero} - Vacuna: ${vacunaId} (Legacy)`,
-          usuarioId,
-          fechaMovimiento: new Date()
-        }
-      });
-
-      stocksAfectados.push({
-        loteId: lote.id,
-        cantidadAfectada: cantidadAfectar,
-        saldoAnterior,
-        saldoNuevo
-      });
-
-      jeringasRestantes -= cantidadAfectar;
-    }
-
-    if (jeringasRestantes > 0) {
-      throw createError(
-        `Stock insuficiente de jeringas. Requerido: ${jeringasNecesarias}, Disponible: ${jeringasNecesarias - jeringasRestantes}`,
-        400
-      );
-    }
-
-    return stocksAfectados;
-  }
 
   /**
    * Generar vale de entrega completo
