@@ -1,6 +1,9 @@
 import { prisma } from '@/config/database';
 import { ILoteJeringa, CreateLoteJeringaDto, UpdateLoteJeringaDto, EstadoLote, FormaIngreso, ComprobanteClase, ServiceResult } from '@/types';
 import { HttpError } from '@/middleware/errorHandler';
+import { TipoMovimientoKardex } from '@prisma/client';
+import { AlmacenCentralService } from './AlmacenCentralService';
+import { KardexService } from './KardexService';
 
 /**
  * Servicio para gestión de lotes de jeringas
@@ -175,6 +178,50 @@ export class LoteJeringaService {
           }
         }
       });
+
+      // Registrar automáticamente el ingreso en Kardex
+      console.log(`📝 [LoteJeringaService] Registrando ingreso en Kardex para lote ${lote.numero}`);
+
+      const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
+      if (almacenCentralResult.success) {
+        // Obtener un usuario administrador del sistema para el registro automático
+        const usuarioSistema = await prisma.usuario.findFirst({
+          where: {
+            rol: 'administrador',
+            estado: 'activo'
+          }
+        });
+
+        if (!usuarioSistema) {
+          console.warn(`⚠️ [LoteJeringaService] No se encontró usuario administrador para registro automático`);
+        } else {
+          try {
+            const kardexResult = await KardexService.generarMovimientoAutomatico({
+              tipo: 'jeringa',
+              itemId: data.jeringaId,
+              loteId: lote.id,
+              tipoMovimiento: TipoMovimientoKardex.ingreso,
+              cantidad: data.cantidadInicial,
+              establecimientoDestinoId: almacenCentralResult.data, // ALMACÉN (CHANKA) como destino
+              documento: data.comprobanteClase || 'INGRESO',
+              numeroDocumento: data.numeroComprobante || lote.numero,
+              observaciones: `Ingreso de lote ${lote.numero} - ${data.comprobanteClase || 'INGRESO'}: ${data.numeroComprobante || 'N/A'}`,
+              usuarioId: usuarioSistema.id,
+              fechaMovimiento: data.fechaIngreso
+            });
+
+            if (!kardexResult.success) {
+              console.warn(`⚠️ [LoteJeringaService] No se pudo registrar en Kardex: ${kardexResult.error}`);
+            } else {
+              console.log(`✅ [LoteJeringaService] Movimiento registrado en Kardex exitosamente`);
+            }
+          } catch (kardexError) {
+            console.error(`❌ [LoteJeringaService] Error al registrar en Kardex:`, kardexError);
+          }
+        }
+      } else {
+        console.warn(`⚠️ [LoteJeringaService] No se pudo obtener almacén central: ${almacenCentralResult.error}`);
+      }
 
       return {
         success: true,

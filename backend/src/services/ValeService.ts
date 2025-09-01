@@ -4,6 +4,7 @@ import { createError } from '@/utils/errors';
 import { EstadoVale, TipoMovimientoKardex, TipoVale } from '@prisma/client';
 import { ConfiguracionJeringaVacunaService } from './ConfiguracionJeringaVacunaService';
 import { StockValidationService, VaccineRequirement } from './StockValidationService';
+import { AlmacenCentralService } from './AlmacenCentralService';
 
 /**
  * Interface para modificaciones de vale
@@ -635,10 +636,15 @@ export class ValeService {
     vacunaId: string,
     cantidadTotal: number,
     valeNumero: string,
-    usuarioId: string
+    usuarioId: string,
+    establecimientoDestinoId?: string
   ): Promise<StockAfectacion[]> {
     const lotesAfectar = await this.obtenerLotesDisponibles(vacunaId, cantidadTotal);
     const stocksAfectados: StockAfectacion[] = [];
+
+    // Obtener ID del almacén central
+    const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
+    const almacenCentralId = almacenCentralResult.success ? almacenCentralResult.data : null;
 
     for (const { lote, cantidadAfectar } of lotesAfectar) {
       const saldoAnterior = lote.cantidadActual;
@@ -653,7 +659,7 @@ export class ValeService {
         }
       });
 
-      // Registrar en kardex
+      // Registrar en kardex con establecimientos origen y destino
       await tx.kardex.create({
         data: {
           tipo: 'vacuna',
@@ -663,6 +669,8 @@ export class ValeService {
           cantidad: cantidadAfectar,
           saldoAnterior,
           saldoActual: saldoNuevo,
+          establecimientoOrigenId: almacenCentralId, // ALMACÉN (CHANKA) como origen
+          establecimientoDestinoId: establecimientoDestinoId, // Establecimiento de destino
           documento: 'VALE_ENTREGA',
           numeroDocumento: valeNumero,
           observaciones: `Salida por vale de entrega ${valeNumero}`,
@@ -692,7 +700,8 @@ export class ValeService {
     cantidadVacunas: number,
     valeNumero: string,
     usuarioId: string,
-    centroAcopioId?: string
+    centroAcopioId?: string,
+    establecimientoDestinoId?: string
   ): Promise<StockAfectacion[]> {
     console.log(`🔍 [ValeService] Verificando configuración de jeringas para vacuna: ${vacunaId}`);
 
@@ -740,7 +749,8 @@ export class ValeService {
           valeNumero,
           usuarioId,
           vacunaId,
-          jeringaConfig.multiplicador || 1
+          jeringaConfig.multiplicador || 1,
+          establecimientoDestinoId
         );
         stocksAfectados.push(...stocksJeringa);
       } catch (error) {
@@ -763,7 +773,8 @@ export class ValeService {
     valeNumero: string,
     usuarioId: string,
     vacunaId: string,
-    multiplicador: number
+    multiplicador: number,
+    establecimientoDestinoId?: string
   ): Promise<StockAfectacion[]> {
 
     // Obtener lotes de la jeringa específica disponibles (FIFO)
@@ -798,7 +809,11 @@ export class ValeService {
         }
       });
 
-      // Registrar en kardex
+      // Obtener ID del almacén central
+      const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
+      const almacenCentralId = almacenCentralResult.success ? almacenCentralResult.data : null;
+
+      // Registrar en kardex con establecimientos origen y destino
       await tx.kardex.create({
         data: {
           tipo: 'jeringa',
@@ -808,6 +823,8 @@ export class ValeService {
           cantidad: cantidadAfectar,
           saldoAnterior,
           saldoActual: saldoNuevo,
+          establecimientoOrigenId: almacenCentralId, // ALMACÉN (CHANKA) como origen
+          establecimientoDestinoId: establecimientoDestinoId, // Establecimiento de destino
           documento: 'VALE_ENTREGA',
           numeroDocumento: valeNumero,
           observaciones: `Salida por vale de entrega ${valeNumero} - Vacuna: ${vacunaId} (Multiplicador: ${multiplicador})`,
@@ -1003,7 +1020,8 @@ export class ValeService {
                     movimiento.vacunaId,
                     cantidadTotalParaVale,
                     numeroVale,
-                    usuarioIdFinal
+                    usuarioIdFinal,
+                    movimiento.establecimientoId // Establecimiento de destino
                   );
                   stocksAfectadosVacunas.push(...stockVacunas);
 
@@ -1014,7 +1032,8 @@ export class ValeService {
                     cantidadTotalParaVale,
                     numeroVale,
                     usuarioIdFinal,
-                    data.centroAcopioId
+                    data.centroAcopioId,
+                    movimiento.establecimientoId // Establecimiento de destino
                   );
                   stocksAfectadosJeringas.push(...stockJeringas);
                 } catch (stockError) {
@@ -1529,7 +1548,12 @@ export class ValeService {
             }
           });
 
-          // Crear entrada de reversión en kardex con cálculos correctos
+          // Obtener ID del almacén central
+          const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
+          const almacenCentralId = almacenCentralResult.success ? almacenCentralResult.data : null;
+
+          // Crear entrada de reversión en kardex con establecimientos correctos
+          // En reversión: origen = establecimiento que recibió, destino = ALMACÉN (CHANKA)
           await tx.kardex.create({
             data: {
               tipo: 'vacuna',
@@ -1539,6 +1563,8 @@ export class ValeService {
               cantidad: kardex.cantidad,
               saldoAnterior: loteActual.cantidadActual,
               saldoActual: nuevaCantidad,
+              establecimientoOrigenId: kardex.establecimientoDestinoId, // El que recibió originalmente
+              establecimientoDestinoId: almacenCentralId, // ALMACÉN (CHANKA) recibe de vuelta
               documento: 'REVERSION',
               numeroDocumento: `REVERSION-VALE-${valeExistente.numero}`,
               observaciones: `Reversión de vale ${valeExistente.numero} - ${valeExistente.centroAcopio.nombre} (Vale actual)`,
@@ -1578,7 +1604,12 @@ export class ValeService {
             }
           });
 
-          // Crear entrada de reversión en kardex con cálculos correctos
+          // Obtener ID del almacén central
+          const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
+          const almacenCentralId = almacenCentralResult.success ? almacenCentralResult.data : null;
+
+          // Crear entrada de reversión en kardex con establecimientos correctos
+          // En reversión: origen = establecimiento que recibió, destino = ALMACÉN (CHANKA)
           await tx.kardex.create({
             data: {
               tipo: 'jeringa',
@@ -1588,6 +1619,8 @@ export class ValeService {
               cantidad: kardex.cantidad,
               saldoAnterior: loteActual.cantidadActual,
               saldoActual: nuevaCantidad,
+              establecimientoOrigenId: kardex.establecimientoDestinoId, // El que recibió originalmente
+              establecimientoDestinoId: almacenCentralId, // ALMACÉN (CHANKA) recibe de vuelta
               documento: 'REVERSION',
               numeroDocumento: `REVERSION-VALE-${valeExistente.numero}`,
               observaciones: `Reversión de vale ${valeExistente.numero} - ${valeExistente.centroAcopio.nombre} (Vale actual)`,
@@ -1989,7 +2022,8 @@ export class ValeService {
                     modificacion.vacunaId,
                     modificacion.diferencia,
                     valeExistente.numero,
-                    usuarioId
+                    usuarioId,
+                    modificacion.establecimientoId // Establecimiento de destino
                   );
                   stocksAfectadosVacunas.push(...stockVacunas);
 
@@ -2000,7 +2034,8 @@ export class ValeService {
                     modificacion.diferencia,
                     valeExistente.numero,
                     usuarioId,
-                    valeExistente.centroAcopioId
+                    valeExistente.centroAcopioId,
+                    modificacion.establecimientoId // Establecimiento de destino
                   );
                   stocksAfectadosJeringas.push(...stockJeringas);
                 } else {

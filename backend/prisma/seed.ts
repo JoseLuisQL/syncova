@@ -147,6 +147,31 @@ async function main() {
     // 3. Crear Centros de Acopio
     console.log('🏢 Creando centros de acopio...');
 
+    // ALMACÉN CENTRAL (CHANKA) - Centro de acopio central por defecto del sistema
+    const almacenChanka = await prisma.centroAcopio.create({
+      data: {
+        nombre: 'ALMACÉN (CHANKA)',
+        codigo: 'CHANKA-001',
+        direccion: 'Almacén Central, Apurímac',
+        responsable: 'Administrador Central',
+        telefono: '083-400000'
+      }
+    });
+
+    // Crear establecimiento específico para ALMACÉN (CHANKA) para uso en Kardex
+    const establecimientoAlmacenChanka = await prisma.establecimiento.create({
+      data: {
+        nombre: 'ALMACÉN (CHANKA)',
+        tipo: 'hospital',
+        codigo: 'CHANKA-EST-001',
+        centroAcopioId: almacenChanka.id,
+        direccion: 'Almacén Central, Apurímac',
+        responsable: 'Administrador Central',
+        telefono: '083-400000',
+        estado: 'activo'
+      }
+    });
+
     // Centros de acopio para José María Arguedas
     const centroHospitalEssalud = await prisma.centroAcopio.create({
       data: {
