@@ -489,9 +489,9 @@ export class KardexService {
           establecimientoCodigo: detalle.establecimiento.codigo,
           vacunaId: detalle.vacuna.id,
           vacunaNombre: detalle.vacuna.nombre,
-          cantidadEntregada: detalle.cantidadProgramada + (detalle.cantidadAdicional || 0),
-          cantidadProgramada: detalle.cantidadProgramada,
-          cantidadAdicional: detalle.cantidadAdicional,
+          cantidadEntregada: detalle.cantidadTotal || (detalle.cantidadProgramada + (detalle.cantidadAdicional || 0)),
+          cantidadProgramada: detalle.cantidadProgramada || 0,
+          cantidadAdicional: detalle.cantidadAdicional || 0,
           numeroEntregaAdicional: detalle.numeroEntregaAdicional
         }))
       };

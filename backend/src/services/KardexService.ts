@@ -179,10 +179,16 @@ export class KardexService {
       if (fechaInicio || fechaFin) {
         where.fechaMovimiento = {};
         if (fechaInicio) {
-          where.fechaMovimiento.gte = fechaInicio;
+          // Asegurar que la fecha de inicio incluya desde las 00:00:00 del día
+          const fechaInicioAjustada = new Date(fechaInicio);
+          fechaInicioAjustada.setHours(0, 0, 0, 0);
+          where.fechaMovimiento.gte = fechaInicioAjustada;
         }
         if (fechaFin) {
-          where.fechaMovimiento.lte = fechaFin;
+          // Asegurar que la fecha de fin incluya hasta las 23:59:59.999 del día
+          const fechaFinAjustada = new Date(fechaFin);
+          fechaFinAjustada.setHours(23, 59, 59, 999);
+          where.fechaMovimiento.lte = fechaFinAjustada;
         }
       }
 
@@ -581,8 +587,18 @@ export class KardexService {
       // Filtro por rango de fechas
       if (filters?.fechaInicio || filters?.fechaFin) {
         where.fechaMovimiento = {};
-        if (filters.fechaInicio) where.fechaMovimiento.gte = filters.fechaInicio;
-        if (filters.fechaFin) where.fechaMovimiento.lte = filters.fechaFin;
+        if (filters.fechaInicio) {
+          // Asegurar que la fecha de inicio incluya desde las 00:00:00 del día
+          const fechaInicioAjustada = new Date(filters.fechaInicio);
+          fechaInicioAjustada.setHours(0, 0, 0, 0);
+          where.fechaMovimiento.gte = fechaInicioAjustada;
+        }
+        if (filters.fechaFin) {
+          // Asegurar que la fecha de fin incluya hasta las 23:59:59.999 del día
+          const fechaFinAjustada = new Date(filters.fechaFin);
+          fechaFinAjustada.setHours(23, 59, 59, 999);
+          where.fechaMovimiento.lte = fechaFinAjustada;
+        }
       }
 
       // Obtener estadísticas básicas

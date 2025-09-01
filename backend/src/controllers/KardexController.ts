@@ -77,12 +77,17 @@ export class KardexController {
         return;
       }
 
-      // Validar fechas
+      // Validar fechas con manejo correcto de zona horaria
       let fechaInicioDate: Date | undefined;
       let fechaFinDate: Date | undefined;
 
       if (fechaInicio) {
-        fechaInicioDate = new Date(fechaInicio as string);
+        // Si solo se proporciona la fecha (YYYY-MM-DD), agregar la hora local
+        const fechaStr = (fechaInicio as string).includes('T')
+          ? fechaInicio as string
+          : `${fechaInicio}T00:00:00`;
+
+        fechaInicioDate = new Date(fechaStr);
         if (isNaN(fechaInicioDate.getTime())) {
           ResponseUtil.error(res, 'Fecha de inicio inválida', 400);
           return;
@@ -90,7 +95,12 @@ export class KardexController {
       }
 
       if (fechaFin) {
-        fechaFinDate = new Date(fechaFin as string);
+        // Si solo se proporciona la fecha (YYYY-MM-DD), agregar la hora local
+        const fechaStr = (fechaFin as string).includes('T')
+          ? fechaFin as string
+          : `${fechaFin}T23:59:59`;
+
+        fechaFinDate = new Date(fechaStr);
         if (isNaN(fechaFinDate.getTime())) {
           ResponseUtil.error(res, 'Fecha de fin inválida', 400);
           return;
@@ -381,12 +391,17 @@ export class KardexController {
         return;
       }
 
-      // Validar fechas
+      // Validar fechas con manejo correcto de zona horaria
       let fechaInicioDate: Date | undefined;
       let fechaFinDate: Date | undefined;
 
       if (fechaInicio) {
-        fechaInicioDate = new Date(fechaInicio as string);
+        // Si solo se proporciona la fecha (YYYY-MM-DD), agregar la hora local
+        const fechaStr = (fechaInicio as string).includes('T')
+          ? fechaInicio as string
+          : `${fechaInicio}T00:00:00`;
+
+        fechaInicioDate = new Date(fechaStr);
         if (isNaN(fechaInicioDate.getTime())) {
           ResponseUtil.error(res, 'Fecha de inicio inválida', 400);
           return;
@@ -394,7 +409,12 @@ export class KardexController {
       }
 
       if (fechaFin) {
-        fechaFinDate = new Date(fechaFin as string);
+        // Si solo se proporciona la fecha (YYYY-MM-DD), agregar la hora local
+        const fechaStr = (fechaFin as string).includes('T')
+          ? fechaFin as string
+          : `${fechaFin}T23:59:59`;
+
+        fechaFinDate = new Date(fechaStr);
         if (isNaN(fechaFinDate.getTime())) {
           ResponseUtil.error(res, 'Fecha de fin inválida', 400);
           return;
@@ -406,16 +426,16 @@ export class KardexController {
         return;
       }
 
-      const filters = {
-        tipo: tipo as 'vacuna' | 'jeringa',
-        itemId: itemId as string,
-        loteId: loteId as string,
-        tipoMovimiento: tipoMovimiento as TipoMovimientoKardex,
-        establecimientoOrigenId: establecimientoOrigenId as string,
-        establecimientoDestinoId: establecimientoDestinoId as string,
-        fechaInicio: fechaInicioDate,
-        fechaFin: fechaFinDate
-      };
+      const filters: Omit<KardexFilters, 'page' | 'limit'> = {};
+
+      if (tipo) filters.tipo = tipo as 'vacuna' | 'jeringa';
+      if (itemId) filters.itemId = itemId as string;
+      if (loteId) filters.loteId = loteId as string;
+      if (tipoMovimiento) filters.tipoMovimiento = tipoMovimiento as TipoMovimientoKardex;
+      if (establecimientoOrigenId) filters.establecimientoOrigenId = establecimientoOrigenId as string;
+      if (establecimientoDestinoId) filters.establecimientoDestinoId = establecimientoDestinoId as string;
+      if (fechaInicioDate) filters.fechaInicio = fechaInicioDate;
+      if (fechaFinDate) filters.fechaFin = fechaFinDate;
 
       const result = await KardexService.getEstadisticas(filters);
 

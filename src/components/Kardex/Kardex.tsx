@@ -18,6 +18,7 @@ import {
   Printer,
   BarChart3,
   Activity,
+  Plus,
   Archive,
   ArrowRightLeft,
   Settings,
@@ -576,99 +577,135 @@ const MovementDetailsModal: React.FC<MovementDetailsModalProps> = ({
 
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <div className="relative bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+          <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className={`p-2 rounded-lg ${colorClass.replace('text-', 'bg-').replace('bg-', 'bg-opacity-20 text-')}`}>
-                  <TipoIcon className="h-6 w-6" />
+              <div className="flex items-center space-x-4">
+                <div className={`p-3 rounded-xl ${colorClass.replace('text-', 'bg-').replace('bg-', 'bg-opacity-20 text-')} backdrop-blur-sm`}>
+                  <TipoIcon className="h-7 w-7" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Detalles del Movimiento</h2>
-                  <p className="text-blue-100 text-sm">
-                    {movement.tipoMovimiento.charAt(0).toUpperCase() + movement.tipoMovimiento.slice(1)} - {movement.numeroDocumento}
+                  <h2 className="text-2xl font-bold text-white">Detalles del Movimiento</h2>
+                  <p className="text-slate-300 text-sm font-medium">
+                    {movement.tipoMovimiento.charAt(0).toUpperCase() + movement.tipoMovimiento.slice(1)} • {movement.numeroDocumento}
                   </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="text-white hover:text-blue-200 transition-colors p-2 hover:bg-white hover:bg-opacity-10 rounded-lg"
+                className="text-slate-300 hover:text-white transition-all duration-200 p-2.5 rounded-xl hover:bg-white hover:bg-opacity-10 group"
               >
-                <X className="h-6 w-6" />
+                <X className="h-6 w-6 group-hover:rotate-90 transition-transform duration-200" />
               </button>
             </div>
           </div>
 
-          {/* Content */}
-          <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Content - Scrollable */}
+          <div className="max-h-[calc(95vh-140px)] overflow-y-auto">
+            <div className="p-6 space-y-6">
+            {/* Main Information Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-              {/* Movement Information */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center mb-3">
-                  <Info className="h-5 w-5 text-blue-600 mr-2" />
-                  <h3 className="text-lg font-semibold text-gray-900">Información del Movimiento</h3>
+              {/* Movement Type Card */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <div className={`p-2.5 rounded-lg ${colorClass.replace('text-', 'bg-').replace('bg-', 'bg-opacity-20 text-')}`}>
+                      <TipoIcon className="h-5 w-5" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-slate-600">Tipo de Movimiento</h3>
+                      <p className="text-lg font-bold text-slate-900 capitalize">{movement.tipoMovimiento}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium text-gray-600">Tipo de Movimiento:</span>
-                    <div className="flex items-center">
-                      <TipoIcon className={`h-4 w-4 mr-1 ${colorClass.split(' ')[0]}`} />
-                      <span className="text-sm font-medium capitalize">{movement.tipoMovimiento}</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium text-gray-600">Documento:</span>
-                    <span className="text-sm text-gray-900">{movement.documento}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium text-gray-600">Número de Documento:</span>
-                    <span className="text-sm font-mono text-gray-900">{movement.numeroDocumento}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium text-gray-600">Fecha del Movimiento:</span>
-                    <div className="text-right">
-                      <div className="text-sm text-gray-900">{movementDate.date}</div>
-                      <div className="text-xs text-gray-500">{movementDate.time}</div>
-                    </div>
-                  </div>
+                <div className="text-xs text-blue-600 font-medium">
+                  {movement.documento} • {movement.numeroDocumento}
                 </div>
               </div>
 
-              {/* Item Details */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center mb-3">
-                  {movement.tipo === 'vacuna' ? (
-                    <Shield className="h-5 w-5 text-green-600 mr-2" />
-                  ) : (
-                    <Syringe className="h-5 w-5 text-purple-600 mr-2" />
-                  )}
-                  <h3 className="text-lg font-semibold text-gray-900">Detalles del Ítem</h3>
+              {/* Quantity Card */}
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-5 border border-emerald-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <div className="p-2.5 rounded-lg bg-emerald-500 bg-opacity-20 text-emerald-600">
+                      <Package className="h-5 w-5" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-slate-600">Cantidad</h3>
+                      <p className="text-lg font-bold text-slate-900">{movement.cantidad.toLocaleString()}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium text-gray-600">Tipo:</span>
-                    <span className="text-sm text-gray-900 capitalize">{movement.tipo}</span>
+                <div className="text-xs text-emerald-600 font-medium">
+                  Saldo: {movement.saldoAnterior.toLocaleString()} → {movement.saldoActual.toLocaleString()}
+                </div>
+              </div>
+
+              {/* Date Card */}
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border border-purple-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <div className="p-2.5 rounded-lg bg-purple-500 bg-opacity-20 text-purple-600">
+                      <Calendar className="h-5 w-5" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-slate-600">Fecha</h3>
+                      <p className="text-lg font-bold text-slate-900">{movementDate.date}</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium text-gray-600">Nombre:</span>
-                    <span className="text-sm text-gray-900">{itemNombre}</span>
+                </div>
+                <div className="text-xs text-purple-600 font-medium">
+                  {movementDate.time}
+                </div>
+              </div>
+            </div>
+
+            {/* Item Details Section */}
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <div className="flex items-center mb-6">
+                <div className={`p-3 rounded-xl ${movement.tipo === 'vacuna' ? 'bg-emerald-100 text-emerald-600' : 'bg-purple-100 text-purple-600'}`}>
+                  {movement.tipo === 'vacuna' ? (
+                    <Shield className="h-6 w-6" />
+                  ) : (
+                    <Syringe className="h-6 w-6" />
+                  )}
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-xl font-bold text-slate-900">Detalles del Ítem</h3>
+                  <p className="text-sm text-slate-500">Información del producto y lote</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Tipo de Producto</label>
+                    <p className="text-lg font-semibold text-slate-900 capitalize mt-1">{movement.tipo}</p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium text-gray-600">Lote:</span>
-                    <span className="text-sm font-mono text-gray-900">{loteNumero}</span>
+                  <div>
+                    <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Nombre del Producto</label>
+                    <p className="text-lg font-semibold text-slate-900 mt-1">{itemNombre}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Número de Lote</label>
+                    <p className="text-lg font-mono font-semibold text-slate-900 mt-1">{loteNumero}</p>
                   </div>
                   {movement.lote?.fechaVencimiento && (
-                    <div className="flex justify-between">
-                      <span className="text-sm font-medium text-gray-600">Fecha de Vencimiento:</span>
-                      <span className="text-sm text-gray-900">
+                    <div>
+                      <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Fecha de Vencimiento</label>
+                      <p className="text-lg font-semibold text-slate-900 mt-1">
                         {new Date(movement.lote.fechaVencimiento).toLocaleDateString('es-ES')}
-                      </span>
+                      </p>
                     </div>
                   )}
                 </div>
               </div>
+            </div>
 
               {/* Quantity Information */}
               <div className="bg-gray-50 rounded-lg p-4">
@@ -870,57 +907,84 @@ const MovementDetailsModal: React.FC<MovementDetailsModalProps> = ({
                       </div>
 
                       {/* Delivery Details Table */}
-                      <div className="bg-white rounded-lg border border-orange-100 overflow-hidden">
-                        <div className="bg-orange-50 px-4 py-3 border-b border-orange-100">
-                          <h4 className="text-sm font-semibold text-gray-900">Distribución por Establecimiento</h4>
+                      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                        <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 border-b border-slate-200">
+                          <div className="flex items-center">
+                            <Building className="h-5 w-5 text-slate-600 mr-3" />
+                            <h4 className="text-lg font-bold text-slate-900">Distribución por Establecimiento</h4>
+                          </div>
+                          <p className="text-sm text-slate-600 mt-1">Detalle de cantidades entregadas por establecimiento</p>
                         </div>
                         <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                          <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-slate-50">
                               <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
                                   Establecimiento
                                 </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Vacuna
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                  Producto
                                 </th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Cantidad
+                                <th className="px-6 py-4 text-right text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                  Cantidad Entregada
                                 </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Tipo
+                                <th className="px-6 py-4 text-center text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                  Estado
                                 </th>
                               </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-white divide-y divide-slate-100">
                               {deliveryBreakdown.detalles.map((detalle, index) => (
-                                <tr key={index} className="hover:bg-gray-50">
-                                  <td className="px-4 py-3 text-sm">
-                                    <div>
-                                      <div className="font-medium text-gray-900">{detalle.establecimientoNombre}</div>
-                                      <div className="text-xs text-gray-500">{detalle.establecimientoCodigo}</div>
+                                <tr key={index} className="hover:bg-slate-50 transition-colors duration-150">
+                                  <td className="px-6 py-4">
+                                    <div className="flex items-center">
+                                      <div className="flex-shrink-0 h-10 w-10">
+                                        <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                          <Building className="h-5 w-5 text-blue-600" />
+                                        </div>
+                                      </div>
+                                      <div className="ml-4">
+                                        <div className="text-sm font-bold text-slate-900">{detalle.establecimientoNombre}</div>
+                                        <div className="text-xs text-slate-500 font-mono">{detalle.establecimientoCodigo}</div>
+                                      </div>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-3 text-sm text-gray-900">
-                                    {detalle.vacunaNombre}
+                                  <td className="px-6 py-4">
+                                    <div className="flex items-center">
+                                      <div className="flex-shrink-0 h-8 w-8">
+                                        <div className="h-8 w-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                          <Shield className="h-4 w-4 text-emerald-600" />
+                                        </div>
+                                      </div>
+                                      <div className="ml-3">
+                                        <div className="text-sm font-medium text-slate-900">{detalle.vacunaNombre}</div>
+                                      </div>
+                                    </div>
                                   </td>
-                                  <td className="px-4 py-3 text-sm text-right">
-                                    <span className="font-medium text-gray-900">
+                                  <td className="px-6 py-4 text-right">
+                                    <div className="text-lg font-bold text-slate-900">
                                       {detalle.cantidadEntregada.toLocaleString()}
-                                    </span>
+                                    </div>
                                     {detalle.cantidadAdicional && detalle.cantidadAdicional > 0 && (
-                                      <div className="text-xs text-orange-600">
-                                        +{detalle.cantidadAdicional} adicional
+                                      <div className="text-xs text-orange-600 font-medium">
+                                        +{detalle.cantidadAdicional.toLocaleString()} adicional
+                                      </div>
+                                    )}
+                                    {detalle.cantidadProgramada && detalle.cantidadProgramada > 0 && (
+                                      <div className="text-xs text-slate-500">
+                                        Base: {detalle.cantidadProgramada.toLocaleString()}
                                       </div>
                                     )}
                                   </td>
-                                  <td className="px-4 py-3 text-center">
+                                  <td className="px-6 py-4 text-center">
                                     {detalle.numeroEntregaAdicional ? (
-                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-orange-100 text-orange-800">
+                                        <Plus className="h-3 w-3 mr-1" />
                                         Adicional #{detalle.numeroEntregaAdicional}
                                       </span>
                                     ) : (
-                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                        <CheckCircle className="h-3 w-3 mr-1" />
                                         Programada
                                       </span>
                                     )}
@@ -946,14 +1010,15 @@ const MovementDetailsModal: React.FC<MovementDetailsModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+          {/* Footer */}
+          <div className="bg-slate-50 px-6 py-4 border-t border-slate-200">
             <div className="flex justify-between items-center">
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-slate-500 font-mono">
                 ID: {movement.id}
               </div>
               <button
                 onClick={onClose}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="px-6 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 font-medium"
               >
                 Cerrar
               </button>
