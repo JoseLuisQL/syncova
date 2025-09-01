@@ -629,7 +629,7 @@ export class ValeService {
   }
 
   /**
-   * Afectar stock de lotes de vacunas
+   * Afectar stock de lotes de vacunas (método original para compatibilidad)
    */
   private static async afectarStockVacunas(
     tx: any,
@@ -685,6 +685,259 @@ export class ValeService {
         saldoAnterior,
         saldoNuevo
       });
+    }
+
+    return stocksAfectados;
+  }
+
+  /**
+   * Afectar stock de vacunas de forma consolidada para múltiples establecimientos
+   * Aplica FIFO y distribuye proporcionalmente entre establecimientos para trazabilidad
+   */
+  private static async afectarStockVacunasConsolidado(
+    tx: any,
+    vacunaId: string,
+    establecimientos: Array<{
+      establecimientoId: string;
+      cantidad: number;
+      nombre: string;
+    }>,
+    valeNumero: string,
+    usuarioId: string
+  ): Promise<StockAfectacion[]> {
+    const cantidadTotal = establecimientos.reduce((sum, est) => sum + est.cantidad, 0);
+
+    console.log(`🔄 [ValeService] Procesando stock consolidado para vacuna ${vacunaId}: ${cantidadTotal} unidades distribuidas en ${establecimientos.length} establecimientos`);
+
+    // Obtener lotes disponibles usando FIFO
+    const lotesAfectar = await this.obtenerLotesDisponibles(vacunaId, cantidadTotal);
+    const stocksAfectados: StockAfectacion[] = [];
+
+    // Obtener ID del almacén central
+    const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
+    const almacenCentralId = almacenCentralResult.success ? almacenCentralResult.data : null;
+
+    // Procesar cada lote afectado
+    for (const { lote, cantidadAfectar } of lotesAfectar) {
+      const saldoAnterior = lote.cantidadActual;
+      const saldoNuevo = saldoAnterior - cantidadAfectar;
+
+      // Actualizar lote
+      await tx.loteVacuna.update({
+        where: { id: lote.id },
+        data: {
+          cantidadActual: saldoNuevo,
+          estado: saldoNuevo === 0 ? 'agotado' : 'disponible'
+        }
+      });
+
+      // Distribuir proporcionalmente entre establecimientos para trazabilidad
+      for (const establecimiento of establecimientos) {
+        const proporcion = establecimiento.cantidad / cantidadTotal;
+        const cantidadProporcional = Math.round(cantidadAfectar * proporcion);
+
+        if (cantidadProporcional > 0) {
+          // Crear entrada de kardex individual para cada establecimiento
+          await tx.kardex.create({
+            data: {
+              tipo: 'vacuna',
+              itemId: vacunaId,
+              loteId: lote.id,
+              tipoMovimiento: TipoMovimientoKardex.salida,
+              cantidad: cantidadProporcional,
+              saldoAnterior: saldoAnterior,
+              saldoActual: saldoNuevo,
+              establecimientoOrigenId: almacenCentralId, // ALMACÉN (CHANKA) como origen
+              establecimientoDestinoId: establecimiento.establecimientoId,
+              documento: 'VALE_ENTREGA',
+              numeroDocumento: valeNumero,
+              observaciones: `Salida por vale de entrega ${valeNumero} - ${establecimiento.nombre} (${establecimiento.cantidad}/${cantidadTotal} unidades)`,
+              usuarioId,
+              fechaMovimiento: new Date()
+            }
+          });
+        }
+      }
+
+      stocksAfectados.push({
+        loteId: lote.id,
+        cantidadAfectada: cantidadAfectar,
+        saldoAnterior,
+        saldoNuevo
+      });
+
+      console.log(`✅ [ValeService] Lote ${lote.numero}: ${cantidadAfectar} unidades deducidas (${saldoAnterior} → ${saldoNuevo})`);
+    }
+
+    console.log(`✅ [ValeService] Stock consolidado procesado: ${cantidadTotal} unidades deducidas de ${lotesAfectar.length} lotes`);
+    return stocksAfectados;
+  }
+
+  /**
+   * Afectar stock de jeringas de forma consolidada para múltiples establecimientos
+   * Aplica FIFO y distribuye proporcionalmente entre establecimientos para trazabilidad
+   */
+  private static async afectarStockJeringasConsolidado(
+    tx: any,
+    vacunaId: string,
+    establecimientos: Array<{
+      establecimientoId: string;
+      cantidad: number;
+      nombre: string;
+    }>,
+    valeNumero: string,
+    usuarioId: string,
+    centroAcopioId?: string
+  ): Promise<StockAfectacion[]> {
+    const cantidadTotalVacunas = establecimientos.reduce((sum, est) => sum + est.cantidad, 0);
+
+    console.log(`🔍 [ValeService] Verificando configuración de jeringas consolidada para vacuna: ${vacunaId}`);
+
+    // Obtener información de la vacuna para cálculos
+    const vacuna = await tx.vacuna.findUnique({
+      where: { id: vacunaId },
+      select: { nombre: true, dosisPorFrasco: true }
+    });
+
+    if (!vacuna) {
+      console.log(`❌ [ValeService] Vacuna no encontrada: ${vacunaId}`);
+      return [];
+    }
+
+    // VALIDACIÓN CRÍTICA: Solo procesar si existe configuración específica real
+    // NO usar fallbacks automáticos que creen movimientos artificiales
+    const configResult = await ConfiguracionJeringaVacunaService.getConfiguracionEfectiva(vacunaId, centroAcopioId, false);
+    if (!configResult.success || !configResult.data || configResult.data.length === 0) {
+      console.log(`⚠️ [ValeService] No hay configuración específica de jeringas para ${vacuna.nombre} - omitiendo procesamiento de jeringas consolidado`);
+      return [];
+    }
+
+    const stocksAfectados: StockAfectacion[] = [];
+
+    // Procesar cada tipo de jeringa según la configuración REAL (no fallbacks)
+    for (const jeringaConfig of configResult.data) {
+      console.log(`🔄 [ValeService] Procesando jeringa consolidada: ${jeringaConfig.jeringaId}, multiplicador: ${jeringaConfig.multiplicador || 1}`);
+
+      try {
+        const stocksJeringa = await this.afectarStockJeringaEspecificaConsolidado(
+          tx,
+          jeringaConfig.jeringaId,
+          cantidadTotalVacunas * jeringaConfig.multiplicador,
+          valeNumero,
+          usuarioId,
+          vacunaId,
+          jeringaConfig.multiplicador || 1,
+          establecimientos
+        );
+        stocksAfectados.push(...stocksJeringa);
+      } catch (error) {
+        console.error(`❌ [ValeService] Error afectando stock consolidado de jeringa ${jeringaConfig.jeringaId}:`, error);
+        // Continuar con las demás jeringas en lugar de fallar completamente
+      }
+    }
+
+    console.log(`✅ [ValeService] Stocks consolidados de jeringas afectados para ${vacuna.nombre}: ${stocksAfectados.length} lotes`);
+    return stocksAfectados;
+  }
+
+  /**
+   * Afectar stock de una jeringa específica de forma consolidada
+   */
+  private static async afectarStockJeringaEspecificaConsolidado(
+    tx: any,
+    jeringaId: string,
+    cantidadNecesaria: number,
+    valeNumero: string,
+    usuarioId: string,
+    vacunaId: string,
+    multiplicador: number,
+    establecimientos: Array<{
+      establecimientoId: string;
+      cantidad: number;
+      nombre: string;
+    }>
+  ): Promise<StockAfectacion[]> {
+
+    // Obtener lotes de la jeringa específica disponibles (FIFO)
+    const lotesJeringas = await tx.loteJeringa.findMany({
+      where: {
+        jeringaId: jeringaId,
+        estado: 'disponible',
+        cantidadActual: { gt: 0 }
+      },
+      orderBy: [
+        { fechaVencimiento: 'asc' },
+        { fechaIngreso: 'asc' }
+      ]
+    });
+
+    const stocksAfectados: StockAfectacion[] = [];
+    let jeringasRestantes = cantidadNecesaria;
+    const cantidadTotalVacunas = establecimientos.reduce((sum, est) => sum + est.cantidad, 0);
+
+    // Obtener ID del almacén central
+    const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
+    const almacenCentralId = almacenCentralResult.success ? almacenCentralResult.data : null;
+
+    for (const lote of lotesJeringas) {
+      if (jeringasRestantes <= 0) break;
+
+      const cantidadAfectar = Math.min(lote.cantidadActual, jeringasRestantes);
+      const saldoAnterior = lote.cantidadActual;
+      const saldoNuevo = saldoAnterior - cantidadAfectar;
+
+      // Actualizar lote de jeringas
+      await tx.loteJeringa.update({
+        where: { id: lote.id },
+        data: {
+          cantidadActual: saldoNuevo,
+          estado: saldoNuevo === 0 ? 'agotado' : 'disponible'
+        }
+      });
+
+      // Distribuir proporcionalmente entre establecimientos para trazabilidad
+      for (const establecimiento of establecimientos) {
+        const proporcion = establecimiento.cantidad / cantidadTotalVacunas;
+        const cantidadProporcional = Math.round(cantidadAfectar * proporcion);
+
+        if (cantidadProporcional > 0) {
+          // Registrar en kardex con establecimientos origen y destino
+          await tx.kardex.create({
+            data: {
+              tipo: 'jeringa',
+              itemId: lote.jeringaId,
+              loteId: lote.id,
+              tipoMovimiento: TipoMovimientoKardex.salida,
+              cantidad: cantidadProporcional,
+              saldoAnterior: saldoAnterior,
+              saldoActual: saldoNuevo,
+              establecimientoOrigenId: almacenCentralId, // ALMACÉN (CHANKA) como origen
+              establecimientoDestinoId: establecimiento.establecimientoId,
+              documento: 'VALE_ENTREGA',
+              numeroDocumento: valeNumero,
+              observaciones: `Salida por vale de entrega ${valeNumero} - Vacuna: ${vacunaId} - ${establecimiento.nombre} (Multiplicador: ${multiplicador})`,
+              usuarioId,
+              fechaMovimiento: new Date()
+            }
+          });
+        }
+      }
+
+      stocksAfectados.push({
+        loteId: lote.id,
+        cantidadAfectada: cantidadAfectar,
+        saldoAnterior,
+        saldoNuevo
+      });
+
+      jeringasRestantes -= cantidadAfectar;
+    }
+
+    if (jeringasRestantes > 0) {
+      throw createError(
+        `Stock insuficiente de jeringas. Requerido: ${cantidadNecesaria}, Disponible: ${cantidadNecesaria - jeringasRestantes}`,
+        400
+      );
     }
 
     return stocksAfectados;
@@ -960,13 +1213,14 @@ export class ValeService {
           }
         });
 
-        // PASO 5: Procesar detalles y afectar stocks
+        // PASO 5: Procesar detalles y afectar stocks de forma consolidada
         const stocksAfectadosVacunas: StockAfectacion[] = [];
         const stocksAfectadosJeringas: StockAfectacion[] = [];
         const errores: string[] = [];
         let totalVacunas = 0;
         const establecimientosUnicos = new Set<string>();
 
+        // PASO 5.1: Crear detalles del vale (sin afectar stock aún)
         for (const movimiento of movimientos) {
           try {
             const cantidades = this.calcularCantidadTotal(movimiento);
@@ -1008,45 +1262,97 @@ export class ValeService {
               }
             }
 
-            // Solo procesar si hay cantidad total para este vale
+            // Acumular totales
             if (cantidadTotalParaVale > 0) {
-
-              // Afectar stocks si está habilitado
-              if (data.afectarStock !== false) {
-                try {
-                  // Afectar stock de vacunas usando la cantidad específica para este vale
-                  const stockVacunas = await this.afectarStockVacunas(
-                    tx,
-                    movimiento.vacunaId,
-                    cantidadTotalParaVale,
-                    numeroVale,
-                    usuarioIdFinal,
-                    movimiento.establecimientoId // Establecimiento de destino
-                  );
-                  stocksAfectadosVacunas.push(...stockVacunas);
-
-                  // Afectar stock de jeringas usando la cantidad específica para este vale
-                  const stockJeringas = await this.afectarStockJeringas(
-                    tx,
-                    movimiento.vacunaId,
-                    cantidadTotalParaVale,
-                    numeroVale,
-                    usuarioIdFinal,
-                    data.centroAcopioId,
-                    movimiento.establecimientoId // Establecimiento de destino
-                  );
-                  stocksAfectadosJeringas.push(...stockJeringas);
-                } catch (stockError) {
-                  errores.push(`Error afectando stock para ${movimiento.establecimiento.nombre} - ${movimiento.vacuna.nombre}: ${stockError instanceof Error ? stockError.message : 'Error desconocido'}`);
-                }
-              }
-
               totalVacunas += cantidadTotalParaVale;
               establecimientosUnicos.add(movimiento.establecimientoId);
             }
           } catch (error) {
-            errores.push(`Error procesando ${movimiento.establecimiento.nombre} - ${movimiento.vacuna.nombre}: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+            errores.push(`Error procesando detalles para ${movimiento.establecimiento?.nombre || 'establecimiento'} - ${movimiento.vacuna?.nombre || 'vacuna'}: ${error instanceof Error ? error.message : 'Error desconocido'}`);
           }
+        }
+
+        // PASO 5.2: Consolidar por vacuna y afectar stocks
+        if (data.afectarStock !== false) {
+          console.log(`🔄 [ValeService] Iniciando procesamiento consolidado de stocks para ${movimientos.length} movimientos...`);
+
+          // Consolidar movimientos por vacuna
+          const consolidadoPorVacuna = new Map<string, {
+            vacunaId: string;
+            cantidadTotal: number;
+            establecimientos: Array<{
+              establecimientoId: string;
+              cantidad: number;
+              nombre: string;
+            }>;
+          }>();
+
+          for (const movimiento of movimientos) {
+            const cantidades = this.calcularCantidadTotal(movimiento);
+            let cantidadTotalParaVale = 0;
+
+            // Calcular cantidad según tipo de vale
+            if (tipoVale === 'solo_base' || tipoVale === 'completo') {
+              cantidadTotalParaVale += cantidades.programada;
+            }
+            if (tipoVale === 'solo_adicionales' || tipoVale === 'completo') {
+              cantidadTotalParaVale += cantidades.adicional;
+            }
+
+            if (cantidadTotalParaVale > 0) {
+              if (!consolidadoPorVacuna.has(movimiento.vacunaId)) {
+                consolidadoPorVacuna.set(movimiento.vacunaId, {
+                  vacunaId: movimiento.vacunaId,
+                  cantidadTotal: 0,
+                  establecimientos: []
+                });
+              }
+
+              const consolidado = consolidadoPorVacuna.get(movimiento.vacunaId)!;
+              consolidado.cantidadTotal += cantidadTotalParaVale;
+              consolidado.establecimientos.push({
+                establecimientoId: movimiento.establecimientoId,
+                cantidad: cantidadTotalParaVale,
+                nombre: movimiento.establecimiento?.nombre || `Establecimiento ${movimiento.establecimientoId}`
+              });
+            }
+          }
+
+          // Procesar cada vacuna consolidada
+          for (const [vacunaId, consolidado] of consolidadoPorVacuna) {
+            try {
+              console.log(`🔄 [ValeService] Procesando vacuna ${vacunaId}: ${consolidado.cantidadTotal} unidades en ${consolidado.establecimientos.length} establecimientos`);
+
+              // Afectar stock de vacunas consolidado
+              const stockVacunas = await this.afectarStockVacunasConsolidado(
+                tx,
+                vacunaId,
+                consolidado.establecimientos,
+                numeroVale,
+                usuarioIdFinal
+              );
+              stocksAfectadosVacunas.push(...stockVacunas);
+
+              // Afectar stock de jeringas consolidado
+              const stockJeringas = await this.afectarStockJeringasConsolidado(
+                tx,
+                vacunaId,
+                consolidado.establecimientos,
+                numeroVale,
+                usuarioIdFinal,
+                data.centroAcopioId
+              );
+              stocksAfectadosJeringas.push(...stockJeringas);
+
+              console.log(`✅ [ValeService] Vacuna ${vacunaId} procesada exitosamente: ${consolidado.cantidadTotal} unidades deducidas`);
+            } catch (stockError) {
+              const errorMsg = `Error afectando stock consolidado para vacuna ${vacunaId}: ${stockError instanceof Error ? stockError.message : 'Error desconocido'}`;
+              console.error(`❌ [ValeService] ${errorMsg}`);
+              errores.push(errorMsg);
+            }
+          }
+
+          console.log(`✅ [ValeService] Procesamiento consolidado completado: ${consolidadoPorVacuna.size} tipos de vacuna procesados`);
         }
 
         // PASO 6: Actualizar totales del vale
