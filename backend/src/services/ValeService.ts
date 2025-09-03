@@ -723,6 +723,23 @@ export class ValeService {
   }
 
   /**
+   * Obtener stock total actual de una jeringa (suma de todos los lotes disponibles)
+   */
+  private static async obtenerStockTotalJeringa(tx: any, jeringaId: string): Promise<number> {
+    const result = await tx.loteJeringa.aggregate({
+      where: {
+        jeringaId,
+        cantidadActual: { gt: 0 }
+      },
+      _sum: {
+        cantidadActual: true
+      }
+    });
+
+    return result._sum.cantidadActual || 0;
+  }
+
+  /**
    * Afectar stock de vacunas de forma consolidada para múltiples establecimientos
    * Aplica FIFO y distribuye proporcionalmente entre establecimientos para trazabilidad
    * CORRIGE el cálculo secuencial de balances en Kardex
@@ -894,6 +911,7 @@ export class ValeService {
 
   /**
    * Afectar stock de una jeringa específica de forma consolidada
+   * CORRIGE el cálculo secuencial de balances en Kardex
    */
   private static async afectarStockJeringaEspecificaConsolidado(
     tx: any,
@@ -931,29 +949,42 @@ export class ValeService {
     const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
     const almacenCentralId = almacenCentralResult.success ? almacenCentralResult.data : null;
 
+    // OBTENER STOCK TOTAL INICIAL para cálculos de balance secuencial
+    let stockTotalActual = await this.obtenerStockTotalJeringa(tx, jeringaId);
+    console.log(`📊 [ValeService] Stock total inicial de jeringa ${jeringaId}: ${stockTotalActual} unidades`);
+
+    // Procesar cada lote afectado
     for (const lote of lotesJeringas) {
       if (jeringasRestantes <= 0) break;
 
       const cantidadAfectar = Math.min(lote.cantidadActual, jeringasRestantes);
-      const saldoAnterior = lote.cantidadActual;
-      const saldoNuevo = saldoAnterior - cantidadAfectar;
+      const saldoAnteriorLote = lote.cantidadActual;
+      const saldoNuevoLote = saldoAnteriorLote - cantidadAfectar;
 
       // Actualizar lote de jeringas
       await tx.loteJeringa.update({
         where: { id: lote.id },
         data: {
-          cantidadActual: saldoNuevo,
-          estado: saldoNuevo === 0 ? 'agotado' : 'disponible'
+          cantidadActual: saldoNuevoLote,
+          estado: saldoNuevoLote === 0 ? 'agotado' : 'disponible'
         }
       });
 
-      // Distribuir proporcionalmente entre establecimientos para trazabilidad
+      // DISTRIBUIR SECUENCIALMENTE entre establecimientos para balance correcto
+      let cantidadRestanteLote = cantidadAfectar;
+
       for (const establecimiento of establecimientos) {
+        if (cantidadRestanteLote <= 0) break;
+
         const proporcion = establecimiento.cantidad / cantidadTotalVacunas;
         const cantidadProporcional = Math.round(cantidadAfectar * proporcion);
 
         if (cantidadProporcional > 0) {
-          // Registrar en kardex con establecimientos origen y destino
+          // CALCULAR BALANCE SECUENCIAL CORRECTO
+          const saldoAnteriorMovimiento = stockTotalActual;
+          const saldoNuevoMovimiento = stockTotalActual - cantidadProporcional;
+
+          // Crear entrada de kardex individual para cada establecimiento con balance secuencial
           await tx.kardex.create({
             data: {
               tipo: 'jeringa',
@@ -961,8 +992,8 @@ export class ValeService {
               loteId: lote.id,
               tipoMovimiento: TipoMovimientoKardex.salida,
               cantidad: cantidadProporcional,
-              saldoAnterior: saldoAnterior,
-              saldoActual: saldoNuevo,
+              saldoAnterior: saldoAnteriorMovimiento, // Balance total ANTES del movimiento
+              saldoActual: saldoNuevoMovimiento,      // Balance total DESPUÉS del movimiento
               establecimientoOrigenId: almacenCentralId, // ALMACÉN (CHANKA) como origen
               establecimientoDestinoId: establecimiento.establecimientoId,
               documento: 'VALE_ENTREGA',
@@ -972,14 +1003,18 @@ export class ValeService {
               fechaMovimiento: new Date()
             }
           });
+
+          // ACTUALIZAR stock total para el siguiente movimiento
+          stockTotalActual = saldoNuevoMovimiento;
+          cantidadRestanteLote -= cantidadProporcional;
         }
       }
 
       stocksAfectados.push({
         loteId: lote.id,
         cantidadAfectada: cantidadAfectar,
-        saldoAnterior,
-        saldoNuevo
+        saldoAnterior: stockTotalActual + cantidadAfectar, // Stock antes de procesar este lote
+        saldoNuevo: stockTotalActual // Stock después de procesar este lote
       });
 
       jeringasRestantes -= cantidadAfectar;
@@ -1070,6 +1105,7 @@ export class ValeService {
 
   /**
    * Afectar stock de una jeringa específica
+   * CORRIGE el cálculo secuencial de balances en Kardex
    */
   private static async afectarStockJeringaEspecifica(
     tx: any,
@@ -1098,27 +1134,35 @@ export class ValeService {
     const stocksAfectados: StockAfectacion[] = [];
     let jeringasRestantes = cantidadNecesaria;
 
+    // Obtener ID del almacén central
+    const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
+    const almacenCentralId = almacenCentralResult.success ? almacenCentralResult.data : null;
+
+    // OBTENER STOCK TOTAL INICIAL para cálculos de balance secuencial
+    let stockTotalActual = await this.obtenerStockTotalJeringa(tx, jeringaId);
+    console.log(`📊 [ValeService] Stock total inicial de jeringa ${jeringaId}: ${stockTotalActual} unidades`);
+
     for (const lote of lotesJeringas) {
       if (jeringasRestantes <= 0) break;
 
       const cantidadAfectar = Math.min(lote.cantidadActual, jeringasRestantes);
-      const saldoAnterior = lote.cantidadActual;
-      const saldoNuevo = saldoAnterior - cantidadAfectar;
+      const saldoAnteriorLote = lote.cantidadActual;
+      const saldoNuevoLote = saldoAnteriorLote - cantidadAfectar;
 
       // Actualizar lote de jeringas
       await tx.loteJeringa.update({
         where: { id: lote.id },
         data: {
-          cantidadActual: saldoNuevo,
-          estado: saldoNuevo === 0 ? 'agotado' : 'disponible'
+          cantidadActual: saldoNuevoLote,
+          estado: saldoNuevoLote === 0 ? 'agotado' : 'disponible'
         }
       });
 
-      // Obtener ID del almacén central
-      const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
-      const almacenCentralId = almacenCentralResult.success ? almacenCentralResult.data : null;
+      // CALCULAR BALANCE SECUENCIAL CORRECTO
+      const saldoAnteriorMovimiento = stockTotalActual;
+      const saldoNuevoMovimiento = stockTotalActual - cantidadAfectar;
 
-      // Registrar en kardex con establecimientos origen y destino
+      // Registrar en kardex con establecimientos origen y destino y balance secuencial
       await tx.kardex.create({
         data: {
           tipo: 'jeringa',
@@ -1126,8 +1170,8 @@ export class ValeService {
           loteId: lote.id,
           tipoMovimiento: TipoMovimientoKardex.salida,
           cantidad: cantidadAfectar,
-          saldoAnterior,
-          saldoActual: saldoNuevo,
+          saldoAnterior: saldoAnteriorMovimiento, // Balance total ANTES del movimiento
+          saldoActual: saldoNuevoMovimiento,      // Balance total DESPUÉS del movimiento
           establecimientoOrigenId: almacenCentralId, // ALMACÉN (CHANKA) como origen
           establecimientoDestinoId: establecimientoDestinoId, // Establecimiento de destino
           documento: 'VALE_ENTREGA',
@@ -1141,10 +1185,12 @@ export class ValeService {
       stocksAfectados.push({
         loteId: lote.id,
         cantidadAfectada: cantidadAfectar,
-        saldoAnterior,
-        saldoNuevo
+        saldoAnterior: saldoAnteriorMovimiento,
+        saldoNuevo: saldoNuevoMovimiento
       });
 
+      // ACTUALIZAR stock total para el siguiente movimiento
+      stockTotalActual = saldoNuevoMovimiento;
       jeringasRestantes -= cantidadAfectar;
     }
 
