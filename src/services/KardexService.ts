@@ -129,7 +129,7 @@ export interface ApiResponse<T> {
 export interface PaginatedResponse<T> {
   success: boolean;
   message: string;
-  data: T;
+  data: T[];
   pagination?: {
     page: number;
     limit: number;
@@ -315,7 +315,8 @@ export class KardexService {
    */
   static async getEstablecimientos(): Promise<Establecimiento[]> {
     try {
-      const response = await fetch(`${this.BASE_URL}/establecimientos`, {
+      // Add noPagination=true to get all establishments without pagination
+      const response = await fetch(`${this.BASE_URL}/establecimientos?noPagination=true`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -326,12 +327,13 @@ export class KardexService {
         throw new Error(`Error HTTP: ${response.status}`);
       }
 
-      const result: PaginatedResponse<Establecimiento[]> = await response.json();
-      
+      const result: PaginatedResponse<Establecimiento> = await response.json();
+
       if (!result.success) {
         throw new Error(result.message || 'Error al obtener establecimientos');
       }
 
+      // result.data is already the array of establishments
       return result.data.map(establecimiento => ({
         ...establecimiento,
         createdAt: new Date(establecimiento.createdAt),

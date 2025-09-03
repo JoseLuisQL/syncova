@@ -778,19 +778,19 @@ const MovementDetailsModal: React.FC<MovementDetailsModalProps> = ({
                     )}
 
                     {/* Standard Origin/Destination Establishments */}
-                    {movement.establecimientoOrigenId && (
+                    {(movement.establecimientoOrigenId || movement.establecimientoOrigen) && (
                       <div className="flex justify-between">
                         <span className="text-sm font-medium text-gray-600">Establecimiento Origen:</span>
                         <span className="text-sm text-gray-900">
-                          {getEstablecimientoNombre(movement.establecimientoOrigenId)}
+                          {movement.establecimientoOrigen?.nombre || getEstablecimientoNombre(movement.establecimientoOrigenId)}
                         </span>
                       </div>
                     )}
-                    {movement.establecimientoDestinoId && (
+                    {(movement.establecimientoDestinoId || movement.establecimientoDestino) && (
                       <div className="flex justify-between">
                         <span className="text-sm font-medium text-gray-600">Establecimiento Destino:</span>
                         <span className="text-sm text-gray-900">
-                          {getEstablecimientoNombre(movement.establecimientoDestinoId)}
+                          {movement.establecimientoDestino?.nombre || getEstablecimientoNombre(movement.establecimientoDestinoId)}
                         </span>
                       </div>
                     )}
