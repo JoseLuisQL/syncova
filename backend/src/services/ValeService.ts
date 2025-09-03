@@ -788,43 +788,72 @@ export class ValeService {
       // DISTRIBUIR SECUENCIALMENTE entre establecimientos para balance correcto
       let cantidadRestanteLote = cantidadAfectar;
 
-      for (const establecimiento of establecimientos) {
-        if (cantidadRestanteLote <= 0) break;
+      // CALCULAR DISTRIBUCIÓN PROPORCIONAL SIN PÉRDIDA DE PRECISIÓN
+      const distribucionProporcional: Array<{establecimiento: any, cantidadAsignada: number}> = [];
+      let totalAsignado = 0;
 
+      // Primera pasada: calcular cantidades proporcionales con Math.floor para evitar excesos
+      for (let i = 0; i < establecimientos.length; i++) {
+        const establecimiento = establecimientos[i];
         const proporcion = establecimiento.cantidad / cantidadTotal;
-        const cantidadProporcional = Math.round(cantidadAfectar * proporcion);
+        let cantidadProporcional = Math.floor(cantidadAfectar * proporcion);
 
-        if (cantidadProporcional > 0 && cantidadRestanteLote >= cantidadProporcional) {
-          // CALCULAR BALANCE SECUENCIAL CORRECTO
-          const saldoAnteriorMovimiento = stockTotalActual;
-          const saldoNuevoMovimiento = stockTotalActual - cantidadProporcional;
-
-          // Crear entrada de kardex individual para cada establecimiento con balance secuencial
-          await tx.kardex.create({
-            data: {
-              tipo: 'vacuna',
-              itemId: vacunaId,
-              loteId: lote.id,
-              tipoMovimiento: TipoMovimientoKardex.salida,
-              cantidad: cantidadProporcional,
-              saldoAnterior: saldoAnteriorMovimiento, // Balance total ANTES del movimiento
-              saldoActual: saldoNuevoMovimiento,      // Balance total DESPUÉS del movimiento
-              establecimientoOrigenId: almacenCentralId, // ALMACÉN (CHANKA) como origen
-              establecimientoDestinoId: establecimiento.establecimientoId,
-              documento: 'VALE_ENTREGA',
-              numeroDocumento: valeNumero,
-              observaciones: `Salida por vale de entrega ${valeNumero} - ${establecimiento.nombre} (${establecimiento.cantidad}/${cantidadTotal} unidades)`,
-              usuarioId,
-              fechaMovimiento: new Date()
-            }
-          });
-
-          // ACTUALIZAR stock total para el siguiente movimiento
-          stockTotalActual = saldoNuevoMovimiento;
-          cantidadRestanteLote -= cantidadProporcional;
-
-          console.log(`✅ [ValeService] Movimiento secuencial: ${establecimiento.nombre} - ${cantidadProporcional} unidades (${saldoAnteriorMovimiento} → ${saldoNuevoMovimiento})`);
+        // Para el último establecimiento, asignar todo lo que queda para evitar pérdida por redondeo
+        if (i === establecimientos.length - 1) {
+          cantidadProporcional = cantidadAfectar - totalAsignado;
         }
+
+        distribucionProporcional.push({
+          establecimiento,
+          cantidadAsignada: cantidadProporcional
+        });
+
+        totalAsignado += cantidadProporcional;
+      }
+
+      // Verificar que la suma sea exacta
+      if (totalAsignado !== cantidadAfectar) {
+        console.warn(`⚠️ [ValeService] Ajuste de distribución: esperado ${cantidadAfectar}, calculado ${totalAsignado}`);
+        // Ajustar la diferencia en el último establecimiento
+        const diferencia = cantidadAfectar - totalAsignado;
+        distribucionProporcional[distribucionProporcional.length - 1].cantidadAsignada += diferencia;
+      }
+
+      // Segunda pasada: crear movimientos de kardex con cantidades exactas
+      for (const {establecimiento, cantidadAsignada} of distribucionProporcional) {
+        if (cantidadAsignada <= 0 || cantidadRestanteLote <= 0) continue;
+
+        const cantidadFinal = Math.min(cantidadAsignada, cantidadRestanteLote);
+
+        // CALCULAR BALANCE SECUENCIAL CORRECTO
+        const saldoAnteriorMovimiento = stockTotalActual;
+        const saldoNuevoMovimiento = stockTotalActual - cantidadFinal;
+
+        // Crear entrada de kardex individual para cada establecimiento con balance secuencial
+        await tx.kardex.create({
+          data: {
+            tipo: 'vacuna',
+            itemId: vacunaId,
+            loteId: lote.id,
+            tipoMovimiento: TipoMovimientoKardex.salida,
+            cantidad: cantidadFinal,
+            saldoAnterior: saldoAnteriorMovimiento, // Balance total ANTES del movimiento
+            saldoActual: saldoNuevoMovimiento,      // Balance total DESPUÉS del movimiento
+            establecimientoOrigenId: almacenCentralId, // ALMACÉN (CHANKA) como origen
+            establecimientoDestinoId: establecimiento.establecimientoId,
+            documento: 'VALE_ENTREGA',
+            numeroDocumento: valeNumero,
+            observaciones: `Salida por vale de entrega ${valeNumero} - ${establecimiento.nombre} (${establecimiento.cantidad}/${cantidadTotal} unidades)`,
+            usuarioId,
+            fechaMovimiento: new Date()
+          }
+        });
+
+        // ACTUALIZAR stock total para el siguiente movimiento
+        stockTotalActual = saldoNuevoMovimiento;
+        cantidadRestanteLote -= cantidadFinal;
+
+        console.log(`✅ [ValeService] Movimiento secuencial: ${establecimiento.nombre} - ${cantidadFinal} unidades (${saldoAnteriorMovimiento} → ${saldoNuevoMovimiento})`);
       }
 
       stocksAfectados.push({
