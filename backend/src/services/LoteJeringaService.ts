@@ -159,12 +159,16 @@ export class LoteJeringaService {
         throw new HttpError('Ya existe un lote con este número', 400);
       }
 
-      // Determinar estado automáticamente
-      const estado = this.determinarEstado(data.fechaVencimiento, data.cantidadActual);
+      // Determinar estado automáticamente basado en la cantidad inicial (no actual)
+      // ya que la cantidad actual se establecerá a través del Kardex
+      const estado = this.determinarEstado(data.fechaVencimiento, data.cantidadInicial);
 
+      // Crear el lote con cantidadActual = 0 inicialmente
+      // El Kardex se encargará de establecer la cantidad correcta
       const lote = await prisma.loteJeringa.create({
         data: {
           ...data,
+          cantidadActual: 0, // Inicializar en 0, el Kardex la actualizará
           estado
         },
         include: {
@@ -207,13 +211,21 @@ export class LoteJeringaService {
               numeroDocumento: data.numeroComprobante || lote.numero,
               observaciones: `Ingreso de lote ${lote.numero} - ${data.comprobanteClase || 'INGRESO'}: ${data.numeroComprobante || 'N/A'}`,
               usuarioId: usuarioSistema.id,
-              fechaMovimiento: data.fechaIngreso
+              fechaMovimiento: new Date() // Usar fecha y hora actual para el movimiento
             });
 
             if (!kardexResult.success) {
               console.warn(`⚠️ [LoteJeringaService] No se pudo registrar en Kardex: ${kardexResult.error}`);
             } else {
               console.log(`✅ [LoteJeringaService] Movimiento registrado en Kardex exitosamente`);
+
+              // Actualizar el estado del lote después del registro exitoso en Kardex
+              // ya que ahora tiene la cantidad correcta
+              const estadoFinal = this.determinarEstado(data.fechaVencimiento, data.cantidadInicial);
+              await prisma.loteJeringa.update({
+                where: { id: lote.id },
+                data: { estado: estadoFinal }
+              });
             }
           } catch (kardexError) {
             console.error(`❌ [LoteJeringaService] Error al registrar en Kardex:`, kardexError);
