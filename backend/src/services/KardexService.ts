@@ -989,25 +989,63 @@ export class KardexService {
   }
 
   /**
-   * Calcular saldo anterior basado en el último movimiento del item/lote
+   * Calcular saldo anterior basado en el stock total actual de todos los lotes del mismo tipo de item
+   * Para vacunas: suma de cantidadActual de todos los lotes de la misma vacuna
+   * Para jeringas: suma de cantidadActual de todos los lotes de la misma jeringa
    */
   private static async calcularSaldoAnterior(tipo: string, itemId: string, loteId: string): Promise<number> {
-    const ultimoMovimiento = await prisma.kardex.findFirst({
-      where: {
-        tipo,
-        itemId,
-        loteId
-      },
-      orderBy: [
-        { fechaMovimiento: 'desc' },
-        { createdAt: 'desc' }
-      ],
-      select: {
-        saldoActual: true
-      }
-    });
+    try {
+      if (tipo === 'vacuna') {
+        // Para vacunas: sumar cantidadActual de todos los lotes de la misma vacuna
+        const stockTotal = await prisma.loteVacuna.aggregate({
+          where: {
+            vacunaId: itemId,
+            estado: 'disponible', // Solo lotes disponibles
+            cantidadActual: { gt: 0 } // Solo lotes con stock positivo
+          },
+          _sum: {
+            cantidadActual: true
+          }
+        });
 
-    return ultimoMovimiento?.saldoActual || 0;
+        return stockTotal._sum.cantidadActual || 0;
+      } else if (tipo === 'jeringa') {
+        // Para jeringas: sumar cantidadActual de todos los lotes de la misma jeringa
+        const stockTotal = await prisma.loteJeringa.aggregate({
+          where: {
+            jeringaId: itemId,
+            estado: 'disponible', // Solo lotes disponibles
+            cantidadActual: { gt: 0 } // Solo lotes con stock positivo
+          },
+          _sum: {
+            cantidadActual: true
+          }
+        });
+
+        return stockTotal._sum.cantidadActual || 0;
+      } else {
+        // Fallback para otros tipos: usar el método anterior
+        const ultimoMovimiento = await prisma.kardex.findFirst({
+          where: {
+            tipo,
+            itemId,
+            loteId
+          },
+          orderBy: [
+            { fechaMovimiento: 'desc' },
+            { createdAt: 'desc' }
+          ],
+          select: {
+            saldoActual: true
+          }
+        });
+
+        return ultimoMovimiento?.saldoActual || 0;
+      }
+    } catch (error) {
+      console.error(`Error calculando saldo anterior para ${tipo} ${itemId}:`, error);
+      return 0;
+    }
   }
 
   /**
