@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { AlmacenCentralService } from '../src/services/AlmacenCentralService';
 
 const prisma = new PrismaClient();
 
@@ -6,6 +7,10 @@ async function main() {
   console.log('🌱 Iniciando seeder de SIVAC...');
 
   try {
+    // Limpiar cache de servicios antes de empezar
+    console.log('🧹 Limpiando cache de servicios...');
+    AlmacenCentralService.limpiarCache();
+
     // Limpiar datos existentes (opcional, comentar en producción)
     console.log('🧹 Limpiando datos existentes...');
 

@@ -265,47 +265,68 @@ export class LoteVacunaService {
 
       const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
       if (almacenCentralResult.success) {
-        // Obtener un usuario administrador del sistema para el registro automático
-        const usuarioSistema = await prisma.usuario.findFirst({
-          where: {
-            rol: 'administrador',
-            estado: 'activo'
-          }
+        console.log(`📦 [LoteVacunaService] Almacén central obtenido: ${almacenCentralResult.data}`);
+
+        // Verificar que el establecimiento existe antes de continuar
+        const establecimientoVerificacion = await prisma.establecimiento.findUnique({
+          where: { id: almacenCentralResult.data },
+          select: { id: true, nombre: true, codigo: true, estado: true }
         });
 
-        if (!usuarioSistema) {
-          console.warn(`⚠️ [LoteVacunaService] No se encontró usuario administrador para registro automático`);
+        if (!establecimientoVerificacion) {
+          console.error(`❌ [LoteVacunaService] CRÍTICO: Establecimiento ${almacenCentralResult.data} no existe en BD`);
+          console.warn(`⚠️ [LoteVacunaService] No se pudo registrar en Kardex: Establecimiento destino no encontrado`);
         } else {
-          try {
-            const kardexResult = await KardexService.generarMovimientoAutomatico({
-              tipo: 'vacuna',
-              itemId: data.vacunaId,
-              loteId: lote.id,
-              tipoMovimiento: TipoMovimientoKardex.ingreso,
-              cantidad: data.cantidadInicial,
-              establecimientoDestinoId: almacenCentralResult.data, // ALMACÉN (CHANKA) como destino
-              documento: data.comprobanteClase || 'INGRESO',
-              numeroDocumento: data.numeroComprobante || lote.numero,
-              observaciones: `Ingreso de lote ${lote.numero} - ${data.comprobanteClase || 'INGRESO'}: ${data.numeroComprobante || 'N/A'}`,
-              usuarioId: usuarioSistema.id,
-              fechaMovimiento: new Date() // Usar fecha y hora actual para el movimiento
-            });
+          console.log(`✅ [LoteVacunaService] Establecimiento verificado: ${establecimientoVerificacion.nombre} (${establecimientoVerificacion.codigo})`);
 
-            if (!kardexResult.success) {
-              console.warn(`⚠️ [LoteVacunaService] No se pudo registrar en Kardex: ${kardexResult.error}`);
-            } else {
-              console.log(`✅ [LoteVacunaService] Movimiento registrado en Kardex exitosamente`);
-
-              // Actualizar el estado del lote después del registro exitoso en Kardex
-              // ya que ahora tiene la cantidad correcta
-              const estadoFinal = this.determinarEstado(data.fechaVencimiento, data.cantidadInicial);
-              await prisma.loteVacuna.update({
-                where: { id: lote.id },
-                data: { estado: estadoFinal }
-              });
+          // Obtener un usuario administrador del sistema para el registro automático
+          const usuarioSistema = await prisma.usuario.findFirst({
+            where: {
+              rol: 'administrador',
+              estado: 'activo'
             }
-          } catch (kardexError) {
-            console.error(`❌ [LoteVacunaService] Error al registrar en Kardex:`, kardexError);
+          });
+
+          if (!usuarioSistema) {
+            console.warn(`⚠️ [LoteVacunaService] No se encontró usuario administrador para registro automático`);
+          } else {
+            console.log(`👤 [LoteVacunaService] Usuario administrador encontrado: ${usuarioSistema.nombres} ${usuarioSistema.apellidos} (${usuarioSistema.id})`);
+
+            try {
+              const kardexData = {
+                tipo: 'vacuna' as const,
+                itemId: data.vacunaId,
+                loteId: lote.id,
+                tipoMovimiento: TipoMovimientoKardex.ingreso,
+                cantidad: data.cantidadInicial,
+                establecimientoDestinoId: almacenCentralResult.data, // ALMACÉN (CHANKA) como destino
+                documento: data.comprobanteClase || 'INGRESO',
+                numeroDocumento: data.numeroComprobante || lote.numero,
+                observaciones: `Ingreso de lote ${lote.numero} - ${data.comprobanteClase || 'INGRESO'}: ${data.numeroComprobante || 'N/A'}`,
+                usuarioId: usuarioSistema.id,
+                fechaMovimiento: new Date() // Usar fecha y hora actual para el movimiento
+              };
+
+              console.log(`📝 [LoteVacunaService] Datos para Kardex:`, JSON.stringify(kardexData, null, 2));
+
+              const kardexResult = await KardexService.generarMovimientoAutomatico(kardexData);
+
+              if (!kardexResult.success) {
+                console.warn(`⚠️ [LoteVacunaService] No se pudo registrar en Kardex: ${kardexResult.error}`);
+              } else {
+                console.log(`✅ [LoteVacunaService] Movimiento registrado en Kardex exitosamente`);
+
+                // Actualizar el estado del lote después del registro exitoso en Kardex
+                // ya que ahora tiene la cantidad correcta
+                const estadoFinal = this.determinarEstado(data.fechaVencimiento, data.cantidadInicial);
+                await prisma.loteVacuna.update({
+                  where: { id: lote.id },
+                  data: { estado: estadoFinal }
+                });
+              }
+            } catch (kardexError) {
+              console.error(`❌ [LoteVacunaService] Error al registrar en Kardex:`, kardexError);
+            }
           }
         }
       } else {

@@ -956,12 +956,26 @@ export class KardexService {
     }
 
     if (data.establecimientoDestinoId) {
+      console.log(`🔍 [KardexService] Validando establecimiento destino: ${data.establecimientoDestinoId}`);
       const establecimientoDestino = await prisma.establecimiento.findUnique({
-        where: { id: data.establecimientoDestinoId }
+        where: { id: data.establecimientoDestinoId },
+        select: { id: true, nombre: true, codigo: true, estado: true }
       });
+
       if (!establecimientoDestino) {
-        throw new Error('Establecimiento destino no encontrado');
+        console.error(`❌ [KardexService] Establecimiento destino no encontrado: ${data.establecimientoDestinoId}`);
+
+        // Buscar todos los establecimientos para diagnóstico
+        const todosEstablecimientos = await prisma.establecimiento.findMany({
+          select: { id: true, nombre: true, codigo: true, estado: true },
+          take: 5
+        });
+        console.log('📋 [KardexService] Primeros 5 establecimientos en BD:', todosEstablecimientos);
+
+        throw new Error(`Establecimiento destino no encontrado: ${data.establecimientoDestinoId}`);
       }
+
+      console.log(`✅ [KardexService] Establecimiento destino válido: ${establecimientoDestino.nombre} (${establecimientoDestino.codigo}) - Estado: ${establecimientoDestino.estado}`);
     }
 
     // Validaciones de negocio según tipo de movimiento

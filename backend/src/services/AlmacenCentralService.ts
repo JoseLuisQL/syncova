@@ -15,17 +15,55 @@ export class AlmacenCentralService {
   private static almacenCentralCache: { id: string; nombre: string } | null = null;
 
   /**
+   * Limpiar cache del almacén central
+   * Útil cuando se detecta que los datos han cambiado (ej: después de seeder)
+   */
+  static limpiarCache(): void {
+    console.log('🧹 [AlmacenCentralService] Limpiando cache del almacén central');
+    this.almacenCentralCache = null;
+  }
+
+  /**
+   * Verificar si el establecimiento en cache aún existe en la BD
+   * @returns Promise<boolean>
+   */
+  private static async verificarCacheValido(): Promise<boolean> {
+    if (!this.almacenCentralCache) {
+      return false;
+    }
+
+    try {
+      const establecimiento = await prisma.establecimiento.findUnique({
+        where: { id: this.almacenCentralCache.id },
+        select: { id: true }
+      });
+
+      return !!establecimiento;
+    } catch (error) {
+      console.warn('⚠️ [AlmacenCentralService] Error verificando cache:', error);
+      return false;
+    }
+  }
+
+  /**
    * Obtener el ID del almacén central (CHANKA) como establecimiento para Kardex
    * @returns Promise<ServiceResult<string>> - ID del establecimiento del almacén central
    */
   static async obtenerIdAlmacenCentral(): Promise<ServiceResult<string>> {
     try {
-      // Verificar cache primero
+      // Verificar cache primero y validar que aún existe
       if (this.almacenCentralCache) {
-        return {
-          success: true,
-          data: this.almacenCentralCache.id
-        };
+        const cacheValido = await this.verificarCacheValido();
+        if (cacheValido) {
+          console.log(`✅ [AlmacenCentralService] Usando cache válido: ${this.almacenCentralCache.id}`);
+          return {
+            success: true,
+            data: this.almacenCentralCache.id
+          };
+        } else {
+          console.log('🧹 [AlmacenCentralService] Cache inválido detectado, limpiando...');
+          this.limpiarCache();
+        }
       }
 
       // Buscar directamente el establecimiento de ALMACÉN (CHANKA)
@@ -49,26 +87,40 @@ export class AlmacenCentralService {
         };
       }
 
-      // Si no existe el establecimiento, buscar el centro de acopio como fallback
-      const almacenCentral = await prisma.centroAcopio.findUnique({
-        where: { codigo: this.ALMACEN_CENTRAL_CODIGO },
-        select: {
-          id: true,
-          nombre: true,
-          establecimientos: {
-            select: { id: true },
-            take: 1
-          }
-        }
+      // Si no existe el establecimiento, intentar crearlo automáticamente
+      console.log('🔄 [AlmacenCentralService] Establecimiento no encontrado, intentando crear/recuperar...');
+      const crearResult = await this.garantizarAlmacenCentral();
+
+      if (!crearResult.success) {
+        return crearResult;
+      }
+
+      // Buscar nuevamente el establecimiento después de garantizar su existencia
+      const establecimientoAlmacenNuevo = await prisma.establecimiento.findUnique({
+        where: { codigo: this.ALMACEN_CENTRAL_ESTABLECIMIENTO_CODIGO },
+        select: { id: true, nombre: true }
       });
 
-      if (!almacenCentral) {
-        console.error(`❌ [AlmacenCentralService] Almacén central no encontrado con código: ${this.ALMACEN_CENTRAL_CODIGO}`);
+      if (!establecimientoAlmacenNuevo) {
+        console.error(`❌ [AlmacenCentralService] No se pudo crear/encontrar el establecimiento ALMACÉN (CHANKA)`);
         return {
           success: false,
-          error: `Almacén central ${this.ALMACEN_CENTRAL_NOMBRE} no encontrado en el sistema`
+          error: `No se pudo crear/encontrar el establecimiento ${this.ALMACEN_CENTRAL_NOMBRE}`
         };
       }
+
+      // Guardar en cache
+      this.almacenCentralCache = {
+        id: establecimientoAlmacenNuevo.id,
+        nombre: establecimientoAlmacenNuevo.nombre
+      };
+
+      console.log(`✅ [AlmacenCentralService] Establecimiento ALMACÉN (CHANKA) creado/recuperado: ${establecimientoAlmacenNuevo.nombre} (${establecimientoAlmacenNuevo.id})`);
+
+      return {
+        success: true,
+        data: establecimientoAlmacenNuevo.id
+      };
 
       // Si tiene establecimientos asociados, usar el primero
       let establecimientoId = almacenCentral.id; // Por defecto usar el ID del centro de acopio
@@ -226,6 +278,85 @@ export class AlmacenCentralService {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Error al crear almacén central'
+      };
+    }
+  }
+
+  /**
+   * Garantizar que existe el almacén central completo (centro de acopio + establecimiento)
+   * Crea ambos si no existen
+   * @returns Promise<ServiceResult<string>> - ID del establecimiento del almacén central
+   */
+  static async garantizarAlmacenCentral(): Promise<ServiceResult<string>> {
+    try {
+      console.log('🔄 [AlmacenCentralService] Garantizando existencia del almacén central...');
+
+      // 1. Verificar/crear centro de acopio
+      let centroAcopio = await prisma.centroAcopio.findUnique({
+        where: { codigo: this.ALMACEN_CENTRAL_CODIGO },
+        select: { id: true, nombre: true }
+      });
+
+      if (!centroAcopio) {
+        console.log('📦 [AlmacenCentralService] Creando centro de acopio ALMACÉN (CHANKA)...');
+        centroAcopio = await prisma.centroAcopio.create({
+          data: {
+            nombre: this.ALMACEN_CENTRAL_NOMBRE,
+            codigo: this.ALMACEN_CENTRAL_CODIGO,
+            direccion: 'Almacén Central, Apurímac',
+            responsable: 'Administrador Central',
+            telefono: '083-400000'
+          },
+          select: { id: true, nombre: true }
+        });
+        console.log(`✅ [AlmacenCentralService] Centro de acopio creado: ${centroAcopio.id}`);
+      } else {
+        console.log(`✅ [AlmacenCentralService] Centro de acopio encontrado: ${centroAcopio.id}`);
+      }
+
+      // 2. Verificar/crear establecimiento
+      let establecimiento = await prisma.establecimiento.findUnique({
+        where: { codigo: this.ALMACEN_CENTRAL_ESTABLECIMIENTO_CODIGO },
+        select: { id: true, nombre: true }
+      });
+
+      if (!establecimiento) {
+        console.log('🏥 [AlmacenCentralService] Creando establecimiento ALMACÉN (CHANKA)...');
+        establecimiento = await prisma.establecimiento.create({
+          data: {
+            nombre: this.ALMACEN_CENTRAL_NOMBRE,
+            tipo: 'hospital',
+            codigo: this.ALMACEN_CENTRAL_ESTABLECIMIENTO_CODIGO,
+            centroAcopioId: centroAcopio.id,
+            direccion: 'Almacén Central, Apurímac',
+            responsable: 'Administrador Central',
+            telefono: '083-400000',
+            estado: 'activo'
+          },
+          select: { id: true, nombre: true }
+        });
+        console.log(`✅ [AlmacenCentralService] Establecimiento creado: ${establecimiento.id}`);
+      } else {
+        console.log(`✅ [AlmacenCentralService] Establecimiento encontrado: ${establecimiento.id}`);
+      }
+
+      // 3. Actualizar cache
+      this.almacenCentralCache = {
+        id: establecimiento.id,
+        nombre: establecimiento.nombre
+      };
+
+      console.log(`✅ [AlmacenCentralService] Almacén central garantizado: ${establecimiento.nombre} (${establecimiento.id})`);
+
+      return {
+        success: true,
+        data: establecimiento.id
+      };
+    } catch (error) {
+      console.error('❌ [AlmacenCentralService] Error al garantizar almacén central:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al garantizar almacén central'
       };
     }
   }
