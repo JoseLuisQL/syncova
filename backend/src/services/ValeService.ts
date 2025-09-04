@@ -741,7 +741,7 @@ export class ValeService {
 
   /**
    * Afectar stock de vacunas de forma consolidada para múltiples establecimientos
-   * Aplica FIFO y distribuye proporcionalmente entre establecimientos para trazabilidad
+   * Aplica FIFO y procesa SECUENCIALMENTE por establecimiento (igual que jeringas)
    * CORRIGE el cálculo secuencial de balances en Kardex
    */
   private static async afectarStockVacunasConsolidado(
@@ -771,103 +771,98 @@ export class ValeService {
     let stockTotalActual = await this.obtenerStockTotalVacuna(tx, vacunaId);
     console.log(`📊 [ValeService] Stock total inicial de vacuna ${vacunaId}: ${stockTotalActual} unidades`);
 
-    // Procesar cada lote afectado
-    for (const { lote, cantidadAfectar } of lotesAfectar) {
-      const saldoAnteriorLote = lote.cantidadActual;
-      const saldoNuevoLote = saldoAnteriorLote - cantidadAfectar;
+    // PROCESAMIENTO SECUENCIAL POR ESTABLECIMIENTO (igual que jeringas)
+    // Crear array de establecimientos con sus requerimientos
+    const establecimientosConRequerimientos = establecimientos.map(est => ({
+      ...est,
+      vacunasRequeridas: est.cantidad,
+      vacunasAsignadas: 0
+    }));
 
-      // Actualizar lote
+    console.log(`🔄 [ValeService] Procesando ${establecimientosConRequerimientos.length} establecimientos secuencialmente:`);
+    establecimientosConRequerimientos.forEach(est => {
+      console.log(`   - ${est.nombre}: ${est.vacunasRequeridas} vacunas requeridas`);
+    });
+
+    let vacunasRestantes = cantidadTotal;
+
+    // Procesar cada lote disponible
+    for (const { lote, cantidadAfectar } of lotesAfectar) {
+      if (vacunasRestantes <= 0) break;
+
+      const cantidadDisponibleLote = Math.min(lote.cantidadActual, vacunasRestantes);
+      let cantidadRestanteLote = cantidadDisponibleLote;
+
+      console.log(`📦 [ValeService] Procesando lote ${lote.numero}: ${cantidadDisponibleLote} vacunas disponibles`);
+
+      // Actualizar lote de vacunas
       await tx.loteVacuna.update({
         where: { id: lote.id },
         data: {
-          cantidadActual: saldoNuevoLote,
-          estado: saldoNuevoLote === 0 ? 'agotado' : 'disponible'
+          cantidadActual: lote.cantidadActual - cantidadDisponibleLote,
+          estado: (lote.cantidadActual - cantidadDisponibleLote) === 0 ? 'agotado' : 'disponible'
         }
       });
 
-      // DISTRIBUIR SECUENCIALMENTE entre establecimientos para balance correcto
-      let cantidadRestanteLote = cantidadAfectar;
+      // PROCESAR ESTABLECIMIENTOS SECUENCIALMENTE
+      for (const establecimiento of establecimientosConRequerimientos) {
+        if (cantidadRestanteLote <= 0) break;
 
-      // CALCULAR DISTRIBUCIÓN PROPORCIONAL SIN PÉRDIDA DE PRECISIÓN
-      const distribucionProporcional: Array<{establecimiento: any, cantidadAsignada: number}> = [];
-      let totalAsignado = 0;
+        const vacunasPendientes = establecimiento.vacunasRequeridas - establecimiento.vacunasAsignadas;
+        if (vacunasPendientes <= 0) continue; // Este establecimiento ya está completo
 
-      // Primera pasada: calcular cantidades proporcionales con Math.floor para evitar excesos
-      for (let i = 0; i < establecimientos.length; i++) {
-        const establecimiento = establecimientos[i];
-        const proporcion = establecimiento.cantidad / cantidadTotal;
-        let cantidadProporcional = Math.floor(cantidadAfectar * proporcion);
+        const cantidadAsignar = Math.min(cantidadRestanteLote, vacunasPendientes);
 
-        // Para el último establecimiento, asignar todo lo que queda para evitar pérdida por redondeo
-        if (i === establecimientos.length - 1) {
-          cantidadProporcional = cantidadAfectar - totalAsignado;
+        if (cantidadAsignar > 0) {
+          // CALCULAR BALANCE SECUENCIAL CORRECTO
+          const saldoAnteriorMovimiento = stockTotalActual;
+          const saldoNuevoMovimiento = stockTotalActual - cantidadAsignar;
+
+          // Crear entrada de kardex para este establecimiento
+          await tx.kardex.create({
+            data: {
+              tipo: 'vacuna',
+              itemId: vacunaId,
+              loteId: lote.id,
+              tipoMovimiento: TipoMovimientoKardex.salida,
+              cantidad: cantidadAsignar,
+              saldoAnterior: saldoAnteriorMovimiento,
+              saldoActual: saldoNuevoMovimiento,
+              establecimientoOrigenId: almacenCentralId,
+              establecimientoDestinoId: establecimiento.establecimientoId,
+              documento: 'VALE_ENTREGA',
+              numeroDocumento: valeNumero,
+              observaciones: `Salida por vale de entrega ${valeNumero} - ${establecimiento.nombre} (${establecimiento.vacunasRequeridas} vacunas requeridas)`,
+              usuarioId,
+              fechaMovimiento: new Date()
+            }
+          });
+
+          // Actualizar contadores
+          establecimiento.vacunasAsignadas += cantidadAsignar;
+          cantidadRestanteLote -= cantidadAsignar;
+          stockTotalActual = saldoNuevoMovimiento;
+
+          console.log(`✅ [ValeService] ${establecimiento.nombre}: ${cantidadAsignar} vacunas asignadas del lote ${lote.numero} (${establecimiento.vacunasAsignadas}/${establecimiento.vacunasRequeridas} completado)`);
         }
-
-        distribucionProporcional.push({
-          establecimiento,
-          cantidadAsignada: cantidadProporcional
-        });
-
-        totalAsignado += cantidadProporcional;
-      }
-
-      // Verificar que la suma sea exacta
-      if (totalAsignado !== cantidadAfectar) {
-        console.warn(`⚠️ [ValeService] Ajuste de distribución: esperado ${cantidadAfectar}, calculado ${totalAsignado}`);
-        // Ajustar la diferencia en el último establecimiento
-        const diferencia = cantidadAfectar - totalAsignado;
-        distribucionProporcional[distribucionProporcional.length - 1].cantidadAsignada += diferencia;
-      }
-
-      // Segunda pasada: crear movimientos de kardex con cantidades exactas
-      for (const {establecimiento, cantidadAsignada} of distribucionProporcional) {
-        if (cantidadAsignada <= 0 || cantidadRestanteLote <= 0) continue;
-
-        const cantidadFinal = Math.min(cantidadAsignada, cantidadRestanteLote);
-
-        // CALCULAR BALANCE SECUENCIAL CORRECTO
-        const saldoAnteriorMovimiento = stockTotalActual;
-        const saldoNuevoMovimiento = stockTotalActual - cantidadFinal;
-
-        // Crear entrada de kardex individual para cada establecimiento con balance secuencial
-        await tx.kardex.create({
-          data: {
-            tipo: 'vacuna',
-            itemId: vacunaId,
-            loteId: lote.id,
-            tipoMovimiento: TipoMovimientoKardex.salida,
-            cantidad: cantidadFinal,
-            saldoAnterior: saldoAnteriorMovimiento, // Balance total ANTES del movimiento
-            saldoActual: saldoNuevoMovimiento,      // Balance total DESPUÉS del movimiento
-            establecimientoOrigenId: almacenCentralId, // ALMACÉN (CHANKA) como origen
-            establecimientoDestinoId: establecimiento.establecimientoId,
-            documento: 'VALE_ENTREGA',
-            numeroDocumento: valeNumero,
-            observaciones: `Salida por vale de entrega ${valeNumero} - ${establecimiento.nombre} (${establecimiento.cantidad}/${cantidadTotal} unidades)`,
-            usuarioId,
-            fechaMovimiento: new Date()
-          }
-        });
-
-        // ACTUALIZAR stock total para el siguiente movimiento
-        stockTotalActual = saldoNuevoMovimiento;
-        cantidadRestanteLote -= cantidadFinal;
-
-        console.log(`✅ [ValeService] Movimiento secuencial: ${establecimiento.nombre} - ${cantidadFinal} unidades (${saldoAnteriorMovimiento} → ${saldoNuevoMovimiento})`);
       }
 
       stocksAfectados.push({
         loteId: lote.id,
-        cantidadAfectada: cantidadAfectar,
-        saldoAnterior: saldoAnteriorLote,
-        saldoNuevo: saldoNuevoLote
+        cantidadAfectada: cantidadDisponibleLote,
+        saldoAnterior: lote.cantidadActual,
+        saldoNuevo: lote.cantidadActual - cantidadDisponibleLote
       });
 
-      console.log(`✅ [ValeService] Lote ${lote.numero}: ${cantidadAfectar} unidades deducidas (${saldoAnteriorLote} → ${saldoNuevoLote})`);
+      vacunasRestantes -= cantidadDisponibleLote;
+      console.log(`📊 [ValeService] Lote ${lote.numero} procesado: ${cantidadDisponibleLote} vacunas asignadas, ${vacunasRestantes} restantes`);
     }
 
-    console.log(`✅ [ValeService] Stock consolidado procesado: ${cantidadTotal} unidades deducidas de ${lotesAfectar.length} lotes`);
-    console.log(`📊 [ValeService] Stock total final de vacuna ${vacunaId}: ${stockTotalActual} unidades`);
+    if (vacunasRestantes > 0) {
+      console.warn(`⚠️ [ValeService] Stock insuficiente para vacuna ${vacunaId}: faltan ${vacunasRestantes} unidades`);
+    }
+
+    console.log(`✅ [ValeService] Stocks de vacunas afectados para vacuna ${vacunaId}: ${stocksAfectados.length} lotes`);
     return stocksAfectados;
   }
 
