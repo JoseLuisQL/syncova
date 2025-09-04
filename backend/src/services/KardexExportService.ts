@@ -657,7 +657,7 @@ class KardexExportService {
     headerCell1.value = '🏛️ GOBIERNO REGIONAL DE APURÍMAC';
     headerCell1.font = {
       bold: true,
-      size: 14,
+      size: 16, // Aumentado de 14 a 16
       color: { argb: 'FF1E3A8A' },
       name: 'Segoe UI'
     };
@@ -673,7 +673,7 @@ class KardexExportService {
     headerCell2.value = 'DIRECCIÓN SUB REGIONAL DE SALUD CHANKA ANDAHUAYLAS';
     headerCell2.font = {
       bold: true,
-      size: 11,
+      size: 13, // Aumentado de 11 a 13
       color: { argb: 'FF1E40AF' },
       name: 'Segoe UI'
     };
@@ -684,7 +684,7 @@ class KardexExportService {
     headerCell3.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRÍO';
     headerCell3.font = {
       bold: true,
-      size: 10,
+      size: 12, // Aumentado de 10 a 12
       color: { argb: 'FF2563EB' },
       name: 'Segoe UI'
     };
@@ -695,7 +695,7 @@ class KardexExportService {
     headerCell4.value = '"Año de la Universalización de la Salud"';
     headerCell4.font = {
       italic: true,
-      size: 9,
+      size: 11, // Aumentado de 9 a 11
       color: { argb: 'FF3B82F6' },
       name: 'Segoe UI'
     };
@@ -707,7 +707,7 @@ class KardexExportService {
     titleCell.value = `📋 KARDEX DE MOVIMIENTOS - ${itemNombre.toUpperCase()}`;
     titleCell.font = {
       bold: true,
-      size: 16,
+      size: 18, // Aumentado de 16 a 18
       color: { argb: 'FFFFFFFF' },
       name: 'Segoe UI'
     };
@@ -726,7 +726,7 @@ class KardexExportService {
     infoCell1.value = `📅 Período: ${fechaInicio} - ${fechaFin}`;
     infoCell1.font = {
       bold: true,
-      size: 11,
+      size: 13, // Aumentado de 11 a 13
       color: { argb: 'FF1F2937' },
       name: 'Segoe UI'
     };
@@ -747,7 +747,7 @@ class KardexExportService {
     })}`;
     infoCell2.font = {
       bold: true,
-      size: 11,
+      size: 13, // Aumentado de 11 a 13
       color: { argb: 'FF1F2937' },
       name: 'Segoe UI'
     };
@@ -771,14 +771,14 @@ class KardexExportService {
       }
     }
 
-    // Ajustar altura de filas para mejor presentación
-    worksheet.getRow(1).height = 25;
-    worksheet.getRow(2).height = 20;
-    worksheet.getRow(3).height = 18;
-    worksheet.getRow(4).height = 16;
-    worksheet.getRow(6).height = 30;
-    worksheet.getRow(8).height = 22;
-    worksheet.getRow(9).height = 22;
+    // Ajustar altura de filas para mejor presentación con fuentes más grandes
+    worksheet.getRow(1).height = 30; // Aumentado de 25 a 30
+    worksheet.getRow(2).height = 24; // Aumentado de 20 a 24
+    worksheet.getRow(3).height = 22; // Aumentado de 18 a 22
+    worksheet.getRow(4).height = 20; // Aumentado de 16 a 20
+    worksheet.getRow(6).height = 35; // Aumentado de 30 a 35
+    worksheet.getRow(8).height = 26; // Aumentado de 22 a 26
+    worksheet.getRow(9).height = 26; // Aumentado de 22 a 26
   }
 
   /**
@@ -805,7 +805,7 @@ class KardexExportService {
       cell.value = header.text;
       cell.font = {
         bold: true,
-        size: 11,
+        size: 13, // Aumentado de 11 a 13
         color: { argb: 'FFFFFFFF' },
         name: 'Segoe UI'
       };
@@ -823,7 +823,7 @@ class KardexExportService {
       };
     });
 
-    worksheet.getRow(fila).height = 20;
+    worksheet.getRow(fila).height = 24; // Aumentado de 20 a 24 para fuentes más grandes
   }
 
   /**
@@ -860,7 +860,7 @@ class KardexExportService {
 
       // Estilos básicos
       cell.font = {
-        size: 10,
+        size: 12, // Aumentado de 10 a 12 para mejor legibilidad al imprimir
         name: 'Segoe UI',
         color: { argb: 'FF374151' }
       };
@@ -915,7 +915,7 @@ class KardexExportService {
       }
     });
 
-    worksheet.getRow(fila).height = 18;
+    worksheet.getRow(fila).height = 22; // Aumentado de 18 a 22 para fuentes más grandes
   }
 
   /**

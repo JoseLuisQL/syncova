@@ -15,7 +15,6 @@ import {
   CheckCircle,
   Clock,
   Eye,
-  Printer,
   BarChart3,
   Activity,
   Plus,
@@ -399,30 +398,6 @@ const Kardex: React.FC = () => {
                 <RefreshCw className={`h-4 w-4 mr-2 ${(loading || loadingEstadisticas || loadingFiltros) ? 'animate-spin' : ''}`} />
                 Actualizar
               </button>
-              <button
-                onClick={handleExportarExcel}
-                disabled={!isExportEnabled()}
-                className={`flex items-center px-6 py-3 bg-gradient-to-r rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform ${
-                  isExportEnabled()
-                    ? 'from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:-translate-y-0.5'
-                    : 'from-gray-400 to-gray-500 text-gray-200 cursor-not-allowed'
-                }`}
-                title={getExportTooltip()}
-              >
-                {exportando ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4 mr-2" />
-                )}
-                {exportando ? 'Exportando...' : 'Exportar'}
-              </button>
-              <button
-                className="flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                title="Imprimir reporte"
-              >
-                <Printer className="h-4 w-4 mr-2" />
-                Imprimir
-              </button>
             </div>
 
             {/* Mensaje de error de exportación */}
@@ -535,6 +510,10 @@ const Kardex: React.FC = () => {
               getTipoMovimientoColor={getTipoMovimientoColor}
               onLimpiarFiltros={handleLimpiarFiltros}
               onAplicarFiltros={aplicarFiltros}
+              onExportar={handleExportarExcel}
+              exportando={exportando}
+              isExportEnabled={isExportEnabled}
+              getExportTooltip={getExportTooltip}
               onCambiarPagina={cambiarPagina}
               onCambiarItemsPorPagina={cambiarItemsPorPagina}
               onIrAPrimeraPagina={irAPrimeraPagina}
@@ -1297,6 +1276,11 @@ interface MovimientosKardexTabProps {
   getTipoMovimientoColor: (tipo: string) => string;
   onLimpiarFiltros: () => void;
   onAplicarFiltros: () => void;
+  // Funciones de exportación
+  onExportar: () => void;
+  exportando: boolean;
+  isExportEnabled: () => boolean;
+  getExportTooltip: () => string;
   // Funciones de paginación
   onCambiarPagina: (page: number) => void;
   onCambiarItemsPorPagina: (itemsPerPage: number) => void;
@@ -1338,6 +1322,10 @@ const MovimientosKardexTab: React.FC<MovimientosKardexTabProps> = ({
   getTipoMovimientoColor,
   onLimpiarFiltros,
   onAplicarFiltros,
+  onExportar,
+  exportando,
+  isExportEnabled,
+  getExportTooltip,
   onCambiarPagina,
   onCambiarItemsPorPagina,
   onIrAPrimeraPagina,
@@ -1506,6 +1494,23 @@ const MovimientosKardexTab: React.FC<MovimientosKardexTabProps> = ({
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Limpiar Filtros
+          </button>
+          <button
+            onClick={onExportar}
+            disabled={!isExportEnabled()}
+            className={`flex items-center px-8 py-3 bg-gradient-to-r rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform ${
+              isExportEnabled()
+                ? 'from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:-translate-y-0.5'
+                : 'from-gray-400 to-gray-500 text-gray-200 cursor-not-allowed'
+            }`}
+            title={getExportTooltip()}
+          >
+            {exportando ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
+            {exportando ? 'Exportando...' : 'Exportar'}
           </button>
         </div>
       </div>
