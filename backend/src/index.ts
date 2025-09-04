@@ -19,6 +19,7 @@ import movimientosRoutes from '@/routes/movimientos';
 import entregasAdicionalesRoutes from '@/routes/entregas-adicionales';
 import valesRoutes from '@/routes/vales';
 import kardexRoutes from '@/routes/kardex';
+import reportesRoutes from '@/routes/reportes';
 import authRoutes from '@/routes/auth';
 
 /**
@@ -87,9 +88,9 @@ async function startServer(): Promise<void> {
     app.use('/api/entregas-adicionales', entregasAdicionalesRoutes);
     app.use('/api/vales', valesRoutes);
     app.use('/api/kardex', kardexRoutes);
+    app.use('/api/reportes', reportesRoutes);
 
     // TODO: Agregar más rutas según se implementen
-    // app.use('/api/reportes', reportesRoutes);
     // app.use('/api/alertas', alertasRoutes);
 
     // Configurar manejo de errores (debe ir al final)

@@ -25,6 +25,14 @@ import {
 import { mockEstablecimientos, mockVacunas } from '../../data/mockData';
 import { Establecimiento, Vacuna } from '../../types';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
+import { useReportes } from '../../hooks/useReportes';
+import {
+  FiltrosReporteBase,
+  FiltrosStockCritico,
+  FiltrosVencimientos,
+  FiltrosKardexDetallado,
+  ConfiguracionExportacion
+} from '../../types/reportes';
 
 // Configuración de secciones organizadas jerárquicamente
 interface SectionConfig {
@@ -493,30 +501,198 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
   vacunas,
   onGenerarReporte,
 }) => {
+  const {
+    reportes,
+    estadisticas,
+    estado,
+    generarStockActual,
+    generarStockCritico,
+    generarVencimientos,
+    generarKardexDetallado,
+    obtenerEstadisticas,
+    exportarExcel,
+    limpiarError
+  } = useReportes();
+
+  const [filtrosReportes, setFiltrosReportes] = React.useState<{
+    stockActual: FiltrosReporteBase;
+    stockCritico: FiltrosStockCritico;
+    vencimientos: FiltrosVencimientos;
+    kardexDetallado: FiltrosKardexDetallado | null;
+  }>({
+    stockActual: {},
+    stockCritico: { porcentajeMinimo: 20, cantidadMinima: 50 },
+    vencimientos: { diasAnticipacion: 30 },
+    kardexDetallado: null
+  });
+
+  const [showKardexModal, setShowKardexModal] = React.useState(false);
+  const [reporteActivo, setReporteActivo] = React.useState<string | null>(null);
+
+  // Cargar estadísticas al montar el componente
+  React.useEffect(() => {
+    obtenerEstadisticas();
+  }, [obtenerEstadisticas]);
+
   const reportesInventario = [
-    { id: 'stock_actual', nombre: 'Stock Actual', descripcion: 'Estado actual del inventario', icon: Package },
-    { id: 'stock_critico', nombre: 'Stock Crítico', descripcion: 'Vacunas con stock bajo', icon: Activity },
-    { id: 'vencimientos', nombre: 'Próximos Vencimientos', descripcion: 'Lotes próximos a vencer', icon: Calendar },
-    { id: 'kardex_detallado', nombre: 'Kardex Detallado', descripcion: 'Movimientos detallados', icon: Archive }
+    {
+      id: 'stock_actual',
+      nombre: 'Stock Actual',
+      descripcion: 'Estado actual del inventario por vacuna',
+      icon: Package,
+      color: 'blue',
+      datos: reportes.stockActual,
+      generar: () => handleGenerarReporte('stock_actual')
+    },
+    {
+      id: 'stock_critico',
+      nombre: 'Stock Crítico',
+      descripcion: 'Vacunas con stock bajo o agotado',
+      icon: Activity,
+      color: 'red',
+      datos: reportes.stockCritico,
+      generar: () => handleGenerarReporte('stock_critico')
+    },
+    {
+      id: 'vencimientos',
+      nombre: 'Próximos Vencimientos',
+      descripcion: 'Lotes próximos a vencer en 30 días',
+      icon: Calendar,
+      color: 'amber',
+      datos: reportes.vencimientos,
+      generar: () => handleGenerarReporte('vencimientos')
+    },
+    {
+      id: 'kardex_detallado',
+      nombre: 'Kardex Detallado',
+      descripcion: 'Movimientos detallados con filtros',
+      icon: Archive,
+      color: 'emerald',
+      datos: reportes.kardexDetallado,
+      generar: () => setShowKardexModal(true)
+    }
   ];
+
+  const handleGenerarReporte = async (tipoReporte: string) => {
+    try {
+      setReporteActivo(tipoReporte);
+
+      switch (tipoReporte) {
+        case 'stock_actual':
+          await generarStockActual(filtrosReportes.stockActual);
+          break;
+        case 'stock_critico':
+          await generarStockCritico(filtrosReportes.stockCritico);
+          break;
+        case 'vencimientos':
+          await generarVencimientos(filtrosReportes.vencimientos);
+          break;
+      }
+    } catch (error) {
+      console.error('Error al generar reporte:', error);
+    } finally {
+      setReporteActivo(null);
+    }
+  };
+
+  const handleExportarExcel = async (tipoReporte: string) => {
+    try {
+      const config: ConfiguracionExportacion = {
+        incluirDetalles: true,
+        incluirGraficos: false,
+        incluirEstadisticas: true,
+        formatoFecha: 'dd/mm/yyyy',
+        responsableReporte: 'Sistema SIVAC',
+        observaciones: `Reporte generado el ${new Date().toLocaleDateString('es-PE')}`
+      };
+
+      await exportarExcel(tipoReporte as any, config);
+    } catch (error) {
+      console.error('Error al exportar reporte:', error);
+    }
+  };
+
+  const handleGenerarKardex = async (filtros: FiltrosKardexDetallado) => {
+    try {
+      await generarKardexDetallado(filtros);
+      setShowKardexModal(false);
+    } catch (error) {
+      console.error('Error al generar kardex:', error);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Reportes de Inventario</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Reportes de Inventario y Stock</h2>
+        {estadisticas && (
+          <div className="text-sm text-gray-600">
+            Última actualización: {estadisticas.ultimaActualizacion.toLocaleString('es-PE')}
+          </div>
+        )}
       </div>
 
-      {/* Filtros Simplificados */}
+      {/* Estadísticas Rápidas */}
+      {estadisticas && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <Package className="h-8 w-8 text-blue-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-blue-600">Total Vacunas</p>
+                <p className="text-2xl font-bold text-blue-900">{estadisticas.totalVacunas}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <Activity className="h-8 w-8 text-emerald-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-emerald-600">Stock Total</p>
+                <p className="text-2xl font-bold text-emerald-900">{estadisticas.totalStock.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <Activity className="h-8 w-8 text-red-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-red-600">Stock Crítico</p>
+                <p className="text-2xl font-bold text-red-900">{estadisticas.vacunasCriticas}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <Calendar className="h-8 w-8 text-amber-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-amber-600">Por Vencer</p>
+                <p className="text-2xl font-bold text-amber-900">{estadisticas.lotesProximosVencer}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Filtros Globales */}
       <div className="bg-gray-50 rounded-xl p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Período</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Centro de Acopio</label>
             <select
-              value={filtros.centroAcopio}
-              onChange={(e) => setFiltros({...filtros, centroAcopio: e.target.value})}
+              value={filtrosReportes.stockActual.centroAcopioId || ''}
+              onChange={(e) => {
+                const value = e.target.value || undefined;
+                setFiltrosReportes(prev => ({
+                  ...prev,
+                  stockActual: { ...prev.stockActual, centroAcopioId: value },
+                  stockCritico: { ...prev.stockCritico, centroAcopioId: value },
+                  vencimientos: { ...prev.vencimientos, centroAcopioId: value }
+                }));
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="todos">Todos los centros</option>
+              <option value="">Todos los centros</option>
               {centrosAcopio.map((centro: Establecimiento) => (
                 <option key={centro.id} value={centro.id}>{centro.nombre}</option>
               ))}
@@ -525,65 +701,265 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Vacuna</label>
             <select
-              value={filtros.vacuna}
-              onChange={(e) => setFiltros({...filtros, vacuna: e.target.value})}
+              value={filtrosReportes.stockActual.vacunaId || ''}
+              onChange={(e) => {
+                const value = e.target.value || undefined;
+                setFiltrosReportes(prev => ({
+                  ...prev,
+                  stockActual: { ...prev.stockActual, vacunaId: value },
+                  stockCritico: { ...prev.stockCritico, vacunaId: value },
+                  vencimientos: { ...prev.vencimientos, vacunaId: value }
+                }));
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="todas">Todas las vacunas</option>
+              <option value="">Todas las vacunas</option>
               {vacunas.map((vacuna: Vacuna) => (
                 <option key={vacuna.id} value={vacuna.id}>{vacuna.nombre}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Formato</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Incluir Inactivos</label>
             <select
-              value={filtros.formato}
-              onChange={(e) => setFiltros({...filtros, formato: e.target.value})}
+              value={filtrosReportes.stockActual.incluirInactivos ? 'true' : 'false'}
+              onChange={(e) => {
+                const value = e.target.value === 'true';
+                setFiltrosReportes(prev => ({
+                  ...prev,
+                  stockActual: { ...prev.stockActual, incluirInactivos: value },
+                  stockCritico: { ...prev.stockCritico, incluirInactivos: value },
+                  vencimientos: { ...prev.vencimientos, incluirInactivos: value }
+                }));
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="pdf">PDF</option>
-              <option value="excel">Excel</option>
-              <option value="csv">CSV</option>
+              <option value="false">Solo activos</option>
+              <option value="true">Incluir inactivos</option>
             </select>
           </div>
         </div>
       </div>
 
+      {/* Mensaje de Error */}
+      {estado.error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <Activity className="h-5 w-5 text-red-600 mr-2" />
+            <div>
+              <p className="text-sm font-medium text-red-800">Error al generar reporte</p>
+              <p className="text-sm text-red-600">{estado.error}</p>
+            </div>
+            <button
+              onClick={limpiarError}
+              className="ml-auto text-red-600 hover:text-red-800"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Reportes Disponibles */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {reportesInventario.map((reporte) => {
           const Icon = reporte.icon;
+          const isLoading = estado.cargando && reporteActivo === reporte.id;
+          const hasData = reporte.datos.length > 0;
+
           return (
             <div key={reporte.id} className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center mb-4">
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <Icon className="h-6 w-6 text-blue-600" />
+                <div className={`bg-${reporte.color}-100 p-3 rounded-lg`}>
+                  <Icon className={`h-6 w-6 text-${reporte.color}-600`} />
                 </div>
-                <div className="ml-4">
-                  <h3 className="font-semibold text-gray-900">{reporte.nombre}</h3>
+                <div className="ml-4 flex-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-900">{reporte.nombre}</h3>
+                    {hasData && (
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                        {reporte.datos.length} registros
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-600">{reporte.descripcion}</p>
                 </div>
               </div>
+
               <div className="flex space-x-3">
                 <button
-                  onClick={() => alert('Vista previa del reporte...')}
-                  className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  onClick={reporte.generar}
+                  disabled={isLoading}
+                  className={`flex-1 py-2 px-4 rounded-lg transition-colors text-sm font-medium ${
+                    isLoading
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : `bg-${reporte.color}-600 text-white hover:bg-${reporte.color}-700`
+                  }`}
                 >
-                  <Eye className="h-4 w-4 mr-2 inline" />
-                  Vista Previa
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 mr-2 inline-block border-2 border-white border-t-transparent rounded-full"></div>
+                      Generando...
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-4 w-4 mr-2 inline" />
+                      Generar
+                    </>
+                  )}
                 </button>
-                <button
-                  onClick={() => onGenerarReporte(filtros.formato)}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                >
-                  <Download className="h-4 w-4 mr-2 inline" />
-                  Generar
-                </button>
+
+                {hasData && (
+                  <button
+                    onClick={() => handleExportarExcel(reporte.id)}
+                    className={`flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium`}
+                  >
+                    <Download className="h-4 w-4 mr-2 inline" />
+                    Exportar Excel
+                  </button>
+                )}
               </div>
             </div>
           );
         })}
+      </div>
+
+      {/* Modal para Kardex Detallado */}
+      {showKardexModal && (
+        <KardexDetalladoModal
+          onClose={() => setShowKardexModal(false)}
+          onGenerar={handleGenerarKardex}
+          vacunas={vacunas}
+          centrosAcopio={centrosAcopio}
+        />
+      )}
+    </div>
+  );
+};
+
+// Modal para configurar filtros de Kardex Detallado
+interface KardexDetalladoModalProps {
+  onClose: () => void;
+  onGenerar: (filtros: FiltrosKardexDetallado) => void;
+  vacunas: Vacuna[];
+  centrosAcopio: Establecimiento[];
+}
+
+const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
+  onClose,
+  onGenerar,
+  vacunas,
+  centrosAcopio
+}) => {
+  const [filtros, setFiltros] = React.useState<FiltrosKardexDetallado>({
+    fechaInicio: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
+    fechaFin: new Date().toISOString().split('T')[0]
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onGenerar(filtros);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-gray-900">Configurar Kardex Detallado</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            ×
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Fecha Inicio *
+              </label>
+              <input
+                type="date"
+                value={filtros.fechaInicio}
+                onChange={(e) => setFiltros(prev => ({ ...prev, fechaInicio: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Fecha Fin *
+              </label>
+              <input
+                type="date"
+                value={filtros.fechaFin}
+                onChange={(e) => setFiltros(prev => ({ ...prev, fechaFin: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+              <select
+                value={filtros.tipo || ''}
+                onChange={(e) => setFiltros(prev => ({ ...prev, tipo: e.target.value as 'vacuna' | 'jeringa' || undefined }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Todos</option>
+                <option value="vacuna">Vacunas</option>
+                <option value="jeringa">Jeringas</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Movimiento</label>
+              <select
+                value={filtros.tipoMovimiento || ''}
+                onChange={(e) => setFiltros(prev => ({ ...prev, tipoMovimiento: e.target.value as any || undefined }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Todos</option>
+                <option value="ingreso">Ingreso</option>
+                <option value="salida">Salida</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="ajuste">Ajuste</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="incluirTrazabilidad"
+              checked={filtros.incluirTrazabilidad || false}
+              onChange={(e) => setFiltros(prev => ({ ...prev, incluirTrazabilidad: e.target.checked }))}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="incluirTrazabilidad" className="ml-2 text-sm text-gray-700">
+              Incluir información de trazabilidad completa
+            </label>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Generar Kardex
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
