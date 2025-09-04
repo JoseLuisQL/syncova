@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { Establecimiento, Vacuna, Jeringa } from '../../types';
 import { KardexService, DeliveryBreakdown } from '../../services/KardexService';
+import { KardexExportService, KardexExportConfig } from '../../services/KardexExportService';
 import { useKardexData } from '../../hooks/useKardexData';
 
 // Configuración de secciones organizadas jerárquicamente
@@ -131,6 +132,10 @@ const Kardex: React.FC = () => {
   const [fechaFin, setFechaFin] = useState<string>('');
   const [tipoMovimiento, setTipoMovimiento] = useState<string>('todos');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Estados para exportación
+  const [exportando, setExportando] = useState(false);
+  const [errorExportacion, setErrorExportacion] = useState<string | null>(null);
 
   // Inicializar fechas solo una vez cuando los filtros estén disponibles
   useEffect(() => {
@@ -239,6 +244,67 @@ const Kardex: React.FC = () => {
     // No llamamos limpiarFiltros() aquí - el usuario debe hacer clic en "Aplicar Filtros"
   };
 
+  // Función para manejar la exportación a Excel
+  const handleExportarExcel = async () => {
+    try {
+      setExportando(true);
+      setErrorExportacion(null);
+
+      // Validar que se hayan seleccionado fechas
+      if (!fechaInicio || !fechaFin) {
+        setErrorExportacion('Debe seleccionar las fechas de inicio y fin para exportar');
+        return;
+      }
+
+      console.log('🔄 Iniciando exportación de Kardex a Excel');
+
+      // Preparar filtros para exportación
+      const filtrosExportacion = {
+        tipo: selectedTipo !== 'todos' ? (selectedTipo as 'vacuna' | 'jeringa') : undefined,
+        itemId: selectedItem !== 'todos' ? selectedItem : undefined,
+        loteId: selectedLote !== 'todos' ? selectedLote : undefined,
+        tipoMovimiento: tipoMovimiento !== 'todos' ? tipoMovimiento as any : undefined,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+        search: searchTerm || undefined
+      };
+
+      // Configuración de exportación
+      const config: KardexExportConfig = {
+        incluirDetalleCompleto: true,
+        incluirTrazabilidad: true,
+        incluirEstadisticas: true,
+        formatoExportacion: 'excel',
+        filtros: filtrosExportacion
+      };
+
+      await KardexExportService.exportToExcel(config);
+      console.log('✅ Exportación completada exitosamente');
+
+    } catch (error) {
+      console.error('❌ Error al exportar Kardex:', error);
+      setErrorExportacion(error instanceof Error ? error.message : 'Error al exportar Kardex');
+    } finally {
+      setExportando(false);
+    }
+  };
+
+  // Verificar si la exportación está habilitada
+  const isExportEnabled = () => {
+    return !!(fechaInicio && fechaFin) && !exportando;
+  };
+
+  // Obtener mensaje de tooltip para el botón de exportar
+  const getExportTooltip = () => {
+    if (exportando) {
+      return 'Exportando...';
+    }
+    if (!fechaInicio || !fechaFin) {
+      return 'Debe seleccionar las fechas de inicio y fin para habilitar la exportación';
+    }
+    return 'Exportar datos a Excel';
+  };
+
   // Mostrar loading inicial si están cargando los datos básicos
   if (loadingFiltros && vacunas.length === 0 && jeringas.length === 0 && establecimientos.length === 0) {
     return (
@@ -334,11 +400,21 @@ const Kardex: React.FC = () => {
                 Actualizar
               </button>
               <button
-                className="flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                title="Exportar datos a Excel"
+                onClick={handleExportarExcel}
+                disabled={!isExportEnabled()}
+                className={`flex items-center px-6 py-3 bg-gradient-to-r rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform ${
+                  isExportEnabled()
+                    ? 'from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 hover:-translate-y-0.5'
+                    : 'from-gray-400 to-gray-500 text-gray-200 cursor-not-allowed'
+                }`}
+                title={getExportTooltip()}
               >
-                <Download className="h-4 w-4 mr-2" />
-                Exportar
+                {exportando ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                {exportando ? 'Exportando...' : 'Exportar'}
               </button>
               <button
                 className="flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
@@ -348,6 +424,23 @@ const Kardex: React.FC = () => {
                 Imprimir
               </button>
             </div>
+
+            {/* Mensaje de error de exportación */}
+            {errorExportacion && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center">
+                  <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
+                  <span className="text-red-800 font-medium">Error de Exportación</span>
+                </div>
+                <p className="text-red-700 mt-1">{errorExportacion}</p>
+                <button
+                  onClick={() => setErrorExportacion(null)}
+                  className="mt-2 text-red-600 hover:text-red-800 text-sm underline"
+                >
+                  Cerrar
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

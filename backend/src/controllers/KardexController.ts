@@ -607,6 +607,37 @@ export class KardexController {
           ResponseUtil.error(res, 'Tipo de movimiento inválido en filtros', 400);
           return;
         }
+
+        // Validar y convertir fechas si se proporcionan
+        if (filtros.fechaInicio) {
+          if (typeof filtros.fechaInicio === 'string') {
+            // Manejar formato YYYY-MM-DD del frontend
+            const fechaStr = filtros.fechaInicio.includes('T')
+              ? filtros.fechaInicio
+              : `${filtros.fechaInicio}T00:00:00.000Z`;
+            const fecha = new Date(fechaStr);
+            if (isNaN(fecha.getTime())) {
+              ResponseUtil.error(res, 'Fecha de inicio inválida en filtros', 400);
+              return;
+            }
+            filtros.fechaInicio = fecha;
+          }
+        }
+
+        if (filtros.fechaFin) {
+          if (typeof filtros.fechaFin === 'string') {
+            // Manejar formato YYYY-MM-DD del frontend
+            const fechaStr = filtros.fechaFin.includes('T')
+              ? filtros.fechaFin
+              : `${filtros.fechaFin}T23:59:59.999Z`;
+            const fecha = new Date(fechaStr);
+            if (isNaN(fecha.getTime())) {
+              ResponseUtil.error(res, 'Fecha de fin inválida en filtros', 400);
+              return;
+            }
+            filtros.fechaFin = fecha;
+          }
+        }
       }
 
       const result = await KardexExportService.exportToExcel(config);

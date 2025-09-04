@@ -2,6 +2,7 @@ import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
 import { KardexService, KardexFilters } from './KardexService';
 import { ServiceResult } from '@/types';
+import { prisma } from '@/config/database';
 
 /**
  * Configuración para exportación del kardex
@@ -12,6 +13,26 @@ export interface KardexExportConfig {
   incluirEstadisticas: boolean;
   formatoExportacion: 'excel' | 'pdf' | 'csv';
   filtros?: KardexFilters;
+}
+
+/**
+ * Datos de movimiento de kardex para exportación
+ */
+export interface KardexMovimientoExport {
+  id: string;
+  fecha: Date;
+  tipo: 'vacuna' | 'jeringa';
+  itemNombre: string;
+  loteNumero: string;
+  tipoMovimiento: 'ingreso' | 'salida' | 'transferencia' | 'ajuste';
+  cantidad: number;
+  saldoAnterior: number;
+  stockFinal: number;
+  establecimientoOrigen?: string | undefined;
+  establecimientoDestino?: string | undefined;
+  numeroDocumento: string;
+  documento: string;
+  observaciones?: string | undefined;
 }
 
 /**
@@ -61,142 +82,71 @@ export interface KardexExportStats {
  */
 class KardexExportService {
   /**
-   * Exportar kardex a Excel
+   * Exportar kardex a Excel con hojas separadas por vacuna/jeringa
+   * Implementación profesional siguiendo el patrón de ValeExportService
    */
   static async exportToExcel(config: KardexExportConfig): Promise<ServiceResult<ExcelExportResult>> {
     try {
-      // Obtener datos del kardex
-      const result = await KardexService.getAll({
-        ...config.filtros,
-        page: 1,
-        limit: 10000 // Obtener todos los registros para exportación
-      });
+      console.log('🔄 Iniciando exportación de Kardex a Excel');
+      console.log('📋 Filtros aplicados:', JSON.stringify(config.filtros, null, 2));
 
-      if (!result.success || !result.data) {
+      // Validar que se hayan proporcionado fechas
+      if (!config.filtros?.fechaInicio || !config.filtros?.fechaFin) {
         return {
           success: false,
-          error: 'Error al obtener datos del kardex'
+          error: 'Las fechas de inicio y fin son requeridas para la exportación'
         };
       }
 
-      const { movimientos } = result.data;
+      // Obtener movimientos de kardex con todas las relaciones
+      const movimientos = await this.obtenerMovimientosParaExportacion(config.filtros);
 
-      // Crear workbook
-      const workbook = new ExcelJS.Workbook();
-      workbook.creator = 'SIVAC - Sistema de Gestión de Vacunas';
-      workbook.created = new Date();
-
-      // Hoja principal: Movimientos de Kardex
-      const worksheetMovimientos = workbook.addWorksheet('Movimientos de Kardex');
-      
-      // Configurar columnas
-      worksheetMovimientos.columns = [
-        { header: 'Fecha y Hora', key: 'fechaMovimiento', width: 20 },
-        { header: 'Tipo', key: 'tipo', width: 12 },
-        { header: 'Item', key: 'itemNombre', width: 30 },
-        { header: 'Lote', key: 'loteNumero', width: 20 },
-        { header: 'Tipo Movimiento', key: 'tipoMovimiento', width: 15 },
-        { header: 'Cantidad', key: 'cantidad', width: 12 },
-        { header: 'Saldo Anterior', key: 'saldoAnterior', width: 15 },
-        { header: 'Saldo Actual', key: 'saldoActual', width: 15 },
-        { header: 'Establecimiento Origen', key: 'establecimientoOrigen', width: 25 },
-        { header: 'Establecimiento Destino', key: 'establecimientoDestino', width: 25 },
-        { header: 'Documento', key: 'documento', width: 15 },
-        { header: 'Número Documento', key: 'numeroDocumento', width: 20 },
-        { header: 'Observaciones', key: 'observaciones', width: 40 },
-        { header: 'Usuario', key: 'usuario', width: 25 }
-      ];
-
-      // Estilo del encabezado
-      const headerRow = worksheetMovimientos.getRow(1);
-      headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
-      headerRow.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: '366092' }
-      };
-      headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
-
-      // Agregar datos
-      movimientos.forEach((movimiento, index) => {
-        const row = worksheetMovimientos.addRow({
-          fechaMovimiento: movimiento.fechaMovimiento,
-          tipo: movimiento.tipo.charAt(0).toUpperCase() + movimiento.tipo.slice(1),
-          itemNombre: movimiento.item?.nombre || 'N/A',
-          loteNumero: movimiento.lote?.numero || 'N/A',
-          tipoMovimiento: movimiento.tipoMovimiento.charAt(0).toUpperCase() + movimiento.tipoMovimiento.slice(1),
-          cantidad: movimiento.cantidad,
-          saldoAnterior: movimiento.saldoAnterior,
-          saldoActual: movimiento.saldoActual,
-          establecimientoOrigen: movimiento.establecimientoOrigen?.nombre || '-',
-          establecimientoDestino: movimiento.establecimientoDestino?.nombre || '-',
-          documento: movimiento.documento,
-          numeroDocumento: movimiento.numeroDocumento,
-          observaciones: movimiento.observaciones || '-',
-          usuario: `${movimiento.usuario.nombres} ${movimiento.usuario.apellidos}`
-        });
-
-        // Alternar colores de filas
-        if (index % 2 === 0) {
-          row.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'F8F9FA' }
-          };
-        }
-
-        // Formatear cantidad según tipo de movimiento
-        const cantidadCell = row.getCell('cantidad');
-        if (movimiento.tipoMovimiento === 'ingreso') {
-          cantidadCell.font = { color: { argb: '28A745' } };
-        } else if (movimiento.tipoMovimiento === 'salida' || movimiento.tipoMovimiento === 'transferencia') {
-          cantidadCell.font = { color: { argb: 'DC3545' } };
-        } else if (movimiento.tipoMovimiento === 'ajuste') {
-          cantidadCell.font = { color: { argb: 'FFC107' } };
-        }
-      });
-
-      // Agregar estadísticas si se solicita
-      if (config.incluirEstadisticas) {
-        const statsResult = await KardexService.getEstadisticas(config.filtros);
-        if (statsResult.success && statsResult.data) {
-          await this.addEstadisticasSheet(workbook, statsResult.data);
-        }
+      if (movimientos.length === 0) {
+        return {
+          success: false,
+          error: 'No se encontraron movimientos para exportar con los filtros aplicados'
+        };
       }
 
-      // Agregar bordes a todas las celdas
-      worksheetMovimientos.eachRow((row, rowNumber) => {
-        row.eachCell((cell) => {
-          cell.border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' }
-          };
-        });
-      });
+      console.log(`📊 Se encontraron ${movimientos.length} movimientos para exportar`);
+
+      // Crear workbook con diseño profesional
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC - Sistema de Vacunación';
+      workbook.created = new Date();
+      workbook.company = 'Gobierno Regional de Apurímac';
+
+      // Agrupar movimientos por item (vacuna/jeringa)
+      const movimientosPorItem = this.agruparMovimientosPorItem(movimientos);
+
+      console.log(`📋 Creando hojas para ${Object.keys(movimientosPorItem).length} items diferentes`);
+
+      // Crear una hoja por cada item
+      for (const [itemNombre, movimientosItem] of Object.entries(movimientosPorItem)) {
+        await this.crearHojaKardexItem(workbook, itemNombre, movimientosItem, config);
+      }
 
       // Generar nombre de archivo
-      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-      const filename = `kardex_${timestamp}.xlsx`;
+      const fechaInicio = config.filtros.fechaInicio.toISOString().split('T')[0];
+      const fechaFin = config.filtros.fechaFin.toISOString().split('T')[0];
+      const filename = `Kardex_${fechaInicio}_${fechaFin}_${new Date().toISOString().split('T')[0]}.xlsx`;
 
-      // Calcular tamaño aproximado
-      const buffer = await workbook.xlsx.writeBuffer();
-      const size = buffer.length;
+      console.log('✅ Exportación de Kardex completada exitosamente');
 
       return {
         success: true,
         data: {
           workbook,
           filename,
-          size
+          size: 0 // Se calculará al escribir
         }
       };
+
     } catch (error) {
-      console.error('Error en KardexExportService.exportToExcel:', error);
+      console.error('❌ Error en KardexExportService.exportToExcel:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Error al exportar a Excel'
+        error: error instanceof Error ? error.message : 'Error al exportar Kardex a Excel'
       };
     }
   }
@@ -384,6 +334,660 @@ class KardexExportService {
         error: error instanceof Error ? error.message : 'Error al exportar a CSV'
       };
     }
+  }
+
+  /**
+   * Obtener movimientos de kardex para exportación con todas las relaciones
+   */
+  private static async obtenerMovimientosParaExportacion(filtros: KardexFilters): Promise<KardexMovimientoExport[]> {
+    try {
+      console.log('🔍 Obteniendo movimientos de kardex para exportación');
+
+      // Construir condiciones WHERE
+      const whereConditions: any = {};
+
+      if (filtros.tipo) {
+        whereConditions.tipo = filtros.tipo;
+      }
+
+      if (filtros.itemId) {
+        whereConditions.itemId = filtros.itemId;
+      }
+
+      if (filtros.loteId) {
+        whereConditions.loteId = filtros.loteId;
+      }
+
+      if (filtros.tipoMovimiento) {
+        whereConditions.tipoMovimiento = filtros.tipoMovimiento;
+      }
+
+      if (filtros.establecimientoOrigenId) {
+        whereConditions.establecimientoOrigenId = filtros.establecimientoOrigenId;
+      }
+
+      if (filtros.establecimientoDestinoId) {
+        whereConditions.establecimientoDestinoId = filtros.establecimientoDestinoId;
+      }
+
+      if (filtros.fechaInicio && filtros.fechaFin) {
+        // Las fechas ya deben venir convertidas desde el controlador
+        whereConditions.fechaMovimiento = {
+          gte: filtros.fechaInicio,
+          lte: filtros.fechaFin
+        };
+      }
+
+      // Obtener movimientos con relaciones disponibles
+      const movimientos = await prisma.kardex.findMany({
+        where: whereConditions,
+        include: {
+          // Establecimientos
+          establecimientoOrigen: {
+            select: {
+              id: true,
+              nombre: true,
+              codigo: true,
+              tipo: true
+            }
+          },
+          establecimientoDestino: {
+            select: {
+              id: true,
+              nombre: true,
+              codigo: true,
+              tipo: true
+            }
+          },
+          // Usuario
+          usuario: {
+            select: {
+              nombres: true,
+              apellidos: true
+            }
+          }
+        },
+        orderBy: [
+          { fechaMovimiento: 'asc' },
+          { createdAt: 'asc' }
+        ]
+      });
+
+      // Obtener información de items y lotes por separado
+      const itemsInfo = new Map<string, any>();
+      const lotesInfo = new Map<string, any>();
+
+      // Recopilar IDs únicos de items y lotes
+      const vacunaIds = new Set<string>();
+      const jeringaIds = new Set<string>();
+      const loteVacunaIds = new Set<string>();
+      const loteJeringaIds = new Set<string>();
+
+      movimientos.forEach(mov => {
+        if (mov.tipo === 'vacuna') {
+          vacunaIds.add(mov.itemId);
+          loteVacunaIds.add(mov.loteId);
+        } else if (mov.tipo === 'jeringa') {
+          jeringaIds.add(mov.itemId);
+          loteJeringaIds.add(mov.loteId);
+        }
+      });
+
+      // Obtener información de vacunas
+      if (vacunaIds.size > 0) {
+        const vacunas = await prisma.vacuna.findMany({
+          where: { id: { in: Array.from(vacunaIds) } },
+          select: { id: true, nombre: true, tipo: true, presentacion: true }
+        });
+        vacunas.forEach(v => itemsInfo.set(v.id, v));
+      }
+
+      // Obtener información de jeringas
+      if (jeringaIds.size > 0) {
+        const jeringas = await prisma.jeringa.findMany({
+          where: { id: { in: Array.from(jeringaIds) } },
+          select: { id: true, tipo: true, capacidad: true, color: true }
+        });
+        jeringas.forEach(j => itemsInfo.set(j.id, j));
+      }
+
+      // Obtener información de lotes de vacunas
+      if (loteVacunaIds.size > 0) {
+        const lotesVacunas = await prisma.loteVacuna.findMany({
+          where: { id: { in: Array.from(loteVacunaIds) } },
+          select: { id: true, numero: true, fechaVencimiento: true, cantidadInicial: true, cantidadActual: true }
+        });
+        lotesVacunas.forEach(l => lotesInfo.set(l.id, l));
+      }
+
+      // Obtener información de lotes de jeringas
+      if (loteJeringaIds.size > 0) {
+        const lotesJeringas = await prisma.loteJeringa.findMany({
+          where: { id: { in: Array.from(loteJeringaIds) } },
+          select: { id: true, numero: true, fechaVencimiento: true, cantidadInicial: true, cantidadActual: true }
+        });
+        lotesJeringas.forEach(l => lotesInfo.set(l.id, l));
+      }
+
+      console.log(`📊 Se obtuvieron ${movimientos.length} movimientos de la base de datos`);
+
+      // Transformar a formato de exportación
+      const movimientosExport: KardexMovimientoExport[] = movimientos.map(mov => {
+        // Determinar el nombre del item usando la información obtenida
+        let itemNombre = 'N/A';
+        const itemInfo = itemsInfo.get(mov.itemId);
+        if (mov.tipo === 'vacuna' && itemInfo) {
+          itemNombre = itemInfo.nombre;
+        } else if (mov.tipo === 'jeringa' && itemInfo) {
+          itemNombre = `${itemInfo.tipo} ${itemInfo.capacidad}`;
+        }
+
+        // Determinar el número de lote usando la información obtenida
+        let loteNumero = 'N/A';
+        const loteInfo = lotesInfo.get(mov.loteId);
+        if (loteInfo) {
+          loteNumero = loteInfo.numero;
+        }
+
+        return {
+          id: mov.id,
+          fecha: mov.fechaMovimiento,
+          tipo: mov.tipo as 'vacuna' | 'jeringa',
+          itemNombre,
+          loteNumero,
+          tipoMovimiento: mov.tipoMovimiento as 'ingreso' | 'salida' | 'transferencia' | 'ajuste',
+          cantidad: mov.cantidad,
+          saldoAnterior: mov.saldoAnterior,
+          stockFinal: mov.saldoActual,
+          establecimientoOrigen: mov.establecimientoOrigen?.nombre || undefined,
+          establecimientoDestino: mov.establecimientoDestino?.nombre || undefined,
+          numeroDocumento: mov.numeroDocumento,
+          documento: mov.documento,
+          observaciones: mov.observaciones || undefined
+        };
+      });
+
+      return movimientosExport;
+
+    } catch (error) {
+      console.error('❌ Error al obtener movimientos para exportación:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Agrupar movimientos por item (vacuna/jeringa)
+   */
+  private static agruparMovimientosPorItem(movimientos: KardexMovimientoExport[]): { [itemNombre: string]: KardexMovimientoExport[] } {
+    const grupos: { [itemNombre: string]: KardexMovimientoExport[] } = {};
+
+    movimientos.forEach(movimiento => {
+      const itemNombre = movimiento.itemNombre;
+
+      if (!grupos[itemNombre]) {
+        grupos[itemNombre] = [];
+      }
+
+      grupos[itemNombre].push(movimiento);
+    });
+
+    // Ordenar movimientos dentro de cada grupo por fecha
+    Object.keys(grupos).forEach(itemNombre => {
+      const movimientosGrupo = grupos[itemNombre];
+      if (movimientosGrupo) {
+        movimientosGrupo.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
+      }
+    });
+
+    return grupos;
+  }
+
+  /**
+   * Crear hoja de Excel para un item específico (vacuna/jeringa)
+   * Siguiendo el diseño profesional de ValeExportService
+   */
+  private static async crearHojaKardexItem(
+    workbook: ExcelJS.Workbook,
+    itemNombre: string,
+    movimientos: KardexMovimientoExport[],
+    config: KardexExportConfig
+  ): Promise<void> {
+    try {
+      console.log(`📋 Creando hoja para: ${itemNombre} (${movimientos.length} movimientos)`);
+
+      // Crear hoja con nombre seguro para Excel
+      const nombreHoja = this.limpiarNombreHoja(itemNombre);
+      const worksheet = workbook.addWorksheet(nombreHoja);
+
+      // Configurar diseño profesional de la hoja
+      worksheet.views = [{
+        showGridLines: false,
+        showRowColHeaders: false,
+        zoomScale: 85
+      }];
+
+      // Configurar columnas con anchos optimizados para impresión A4
+      worksheet.columns = [
+        { width: 10 },  // A - Fecha (reducido)
+        { width: 7 },   // B - Tipo (reducido)
+        { width: 18 },  // C - Item (reducido)
+        { width: 12 },  // D - Lote (reducido)
+        { width: 10 },  // E - Movimiento (reducido)
+        { width: 15 },  // F - Tipo Doc (aumentado para VALE_ENTREGA, PECOSA)
+        { width: 8 },   // G - Cantidad (reducido)
+        { width: 10 },  // H - Saldo Ant. (reducido)
+        { width: 10 },  // I - Stock Final (reducido)
+        { width: 18 },  // J - Origen (reducido)
+        { width: 18 },  // K - Destino (reducido)
+        { width: 12 }   // L - N° Doc (reducido)
+      ];
+
+      // Agregar encabezado institucional
+      this.agregarEncabezadoKardex(worksheet, itemNombre, config);
+
+      // Agregar encabezados de tabla
+      const filaHeaders = 12;
+      this.agregarHeadersTablaKardex(worksheet, filaHeaders);
+
+      // Agregar datos de movimientos
+      let filaActual = filaHeaders + 1;
+      movimientos.forEach((movimiento, index) => {
+        this.agregarFilaMovimiento(worksheet, filaActual, movimiento, index);
+        filaActual++;
+      });
+
+      // Configurar página para impresión A4
+      worksheet.pageSetup = {
+        paperSize: 9, // A4
+        orientation: 'landscape', // Horizontal para más columnas
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, // Permitir múltiples páginas verticalmente si es necesario
+        margins: {
+          left: 0.5,
+          right: 0.5,
+          top: 0.75,
+          bottom: 0.75,
+          header: 0.3,
+          footer: 0.3
+        },
+        printTitlesRow: `${filaHeaders}:${filaHeaders}` // Repetir encabezados en cada página
+      };
+
+      // Aplicar bordes y estilos finales
+      this.aplicarEstilosFinalesKardex(worksheet, filaHeaders, filaActual - 1);
+
+      console.log(`✅ Hoja creada para ${itemNombre}: ${movimientos.length} movimientos`);
+
+    } catch (error) {
+      console.error(`❌ Error al crear hoja para ${itemNombre}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Limpiar nombre de hoja para Excel (máximo 31 caracteres, sin caracteres especiales)
+   */
+  private static limpiarNombreHoja(nombre: string): string {
+    return nombre
+      .replace(/[\\\/\?\*\[\]]/g, '') // Remover caracteres no permitidos en Excel
+      .substring(0, 31) // Máximo 31 caracteres
+      .trim();
+  }
+
+  /**
+   * Agregar encabezado institucional profesional al estilo ValeExportService
+   */
+  private static agregarEncabezadoKardex(worksheet: ExcelJS.Worksheet, itemNombre: string, config: KardexExportConfig): void {
+    // Fondo degradado para toda la sección del encabezado
+    for (let row = 1; row <= 6; row++) {
+      for (let col = 1; col <= 12; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFF8FAFE' }
+        };
+      }
+    }
+
+    // Logo y encabezado principal
+    worksheet.mergeCells('A1:L1');
+    const headerCell1 = worksheet.getCell('A1');
+    headerCell1.value = '🏛️ GOBIERNO REGIONAL DE APURÍMAC';
+    headerCell1.font = {
+      bold: true,
+      size: 14,
+      color: { argb: 'FF1E3A8A' },
+      name: 'Segoe UI'
+    };
+    headerCell1.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerCell1.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFDBEAFE' }
+    };
+
+    worksheet.mergeCells('A2:L2');
+    const headerCell2 = worksheet.getCell('A2');
+    headerCell2.value = 'DIRECCIÓN SUB REGIONAL DE SALUD CHANKA ANDAHUAYLAS';
+    headerCell2.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1E40AF' },
+      name: 'Segoe UI'
+    };
+    headerCell2.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    worksheet.mergeCells('A3:L3');
+    const headerCell3 = worksheet.getCell('A3');
+    headerCell3.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRÍO';
+    headerCell3.font = {
+      bold: true,
+      size: 10,
+      color: { argb: 'FF2563EB' },
+      name: 'Segoe UI'
+    };
+    headerCell3.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    worksheet.mergeCells('A4:L4');
+    const headerCell4 = worksheet.getCell('A4');
+    headerCell4.value = '"Año de la Universalización de la Salud"';
+    headerCell4.font = {
+      italic: true,
+      size: 9,
+      color: { argb: 'FF3B82F6' },
+      name: 'Segoe UI'
+    };
+    headerCell4.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Título principal con diseño moderno
+    worksheet.mergeCells('A6:L6');
+    const titleCell = worksheet.getCell('A6');
+    titleCell.value = `📋 KARDEX DE MOVIMIENTOS - ${itemNombre.toUpperCase()}`;
+    titleCell.font = {
+      bold: true,
+      size: 16,
+      color: { argb: 'FFFFFFFF' },
+      name: 'Segoe UI'
+    };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF1E40AF' }
+    };
+
+    // Información del período
+    worksheet.mergeCells('A8:L8');
+    const infoCell1 = worksheet.getCell('A8');
+    const fechaInicio = config.filtros?.fechaInicio?.toLocaleDateString('es-PE') || 'N/A';
+    const fechaFin = config.filtros?.fechaFin?.toLocaleDateString('es-PE') || 'N/A';
+    infoCell1.value = `📅 Período: ${fechaInicio} - ${fechaFin}`;
+    infoCell1.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1F2937' },
+      name: 'Segoe UI'
+    };
+    infoCell1.alignment = { horizontal: 'center', vertical: 'middle' };
+    infoCell1.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' }
+    };
+
+    worksheet.mergeCells('A9:L9');
+    const infoCell2 = worksheet.getCell('A9');
+    infoCell2.value = `📊 Generado el: ${new Date().toLocaleDateString('es-PE', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })}`;
+    infoCell2.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1F2937' },
+      name: 'Segoe UI'
+    };
+    infoCell2.alignment = { horizontal: 'center', vertical: 'middle' };
+    infoCell2.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' }
+    };
+
+    // Aplicar bordes modernos al encabezado
+    for (let row = 1; row <= 9; row++) {
+      for (let col = 1; col <= 12; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+        };
+      }
+    }
+
+    // Ajustar altura de filas para mejor presentación
+    worksheet.getRow(1).height = 25;
+    worksheet.getRow(2).height = 20;
+    worksheet.getRow(3).height = 18;
+    worksheet.getRow(4).height = 16;
+    worksheet.getRow(6).height = 30;
+    worksheet.getRow(8).height = 22;
+    worksheet.getRow(9).height = 22;
+  }
+
+  /**
+   * Agregar encabezados de tabla de kardex
+   */
+  private static agregarHeadersTablaKardex(worksheet: ExcelJS.Worksheet, fila: number): void {
+    const headers = [
+      { col: 'A', text: 'Fecha', width: 12 },
+      { col: 'B', text: 'Tipo', width: 8 },
+      { col: 'C', text: '💉 Item', width: 20 },
+      { col: 'D', text: '📦 Lote', width: 15 },
+      { col: 'E', text: 'Movimiento', width: 12 },
+      { col: 'F', text: 'Tipo', width: 18 }, // Aumentado para VALE_ENTREGA, PECOSA, etc.
+      { col: 'G', text: 'Cantidad', width: 10 },
+      { col: 'H', text: 'Saldo Ant.', width: 12 },
+      { col: 'I', text: 'Stock Final', width: 12 },
+      { col: 'J', text: 'Origen', width: 20 },
+      { col: 'K', text: 'Destino', width: 20 },
+      { col: 'L', text: 'N° Doc', width: 15 }
+    ];
+
+    headers.forEach(header => {
+      const cell = worksheet.getCell(`${header.col}${fila}`);
+      cell.value = header.text;
+      cell.font = {
+        bold: true,
+        size: 11,
+        color: { argb: 'FFFFFFFF' },
+        name: 'Segoe UI'
+      };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF0D9488' }
+      };
+      cell.border = {
+        top: { style: 'medium', color: { argb: 'FF065F46' } },
+        left: { style: 'thin', color: { argb: 'FF065F46' } },
+        bottom: { style: 'medium', color: { argb: 'FF065F46' } },
+        right: { style: 'thin', color: { argb: 'FF065F46' } }
+      };
+    });
+
+    worksheet.getRow(fila).height = 20;
+  }
+
+  /**
+   * Agregar fila de movimiento de kardex
+   */
+  private static agregarFilaMovimiento(
+    worksheet: ExcelJS.Worksheet,
+    fila: number,
+    movimiento: KardexMovimientoExport,
+    index: number
+  ): void {
+    const isEvenRow = index % 2 === 0;
+    const rowColor = isEvenRow ? 'FFF9FAFB' : 'FFFFFFFF';
+
+    // Datos de la fila
+    const datos = [
+      { col: 'A', valor: movimiento.fecha.toLocaleDateString('es-PE') },
+      { col: 'B', valor: movimiento.tipo.charAt(0).toUpperCase() + movimiento.tipo.slice(1) },
+      { col: 'C', valor: movimiento.itemNombre },
+      { col: 'D', valor: movimiento.loteNumero },
+      { col: 'E', valor: this.getTipoMovimientoTexto(movimiento.tipoMovimiento) },
+      { col: 'F', valor: this.formatearTipoDocumento(movimiento.documento) }, // Mostrar PECOSA, VALE_ENTREGA, etc.
+      { col: 'G', valor: movimiento.cantidad },
+      { col: 'H', valor: movimiento.saldoAnterior },
+      { col: 'I', valor: movimiento.stockFinal },
+      { col: 'J', valor: movimiento.establecimientoOrigen || '-' },
+      { col: 'K', valor: movimiento.establecimientoDestino || '-' },
+      { col: 'L', valor: movimiento.numeroDocumento }
+    ];
+
+    datos.forEach(dato => {
+      const cell = worksheet.getCell(`${dato.col}${fila}`);
+      cell.value = dato.valor;
+
+      // Estilos básicos
+      cell.font = {
+        size: 10,
+        name: 'Segoe UI',
+        color: { argb: 'FF374151' }
+      };
+      cell.alignment = {
+        horizontal: dato.col === 'G' || dato.col === 'H' || dato.col === 'I' ? 'center' : 'left',
+        vertical: 'middle'
+      };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: rowColor }
+      };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+      };
+
+      // Colores especiales para cantidades según tipo de movimiento
+      if (dato.col === 'G') {
+        if (movimiento.tipoMovimiento === 'ingreso') {
+          cell.font = { ...cell.font, color: { argb: 'FF059669' }, bold: true };
+        } else if (movimiento.tipoMovimiento === 'salida') {
+          cell.font = { ...cell.font, color: { argb: 'FFDC2626' }, bold: true };
+        } else if (movimiento.tipoMovimiento === 'transferencia') {
+          cell.font = { ...cell.font, color: { argb: 'FFEA580C' }, bold: true };
+        } else if (movimiento.tipoMovimiento === 'ajuste') {
+          cell.font = { ...cell.font, color: { argb: 'FFCA8A04' }, bold: true };
+        }
+      }
+
+      // Colores profesionales para tipo de documento
+      if (dato.col === 'F') {
+        const tipoDoc = movimiento.documento.toUpperCase();
+        if (tipoDoc.includes('PECOSA')) {
+          cell.font = { ...cell.font, color: { argb: 'FF059669' }, bold: true }; // Verde para PECOSA
+        } else if (tipoDoc.includes('VALE')) {
+          cell.font = { ...cell.font, color: { argb: 'FF2563EB' }, bold: true }; // Azul para VALE_ENTREGA
+        } else if (tipoDoc.includes('TRANSFERENCIA')) {
+          cell.font = { ...cell.font, color: { argb: 'FFEA580C' }, bold: true }; // Naranja para transferencias
+        } else if (tipoDoc.includes('AJUSTE')) {
+          cell.font = { ...cell.font, color: { argb: 'FFCA8A04' }, bold: true }; // Amarillo para ajustes
+        } else {
+          cell.font = { ...cell.font, color: { argb: 'FF6B7280' }, bold: true }; // Gris para otros
+        }
+      }
+
+      // Destacar stock final
+      if (dato.col === 'I') {
+        cell.font = { ...cell.font, bold: true, color: { argb: 'FF1E40AF' } };
+      }
+    });
+
+    worksheet.getRow(fila).height = 18;
+  }
+
+  /**
+   * Obtener texto descriptivo del tipo de movimiento
+   */
+  private static getTipoMovimientoTexto(tipo: string): string {
+    const tipos: { [key: string]: string } = {
+      'ingreso': 'Ingreso',
+      'salida': 'Salida',
+      'transferencia': 'Transferencia',
+      'ajuste': 'Ajuste'
+    };
+    return tipos[tipo] || tipo;
+  }
+
+  /**
+   * Formatear tipo de documento de manera profesional
+   */
+  private static formatearTipoDocumento(documento: string): string {
+    if (!documento) return '-';
+
+    // Convertir a mayúsculas y reemplazar guiones bajos con espacios
+    const documentoFormateado = documento.toUpperCase().replace(/_/g, ' ');
+
+    // Mapeo de documentos comunes para mejor presentación
+    const tiposDocumento: { [key: string]: string } = {
+      'VALE_ENTREGA': 'VALE ENTREGA',
+      'VALE ENTREGA': 'VALE ENTREGA',
+      'PECOSA': 'PECOSA',
+      'NOTA_ENTRADA': 'NOTA ENTRADA',
+      'NOTA ENTRADA': 'NOTA ENTRADA',
+      'NOTA_SALIDA': 'NOTA SALIDA',
+      'NOTA SALIDA': 'NOTA SALIDA',
+      'TRANSFERENCIA': 'TRANSFERENCIA',
+      'AJUSTE_INVENTARIO': 'AJUSTE INVENTARIO',
+      'AJUSTE INVENTARIO': 'AJUSTE INVENTARIO',
+      'DEVOLUCION': 'DEVOLUCIÓN',
+      'DEVOLUCIÓN': 'DEVOLUCIÓN'
+    };
+
+    return tiposDocumento[documentoFormateado] || documentoFormateado;
+  }
+
+  /**
+   * Aplicar estilos finales a la hoja de kardex
+   */
+  private static aplicarEstilosFinalesKardex(worksheet: ExcelJS.Worksheet, filaInicio: number, _filaFin: number): void {
+    // Ajustar ancho de columnas automáticamente
+    worksheet.columns.forEach(column => {
+      if (column.eachCell) {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: false }, (cell) => {
+          const columnLength = cell.value ? cell.value.toString().length : 10;
+          if (columnLength > maxLength) {
+            maxLength = columnLength;
+          }
+        });
+        column.width = Math.min(Math.max(maxLength + 2, 8), 30);
+      }
+    });
+
+    // Congelar paneles en la fila de headers
+    worksheet.views = [{
+      state: 'frozen' as const,
+      xSplit: 0,
+      ySplit: filaInicio,
+      topLeftCell: `A${filaInicio + 1}`,
+      activeCell: `A${filaInicio + 1}`,
+      showGridLines: false,
+      showRowColHeaders: false,
+      zoomScale: 85
+    }];
   }
 
   /**
