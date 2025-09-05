@@ -18,7 +18,6 @@ import {
   Edit,
   Trash2,
   Mail,
-  FolderOpen,
   Archive,
   Star,
   X,
@@ -48,27 +47,17 @@ interface SectionConfig {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   path: string;
-  category: 'dashboard' | 'generacion' | 'automatizacion' | 'configuracion';
+  category: 'generacion' | 'automatizacion' | 'configuracion';
   description?: string;
 }
 
 const REPORTS_SECTIONS: SectionConfig[] = [
-  // Sección Dashboard
-  {
-    id: 'overview', 
-    label: 'Dashboard de Reportes', 
-    icon: BarChart3, 
-    path: '/reportes/overview', 
-    category: 'dashboard',
-    description: 'Vista general y estadísticas'
-  },
-  
   // Sección Generación
-  { 
-    id: 'inventario', 
-    label: 'Inventario y Stock', 
-    icon: Package, 
-    path: '/reportes/inventario', 
+  {
+    id: 'inventario',
+    label: 'Inventario y Stock',
+    icon: Package,
+    path: '/reportes/inventario',
     category: 'generacion',
     description: 'Reportes de inventario y stock'
   },
@@ -119,7 +108,6 @@ const REPORTS_SECTIONS: SectionConfig[] = [
 ];
 
 const CATEGORY_CONFIG = {
-  dashboard: { label: 'Vista General', icon: FolderOpen, color: 'blue' },
   generacion: { label: 'Generación de Reportes', icon: FileText, color: 'emerald' },
   automatizacion: { label: 'Automatización', icon: Clock, color: 'purple' },
   configuracion: { label: 'Configuración', icon: Settings, color: 'amber' }
@@ -294,8 +282,7 @@ const Reportes: React.FC = () => {
       <div className="max-w-full px-6 py-6">
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
           <Routes>
-            <Route path="/" element={<Navigate to="overview" replace />} />
-            <Route path="overview" element={<DashboardReportesTab reportesProgramados={reportesProgramados} />} />
+            <Route path="/" element={<Navigate to="inventario" replace />} />
             <Route path="inventario" element={<InventarioReportesTab filtros={filtros} setFiltros={setFiltros} centrosAcopio={centrosAcopio} vacunas={vacunas} onGenerarReporte={handleExportarReporte} />} />
             <Route path="movimientos" element={<MovimientosReportesTab filtros={filtros} setFiltros={setFiltros} centrosAcopio={centrosAcopio} vacunas={vacunas} onGenerarReporte={handleExportarReporte} />} />
             <Route path="planificacion" element={<PlanificacionReportesTab filtros={filtros} setFiltros={setFiltros} centrosAcopio={centrosAcopio} vacunas={vacunas} onGenerarReporte={handleExportarReporte} />} />
@@ -329,191 +316,6 @@ const Reportes: React.FC = () => {
           }}
         />
       )}
-    </div>
-  );
-};
-
-// Dashboard de Reportes Tab - Versión Premium y Limpia
-interface DashboardReportesTabProps {
-  reportesProgramados: any[];
-}
-
-const DashboardReportesTab: React.FC<DashboardReportesTabProps> = ({
-  reportesProgramados,
-}) => {
-  const estadisticas = [
-    {
-      label: 'Reportes Generados',
-      value: '1,247',
-      change: '+12%',
-      icon: FileText,
-      color: 'blue',
-    },
-    {
-      label: 'Reportes Programados',
-      value: reportesProgramados.length.toString(),
-      change: '+3',
-      icon: Clock,
-      color: 'emerald',
-    },
-    {
-      label: 'Usuarios Activos',
-      value: '45',
-      change: '+8%',
-      icon: Users,
-      color: 'purple',
-    },
-    {
-      label: 'Tiempo Promedio',
-      value: '2.3s',
-      change: '-15%',
-      icon: Activity,
-      color: 'amber',
-    },
-  ];
-
-  const reportesRecientes = [
-    {
-      nombre: 'Stock Actual por Vacuna',
-      tipo: 'Inventario',
-      fecha: new Date('2024-12-15T10:30:00'),
-      usuario: 'María R.',
-      formato: 'PDF'
-    },
-    {
-      nombre: 'Movimientos Mensuales',
-      tipo: 'Distribución',
-      fecha: new Date('2024-12-14T16:45:00'),
-      usuario: 'Carlos M.',
-      formato: 'Excel'
-    },
-    {
-      nombre: 'Dashboard Ejecutivo',
-      tipo: 'Estratégico',
-      fecha: new Date('2024-12-13T14:20:00'),
-      usuario: 'José H.',
-      formato: 'PDF'
-    }
-  ];
-
-  return (
-    <div className="p-6 space-y-6">
-      {/* Estadísticas Premium */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {estadisticas.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <div key={index} className={`bg-gradient-to-r from-${stat.color}-500 to-${stat.color}-600 rounded-xl p-6 text-white shadow-lg`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-${stat.color}-100 text-sm font-medium`}>{stat.label}</p>
-                  <p className="text-3xl font-bold mt-2">{stat.value}</p>
-                  <div className="flex items-center mt-2">
-                    <span className="text-sm font-medium bg-white/20 px-2 py-1 rounded">
-                      {stat.change}
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-white/20 p-3 rounded-lg">
-                  <Icon className="h-8 w-8" />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Accesos Rápidos a Reportes */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center mb-4">
-            <div className="bg-blue-100 p-3 rounded-lg">
-              <Package className="h-6 w-6 text-blue-600" />
-            </div>
-            <h3 className="ml-3 font-semibold text-gray-900">Inventario</h3>
-          </div>
-          <p className="text-gray-600 text-sm mb-4">Stock actual, vencimientos y alertas críticas</p>
-          <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-            Generar Reporte
-          </button>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center mb-4">
-            <div className="bg-emerald-100 p-3 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-emerald-600" />
-            </div>
-            <h3 className="ml-3 font-semibold text-gray-900">Movimientos</h3>
-          </div>
-          <p className="text-gray-600 text-sm mb-4">Entregas, recepciones y distribución</p>
-          <button className="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium">
-            Generar Reporte
-          </button>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center mb-4">
-            <div className="bg-purple-100 p-3 rounded-lg">
-              <Target className="h-6 w-6 text-purple-600" />
-            </div>
-            <h3 className="ml-3 font-semibold text-gray-900">Planificación</h3>
-          </div>
-          <p className="text-gray-600 text-sm mb-4">Programación anual y cumplimiento</p>
-          <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium">
-            Generar Reporte
-          </button>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-center mb-4">
-            <div className="bg-amber-100 p-3 rounded-lg">
-              <Star className="h-6 w-6 text-amber-600" />
-            </div>
-            <h3 className="ml-3 font-semibold text-gray-900">Ejecutivo</h3>
-          </div>
-          <p className="text-gray-600 text-sm mb-4">Dashboards y métricas estratégicas</p>
-          <button className="w-full bg-amber-600 text-white py-2 px-4 rounded-lg hover:bg-amber-700 transition-colors text-sm font-medium">
-            Generar Reporte
-          </button>
-        </div>
-      </div>
-
-      {/* Actividad Reciente - Más Limpia */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Actividad Reciente</h3>
-            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">Ver todo</button>
-          </div>
-        </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {reportesRecientes.map((reporte, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <div className="flex items-center">
-                  <div className="bg-white p-2 rounded-lg shadow-sm">
-                    <FileText className="h-5 w-5 text-gray-600" />
-                  </div>
-                  <div className="ml-4">
-                    <div className="text-sm font-medium text-gray-900">{reporte.nombre}</div>
-                    <div className="text-xs text-gray-500">
-                      {reporte.tipo} • {reporte.usuario} • {reporte.fecha.toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs font-medium text-gray-500 bg-white px-2 py-1 rounded">
-                    {reporte.formato}
-                  </span>
-                  <button className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded">
-                    <Download className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
