@@ -35,6 +35,34 @@ export interface FiltrosKardexDetallado {
 }
 
 /**
+ * Filtros para reportes de movimientos
+ */
+export interface FiltrosMovimientosMensuales extends FiltrosReporteBase {
+  establecimientoId?: string;
+  mes?: number;
+  anio?: number;
+  agruparPor?: 'mes' | 'vacuna' | 'establecimiento';
+}
+
+export interface FiltrosConsumoHistorico extends FiltrosReporteBase {
+  establecimientoId?: string;
+  periodoMeses?: number;
+  incluirProyecciones?: boolean;
+}
+
+export interface FiltrosEntregasPorEstablecimiento extends FiltrosReporteBase {
+  establecimientoId?: string;
+  incluirDetalleVacunas?: boolean;
+  ordenarPor?: 'establecimiento' | 'cantidad' | 'fecha';
+}
+
+export interface FiltrosEficienciaDistribucion extends FiltrosReporteBase {
+  establecimientoId?: string;
+  incluirIndicadores?: boolean;
+  calcularTendencias?: boolean;
+}
+
+/**
  * Tipos para datos de reportes
  */
 export interface LoteReporte {
@@ -119,6 +147,87 @@ export interface ItemKardexDetallado {
 }
 
 /**
+ * Tipos para reportes de movimientos
+ */
+export interface ItemMovimientoMensual {
+  establecimientoId: string;
+  establecimientoNombre: string;
+  vacunaId: string;
+  vacunaNombre: string;
+  mes: number;
+  anio: number;
+  saldoAnterior: number;
+  transIngreso: number;
+  salida: number;
+  transSalida: number;
+  entrega: number;
+  saldoFinal: number;
+  consumoTotal: number;
+  eficienciaDistribucion: number;
+  fechaUltimaActualizacion: Date;
+}
+
+export interface ItemConsumoHistorico {
+  vacunaId: string;
+  vacunaNombre: string;
+  establecimientoId: string;
+  establecimientoNombre: string;
+  periodoInicio: Date;
+  periodoFin: Date;
+  consumoPromedio: number;
+  consumoTotal: number;
+  tendencia: 'creciente' | 'decreciente' | 'estable';
+  variabilidad: number;
+  proyeccionProximoMes?: number;
+  historialMensual: {
+    mes: number;
+    anio: number;
+    consumo: number;
+    fecha: Date;
+  }[];
+}
+
+export interface ItemEntregaPorEstablecimiento {
+  establecimientoId: string;
+  establecimientoNombre: string;
+  centroAcopioId: string;
+  centroAcopioNombre: string;
+  totalEntregas: number;
+  totalVacunas: number;
+  fechaUltimaEntrega: Date;
+  eficienciaEntrega: number;
+  detalleVacunas: {
+    vacunaId: string;
+    vacunaNombre: string;
+    cantidadEntregada: number;
+    numeroEntregas: number;
+    promedioEntrega: number;
+  }[];
+}
+
+export interface ItemEficienciaDistribucion {
+  establecimientoId: string;
+  establecimientoNombre: string;
+  centroAcopioId: string;
+  centroAcopioNombre: string;
+  periodoAnalisis: {
+    fechaInicio: Date;
+    fechaFin: Date;
+  };
+  indicadores: {
+    tiempoPromedioEntrega: number;
+    porcentajeCumplimiento: number;
+    eficienciaStock: number;
+    rotacionInventario: number;
+  };
+  tendencias: {
+    mejoraMes: boolean;
+    variacionPorcentual: number;
+  };
+  alertas: string[];
+}
+
+/**
  * Tipos para estadísticas y métricas
  */
 export interface EstadisticasReportes {
@@ -174,6 +283,10 @@ export interface EstadoFiltros {
   vencimientos: FiltrosVencimientos;
   lotesVencidos: FiltrosReporteBase;
   kardexDetallado: FiltrosKardexDetallado | null;
+  movimientosMensuales: FiltrosMovimientosMensuales;
+  consumoHistorico: FiltrosConsumoHistorico;
+  entregasPorEstablecimiento: FiltrosEntregasPorEstablecimiento;
+  eficienciaDistribucion: FiltrosEficienciaDistribucion;
 }
 
 /**
@@ -184,7 +297,11 @@ export type TipoReporte =
   | 'stock-critico' | 'stock_critico'
   | 'vencimientos' | 'proximos_vencimientos'
   | 'lotes-vencidos' | 'lotes_vencidos'
-  | 'kardex-detallado' | 'kardex_detallado';
+  | 'kardex-detallado' | 'kardex_detallado'
+  | 'movimientos-mensuales' | 'movimientos_mensuales'
+  | 'consumo-historico' | 'consumo_historico'
+  | 'entregas-por-establecimiento' | 'entregas_por_establecimiento'
+  | 'eficiencia-distribucion' | 'eficiencia_distribucion';
 
 export interface OpcionFiltro {
   value: string;
@@ -251,6 +368,10 @@ export interface UseReportesReturn {
     vencimientos: ItemVencimiento[];
     lotesVencidos: ItemLoteVencido[];
     kardexDetallado: ItemKardexDetallado[];
+    movimientosMensuales: ItemMovimientoMensual[];
+    consumoHistorico: ItemConsumoHistorico[];
+    entregasPorEstablecimiento: ItemEntregaPorEstablecimiento[];
+    eficienciaDistribucion: ItemEficienciaDistribucion[];
   };
   estadisticas: EstadisticasReportes | null;
   estado: EstadoReportes;
@@ -262,15 +383,23 @@ export interface UseReportesReturn {
   generarVencimientos: (filtros?: FiltrosVencimientos) => Promise<void>;
   generarLotesVencidos: (filtros?: FiltrosReporteBase) => Promise<void>;
   generarKardexDetallado: (filtros: FiltrosKardexDetallado) => Promise<void>;
+  generarMovimientosMensuales: (filtros?: FiltrosMovimientosMensuales) => Promise<void>;
+  generarConsumoHistorico: (filtros?: FiltrosConsumoHistorico) => Promise<void>;
+  generarEntregasPorEstablecimiento: (filtros?: FiltrosEntregasPorEstablecimiento) => Promise<void>;
+  generarEficienciaDistribucion: (filtros?: FiltrosEficienciaDistribucion) => Promise<void>;
   obtenerEstadisticas: () => Promise<void>;
   exportarExcel: (tipo: TipoReporte, config: ConfiguracionExportacion) => Promise<void>;
   exportarKardexDetallado: (filtros: FiltrosKardexDetallado, config: ConfiguracionExportacion) => Promise<void>;
+  exportarMovimientosMensuales: (filtros: FiltrosMovimientosMensuales, config: ConfiguracionExportacion) => Promise<void>;
+  exportarConsumoHistorico: (filtros: FiltrosConsumoHistorico, config: ConfiguracionExportacion) => Promise<void>;
+  exportarEntregasPorEstablecimiento: (filtros: FiltrosEntregasPorEstablecimiento, config: ConfiguracionExportacion) => Promise<void>;
+  exportarEficienciaDistribucion: (filtros: FiltrosEficienciaDistribucion, config: ConfiguracionExportacion) => Promise<void>;
   limpiarReportes: () => void;
   actualizarFiltros: (tipo: TipoReporte, filtros: any) => void;
 
   // Utilidades adicionales
   limpiarError: () => void;
-  obtenerDatosReporteActivo: () => any[];
+  obtenerDatosReporteActivo: () => unknown[];
   tieneDatos: (tipo: TipoReporte) => boolean;
 }
 

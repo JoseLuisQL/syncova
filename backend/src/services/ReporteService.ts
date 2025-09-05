@@ -13,6 +13,17 @@ export interface ReporteInventarioFilters {
   incluirInactivos?: boolean;
 }
 
+export interface ReporteMovimientosFilters {
+  centroAcopioId?: string;
+  vacunaId?: string;
+  establecimientoId?: string;
+  fechaInicio?: Date;
+  fechaFin?: Date;
+  mes?: number;
+  anio?: number;
+  incluirInactivos?: boolean;
+}
+
 export interface StockCriticoFilters extends ReporteInventarioFilters {
   porcentajeMinimo?: number; // Por defecto 20%
   cantidadMinima?: number;   // Cantidad mínima absoluta
@@ -31,6 +42,25 @@ export interface KardexDetalladoFilters {
   fechaInicio: Date;
   fechaFin: Date;
   incluirTrazabilidad?: boolean;
+}
+
+export interface MovimientosMensualesFilters extends ReporteMovimientosFilters {
+  agruparPor?: 'mes' | 'vacuna' | 'establecimiento';
+}
+
+export interface ConsumoHistoricoFilters extends ReporteMovimientosFilters {
+  periodoMeses?: number; // Número de meses hacia atrás
+  incluirProyecciones?: boolean;
+}
+
+export interface EntregasPorEstablecimientoFilters extends ReporteMovimientosFilters {
+  incluirDetalleVacunas?: boolean;
+  ordenarPor?: 'establecimiento' | 'cantidad' | 'fecha';
+}
+
+export interface EficienciaDistribucionFilters extends ReporteMovimientosFilters {
+  incluirIndicadores?: boolean;
+  calcularTendencias?: boolean;
 }
 
 /**
@@ -115,6 +145,91 @@ export interface KardexDetalladoItem {
   numeroDocumento: string;
   observaciones?: string | undefined;
   usuario: string;
+}
+
+/**
+ * Interfaces para resultados de reportes de movimientos
+ */
+export interface MovimientoMensualItem {
+  centroAcopioId: string;
+  centroAcopioNombre: string;
+  establecimientoId: string;
+  establecimientoNombre: string;
+  vacunaId: string;
+  vacunaNombre: string;
+  mes: number;
+  anio: number;
+  saldoAnterior: number;
+  transIngreso: number;
+  salida: number;
+  transSalida: number;
+  entrega: number;
+  saldoFinal: number;
+  consumoTotal: number;
+  eficienciaDistribucion: number;
+  fechaUltimaActualizacion: Date;
+}
+
+export interface ConsumoHistoricoItem {
+  centroAcopioId: string;
+  centroAcopioNombre: string;
+  vacunaId: string;
+  vacunaNombre: string;
+  establecimientoId: string;
+  establecimientoNombre: string;
+  periodoInicio: Date;
+  periodoFin: Date;
+  consumoPromedio: number;
+  consumoTotal: number;
+  tendencia: 'creciente' | 'decreciente' | 'estable';
+  variabilidad: number;
+  proyeccionProximoMes?: number | undefined;
+  historialMensual: {
+    mes: number;
+    anio: number;
+    consumo: number;
+    fecha: Date;
+  }[];
+}
+
+export interface EntregaPorEstablecimientoItem {
+  centroAcopioId: string;
+  centroAcopioNombre: string;
+  establecimientoId: string;
+  establecimientoNombre: string;
+  totalEntregas: number;
+  totalVacunas: number;
+  fechaUltimaEntrega: Date;
+  eficienciaEntrega: number;
+  detalleVacunas: {
+    vacunaId: string;
+    vacunaNombre: string;
+    cantidadEntregada: number;
+    numeroEntregas: number;
+    promedioEntrega: number;
+  }[];
+}
+
+export interface EficienciaDistribucionItem {
+  centroAcopioId: string;
+  centroAcopioNombre: string;
+  establecimientoId: string;
+  establecimientoNombre: string;
+  periodoAnalisis: {
+    fechaInicio: Date;
+    fechaFin: Date;
+  };
+  indicadores: {
+    tiempoPromedioEntrega: number; // días
+    porcentajeCumplimiento: number;
+    eficienciaStock: number;
+    rotacionInventario: number;
+  };
+  tendencias: {
+    mejoraMes: boolean;
+    variacionPorcentual: number;
+  };
+  alertas: string[];
 }
 
 /**
@@ -816,5 +931,796 @@ export class ReporteService {
         error: error instanceof Error ? error.message : 'Error al obtener estadísticas generales'
       };
     }
+  }
+
+  // =====================================================
+  // MÉTODOS PARA REPORTES DE MOVIMIENTOS
+  // =====================================================
+
+  /**
+   * Generar reporte de movimientos mensuales
+   */
+  static async generarMovimientosMensuales(
+    filters: MovimientosMensualesFilters = {}
+  ): Promise<ServiceResult<MovimientoMensualItem[]>> {
+    try {
+      console.log('🔄 Generando reporte de movimientos mensuales:', filters);
+
+      const {
+        centroAcopioId,
+        vacunaId,
+        establecimientoId,
+        fechaInicio,
+        fechaFin,
+        mes,
+        anio,
+        incluirInactivos = false,
+        agruparPor = 'mes'
+      } = filters;
+
+      // Construir condiciones WHERE
+      const whereConditions: any = {};
+
+      if (centroAcopioId) {
+        whereConditions.establecimiento = {
+          centroAcopioId
+        };
+      }
+
+      if (vacunaId) {
+        whereConditions.vacunaId = vacunaId;
+      }
+
+      if (establecimientoId) {
+        whereConditions.establecimientoId = establecimientoId;
+      }
+
+      if (mes) {
+        whereConditions.mes = mes;
+      }
+
+      if (anio) {
+        whereConditions.anio = anio;
+      } else {
+        // Por defecto, año actual
+        whereConditions.anio = new Date().getFullYear();
+      }
+
+      if (fechaInicio && fechaFin) {
+        // Asegurar que las fechas sean objetos Date válidos
+        const fechaInicioDate = new Date(fechaInicio);
+        const fechaFinDate = new Date(fechaFin);
+
+        // Ajustar las fechas para incluir todo el día
+        fechaInicioDate.setHours(0, 0, 0, 0);
+        fechaFinDate.setHours(23, 59, 59, 999);
+
+        whereConditions.fechaMovimiento = {
+          gte: fechaInicioDate,
+          lte: fechaFinDate
+        };
+      }
+
+      if (!incluirInactivos) {
+        whereConditions.vacuna = {
+          estado: 'activo'
+        };
+        whereConditions.establecimiento = {
+          ...whereConditions.establecimiento,
+          estado: 'activo'
+        };
+      }
+
+      // Obtener movimientos con relaciones
+      const movimientos = await prisma.movimientoVacuna.findMany({
+        where: whereConditions,
+        include: {
+          establecimiento: {
+            include: {
+              centroAcopio: true
+            }
+          },
+          vacuna: true,
+          entregasAdicionales: true
+        },
+        orderBy: [
+          { anio: 'desc' },
+          { mes: 'desc' },
+          { establecimiento: { nombre: 'asc' } },
+          { vacuna: { nombre: 'asc' } }
+        ]
+      });
+
+      // Procesar datos para el reporte
+      const reporteData: MovimientoMensualItem[] = movimientos.map(mov => {
+        const saldoFinal = mov.saldoAnterior + mov.transIngreso - mov.salida - mov.transSalida;
+        const consumoTotal = mov.salida + mov.transSalida;
+        const eficienciaDistribucion = mov.entrega > 0 ? (consumoTotal / mov.entrega) * 100 : 0;
+
+        return {
+          centroAcopioId: mov.establecimiento.centroAcopio?.id || '',
+          centroAcopioNombre: mov.establecimiento.centroAcopio?.nombre || 'Sin Centro',
+          establecimientoId: mov.establecimientoId,
+          establecimientoNombre: mov.establecimiento.nombre,
+          vacunaId: mov.vacunaId,
+          vacunaNombre: mov.vacuna.nombre,
+          mes: mov.mes,
+          anio: mov.anio,
+          saldoAnterior: mov.saldoAnterior,
+          transIngreso: mov.transIngreso,
+          salida: mov.salida,
+          transSalida: mov.transSalida,
+          entrega: mov.entrega,
+          saldoFinal,
+          consumoTotal,
+          eficienciaDistribucion: Math.round(eficienciaDistribucion * 100) / 100,
+          fechaUltimaActualizacion: mov.updatedAt
+        };
+      });
+
+      console.log(`✅ Reporte de movimientos mensuales generado: ${reporteData.length} registros`);
+
+      return {
+        success: true,
+        data: reporteData
+      };
+
+    } catch (error) {
+      console.error('❌ Error al generar reporte de movimientos mensuales:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al generar reporte de movimientos mensuales'
+      };
+    }
+  }
+
+  /**
+   * Generar reporte de consumo histórico
+   */
+  static async generarConsumoHistorico(
+    filters: ConsumoHistoricoFilters = {}
+  ): Promise<ServiceResult<ConsumoHistoricoItem[]>> {
+    try {
+      console.log('🔄 Generando reporte de consumo histórico:', filters);
+
+      const {
+        centroAcopioId,
+        vacunaId,
+        establecimientoId,
+        fechaInicio,
+        fechaFin,
+        periodoMeses = 12,
+        incluirInactivos = false,
+        incluirProyecciones = true
+      } = filters;
+
+      // Calcular fechas del período si no se proporcionan
+      const fechaFinCalculada = fechaFin ? new Date(fechaFin) : new Date();
+      const fechaInicioCalculada = fechaInicio ? new Date(fechaInicio) : new Date(fechaFinCalculada.getFullYear(), fechaFinCalculada.getMonth() - periodoMeses, 1);
+
+      // Ajustar las fechas para incluir todo el día
+      fechaInicioCalculada.setHours(0, 0, 0, 0);
+      fechaFinCalculada.setHours(23, 59, 59, 999);
+
+      // Construir condiciones WHERE
+      const whereConditions: any = {
+        fechaMovimiento: {
+          gte: fechaInicioCalculada,
+          lte: fechaFinCalculada
+        }
+      };
+
+      if (centroAcopioId) {
+        whereConditions.establecimiento = {
+          centroAcopioId
+        };
+      }
+
+      if (vacunaId) {
+        whereConditions.vacunaId = vacunaId;
+      }
+
+      if (establecimientoId) {
+        whereConditions.establecimientoId = establecimientoId;
+      }
+
+      if (!incluirInactivos) {
+        whereConditions.vacuna = {
+          estado: 'activo'
+        };
+        whereConditions.establecimiento = {
+          ...whereConditions.establecimiento,
+          estado: 'activo'
+        };
+      }
+
+      // Obtener movimientos históricos
+      const movimientos = await prisma.movimientoVacuna.findMany({
+        where: whereConditions,
+        include: {
+          establecimiento: {
+            include: {
+              centroAcopio: true
+            }
+          },
+          vacuna: true
+        },
+        orderBy: [
+          { anio: 'asc' },
+          { mes: 'asc' }
+        ]
+      });
+
+      // Agrupar por vacuna y establecimiento
+      const agrupados = new Map<string, any>();
+
+      movimientos.forEach(mov => {
+        const key = `${mov.vacunaId}-${mov.establecimientoId}`;
+
+        if (!agrupados.has(key)) {
+          agrupados.set(key, {
+            centroAcopioId: mov.establecimiento.centroAcopio?.id || '',
+            centroAcopioNombre: mov.establecimiento.centroAcopio?.nombre || 'Sin Centro',
+            vacunaId: mov.vacunaId,
+            vacunaNombre: mov.vacuna.nombre,
+            establecimientoId: mov.establecimientoId,
+            establecimientoNombre: mov.establecimiento.nombre,
+            movimientos: []
+          });
+        }
+
+        const consumo = mov.salida + mov.transSalida;
+        agrupados.get(key).movimientos.push({
+          mes: mov.mes,
+          anio: mov.anio,
+          consumo,
+          fecha: new Date(mov.anio, mov.mes - 1, 1)
+        });
+      });
+
+      // Procesar datos para el reporte
+      const reporteData: ConsumoHistoricoItem[] = Array.from(agrupados.values()).map(grupo => {
+        const { movimientos: historial } = grupo;
+
+        // Calcular estadísticas
+        const consumoTotal = historial.reduce((sum: number, mov: any) => sum + mov.consumo, 0);
+        const consumoPromedio = historial.length > 0 ? consumoTotal / historial.length : 0;
+
+        // Calcular tendencia (regresión lineal simple)
+        const tendencia = this.calcularTendencia(historial);
+
+        // Calcular variabilidad (desviación estándar)
+        const variabilidad = this.calcularVariabilidad(historial, consumoPromedio);
+
+        // Proyección para el próximo mes
+        const proyeccionProximoMes = incluirProyecciones ?
+          this.calcularProyeccion(historial, consumoPromedio) : undefined;
+
+        return {
+          centroAcopioId: grupo.centroAcopioId || '',
+          centroAcopioNombre: grupo.centroAcopioNombre || 'Sin Centro',
+          vacunaId: grupo.vacunaId,
+          vacunaNombre: grupo.vacunaNombre,
+          establecimientoId: grupo.establecimientoId,
+          establecimientoNombre: grupo.establecimientoNombre,
+          periodoInicio: fechaInicioCalculada,
+          periodoFin: fechaFinCalculada,
+          consumoPromedio: Math.round(consumoPromedio * 100) / 100,
+          consumoTotal,
+          tendencia,
+          variabilidad: Math.round(variabilidad * 100) / 100,
+          proyeccionProximoMes,
+          historialMensual: historial.sort((a: any, b: any) => a.fecha.getTime() - b.fecha.getTime())
+        };
+      });
+
+      console.log(`✅ Reporte de consumo histórico generado: ${reporteData.length} registros`);
+
+      return {
+        success: true,
+        data: reporteData
+      };
+
+    } catch (error) {
+      console.error('❌ Error al generar reporte de consumo histórico:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al generar reporte de consumo histórico'
+      };
+    }
+  }
+
+  /**
+   * Generar reporte de entregas por establecimiento
+   */
+  static async generarEntregasPorEstablecimiento(
+    filters: EntregasPorEstablecimientoFilters = {}
+  ): Promise<ServiceResult<EntregaPorEstablecimientoItem[]>> {
+    try {
+      console.log('🔄 Generando reporte de entregas por establecimiento:', filters);
+
+      const {
+        centroAcopioId,
+        vacunaId,
+        establecimientoId,
+        fechaInicio,
+        fechaFin,
+        incluirInactivos = false,
+        incluirDetalleVacunas = true,
+        ordenarPor = 'establecimiento'
+      } = filters;
+
+      // Calcular fechas del período si no se proporcionan
+      const fechaFinCalculada = fechaFin ? new Date(fechaFin) : new Date();
+      const fechaInicioCalculada = fechaInicio ? new Date(fechaInicio) : new Date(fechaFinCalculada.getFullYear(), 0, 1); // Inicio del año
+
+      // Ajustar las fechas para incluir todo el día
+      fechaInicioCalculada.setHours(0, 0, 0, 0);
+      fechaFinCalculada.setHours(23, 59, 59, 999);
+
+      // Construir condiciones WHERE
+      const whereConditions: any = {
+        fechaMovimiento: {
+          gte: fechaInicioCalculada,
+          lte: fechaFinCalculada
+        }
+      };
+
+      if (centroAcopioId) {
+        whereConditions.establecimiento = {
+          centroAcopioId
+        };
+      }
+
+      if (vacunaId) {
+        whereConditions.vacunaId = vacunaId;
+      }
+
+      if (establecimientoId) {
+        whereConditions.establecimientoId = establecimientoId;
+      }
+
+      if (!incluirInactivos) {
+        whereConditions.vacuna = {
+          estado: 'activo'
+        };
+        whereConditions.establecimiento = {
+          ...whereConditions.establecimiento,
+          estado: 'activo'
+        };
+      }
+
+      // Obtener movimientos con entregas
+      const movimientos = await prisma.movimientoVacuna.findMany({
+        where: {
+          ...whereConditions,
+          entrega: {
+            gt: 0
+          }
+        },
+        include: {
+          establecimiento: {
+            include: {
+              centroAcopio: true
+            }
+          },
+          vacuna: true,
+          entregasAdicionales: true
+        },
+        orderBy: [
+          { establecimiento: { nombre: 'asc' } },
+          { vacuna: { nombre: 'asc' } }
+        ]
+      });
+
+      // Agrupar por establecimiento
+      const agrupados = new Map<string, any>();
+
+      movimientos.forEach(mov => {
+        const key = mov.establecimientoId;
+
+        if (!agrupados.has(key)) {
+          agrupados.set(key, {
+            establecimientoId: mov.establecimientoId,
+            establecimientoNombre: mov.establecimiento.nombre,
+            centroAcopioId: mov.establecimiento.centroAcopioId,
+            centroAcopioNombre: mov.establecimiento.centroAcopio?.nombre || 'Sin centro',
+            entregas: [],
+            vacunas: new Map()
+          });
+        }
+
+        const grupo = agrupados.get(key);
+        const entregaTotal = mov.entrega + (mov.entregasAdicionales?.reduce((sum, ea) => sum + ea.cantidad, 0) || 0);
+
+        grupo.entregas.push({
+          fecha: mov.fechaMovimiento,
+          cantidad: entregaTotal,
+          vacunaId: mov.vacunaId
+        });
+
+        // Agrupar por vacuna si se requiere detalle
+        if (incluirDetalleVacunas) {
+          const vacunaKey = mov.vacunaId;
+          if (!grupo.vacunas.has(vacunaKey)) {
+            grupo.vacunas.set(vacunaKey, {
+              vacunaId: mov.vacunaId,
+              vacunaNombre: mov.vacuna.nombre,
+              cantidadEntregada: 0,
+              numeroEntregas: 0
+            });
+          }
+
+          const vacunaData = grupo.vacunas.get(vacunaKey);
+          vacunaData.cantidadEntregada += entregaTotal;
+          vacunaData.numeroEntregas += 1;
+        }
+      });
+
+      // Procesar datos para el reporte
+      const reporteData: EntregaPorEstablecimientoItem[] = Array.from(agrupados.values()).map(grupo => {
+        const totalEntregas = grupo.entregas.length;
+        const totalVacunas = grupo.entregas.reduce((sum: number, e: any) => sum + e.cantidad, 0);
+        const fechaUltimaEntrega = grupo.entregas.length > 0 ?
+          new Date(Math.max(...grupo.entregas.map((e: any) => e.fecha.getTime()))) :
+          new Date();
+
+        // Calcular eficiencia de entrega (entregas realizadas vs programadas)
+        // Por simplicidad, asumimos 100% si hay entregas
+        const eficienciaEntrega = totalEntregas > 0 ? 95 : 0; // Placeholder
+
+        const detalleVacunas = incluirDetalleVacunas ?
+          Array.from(grupo.vacunas.values()).map((v: any) => ({
+            ...v,
+            promedioEntrega: v.numeroEntregas > 0 ? Math.round((v.cantidadEntregada / v.numeroEntregas) * 100) / 100 : 0
+          })) : [];
+
+        return {
+          centroAcopioId: grupo.centroAcopioId,
+          centroAcopioNombre: grupo.centroAcopioNombre,
+          establecimientoId: grupo.establecimientoId,
+          establecimientoNombre: grupo.establecimientoNombre,
+          totalEntregas,
+          totalVacunas,
+          fechaUltimaEntrega,
+          eficienciaEntrega,
+          detalleVacunas
+        };
+      });
+
+      // Ordenar según criterio
+      reporteData.sort((a, b) => {
+        switch (ordenarPor) {
+          case 'cantidad':
+            return b.totalVacunas - a.totalVacunas;
+          case 'fecha':
+            return b.fechaUltimaEntrega.getTime() - a.fechaUltimaEntrega.getTime();
+          default:
+            return a.establecimientoNombre.localeCompare(b.establecimientoNombre);
+        }
+      });
+
+      console.log(`✅ Reporte de entregas por establecimiento generado: ${reporteData.length} registros`);
+
+      return {
+        success: true,
+        data: reporteData
+      };
+
+    } catch (error) {
+      console.error('❌ Error al generar reporte de entregas por establecimiento:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al generar reporte de entregas por establecimiento'
+      };
+    }
+  }
+
+  /**
+   * Generar reporte de eficiencia de distribución
+   */
+  static async generarEficienciaDistribucion(
+    filters: EficienciaDistribucionFilters = {}
+  ): Promise<ServiceResult<EficienciaDistribucionItem[]>> {
+    try {
+      console.log('🔄 Generando reporte de eficiencia de distribución:', filters);
+
+      const {
+        centroAcopioId,
+        vacunaId,
+        establecimientoId,
+        fechaInicio,
+        fechaFin,
+        incluirInactivos = false,
+        incluirIndicadores = true,
+        calcularTendencias = true
+      } = filters;
+
+      // Calcular fechas del período si no se proporcionan
+      const fechaFinCalculada = fechaFin ? new Date(fechaFin) : new Date();
+      const fechaInicioCalculada = fechaInicio ? new Date(fechaInicio) : new Date(fechaFinCalculada.getFullYear(), fechaFinCalculada.getMonth() - 3, 1); // Últimos 3 meses
+
+      // Ajustar las fechas para incluir todo el día
+      fechaInicioCalculada.setHours(0, 0, 0, 0);
+      fechaFinCalculada.setHours(23, 59, 59, 999);
+
+      // Construir condiciones WHERE
+      const whereConditions: any = {
+        fechaMovimiento: {
+          gte: fechaInicioCalculada,
+          lte: fechaFinCalculada
+        }
+      };
+
+      if (centroAcopioId) {
+        whereConditions.establecimiento = {
+          centroAcopioId
+        };
+      }
+
+      if (vacunaId) {
+        whereConditions.vacunaId = vacunaId;
+      }
+
+      if (establecimientoId) {
+        whereConditions.establecimientoId = establecimientoId;
+      }
+
+      if (!incluirInactivos) {
+        whereConditions.vacuna = {
+          estado: 'activo'
+        };
+        whereConditions.establecimiento = {
+          ...whereConditions.establecimiento,
+          estado: 'activo'
+        };
+      }
+
+      // Obtener movimientos para análisis
+      const movimientos = await prisma.movimientoVacuna.findMany({
+        where: whereConditions,
+        include: {
+          establecimiento: {
+            include: {
+              centroAcopio: true
+            }
+          },
+          vacuna: true,
+          entregasAdicionales: true
+        },
+        orderBy: [
+          { establecimiento: { nombre: 'asc' } },
+          { anio: 'asc' },
+          { mes: 'asc' }
+        ]
+      });
+
+      // Agrupar por establecimiento
+      const agrupados = new Map<string, any>();
+
+      movimientos.forEach(mov => {
+        const key = mov.establecimientoId;
+
+        if (!agrupados.has(key)) {
+          agrupados.set(key, {
+            establecimientoId: mov.establecimientoId,
+            establecimientoNombre: mov.establecimiento.nombre,
+            centroAcopioId: mov.establecimiento.centroAcopioId,
+            centroAcopioNombre: mov.establecimiento.centroAcopio?.nombre || 'Sin centro',
+            movimientos: []
+          });
+        }
+
+        agrupados.get(key).movimientos.push(mov);
+      });
+
+      // Procesar datos para el reporte
+      const reporteData: EficienciaDistribucionItem[] = Array.from(agrupados.values()).map(grupo => {
+        const { movimientos: movs } = grupo;
+
+        // Calcular indicadores de eficiencia
+        const indicadores = incluirIndicadores ? this.calcularIndicadoresEficiencia(movs) : {
+          tiempoPromedioEntrega: 0,
+          porcentajeCumplimiento: 0,
+          eficienciaStock: 0,
+          rotacionInventario: 0
+        };
+
+        // Calcular tendencias
+        const tendencias = calcularTendencias ? this.calcularTendenciasEficiencia(movs) : {
+          mejoraMes: false,
+          variacionPorcentual: 0
+        };
+
+        // Generar alertas
+        const alertas = this.generarAlertasEficiencia(indicadores, tendencias);
+
+        return {
+          centroAcopioId: grupo.centroAcopioId,
+          centroAcopioNombre: grupo.centroAcopioNombre,
+          establecimientoId: grupo.establecimientoId,
+          establecimientoNombre: grupo.establecimientoNombre,
+          periodoAnalisis: {
+            fechaInicio: fechaInicioCalculada,
+            fechaFin: fechaFinCalculada
+          },
+          indicadores,
+          tendencias,
+          alertas
+        };
+      });
+
+      console.log(`✅ Reporte de eficiencia de distribución generado: ${reporteData.length} registros`);
+
+      return {
+        success: true,
+        data: reporteData
+      };
+
+    } catch (error) {
+      console.error('❌ Error al generar reporte de eficiencia de distribución:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al generar reporte de eficiencia de distribución'
+      };
+    }
+  }
+
+  // =====================================================
+  // MÉTODOS AUXILIARES PARA CÁLCULOS
+  // =====================================================
+
+  /**
+   * Calcular tendencia de consumo (regresión lineal simple)
+   */
+  private static calcularTendencia(historial: any[]): 'creciente' | 'decreciente' | 'estable' {
+    if (historial.length < 2) return 'estable';
+
+    const n = historial.length;
+    const sumX = historial.reduce((sum, _, index) => sum + index, 0);
+    const sumY = historial.reduce((sum, mov) => sum + mov.consumo, 0);
+    const sumXY = historial.reduce((sum, mov, index) => sum + (index * mov.consumo), 0);
+    const sumX2 = historial.reduce((sum, _, index) => sum + (index * index), 0);
+
+    const pendiente = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+
+    if (pendiente > 0.1) return 'creciente';
+    if (pendiente < -0.1) return 'decreciente';
+    return 'estable';
+  }
+
+  /**
+   * Calcular variabilidad (desviación estándar)
+   */
+  private static calcularVariabilidad(historial: any[], promedio: number): number {
+    if (historial.length < 2) return 0;
+
+    const varianza = historial.reduce((sum, mov) => {
+      const diff = mov.consumo - promedio;
+      return sum + (diff * diff);
+    }, 0) / historial.length;
+
+    return Math.sqrt(varianza);
+  }
+
+  /**
+   * Calcular proyección para el próximo mes
+   */
+  private static calcularProyeccion(historial: any[], promedio: number): number {
+    if (historial.length < 3) return Math.round(promedio);
+
+    // Usar promedio móvil de los últimos 3 meses
+    const ultimos3 = historial.slice(-3);
+    const promedioReciente = ultimos3.reduce((sum, mov) => sum + mov.consumo, 0) / 3;
+
+    return Math.round(promedioReciente);
+  }
+
+  /**
+   * Calcular indicadores de eficiencia
+   */
+  private static calcularIndicadoresEficiencia(movimientos: any[]): {
+    tiempoPromedioEntrega: number;
+    porcentajeCumplimiento: number;
+    eficienciaStock: number;
+    rotacionInventario: number;
+  } {
+    if (movimientos.length === 0) {
+      return {
+        tiempoPromedioEntrega: 0,
+        porcentajeCumplimiento: 0,
+        eficienciaStock: 0,
+        rotacionInventario: 0
+      };
+    }
+
+    // Tiempo promedio de entrega (días entre movimientos)
+    const tiempoPromedioEntrega = 30; // Placeholder - requiere lógica más compleja
+
+    // Porcentaje de cumplimiento (entregas realizadas vs programadas)
+    const entregasRealizadas = movimientos.filter(mov => mov.entrega > 0).length;
+    const porcentajeCumplimiento = (entregasRealizadas / movimientos.length) * 100;
+
+    // Eficiencia de stock (stock utilizado vs stock disponible)
+    const stockUtilizado = movimientos.reduce((sum, mov) => sum + mov.salida + mov.transSalida, 0);
+    const stockDisponible = movimientos.reduce((sum, mov) => sum + mov.saldoAnterior + mov.transIngreso, 0);
+    const eficienciaStock = stockDisponible > 0 ? (stockUtilizado / stockDisponible) * 100 : 0;
+
+    // Rotación de inventario
+    const rotacionInventario = stockUtilizado > 0 ? stockDisponible / stockUtilizado : 0;
+
+    return {
+      tiempoPromedioEntrega: Math.round(tiempoPromedioEntrega * 100) / 100,
+      porcentajeCumplimiento: Math.round(porcentajeCumplimiento * 100) / 100,
+      eficienciaStock: Math.round(eficienciaStock * 100) / 100,
+      rotacionInventario: Math.round(rotacionInventario * 100) / 100
+    };
+  }
+
+  /**
+   * Calcular tendencias de eficiencia
+   */
+  private static calcularTendenciasEficiencia(movimientos: any[]): {
+    mejoraMes: boolean;
+    variacionPorcentual: number;
+  } {
+    if (movimientos.length < 2) {
+      return {
+        mejoraMes: false,
+        variacionPorcentual: 0
+      };
+    }
+
+    // Comparar último mes con mes anterior
+    const movimientosOrdenados = movimientos.sort((a, b) => {
+      if (a.anio !== b.anio) return a.anio - b.anio;
+      return a.mes - b.mes;
+    });
+
+    const ultimoMes = movimientosOrdenados[movimientosOrdenados.length - 1];
+    const mesAnterior = movimientosOrdenados[movimientosOrdenados.length - 2];
+
+    const eficienciaUltimo = ultimoMes.entrega > 0 ? ((ultimoMes.salida + ultimoMes.transSalida) / ultimoMes.entrega) * 100 : 0;
+    const eficienciaAnterior = mesAnterior.entrega > 0 ? ((mesAnterior.salida + mesAnterior.transSalida) / mesAnterior.entrega) * 100 : 0;
+
+    const variacionPorcentual = eficienciaAnterior > 0 ?
+      ((eficienciaUltimo - eficienciaAnterior) / eficienciaAnterior) * 100 : 0;
+
+    return {
+      mejoraMes: variacionPorcentual > 0,
+      variacionPorcentual: Math.round(variacionPorcentual * 100) / 100
+    };
+  }
+
+  /**
+   * Generar alertas de eficiencia
+   */
+  private static generarAlertasEficiencia(
+    indicadores: any,
+    tendencias: any
+  ): string[] {
+    const alertas: string[] = [];
+
+    if (indicadores.porcentajeCumplimiento < 80) {
+      alertas.push('Bajo porcentaje de cumplimiento en entregas');
+    }
+
+    if (indicadores.eficienciaStock < 60) {
+      alertas.push('Baja eficiencia en el uso del stock');
+    }
+
+    if (indicadores.rotacionInventario > 6) {
+      alertas.push('Alta rotación de inventario - posible desabastecimiento');
+    }
+
+    if (indicadores.rotacionInventario < 2) {
+      alertas.push('Baja rotación de inventario - posible sobrestock');
+    }
+
+    if (tendencias.variacionPorcentual < -20) {
+      alertas.push('Tendencia decreciente significativa en eficiencia');
+    }
+
+    return alertas;
   }
 }

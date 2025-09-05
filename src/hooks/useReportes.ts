@@ -6,11 +6,19 @@ import {
   ItemVencimiento,
   ItemLoteVencido,
   ItemKardexDetallado,
+  ItemMovimientoMensual,
+  ItemConsumoHistorico,
+  ItemEntregaPorEstablecimiento,
+  ItemEficienciaDistribucion,
   EstadisticasReportes,
   FiltrosReporteBase,
   FiltrosStockCritico,
   FiltrosVencimientos,
   FiltrosKardexDetallado,
+  FiltrosMovimientosMensuales,
+  FiltrosConsumoHistorico,
+  FiltrosEntregasPorEstablecimiento,
+  FiltrosEficienciaDistribucion,
   ConfiguracionExportacion,
   TipoReporte,
   EstadoReportes,
@@ -29,7 +37,11 @@ export const useReportes = (): UseReportesReturn => {
     stockCritico: [] as ItemStockCritico[],
     vencimientos: [] as ItemVencimiento[],
     lotesVencidos: [] as ItemLoteVencido[],
-    kardexDetallado: [] as ItemKardexDetallado[]
+    kardexDetallado: [] as ItemKardexDetallado[],
+    movimientosMensuales: [] as ItemMovimientoMensual[],
+    consumoHistorico: [] as ItemConsumoHistorico[],
+    entregasPorEstablecimiento: [] as ItemEntregaPorEstablecimiento[],
+    eficienciaDistribucion: [] as ItemEficienciaDistribucion[]
   });
 
   const [estadisticas, setEstadisticas] = useState<EstadisticasReportes | null>(null);
@@ -46,7 +58,11 @@ export const useReportes = (): UseReportesReturn => {
     stockCritico: {},
     vencimientos: {},
     lotesVencidos: {},
-    kardexDetallado: null
+    kardexDetallado: null,
+    movimientosMensuales: {},
+    consumoHistorico: {},
+    entregasPorEstablecimiento: {},
+    eficienciaDistribucion: {}
   });
 
   // Referencias para cancelar requests
@@ -209,6 +225,94 @@ export const useReportes = (): UseReportesReturn => {
   }, [ejecutarConCarga]);
 
   /**
+   * Generar reporte de movimientos mensuales
+   */
+  const generarMovimientosMensuales = useCallback(async (filtrosReporte: FiltrosMovimientosMensuales = {}) => {
+    const resultado = await ejecutarConCarga(
+      () => ReportesService.generarMovimientosMensuales(filtrosReporte),
+      'movimientos-mensuales'
+    );
+
+    if (resultado) {
+      setReportes(prev => ({
+        ...prev,
+        movimientosMensuales: resultado
+      }));
+
+      setFiltros(prev => ({
+        ...prev,
+        movimientosMensuales: filtrosReporte
+      }));
+    }
+  }, [ejecutarConCarga]);
+
+  /**
+   * Generar reporte de consumo histórico
+   */
+  const generarConsumoHistorico = useCallback(async (filtrosReporte: FiltrosConsumoHistorico = {}) => {
+    const resultado = await ejecutarConCarga(
+      () => ReportesService.generarConsumoHistorico(filtrosReporte),
+      'consumo-historico'
+    );
+
+    if (resultado) {
+      setReportes(prev => ({
+        ...prev,
+        consumoHistorico: resultado
+      }));
+
+      setFiltros(prev => ({
+        ...prev,
+        consumoHistorico: filtrosReporte
+      }));
+    }
+  }, [ejecutarConCarga]);
+
+  /**
+   * Generar reporte de entregas por establecimiento
+   */
+  const generarEntregasPorEstablecimiento = useCallback(async (filtrosReporte: FiltrosEntregasPorEstablecimiento = {}) => {
+    const resultado = await ejecutarConCarga(
+      () => ReportesService.generarEntregasPorEstablecimiento(filtrosReporte),
+      'entregas-por-establecimiento'
+    );
+
+    if (resultado) {
+      setReportes(prev => ({
+        ...prev,
+        entregasPorEstablecimiento: resultado
+      }));
+
+      setFiltros(prev => ({
+        ...prev,
+        entregasPorEstablecimiento: filtrosReporte
+      }));
+    }
+  }, [ejecutarConCarga]);
+
+  /**
+   * Generar reporte de eficiencia de distribución
+   */
+  const generarEficienciaDistribucion = useCallback(async (filtrosReporte: FiltrosEficienciaDistribucion = {}) => {
+    const resultado = await ejecutarConCarga(
+      () => ReportesService.generarEficienciaDistribucion(filtrosReporte),
+      'eficiencia-distribucion'
+    );
+
+    if (resultado) {
+      setReportes(prev => ({
+        ...prev,
+        eficienciaDistribucion: resultado
+      }));
+
+      setFiltros(prev => ({
+        ...prev,
+        eficienciaDistribucion: filtrosReporte
+      }));
+    }
+  }, [ejecutarConCarga]);
+
+  /**
    * Obtener estadísticas generales
    */
   const obtenerEstadisticas = useCallback(async () => {
@@ -219,6 +323,45 @@ export const useReportes = (): UseReportesReturn => {
     if (resultado) {
       setEstadisticas(resultado);
     }
+  }, [ejecutarConCarga]);
+
+  /**
+   * Exportar reportes de movimientos a Excel
+   */
+  const exportarMovimientosMensuales = useCallback(async (
+    filtros: FiltrosMovimientosMensuales,
+    config: ConfiguracionExportacion
+  ) => {
+    await ejecutarConCarga(
+      () => ReportesService.exportarMovimientosMensuales(filtros, config)
+    );
+  }, [ejecutarConCarga]);
+
+  const exportarConsumoHistorico = useCallback(async (
+    filtros: FiltrosConsumoHistorico,
+    config: ConfiguracionExportacion
+  ) => {
+    await ejecutarConCarga(
+      () => ReportesService.exportarConsumoHistorico(filtros, config)
+    );
+  }, [ejecutarConCarga]);
+
+  const exportarEntregasPorEstablecimiento = useCallback(async (
+    filtros: FiltrosEntregasPorEstablecimiento,
+    config: ConfiguracionExportacion
+  ) => {
+    await ejecutarConCarga(
+      () => ReportesService.exportarEntregasPorEstablecimiento(filtros, config)
+    );
+  }, [ejecutarConCarga]);
+
+  const exportarEficienciaDistribucion = useCallback(async (
+    filtros: FiltrosEficienciaDistribucion,
+    config: ConfiguracionExportacion
+  ) => {
+    await ejecutarConCarga(
+      () => ReportesService.exportarEficienciaDistribucion(filtros, config)
+    );
   }, [ejecutarConCarga]);
 
   /**
@@ -280,7 +423,11 @@ export const useReportes = (): UseReportesReturn => {
       stockCritico: [],
       vencimientos: [],
       lotesVencidos: [],
-      kardexDetallado: []
+      kardexDetallado: [],
+      movimientosMensuales: [],
+      consumoHistorico: [],
+      entregasPorEstablecimiento: [],
+      eficienciaDistribucion: []
     });
 
     setEstadisticas(null);
@@ -297,7 +444,11 @@ export const useReportes = (): UseReportesReturn => {
       stockCritico: {},
       vencimientos: {},
       lotesVencidos: {},
-      kardexDetallado: null
+      kardexDetallado: null,
+      movimientosMensuales: {},
+      consumoHistorico: {},
+      entregasPorEstablecimiento: {},
+      eficienciaDistribucion: {}
     });
 
     // Cancelar cualquier request en curso
@@ -379,9 +530,17 @@ export const useReportes = (): UseReportesReturn => {
     generarVencimientos,
     generarLotesVencidos,
     generarKardexDetallado,
+    generarMovimientosMensuales,
+    generarConsumoHistorico,
+    generarEntregasPorEstablecimiento,
+    generarEficienciaDistribucion,
     obtenerEstadisticas,
     exportarExcel,
     exportarKardexDetallado,
+    exportarMovimientosMensuales,
+    exportarConsumoHistorico,
+    exportarEntregasPorEstablecimiento,
+    exportarEficienciaDistribucion,
     limpiarReportes,
     actualizarFiltros,
 

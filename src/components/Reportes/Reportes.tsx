@@ -1111,12 +1111,158 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
   centrosAcopio,
   onGenerarReporte,
 }) => {
+  const {
+    reportes,
+    estado,
+    generarMovimientosMensuales,
+    generarConsumoHistorico,
+    generarEntregasPorEstablecimiento,
+    generarEficienciaDistribucion,
+    exportarMovimientosMensuales,
+    exportarConsumoHistorico,
+    exportarEntregasPorEstablecimiento,
+    exportarEficienciaDistribucion,
+    limpiarError
+  } = useReportes();
+
+  const [reporteActivo, setReporteActivo] = React.useState<string | null>(null);
+
+  const handleExportarReporte = async (tipoReporte: string) => {
+    try {
+      const filtrosMovimientos = {
+        centroAcopioId: filtros.centroAcopio !== 'todos' ? filtros.centroAcopio : undefined,
+        fechaInicio: filtros.fechaInicio,
+        fechaFin: filtros.fechaFin,
+        incluirInactivos: false
+      };
+
+      const config = {
+        incluirDetalles: true,
+        incluirGraficos: false,
+        incluirEstadisticas: true,
+        formatoFecha: 'dd/mm/yyyy' as const,
+        responsableReporte: 'Sistema SIVAC',
+        observaciones: 'Reporte generado automáticamente'
+      };
+
+      switch (tipoReporte) {
+        case 'movimientos_mensuales':
+          await exportarMovimientosMensuales(filtrosMovimientos, config);
+          break;
+        case 'consumo_historico':
+          await exportarConsumoHistorico({
+            ...filtrosMovimientos,
+            periodoMeses: 12,
+            incluirProyecciones: true
+          }, config);
+          break;
+        case 'entregas_establecimiento':
+          await exportarEntregasPorEstablecimiento({
+            ...filtrosMovimientos,
+            incluirDetalleVacunas: true,
+            ordenarPor: 'establecimiento'
+          }, config);
+          break;
+        case 'eficiencia_distribucion':
+          await exportarEficienciaDistribucion({
+            ...filtrosMovimientos,
+            incluirIndicadores: true,
+            calcularTendencias: true
+          }, config);
+          break;
+      }
+    } catch (error) {
+      console.error('Error al exportar reporte:', error);
+    }
+  };
+
   const reportesMovimientos = [
-    { id: 'movimientos_mensual', nombre: 'Movimientos Mensuales', descripcion: 'Resumen mensual', icon: TrendingUp },
-    { id: 'entregas_establecimiento', nombre: 'Entregas por Establecimiento', descripcion: 'Detalle de entregas', icon: Package },
-    { id: 'consumo_historico', nombre: 'Consumo Histórico', descripcion: 'Tendencias de consumo', icon: BarChart3 },
-    { id: 'eficiencia_distribucion', nombre: 'Eficiencia de Distribución', descripcion: 'Métricas de eficiencia', icon: Target }
+    {
+      id: 'movimientos_mensuales',
+      nombre: 'Movimientos Mensuales',
+      descripcion: 'Resumen mensual de movimientos por establecimiento',
+      icon: TrendingUp,
+      color: 'emerald',
+      datos: reportes.movimientosMensuales,
+      generar: () => handleGenerarReporte('movimientos_mensuales'),
+      exportar: () => handleExportarReporte('movimientos_mensuales')
+    },
+    {
+      id: 'entregas_establecimiento',
+      nombre: 'Entregas por Establecimiento',
+      descripcion: 'Detalle de entregas realizadas por establecimiento',
+      icon: Package,
+      color: 'blue',
+      datos: reportes.entregasPorEstablecimiento,
+      generar: () => handleGenerarReporte('entregas_establecimiento'),
+      exportar: () => handleExportarReporte('entregas_establecimiento')
+    },
+    {
+      id: 'consumo_historico',
+      nombre: 'Consumo Histórico',
+      descripcion: 'Tendencias de consumo y proyecciones',
+      icon: BarChart3,
+      color: 'purple',
+      datos: reportes.consumoHistorico,
+      generar: () => handleGenerarReporte('consumo_historico'),
+      exportar: () => handleExportarReporte('consumo_historico')
+    },
+    {
+      id: 'eficiencia_distribucion',
+      nombre: 'Eficiencia de Distribución',
+      descripción: 'Métricas e indicadores de eficiencia',
+      icon: Target,
+      color: 'orange',
+      datos: reportes.eficienciaDistribucion,
+      generar: () => handleGenerarReporte('eficiencia_distribucion'),
+      exportar: () => handleExportarReporte('eficiencia_distribucion')
+    }
   ];
+
+  const handleGenerarReporte = async (tipoReporte: string) => {
+    try {
+      setReporteActivo(tipoReporte);
+
+      // Construir filtros basados en el estado actual
+      const filtrosMovimientos = {
+        centroAcopioId: filtros.centroAcopio !== 'todos' ? filtros.centroAcopio : undefined,
+        fechaInicio: filtros.fechaInicio,
+        fechaFin: filtros.fechaFin,
+        incluirInactivos: false
+      };
+
+      switch (tipoReporte) {
+        case 'movimientos_mensuales':
+          await generarMovimientosMensuales(filtrosMovimientos);
+          break;
+        case 'consumo_historico':
+          await generarConsumoHistorico({
+            ...filtrosMovimientos,
+            periodoMeses: 12,
+            incluirProyecciones: true
+          });
+          break;
+        case 'entregas_establecimiento':
+          await generarEntregasPorEstablecimiento({
+            ...filtrosMovimientos,
+            incluirDetalleVacunas: true,
+            ordenarPor: 'establecimiento'
+          });
+          break;
+        case 'eficiencia_distribucion':
+          await generarEficienciaDistribucion({
+            ...filtrosMovimientos,
+            incluirIndicadores: true,
+            calcularTendencias: true
+          });
+          break;
+      }
+    } catch (error) {
+      console.error('Error al generar reporte:', error);
+    } finally {
+      setReporteActivo(null);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -1172,6 +1318,33 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
         </div>
       </div>
 
+      {/* Mostrar errores si existen */}
+      {estado.error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error al generar reporte</h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{estado.error}</p>
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={limpiarError}
+                  className="bg-red-100 px-2 py-1 rounded text-sm text-red-800 hover:bg-red-200"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Reportes Disponibles */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {reportesMovimientos.map((reporte) => {
@@ -1189,24 +1362,42 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
               </div>
               <div className="flex space-x-3">
                 <button
-                  onClick={() => alert('Vista previa del reporte...')}
-                  className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  onClick={reporte.generar}
+                  disabled={reporteActivo === reporte.id}
+                  className={`flex-1 py-2 px-4 rounded-lg transition-colors text-sm font-medium ${
+                    reporteActivo === reporte.id
+                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                  }`}
                 >
-                  <Eye className="h-4 w-4 mr-2 inline" />
-                  Vista Previa
+                  {reporteActivo === reporte.id ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Generando...
+                    </div>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2 inline" />
+                      Generar
+                    </>
+                  )}
                 </button>
-                <button
-                  onClick={() => onGenerarReporte(filtros.formato)}
-                  className="flex-1 bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
-                >
-                  <Download className="h-4 w-4 mr-2 inline" />
-                  Generar
-                </button>
+                {reporte.datos && reporte.datos.length > 0 && (
+                  <button
+                    onClick={reporte.exportar}
+                    className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  >
+                    <Download className="h-4 w-4 mr-2 inline" />
+                    Exportar Excel
+                  </button>
+                )}
               </div>
             </div>
           );
         })}
       </div>
+
+
     </div>
   );
 };

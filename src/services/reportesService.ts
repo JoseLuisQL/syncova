@@ -1,5 +1,5 @@
-import { apiClient } from '../config/api';
-import { ApiResponse } from '../types/api';
+import { apiClient, ApiResponse } from '../config/api';
+import { ConfiguracionExportacion } from '../types/reportes';
 
 /**
  * Interfaces para filtros de reportes
@@ -30,6 +30,54 @@ export interface KardexDetalladoFilters {
   fechaInicio: string;
   fechaFin: string;
   incluirTrazabilidad?: boolean;
+}
+
+/**
+ * Interfaces para filtros de reportes de movimientos
+ */
+export interface MovimientosMensualesFilters {
+  centroAcopioId?: string;
+  vacunaId?: string;
+  establecimientoId?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  mes?: number;
+  anio?: number;
+  incluirInactivos?: boolean;
+  agruparPor?: 'mes' | 'vacuna' | 'establecimiento';
+}
+
+export interface ConsumoHistoricoFilters {
+  centroAcopioId?: string;
+  vacunaId?: string;
+  establecimientoId?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  periodoMeses?: number;
+  incluirInactivos?: boolean;
+  incluirProyecciones?: boolean;
+}
+
+export interface EntregasPorEstablecimientoFilters {
+  centroAcopioId?: string;
+  vacunaId?: string;
+  establecimientoId?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  incluirInactivos?: boolean;
+  incluirDetalleVacunas?: boolean;
+  ordenarPor?: 'establecimiento' | 'cantidad' | 'fecha';
+}
+
+export interface EficienciaDistribucionFilters {
+  centroAcopioId?: string;
+  vacunaId?: string;
+  establecimientoId?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  incluirInactivos?: boolean;
+  incluirIndicadores?: boolean;
+  calcularTendencias?: boolean;
 }
 
 /**
@@ -123,6 +171,87 @@ export interface EstadisticasReportes {
   lotesProximosVencer: number;
   movimientosUltimoMes: number;
   ultimaActualizacion: Date;
+}
+
+/**
+ * Interfaces para resultados de reportes de movimientos
+ */
+export interface MovimientoMensualItem {
+  establecimientoId: string;
+  establecimientoNombre: string;
+  vacunaId: string;
+  vacunaNombre: string;
+  mes: number;
+  anio: number;
+  saldoAnterior: number;
+  transIngreso: number;
+  salida: number;
+  transSalida: number;
+  entrega: number;
+  saldoFinal: number;
+  consumoTotal: number;
+  eficienciaDistribucion: number;
+  fechaUltimaActualizacion: Date;
+}
+
+export interface ConsumoHistoricoItem {
+  vacunaId: string;
+  vacunaNombre: string;
+  establecimientoId: string;
+  establecimientoNombre: string;
+  periodoInicio: Date;
+  periodoFin: Date;
+  consumoPromedio: number;
+  consumoTotal: number;
+  tendencia: 'creciente' | 'decreciente' | 'estable';
+  variabilidad: number;
+  proyeccionProximoMes?: number;
+  historialMensual: {
+    mes: number;
+    anio: number;
+    consumo: number;
+    fecha: Date;
+  }[];
+}
+
+export interface EntregaPorEstablecimientoItem {
+  establecimientoId: string;
+  establecimientoNombre: string;
+  centroAcopioId: string;
+  centroAcopioNombre: string;
+  totalEntregas: number;
+  totalVacunas: number;
+  fechaUltimaEntrega: Date;
+  eficienciaEntrega: number;
+  detalleVacunas: {
+    vacunaId: string;
+    vacunaNombre: string;
+    cantidadEntregada: number;
+    numeroEntregas: number;
+    promedioEntrega: number;
+  }[];
+}
+
+export interface EficienciaDistribucionItem {
+  establecimientoId: string;
+  establecimientoNombre: string;
+  centroAcopioId: string;
+  centroAcopioNombre: string;
+  periodoAnalisis: {
+    fechaInicio: Date;
+    fechaFin: Date;
+  };
+  indicadores: {
+    tiempoPromedioEntrega: number;
+    porcentajeCumplimiento: number;
+    eficienciaStock: number;
+    rotacionInventario: number;
+  };
+  tendencias: {
+    mejoraMes: boolean;
+    variacionPorcentual: number;
+  };
+  alertas: string[];
 }
 
 /**
@@ -519,18 +648,277 @@ export class ReportesService {
     }
   }
 
+  // =====================================================
+  // MÉTODOS PARA REPORTES DE MOVIMIENTOS
+  // =====================================================
+
+  /**
+   * Generar reporte de movimientos mensuales
+   */
+  static async generarMovimientosMensuales(
+    filters: MovimientosMensualesFilters = {}
+  ): Promise<MovimientoMensualItem[]> {
+    try {
+      console.log('🔄 Generando reporte de movimientos mensuales:', filters);
+
+      const response = await apiClient.get<ApiResponse<MovimientoMensualItem[]>>(
+        `${this.BASE_URL}/movimientos-mensuales`,
+        { params: filters }
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error al generar reporte de movimientos mensuales');
+      }
+
+      console.log('✅ Reporte de movimientos mensuales generado exitosamente');
+      return response.data.data;
+    } catch (error) {
+      console.error('❌ Error al generar reporte de movimientos mensuales:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Generar reporte de consumo histórico
+   */
+  static async generarConsumoHistorico(
+    filters: ConsumoHistoricoFilters = {}
+  ): Promise<ConsumoHistoricoItem[]> {
+    try {
+      console.log('🔄 Generando reporte de consumo histórico:', filters);
+
+      const response = await apiClient.get<ApiResponse<ConsumoHistoricoItem[]>>(
+        `${this.BASE_URL}/consumo-historico`,
+        { params: filters }
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error al generar reporte de consumo histórico');
+      }
+
+      console.log('✅ Reporte de consumo histórico generado exitosamente');
+      return response.data.data;
+    } catch (error) {
+      console.error('❌ Error al generar reporte de consumo histórico:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Generar reporte de entregas por establecimiento
+   */
+  static async generarEntregasPorEstablecimiento(
+    filters: EntregasPorEstablecimientoFilters = {}
+  ): Promise<EntregaPorEstablecimientoItem[]> {
+    try {
+      console.log('🔄 Generando reporte de entregas por establecimiento:', filters);
+
+      const response = await apiClient.get<ApiResponse<EntregaPorEstablecimientoItem[]>>(
+        `${this.BASE_URL}/entregas-por-establecimiento`,
+        { params: filters }
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error al generar reporte de entregas por establecimiento');
+      }
+
+      console.log('✅ Reporte de entregas por establecimiento generado exitosamente');
+      return response.data.data;
+    } catch (error) {
+      console.error('❌ Error al generar reporte de entregas por establecimiento:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Generar reporte de eficiencia de distribución
+   */
+  static async generarEficienciaDistribucion(
+    filters: EficienciaDistribucionFilters = {}
+  ): Promise<EficienciaDistribucionItem[]> {
+    try {
+      console.log('🔄 Generando reporte de eficiencia de distribución:', filters);
+
+      const response = await apiClient.get<ApiResponse<EficienciaDistribucionItem[]>>(
+        `${this.BASE_URL}/eficiencia-distribucion`,
+        { params: filters }
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error al generar reporte de eficiencia de distribución');
+      }
+
+      console.log('✅ Reporte de eficiencia de distribución generado exitosamente');
+      return response.data.data;
+    } catch (error) {
+      console.error('❌ Error al generar reporte de eficiencia de distribución:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Exportar reporte de movimientos mensuales a Excel
+   */
+  static async exportarMovimientosMensuales(
+    filtros: MovimientosMensualesFilters = {},
+    config: ConfiguracionExportacion
+  ): Promise<void> {
+    try {
+      console.log('🔄 Exportando reporte de movimientos mensuales a Excel:', filtros);
+
+      const response = await apiClient.post(
+        `${this.BASE_URL}/movimientos-mensuales/exportar`,
+        { filtros, config },
+        { responseType: 'blob' }
+      );
+
+      // Crear y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `movimientos_mensuales_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ Reporte de movimientos mensuales exportado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de movimientos mensuales:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Exportar reporte de consumo histórico a Excel
+   */
+  static async exportarConsumoHistorico(
+    filtros: ConsumoHistoricoFilters = {},
+    config: ConfiguracionExportacion
+  ): Promise<void> {
+    try {
+      console.log('🔄 Exportando reporte de consumo histórico a Excel:', filtros);
+
+      const response = await apiClient.post(
+        `${this.BASE_URL}/consumo-historico/exportar`,
+        { filtros, config },
+        { responseType: 'blob' }
+      );
+
+      // Crear y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `consumo_historico_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ Reporte de consumo histórico exportado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de consumo histórico:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Exportar reporte de entregas por establecimiento a Excel
+   */
+  static async exportarEntregasPorEstablecimiento(
+    filtros: EntregasPorEstablecimientoFilters = {},
+    config: ConfiguracionExportacion
+  ): Promise<void> {
+    try {
+      console.log('🔄 Exportando reporte de entregas por establecimiento a Excel:', filtros);
+
+      const response = await apiClient.post(
+        `${this.BASE_URL}/entregas-por-establecimiento/exportar`,
+        { filtros, config },
+        { responseType: 'blob' }
+      );
+
+      // Crear y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `entregas_por_establecimiento_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ Reporte de entregas por establecimiento exportado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de entregas por establecimiento:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Exportar reporte de eficiencia de distribución a Excel
+   */
+  static async exportarEficienciaDistribucion(
+    filtros: EficienciaDistribucionFilters = {},
+    config: ConfiguracionExportacion
+  ): Promise<void> {
+    try {
+      console.log('🔄 Exportando reporte de eficiencia de distribución a Excel:', filtros);
+
+      const response = await apiClient.post(
+        `${this.BASE_URL}/eficiencia-distribucion/exportar`,
+        { filtros, config },
+        { responseType: 'blob' }
+      );
+
+      // Crear y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `eficiencia_distribucion_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ Reporte de eficiencia de distribución exportado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de eficiencia de distribución:', error);
+      throw this.handleError(error);
+    }
+  }
+
   /**
    * Manejo de errores
    */
-  private static handleError(error: any): Error {
-    if (error.response?.data?.message) {
-      return new Error(error.response.data.message);
+  private static handleError(error: unknown): Error {
+    if (error instanceof Error) {
+      return error;
     }
-    
-    if (error.message) {
-      return new Error(error.message);
+
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      if (axiosError.response?.data?.message) {
+        return new Error(axiosError.response.data.message);
+      }
     }
-    
+
     return new Error('Error desconocido en el servicio de reportes');
   }
 

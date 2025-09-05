@@ -35,6 +35,38 @@ router.post('/kardex-detallado', ReporteController.generarKardexDetallado);
 router.get('/estadisticas', ReporteController.obtenerEstadisticas);
 
 /**
+ * Rutas para reportes de movimientos
+ */
+
+// GET /api/reportes/movimientos-mensuales - Generar reporte de movimientos mensuales
+router.get('/movimientos-mensuales', ReporteController.generarMovimientosMensuales);
+
+// GET /api/reportes/consumo-historico - Generar reporte de consumo histórico
+router.get('/consumo-historico', ReporteController.generarConsumoHistorico);
+
+// GET /api/reportes/entregas-por-establecimiento - Generar reporte de entregas por establecimiento
+router.get('/entregas-por-establecimiento', ReporteController.generarEntregasPorEstablecimiento);
+
+// GET /api/reportes/eficiencia-distribucion - Generar reporte de eficiencia de distribución
+router.get('/eficiencia-distribucion', ReporteController.generarEficienciaDistribucion);
+
+/**
+ * Rutas para exportar reportes de movimientos
+ */
+
+// POST /api/reportes/movimientos-mensuales/exportar - Exportar reporte de movimientos mensuales
+router.post('/movimientos-mensuales/exportar', ReporteController.exportarMovimientosMensuales);
+
+// POST /api/reportes/consumo-historico/exportar - Exportar reporte de consumo histórico
+router.post('/consumo-historico/exportar', ReporteController.exportarConsumoHistorico);
+
+// POST /api/reportes/entregas-por-establecimiento/exportar - Exportar reporte de entregas por establecimiento
+router.post('/entregas-por-establecimiento/exportar', ReporteController.exportarEntregasPorEstablecimiento);
+
+// POST /api/reportes/eficiencia-distribucion/exportar - Exportar reporte de eficiencia de distribución
+router.post('/eficiencia-distribucion/exportar', ReporteController.exportarEficienciaDistribucion);
+
+/**
  * Rutas para exportación de reportes (archivos Excel)
  */
 

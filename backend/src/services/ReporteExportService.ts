@@ -5,7 +5,11 @@ import {
   StockCriticoItem,
   VencimientoItem,
   LoteVencidoItem,
-  KardexDetalladoItem
+  KardexDetalladoItem,
+  MovimientoMensualItem,
+  ConsumoHistoricoItem,
+  EntregaPorEstablecimientoItem,
+  EficienciaDistribucionItem
 } from './ReporteService';
 
 /**
@@ -1171,5 +1175,1365 @@ export class ReporteExportService {
   private static aplicarEstilosLotesVencidos(worksheet: ExcelJS.Worksheet): void {
     this.aplicarEstilosExcel(worksheet);
     // Los estilos específicos ya se aplican en agregarDatosLotesVencidos
+  }
+
+  // =====================================================
+  // MÉTODOS AUXILIARES PARA REPORTES DE MOVIMIENTOS
+  // =====================================================
+
+  /**
+   * Agregar datos de movimientos mensuales
+   */
+  private static agregarDatosMovimientosMensuales(
+    worksheet: ExcelJS.Worksheet,
+    data: MovimientoMensualItem[],
+    startRow: number
+  ): void {
+    // Encabezados de columnas
+    const headers = [
+      'Centro de Acopio',
+      'Establecimiento',
+      'Vacuna',
+      'Mes',
+      'Año',
+      'Saldo Anterior',
+      'Trans. Ingreso',
+      'Salida',
+      'Trans. Salida',
+      'Entrega',
+      'Saldo Final',
+      'Consumo Total',
+      'Eficiencia (%)',
+      'Última Actualización'
+    ];
+
+    // SECCIÓN DE DATOS CON DISEÑO MODERNO
+    const sectionStartRow = startRow;
+    const headerStartRow = startRow + 2;
+
+    // Título de la sección de datos
+    worksheet.mergeCells(`A${sectionStartRow}:N${sectionStartRow}`);
+    const sectionHeader = worksheet.getCell(`A${sectionStartRow}`);
+    sectionHeader.value = '📊 DATOS DE MOVIMIENTOS MENSUALES';
+    sectionHeader.font = {
+      bold: true,
+      size: 14,
+      color: { argb: 'FFFFFFFF' },
+      name: 'Segoe UI'
+    };
+    sectionHeader.alignment = { horizontal: 'center', vertical: 'middle' };
+    sectionHeader.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF059669' }
+    };
+
+    // Agregar encabezados con estilo profesional
+    const headerRow = worksheet.getRow(headerStartRow);
+    headers.forEach((header, index) => {
+      const cell = headerRow.getCell(index + 1);
+      cell.value = header;
+      cell.font = {
+        bold: true,
+        color: { argb: 'FFFFFFFF' },
+        name: 'Segoe UI',
+        size: 11
+      };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF2E7D32' }
+      };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+      };
+    });
+
+    // Agregar datos con formato profesional
+    data.forEach((item, index) => {
+      const row = worksheet.getRow(headerStartRow + 1 + index);
+      const values = [
+        item.centroAcopioNombre,
+        item.establecimientoNombre,
+        item.vacunaNombre,
+        item.mes,
+        item.anio,
+        item.saldoAnterior,
+        item.transIngreso,
+        item.salida,
+        item.transSalida,
+        item.entrega,
+        item.saldoFinal,
+        item.consumoTotal,
+        item.eficienciaDistribucion,
+        item.fechaUltimaActualizacion.toLocaleDateString('es-ES')
+      ];
+
+      values.forEach((value, colIndex) => {
+        const cell = row.getCell(colIndex + 1);
+        cell.value = value;
+
+        // Formato de números
+        if (typeof value === 'number' && colIndex >= 5 && colIndex <= 12) {
+          cell.numFmt = '#,##0';
+        }
+
+        // Formato de porcentaje para eficiencia
+        if (colIndex === 12) {
+          cell.font = { bold: true, color: { argb: 'FF059669' }, name: 'Segoe UI' };
+        }
+
+        // Aplicar estilos profesionales
+        cell.font = {
+          name: 'Segoe UI',
+          size: 10,
+          color: { argb: 'FF1F2937' }
+        };
+        cell.alignment = {
+          horizontal: colIndex >= 5 && colIndex <= 12 ? 'center' : 'left',
+          vertical: 'middle'
+        };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+        };
+
+        // Alternar colores de fila para mejor legibilidad
+        if (index % 2 === 0) {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF9FAFB' }
+          };
+        } else {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFFFFFF' }
+          };
+        }
+      });
+
+      row.height = 18;
+    });
+
+    // Ajustar altura de filas especiales
+    worksheet.getRow(sectionStartRow).height = 25;
+    worksheet.getRow(headerStartRow).height = 20;
+  }
+
+  /**
+   * Agregar datos de consumo histórico
+   */
+  private static agregarDatosConsumoHistorico(
+    worksheet: ExcelJS.Worksheet,
+    data: ConsumoHistoricoItem[],
+    startRow: number
+  ): void {
+    // Encabezados de columnas
+    const headers = [
+      'Centro de Acopio',
+      'Establecimiento',
+      'Vacuna',
+      'Período Inicio',
+      'Período Fin',
+      'Consumo Promedio',
+      'Consumo Total',
+      'Tendencia',
+      'Variabilidad',
+      'Proyección Próximo Mes'
+    ];
+
+    // Agregar encabezados
+    const headerRow = worksheet.getRow(startRow);
+    headers.forEach((header, index) => {
+      const cell = headerRow.getCell(index + 1);
+      cell.value = header;
+      cell.font = { bold: true, color: { argb: 'FFFFFF' } };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: '7B1FA2' }
+      };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
+
+    // Agregar datos
+    data.forEach((item, index) => {
+      const row = worksheet.getRow(startRow + 1 + index);
+      const values = [
+        item.centroAcopioNombre,
+        item.establecimientoNombre,
+        item.vacunaNombre,
+        item.periodoInicio.toLocaleDateString('es-ES'),
+        item.periodoFin.toLocaleDateString('es-ES'),
+        item.consumoPromedio,
+        item.consumoTotal,
+        item.tendencia,
+        item.variabilidad,
+        item.proyeccionProximoMes || 'N/A'
+      ];
+
+      values.forEach((value, colIndex) => {
+        const cell = row.getCell(colIndex + 1);
+        cell.value = value;
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+
+        // Formato especial para números
+        if (typeof value === 'number' && (colIndex === 5 || colIndex === 6 || colIndex === 8)) {
+          cell.numFmt = '#,##0.00';
+          cell.alignment = { horizontal: 'right' };
+        }
+
+        // Color para tendencia
+        if (colIndex === 7) {
+          if (value === 'creciente') {
+            cell.font = { color: { argb: '2E7D32' } };
+          } else if (value === 'decreciente') {
+            cell.font = { color: { argb: 'D32F2F' } };
+          }
+        }
+      });
+
+      row.height = 20;
+    });
+  }
+
+  // =====================================================
+  // MÉTODOS PARA EXPORTAR REPORTES DE MOVIMIENTOS
+  // =====================================================
+
+  /**
+   * Exportar reporte de movimientos mensuales a Excel
+   */
+  static async exportarMovimientosMensuales(
+    data: MovimientoMensualItem[],
+    config: ReporteExportConfig
+  ): Promise<ServiceResult<ReporteExcelResult>> {
+    try {
+      console.log('🔄 Exportando reporte de movimientos mensuales a Excel');
+
+      // Crear workbook con diseño profesional
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC - Sistema de Vacunación';
+      workbook.created = new Date();
+
+      // Crear worksheet principal
+      const worksheet = workbook.addWorksheet('Movimientos Mensuales');
+
+      // Agregar encabezado específico
+      this.agregarEncabezadoMovimientosMensuales(worksheet, config);
+
+      // Agregar datos
+      this.agregarDatosMovimientosMensuales(worksheet, data, 11);
+
+      // Aplicar estilos
+      this.aplicarEstilosExcel(worksheet);
+
+      const filename = `movimientos_mensuales_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+      console.log('✅ Reporte de movimientos mensuales exportado exitosamente');
+
+      return {
+        success: true,
+        data: {
+          workbook,
+          filename,
+          size: 0 // Se calculará al generar el buffer
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de movimientos mensuales:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al exportar reporte de movimientos mensuales'
+      };
+    }
+  }
+
+  /**
+   * Exportar reporte de consumo histórico a Excel
+   */
+  static async exportarConsumoHistorico(
+    data: ConsumoHistoricoItem[],
+    config: ReporteExportConfig
+  ): Promise<ServiceResult<ReporteExcelResult>> {
+    try {
+      console.log('🔄 Exportando reporte de consumo histórico a Excel');
+
+      // Crear workbook con diseño profesional
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC - Sistema de Vacunación';
+      workbook.created = new Date();
+
+      // Crear worksheet principal
+      const worksheet = workbook.addWorksheet('Consumo Histórico');
+
+      // Agregar encabezado específico
+      this.agregarEncabezadoConsumoHistorico(worksheet, config);
+
+      // Agregar datos
+      this.agregarDatosConsumoHistorico(worksheet, data, 11);
+
+      // Aplicar estilos
+      this.aplicarEstilosExcel(worksheet);
+
+      const filename = `consumo_historico_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+      console.log('✅ Reporte de consumo histórico exportado exitosamente');
+
+      return {
+        success: true,
+        data: {
+          workbook,
+          filename,
+          size: 0 // Se calculará al generar el buffer
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de consumo histórico:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al exportar reporte de consumo histórico'
+      };
+    }
+  }
+
+  /**
+   * Exportar reporte de entregas por establecimiento a Excel
+   */
+  static async exportarEntregasPorEstablecimiento(
+    data: EntregaPorEstablecimientoItem[],
+    config: ReporteExportConfig
+  ): Promise<ServiceResult<ReporteExcelResult>> {
+    try {
+      console.log('🔄 Exportando reporte de entregas por establecimiento a Excel');
+
+      // Crear workbook con diseño profesional
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC - Sistema de Vacunación';
+      workbook.created = new Date();
+
+      // Crear worksheet principal
+      const worksheet = workbook.addWorksheet('Entregas por Establecimiento');
+
+      // Agregar encabezado específico
+      this.agregarEncabezadoEntregasPorEstablecimiento(worksheet, config);
+
+      // Agregar datos
+      this.agregarDatosEntregasPorEstablecimiento(worksheet, data, 11);
+
+      // Aplicar estilos
+      this.aplicarEstilosExcel(worksheet);
+
+      const filename = `entregas_por_establecimiento_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+      console.log('✅ Reporte de entregas por establecimiento exportado exitosamente');
+
+      return {
+        success: true,
+        data: {
+          workbook,
+          filename,
+          size: 0 // Se calculará al generar el buffer
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de entregas por establecimiento:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al exportar reporte de entregas por establecimiento'
+      };
+    }
+  }
+
+  /**
+   * Exportar reporte de eficiencia de distribución a Excel
+   */
+  static async exportarEficienciaDistribucion(
+    data: EficienciaDistribucionItem[],
+    config: ReporteExportConfig
+  ): Promise<ServiceResult<ReporteExcelResult>> {
+    try {
+      console.log('🔄 Exportando reporte de eficiencia de distribución a Excel');
+
+      // Crear workbook con diseño profesional
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC - Sistema de Vacunación';
+      workbook.created = new Date();
+
+      // Crear worksheet principal
+      const worksheet = workbook.addWorksheet('Eficiencia de Distribución');
+
+      // Agregar encabezado específico
+      this.agregarEncabezadoEficienciaDistribucion(worksheet, config);
+
+      // Agregar datos
+      this.agregarDatosEficienciaDistribucion(worksheet, data, 11);
+
+      // Aplicar estilos
+      this.aplicarEstilosExcel(worksheet);
+
+      const filename = `eficiencia_distribucion_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+      console.log('✅ Reporte de eficiencia de distribución exportado exitosamente');
+
+      return {
+        success: true,
+        data: {
+          workbook,
+          filename,
+          size: 0 // Se calculará al generar el buffer
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de eficiencia de distribución:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al exportar reporte de eficiencia de distribución'
+      };
+    }
+  }
+
+  // =====================================================
+  // MÉTODOS AUXILIARES ADICIONALES PARA MOVIMIENTOS
+  // =====================================================
+
+  /**
+   * Agregar datos de entregas por establecimiento
+   */
+  private static agregarDatosEntregasPorEstablecimiento(
+    worksheet: ExcelJS.Worksheet,
+    data: EntregaPorEstablecimientoItem[],
+    startRow: number
+  ): void {
+    // Encabezados de columnas
+    const headers = [
+      'Centro de Acopio',
+      'Establecimiento',
+      'Total Entregas',
+      'Total Vacunas',
+      'Fecha Última Entrega',
+      'Eficiencia Entrega (%)'
+    ];
+
+    // Agregar encabezados
+    const headerRow = worksheet.getRow(startRow);
+    headers.forEach((header, index) => {
+      const cell = headerRow.getCell(index + 1);
+      cell.value = header;
+      cell.font = { bold: true, color: { argb: 'FFFFFF' } };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: '1976D2' }
+      };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
+
+    // Agregar datos
+    data.forEach((item, index) => {
+      const row = worksheet.getRow(startRow + 1 + index);
+      const values = [
+        item.centroAcopioNombre,
+        item.establecimientoNombre,
+        item.totalEntregas,
+        item.totalVacunas,
+        item.fechaUltimaEntrega.toLocaleDateString('es-ES'),
+        item.eficienciaEntrega
+      ];
+
+      values.forEach((value, colIndex) => {
+        const cell = row.getCell(colIndex + 1);
+        cell.value = value;
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+
+        // Formato especial para números
+        if (typeof value === 'number' && (colIndex === 2 || colIndex === 3 || colIndex === 5)) {
+          cell.numFmt = '#,##0';
+          cell.alignment = { horizontal: 'right' };
+        }
+      });
+
+      row.height = 20;
+    });
+  }
+
+  /**
+   * Agregar datos de eficiencia de distribución
+   */
+  private static agregarDatosEficienciaDistribucion(
+    worksheet: ExcelJS.Worksheet,
+    data: EficienciaDistribucionItem[],
+    startRow: number
+  ): void {
+    // Encabezados de columnas
+    const headers = [
+      'Centro de Acopio',
+      'Establecimiento',
+      'Tiempo Promedio Entrega (días)',
+      'Cumplimiento (%)',
+      'Eficiencia Stock (%)',
+      'Rotación Inventario',
+      'Mejora Mes',
+      'Variación (%)',
+      'Alertas'
+    ];
+
+    // Agregar encabezados
+    const headerRow = worksheet.getRow(startRow);
+    headers.forEach((header, index) => {
+      const cell = headerRow.getCell(index + 1);
+      cell.value = header;
+      cell.font = { bold: true, color: { argb: 'FFFFFF' } };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF9800' }
+      };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
+
+    // Agregar datos
+    data.forEach((item, index) => {
+      const row = worksheet.getRow(startRow + 1 + index);
+      const values = [
+        item.centroAcopioNombre,
+        item.establecimientoNombre,
+        item.indicadores.tiempoPromedioEntrega,
+        item.indicadores.porcentajeCumplimiento,
+        item.indicadores.eficienciaStock,
+        item.indicadores.rotacionInventario,
+        item.tendencias.mejoraMes ? 'Sí' : 'No',
+        item.tendencias.variacionPorcentual,
+        item.alertas.join('; ')
+      ];
+
+      values.forEach((value, colIndex) => {
+        const cell = row.getCell(colIndex + 1);
+        cell.value = value;
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+
+        // Formato especial para números
+        if (typeof value === 'number' && colIndex >= 2 && colIndex <= 7) {
+          cell.numFmt = '#,##0.00';
+          cell.alignment = { horizontal: 'right' };
+        }
+
+        // Color para mejora
+        if (colIndex === 6) {
+          if (value === 'Sí') {
+            cell.font = { color: { argb: '2E7D32' } };
+          } else {
+            cell.font = { color: { argb: 'D32F2F' } };
+          }
+        }
+      });
+
+      row.height = 20;
+    });
+  }
+
+  /**
+   * Agregar encabezado para movimientos mensuales
+   */
+  private static agregarEncabezadoMovimientosMensuales(worksheet: ExcelJS.Worksheet, config: ReporteExportConfig): void {
+    // CONFIGURACIÓN PROFESIONAL DE LA HOJA
+    // Eliminar líneas de cuadrícula para diseño moderno
+    worksheet.views = [{
+      showGridLines: false,
+      showRowColHeaders: false,
+      zoomScale: 85
+    }];
+
+    // Configurar ancho de columnas optimizado para diseño profesional
+    worksheet.columns = [
+      { width: 25 },  // A - Centro de Acopio
+      { width: 25 },  // B - Establecimiento
+      { width: 20 },  // C - Vacuna
+      { width: 8 },   // D - Mes
+      { width: 8 },   // E - Año
+      { width: 12 },  // F - Saldo Anterior
+      { width: 12 },  // G - Trans. Ingreso
+      { width: 10 },  // H - Salida
+      { width: 12 },  // I - Trans. Salida
+      { width: 10 },  // J - Entrega
+      { width: 12 },  // K - Saldo Final
+      { width: 12 },  // L - Consumo Total
+      { width: 12 },  // M - Eficiencia (%)
+      { width: 15 }   // N - Última Actualización
+    ];
+
+    // ENCABEZADO INSTITUCIONAL MODERNO
+    // Fondo degradado para toda la sección del encabezado
+    for (let row = 1; row <= 6; row++) {
+      for (let col = 1; col <= 14; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFF8FAFE' }
+        };
+      }
+    }
+
+    // Logo y encabezado principal
+    worksheet.mergeCells('A1:N1');
+    const headerCell1 = worksheet.getCell('A1');
+    headerCell1.value = '🏛️ GOBIERNO REGIONAL DE APURÍMAC';
+    headerCell1.font = {
+      bold: true,
+      size: 14,
+      color: { argb: 'FF1E3A8A' },
+      name: 'Segoe UI'
+    };
+    headerCell1.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerCell1.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFDBEAFE' }
+    };
+
+    worksheet.mergeCells('A2:N2');
+    const headerCell2 = worksheet.getCell('A2');
+    headerCell2.value = 'DIRECCIÓN SUB REGIONAL DE SALUD CHANKA ANDAHUAYLAS';
+    headerCell2.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1E40AF' },
+      name: 'Segoe UI'
+    };
+    headerCell2.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    worksheet.mergeCells('A3:N3');
+    const headerCell3 = worksheet.getCell('A3');
+    headerCell3.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRÍO';
+    headerCell3.font = {
+      bold: true,
+      size: 10,
+      color: { argb: 'FF2563EB' },
+      name: 'Segoe UI'
+    };
+    headerCell3.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    worksheet.mergeCells('A4:N4');
+    const headerCell4 = worksheet.getCell('A4');
+    headerCell4.value = '"Año de la Universalización de la Salud"';
+    headerCell4.font = {
+      italic: true,
+      size: 9,
+      color: { argb: 'FF3B82F6' },
+      name: 'Segoe UI'
+    };
+    headerCell4.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Título principal con diseño moderno
+    worksheet.mergeCells('A6:N6');
+    const titleCell = worksheet.getCell('A6');
+    titleCell.value = '📊 REPORTE DE MOVIMIENTOS MENSUALES';
+    titleCell.font = {
+      bold: true,
+      size: 16,
+      color: { argb: 'FFFFFFFF' },
+      name: 'Segoe UI'
+    };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF2E7D32' }
+    };
+
+    // Información del reporte con diseño moderno
+    worksheet.mergeCells('A8:G8');
+    const infoCell1 = worksheet.getCell('A8');
+    infoCell1.value = `📅 Fecha de Generación: ${new Date().toLocaleDateString('es-PE', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })}`;
+    infoCell1.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1F2937' },
+      name: 'Segoe UI'
+    };
+    infoCell1.alignment = { horizontal: 'left', vertical: 'middle' };
+    infoCell1.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' }
+    };
+
+    worksheet.mergeCells('H8:N8');
+    const infoCell2 = worksheet.getCell('H8');
+    infoCell2.value = `👤 Responsable: ${config.responsableReporte}`;
+    infoCell2.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1F2937' },
+      name: 'Segoe UI'
+    };
+    infoCell2.alignment = { horizontal: 'left', vertical: 'middle' };
+    infoCell2.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' }
+    };
+
+    if (config.observaciones) {
+      worksheet.mergeCells('A9:N9');
+      const infoCell3 = worksheet.getCell('A9');
+      infoCell3.value = `📝 Observaciones: ${config.observaciones}`;
+      infoCell3.font = {
+        bold: true,
+        size: 11,
+        color: { argb: 'FF1F2937' },
+        name: 'Segoe UI'
+      };
+      infoCell3.alignment = { horizontal: 'left', vertical: 'middle' };
+      infoCell3.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFF3F4F6' }
+      };
+    }
+
+    // Aplicar bordes modernos al encabezado
+    const lastRow = config.observaciones ? 9 : 8;
+    for (let row = 1; row <= lastRow; row++) {
+      for (let col = 1; col <= 14; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+        };
+      }
+    }
+
+    // Ajustar altura de filas para mejor presentación
+    worksheet.getRow(1).height = 25;
+    worksheet.getRow(2).height = 20;
+    worksheet.getRow(3).height = 18;
+    worksheet.getRow(4).height = 16;
+    worksheet.getRow(6).height = 30;
+    worksheet.getRow(8).height = 22;
+    if (config.observaciones) {
+      worksheet.getRow(9).height = 22;
+    }
+  }
+
+  /**
+   * Agregar encabezado para consumo histórico
+   */
+  private static agregarEncabezadoConsumoHistorico(worksheet: ExcelJS.Worksheet, config: ReporteExportConfig): void {
+    // CONFIGURACIÓN PROFESIONAL DE LA HOJA
+    // Eliminar líneas de cuadrícula para diseño moderno
+    worksheet.views = [{
+      showGridLines: false,
+      showRowColHeaders: false,
+      zoomScale: 85
+    }];
+
+    // Configurar ancho de columnas optimizado para diseño profesional
+    worksheet.columns = [
+      { width: 25 },  // A - Centro de Acopio
+      { width: 25 },  // B - Establecimiento
+      { width: 20 },  // C - Vacuna
+      { width: 12 },  // D - Consumo Total
+      { width: 12 },  // E - Consumo Promedio
+      { width: 12 },  // F - Tendencia
+      { width: 12 },  // G - Variabilidad
+      { width: 15 },  // H - Proyección
+      { width: 12 },  // I - Último Mes
+      { width: 12 },  // J - Mes Anterior
+      { width: 12 },  // K - Variación (%)
+      { width: 15 },  // L - Estado
+      { width: 20 }   // M - Observaciones
+    ];
+
+    // ENCABEZADO INSTITUCIONAL MODERNO
+    // Fondo degradado para toda la sección del encabezado
+    for (let row = 1; row <= 6; row++) {
+      for (let col = 1; col <= 13; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFF8FAFE' }
+        };
+      }
+    }
+
+    // Logo y encabezado principal
+    worksheet.mergeCells('A1:M1');
+    const headerCell1 = worksheet.getCell('A1');
+    headerCell1.value = '🏛️ GOBIERNO REGIONAL DE APURÍMAC';
+    headerCell1.font = {
+      bold: true,
+      size: 14,
+      color: { argb: 'FF1E3A8A' },
+      name: 'Segoe UI'
+    };
+    headerCell1.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerCell1.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFDBEAFE' }
+    };
+
+    worksheet.mergeCells('A2:M2');
+    const headerCell2 = worksheet.getCell('A2');
+    headerCell2.value = 'DIRECCIÓN SUB REGIONAL DE SALUD CHANKA ANDAHUAYLAS';
+    headerCell2.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1E40AF' },
+      name: 'Segoe UI'
+    };
+    headerCell2.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    worksheet.mergeCells('A3:M3');
+    const headerCell3 = worksheet.getCell('A3');
+    headerCell3.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRÍO';
+    headerCell3.font = {
+      bold: true,
+      size: 10,
+      color: { argb: 'FF2563EB' },
+      name: 'Segoe UI'
+    };
+    headerCell3.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    worksheet.mergeCells('A4:M4');
+    const headerCell4 = worksheet.getCell('A4');
+    headerCell4.value = '"Año de la Universalización de la Salud"';
+    headerCell4.font = {
+      italic: true,
+      size: 9,
+      color: { argb: 'FF3B82F6' },
+      name: 'Segoe UI'
+    };
+    headerCell4.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Título principal con diseño moderno
+    worksheet.mergeCells('A6:M6');
+    const titleCell = worksheet.getCell('A6');
+    titleCell.value = '📈 REPORTE DE CONSUMO HISTÓRICO';
+    titleCell.font = {
+      bold: true,
+      size: 16,
+      color: { argb: 'FFFFFFFF' },
+      name: 'Segoe UI'
+    };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF7B1FA2' }
+    };
+
+    // Información del reporte con diseño moderno
+    worksheet.mergeCells('A8:G8');
+    const infoCell1 = worksheet.getCell('A8');
+    infoCell1.value = `📅 Fecha de Generación: ${new Date().toLocaleDateString('es-PE', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })}`;
+    infoCell1.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1F2937' },
+      name: 'Segoe UI'
+    };
+    infoCell1.alignment = { horizontal: 'left', vertical: 'middle' };
+    infoCell1.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' }
+    };
+
+    worksheet.mergeCells('H8:M8');
+    const infoCell2 = worksheet.getCell('H8');
+    infoCell2.value = `👤 Responsable: ${config.responsableReporte}`;
+    infoCell2.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1F2937' },
+      name: 'Segoe UI'
+    };
+    infoCell2.alignment = { horizontal: 'left', vertical: 'middle' };
+    infoCell2.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' }
+    };
+
+    if (config.observaciones) {
+      worksheet.mergeCells('A9:M9');
+      const infoCell3 = worksheet.getCell('A9');
+      infoCell3.value = `📝 Observaciones: ${config.observaciones}`;
+      infoCell3.font = {
+        bold: true,
+        size: 11,
+        color: { argb: 'FF1F2937' },
+        name: 'Segoe UI'
+      };
+      infoCell3.alignment = { horizontal: 'left', vertical: 'middle' };
+      infoCell3.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFF3F4F6' }
+      };
+    }
+
+    // Aplicar bordes modernos al encabezado
+    const lastRow = config.observaciones ? 9 : 8;
+    for (let row = 1; row <= lastRow; row++) {
+      for (let col = 1; col <= 13; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+        };
+      }
+    }
+
+    // Ajustar altura de filas para mejor presentación
+    worksheet.getRow(1).height = 25;
+    worksheet.getRow(2).height = 20;
+    worksheet.getRow(3).height = 18;
+    worksheet.getRow(4).height = 16;
+    worksheet.getRow(6).height = 30;
+    worksheet.getRow(8).height = 22;
+    if (config.observaciones) {
+      worksheet.getRow(9).height = 22;
+    }
+  }
+
+  /**
+   * Agregar encabezado para entregas por establecimiento
+   */
+  private static agregarEncabezadoEntregasPorEstablecimiento(worksheet: ExcelJS.Worksheet, config: ReporteExportConfig): void {
+    // CONFIGURACIÓN PROFESIONAL DE LA HOJA
+    // Eliminar líneas de cuadrícula para diseño moderno
+    worksheet.views = [{
+      showGridLines: false,
+      showRowColHeaders: false,
+      zoomScale: 85
+    }];
+
+    // Configurar ancho de columnas optimizado para diseño profesional
+    worksheet.columns = [
+      { width: 25 },  // A - Establecimiento
+      { width: 20 },  // B - Centro Acopio
+      { width: 12 },  // C - Total Entregas
+      { width: 12 },  // D - Total Vacunas
+      { width: 15 },  // E - Última Entrega
+      { width: 12 },  // F - Eficiencia (%)
+      { width: 12 },  // G - Estado
+      { width: 15 },  // H - Responsable
+      { width: 12 },  // I - Mes Actual
+      { width: 12 },  // J - Mes Anterior
+      { width: 20 }   // K - Observaciones
+    ];
+
+    // ENCABEZADO INSTITUCIONAL MODERNO
+    // Fondo degradado para toda la sección del encabezado
+    for (let row = 1; row <= 6; row++) {
+      for (let col = 1; col <= 11; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFF8FAFE' }
+        };
+      }
+    }
+
+    // Logo y encabezado principal
+    worksheet.mergeCells('A1:K1');
+    const headerCell1 = worksheet.getCell('A1');
+    headerCell1.value = '🏛️ GOBIERNO REGIONAL DE APURÍMAC';
+    headerCell1.font = {
+      bold: true,
+      size: 14,
+      color: { argb: 'FF1E3A8A' },
+      name: 'Segoe UI'
+    };
+    headerCell1.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerCell1.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFDBEAFE' }
+    };
+
+    worksheet.mergeCells('A2:K2');
+    const headerCell2 = worksheet.getCell('A2');
+    headerCell2.value = 'DIRECCIÓN SUB REGIONAL DE SALUD CHANKA ANDAHUAYLAS';
+    headerCell2.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1E40AF' },
+      name: 'Segoe UI'
+    };
+    headerCell2.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    worksheet.mergeCells('A3:K3');
+    const headerCell3 = worksheet.getCell('A3');
+    headerCell3.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRÍO';
+    headerCell3.font = {
+      bold: true,
+      size: 10,
+      color: { argb: 'FF2563EB' },
+      name: 'Segoe UI'
+    };
+    headerCell3.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    worksheet.mergeCells('A4:K4');
+    const headerCell4 = worksheet.getCell('A4');
+    headerCell4.value = '"Año de la Universalización de la Salud"';
+    headerCell4.font = {
+      italic: true,
+      size: 9,
+      color: { argb: 'FF3B82F6' },
+      name: 'Segoe UI'
+    };
+    headerCell4.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Título principal con diseño moderno
+    worksheet.mergeCells('A6:K6');
+    const titleCell = worksheet.getCell('A6');
+    titleCell.value = '📦 REPORTE DE ENTREGAS POR ESTABLECIMIENTO';
+    titleCell.font = {
+      bold: true,
+      size: 16,
+      color: { argb: 'FFFFFFFF' },
+      name: 'Segoe UI'
+    };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF1976D2' }
+    };
+
+    // Información del reporte con diseño moderno
+    worksheet.mergeCells('A8:F8');
+    const infoCell1 = worksheet.getCell('A8');
+    infoCell1.value = `📅 Fecha de Generación: ${new Date().toLocaleDateString('es-PE', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })}`;
+    infoCell1.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1F2937' },
+      name: 'Segoe UI'
+    };
+    infoCell1.alignment = { horizontal: 'left', vertical: 'middle' };
+    infoCell1.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' }
+    };
+
+    worksheet.mergeCells('G8:K8');
+    const infoCell2 = worksheet.getCell('G8');
+    infoCell2.value = `👤 Responsable: ${config.responsableReporte}`;
+    infoCell2.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1F2937' },
+      name: 'Segoe UI'
+    };
+    infoCell2.alignment = { horizontal: 'left', vertical: 'middle' };
+    infoCell2.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' }
+    };
+
+    if (config.observaciones) {
+      worksheet.mergeCells('A9:K9');
+      const infoCell3 = worksheet.getCell('A9');
+      infoCell3.value = `📝 Observaciones: ${config.observaciones}`;
+      infoCell3.font = {
+        bold: true,
+        size: 11,
+        color: { argb: 'FF1F2937' },
+        name: 'Segoe UI'
+      };
+      infoCell3.alignment = { horizontal: 'left', vertical: 'middle' };
+      infoCell3.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFF3F4F6' }
+      };
+    }
+
+    // Aplicar bordes modernos al encabezado
+    const lastRow = config.observaciones ? 9 : 8;
+    for (let row = 1; row <= lastRow; row++) {
+      for (let col = 1; col <= 11; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+        };
+      }
+    }
+
+    // Ajustar altura de filas para mejor presentación
+    worksheet.getRow(1).height = 25;
+    worksheet.getRow(2).height = 20;
+    worksheet.getRow(3).height = 18;
+    worksheet.getRow(4).height = 16;
+    worksheet.getRow(6).height = 30;
+    worksheet.getRow(8).height = 22;
+    if (config.observaciones) {
+      worksheet.getRow(9).height = 22;
+    }
+  }
+
+  /**
+   * Agregar encabezado para eficiencia de distribución
+   */
+  private static agregarEncabezadoEficienciaDistribucion(worksheet: ExcelJS.Worksheet, config: ReporteExportConfig): void {
+    // CONFIGURACIÓN PROFESIONAL DE LA HOJA
+    // Eliminar líneas de cuadrícula para diseño moderno
+    worksheet.views = [{
+      showGridLines: false,
+      showRowColHeaders: false,
+      zoomScale: 85
+    }];
+
+    // Configurar ancho de columnas optimizado para diseño profesional
+    worksheet.columns = [
+      { width: 25 },  // A - Establecimiento
+      { width: 20 },  // B - Centro Acopio
+      { width: 12 },  // C - Eficiencia General (%)
+      { width: 12 },  // D - Tiempo Promedio
+      { width: 12 },  // E - Entregas Completas
+      { width: 12 },  // F - Entregas Parciales
+      { width: 12 },  // G - Entregas Tardías
+      { width: 15 },  // H - Índice Calidad
+      { width: 12 },  // I - Tendencia
+      { width: 20 }   // J - Recomendaciones
+    ];
+
+    // ENCABEZADO INSTITUCIONAL MODERNO
+    // Fondo degradado para toda la sección del encabezado
+    for (let row = 1; row <= 6; row++) {
+      for (let col = 1; col <= 10; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFF8FAFE' }
+        };
+      }
+    }
+
+    // Logo y encabezado principal
+    worksheet.mergeCells('A1:J1');
+    const headerCell1 = worksheet.getCell('A1');
+    headerCell1.value = '🏛️ GOBIERNO REGIONAL DE APURÍMAC';
+    headerCell1.font = {
+      bold: true,
+      size: 14,
+      color: { argb: 'FF1E3A8A' },
+      name: 'Segoe UI'
+    };
+    headerCell1.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerCell1.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFDBEAFE' }
+    };
+
+    worksheet.mergeCells('A2:J2');
+    const headerCell2 = worksheet.getCell('A2');
+    headerCell2.value = 'DIRECCIÓN SUB REGIONAL DE SALUD CHANKA ANDAHUAYLAS';
+    headerCell2.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1E40AF' },
+      name: 'Segoe UI'
+    };
+    headerCell2.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    worksheet.mergeCells('A3:J3');
+    const headerCell3 = worksheet.getCell('A3');
+    headerCell3.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRÍO';
+    headerCell3.font = {
+      bold: true,
+      size: 10,
+      color: { argb: 'FF2563EB' },
+      name: 'Segoe UI'
+    };
+    headerCell3.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    worksheet.mergeCells('A4:J4');
+    const headerCell4 = worksheet.getCell('A4');
+    headerCell4.value = '"Año de la Universalización de la Salud"';
+    headerCell4.font = {
+      italic: true,
+      size: 9,
+      color: { argb: 'FF3B82F6' },
+      name: 'Segoe UI'
+    };
+    headerCell4.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Título principal con diseño moderno
+    worksheet.mergeCells('A6:J6');
+    const titleCell = worksheet.getCell('A6');
+    titleCell.value = '🎯 REPORTE DE EFICIENCIA DE DISTRIBUCIÓN';
+    titleCell.font = {
+      bold: true,
+      size: 16,
+      color: { argb: 'FFFFFFFF' },
+      name: 'Segoe UI'
+    };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFFF9800' }
+    };
+
+    // Información del reporte con diseño moderno
+    worksheet.mergeCells('A8:E8');
+    const infoCell1 = worksheet.getCell('A8');
+    infoCell1.value = `📅 Fecha de Generación: ${new Date().toLocaleDateString('es-PE', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })}`;
+    infoCell1.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1F2937' },
+      name: 'Segoe UI'
+    };
+    infoCell1.alignment = { horizontal: 'left', vertical: 'middle' };
+    infoCell1.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' }
+    };
+
+    worksheet.mergeCells('F8:J8');
+    const infoCell2 = worksheet.getCell('F8');
+    infoCell2.value = `👤 Responsable: ${config.responsableReporte}`;
+    infoCell2.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FF1F2937' },
+      name: 'Segoe UI'
+    };
+    infoCell2.alignment = { horizontal: 'left', vertical: 'middle' };
+    infoCell2.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' }
+    };
+
+    if (config.observaciones) {
+      worksheet.mergeCells('A9:J9');
+      const infoCell3 = worksheet.getCell('A9');
+      infoCell3.value = `📝 Observaciones: ${config.observaciones}`;
+      infoCell3.font = {
+        bold: true,
+        size: 11,
+        color: { argb: 'FF1F2937' },
+        name: 'Segoe UI'
+      };
+      infoCell3.alignment = { horizontal: 'left', vertical: 'middle' };
+      infoCell3.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFF3F4F6' }
+      };
+    }
+
+    // Aplicar bordes modernos al encabezado
+    const lastRow = config.observaciones ? 9 : 8;
+    for (let row = 1; row <= lastRow; row++) {
+      for (let col = 1; col <= 10; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+        };
+      }
+    }
+
+    // Ajustar altura de filas para mejor presentación
+    worksheet.getRow(1).height = 25;
+    worksheet.getRow(2).height = 20;
+    worksheet.getRow(3).height = 18;
+    worksheet.getRow(4).height = 16;
+    worksheet.getRow(6).height = 30;
+    worksheet.getRow(8).height = 22;
+    if (config.observaciones) {
+      worksheet.getRow(9).height = 22;
+    }
   }
 }
