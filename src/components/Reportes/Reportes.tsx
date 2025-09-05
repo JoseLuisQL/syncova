@@ -28,11 +28,11 @@ import {
 } from 'lucide-react';
 import { mockEstablecimientos, mockVacunas } from '../../data/mockData';
 import { Establecimiento, Vacuna } from '../../types';
+import { useToastContext } from '../../contexts/ToastContext';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 import { useReportes } from '../../hooks/useReportes';
 import { KardexService } from '../../services/KardexService';
 import { useKardexFiltros } from '../../hooks/useKardexData';
-import { useToastContext } from '../../contexts/ToastContext';
 import {
   FiltrosReporteBase,
   FiltrosStockCritico,
@@ -351,6 +351,9 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
     limpiarError
   } = useReportes();
 
+  // Hook para toast notifications
+  const { toast } = useToastContext();
+
   const [filtrosReportes, setFiltrosReportes] = React.useState<{
     stockActual: FiltrosReporteBase;
     stockCritico: FiltrosStockCritico;
@@ -426,19 +429,30 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
     try {
       setReporteActivo(tipoReporte);
 
+      let resultado: any[] | null = null;
+
       switch (tipoReporte) {
         case 'stock_actual':
-          await generarStockActual(filtrosReportes.stockActual);
+          resultado = await generarStockActual(filtrosReportes.stockActual);
           break;
         case 'stock_critico':
-          await generarStockCritico(filtrosReportes.stockCritico);
+          resultado = await generarStockCritico(filtrosReportes.stockCritico);
           break;
         case 'vencimientos':
-          await generarVencimientos(filtrosReportes.vencimientos);
+          resultado = await generarVencimientos(filtrosReportes.vencimientos);
           break;
         case 'lotes_vencidos':
-          await generarLotesVencidos(filtrosReportes.lotesVencidos);
+          resultado = await generarLotesVencidos(filtrosReportes.lotesVencidos);
           break;
+      }
+
+      // Verificar si no hay datos disponibles y mostrar toast
+      if (resultado && Array.isArray(resultado) && resultado.length === 0) {
+        toast.warning(
+          'Sin datos disponibles',
+          'No hay datos disponibles para los filtros seleccionados',
+          { duration: 4000 }
+        );
       }
     } catch (error) {
       console.error('Error al generar reporte:', error);
@@ -466,6 +480,20 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
 
   const handleExportarKardex = async (filtros: FiltrosKardexDetallado) => {
     try {
+      // Primero generar los datos para verificar si hay resultados
+      const resultado = await generarKardexDetallado(filtros);
+
+      // Verificar si no hay datos disponibles y mostrar toast
+      if (resultado && Array.isArray(resultado) && resultado.length === 0) {
+        toast.warning(
+          'Sin datos disponibles',
+          'No hay datos disponibles para los filtros seleccionados en el kardex detallado',
+          { duration: 4000 }
+        );
+        return; // No proceder con la exportación
+      }
+
+      // Si hay datos, proceder con la exportación
       const config: ConfiguracionExportacion = {
         incluirDetalles: true,
         incluirGraficos: false,
@@ -478,8 +506,12 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
       await exportarKardexDetallado(filtros, config);
       setShowKardexModal(false);
 
-      // Toast de éxito (temporalmente comentado hasta arreglar el scope)
-      console.log('✅ Kardex exportado exitosamente:', `Movimientos del ${filtros.fechaInicio} al ${filtros.fechaFin}`);
+      // Toast de éxito
+      toast.success(
+        'Exportación exitosa',
+        `Kardex exportado exitosamente: Movimientos del ${filtros.fechaInicio} al ${filtros.fechaFin}`,
+        { duration: 3000 }
+      );
     } catch (error: any) {
       console.error('Error al exportar kardex:', error);
 
@@ -500,8 +532,8 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
         errorMessage = error.message;
       }
 
-      // Mostrar error en consola (temporalmente hasta arreglar el toast)
-      console.error('❌', errorTitle + ':', errorMessage);
+      // Mostrar error con toast
+      toast.error(errorTitle, errorMessage, { duration: 5000 });
     }
   };
 
@@ -1125,6 +1157,9 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
     limpiarError
   } = useReportes();
 
+  // Hook para toast notifications
+  const { toast } = useToastContext();
+
   const [reporteActivo, setReporteActivo] = React.useState<string | null>(null);
 
   const handleExportarReporte = async (tipoReporte: string) => {
@@ -1231,31 +1266,42 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
         incluirInactivos: false
       };
 
+      let resultado: any[] | null = null;
+
       switch (tipoReporte) {
         case 'movimientos_mensuales':
-          await generarMovimientosMensuales(filtrosMovimientos);
+          resultado = await generarMovimientosMensuales(filtrosMovimientos);
           break;
         case 'consumo_historico':
-          await generarConsumoHistorico({
+          resultado = await generarConsumoHistorico({
             ...filtrosMovimientos,
             periodoMeses: 12,
             incluirProyecciones: true
           });
           break;
         case 'entregas_establecimiento':
-          await generarEntregasPorEstablecimiento({
+          resultado = await generarEntregasPorEstablecimiento({
             ...filtrosMovimientos,
             incluirDetalleVacunas: true,
             ordenarPor: 'establecimiento'
           });
           break;
         case 'eficiencia_distribucion':
-          await generarEficienciaDistribucion({
+          resultado = await generarEficienciaDistribucion({
             ...filtrosMovimientos,
             incluirIndicadores: true,
             calcularTendencias: true
           });
           break;
+      }
+
+      // Verificar si no hay datos disponibles y mostrar toast
+      if (resultado && Array.isArray(resultado) && resultado.length === 0) {
+        toast.warning(
+          'Sin datos disponibles',
+          'No hay datos disponibles en el rango de fechas seleccionado',
+          { duration: 4000 }
+        );
       }
     } catch (error) {
       console.error('Error al generar reporte:', error);

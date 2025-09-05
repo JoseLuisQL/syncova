@@ -134,6 +134,8 @@ export const useReportes = (): UseReportesReturn => {
         stockActual: filtrosReporte
       }));
     }
+
+    return resultado;
   }, [ejecutarConCarga]);
 
   /**
@@ -156,6 +158,8 @@ export const useReportes = (): UseReportesReturn => {
         stockCritico: filtrosReporte
       }));
     }
+
+    return resultado;
   }, [ejecutarConCarga]);
 
   /**
@@ -178,6 +182,8 @@ export const useReportes = (): UseReportesReturn => {
         vencimientos: filtrosReporte
       }));
     }
+
+    return resultado;
   }, [ejecutarConCarga]);
 
   /**
@@ -200,6 +206,8 @@ export const useReportes = (): UseReportesReturn => {
         lotesVencidos: filtrosReporte
       }));
     }
+
+    return resultado;
   }, [ejecutarConCarga]);
 
   /**
@@ -222,6 +230,8 @@ export const useReportes = (): UseReportesReturn => {
         kardexDetallado: filtrosReporte
       }));
     }
+
+    return resultado;
   }, [ejecutarConCarga]);
 
   /**
@@ -244,6 +254,8 @@ export const useReportes = (): UseReportesReturn => {
         movimientosMensuales: filtrosReporte
       }));
     }
+
+    return resultado;
   }, [ejecutarConCarga]);
 
   /**
@@ -266,6 +278,8 @@ export const useReportes = (): UseReportesReturn => {
         consumoHistorico: filtrosReporte
       }));
     }
+
+    return resultado;
   }, [ejecutarConCarga]);
 
   /**
@@ -288,6 +302,8 @@ export const useReportes = (): UseReportesReturn => {
         entregasPorEstablecimiento: filtrosReporte
       }));
     }
+
+    return resultado;
   }, [ejecutarConCarga]);
 
   /**
@@ -310,6 +326,8 @@ export const useReportes = (): UseReportesReturn => {
         eficienciaDistribucion: filtrosReporte
       }));
     }
+
+    return resultado;
   }, [ejecutarConCarga]);
 
   /**

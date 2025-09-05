@@ -378,15 +378,15 @@ export interface UseReportesReturn {
   filtros: EstadoFiltros;
 
   // Acciones
-  generarStockActual: (filtros?: FiltrosReporteBase) => Promise<void>;
-  generarStockCritico: (filtros?: FiltrosStockCritico) => Promise<void>;
-  generarVencimientos: (filtros?: FiltrosVencimientos) => Promise<void>;
-  generarLotesVencidos: (filtros?: FiltrosReporteBase) => Promise<void>;
-  generarKardexDetallado: (filtros: FiltrosKardexDetallado) => Promise<void>;
-  generarMovimientosMensuales: (filtros?: FiltrosMovimientosMensuales) => Promise<void>;
-  generarConsumoHistorico: (filtros?: FiltrosConsumoHistorico) => Promise<void>;
-  generarEntregasPorEstablecimiento: (filtros?: FiltrosEntregasPorEstablecimiento) => Promise<void>;
-  generarEficienciaDistribucion: (filtros?: FiltrosEficienciaDistribucion) => Promise<void>;
+  generarStockActual: (filtros?: FiltrosReporteBase) => Promise<ItemStockActual[] | null>;
+  generarStockCritico: (filtros?: FiltrosStockCritico) => Promise<ItemStockCritico[] | null>;
+  generarVencimientos: (filtros?: FiltrosVencimientos) => Promise<ItemVencimiento[] | null>;
+  generarLotesVencidos: (filtros?: FiltrosReporteBase) => Promise<ItemLoteVencido[] | null>;
+  generarKardexDetallado: (filtros: FiltrosKardexDetallado) => Promise<ItemKardexDetallado[] | null>;
+  generarMovimientosMensuales: (filtros?: FiltrosMovimientosMensuales) => Promise<ItemMovimientoMensual[] | null>;
+  generarConsumoHistorico: (filtros?: FiltrosConsumoHistorico) => Promise<ItemConsumoHistorico[] | null>;
+  generarEntregasPorEstablecimiento: (filtros?: FiltrosEntregasPorEstablecimiento) => Promise<ItemEntregaPorEstablecimiento[] | null>;
+  generarEficienciaDistribucion: (filtros?: FiltrosEficienciaDistribucion) => Promise<ItemEficienciaDistribucion[] | null>;
   obtenerEstadisticas: () => Promise<void>;
   exportarExcel: (tipo: TipoReporte, config: ConfiguracionExportacion) => Promise<void>;
   exportarKardexDetallado: (filtros: FiltrosKardexDetallado, config: ConfiguracionExportacion) => Promise<void>;
