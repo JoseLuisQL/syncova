@@ -22,7 +22,12 @@ import {
   Loader2,
   FolderOpen,
   Database,
-  Info
+  Info,
+  Package,
+  Building2,
+  Clock,
+  Wrench,
+  TrendingUp
 } from 'lucide-react';
 import {
   Establecimiento,
@@ -1481,35 +1486,84 @@ const DistribucionAutomaticaTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">🧮 Distribución Automática Inteligente</h3>
+      {/* Banner de Estado en Desarrollo */}
+      <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="bg-amber-100 p-3 rounded-xl">
+              <Clock className="h-8 w-8 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-amber-900">Funcionalidad en Desarrollo</h3>
+              <p className="text-amber-700 mt-1">
+                La Distribución Automática está siendo desarrollada y estará disponible próximamente
+              </p>
+            </div>
+          </div>
+          <div className="bg-amber-100 px-4 py-2 rounded-full">
+            <span className="text-amber-800 font-semibold text-sm">🚧 Próximamente</span>
+          </div>
+        </div>
+        <div className="mt-4 bg-white/60 rounded-lg p-4 border border-amber-200">
+          <div className="flex items-start space-x-3">
+            <Info className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-amber-800">
+              <p className="font-medium mb-2">Características que estarán disponibles:</p>
+              <ul className="list-disc list-inside space-y-1 text-amber-700">
+                <li>Algoritmos inteligentes de distribución automática</li>
+                <li>Criterios basados en datos históricos y poblacionales</li>
+                <li>Configuración avanzada de parámetros de distribución</li>
+                <li>Validación automática de coherencia en las distribuciones</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg border border-gray-200 p-6 opacity-75">
+        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <Calculator className="h-5 w-5 mr-2 text-blue-600" />
+          Distribución Automática Inteligente
+          <span className="ml-3 bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">
+            Vista Previa
+          </span>
+        </h3>
         <p className="text-gray-600 mb-6">
           Utilice criterios avanzados para distribuir automáticamente las metas anuales en cantidades mensuales por vacuna
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {criterios.map((criterio) => (
-            <div key={criterio.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer">
+            <div key={criterio.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50 opacity-60 cursor-not-allowed">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-medium text-gray-900">{criterio.nombre}</h4>
-                <span className="text-2xl">{criterio.icono}</span>
+                <h4 className="font-medium text-gray-500">{criterio.nombre}</h4>
+                <span className="text-2xl opacity-50">{criterio.icono}</span>
               </div>
-              <p className="text-sm text-gray-600 mb-4">{criterio.descripcion}</p>
-              <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                Aplicar Criterio
+              <p className="text-sm text-gray-400 mb-4">{criterio.descripcion}</p>
+              <button
+                disabled
+                className="w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed text-sm"
+              >
+                En Desarrollo
               </button>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 bg-blue-50 rounded-lg p-6">
-          <h4 className="font-medium text-blue-900 mb-3">⚙️ Configuración Avanzada</h4>
+        <div className="mt-8 bg-gray-50 rounded-lg p-6 opacity-60">
+          <h4 className="font-medium text-gray-500 mb-3 flex items-center">
+            <Calculator className="h-4 w-4 mr-2" />
+            Configuración Avanzada
+            <span className="ml-2 bg-gray-200 text-gray-600 px-2 py-1 rounded text-xs">
+              Próximamente
+            </span>
+          </h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-blue-800 mb-2">
+              <label className="block text-sm font-medium text-gray-400 mb-2">
                 Vacuna a Distribuir
               </label>
-              <select className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select disabled className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">
                 <option>BCG</option>
                 <option>Pentavalente</option>
                 <option>HVB Pediátrico</option>
@@ -1517,20 +1571,20 @@ const DistribucionAutomaticaTab: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-blue-800 mb-2">
+              <label className="block text-sm font-medium text-gray-400 mb-2">
                 Factor de Estacionalidad
               </label>
-              <select className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select disabled className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">
                 <option>Estándar (1.0)</option>
                 <option>Alto (1.5)</option>
                 <option>Muy Alto (2.0)</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-blue-800 mb-2">
+              <label className="block text-sm font-medium text-gray-400 mb-2">
                 Reserva de Seguridad
               </label>
-              <select className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select disabled className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">
                 <option>5%</option>
                 <option>10%</option>
                 <option>15%</option>
