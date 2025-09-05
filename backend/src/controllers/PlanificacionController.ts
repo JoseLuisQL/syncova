@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PlanificacionService } from '@/services/PlanificacionService';
+import { PlanificacionExportService, PlanificacionExportConfig } from '@/services/PlanificacionExportService';
 import { successResponse, errorResponse } from '@/utils/response';
 import { validateUUID } from '@/utils/validation';
 import { prisma } from '@/config/database';
@@ -710,6 +711,117 @@ export class PlanificacionController {
       successResponse(res, result.data, 'Verificación de planificación completada');
     } catch (error) {
       console.error('Error en PlanificacionController.verificarExistenciaPlanificacion:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Exportar planificación por vacuna específica a Excel
+   * POST /api/planificacion/exportar/vacuna/:vacunaId
+   */
+  static async exportarPorVacuna(req: Request, res: Response): Promise<void> {
+    try {
+      const { vacunaId } = req.params;
+      const { anio, centroAcopioId, incluirEstablecimientosSinProgramacion, responsableReporte, observaciones } = req.body;
+
+      // Validar parámetros
+      if (!validateUUID(vacunaId)) {
+        errorResponse(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      if (!responsableReporte || responsableReporte.trim() === '') {
+        errorResponse(res, 'Responsable del reporte es requerido', 400);
+        return;
+      }
+
+      // Configurar exportación
+      const config: PlanificacionExportConfig = {
+        anio: anioNum,
+        vacunaId,
+        centroAcopioId: centroAcopioId && centroAcopioId !== 'todos' ? centroAcopioId : undefined,
+        incluirEstablecimientosSinProgramacion: incluirEstablecimientosSinProgramacion === true,
+        responsableReporte: responsableReporte.trim(),
+        observaciones: observaciones?.trim()
+      };
+
+      // Generar exportación
+      const result = await PlanificacionExportService.exportarPorVacuna(config);
+
+      if (!result.success || !result.data) {
+        errorResponse(res, result.error || 'Error al generar exportación', 500);
+        return;
+      }
+
+      // Configurar headers para descarga
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${result.data.filename}"`);
+      res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+
+      // Escribir el archivo Excel al response
+      await result.data.workbook.xlsx.write(res);
+      res.end();
+
+    } catch (error) {
+      console.error('Error en PlanificacionController.exportarPorVacuna:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Exportar todas las vacunas a Excel (hojas separadas)
+   * POST /api/planificacion/exportar/todas-vacunas
+   */
+  static async exportarTodasVacunas(req: Request, res: Response): Promise<void> {
+    try {
+      const { anio, centroAcopioId, incluirEstablecimientosSinProgramacion, responsableReporte, observaciones } = req.body;
+
+      // Validar parámetros
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      if (!responsableReporte || responsableReporte.trim() === '') {
+        errorResponse(res, 'Responsable del reporte es requerido', 400);
+        return;
+      }
+
+      // Configurar exportación
+      const config: PlanificacionExportConfig = {
+        anio: anioNum,
+        centroAcopioId: centroAcopioId && centroAcopioId !== 'todos' ? centroAcopioId : undefined,
+        incluirEstablecimientosSinProgramacion: incluirEstablecimientosSinProgramacion === true,
+        responsableReporte: responsableReporte.trim(),
+        observaciones: observaciones?.trim()
+      };
+
+      // Generar exportación
+      const result = await PlanificacionExportService.exportarTodasVacunas(config);
+
+      if (!result.success || !result.data) {
+        errorResponse(res, result.error || 'Error al generar exportación', 500);
+        return;
+      }
+
+      // Configurar headers para descarga
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${result.data.filename}"`);
+      res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+
+      // Escribir el archivo Excel al response
+      await result.data.workbook.xlsx.write(res);
+      res.end();
+
+    } catch (error) {
+      console.error('Error en PlanificacionController.exportarTodasVacunas:', error);
       errorResponse(res, 'Error interno del servidor', 500);
     }
   }

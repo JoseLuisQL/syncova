@@ -215,6 +215,18 @@ export const COLORES_CENTROS_ACOPIO_EXCEL = {
     name: 'Verde Clásico'
   },
   // Color por defecto para establecimientos sin centro de acopio
+  'HOSPITAL ANDAHUAYLAS': {
+    bg: 'FFFEF2F2', // Rojo claro
+    text: 'FF991B1B', // Rojo oscuro
+    accent: 'FFEF4444', // Rojo
+    name: 'Hospital Andahuaylas'
+  },
+  'HOSP. ESSALUD-ANDAHUAYLAS': {
+    bg: 'FFF0F9FF', // Índigo claro
+    text: 'FF1E40AF', // Índigo oscuro
+    accent: 'FF3B82F6', // Índigo
+    name: 'Hospital EsSalud'
+  },
   'DEFAULT': {
     bg: 'FFF5F5F5', // Gris claro
     text: 'FF424242', // Gris oscuro
@@ -227,9 +239,9 @@ export const COLORES_CENTROS_ACOPIO_EXCEL = {
  * Mapeo de establecimientos a sus centros de acopio
  */
 export const ESTABLECIMIENTO_TO_CENTRO: Record<string, string> = {
-  // Establecimientos regionales (sin centro específico)
-  'HOSP. ESSALUD-ANDAHUAYLAS': 'DEFAULT',
-  'HOSPITAL ANDAHUAYLAS': 'DEFAULT',
+  // Hospitales como centros de acopio principales
+  'HOSP. ESSALUD-ANDAHUAYLAS': 'HOSP. ESSALUD-ANDAHUAYLAS',
+  'HOSPITAL ANDAHUAYLAS': 'HOSPITAL ANDAHUAYLAS',
   
   // Centro ANDAHUAYLAS
   'C.S. ANDAHUAYLAS': 'ANDAHUAYLAS',

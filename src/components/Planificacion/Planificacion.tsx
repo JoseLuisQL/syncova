@@ -45,6 +45,7 @@ import {
   getIconoTipoEstablecimiento,
   getCentroAcopioPorNombre
 } from '../../utils/centroAcopioUtils';
+import { PlanificacionExportService } from '../../services/planificacionExportService';
 import { usePlanificacion } from '../../hooks/usePlanificacion';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useVacunas } from '../../hooks/useVacunas';
@@ -936,7 +937,17 @@ const Planificacion: React.FC = () => {
             />
             <Route
               path="reportes"
-              element={<ReportesTab stats={stats} isLoadingStats={isLoadingStats} />}
+              element={
+                <ReportesTab
+                  selectedAnio={selectedAnio}
+                  selectedVacuna={selectedVacuna}
+                  selectedCentroAcopio={selectedCentroAcopio}
+                  vacunas={vacunas}
+                  centrosAcopio={centrosAcopio}
+                  stats={stats}
+                  isLoadingStats={isLoadingStats}
+                />
+              }
             />
           </Routes>
         </div>
@@ -1538,7 +1549,81 @@ const DistribucionAutomaticaTab: React.FC = () => {
 };
 
 // Tab de Reportes
-const ReportesTab: React.FC = () => {
+interface ReportesTabProps {
+  selectedAnio: number;
+  selectedVacuna: string;
+  selectedCentroAcopio: string;
+  vacunas: Vacuna[];
+  centrosAcopio: CentroAcopio[];
+  stats: any;
+  isLoadingStats: boolean;
+}
+
+const ReportesTab: React.FC<ReportesTabProps> = ({
+  selectedAnio,
+  selectedVacuna,
+  selectedCentroAcopio,
+  vacunas,
+  centrosAcopio,
+  stats,
+  isLoadingStats
+}) => {
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportAnio, setExportAnio] = useState(selectedAnio);
+  const [exportVacuna, setExportVacuna] = useState('todos');
+  const [exportCentroAcopio, setExportCentroAcopio] = useState(selectedCentroAcopio);
+  const { toast } = useToastContext();
+
+  // Resetear filtros cuando se abre el modal
+  const handleOpenModal = () => {
+    setExportAnio(selectedAnio);
+    setExportVacuna('todos');
+    setExportCentroAcopio(selectedCentroAcopio);
+    setShowExportModal(true);
+  };
+
+  // Manejar exportación
+  const handleExportarProgramacion = async (exportarTodasVacunas: boolean = false) => {
+    try {
+      setIsExporting(true);
+
+      // Usar los filtros del modal
+      const vacunaIdParaExportar = exportarTodasVacunas || exportVacuna === 'todos' ? undefined : exportVacuna;
+
+      // Crear configuración de exportación
+      const config = PlanificacionExportService.crearConfiguracionDesdeFiltros(
+        exportAnio,
+        vacunaIdParaExportar,
+        exportCentroAcopio,
+        'Usuario del Sistema',
+        `Reporte generado desde el módulo de planificación - Filtros aplicados: Año ${exportAnio}, Vacuna: ${exportVacuna === 'todos' ? 'Todas' : vacunas.find(v => v.id === exportVacuna)?.nombre || 'Específica'}, Centro de Acopio: ${exportCentroAcopio === 'todos' ? 'Todos' : 'Específico'}`
+      );
+
+      if (exportarTodasVacunas || exportVacuna === 'todos') {
+        // Exportar todas las vacunas
+        await PlanificacionExportService.exportarYDescargarTodasVacunas(config);
+        toast.success('Exportación de todas las vacunas completada exitosamente');
+      } else {
+        // Exportar vacuna específica
+        const vacunaSeleccionada = vacunas.find(v => v.id === exportVacuna);
+        await PlanificacionExportService.exportarYDescargarPorVacuna(
+          exportVacuna,
+          config,
+          vacunaSeleccionada?.nombre
+        );
+        toast.success(`Exportación de ${vacunaSeleccionada?.nombre || 'la vacuna'} completada exitosamente`);
+      }
+
+      setShowExportModal(false);
+    } catch (error) {
+      console.error('Error al exportar:', error);
+      toast.error(error instanceof Error ? error.message : 'Error al exportar la programación');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Métricas de Resumen */}
@@ -1593,8 +1678,22 @@ const ReportesTab: React.FC = () => {
             <p className="text-sm text-gray-600 mb-4">
               Reporte detallado de la programación anual por cada tipo de vacuna
             </p>
-            <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              Generar Reporte
+            <button
+              onClick={handleOpenModal}
+              disabled={isExporting}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generando...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Generar Reporte
+                </>
+              )}
             </button>
           </div>
           
@@ -1638,6 +1737,111 @@ const ReportesTab: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de Confirmación de Exportación */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="flex items-center mb-4">
+              <div className="bg-blue-100 p-3 rounded-lg mr-4">
+                <Download className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Exportar Programación</h3>
+                <p className="text-sm text-gray-600">Generar reporte Excel con filtros aplicados</p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h4 className="font-medium text-gray-900 mb-4">Configurar Filtros de Exportación:</h4>
+
+              {/* Filtro de Año */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Año de Programación
+                </label>
+                <select
+                  value={exportAnio}
+                  onChange={(e) => setExportAnio(parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {Array.from({ length: 11 }, (_, i) => 2020 + i).map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Filtro de Vacuna */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Vacuna
+                </label>
+                <select
+                  value={exportVacuna}
+                  onChange={(e) => setExportVacuna(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="todos">Todas las vacunas</option>
+                  {vacunas.map(vacuna => (
+                    <option key={vacuna.id} value={vacuna.id}>
+                      {vacuna.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Filtro de Centro de Acopio */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Centro de Acopio
+                </label>
+                <select
+                  value={exportCentroAcopio}
+                  onChange={(e) => setExportCentroAcopio(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="todos">Todos los centros</option>
+                  {centrosAcopio.map(centro => (
+                    <option key={centro.id} value={centro.id}>
+                      {centro.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <button
+                onClick={() => handleExportarProgramacion(false)}
+                disabled={isExporting}
+                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isExporting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Exportando...
+                  </>
+                ) : (
+                  <>
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    {exportVacuna === 'todos' ? 'Exportar Todas las Vacunas' : `Exportar ${vacunas.find(v => v.id === exportVacuna)?.nombre || 'Vacuna Seleccionada'}`}
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowExportModal(false)}
+                disabled={isExporting}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

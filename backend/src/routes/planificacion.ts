@@ -153,4 +153,29 @@ router.post('/:id/sincronizar-movimientos', PlanificacionController.sincronizarC
  */
 router.get('/verificar/:establecimientoId/:vacunaId/:anio', PlanificacionController.verificarExistenciaPlanificacion);
 
+/**
+ * @route POST /api/planificacion/exportar/vacuna/:vacunaId
+ * @desc Exportar planificación por vacuna específica a Excel
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {string} vacunaId - ID de la vacuna
+ * @body {number} anio - Año de planificación
+ * @body {string} [centroAcopioId] - ID del centro de acopio (opcional)
+ * @body {boolean} [incluirEstablecimientosSinProgramacion] - Incluir establecimientos sin programación
+ * @body {string} responsableReporte - Nombre del responsable del reporte
+ * @body {string} [observaciones] - Observaciones adicionales
+ */
+router.post('/exportar/vacuna/:vacunaId', PlanificacionController.exportarPorVacuna);
+
+/**
+ * @route POST /api/planificacion/exportar/todas-vacunas
+ * @desc Exportar todas las vacunas a Excel (hojas separadas)
+ * @access Public (TODO: Proteger con autenticación)
+ * @body {number} anio - Año de planificación
+ * @body {string} [centroAcopioId] - ID del centro de acopio (opcional)
+ * @body {boolean} [incluirEstablecimientosSinProgramacion] - Incluir establecimientos sin programación
+ * @body {string} responsableReporte - Nombre del responsable del reporte
+ * @body {string} [observaciones] - Observaciones adicionales
+ */
+router.post('/exportar/todas-vacunas', PlanificacionController.exportarTodasVacunas);
+
 export default router;

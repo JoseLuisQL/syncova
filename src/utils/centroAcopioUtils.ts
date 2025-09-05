@@ -239,6 +239,22 @@ export const COLORES_CENTROS_ACOPIO = {
     name: 'Verde Clásico'
   },
   // Color por defecto para establecimientos sin centro de acopio
+  'HOSPITAL ANDAHUAYLAS': {
+    bg: 'bg-red-50',
+    border: 'border-red-200',
+    text: 'text-red-800',
+    accent: 'bg-red-500',
+    icon: '🏥',
+    name: 'Hospital Andahuaylas'
+  },
+  'HOSP. ESSALUD-ANDAHUAYLAS': {
+    bg: 'bg-indigo-50',
+    border: 'border-indigo-200',
+    text: 'text-indigo-800',
+    accent: 'bg-indigo-500',
+    icon: '🏥',
+    name: 'Hospital EsSalud'
+  },
   'DEFAULT': {
     bg: 'bg-gray-50',
     border: 'border-gray-200',
@@ -254,9 +270,9 @@ export const COLORES_CENTROS_ACOPIO = {
  * Basado en el orden específico proporcionado
  */
 export const ESTABLECIMIENTO_TO_CENTRO: Record<string, string> = {
-  // Establecimientos regionales (sin centro específico)
-  'HOSP. ESSALUD-ANDAHUAYLAS': 'DEFAULT',
-  'HOSPITAL ANDAHUAYLAS': 'DEFAULT',
+  // Hospitales como centros de acopio principales
+  'HOSP. ESSALUD-ANDAHUAYLAS': 'HOSP. ESSALUD-ANDAHUAYLAS',
+  'HOSPITAL ANDAHUAYLAS': 'HOSPITAL ANDAHUAYLAS',
   
   // Centro ANDAHUAYLAS
   'C.S. ANDAHUAYLAS': 'ANDAHUAYLAS',
