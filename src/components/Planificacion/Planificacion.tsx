@@ -4,30 +4,25 @@ import {
   Calendar,
   Upload,
   Download,
-  Target,
-  TrendingUp,
   FileSpreadsheet,
   Settings,
   CheckCircle,
   AlertTriangle,
   BarChart3,
-  PieChart,
   Users,
-  Building2,
-  Package,
   Plus,
   Edit,
   Trash2,
   Save,
   RefreshCw,
-  FileText,
   Calculator,
   Eye,
   Filter,
   Search,
   Loader2,
   FolderOpen,
-  Database
+  Database,
+  Info
 } from 'lucide-react';
 import {
   Establecimiento,
@@ -1568,20 +1563,18 @@ const ReportesTab: React.FC<ReportesTabProps> = ({
   stats,
   isLoadingStats
 }) => {
-  const [showExportModal, setShowExportModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportAnio, setExportAnio] = useState(selectedAnio);
   const [exportVacuna, setExportVacuna] = useState('todos');
   const [exportCentroAcopio, setExportCentroAcopio] = useState(selectedCentroAcopio);
   const { toast } = useToastContext();
 
-  // Resetear filtros cuando se abre el modal
-  const handleOpenModal = () => {
+  // Inicializar filtros al cargar el componente
+  useEffect(() => {
     setExportAnio(selectedAnio);
     setExportVacuna('todos');
     setExportCentroAcopio(selectedCentroAcopio);
-    setShowExportModal(true);
-  };
+  }, [selectedAnio, selectedCentroAcopio]);
 
   // Manejar exportación
   const handleExportarProgramacion = async (exportarTodasVacunas: boolean = false) => {
@@ -1615,7 +1608,6 @@ const ReportesTab: React.FC<ReportesTabProps> = ({
         toast.success(`Exportación de ${vacunaSeleccionada?.nombre || 'la vacuna'} completada exitosamente`);
       }
 
-      setShowExportModal(false);
     } catch (error) {
       console.error('Error al exportar:', error);
       toast.error(error instanceof Error ? error.message : 'Error al exportar la programación');
@@ -1626,222 +1618,118 @@ const ReportesTab: React.FC<ReportesTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Métricas de Resumen */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Vacunas Programadas</p>
-              <p className="text-3xl font-bold text-blue-600">10</p>
-            </div>
-            <Package className="h-8 w-8 text-blue-600" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Programado</p>
-              <p className="text-3xl font-bold text-green-600">15,847</p>
-            </div>
-            <TrendingUp className="h-8 w-8 text-green-600" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Establecimientos</p>
-              <p className="text-3xl font-bold text-purple-600">15</p>
-            </div>
-            <Building2 className="h-8 w-8 text-purple-600" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Eficiencia</p>
-              <p className="text-3xl font-bold text-orange-600">94%</p>
-            </div>
-            <Target className="h-8 w-8 text-orange-600" />
-          </div>
-        </div>
-      </div>
 
-      {/* Reportes Disponibles */}
+      {/* Exportación de Programación */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">📊 Reportes y Análisis Disponibles</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center mb-3">
-              <BarChart3 className="h-5 w-5 text-blue-600 mr-2" />
-              <h4 className="font-medium text-gray-900">Programación por Vacuna</h4>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Reporte detallado de la programación anual por cada tipo de vacuna
-            </p>
-            <button
-              onClick={handleOpenModal}
-              disabled={isExporting}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-            >
-              {isExporting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generando...
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-2" />
-                  Generar Reporte
-                </>
-              )}
-            </button>
+        <div className="flex items-center mb-6">
+          <div className="bg-blue-100 p-3 rounded-lg mr-4">
+            <Download className="h-6 w-6 text-blue-600" />
           </div>
-          
-          <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center mb-3">
-              <PieChart className="h-5 w-5 text-green-600 mr-2" />
-              <h4 className="font-medium text-gray-900">Distribución por Centro</h4>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Análisis de distribución de vacunas por centro de acopio
-            </p>
-            <button className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-              Generar Reporte
-            </button>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">📊 Exportar Programación por Vacuna</h3>
+            <p className="text-sm text-gray-600">Generar reporte Excel con filtros aplicados</p>
           </div>
-          
-          <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center mb-3">
-              <Calendar className="h-5 w-5 text-purple-600 mr-2" />
-              <h4 className="font-medium text-gray-900">Cronograma Mensual</h4>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-6 mb-6">
+          <h4 className="font-medium text-gray-900 mb-4">Configurar Filtros de Exportación:</h4>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Filtro de Año */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Año de Programación
+              </label>
+              <select
+                value={exportAnio}
+                onChange={(e) => setExportAnio(parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                {Array.from({ length: 11 }, (_, i) => 2020 + i).map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Cronograma detallado de entregas mensuales programadas
-            </p>
-            <button className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-              Generar Reporte
-            </button>
+
+            {/* Filtro de Vacuna */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Vacuna
+              </label>
+              <select
+                value={exportVacuna}
+                onChange={(e) => setExportVacuna(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="todos">Todas las vacunas</option>
+                {vacunas.map(vacuna => (
+                  <option key={vacuna.id} value={vacuna.id}>
+                    {vacuna.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filtro de Centro de Acopio */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Centro de Acopio
+              </label>
+              <select
+                value={exportCentroAcopio}
+                onChange={(e) => setExportCentroAcopio(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="todos">Todos los centros</option>
+                {centrosAcopio.map(centro => (
+                  <option key={centro.id} value={centro.id}>
+                    {centro.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          
-          <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center mb-3">
-              <FileText className="h-5 w-5 text-orange-600 mr-2" />
-              <h4 className="font-medium text-gray-900">Reporte Ejecutivo</h4>
+        </div>
+
+        {/* Botón de Exportación */}
+        <div className="flex justify-center">
+          <button
+            onClick={() => handleExportarProgramacion(false)}
+            disabled={isExporting}
+            className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg font-medium shadow-lg"
+          >
+            {isExporting ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                Exportando...
+              </>
+            ) : (
+              <>
+                <FileSpreadsheet className="h-5 w-5 mr-3" />
+                {exportVacuna === 'todos' ? 'Exportar Todas las Vacunas' : `Exportar ${vacunas.find(v => v.id === exportVacuna)?.nombre || 'Vacuna Seleccionada'}`}
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Información adicional */}
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <Info className="h-5 w-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-blue-800">
+              <p className="font-medium mb-1">Información sobre la exportación:</p>
+              <ul className="list-disc list-inside space-y-1 text-blue-700">
+                <li>El reporte incluirá la programación detallada por establecimiento y mes</li>
+                <li>Los datos se exportarán en formato Excel con diseño profesional</li>
+                <li>Se aplicarán los filtros seleccionados arriba</li>
+                <li>La descarga comenzará automáticamente una vez completada la exportación</li>
+              </ul>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Resumen ejecutivo con métricas clave y recomendaciones estratégicas
-            </p>
-            <button className="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-              Generar Reporte
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Modal de Confirmación de Exportación */}
-      {showExportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
-            <div className="flex items-center mb-4">
-              <div className="bg-blue-100 p-3 rounded-lg mr-4">
-                <Download className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Exportar Programación</h3>
-                <p className="text-sm text-gray-600">Generar reporte Excel con filtros aplicados</p>
-              </div>
-            </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h4 className="font-medium text-gray-900 mb-4">Configurar Filtros de Exportación:</h4>
-
-              {/* Filtro de Año */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Año de Programación
-                </label>
-                <select
-                  value={exportAnio}
-                  onChange={(e) => setExportAnio(parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {Array.from({ length: 11 }, (_, i) => 2020 + i).map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Filtro de Vacuna */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Vacuna
-                </label>
-                <select
-                  value={exportVacuna}
-                  onChange={(e) => setExportVacuna(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="todos">Todas las vacunas</option>
-                  {vacunas.map(vacuna => (
-                    <option key={vacuna.id} value={vacuna.id}>
-                      {vacuna.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Filtro de Centro de Acopio */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Centro de Acopio
-                </label>
-                <select
-                  value={exportCentroAcopio}
-                  onChange={(e) => setExportCentroAcopio(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="todos">Todos los centros</option>
-                  {centrosAcopio.map(centro => (
-                    <option key={centro.id} value={centro.id}>
-                      {centro.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-3 mb-6">
-              <button
-                onClick={() => handleExportarProgramacion(false)}
-                disabled={isExporting}
-                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {isExporting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Exportando...
-                  </>
-                ) : (
-                  <>
-                    <FileSpreadsheet className="h-4 w-4 mr-2" />
-                    {exportVacuna === 'todos' ? 'Exportar Todas las Vacunas' : `Exportar ${vacunas.find(v => v.id === exportVacuna)?.nombre || 'Vacuna Seleccionada'}`}
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setShowExportModal(false)}
-                disabled={isExporting}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
