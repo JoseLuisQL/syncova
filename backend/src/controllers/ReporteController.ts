@@ -10,6 +10,7 @@ import {
   ReporteExportService,
   ReporteExportConfig
 } from '@/services/ReporteExportService';
+import { KardexExportService, KardexExportConfig } from '@/services/KardexExportService';
 import { ResponseUtil } from '@/utils/response';
 import { validateUUID } from '@/utils/validation';
 
@@ -265,6 +266,159 @@ export class ReporteController {
       ResponseUtil.success(res, result.data, 'Reporte de kardex detallado generado exitosamente');
     } catch (error) {
       console.error('Error en ReporteController.generarKardexDetallado:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Exportar reporte de kardex detallado a Excel
+   * POST /api/reportes/kardex-detallado/export/excel
+   */
+  static async exportarKardexDetalladoExcel(req: Request, res: Response): Promise<void> {
+    try {
+      const { filters, config } = req.body;
+
+      console.log('🔄 Iniciando exportación de Kardex detallado desde ReporteController');
+      console.log('📋 Body completo recibido:', JSON.stringify(req.body, null, 2));
+      console.log('📋 Filtros recibidos:', JSON.stringify(filters, null, 2));
+
+      // Validaciones requeridas
+      if (!filters || !filters.fechaInicio || !filters.fechaFin) {
+        ResponseUtil.error(res, 'Los filtros con fechas de inicio y fin son requeridos', 400);
+        return;
+      }
+
+      // Validar y procesar fechas - CORREGIR ZONA HORARIA
+      // El frontend envía fechas en formato YYYY-MM-DD, pero new Date() las interpreta en UTC
+      // Necesitamos crear las fechas en zona horaria local para evitar cambios de día
+      const fechaInicioDate = new Date(filters.fechaInicio + 'T00:00:00.000');
+      const fechaFinDate = new Date(filters.fechaFin + 'T23:59:59.999');
+
+      console.log(`📅 Fechas recibidas del frontend:`);
+      console.log(`   - fechaInicio (string): ${filters.fechaInicio}`);
+      console.log(`   - fechaFin (string): ${filters.fechaFin}`);
+      console.log(`📅 Fechas convertidas a Date (con zona horaria corregida):`);
+      console.log(`   - fechaInicioDate: ${fechaInicioDate.toISOString()} (${fechaInicioDate.toLocaleDateString('es-PE')})`);
+      console.log(`   - fechaFinDate: ${fechaFinDate.toISOString()} (${fechaFinDate.toLocaleDateString('es-PE')})`);
+
+      if (isNaN(fechaInicioDate.getTime()) || isNaN(fechaFinDate.getTime())) {
+        ResponseUtil.error(res, 'Formato de fecha inválido', 400);
+        return;
+      }
+
+      if (fechaInicioDate > fechaFinDate) {
+        ResponseUtil.error(res, 'La fecha de inicio debe ser menor a la fecha de fin', 400);
+        return;
+      }
+
+      // Validar UUIDs si se proporcionan
+      if (filters.itemId && !validateUUID(filters.itemId)) {
+        ResponseUtil.error(res, 'ID de item inválido', 400);
+        return;
+      }
+
+      if (filters.loteId && !validateUUID(filters.loteId)) {
+        ResponseUtil.error(res, 'ID de lote inválido', 400);
+        return;
+      }
+
+      if (filters.establecimientoId && !validateUUID(filters.establecimientoId)) {
+        ResponseUtil.error(res, 'ID de establecimiento inválido', 400);
+        return;
+      }
+
+      // Validar tipo si se proporciona
+      if (filters.tipo && !['vacuna', 'jeringa'].includes(filters.tipo)) {
+        ResponseUtil.error(res, 'Tipo debe ser "vacuna" o "jeringa"', 400);
+        return;
+      }
+
+      // Validar tipo de movimiento si se proporciona
+      if (filters.tipoMovimiento && !['ingreso', 'salida', 'transferencia', 'ajuste'].includes(filters.tipoMovimiento)) {
+        ResponseUtil.error(res, 'Tipo de movimiento inválido', 400);
+        return;
+      }
+
+      // Construir configuración para KardexExportService
+      // Mapear desde ConfiguracionExportacion (frontend) a KardexExportConfig (backend)
+      const kardexExportConfig: KardexExportConfig = {
+        incluirDetalleCompleto: config?.incluirDetalles !== false,
+        incluirTrazabilidad: false, // No se usa en el frontend actual
+        incluirEstadisticas: config?.incluirEstadisticas !== false,
+        formatoExportacion: 'excel',
+        filtros: {
+          tipo: filters.tipo as 'vacuna' | 'jeringa',
+          itemId: filters.itemId,
+          loteId: filters.loteId,
+          tipoMovimiento: filters.tipoMovimiento as 'ingreso' | 'salida' | 'transferencia' | 'ajuste',
+          establecimientoOrigenId: filters.establecimientoId,
+          establecimientoDestinoId: filters.establecimientoId,
+          fechaInicio: fechaInicioDate,
+          fechaFin: fechaFinDate,
+          search: filters.search
+        }
+      };
+
+      console.log('🔍 Fechas que se enviarán a KardexExportService:');
+      console.log('   - fechaInicio (Date):', fechaInicioDate.toISOString());
+      console.log('   - fechaFin (Date):', fechaFinDate.toISOString());
+      console.log('   - tipo:', filters.tipo);
+      console.log('   - itemId:', filters.itemId);
+      console.log('   - loteId:', filters.loteId);
+      console.log('📊 Mapeo de configuración:');
+      console.log('   Frontend config.incluirDetalles:', config?.incluirDetalles, '→ Backend incluirDetalleCompleto:', kardexExportConfig.incluirDetalleCompleto);
+      console.log('   Frontend config.incluirEstadisticas:', config?.incluirEstadisticas, '→ Backend incluirEstadisticas:', kardexExportConfig.incluirEstadisticas);
+      console.log('   Backend incluirTrazabilidad:', kardexExportConfig.incluirTrazabilidad);
+      console.log('   Backend formatoExportacion:', kardexExportConfig.formatoExportacion);
+      console.log('📊 Filtros mapeados:');
+      console.log('   - tipo:', kardexExportConfig.filtros?.tipo);
+      console.log('   - itemId:', kardexExportConfig.filtros?.itemId);
+      console.log('   - loteId:', kardexExportConfig.filtros?.loteId);
+      console.log('   - fechaInicio existe:', !!kardexExportConfig.filtros?.fechaInicio);
+      console.log('   - fechaFin existe:', !!kardexExportConfig.filtros?.fechaFin);
+
+      // Hacer una prueba rápida para verificar los filtros
+      console.log('🧪 PRUEBA: Verificando filtros antes de exportar');
+      console.log('   - Rango de fechas solicitado:', {
+        inicio: fechaInicioDate.toLocaleDateString('es-PE'),
+        fin: fechaFinDate.toLocaleDateString('es-PE')
+      });
+
+      console.log('🚀 Llamando a KardexExportService.exportToExcel...');
+
+      // Usar KardexExportService para generar el Excel
+      const exportResult = await KardexExportService.exportToExcel(kardexExportConfig);
+
+      console.log('📊 Resultado de exportación:', {
+        success: exportResult.success,
+        hasData: !!exportResult.data,
+        error: exportResult.error
+      });
+
+      if (!exportResult.success) {
+        console.error('❌ Error en exportación:', exportResult.error);
+        ResponseUtil.error(res, exportResult.error || 'Error al exportar kardex detallado', 400);
+        return;
+      }
+
+      console.log('✅ Exportación exitosa, generando buffer...');
+
+      // Generar buffer del archivo Excel
+      const buffer = await exportResult.data.workbook.xlsx.writeBuffer();
+
+      console.log(`📁 Archivo generado: ${exportResult.data.filename} (${buffer.length} bytes)`);
+
+      // Configurar headers para descarga de archivo Excel
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${exportResult.data.filename}"`);
+      res.setHeader('Content-Length', buffer.length.toString());
+
+      // Enviar el buffer del archivo
+      res.send(buffer);
+
+      console.log('✅ Kardex detallado exportado exitosamente');
+    } catch (error) {
+      console.error('❌ Error en ReporteController.exportarKardexDetalladoExcel:', error);
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }

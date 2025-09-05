@@ -245,6 +245,7 @@ export interface UseReportesReturn {
   generarKardexDetallado: (filtros: FiltrosKardexDetallado) => Promise<void>;
   obtenerEstadisticas: () => Promise<void>;
   exportarExcel: (tipo: TipoReporte, config: ConfiguracionExportacion) => Promise<void>;
+  exportarKardexDetallado: (filtros: FiltrosKardexDetallado, config: ConfiguracionExportacion) => Promise<void>;
   limpiarReportes: () => void;
   actualizarFiltros: (tipo: TipoReporte, filtros: any) => void;
 

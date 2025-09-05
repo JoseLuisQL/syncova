@@ -385,6 +385,55 @@ export class ReportesService {
   }
 
   /**
+   * Exportar reporte de kardex detallado a Excel
+   */
+  static async exportarKardexDetalladoExcel(
+    filters: KardexDetalladoFilters,
+    config: ReporteExportConfig
+  ): Promise<void> {
+    try {
+      console.log('🔄 Exportando reporte de kardex detallado a Excel:', filters);
+
+      const response = await apiClient.post(
+        `${this.BASE_URL}/kardex-detallado/export/excel`,
+        { filters, config },
+        {
+          responseType: 'blob',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // Crear y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Generar nombre de archivo descriptivo
+      const fechaInicio = filters.fechaInicio ? new Date(filters.fechaInicio).toLocaleDateString('es-PE').replace(/\//g, '-') : '';
+      const fechaFin = filters.fechaFin ? new Date(filters.fechaFin).toLocaleDateString('es-PE').replace(/\//g, '-') : '';
+      const rangoFechas = fechaInicio && fechaFin ? `_${fechaInicio}_al_${fechaFin}` : `_${new Date().toISOString().split('T')[0]}`;
+      const tipoFiltro = filters.tipo ? `_${filters.tipo}` : '';
+
+      link.download = `Kardex_Detallado${tipoFiltro}${rangoFechas}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ Reporte de kardex detallado exportado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de kardex detallado:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
    * Manejo de errores
    */
   private static handleError(error: any): Error {

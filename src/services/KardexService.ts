@@ -282,7 +282,7 @@ export class KardexService {
    */
   static async getJeringas(): Promise<Jeringa[]> {
     try {
-      const response = await fetch(`${this.BASE_URL}/jeringas`, {
+      const response = await fetch(`${this.BASE_URL}/jeringas?estado=activo&limit=1000`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -293,14 +293,17 @@ export class KardexService {
         throw new Error(`Error HTTP: ${response.status}`);
       }
 
-      const result: ApiResponse<Jeringa[]> = await response.json();
-      
+      const result: PaginatedResponse<Jeringa[]> = await response.json();
+
       if (!result.success) {
         throw new Error(result.message || 'Error al obtener jeringas');
       }
 
-      return result.data.map(jeringa => ({
+      // La respuesta puede ser paginada o directa
+      const jeringas = result.data.jeringas || result.data || [];
+      return jeringas.map((jeringa: any) => ({
         ...jeringa,
+        nombre: jeringa.tipo, // Mapear 'tipo' a 'nombre' para consistencia
         createdAt: new Date(jeringa.createdAt),
         updatedAt: new Date(jeringa.updatedAt)
       }));
@@ -351,8 +354,8 @@ export class KardexService {
   static async getLotesVacunas(vacunaId?: string): Promise<any[]> {
     try {
       const url = vacunaId
-        ? `${this.BASE_URL}/lotes-vacunas?vacunaId=${vacunaId}`
-        : `${this.BASE_URL}/lotes-vacunas`;
+        ? `${this.BASE_URL}/lotes-vacunas/vacuna/${vacunaId}`
+        : `${this.BASE_URL}/lotes-vacunas?estado=disponible&limit=1000`;
 
       const response = await fetch(url, {
         method: 'GET',
@@ -371,7 +374,9 @@ export class KardexService {
         throw new Error(result.message || 'Error al obtener lotes de vacunas');
       }
 
-      return result.data.map(lote => ({
+      // Manejar tanto respuesta paginada como directa
+      const lotes = result.data.lotes || result.data || [];
+      return lotes.map((lote: any) => ({
         ...lote,
         fechaIngreso: new Date(lote.fechaIngreso),
         fechaVencimiento: new Date(lote.fechaVencimiento),
@@ -390,8 +395,8 @@ export class KardexService {
   static async getLotesJeringas(jeringaId?: string): Promise<any[]> {
     try {
       const url = jeringaId
-        ? `${this.BASE_URL}/lotes-jeringas?jeringaId=${jeringaId}`
-        : `${this.BASE_URL}/lotes-jeringas`;
+        ? `${this.BASE_URL}/lotes-jeringas/jeringa/${jeringaId}`
+        : `${this.BASE_URL}/lotes-jeringas?estado=disponible&limit=1000`;
 
       const response = await fetch(url, {
         method: 'GET',
@@ -410,7 +415,9 @@ export class KardexService {
         throw new Error(result.message || 'Error al obtener lotes de jeringas');
       }
 
-      return result.data.map(lote => ({
+      // Manejar tanto respuesta paginada como directa
+      const lotes = result.data.lotes || result.data || [];
+      return lotes.map((lote: any) => ({
         ...lote,
         fechaIngreso: new Date(lote.fechaIngreso),
         fechaVencimiento: lote.fechaVencimiento ? new Date(lote.fechaVencimiento) : null,

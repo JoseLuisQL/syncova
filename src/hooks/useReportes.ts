@@ -219,11 +219,25 @@ export const useReportes = (): UseReportesReturn => {
           break;
         case 'kardex-detallado':
         case 'kardex_detallado':
-          // TODO: Implementar cuando esté disponible en el servicio
-          throw new Error('Exportación de kardex detallado no implementada aún');
+          if (!filtros.kardexDetallado) {
+            throw new Error('Filtros de kardex detallado no configurados');
+          }
+          await ReportesService.exportarKardexDetalladoExcel(filtros.kardexDetallado, config);
         default:
           throw new Error(`Tipo de reporte no soportado: ${tipo}`);
       }
+    });
+  }, [ejecutarConCarga]);
+
+  /**
+   * Exportar kardex detallado a Excel
+   */
+  const exportarKardexDetallado = useCallback(async (
+    filtrosKardex: FiltrosKardexDetallado,
+    config: ConfiguracionExportacion
+  ) => {
+    await ejecutarConCarga(async () => {
+      await ReportesService.exportarKardexDetalladoExcel(filtrosKardex, config);
     });
   }, [filtros]);
 
@@ -334,6 +348,7 @@ export const useReportes = (): UseReportesReturn => {
     generarKardexDetallado,
     obtenerEstadisticas,
     exportarExcel,
+    exportarKardexDetallado,
     limpiarReportes,
     actualizarFiltros,
 

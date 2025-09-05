@@ -21,12 +21,18 @@ import {
   FolderOpen,
   Archive,
   Star,
-  X
+  X,
+  Search,
+  ArrowRightLeft,
+  Loader2
 } from 'lucide-react';
 import { mockEstablecimientos, mockVacunas } from '../../data/mockData';
 import { Establecimiento, Vacuna } from '../../types';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 import { useReportes } from '../../hooks/useReportes';
+import { KardexService } from '../../services/KardexService';
+import { useKardexFiltros } from '../../hooks/useKardexData';
+import { useToastContext } from '../../contexts/ToastContext';
 import {
   FiltrosReporteBase,
   FiltrosStockCritico,
@@ -121,6 +127,11 @@ const CATEGORY_CONFIG = {
 const Reportes: React.FC = () => {
   const { navigateToModule } = useAppNavigation();
   const { currentSubModule } = useCurrentRoute();
+  const { toast } = useToastContext();
+
+  // Cargar datos reales desde la base de datos
+  const { vacunas: vacunasReales, establecimientos: establecimientosReales, loading: loadingFiltros } = useKardexFiltros();
+
   const [filtros, setFiltros] = useState({
     fechaInicio: new Date().toISOString().split('T')[0],
     fechaFin: new Date().toISOString().split('T')[0],
@@ -162,7 +173,12 @@ const Reportes: React.FC = () => {
     return acc;
   }, {} as Record<string, SectionConfig[]>);
 
-  const centrosAcopio = mockEstablecimientos.filter((e: Establecimiento) => e.nombre.includes('Acopio'));
+  // Usar datos reales si están disponibles, sino usar mock como fallback
+  const centrosAcopio = establecimientosReales.length > 0
+    ? establecimientosReales.filter((e: Establecimiento) => e.nombre.includes('Acopio'))
+    : mockEstablecimientos.filter((e: Establecimiento) => e.nombre.includes('Acopio'));
+
+  const vacunas = vacunasReales.length > 0 ? vacunasReales : mockVacunas;
 
   const handleProgramarReporte = () => {
     setShowModalProgramar(true);
@@ -264,9 +280,9 @@ const Reportes: React.FC = () => {
           <Routes>
             <Route path="/" element={<Navigate to="overview" replace />} />
             <Route path="overview" element={<DashboardReportesTab reportesProgramados={reportesProgramados} />} />
-            <Route path="inventario" element={<InventarioReportesTab filtros={filtros} setFiltros={setFiltros} centrosAcopio={centrosAcopio} vacunas={mockVacunas} onGenerarReporte={handleExportarReporte} />} />
-            <Route path="movimientos" element={<MovimientosReportesTab filtros={filtros} setFiltros={setFiltros} centrosAcopio={centrosAcopio} vacunas={mockVacunas} onGenerarReporte={handleExportarReporte} />} />
-            <Route path="planificacion" element={<PlanificacionReportesTab filtros={filtros} setFiltros={setFiltros} centrosAcopio={centrosAcopio} vacunas={mockVacunas} onGenerarReporte={handleExportarReporte} />} />
+            <Route path="inventario" element={<InventarioReportesTab filtros={filtros} setFiltros={setFiltros} centrosAcopio={centrosAcopio} vacunas={vacunas} onGenerarReporte={handleExportarReporte} />} />
+            <Route path="movimientos" element={<MovimientosReportesTab filtros={filtros} setFiltros={setFiltros} centrosAcopio={centrosAcopio} vacunas={vacunas} onGenerarReporte={handleExportarReporte} />} />
+            <Route path="planificacion" element={<PlanificacionReportesTab filtros={filtros} setFiltros={setFiltros} centrosAcopio={centrosAcopio} vacunas={vacunas} onGenerarReporte={handleExportarReporte} />} />
             <Route path="ejecutivo" element={<EjecutivoReportesTab filtros={filtros} setFiltros={setFiltros} onGenerarReporte={handleExportarReporte} />} />
             <Route path="programados" element={<ReportesProgramadosTab reportesProgramados={reportesProgramados} setReportesProgramados={setReportesProgramados} />} />
             <Route path="configuracion" element={<ConfiguracionReportesTab />} />
@@ -281,7 +297,7 @@ const Reportes: React.FC = () => {
           filtros={filtros}
           setFiltros={setFiltros}
           centrosAcopio={centrosAcopio}
-          vacunas={mockVacunas}
+          vacunas={vacunas}
           onClose={() => setShowModalGenerador(false)}
           onGenerar={handleExportarReporte}
         />
@@ -512,6 +528,7 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
     generarKardexDetallado,
     obtenerEstadisticas,
     exportarExcel,
+    exportarKardexDetallado,
     limpiarError
   } = useReportes();
 
@@ -614,12 +631,44 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
     }
   };
 
-  const handleGenerarKardex = async (filtros: FiltrosKardexDetallado) => {
+  const handleExportarKardex = async (filtros: FiltrosKardexDetallado) => {
     try {
-      await generarKardexDetallado(filtros);
+      const config: ConfiguracionExportacion = {
+        incluirDetalles: true,
+        incluirGraficos: false,
+        incluirEstadisticas: true,
+        formatoFecha: 'dd/mm/yyyy',
+        responsableReporte: 'Sistema SIVAC',
+        observaciones: `Kardex detallado generado el ${new Date().toLocaleDateString('es-PE')}`
+      };
+
+      await exportarKardexDetallado(filtros, config);
       setShowKardexModal(false);
-    } catch (error) {
-      console.error('Error al generar kardex:', error);
+
+      // Toast de éxito (temporalmente comentado hasta arreglar el scope)
+      console.log('✅ Kardex exportado exitosamente:', `Movimientos del ${filtros.fechaInicio} al ${filtros.fechaFin}`);
+    } catch (error: any) {
+      console.error('Error al exportar kardex:', error);
+
+      // Extraer mensaje de error específico
+      let errorMessage = 'Error desconocido al exportar kardex';
+      let errorTitle = 'Error de exportación';
+
+      if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+
+        // Personalizar título según el tipo de error
+        if (errorMessage.includes('No se encontraron movimientos')) {
+          errorTitle = 'Sin movimientos en el rango';
+        } else if (errorMessage.includes('fecha')) {
+          errorTitle = 'Error de fechas';
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      // Mostrar error en consola (temporalmente hasta arreglar el toast)
+      console.error('❌', errorTitle + ':', errorMessage);
     }
   };
 
@@ -839,7 +888,7 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
       {showKardexModal && (
         <KardexDetalladoModal
           onClose={() => setShowKardexModal(false)}
-          onGenerar={handleGenerarKardex}
+          onExportar={handleExportarKardex}
           vacunas={vacunas}
           centrosAcopio={centrosAcopio}
         />
@@ -860,126 +909,344 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
 // Modal para configurar filtros de Kardex Detallado
 interface KardexDetalladoModalProps {
   onClose: () => void;
-  onGenerar: (filtros: FiltrosKardexDetallado) => void;
+  onExportar: (filtros: FiltrosKardexDetallado) => void;
   vacunas: Vacuna[];
   centrosAcopio: Establecimiento[];
 }
 
 const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
   onClose,
-  onGenerar,
+  onExportar,
   vacunas,
   centrosAcopio
 }) => {
+  // Función para obtener fecha actual en zona horaria de Perú
+  const getFechaPeruActual = () => {
+    const ahora = new Date();
+    // Perú está en UTC-5 (sin horario de verano)
+    const fechaPeru = new Date(ahora.getTime() - (5 * 60 * 60 * 1000));
+    return fechaPeru.toISOString().split('T')[0];
+  };
+
+  const getFechaPeruMesAnterior = () => {
+    const ahora = new Date();
+    // Perú está en UTC-5 (sin horario de verano)
+    const fechaPeru = new Date(ahora.getTime() - (5 * 60 * 60 * 1000));
+    fechaPeru.setMonth(fechaPeru.getMonth() - 1);
+    return fechaPeru.toISOString().split('T')[0];
+  };
+
   const [filtros, setFiltros] = React.useState<FiltrosKardexDetallado>({
-    fechaInicio: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
-    fechaFin: new Date().toISOString().split('T')[0]
+    fechaInicio: getFechaPeruMesAnterior(),
+    fechaFin: getFechaPeruActual()
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onGenerar(filtros);
+  const [jeringas, setJeringas] = React.useState<any[]>([]);
+  const [lotes, setLotes] = React.useState<any[]>([]);
+  const [loadingJeringas, setLoadingJeringas] = React.useState(false);
+  const [loadingLotes, setLoadingLotes] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [exportando, setExportando] = React.useState(false);
+
+  // Cargar jeringas al montar el componente
+  React.useEffect(() => {
+    const cargarJeringas = async () => {
+      setLoadingJeringas(true);
+      try {
+        // Usar el servicio real de Kardex
+        const jeringasData = await KardexService.getJeringas();
+        setJeringas(jeringasData);
+        console.log('✅ Jeringas cargadas desde KardexService:', jeringasData.length);
+      } catch (error) {
+        console.error('❌ Error al cargar jeringas:', error);
+        setJeringas([]);
+      } finally {
+        setLoadingJeringas(false);
+      }
+    };
+
+    cargarJeringas();
+  }, []);
+
+  // Cargar lotes cuando cambie el tipo o item seleccionado
+  React.useEffect(() => {
+    const cargarLotes = async () => {
+      if (!filtros.tipo || !filtros.itemId) {
+        setLotes([]);
+        return;
+      }
+
+      setLoadingLotes(true);
+      try {
+        let lotesData: any[] = [];
+
+        if (filtros.tipo === 'vacuna') {
+          lotesData = await KardexService.getLotesVacunas(filtros.itemId);
+        } else if (filtros.tipo === 'jeringa') {
+          lotesData = await KardexService.getLotesJeringas(filtros.itemId);
+        }
+
+        setLotes(lotesData);
+        console.log(`✅ Lotes de ${filtros.tipo} cargados:`, lotesData.length);
+      } catch (error) {
+        console.error('❌ Error al cargar lotes:', error);
+        setLotes([]);
+      } finally {
+        setLoadingLotes(false);
+      }
+    };
+
+    cargarLotes();
+  }, [filtros.tipo, filtros.itemId]);
+
+  const handleExportar = async () => {
+    setExportando(true);
+    try {
+      const filtrosCompletos = {
+        ...filtros,
+        search: searchTerm || undefined
+      };
+      await onExportar(filtrosCompletos);
+    } finally {
+      setExportando(false);
+    }
+  };
+
+  const getItemsDisponibles = () => {
+    if (!filtros.tipo) return [];
+    return filtros.tipo === 'vacuna' ? vacunas : jeringas;
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4">
+      <div className="bg-white rounded-xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-900">Configurar Kardex Detallado</h3>
+          <div className="flex items-center space-x-3">
+            <Archive className="h-6 w-6 text-emerald-600" />
+            <h3 className="text-xl font-semibold text-gray-900">Configurar Kardex Detallado</h3>
+          </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            ×
+            <X className="h-6 w-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha Inicio *
-              </label>
-              <input
-                type="date"
-                value={filtros.fechaInicio}
-                onChange={(e) => setFiltros(prev => ({ ...prev, fechaInicio: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha Fin *
-              </label>
-              <input
-                type="date"
-                value={filtros.fechaFin}
-                onChange={(e) => setFiltros(prev => ({ ...prev, fechaFin: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
-              <select
-                value={filtros.tipo || ''}
-                onChange={(e) => setFiltros(prev => ({ ...prev, tipo: e.target.value as 'vacuna' | 'jeringa' || undefined }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Todos</option>
-                <option value="vacuna">Vacunas</option>
-                <option value="jeringa">Jeringas</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Movimiento</label>
-              <select
-                value={filtros.tipoMovimiento || ''}
-                onChange={(e) => setFiltros(prev => ({ ...prev, tipoMovimiento: e.target.value as any || undefined }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Todos</option>
-                <option value="ingreso">Ingreso</option>
-                <option value="salida">Salida</option>
-                <option value="transferencia">Transferencia</option>
-                <option value="ajuste">Ajuste</option>
-              </select>
+        <div className="space-y-6">
+          {/* Fechas */}
+          <div className="bg-gray-50 rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+              <Calendar className="h-4 w-4 mr-2" />
+              Rango de Fechas *
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha Inicio
+                </label>
+                <input
+                  type="date"
+                  value={filtros.fechaInicio}
+                  onChange={(e) => setFiltros(prev => ({ ...prev, fechaInicio: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha Fin
+                </label>
+                <input
+                  type="date"
+                  value={filtros.fechaFin}
+                  onChange={(e) => setFiltros(prev => ({ ...prev, fechaFin: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  required
+                />
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="incluirTrazabilidad"
-              checked={filtros.incluirTrazabilidad || false}
-              onChange={(e) => setFiltros(prev => ({ ...prev, incluirTrazabilidad: e.target.checked }))}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="incluirTrazabilidad" className="ml-2 text-sm text-gray-700">
-              Incluir información de trazabilidad completa
-            </label>
+          {/* Filtros de Tipo y Item */}
+          <div className="bg-gray-50 rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+              <Package className="h-4 w-4 mr-2" />
+              Filtros de Producto
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                <select
+                  value={filtros.tipo || ''}
+                  onChange={(e) => {
+                    const nuevoTipo = e.target.value as 'vacuna' | 'jeringa' || undefined;
+                    setFiltros(prev => ({
+                      ...prev,
+                      tipo: nuevoTipo,
+                      itemId: undefined, // Reset item cuando cambia tipo
+                      loteId: undefined  // Reset lote cuando cambia tipo
+                    }));
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                >
+                  <option value="">Todos</option>
+                  <option value="vacuna">Vacunas</option>
+                  <option value="jeringa">Jeringas</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {filtros.tipo === 'vacuna' ? 'Vacuna' : filtros.tipo === 'jeringa' ? 'Jeringa' : 'Item'}
+                </label>
+                <select
+                  value={filtros.itemId || ''}
+                  onChange={(e) => setFiltros(prev => ({
+                    ...prev,
+                    itemId: e.target.value || undefined,
+                    loteId: undefined // Reset lote cuando cambia item
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  disabled={!filtros.tipo || (filtros.tipo === 'jeringa' && loadingJeringas)}
+                >
+                  <option value="">Todos</option>
+                  {getItemsDisponibles().map((item: any) => (
+                    <option key={item.id} value={item.id}>
+                      {item.nombre}
+                    </option>
+                  ))}
+                </select>
+                {filtros.tipo === 'jeringa' && loadingJeringas && (
+                  <div className="text-xs text-gray-500 mt-1">Cargando jeringas...</div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Lote</label>
+                <select
+                  value={filtros.loteId || ''}
+                  onChange={(e) => setFiltros(prev => ({ ...prev, loteId: e.target.value || undefined }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  disabled={!filtros.itemId || loadingLotes}
+                >
+                  <option value="">Todos</option>
+                  {lotes.map((lote: any) => (
+                    <option key={lote.id} value={lote.id}>
+                      {lote.numero}
+                    </option>
+                  ))}
+                </select>
+                {loadingLotes && (
+                  <div className="text-xs text-gray-500 mt-1">Cargando lotes...</div>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4">
+          {/* Filtros de Movimiento y Establecimiento */}
+          <div className="bg-gray-50 rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+              <ArrowRightLeft className="h-4 w-4 mr-2" />
+              Filtros de Movimiento
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Movimiento</label>
+                <select
+                  value={filtros.tipoMovimiento || ''}
+                  onChange={(e) => setFiltros(prev => ({ ...prev, tipoMovimiento: e.target.value as any || undefined }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                >
+                  <option value="">Todos</option>
+                  <option value="ingreso">Ingreso</option>
+                  <option value="salida">Salida</option>
+                  <option value="transferencia">Transferencia</option>
+                  <option value="ajuste">Ajuste</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Establecimiento</label>
+                <select
+                  value={filtros.establecimientoId || ''}
+                  onChange={(e) => setFiltros(prev => ({ ...prev, establecimientoId: e.target.value || undefined }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                >
+                  <option value="">Todos</option>
+                  {centrosAcopio.map((centro) => (
+                    <option key={centro.id} value={centro.id}>
+                      {centro.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Búsqueda y Opciones Adicionales */}
+          <div className="bg-gray-50 rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+              <Search className="h-4 w-4 mr-2" />
+              Búsqueda y Opciones
+            </h4>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Búsqueda General</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Buscar por documento, número de documento, observaciones..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="incluirTrazabilidad"
+                  checked={filtros.incluirTrazabilidad || false}
+                  onChange={(e) => setFiltros(prev => ({ ...prev, incluirTrazabilidad: e.target.checked }))}
+                  className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                />
+                <label htmlFor="incluirTrazabilidad" className="ml-2 text-sm text-gray-700">
+                  Incluir información de trazabilidad completa
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Botones de Acción */}
+          <div className="flex justify-between items-center pt-6 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
             >
               Cancelar
             </button>
+
             <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              type="button"
+              onClick={handleExportar}
+              disabled={exportando}
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
-              Generar Kardex
+              {exportando ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Exportando...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Exportar Excel
+                </>
+              )}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

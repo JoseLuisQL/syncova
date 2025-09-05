@@ -125,15 +125,15 @@ const AppRoutes: React.FC = () => {
       />
       
       {/* Debug */}
-      <Route 
-        path="/debug" 
+      <Route
+        path="/debug"
         element={
           <ProtectedRoute requiredRoles={['administrador']}>
             <VacunasDebug />
           </ProtectedRoute>
-        } 
+        }
       />
-      
+
       {/* Ruta 404 - redirigir al dashboard */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

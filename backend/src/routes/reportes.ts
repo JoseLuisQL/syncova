@@ -45,7 +45,7 @@ router.post('/stock-critico/export/excel', ReporteController.exportarStockCritic
 router.post('/proximos-vencimientos/export/excel', ReporteController.exportarProximosVencimientosExcel);
 
 // POST /api/reportes/kardex-detallado/export/excel - Exportar kardex detallado a Excel
-// router.post('/kardex-detallado/export/excel', ReporteController.exportarKardexDetalladoExcel);
+router.post('/kardex-detallado/export/excel', ReporteController.exportarKardexDetalladoExcel);
 
 /**
  * Rutas adicionales para futuras funcionalidades

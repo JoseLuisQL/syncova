@@ -88,23 +88,71 @@ class KardexExportService {
   static async exportToExcel(config: KardexExportConfig): Promise<ServiceResult<ExcelExportResult>> {
     try {
       console.log('🔄 Iniciando exportación de Kardex a Excel');
-      console.log('📋 Filtros aplicados:', JSON.stringify(config.filtros, null, 2));
+      console.log('📋 Config completo recibido:', {
+        incluirDetalleCompleto: config.incluirDetalleCompleto,
+        incluirTrazabilidad: config.incluirTrazabilidad,
+        incluirEstadisticas: config.incluirEstadisticas,
+        formatoExportacion: config.formatoExportacion
+      });
+
+      console.log('📋 Filtros recibidos:', {
+        tipo: config.filtros?.tipo,
+        itemId: config.filtros?.itemId,
+        loteId: config.filtros?.loteId,
+        fechaInicio: config.filtros?.fechaInicio?.toISOString(),
+        fechaFin: config.filtros?.fechaFin?.toISOString(),
+        search: config.filtros?.search
+      });
 
       // Validar que se hayan proporcionado fechas
+      console.log('🔍 Validando fechas...');
+      console.log('   - config.filtros existe:', !!config.filtros);
+      console.log('   - fechaInicio existe:', !!config.filtros?.fechaInicio);
+      console.log('   - fechaFin existe:', !!config.filtros?.fechaFin);
+
       if (!config.filtros?.fechaInicio || !config.filtros?.fechaFin) {
+        console.error('❌ Error: Fechas no proporcionadas');
         return {
           success: false,
           error: 'Las fechas de inicio y fin son requeridas para la exportación'
         };
       }
 
+      console.log('✅ Fechas validadas correctamente');
+
       // Obtener movimientos de kardex con todas las relaciones
+      console.log('🔄 Llamando a obtenerMovimientosParaExportacion...');
       const movimientos = await this.obtenerMovimientosParaExportacion(config.filtros);
+      console.log(`📊 obtenerMovimientosParaExportacion completado. Movimientos obtenidos: ${movimientos.length}`);
 
       if (movimientos.length === 0) {
+        const fechaInicio = config.filtros.fechaInicio.toLocaleDateString('es-PE');
+        const fechaFin = config.filtros.fechaFin.toLocaleDateString('es-PE');
+
+        // Obtener información sobre movimientos disponibles
+        let mensajeAdicional = '';
+        try {
+          const totalMovimientos = await prisma.kardex.count();
+          if (totalMovimientos > 0) {
+            const rangoFechas = await prisma.kardex.aggregate({
+              _min: { fechaMovimiento: true },
+              _max: { fechaMovimiento: true }
+            });
+
+            const fechaMinima = rangoFechas._min.fechaMovimiento?.toLocaleDateString('es-PE');
+            const fechaMaxima = rangoFechas._max.fechaMovimiento?.toLocaleDateString('es-PE');
+
+            mensajeAdicional = ` Los movimientos disponibles están en el rango del ${fechaMinima} al ${fechaMaxima}.`;
+          } else {
+            mensajeAdicional = ' No hay movimientos registrados en el sistema.';
+          }
+        } catch (error) {
+          console.error('Error al obtener información de movimientos:', error);
+        }
+
         return {
           success: false,
-          error: 'No se encontraron movimientos para exportar con los filtros aplicados'
+          error: `No se encontraron movimientos de kardex en el rango de fechas del ${fechaInicio} al ${fechaFin}.${mensajeAdicional} Verifique que existan movimientos en este período o ajuste el rango de fechas.`
         };
       }
 
@@ -370,12 +418,51 @@ class KardexExportService {
         whereConditions.establecimientoDestinoId = filtros.establecimientoDestinoId;
       }
 
-      if (filtros.fechaInicio && filtros.fechaFin) {
-        // Las fechas ya deben venir convertidas desde el controlador
-        whereConditions.fechaMovimiento = {
-          gte: filtros.fechaInicio,
-          lte: filtros.fechaFin
-        };
+      // Filtro por rango de fechas con ajuste de horas
+      if (filtros.fechaInicio || filtros.fechaFin) {
+        whereConditions.fechaMovimiento = {};
+
+        if (filtros.fechaInicio) {
+          // Asegurar que la fecha de inicio incluya desde las 00:00:00 del día
+          const fechaInicioAjustada = new Date(filtros.fechaInicio);
+          fechaInicioAjustada.setHours(0, 0, 0, 0);
+          whereConditions.fechaMovimiento.gte = fechaInicioAjustada;
+          console.log(`📅 Fecha inicio ajustada: ${fechaInicioAjustada.toISOString()}`);
+        }
+
+        if (filtros.fechaFin) {
+          // Asegurar que la fecha de fin incluya hasta las 23:59:59.999 del día
+          const fechaFinAjustada = new Date(filtros.fechaFin);
+          fechaFinAjustada.setHours(23, 59, 59, 999);
+          whereConditions.fechaMovimiento.lte = fechaFinAjustada;
+          console.log(`📅 Fecha fin ajustada: ${fechaFinAjustada.toISOString()}`);
+        }
+      }
+
+      console.log('🔍 Condiciones WHERE construidas:', JSON.stringify(whereConditions, null, 2));
+
+      // Hacer una consulta de prueba para contar movimientos
+      const totalMovimientos = await prisma.kardex.count({ where: whereConditions });
+      console.log(`📊 Total de movimientos que coinciden con los filtros: ${totalMovimientos}`);
+
+      // Si hay filtros de fecha, mostrar algunos movimientos de ejemplo
+      if (filtros.fechaInicio || filtros.fechaFin) {
+        const movimientosEjemplo = await prisma.kardex.findMany({
+          where: whereConditions,
+          select: {
+            id: true,
+            fechaMovimiento: true,
+            tipo: true,
+            cantidad: true
+          },
+          take: 3,
+          orderBy: { fechaMovimiento: 'desc' }
+        });
+
+        console.log('📅 Movimientos de ejemplo que coinciden:');
+        movimientosEjemplo.forEach((mov, index) => {
+          console.log(`   ${index + 1}. ${mov.fechaMovimiento.toISOString()} - ${mov.tipo} - ${mov.cantidad}`);
+        });
       }
 
       // Obtener movimientos con relaciones disponibles
@@ -470,6 +557,37 @@ class KardexExportService {
       }
 
       console.log(`📊 Se obtuvieron ${movimientos.length} movimientos de la base de datos`);
+
+      // Verificar si hay movimientos en el rango de fechas especificado
+      if (movimientos.length === 0) {
+        console.log('⚠️ No se encontraron movimientos en el rango de fechas especificado');
+        console.log(`📅 Rango solicitado: ${filtros.fechaInicio?.toISOString()} - ${filtros.fechaFin?.toISOString()}`);
+
+        // Verificar si existen movimientos en general (para debug)
+        const totalMovimientos = await prisma.kardex.count();
+        console.log(`📊 Total de movimientos en la base de datos: ${totalMovimientos}`);
+
+        if (totalMovimientos > 0) {
+          // Obtener el rango de fechas de movimientos existentes
+          const rangoFechas = await prisma.kardex.aggregate({
+            _min: { fechaMovimiento: true },
+            _max: { fechaMovimiento: true }
+          });
+          console.log(`📅 Rango de fechas disponible en BD: ${rangoFechas._min.fechaMovimiento} - ${rangoFechas._max.fechaMovimiento}`);
+
+          // Obtener algunos movimientos recientes para mostrar fechas de ejemplo
+          const movimientosRecientes = await prisma.kardex.findMany({
+            select: { fechaMovimiento: true },
+            orderBy: { fechaMovimiento: 'desc' },
+            take: 5
+          });
+
+          console.log('📅 Fechas de movimientos recientes:');
+          movimientosRecientes.forEach((mov, index) => {
+            console.log(`   ${index + 1}. ${mov.fechaMovimiento.toLocaleDateString('es-PE')}`);
+          });
+        }
+      }
 
       // Transformar a formato de exportación
       const movimientosExport: KardexMovimientoExport[] = movimientos.map(mov => {
