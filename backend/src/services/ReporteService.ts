@@ -81,6 +81,24 @@ export interface VencimientoItem {
   }[];
 }
 
+export interface LoteVencidoItem {
+  loteId: string;
+  numeroLote: string;
+  vacunaId: string;
+  vacunaNombre: string;
+  vacunaTipo: string;
+  cantidadActual: number;
+  fechaVencimiento: Date;
+  diasVencido: number;
+  nivelCriticidad: 'critico' | 'muy_critico' | 'extremo';
+  valorPerdido: number;
+  establecimientosAfectados: {
+    id: string;
+    nombre: string;
+    cantidadAsignada: number;
+  }[];
+}
+
 export interface KardexDetalladoItem {
   id: string;
   fecha: Date;
@@ -400,6 +418,101 @@ export class ReporteService {
   }
 
   /**
+   * Generar reporte de lotes vencidos
+   */
+  static async generarLotesVencidos(
+    filters: ReporteInventarioFilters = {}
+  ): Promise<ServiceResult<LoteVencidoItem[]>> {
+    try {
+      console.log('🔄 Generando reporte de lotes vencidos:', filters);
+
+      const fechaActual = new Date();
+
+      // Construir condiciones WHERE
+      const whereConditions: any = {
+        fechaVencimiento: { lt: fechaActual },
+        cantidadActual: { gt: 0 }
+      };
+
+      // Por defecto incluir solo lotes disponibles y vencidos (no agotados)
+      if (!filters.incluirInactivos) {
+        whereConditions.estado = { in: ['disponible', 'vencido'] };
+      }
+
+      if (filters.vacunaId && validateUUID(filters.vacunaId)) {
+        whereConditions.vacunaId = filters.vacunaId;
+      }
+
+      // Obtener lotes vencidos
+      const lotes = await prisma.loteVacuna.findMany({
+        where: whereConditions,
+        include: {
+          vacuna: {
+            select: {
+              id: true,
+              nombre: true,
+              tipo: true
+            }
+          }
+        },
+        orderBy: { fechaVencimiento: 'desc' }
+      });
+
+      // Procesar resultados
+      const lotesVencidos: LoteVencidoItem[] = [];
+
+      for (const lote of lotes) {
+        const diasVencido = Math.ceil(
+          (fechaActual.getTime() - lote.fechaVencimiento.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        // Determinar nivel de criticidad
+        let nivelCriticidad: 'critico' | 'muy_critico' | 'extremo';
+        if (diasVencido <= 30) {
+          nivelCriticidad = 'critico';
+        } else if (diasVencido <= 90) {
+          nivelCriticidad = 'muy_critico';
+        } else {
+          nivelCriticidad = 'extremo';
+        }
+
+        // Calcular valor perdido (sin precio unitario disponible, usar 0)
+        const valorPerdido = 0; // TODO: Implementar cuando se agregue precio unitario al modelo
+
+        // Obtener establecimientos que podrían estar afectados
+        const establecimientosAfectados = await this.obtenerEstablecimientosAfectados(lote.id);
+
+        lotesVencidos.push({
+          loteId: lote.id,
+          numeroLote: lote.numero,
+          vacunaId: lote.vacuna.id,
+          vacunaNombre: lote.vacuna.nombre,
+          vacunaTipo: lote.vacuna.tipo,
+          cantidadActual: lote.cantidadActual,
+          fechaVencimiento: lote.fechaVencimiento,
+          diasVencido,
+          nivelCriticidad,
+          valorPerdido,
+          establecimientosAfectados
+        });
+      }
+
+      console.log(`✅ Reporte de lotes vencidos generado: ${lotesVencidos.length} lotes`);
+
+      return {
+        success: true,
+        data: lotesVencidos
+      };
+    } catch (error) {
+      console.error('❌ Error al generar reporte de lotes vencidos:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error desconocido al generar reporte de lotes vencidos'
+      };
+    }
+  }
+
+  /**
    * Generar reporte de kardex detallado
    */
   static async generarKardexDetallado(
@@ -628,6 +741,7 @@ export class ReporteService {
     totalStock: number;
     vacunasCriticas: number;
     lotesProximosVencer: number;
+    lotesVencidos: number;
     movimientosUltimoMes: number;
     ultimaActualizacion: Date;
   }>> {
@@ -640,6 +754,7 @@ export class ReporteService {
         stockData,
         stockCriticoResult,
         vencimientosResult,
+        lotesVencidosResult,
         movimientosUltimoMes
       ] = await Promise.all([
         // Total de vacunas activas
@@ -659,6 +774,9 @@ export class ReporteService {
         // Lotes próximos a vencer
         this.generarProximosVencimientos({ diasAnticipacion: 30 }),
 
+        // Lotes vencidos
+        this.generarLotesVencidos({}),
+
         // Movimientos del último mes
         prisma.kardex.count({
           where: {
@@ -672,12 +790,14 @@ export class ReporteService {
       const totalStock = parseInt(stockData[0]?.total_stock || '0');
       const vacunasCriticas = stockCriticoResult.success ? stockCriticoResult.data!.length : 0;
       const lotesProximosVencer = vencimientosResult.success ? vencimientosResult.data!.length : 0;
+      const lotesVencidos = lotesVencidosResult.success ? lotesVencidosResult.data!.length : 0;
 
       const estadisticas = {
         totalVacunas,
         totalStock,
         vacunasCriticas,
         lotesProximosVencer,
+        lotesVencidos,
         movimientosUltimoMes,
         ultimaActualizacion: new Date()
       };

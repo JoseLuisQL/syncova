@@ -24,7 +24,8 @@ import {
   X,
   Search,
   ArrowRightLeft,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react';
 import { mockEstablecimientos, mockVacunas } from '../../data/mockData';
 import { Establecimiento, Vacuna } from '../../types';
@@ -130,7 +131,12 @@ const Reportes: React.FC = () => {
   const { toast } = useToastContext();
 
   // Cargar datos reales desde la base de datos
-  const { vacunas: vacunasReales, establecimientos: establecimientosReales, loading: loadingFiltros } = useKardexFiltros();
+  const {
+    vacunas: vacunasReales,
+    establecimientos: establecimientosReales,
+    centrosAcopio: centrosAcopioReales,
+    loading: loadingFiltros
+  } = useKardexFiltros();
 
   const [filtros, setFiltros] = useState({
     fechaInicio: new Date().toISOString().split('T')[0],
@@ -173,10 +179,20 @@ const Reportes: React.FC = () => {
     return acc;
   }, {} as Record<string, SectionConfig[]>);
 
-  // Usar datos reales si están disponibles, sino usar mock como fallback
-  const centrosAcopio = establecimientosReales.length > 0
-    ? establecimientosReales.filter((e: Establecimiento) => e.nombre.includes('Acopio'))
-    : mockEstablecimientos.filter((e: Establecimiento) => e.nombre.includes('Acopio'));
+  // Usar centros de acopio específicos si están disponibles, sino usar mock filtrado
+  const centrosAcopio = centrosAcopioReales.length > 0
+    ? centrosAcopioReales
+    : mockEstablecimientos.filter((e: Establecimiento) => e.nombre.toLowerCase().includes('acopio'));
+
+  // Debug: Verificar que se están cargando los centros de acopio
+  React.useEffect(() => {
+    console.log('🏥 Centros de Acopio cargados:', {
+      reales: centrosAcopioReales.length,
+      mockFiltrados: mockEstablecimientos.filter(e => e.nombre.toLowerCase().includes('acopio')).length,
+      total: centrosAcopio.length,
+      nombres: centrosAcopio.map(e => e.nombre)
+    });
+  }, [centrosAcopioReales, centrosAcopio]);
 
   const vacunas = vacunasReales.length > 0 ? vacunasReales : mockVacunas;
 
@@ -525,6 +541,7 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
     generarStockActual,
     generarStockCritico,
     generarVencimientos,
+    generarLotesVencidos,
     generarKardexDetallado,
     obtenerEstadisticas,
     exportarExcel,
@@ -536,11 +553,13 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
     stockActual: FiltrosReporteBase;
     stockCritico: FiltrosStockCritico;
     vencimientos: FiltrosVencimientos;
+    lotesVencidos: FiltrosReporteBase;
     kardexDetallado: FiltrosKardexDetallado | null;
   }>({
     stockActual: {},
     stockCritico: { porcentajeMinimo: 20, cantidadMinima: 50 },
     vencimientos: { diasAnticipacion: 30 },
+    lotesVencidos: {},
     kardexDetallado: null
   });
 
@@ -582,9 +601,18 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
       generar: () => handleGenerarReporte('vencimientos')
     },
     {
+      id: 'lotes_vencidos',
+      nombre: 'Lotes Vencidos',
+      descripcion: 'Lotes que ya han vencido y requieren acción',
+      icon: AlertTriangle,
+      color: 'red',
+      datos: reportes.lotesVencidos,
+      generar: () => handleGenerarReporte('lotes_vencidos')
+    },
+    {
       id: 'kardex_detallado',
       nombre: 'Kardex Detallado',
-      descripcion: 'Movimientos detallados con filtros',
+      descripción: 'Movimientos detallados con filtros',
       icon: Archive,
       color: 'emerald',
       datos: reportes.kardexDetallado,
@@ -605,6 +633,9 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
           break;
         case 'vencimientos':
           await generarVencimientos(filtrosReportes.vencimientos);
+          break;
+        case 'lotes_vencidos':
+          await generarLotesVencidos(filtrosReportes.lotesVencidos);
           break;
       }
     } catch (error) {
@@ -685,7 +716,7 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
 
       {/* Estadísticas Rápidas */}
       {estadisticas && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center">
               <Package className="h-8 w-8 text-blue-600" />
@@ -722,6 +753,15 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
               </div>
             </div>
           </div>
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <AlertTriangle className="h-8 w-8 text-orange-600" />
+              <div className="ml-3">
+                <p className="text-sm font-medium text-orange-600">Vencidos</p>
+                <p className="text-2xl font-bold text-orange-900">{estadisticas.lotesVencidos}</p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -738,7 +778,8 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
                   ...prev,
                   stockActual: { ...prev.stockActual, centroAcopioId: value },
                   stockCritico: { ...prev.stockCritico, centroAcopioId: value },
-                  vencimientos: { ...prev.vencimientos, centroAcopioId: value }
+                  vencimientos: { ...prev.vencimientos, centroAcopioId: value },
+                  lotesVencidos: { ...prev.lotesVencidos, centroAcopioId: value }
                 }));
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -759,7 +800,8 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
                   ...prev,
                   stockActual: { ...prev.stockActual, vacunaId: value },
                   stockCritico: { ...prev.stockCritico, vacunaId: value },
-                  vencimientos: { ...prev.vencimientos, vacunaId: value }
+                  vencimientos: { ...prev.vencimientos, vacunaId: value },
+                  lotesVencidos: { ...prev.lotesVencidos, vacunaId: value }
                 }));
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -780,7 +822,8 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
                   ...prev,
                   stockActual: { ...prev.stockActual, incluirInactivos: value },
                   stockCritico: { ...prev.stockCritico, incluirInactivos: value },
-                  vencimientos: { ...prev.vencimientos, incluirInactivos: value }
+                  vencimientos: { ...prev.vencimientos, incluirInactivos: value },
+                  lotesVencidos: { ...prev.lotesVencidos, incluirInactivos: value }
                 }));
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -2482,6 +2525,86 @@ const VisualizarReporteModal: React.FC<VisualizarReporteModalProps> = ({
     );
   };
 
+  const renderLotesVencidos = () => {
+    if (!datos.lotesVencidos || datos.lotesVencidos.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">No hay lotes vencidos</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Nº Lote
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Vacuna
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Tipo
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Cantidad
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Fecha Vencimiento
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Días Vencido
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Criticidad
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {datos.lotesVencidos.map((item: any, index: number) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{item.numeroLote}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{item.vacunaNombre}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{item.vacunaTipo}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{item.cantidadActual.toLocaleString()}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {new Date(item.fechaVencimiento).toLocaleDateString('es-PE')}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-red-600">{item.diasVencido} días</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    item.nivelCriticidad === 'extremo'
+                      ? 'bg-red-100 text-red-800'
+                      : item.nivelCriticidad === 'muy_critico'
+                      ? 'bg-orange-100 text-orange-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {item.nivelCriticidad.toUpperCase().replace('_', ' ')}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   const getTitulo = () => {
     switch (tipoReporte) {
       case 'stock_critico':
@@ -2490,6 +2613,8 @@ const VisualizarReporteModal: React.FC<VisualizarReporteModalProps> = ({
         return 'Stock Actual';
       case 'vencimientos':
         return 'Próximos Vencimientos';
+      case 'lotes_vencidos':
+        return 'Lotes Vencidos';
       default:
         return 'Datos del Reporte';
     }
@@ -2503,6 +2628,8 @@ const VisualizarReporteModal: React.FC<VisualizarReporteModalProps> = ({
         return renderStockActual();
       case 'vencimientos':
         return renderVencimientos();
+      case 'lotes_vencidos':
+        return renderLotesVencidos();
       default:
         return <div className="text-center py-8"><p className="text-gray-500">Tipo de reporte no soportado</p></div>;
     }

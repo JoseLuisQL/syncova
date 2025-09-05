@@ -4,6 +4,7 @@ import {
   StockActualItem,
   StockCriticoItem,
   VencimientoItem,
+  LoteVencidoItem,
   KardexDetalladoItem
 } from './ReporteService';
 
@@ -201,6 +202,66 @@ export class ReporteExportService {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Error al exportar reporte de próximos vencimientos'
+      };
+    }
+  }
+
+  /**
+   * Exportar reporte de lotes vencidos a Excel
+   */
+  static async exportarLotesVencidos(
+    data: LoteVencidoItem[],
+    config: ReporteExportConfig
+  ): Promise<ServiceResult<ReporteExcelResult>> {
+    try {
+      console.log('🔄 Exportando reporte de lotes vencidos a Excel');
+
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC - Sistema de Vacunación';
+      workbook.created = new Date();
+      workbook.company = 'Gobierno Regional de Apurímac';
+
+      const worksheet = workbook.addWorksheet('Lotes Vencidos');
+
+      // Configurar propiedades de la hoja
+      worksheet.properties.defaultRowHeight = 20;
+      worksheet.views = [{
+        state: 'frozen',
+        xSplit: 0,
+        ySplit: config.observaciones ? 6 : 5
+      }];
+
+      // Agregar encabezado específico
+      this.agregarEncabezadoLotesVencidos(worksheet, config);
+
+      // Configurar columnas con encabezados
+      this.configurarColumnasLotesVencidos(worksheet, config);
+
+      // Agregar datos con formato especial para criticidad
+      this.agregarDatosLotesVencidos(worksheet, data, config);
+
+      // Aplicar estilos con colores de criticidad
+      this.aplicarEstilosLotesVencidos(worksheet);
+
+      const fecha = new Date().toISOString().split('T')[0];
+      const filename = `Reporte_Lotes_Vencidos_${fecha}.xlsx`;
+
+      console.log('✅ Reporte de lotes vencidos exportado exitosamente');
+
+      return {
+        success: true,
+        data: {
+          workbook,
+          filename,
+          size: 0
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de lotes vencidos:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al exportar reporte de lotes vencidos'
       };
     }
   }
@@ -944,5 +1005,171 @@ export class ReporteExportService {
   private static aplicarEstilosKardex(worksheet: ExcelJS.Worksheet): void {
     this.aplicarEstilosExcel(worksheet);
     // Estilos adicionales para kardex se implementarán después
+  }
+
+  /**
+   * Métodos auxiliares para lotes vencidos
+   */
+  private static agregarEncabezadoLotesVencidos(worksheet: ExcelJS.Worksheet, config: ReporteExportConfig): void {
+    // Título principal
+    const titleRow = worksheet.getRow(1);
+    titleRow.values = ['REPORTE DE LOTES VENCIDOS'];
+    titleRow.font = { size: 16, bold: true, color: { argb: 'FF1F2937' } };
+    titleRow.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells('A1:H1');
+
+    // Información del reporte
+    const infoRow = worksheet.getRow(2);
+    infoRow.values = [`Generado el: ${new Date().toLocaleDateString('es-PE')} | Responsable: ${config.responsableReporte}`];
+    infoRow.font = { size: 10, color: { argb: 'FF6B7280' } };
+    infoRow.alignment = { horizontal: 'center', vertical: 'middle' };
+    worksheet.mergeCells('A2:H2');
+
+    // Observaciones si existen
+    if (config.observaciones) {
+      const obsRow = worksheet.getRow(3);
+      obsRow.values = [`Observaciones: ${config.observaciones}`];
+      obsRow.font = { size: 10, italic: true, color: { argb: 'FF6B7280' } };
+      obsRow.alignment = { horizontal: 'left', vertical: 'middle' };
+      worksheet.mergeCells('A3:H3');
+    }
+  }
+
+  private static configurarColumnasLotesVencidos(worksheet: ExcelJS.Worksheet, config: ReporteExportConfig): void {
+    const headerRow = config.observaciones ? 5 : 4;
+
+    // Configurar columnas
+    worksheet.columns = [
+      { header: 'Nº', key: 'numero', width: 5 },
+      { header: 'Nº Lote', key: 'numeroLote', width: 15 },
+      { header: 'Vacuna', key: 'vacunaNombre', width: 25 },
+      { header: 'Tipo', key: 'vacunaTipo', width: 15 },
+      { header: 'Cantidad', key: 'cantidadActual', width: 10 },
+      { header: 'Fecha Vencimiento', key: 'fechaVencimiento', width: 15 },
+      { header: 'Días Vencido', key: 'diasVencido', width: 12 },
+      { header: 'Criticidad', key: 'nivelCriticidad', width: 12 }
+    ];
+
+    // Aplicar estilos al encabezado
+    const headerRowObj = worksheet.getRow(headerRow);
+    headerRowObj.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+    headerRowObj.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF1F2937' }
+    };
+    headerRowObj.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerRowObj.height = 25;
+
+    // Aplicar bordes al encabezado
+    headerRowObj.eachCell((cell) => {
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FF374151' } },
+        left: { style: 'thin', color: { argb: 'FF374151' } },
+        bottom: { style: 'thin', color: { argb: 'FF374151' } },
+        right: { style: 'thin', color: { argb: 'FF374151' } }
+      };
+    });
+  }
+
+  private static agregarDatosLotesVencidos(worksheet: ExcelJS.Worksheet, data: LoteVencidoItem[], config: ReporteExportConfig): void {
+    const startRow = (config.observaciones ? 6 : 5) + 1;
+
+    data.forEach((item, index) => {
+      const row = worksheet.getRow(startRow + index);
+
+      // Formatear fecha de vencimiento
+      const fechaVencimiento = item.fechaVencimiento.toLocaleDateString('es-PE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+
+      row.values = [
+        index + 1,
+        item.numeroLote,
+        item.vacunaNombre,
+        item.vacunaTipo,
+        item.cantidadActual,
+        fechaVencimiento,
+        item.diasVencido,
+        item.nivelCriticidad.toUpperCase().replace('_', ' ')
+      ];
+
+      // Aplicar estilos profesionales
+      row.eachCell((cell, colNumber) => {
+        cell.font = { size: 10, name: 'Segoe UI' };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+        };
+
+        // Formato especial para números
+        if (colNumber === 5) { // Cantidad
+          cell.numFmt = '#,##0';
+        }
+
+        // Color especial para la columna de criticidad
+        if (colNumber === 8) {
+          const nivel = item.nivelCriticidad.toLowerCase();
+          if (nivel === 'extremo') {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFDC2626' } // Rojo intenso
+            };
+            cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' }, bold: true };
+          } else if (nivel === 'muy_critico') {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFEF4444' } // Rojo
+            };
+            cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' }, bold: true };
+          } else if (nivel === 'critico') {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFF59E0B' } // Ámbar
+            };
+            cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' }, bold: true };
+          }
+        }
+
+        // Color especial para días vencido
+        if (colNumber === 7) {
+          if (item.diasVencido > 90) {
+            cell.font = { ...cell.font, bold: true, color: { argb: 'FFDC2626' } };
+          } else if (item.diasVencido > 30) {
+            cell.font = { ...cell.font, bold: true, color: { argb: 'FFEF4444' } };
+          } else {
+            cell.font = { ...cell.font, bold: true, color: { argb: 'FFF59E0B' } };
+          }
+        }
+      });
+
+      // Alternar colores de fila
+      if (index % 2 === 1) {
+        row.eachCell((cell, colNumber) => {
+          if (colNumber !== 8) { // No aplicar a la columna de criticidad
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFF9FAFB' }
+            };
+          }
+        });
+      }
+
+      row.height = 22;
+    });
+  }
+
+  private static aplicarEstilosLotesVencidos(worksheet: ExcelJS.Worksheet): void {
+    this.aplicarEstilosExcel(worksheet);
+    // Los estilos específicos ya se aplican en agregarDatosLotesVencidos
   }
 }

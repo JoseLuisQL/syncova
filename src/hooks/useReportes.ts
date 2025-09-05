@@ -4,6 +4,7 @@ import {
   ItemStockActual,
   ItemStockCritico,
   ItemVencimiento,
+  ItemLoteVencido,
   ItemKardexDetallado,
   EstadisticasReportes,
   FiltrosReporteBase,
@@ -27,6 +28,7 @@ export const useReportes = (): UseReportesReturn => {
     stockActual: [] as ItemStockActual[],
     stockCritico: [] as ItemStockCritico[],
     vencimientos: [] as ItemVencimiento[],
+    lotesVencidos: [] as ItemLoteVencido[],
     kardexDetallado: [] as ItemKardexDetallado[]
   });
 
@@ -43,6 +45,7 @@ export const useReportes = (): UseReportesReturn => {
     stockActual: {},
     stockCritico: {},
     vencimientos: {},
+    lotesVencidos: {},
     kardexDetallado: null
   });
 
@@ -162,6 +165,28 @@ export const useReportes = (): UseReportesReturn => {
   }, [ejecutarConCarga]);
 
   /**
+   * Generar reporte de lotes vencidos
+   */
+  const generarLotesVencidos = useCallback(async (filtrosReporte: FiltrosReporteBase = {}) => {
+    const resultado = await ejecutarConCarga(
+      () => ReportesService.generarLotesVencidos(filtrosReporte),
+      'lotes-vencidos'
+    );
+
+    if (resultado) {
+      setReportes(prev => ({
+        ...prev,
+        lotesVencidos: resultado
+      }));
+
+      setFiltros(prev => ({
+        ...prev,
+        lotesVencidos: filtrosReporte
+      }));
+    }
+  }, [ejecutarConCarga]);
+
+  /**
    * Generar reporte de kardex detallado
    */
   const generarKardexDetallado = useCallback(async (filtrosReporte: FiltrosKardexDetallado) => {
@@ -217,12 +242,17 @@ export const useReportes = (): UseReportesReturn => {
         case 'proximos_vencimientos':
           await ReportesService.exportarProximosVencimientosExcel(filtros.vencimientos, config);
           break;
+        case 'lotes-vencidos':
+        case 'lotes_vencidos':
+          await ReportesService.exportarLotesVencidosExcel(filtros.lotesVencidos || {}, config);
+          break;
         case 'kardex-detallado':
         case 'kardex_detallado':
           if (!filtros.kardexDetallado) {
             throw new Error('Filtros de kardex detallado no configurados');
           }
           await ReportesService.exportarKardexDetalladoExcel(filtros.kardexDetallado, config);
+          break;
         default:
           throw new Error(`Tipo de reporte no soportado: ${tipo}`);
       }
@@ -249,6 +279,7 @@ export const useReportes = (): UseReportesReturn => {
       stockActual: [],
       stockCritico: [],
       vencimientos: [],
+      lotesVencidos: [],
       kardexDetallado: []
     });
 
@@ -265,6 +296,7 @@ export const useReportes = (): UseReportesReturn => {
       stockActual: {},
       stockCritico: {},
       vencimientos: {},
+      lotesVencidos: {},
       kardexDetallado: null
     });
 
@@ -345,6 +377,7 @@ export const useReportes = (): UseReportesReturn => {
     generarStockActual,
     generarStockCritico,
     generarVencimientos,
+    generarLotesVencidos,
     generarKardexDetallado,
     obtenerEstadisticas,
     exportarExcel,

@@ -349,6 +349,47 @@ export class KardexService {
   }
 
   /**
+   * Obtener todos los centros de acopio disponibles
+   */
+  static async getCentrosAcopio(): Promise<any[]> {
+    try {
+      // Usar el endpoint de establecimientos que no requiere autenticación especial
+      const response = await fetch(`${this.BASE_URL}/establecimientos/centros-acopio`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result: any = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Error al obtener centros de acopio');
+      }
+
+      // Mapear los centros de acopio al formato esperado
+      return result.data.map((centro: any) => ({
+        id: centro.id,
+        nombre: centro.nombre,
+        codigo: centro.codigo || centro.codigoCentroAcopio,
+        direccion: centro.direccion,
+        responsable: centro.responsable,
+        telefono: centro.telefono,
+        estado: centro.estado,
+        createdAt: new Date(centro.createdAt),
+        updatedAt: new Date(centro.updatedAt)
+      }));
+    } catch (error) {
+      console.error('Error al obtener centros de acopio:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtener lotes de vacunas
    */
   static async getLotesVacunas(vacunaId?: string): Promise<any[]> {

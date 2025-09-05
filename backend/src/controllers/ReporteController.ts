@@ -4,7 +4,8 @@ import {
   ReporteInventarioFilters,
   StockCriticoFilters,
   VencimientosFilters,
-  KardexDetalladoFilters
+  KardexDetalladoFilters,
+  LoteVencidoItem
 } from '@/services/ReporteService';
 import {
   ReporteExportService,
@@ -175,6 +176,50 @@ export class ReporteController {
       ResponseUtil.success(res, result.data, 'Reporte de próximos vencimientos generado exitosamente');
     } catch (error) {
       console.error('Error en ReporteController.generarProximosVencimientos:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Generar reporte de lotes vencidos
+   * GET /api/reportes/lotes-vencidos
+   */
+  static async generarLotesVencidos(req: Request, res: Response): Promise<void> {
+    try {
+      const {
+        centroAcopioId,
+        vacunaId,
+        incluirInactivos
+      } = req.query;
+
+      // Validaciones
+      if (centroAcopioId && !validateUUID(centroAcopioId as string)) {
+        ResponseUtil.error(res, 'ID de centro de acopio inválido', 400);
+        return;
+      }
+
+      if (vacunaId && !validateUUID(vacunaId as string)) {
+        ResponseUtil.error(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      // Construir filtros
+      const filters: ReporteInventarioFilters = {
+        centroAcopioId: centroAcopioId as string,
+        vacunaId: vacunaId as string,
+        incluirInactivos: incluirInactivos === 'true'
+      };
+
+      const result = await ReporteService.generarLotesVencidos(filters);
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al generar reporte de lotes vencidos', 400);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, 'Reporte de lotes vencidos generado exitosamente');
+    } catch (error) {
+      console.error('Error en ReporteController.generarLotesVencidos:', error);
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }
@@ -607,6 +652,64 @@ export class ReporteController {
       res.send(buffer);
     } catch (error) {
       console.error('Error en ReporteController.exportarProximosVencimientosExcel:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Exportar reporte de lotes vencidos a Excel
+   * POST /api/reportes/lotes-vencidos/export/excel
+   */
+  static async exportarLotesVencidosExcel(req: Request, res: Response): Promise<void> {
+    try {
+      const { filters, config } = req.body;
+
+      // Validar configuración de exportación
+      if (!config || !config.responsableReporte) {
+        ResponseUtil.error(res, 'Configuración de exportación requerida', 400);
+        return;
+      }
+
+      // Generar reporte de lotes vencidos
+      const reporteResult = await ReporteService.generarLotesVencidos(filters);
+
+      if (!reporteResult.success || !reporteResult.data) {
+        ResponseUtil.error(res, reporteResult.error || 'Error al generar reporte de lotes vencidos', 400);
+        return;
+      }
+
+      // Configurar exportación
+      const exportConfig: ReporteExportConfig = {
+        incluirDetalles: config.incluirDetalles !== false,
+        incluirGraficos: config.incluirGraficos === true,
+        incluirEstadisticas: config.incluirEstadisticas !== false,
+        formatoFecha: 'dd/mm/yyyy',
+        responsableReporte: config.responsableReporte,
+        observaciones: config.observaciones
+      };
+
+      // Exportar a Excel
+      const exportResult = await ReporteExportService.exportarLotesVencidos(
+        reporteResult.data!,
+        exportConfig
+      );
+
+      if (!exportResult.success || !exportResult.data) {
+        ResponseUtil.error(res, exportResult.error || 'Error al exportar reporte de lotes vencidos', 500);
+        return;
+      }
+
+      // Generar buffer del archivo Excel
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+
+      // Configurar headers para descarga
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${exportResult.data!.filename}"`);
+      res.setHeader('Content-Length', buffer.length);
+
+      res.send(buffer);
+    } catch (error) {
+      console.error('Error en ReporteController.exportarLotesVencidosExcel:', error);
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }

@@ -80,6 +80,24 @@ export interface VencimientoItem {
   }[];
 }
 
+export interface LoteVencidoItem {
+  loteId: string;
+  numeroLote: string;
+  vacunaId: string;
+  vacunaNombre: string;
+  vacunaTipo: string;
+  cantidadActual: number;
+  fechaVencimiento: Date;
+  diasVencido: number;
+  nivelCriticidad: 'critico' | 'muy_critico' | 'extremo';
+  valorPerdido: number;
+  establecimientosAfectados: {
+    id: string;
+    nombre: string;
+    cantidadAsignada: number;
+  }[];
+}
+
 export interface KardexDetalladoItem {
   id: string;
   fecha: Date;
@@ -205,6 +223,32 @@ export class ReportesService {
       return response.data.data;
     } catch (error) {
       console.error('❌ Error al generar reporte de próximos vencimientos:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Generar reporte de lotes vencidos
+   */
+  static async generarLotesVencidos(
+    filters: ReporteInventarioFilters = {}
+  ): Promise<LoteVencidoItem[]> {
+    try {
+      console.log('🔄 Generando reporte de lotes vencidos:', filters);
+
+      const response = await apiClient.get<ApiResponse<LoteVencidoItem[]>>(
+        `${this.BASE_URL}/lotes-vencidos`,
+        { params: filters }
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error al generar reporte de lotes vencidos');
+      }
+
+      console.log('✅ Reporte de lotes vencidos generado exitosamente');
+      return response.data.data;
+    } catch (error) {
+      console.error('❌ Error al generar reporte de lotes vencidos:', error);
       throw this.handleError(error);
     }
   }
@@ -380,6 +424,48 @@ export class ReportesService {
       console.log('✅ Reporte de próximos vencimientos exportado exitosamente');
     } catch (error) {
       console.error('❌ Error al exportar reporte de próximos vencimientos:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Exportar reporte de lotes vencidos a Excel
+   */
+  static async exportarLotesVencidosExcel(
+    filters: ReporteInventarioFilters = {},
+    config: ReporteExportConfig
+  ): Promise<void> {
+    try {
+      console.log('🔄 Exportando reporte de lotes vencidos a Excel');
+
+      const response = await apiClient.post(
+        `${this.BASE_URL}/lotes-vencidos/export/excel`,
+        { filters, config },
+        {
+          responseType: 'blob',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // Crear y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Reporte_Lotes_Vencidos_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ Reporte de lotes vencidos exportado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de lotes vencidos:', error);
       throw this.handleError(error);
     }
   }

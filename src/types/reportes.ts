@@ -86,6 +86,20 @@ export interface ItemVencimiento {
   establecimientosAfectados: EstablecimientoAfectado[];
 }
 
+export interface ItemLoteVencido {
+  loteId: string;
+  numeroLote: string;
+  vacunaId: string;
+  vacunaNombre: string;
+  vacunaTipo: string;
+  cantidadActual: number;
+  fechaVencimiento: Date;
+  diasVencido: number;
+  nivelCriticidad: 'critico' | 'muy_critico' | 'extremo';
+  valorPerdido: number;
+  establecimientosAfectados: EstablecimientoAfectado[];
+}
+
 export interface ItemKardexDetallado {
   id: string;
   fecha: Date;
@@ -112,6 +126,7 @@ export interface EstadisticasReportes {
   totalStock: number;
   vacunasCriticas: number;
   lotesProximosVencer: number;
+  lotesVencidos: number;
   movimientosUltimoMes: number;
   ultimaActualizacion: Date;
 }
@@ -157,6 +172,7 @@ export interface EstadoFiltros {
   stockActual: FiltrosReporteBase;
   stockCritico: FiltrosStockCritico;
   vencimientos: FiltrosVencimientos;
+  lotesVencidos: FiltrosReporteBase;
   kardexDetallado: FiltrosKardexDetallado | null;
 }
 
@@ -167,6 +183,7 @@ export type TipoReporte =
   | 'stock-actual' | 'stock_actual'
   | 'stock-critico' | 'stock_critico'
   | 'vencimientos' | 'proximos_vencimientos'
+  | 'lotes-vencidos' | 'lotes_vencidos'
   | 'kardex-detallado' | 'kardex_detallado';
 
 export interface OpcionFiltro {
@@ -232,6 +249,7 @@ export interface UseReportesReturn {
     stockActual: ItemStockActual[];
     stockCritico: ItemStockCritico[];
     vencimientos: ItemVencimiento[];
+    lotesVencidos: ItemLoteVencido[];
     kardexDetallado: ItemKardexDetallado[];
   };
   estadisticas: EstadisticasReportes | null;
@@ -242,6 +260,7 @@ export interface UseReportesReturn {
   generarStockActual: (filtros?: FiltrosReporteBase) => Promise<void>;
   generarStockCritico: (filtros?: FiltrosStockCritico) => Promise<void>;
   generarVencimientos: (filtros?: FiltrosVencimientos) => Promise<void>;
+  generarLotesVencidos: (filtros?: FiltrosReporteBase) => Promise<void>;
   generarKardexDetallado: (filtros: FiltrosKardexDetallado) => Promise<void>;
   obtenerEstadisticas: () => Promise<void>;
   exportarExcel: (tipo: TipoReporte, config: ConfiguracionExportacion) => Promise<void>;

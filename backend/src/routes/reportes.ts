@@ -25,6 +25,9 @@ router.get('/stock-critico', ReporteController.generarStockCritico);
 // GET /api/reportes/proximos-vencimientos - Generar reporte de próximos vencimientos
 router.get('/proximos-vencimientos', ReporteController.generarProximosVencimientos);
 
+// GET /api/reportes/lotes-vencidos - Generar reporte de lotes vencidos
+router.get('/lotes-vencidos', ReporteController.generarLotesVencidos);
+
 // POST /api/reportes/kardex-detallado - Generar reporte de kardex detallado
 router.post('/kardex-detallado', ReporteController.generarKardexDetallado);
 
@@ -43,6 +46,9 @@ router.post('/stock-critico/export/excel', ReporteController.exportarStockCritic
 
 // POST /api/reportes/proximos-vencimientos/export/excel - Exportar vencimientos a Excel
 router.post('/proximos-vencimientos/export/excel', ReporteController.exportarProximosVencimientosExcel);
+
+// POST /api/reportes/lotes-vencidos/export/excel - Exportar lotes vencidos a Excel
+router.post('/lotes-vencidos/export/excel', ReporteController.exportarLotesVencidosExcel);
 
 // POST /api/reportes/kardex-detallado/export/excel - Exportar kardex detallado a Excel
 router.post('/kardex-detallado/export/excel', ReporteController.exportarKardexDetalladoExcel);

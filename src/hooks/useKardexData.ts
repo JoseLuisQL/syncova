@@ -395,24 +395,27 @@ export const useKardexFiltros = () => {
     vacunas: [] as Vacuna[],
     jeringas: [] as Jeringa[],
     establecimientos: [] as Establecimiento[],
+    centrosAcopio: [] as any[], // Agregar centros de acopio específicos
     loading: false,
     error: null as string | null
   });
 
   const cargarDatos = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
-    
+
     try {
-      const [vacunas, jeringas, establecimientos] = await Promise.all([
+      const [vacunas, jeringas, establecimientos, centrosAcopio] = await Promise.all([
         KardexService.getVacunas(),
         KardexService.getJeringas(),
-        KardexService.getEstablecimientos()
+        KardexService.getEstablecimientos(),
+        KardexService.getCentrosAcopio()
       ]);
-      
+
       setState({
         vacunas,
         jeringas,
         establecimientos,
+        centrosAcopio,
         loading: false,
         error: null
       });
