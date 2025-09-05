@@ -39,10 +39,10 @@ router.get('/estadisticas', ReporteController.obtenerEstadisticas);
 router.post('/stock-actual/export/excel', ReporteController.exportarStockActualExcel);
 
 // POST /api/reportes/stock-critico/export/excel - Exportar stock crítico a Excel
-// router.post('/stock-critico/export/excel', ReporteController.exportarStockCriticoExcel);
+router.post('/stock-critico/export/excel', ReporteController.exportarStockCriticoExcel);
 
 // POST /api/reportes/proximos-vencimientos/export/excel - Exportar vencimientos a Excel
-// router.post('/proximos-vencimientos/export/excel', ReporteController.exportarVencimientosExcel);
+router.post('/proximos-vencimientos/export/excel', ReporteController.exportarProximosVencimientosExcel);
 
 // POST /api/reportes/kardex-detallado/export/excel - Exportar kardex detallado a Excel
 // router.post('/kardex-detallado/export/excel', ReporteController.exportarKardexDetalladoExcel);

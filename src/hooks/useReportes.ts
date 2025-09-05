@@ -211,12 +211,12 @@ export const useReportes = (): UseReportesReturn => {
           break;
         case 'stock-critico':
         case 'stock_critico':
-          // TODO: Implementar cuando esté disponible en el servicio
-          throw new Error('Exportación de stock crítico no implementada aún');
+          await ReportesService.exportarStockCriticoExcel(filtros.stockCritico, config);
+          break;
         case 'vencimientos':
         case 'proximos_vencimientos':
-          // TODO: Implementar cuando esté disponible en el servicio
-          throw new Error('Exportación de vencimientos no implementada aún');
+          await ReportesService.exportarProximosVencimientosExcel(filtros.vencimientos, config);
+          break;
         case 'kardex-detallado':
         case 'kardex_detallado':
           // TODO: Implementar cuando esté disponible en el servicio

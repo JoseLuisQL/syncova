@@ -345,6 +345,117 @@ export class ReporteController {
     }
   }
 
+  /**
+   * Exportar reporte de stock crítico a Excel
+   * POST /api/reportes/stock-critico/export/excel
+   */
+  static async exportarStockCriticoExcel(req: Request, res: Response): Promise<void> {
+    try {
+      const { filters, config } = req.body;
+
+      // Validar configuración de exportación
+      if (!config || !config.responsableReporte) {
+        ResponseUtil.error(res, 'Configuración de exportación requerida', 400);
+        return;
+      }
+
+      // Generar datos del reporte
+      const reporteResult = await ReporteService.generarStockCritico(filters || {});
+      if (!reporteResult.success) {
+        ResponseUtil.error(res, reporteResult.error || 'Error al generar datos del reporte', 400);
+        return;
+      }
+
+      // Configuración por defecto para exportación
+      const exportConfig: ReporteExportConfig = {
+        incluirDetalles: true,
+        incluirGraficos: false,
+        incluirEstadisticas: true,
+        formatoFecha: 'dd/mm/yyyy',
+        responsableReporte: config.responsableReporte,
+        observaciones: config.observaciones
+      };
+
+      // Exportar a Excel
+      const exportResult = await ReporteExportService.exportarStockCritico(
+        reporteResult.data!,
+        exportConfig
+      );
+
+      if (!exportResult.success) {
+        ResponseUtil.error(res, exportResult.error || 'Error al exportar reporte', 400);
+        return;
+      }
+
+      // Configurar respuesta para descarga
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${exportResult.data!.filename}"`);
+      res.setHeader('Content-Length', buffer.length);
+
+      res.send(buffer);
+    } catch (error) {
+      console.error('Error en ReporteController.exportarStockCriticoExcel:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Exportar reporte de próximos vencimientos a Excel
+   * POST /api/reportes/proximos-vencimientos/export/excel
+   */
+  static async exportarProximosVencimientosExcel(req: Request, res: Response): Promise<void> {
+    try {
+      const { filters, config } = req.body;
+
+      // Validar configuración de exportación
+      if (!config || !config.responsableReporte) {
+        ResponseUtil.error(res, 'Configuración de exportación requerida', 400);
+        return;
+      }
+
+      // Generar datos del reporte
+      const reporteResult = await ReporteService.generarProximosVencimientos(filters || {});
+      if (!reporteResult.success) {
+        ResponseUtil.error(res, reporteResult.error || 'Error al generar datos del reporte', 400);
+        return;
+      }
+
+      // Configuración por defecto para exportación
+      const exportConfig: ReporteExportConfig = {
+        incluirDetalles: true,
+        incluirGraficos: false,
+        incluirEstadisticas: true,
+        formatoFecha: 'dd/mm/yyyy',
+        responsableReporte: config.responsableReporte,
+        observaciones: config.observaciones
+      };
+
+      // Exportar a Excel
+      const exportResult = await ReporteExportService.exportarProximosVencimientos(
+        reporteResult.data!,
+        exportConfig
+      );
+
+      if (!exportResult.success) {
+        ResponseUtil.error(res, exportResult.error || 'Error al exportar reporte', 400);
+        return;
+      }
+
+      // Configurar respuesta para descarga
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${exportResult.data!.filename}"`);
+      res.setHeader('Content-Length', buffer.length);
+
+      res.send(buffer);
+    } catch (error) {
+      console.error('Error en ReporteController.exportarProximosVencimientosExcel:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
   // Métodos adicionales de exportación se pueden agregar aquí
-  // Por ahora, el controlador está completo con la funcionalidad básica
 }

@@ -166,11 +166,16 @@ export class ReportesService {
         { params: filters }
       );
 
+      console.log('📡 Respuesta del servidor:', response.data);
+
       if (!response.data.success || !response.data.data) {
         throw new Error(response.data.message || 'Error al generar reporte de stock crítico');
       }
 
       console.log('✅ Reporte de stock crítico generado exitosamente');
+      console.log('📊 Datos recibidos:', response.data.data.length, 'elementos');
+      console.log('🔍 Primer elemento:', response.data.data[0]);
+
       return response.data.data;
     } catch (error) {
       console.error('❌ Error al generar reporte de stock crítico:', error);
@@ -291,6 +296,90 @@ export class ReportesService {
       console.log('✅ Reporte de stock actual exportado exitosamente');
     } catch (error) {
       console.error('❌ Error al exportar reporte de stock actual:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Exportar reporte de stock crítico a Excel
+   */
+  static async exportarStockCriticoExcel(
+    filters: StockCriticoFilters = {},
+    config: ReporteExportConfig
+  ): Promise<void> {
+    try {
+      console.log('🔄 Exportando reporte de stock crítico a Excel');
+
+      const response = await apiClient.post(
+        `${this.BASE_URL}/stock-critico/export/excel`,
+        { filters, config },
+        {
+          responseType: 'blob',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // Crear y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Reporte_Stock_Critico_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ Reporte de stock crítico exportado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de stock crítico:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Exportar reporte de próximos vencimientos a Excel
+   */
+  static async exportarProximosVencimientosExcel(
+    filters: VencimientosFilters = {},
+    config: ReporteExportConfig
+  ): Promise<void> {
+    try {
+      console.log('🔄 Exportando reporte de próximos vencimientos a Excel');
+
+      const response = await apiClient.post(
+        `${this.BASE_URL}/proximos-vencimientos/export/excel`,
+        { filters, config },
+        {
+          responseType: 'blob',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // Crear y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Reporte_Proximos_Vencimientos_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ Reporte de próximos vencimientos exportado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de próximos vencimientos:', error);
       throw this.handleError(error);
     }
   }

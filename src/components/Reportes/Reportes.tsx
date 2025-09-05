@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { 
-  FileText, 
-  Download, 
-  Calendar, 
-  BarChart3, 
-  TrendingUp, 
-  Package, 
-  Users, 
-  CheckCircle, 
-  Clock, 
-  Target, 
-  Activity, 
-  Settings, 
-  Eye, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Mail, 
+import {
+  FileText,
+  Download,
+  Calendar,
+  BarChart3,
+  TrendingUp,
+  Package,
+  Users,
+  CheckCircle,
+  Clock,
+  Target,
+  Activity,
+  Settings,
+  Eye,
+  Plus,
+  Edit,
+  Trash2,
+  Mail,
   FolderOpen,
   Archive,
-  Star
+  Star,
+  X
 } from 'lucide-react';
 import { mockEstablecimientos, mockVacunas } from '../../data/mockData';
 import { Establecimiento, Vacuna } from '../../types';
@@ -528,6 +529,7 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
 
   const [showKardexModal, setShowKardexModal] = React.useState(false);
   const [reporteActivo, setReporteActivo] = React.useState<string | null>(null);
+  const [reporteVisualizando, setReporteVisualizando] = React.useState<string | null>(null);
 
   // Cargar estadísticas al montar el componente
   React.useEffect(() => {
@@ -810,13 +812,22 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
                 </button>
 
                 {hasData && (
-                  <button
-                    onClick={() => handleExportarExcel(reporte.id)}
-                    className={`flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium`}
-                  >
-                    <Download className="h-4 w-4 mr-2 inline" />
-                    Exportar Excel
-                  </button>
+                  <>
+                    <button
+                      onClick={() => setReporteVisualizando(reporte.id)}
+                      className={`flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium mr-2`}
+                    >
+                      <Eye className="h-4 w-4 mr-2 inline" />
+                      Ver Datos
+                    </button>
+                    <button
+                      onClick={() => handleExportarExcel(reporte.id)}
+                      className={`flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium`}
+                    >
+                      <Download className="h-4 w-4 mr-2 inline" />
+                      Exportar Excel
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -831,6 +842,15 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
           onGenerar={handleGenerarKardex}
           vacunas={vacunas}
           centrosAcopio={centrosAcopio}
+        />
+      )}
+
+      {/* Modal para visualizar datos del reporte */}
+      {reporteVisualizando && (
+        <VisualizarReporteModal
+          tipoReporte={reporteVisualizando}
+          datos={reportes}
+          onClose={() => setReporteVisualizando(null)}
         />
       )}
     </div>
@@ -1966,6 +1986,280 @@ const ProgramarReporteModal: React.FC<ProgramarReporteModalProps> = ({
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Modal para visualizar datos del reporte
+interface VisualizarReporteModalProps {
+  tipoReporte: string;
+  datos: any;
+  onClose: () => void;
+}
+
+const VisualizarReporteModal: React.FC<VisualizarReporteModalProps> = ({
+  tipoReporte,
+  datos,
+  onClose
+}) => {
+  const renderStockCritico = () => {
+    if (!datos.stockCritico || datos.stockCritico.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">No hay vacunas con stock crítico</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Vacuna
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Stock Actual
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Stock Mínimo
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                % Crítico
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Nivel
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Acción Recomendada
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {datos.stockCritico.map((item: any, index: number) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{item.vacunaNombre}</div>
+                  <div className="text-sm text-gray-500">{item.vacunaTipo}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-bold text-gray-900">{item.stockTotal.toLocaleString()}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{item.stockMinimo.toLocaleString()}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{item.porcentajeCritico}%</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    item.nivelCriticidad === 'agotado'
+                      ? 'bg-red-100 text-red-800'
+                      : item.nivelCriticidad === 'critico'
+                      ? 'bg-orange-100 text-orange-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {item.nivelCriticidad.toUpperCase()}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="text-sm text-gray-900">{item.recomendacionAccion}</div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderStockActual = () => {
+    if (!datos.stockActual || datos.stockActual.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">No hay datos de stock actual</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Vacuna
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Stock Total
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Total Lotes
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Lotes por Vencer
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Última Actualización
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {datos.stockActual.map((item: any, index: number) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{item.vacunaNombre}</div>
+                  <div className="text-sm text-gray-500">{item.vacunaTipo}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-bold text-gray-900">{item.stockTotal.toLocaleString()}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{item.totalLotes}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{item.lotesPorVencer}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {new Date(item.ultimaActualizacion).toLocaleDateString('es-PE')}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderVencimientos = () => {
+    if (!datos.vencimientos || datos.vencimientos.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">No hay lotes próximos a vencer</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Lote
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Vacuna
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Cantidad
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Fecha Vencimiento
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Días para Vencer
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Urgencia
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {datos.vencimientos.map((item: any, index: number) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{item.numeroLote}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{item.vacunaNombre}</div>
+                  <div className="text-sm text-gray-500">{item.vacunaTipo}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-bold text-gray-900">{item.cantidadActual.toLocaleString()}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {new Date(item.fechaVencimiento).toLocaleDateString('es-PE')}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{item.diasParaVencer} días</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    item.nivelUrgencia === 'inmediato'
+                      ? 'bg-red-100 text-red-800'
+                      : item.nivelUrgencia === 'urgente'
+                      ? 'bg-orange-100 text-orange-800'
+                      : item.nivelUrgencia === 'atencion'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-green-100 text-green-800'
+                  }`}>
+                    {item.nivelUrgencia.toUpperCase()}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const getTitulo = () => {
+    switch (tipoReporte) {
+      case 'stock_critico':
+        return 'Stock Crítico';
+      case 'stock_actual':
+        return 'Stock Actual';
+      case 'vencimientos':
+        return 'Próximos Vencimientos';
+      default:
+        return 'Datos del Reporte';
+    }
+  };
+
+  const renderContent = () => {
+    switch (tipoReporte) {
+      case 'stock_critico':
+        return renderStockCritico();
+      case 'stock_actual':
+        return renderStockActual();
+      case 'vencimientos':
+        return renderVencimientos();
+      default:
+        return <div className="text-center py-8"><p className="text-gray-500">Tipo de reporte no soportado</p></div>;
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl max-w-6xl w-full m-4 shadow-2xl max-h-[90vh] overflow-hidden">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900">
+              📊 {getTitulo()}
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+          {renderContent()}
         </div>
       </div>
     </div>

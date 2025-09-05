@@ -276,7 +276,6 @@ export class ReporteService {
         } else {
           continue; // No incluir en reporte si no es crítico
         }
-
         stockCritico.push({
           ...item,
           stockMinimo,
@@ -570,7 +569,8 @@ export class ReporteService {
       // Calcular promedio manualmente
       const totalMovimientos = movimientos.length;
       if (totalMovimientos === 0) {
-        return 0; // Sin movimientos, stock mínimo es 0
+        // Sin movimientos históricos, usar la cantidad mínima establecida
+        return cantidadMinima;
       }
 
       const sumaConsumo = movimientos.reduce((sum, mov) =>
