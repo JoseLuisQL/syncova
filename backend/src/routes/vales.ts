@@ -94,6 +94,18 @@ router.get('/estadisticas', ValeController.getEstadisticas);
 router.get('/tipos-generados', ValeController.getTiposValesGenerados);
 
 /**
+ * @route GET /api/vales/verificar-existencia
+ * @desc Verificar si existen vales para un establecimiento específico
+ * @access Public (TODO: Proteger con autenticación)
+ * @query {string} establecimientoId - ID del establecimiento
+ * @query {string} vacunaId - ID de la vacuna
+ * @query {number} mes - Mes (1-12)
+ * @query {number} anio - Año
+ * @example GET /api/vales/verificar-existencia?establecimientoId=uuid&vacunaId=uuid&mes=8&anio=2025
+ */
+router.get('/verificar-existencia', ValeController.verificarValesExistentes);
+
+/**
  * @route GET /api/vales/grupos-entregas-generados
  * @desc Obtener números de grupos de entregas adicionales ya generados en vales
  * @access Public (TODO: Proteger con autenticación)

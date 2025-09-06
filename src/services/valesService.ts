@@ -433,6 +433,33 @@ export class ValesService {
   }
 
   /**
+   * Verificar si existen vales generados para un establecimiento específico
+   * en un período determinado (para mostrar modal de confirmación)
+   */
+  static async verificarValesExistentes(
+    establecimientoId: string,
+    vacunaId: string,
+    mes: number,
+    anio: number
+  ): Promise<ApiResponse<{ existenVales: boolean; valesEncontrados: ValeEntrega[] }>> {
+    try {
+      console.log(`🔍 [ValesService] Verificando vales existentes para establecimiento ${establecimientoId}, vacuna ${vacunaId}, ${mes}/${anio}`);
+
+      const response = await apiClient.get(`${this.BASE_URL}/verificar-existencia`, {
+        params: { establecimientoId, vacunaId, mes, anio }
+      });
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al verificar vales existentes:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Error al verificar vales existentes'
+      };
+    }
+  }
+
+  /**
    * SINCRONIZACIÓN AUTOMÁTICA EN TIEMPO REAL
    * Verifica y sincroniza vales automáticamente cuando detecta cambios
    * TEMPORALMENTE DESHABILITADA PARA EVITAR ERRORES

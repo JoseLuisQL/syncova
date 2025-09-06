@@ -48,6 +48,7 @@ import { useAutoSync } from '../../hooks/useAutoSync';
 import { debounce } from '../../utils/debounce';
 import { PlanificacionService } from '../../services/planificacionService';
 import { MovimientosExportService, MovimientosExportConfig } from '../../services/movimientosExportService';
+import { ValesService } from '../../services/valesService';
 import {
   ordenarEstablecimientos,
   getEstiloEstablecimiento,
@@ -59,6 +60,7 @@ import {
 import Vales from '../Vales/Vales';
 import ValesErrorBoundary from '../Vales/ValesErrorBoundary';
 import ImportarModal from './ImportarModal';
+import ConfirmacionModificacionModal from './ConfirmacionModificacionModal';
 
 const Movimientos: React.FC = () => {
   // Hooks para gestión de datos
@@ -162,6 +164,20 @@ const Movimientos: React.FC = () => {
 
   // Estado para modal de importación
   const [showImportarModal, setShowImportarModal] = useState<boolean>(false);
+
+  // Estados para modal de confirmación de modificación
+  const [showConfirmacionModal, setShowConfirmacionModal] = useState<boolean>(false);
+  const [pendingModification, setPendingModification] = useState<{
+    establecimientoId: string;
+    campo: string;
+    valorOriginal: number;
+    valorNuevo: number;
+    establecimientoNombre: string;
+    valesAfectados: Array<{
+      numero: string;
+      fechaGeneracion: Date;
+    }>;
+  } | null>(null);
 
   // Estados para stock disponible
   const [stockInfo, setStockInfo] = useState<{
@@ -511,13 +527,100 @@ const Movimientos: React.FC = () => {
       clearTimeout(debounceTimeouts.current[key]);
     }
 
-    // Configurar nuevo timeout para auto-guardar después de 2 segundos de inactividad
+    // VERIFICACIÓN CRÍTICA: Comprobar INMEDIATAMENTE si necesita confirmación
+    // para prevenir cualquier auto-guardado no deseado
+    if (campo === 'entrega' && selectedVacuna) {
+      const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
+      const esCreacion = !movimientoExistente?.tieneMovimiento;
+      const valorOriginal = movimientoExistente?.[campo as keyof typeof movimientoExistente] as number || 0;
+
+      // Si es modificación de entrega y el valor cambió, verificar vales INMEDIATAMENTE
+      if (!esCreacion && valorOriginal !== newValue) {
+        // Verificar vales de forma asíncrona pero sin esperar
+        checkForVoucherConfirmation(establecimientoId, campo, newValue).then(necesitaConfirmacion => {
+          if (necesitaConfirmacion) {
+            // Si necesita confirmación, cancelar cualquier auto-guardado pendiente
+            if (debounceTimeouts.current[key]) {
+              clearTimeout(debounceTimeouts.current[key]);
+              delete debounceTimeouts.current[key];
+            }
+            // El modal ya se mostró en checkForVoucherConfirmation
+            return;
+          } else {
+            // Si no necesita confirmación, configurar auto-guardado normal
+            debounceTimeouts.current[key] = setTimeout(() => {
+              handleSaveFieldValue(establecimientoId, campo, newValue);
+            }, 2000);
+          }
+        });
+        return; // Salir temprano para evitar configurar timeout normal
+      }
+    }
+
+    // Configurar timeout normal para campos que no requieren verificación de vales
     debounceTimeouts.current[key] = setTimeout(() => {
       handleSaveFieldValue(establecimientoId, campo, newValue);
     }, 2000);
   };
 
-  // Función para guardar un campo específico
+  // Función para verificar si se necesita confirmación antes de guardar
+  const checkForVoucherConfirmation = async (establecimientoId: string, campo: string, value: number): Promise<boolean> => {
+    // Si ya hay un modal de confirmación abierto, no procesar más verificaciones
+    if (showConfirmacionModal) {
+      return true; // Bloquear cualquier guardado adicional
+    }
+
+    // Obtener el movimiento existente para determinar si es creación o actualización
+    const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
+    const esCreacion = !movimientoExistente?.tieneMovimiento;
+    const valorOriginal = movimientoExistente?.[campo as keyof typeof movimientoExistente] as number || 0;
+
+    // Solo verificar para modificaciones de entrega en establecimientos existentes
+    if (!esCreacion && campo === 'entrega' && selectedVacuna && valorOriginal !== value) {
+      try {
+        const verificacionVales = await ValesService.verificarValesExistentes(
+          establecimientoId,
+          selectedVacuna,
+          selectedMes,
+          selectedAnio
+        );
+
+        if (verificacionVales.success && verificacionVales.data?.existenVales) {
+          // Hay vales existentes - configurar modal de confirmación
+          const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
+          const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+
+          // CRÍTICO: Cancelar cualquier timeout de auto-guardado antes de mostrar modal
+          const key = getFieldKey(establecimientoId, campo);
+          if (debounceTimeouts.current[key]) {
+            clearTimeout(debounceTimeouts.current[key]);
+            delete debounceTimeouts.current[key];
+          }
+
+          setPendingModification({
+            establecimientoId,
+            campo,
+            valorOriginal,
+            valorNuevo: value,
+            establecimientoNombre: nombreEstablecimiento,
+            valesAfectados: verificacionVales.data.valesEncontrados.map(vale => ({
+              numero: vale.numero,
+              fechaGeneracion: vale.fechaGeneracion
+            }))
+          });
+          setShowConfirmacionModal(true);
+          return true; // Necesita confirmación
+        }
+      } catch (error) {
+        console.error('Error verificando vales existentes:', error);
+        // Si hay error en la verificación, continuar con la modificación normal
+      }
+    }
+
+    return false; // No necesita confirmación
+  };
+
+  // Función para guardar un campo específico (ahora con verificación previa)
   const handleSaveFieldValue = async (establecimientoId: string, campo: string, value: number) => {
     const key = getFieldKey(establecimientoId, campo);
 
@@ -530,71 +633,19 @@ const Movimientos: React.FC = () => {
         delete debounceTimeouts.current[key];
       }
 
-      // Obtener información del establecimiento para el toast
-      const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
-      const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+      // VERIFICACIÓN CRÍTICA: Comprobar si se necesita confirmación ANTES de guardar
+      const necesitaConfirmacion = await checkForVoucherConfirmation(establecimientoId, campo, value);
 
-      // Obtener el movimiento existente para determinar si es creación o actualización
-      const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
-      const esCreacion = !movimientoExistente?.tieneMovimiento;
-
-      // Actualizar en el backend
-      await handleActualizarCampoMovimiento(establecimientoId, campo as keyof UpdateMovimientoDto, value);
-
-      // Limpiar estado temporal
-      setTempValues(prev => {
-        const newTemp = { ...prev };
-        delete newTemp[key];
-        return newTemp;
-      });
-
-      setPendingChanges(prev => {
-        const newPending = { ...prev };
-        delete newPending[key];
-        return newPending;
-      });
-
-      // Mostrar toast de confirmación profesional
-      const campoNombre = {
-        'transIngreso': 'Trans. Ingreso',
-        'salida': 'Salida',
-        'transSalida': 'Trans. Salida',
-        'entrega': 'Entrega'
-      }[campo] || campo;
-
-      if (esCreacion) {
-        toast.success(
-          `✅ Movimiento creado • ${nombreEstablecimiento} • ${campoNombre}: ${value.toLocaleString()}`
-        );
-      } else {
-        const mensajeBase = `✅ ${campoNombre} actualizado • ${nombreEstablecimiento} • Valor: ${value.toLocaleString()}`;
-        const mensajeSincronizacion = campo === 'entrega' ? ' • Sincronizado con planificación' : '';
-        toast.success(mensajeBase + mensajeSincronizacion);
+      if (necesitaConfirmacion) {
+        // Modal de confirmación mostrado - NO guardar todavía
+        setIsAutoSaving(false);
+        return;
       }
 
-      // FUNCIONALIDAD NUEVA: Recargar datos automáticamente después de actualizar campos que afectan el stock
-      // Esto asegura que los cambios en el saldo anterior del siguiente mes se reflejen inmediatamente
-      if (['saldoAnterior', 'transIngreso', 'salida', 'transSalida', 'entrega', 'entregaBase'].includes(campo)) {
-        // Recargar los datos con un pequeño delay para permitir que el trigger de base de datos se ejecute
-        setTimeout(async () => {
-          if (selectedVacuna) {
-            const filters = {
-              vacunaId: selectedVacuna,
-              mes: selectedMes,
-              anio: selectedAnio,
-              ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
-            };
-            await loadMovimientos(filters);
+      // Proceder con el guardado normal (sin confirmación necesaria)
+      await saveFieldValueToDatabase(establecimientoId, campo, value);
 
-            // 🚀 NUEVA FUNCIONALIDAD: Actualizar Stock Disponible en tiempo real cuando cambia la entrega
-            if (campo === 'entrega') {
-              await updateStockInRealTime();
-            }
-          }
-        }, 500); // 500ms de delay para asegurar que el trigger se ejecute
-      }
-
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al guardar campo:', error);
 
       // Obtener información del establecimiento para el toast de error
@@ -618,13 +669,172 @@ const Movimientos: React.FC = () => {
     }
   };
 
+  // Función separada para guardar en la base de datos (sin verificaciones de confirmación)
+  const saveFieldValueToDatabase = async (establecimientoId: string, campo: string, value: number) => {
+    const key = getFieldKey(establecimientoId, campo);
+
+    // Obtener información del establecimiento para el toast
+    const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
+    const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+
+    // Obtener el movimiento existente para determinar si es creación o actualización
+    const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
+    const esCreacion = !movimientoExistente?.tieneMovimiento;
+
+    // Actualizar en el backend
+    await handleActualizarCampoMovimiento(establecimientoId, campo as keyof UpdateMovimientoDto, value);
+
+    // Limpiar estado temporal
+    setTempValues(prev => {
+      const newTemp = { ...prev };
+      delete newTemp[key];
+      return newTemp;
+    });
+
+    setPendingChanges(prev => {
+      const newPending = { ...prev };
+      delete newPending[key];
+      return newPending;
+    });
+
+    // Mostrar toast de confirmación profesional
+    const campoNombre = {
+      'transIngreso': 'Trans. Ingreso',
+      'salida': 'Salida',
+      'transSalida': 'Trans. Salida',
+      'entrega': 'Entrega'
+    }[campo] || campo;
+
+    if (esCreacion) {
+      toast.success(
+        `✅ Movimiento creado • ${nombreEstablecimiento} • ${campoNombre}: ${value.toLocaleString()}`
+      );
+    } else {
+      const mensajeBase = `✅ ${campoNombre} actualizado • ${nombreEstablecimiento} • Valor: ${value.toLocaleString()}`;
+      const mensajeSincronizacion = campo === 'entrega' ? ' • Sincronizado con planificación' : '';
+      toast.success(mensajeBase + mensajeSincronizacion);
+    }
+
+    // FUNCIONALIDAD NUEVA: Recargar datos automáticamente después de actualizar campos que afectan el stock
+    // Esto asegura que los cambios en el saldo anterior del siguiente mes se reflejen inmediatamente
+    if (['saldoAnterior', 'transIngreso', 'salida', 'transSalida', 'entrega', 'entregaBase'].includes(campo)) {
+      // Recargar los datos con un pequeño delay para permitir que el trigger de base de datos se ejecute
+      setTimeout(async () => {
+        if (selectedVacuna) {
+          const filters = {
+            vacunaId: selectedVacuna,
+            mes: selectedMes,
+            anio: selectedAnio,
+            ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
+          };
+          await loadMovimientos(filters);
+
+          // 🚀 NUEVA FUNCIONALIDAD: Actualizar Stock Disponible en tiempo real cuando cambia la entrega
+          if (campo === 'entrega') {
+            await updateStockInRealTime();
+          }
+        }
+      }, 500); // 500ms de delay para asegurar que el trigger se ejecute
+    }
+  };
+
+  // Funciones para manejar el modal de confirmación de modificación
+  const handleConfirmModification = async () => {
+    if (!pendingModification) return;
+
+    try {
+      setIsAutoSaving(true);
+
+      // Proceder con la modificación usando la función de guardado en base de datos
+      await saveFieldValueToDatabase(
+        pendingModification.establecimientoId,
+        pendingModification.campo,
+        pendingModification.valorNuevo
+      );
+
+      // Mostrar toast de confirmación específico para modificaciones con vales
+      toast.success(
+        `✅ Entrega modificada • ${pendingModification.establecimientoNombre} • Valor: ${pendingModification.valorNuevo.toLocaleString()} • Vales sincronizados automáticamente`
+      );
+
+      // Recargar datos para reflejar cambios
+      if (selectedVacuna) {
+        const filters = {
+          vacunaId: selectedVacuna,
+          mes: selectedMes,
+          anio: selectedAnio,
+          ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
+        };
+        await loadMovimientos(filters);
+      }
+
+      // Cerrar modal
+      setShowConfirmacionModal(false);
+      setPendingModification(null);
+    } catch (error: any) {
+      console.error('Error al confirmar modificación:', error);
+      toast.error(
+        `❌ Error al modificar entrega • ${pendingModification.establecimientoNombre} • ${error.message || 'Error desconocido'}`
+      );
+    } finally {
+      setIsAutoSaving(false);
+    }
+  };
+
+  const handleCancelModification = () => {
+    if (!pendingModification) return;
+
+    const key = getFieldKey(pendingModification.establecimientoId, pendingModification.campo);
+
+    // CRÍTICO: Cancelar cualquier timeout de auto-guardado pendiente
+    if (debounceTimeouts.current[key]) {
+      clearTimeout(debounceTimeouts.current[key]);
+      delete debounceTimeouts.current[key];
+    }
+
+    // Revertir el valor temporal al original
+    setTempValues(prev => {
+      const newTemp = { ...prev };
+      newTemp[key] = pendingModification.valorOriginal;
+      return newTemp;
+    });
+
+    // Limpiar cambios pendientes
+    setPendingChanges(prev => {
+      const newPending = { ...prev };
+      delete newPending[key];
+      return newPending;
+    });
+
+    // Cerrar modal
+    setShowConfirmacionModal(false);
+    setPendingModification(null);
+
+    toast.info(
+      `🔄 Modificación cancelada • ${pendingModification.establecimientoNombre} • Valor revertido a: ${pendingModification.valorOriginal.toLocaleString()}`
+    );
+  };
+
+  const handleCloseConfirmationModal = () => {
+    if (!isAutoSaving) {
+      handleCancelModification();
+    }
+  };
+
   // Función para manejar cuando el usuario sale del campo (onBlur)
-  const handleFieldBlur = (establecimientoId: string, campo: string) => {
+  const handleFieldBlur = async (establecimientoId: string, campo: string) => {
     const key = getFieldKey(establecimientoId, campo);
     const tempValue = tempValues[key];
 
     if (tempValue !== undefined && pendingChanges[key]) {
-      handleSaveFieldValue(establecimientoId, campo, tempValue);
+      // Verificar si necesita confirmación antes del guardado en blur
+      const necesitaConfirmacion = await checkForVoucherConfirmation(establecimientoId, campo, tempValue);
+
+      if (!necesitaConfirmacion) {
+        // Solo guardar si no necesita confirmación
+        handleSaveFieldValue(establecimientoId, campo, tempValue);
+      }
+      // Si necesita confirmación, el modal ya se habrá mostrado por checkForVoucherConfirmation
     }
   };
 
@@ -2569,6 +2779,22 @@ const Movimientos: React.FC = () => {
           onGenerarReporteErrores={generarReporteErrores}
           isDownloadingTemplate={isDownloadingTemplate}
           isImportingExcel={isImportingExcel}
+        />
+      )}
+
+      {/* Modal de Confirmación de Modificación */}
+      {showConfirmacionModal && pendingModification && (
+        <ConfirmacionModificacionModal
+          isOpen={showConfirmacionModal}
+          onClose={handleCloseConfirmationModal}
+          onConfirm={handleConfirmModification}
+          onCancel={handleCancelModification}
+          establecimientoNombre={pendingModification.establecimientoNombre}
+          vacunaNombre={vacunasActivas.find(v => v.id === selectedVacuna)?.nombre || 'Vacuna'}
+          cantidadOriginal={pendingModification.valorOriginal}
+          cantidadNueva={pendingModification.valorNuevo}
+          valesAfectados={pendingModification.valesAfectados}
+          isProcessing={isAutoSaving}
         />
       )}
       </div>

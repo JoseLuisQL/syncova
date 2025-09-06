@@ -556,6 +556,57 @@ export class ValeController {
   }
 
   /**
+   * Verificar si existen vales para un establecimiento específico
+   * GET /api/vales/verificar-existencia
+   */
+  static async verificarValesExistentes(req: Request, res: Response): Promise<void> {
+    try {
+      const { establecimientoId, vacunaId, mes, anio } = req.query;
+
+      // Validaciones básicas
+      if (!establecimientoId || !validateUUID(establecimientoId as string)) {
+        ResponseUtil.error(res, 'ID de establecimiento inválido', 400);
+        return;
+      }
+
+      if (!vacunaId || !validateUUID(vacunaId as string)) {
+        ResponseUtil.error(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      const mesNum = parseInt(mes as string);
+      const anioNum = parseInt(anio as string);
+
+      if (!mesNum || mesNum < 1 || mesNum > 12) {
+        ResponseUtil.error(res, 'Mes debe estar entre 1 y 12', 400);
+        return;
+      }
+
+      if (!anioNum || anioNum < 2020) {
+        ResponseUtil.error(res, 'Año inválido', 400);
+        return;
+      }
+
+      const result = await ValeService.verificarValesExistentesParaEstablecimiento(
+        establecimientoId as string,
+        vacunaId as string,
+        mesNum,
+        anioNum
+      );
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al verificar vales existentes', 400);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, 'Verificación de vales existentes completada');
+    } catch (error) {
+      console.error('Error en ValeController.verificarValesExistentes:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
    * Obtener grupos de entregas adicionales ya generados
    * GET /api/vales/grupos-entregas-generados
    */

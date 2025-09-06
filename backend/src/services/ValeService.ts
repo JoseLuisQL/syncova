@@ -3279,4 +3279,127 @@ export class ValeService {
       };
     }
   }
+
+  /**
+   * Verificar si existen vales generados para un establecimiento específico
+   * (Para mostrar modal de confirmación antes de modificar entregas)
+   */
+  static async verificarValesExistentesParaEstablecimiento(
+    establecimientoId: string,
+    vacunaId: string,
+    mes: number,
+    anio: number
+  ): Promise<ServiceResult<{ existenVales: boolean; valesEncontrados: ValeEntregaConRelaciones[] }>> {
+    try {
+      console.log(`🔍 [ValeService] Verificando vales existentes para establecimiento ${establecimientoId}, vacuna ${vacunaId}, ${mes}/${anio}`);
+
+      // Obtener el establecimiento para determinar el centro de acopio
+      const establecimiento = await prisma.establecimiento.findUnique({
+        where: { id: establecimientoId },
+        select: {
+          id: true,
+          nombre: true,
+          tipo: true,
+          centroAcopioId: true,
+          centroAcopio: {
+            select: { id: true, nombre: true }
+          }
+        }
+      });
+
+      if (!establecimiento) {
+        return {
+          success: false,
+          error: 'Establecimiento no encontrado'
+        };
+      }
+
+      // Determinar el centro de acopio
+      let centroAcopioId: string;
+      if (establecimiento.tipo === 'centro_acopio') {
+        centroAcopioId = establecimiento.id;
+      } else if (establecimiento.centroAcopioId) {
+        centroAcopioId = establecimiento.centroAcopioId;
+      } else {
+        return {
+          success: false,
+          error: 'No se pudo determinar el centro de acopio'
+        };
+      }
+
+      // Buscar vales que contengan este establecimiento y vacuna
+      const valesExistentes = await prisma.valeEntrega.findMany({
+        where: {
+          centroAcopioId,
+          mes,
+          anio,
+          estado: 'generado', // Solo vales generados (no eliminados)
+          detalles: {
+            some: {
+              establecimientoId,
+              vacunaId
+            }
+          }
+        },
+        include: {
+          centroAcopio: {
+            select: {
+              id: true,
+              nombre: true,
+              codigo: true
+            }
+          },
+          usuario: {
+            select: {
+              id: true,
+              nombres: true,
+              apellidos: true
+            }
+          },
+          detalles: {
+            where: {
+              establecimientoId,
+              vacunaId
+            },
+            include: {
+              establecimiento: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  codigo: true
+                }
+              },
+              vacuna: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  presentacion: true,
+                  dosisPorFrasco: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: { fechaGeneracion: 'desc' }
+      });
+
+      const existenVales = valesExistentes.length > 0;
+
+      console.log(`📋 [ValeService] ${existenVales ? 'Encontrados' : 'No se encontraron'} ${valesExistentes.length} vales para el establecimiento ${establecimiento.nombre}`);
+
+      return {
+        success: true,
+        data: {
+          existenVales,
+          valesEncontrados: valesExistentes as ValeEntregaConRelaciones[]
+        }
+      };
+    } catch (error) {
+      console.error('Error verificando vales existentes:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error verificando vales existentes'
+      };
+    }
+  }
 }
