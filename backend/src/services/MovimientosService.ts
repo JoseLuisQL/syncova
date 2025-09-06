@@ -1569,7 +1569,9 @@ export class MovimientosService {
       // Calcular stock inicial (suma de todos los lotes)
       const stockInicial = lotes.reduce((sum, lote) => sum + lote.cantidadActual, 0);
 
-      // Obtener total de entregas SOLO para el mes/año especificado (no acumulativo)
+      // CORRECCIÓN: Obtener total de entregas SOLO para el mes/año especificado
+      // El campo 'entrega' ya incluye la suma de entrega_base + entregas_adicionales
+      // por lo que NO debemos sumar las entregas adicionales por separado
       const totalEntregas = await prisma.movimientoVacuna.aggregate({
         where: {
           vacunaId,
@@ -1581,21 +1583,9 @@ export class MovimientosService {
         }
       });
 
-      // Obtener entregas adicionales SOLO para el mes/año especificado (no acumulativo)
-      const entregasAdicionales = await prisma.entregaAdicional.aggregate({
-        where: {
-          movimientoVacuna: {
-            vacunaId,
-            mes,
-            anio
-          }
-        },
-        _sum: {
-          cantidad: true
-        }
-      });
-
-      const totalEntregasCalculado = (totalEntregas._sum.entrega || 0) + (entregasAdicionales._sum.cantidad || 0);
+      // CORRECCIÓN: No sumar entregas adicionales por separado ya que están incluidas en el campo 'entrega'
+      // El backend actualiza automáticamente el campo 'entrega' cuando se crean/modifican entregas adicionales
+      const totalEntregasCalculado = totalEntregas._sum.entrega || 0;
       const stockDisponible = stockInicial - totalEntregasCalculado; // Permitir valores negativos para mostrar advertencias
 
       // Determinar estado del stock basado en el stock disponible
