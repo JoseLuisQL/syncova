@@ -374,7 +374,7 @@ export class ValeService {
   /**
    * Obtener movimientos para generar vale
    */
-  private static async obtenerMovimientosParaVale(
+  static async obtenerMovimientosParaVale(
     centroAcopioId: string,
     mes: number,
     anio: number,

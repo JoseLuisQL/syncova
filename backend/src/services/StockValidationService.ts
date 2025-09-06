@@ -12,6 +12,10 @@ export interface StockValidationResult {
     vaccines: VaccineStockDetail[];
     syringes: SyringeStockDetail[];
   };
+  expiredLots: {
+    vaccines: ExpiredLotDetail[];
+    syringes: ExpiredLotDetail[];
+  };
 }
 
 export interface VaccineStockDetail {
@@ -25,6 +29,8 @@ export interface VaccineStockDetail {
     number: string;
     availableQuantity: number;
     expirationDate: Date;
+    isExpired: boolean;
+    daysUntilExpiration: number;
   }[];
 }
 
@@ -39,7 +45,19 @@ export interface SyringeStockDetail {
     number: string;
     availableQuantity: number;
     expirationDate?: Date;
+    isExpired?: boolean;
+    daysUntilExpiration?: number;
   }[];
+}
+
+export interface ExpiredLotDetail {
+  id: string;
+  number: string;
+  itemName: string;
+  itemType: 'vaccine' | 'syringe';
+  expirationDate: Date;
+  availableQuantity: number;
+  daysExpired: number;
 }
 
 export interface VaccineRequirement {
@@ -59,13 +77,16 @@ export class StockValidationService {
     const warnings: string[] = [];
     const vaccineDetails: VaccineStockDetail[] = [];
     const syringeDetails: SyringeStockDetail[] = [];
+    const expiredVaccineLots: ExpiredLotDetail[] = [];
+    const expiredSyringeLots: ExpiredLotDetail[] = [];
 
     try {
-      // 1. Validate vaccine stock
+      // 1. Validate vaccine stock and check for expired lots
       for (const requirement of vaccineRequirements) {
         const vaccineDetail = await this.validateVaccineStock(requirement);
         vaccineDetails.push(vaccineDetail);
 
+        // Check for insufficient stock
         if (!vaccineDetail.sufficient) {
           errors.push(
             `Stock insuficiente de ${vaccineDetail.vaccineName}. ` +
@@ -73,9 +94,29 @@ export class StockValidationService {
             `Disponible: ${vaccineDetail.availableQuantity}`
           );
         }
+
+        // Check for expired lots
+        const expiredLots = vaccineDetail.lots.filter(lot => lot.isExpired);
+        if (expiredLots.length > 0) {
+          expiredLots.forEach(lot => {
+            expiredVaccineLots.push({
+              id: lot.id,
+              number: lot.number,
+              itemName: vaccineDetail.vaccineName,
+              itemType: 'vaccine',
+              expirationDate: lot.expirationDate,
+              availableQuantity: lot.availableQuantity,
+              daysExpired: Math.abs(lot.daysUntilExpiration)
+            });
+          });
+
+          errors.push(
+            `La vacuna ${vaccineDetail.vaccineName} tiene lotes vencidos que deben ser actualizados antes de generar el vale`
+          );
+        }
       }
 
-      // 2. Validate syringe stock
+      // 2. Validate syringe stock and check for expired lots
       for (const requirement of vaccineRequirements) {
         const syringeValidation = await this.validateSyringeStock(
           requirement,
@@ -83,12 +124,37 @@ export class StockValidationService {
         );
         syringeDetails.push(...syringeValidation.details);
 
+        // Check for insufficient stock
         if (syringeValidation.errors.length > 0) {
           errors.push(...syringeValidation.errors);
         }
         if (syringeValidation.warnings.length > 0) {
           warnings.push(...syringeValidation.warnings);
         }
+
+        // Check for expired syringe lots
+        syringeValidation.details.forEach(syringeDetail => {
+          const expiredLots = syringeDetail.lots.filter(lot => lot.isExpired);
+          if (expiredLots.length > 0) {
+            expiredLots.forEach(lot => {
+              if (lot.expirationDate && lot.daysUntilExpiration !== undefined) {
+                expiredSyringeLots.push({
+                  id: lot.id,
+                  number: lot.number,
+                  itemName: syringeDetail.syringeType,
+                  itemType: 'syringe',
+                  expirationDate: lot.expirationDate,
+                  availableQuantity: lot.availableQuantity,
+                  daysExpired: Math.abs(lot.daysUntilExpiration)
+                });
+              }
+            });
+
+            errors.push(
+              `Las jeringas ${syringeDetail.syringeType} tienen lotes vencidos que deben ser actualizados antes de generar el vale`
+            );
+          }
+        });
       }
 
       return {
@@ -98,6 +164,10 @@ export class StockValidationService {
         stockDetails: {
           vaccines: vaccineDetails,
           syringes: syringeDetails
+        },
+        expiredLots: {
+          vaccines: expiredVaccineLots,
+          syringes: expiredSyringeLots
         }
       };
 
@@ -110,6 +180,10 @@ export class StockValidationService {
         stockDetails: {
           vaccines: vaccineDetails,
           syringes: syringeDetails
+        },
+        expiredLots: {
+          vaccines: expiredVaccineLots,
+          syringes: expiredSyringeLots
         }
       };
     }
@@ -150,6 +224,7 @@ export class StockValidationService {
       }
     });
 
+    const today = new Date();
     const availableQuantity = lots.reduce((sum, lot) => sum + lot.cantidadActual, 0);
     const sufficient = availableQuantity >= requirement.quantity;
 
@@ -159,12 +234,21 @@ export class StockValidationService {
       requiredQuantity: requirement.quantity,
       availableQuantity,
       sufficient,
-      lots: lots.map(lot => ({
-        id: lot.id,
-        number: lot.numero,
-        availableQuantity: lot.cantidadActual,
-        expirationDate: lot.fechaVencimiento
-      }))
+      lots: lots.map(lot => {
+        const expirationDate = new Date(lot.fechaVencimiento);
+        const timeDiff = expirationDate.getTime() - today.getTime();
+        const daysUntilExpiration = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const isExpired = daysUntilExpiration < 0;
+
+        return {
+          id: lot.id,
+          number: lot.numero,
+          availableQuantity: lot.cantidadActual,
+          expirationDate: lot.fechaVencimiento,
+          isExpired,
+          daysUntilExpiration
+        };
+      })
     };
   }
 
@@ -278,6 +362,7 @@ export class StockValidationService {
       }
     });
 
+    const today = new Date();
     const availableQuantity = lots.reduce((sum, lot) => sum + lot.cantidadActual, 0);
     const sufficient = availableQuantity >= requiredQuantity;
 
@@ -287,12 +372,32 @@ export class StockValidationService {
       requiredQuantity,
       availableQuantity,
       sufficient,
-      lots: lots.map(lot => ({
-        id: lot.id,
-        number: lot.numero,
-        availableQuantity: lot.cantidadActual,
-        expirationDate: lot.fechaVencimiento || undefined
-      }))
+      lots: lots.map(lot => {
+        if (!lot.fechaVencimiento) {
+          return {
+            id: lot.id,
+            number: lot.numero,
+            availableQuantity: lot.cantidadActual,
+            expirationDate: undefined,
+            isExpired: false,
+            daysUntilExpiration: undefined
+          };
+        }
+
+        const expirationDate = new Date(lot.fechaVencimiento);
+        const timeDiff = expirationDate.getTime() - today.getTime();
+        const daysUntilExpiration = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const isExpired = daysUntilExpiration < 0;
+
+        return {
+          id: lot.id,
+          number: lot.numero,
+          availableQuantity: lot.cantidadActual,
+          expirationDate: lot.fechaVencimiento,
+          isExpired,
+          daysUntilExpiration
+        };
+      })
     };
   }
 
@@ -342,18 +447,40 @@ export class StockValidationService {
     const availableQuantity = syringe.lotes.reduce((sum, lot) => sum + lot.cantidadActual, 0);
     const requiredQuantity = totalDoses; // 1:1 ratio by default
 
+    const today = new Date();
+
     return [{
       syringeId: syringe.id,
       syringeType: `${syringe.tipo} ${syringe.capacidad} (${syringe.color})`,
       requiredQuantity,
       availableQuantity,
       sufficient: availableQuantity >= requiredQuantity,
-      lots: syringe.lotes.map(lot => ({
-        id: lot.id,
-        number: lot.numero,
-        availableQuantity: lot.cantidadActual,
-        expirationDate: lot.fechaVencimiento || undefined
-      }))
+      lots: syringe.lotes.map(lot => {
+        if (!lot.fechaVencimiento) {
+          return {
+            id: lot.id,
+            number: lot.numero,
+            availableQuantity: lot.cantidadActual,
+            expirationDate: undefined,
+            isExpired: false,
+            daysUntilExpiration: undefined
+          };
+        }
+
+        const expirationDate = new Date(lot.fechaVencimiento);
+        const timeDiff = expirationDate.getTime() - today.getTime();
+        const daysUntilExpiration = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const isExpired = daysUntilExpiration < 0;
+
+        return {
+          id: lot.id,
+          number: lot.numero,
+          availableQuantity: lot.cantidadActual,
+          expirationDate: lot.fechaVencimiento,
+          isExpired,
+          daysUntilExpiration
+        };
+      })
     }];
   }
 }

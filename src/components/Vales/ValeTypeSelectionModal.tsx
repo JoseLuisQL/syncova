@@ -10,9 +10,12 @@ import {
   Calendar,
   Loader2,
   ChevronRight,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle,
+  ShieldAlert
 } from 'lucide-react';
 import { ValesService, EntregaAdicionalInfo, ValeTypeSelectionConfig, GrupoEntregaAdicional } from '../../services/valesService';
+import { StockValidationService, StockValidationRequest } from '../../services/stockValidationService';
 import { useToastContext } from '../../contexts/ToastContext';
 
 interface ValeTypeSelectionModalProps {
@@ -36,6 +39,7 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
 }) => {
   const { toast } = useToastContext();
   const [isLoading, setIsLoading] = useState(false);
+  const [isValidatingStock, setIsValidatingStock] = useState(false);
   const [entregasAdicionales, setEntregasAdicionales] = useState<EntregaAdicionalInfo[]>([]);
   const [gruposEntregasAdicionales, setGruposEntregasAdicionales] = useState<GrupoEntregaAdicional[]>([]);
   const [gruposGenerados, setGruposGenerados] = useState<number[]>([]);
@@ -203,7 +207,7 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
     });
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     // Validaciones específicas por tipo
     if (config.tipoVale === 'solo_adicionales') {
       if (config.gruposEntregasSeleccionados.length === 0) {
@@ -222,8 +226,131 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
       }
     }
 
-    onConfirm(config);
-    onClose();
+    // Validar stock antes de confirmar
+    await validateStockBeforeConfirm();
+  };
+
+  const validateStockBeforeConfirm = async () => {
+    setIsValidatingStock(true);
+
+    try {
+      const validationRequest: StockValidationRequest = {
+        centroAcopioId,
+        mes,
+        anio,
+        tipoVale: config.tipoVale,
+        entregasAdicionalesSeleccionadas: config.entregasAdicionalesSeleccionadas,
+        gruposEntregasSeleccionados: config.gruposEntregasSeleccionados
+      };
+
+      const result = await StockValidationService.validateStockForVoucher(validationRequest);
+
+      if (!result.success) {
+        toast.error(
+          'Error de validación',
+          result.error || 'Error al validar stock disponible',
+          { duration: 8000 }
+        );
+        return;
+      }
+
+      const validation = result.data!;
+
+      // Verificar si hay errores de stock o lotes vencidos
+      if (!validation.success) {
+        showStockValidationErrors(validation);
+        return;
+      }
+
+      // Si todo está bien, proceder con la confirmación
+      onConfirm(config);
+      onClose();
+
+    } catch (error) {
+      console.error('Error validating stock:', error);
+      toast.error(
+        'Error de conexión',
+        'No se pudo validar el stock disponible. Intente nuevamente.',
+        { duration: 8000 }
+      );
+    } finally {
+      setIsValidatingStock(false);
+    }
+  };
+
+  const showStockValidationErrors = (validation: any) => {
+    const { stockDetails, expiredLots } = validation;
+
+    // Verificar vacunas con stock insuficiente
+    const insufficientVaccines = stockDetails.vaccines.filter((v: any) => !v.sufficient);
+    const insufficientSyringes = stockDetails.syringes.filter((s: any) => !s.sufficient);
+    const hasExpiredLots = expiredLots.vaccines.length > 0 || expiredLots.syringes.length > 0;
+
+    // Calcular totales
+    const totalVaccinesRequired = insufficientVaccines.reduce((sum: number, v: any) => sum + v.requiredQuantity, 0);
+    const totalVaccinesAvailable = insufficientVaccines.reduce((sum: number, v: any) => sum + v.availableQuantity, 0);
+    const totalSyringesRequired = insufficientSyringes.reduce((sum: number, s: any) => sum + s.requiredQuantity, 0);
+    const totalSyringesAvailable = insufficientSyringes.reduce((sum: number, s: any) => sum + s.availableQuantity, 0);
+
+    // Crear mensaje profesional continuo
+    let message = 'Stock insuficiente para generar el vale. ';
+
+    // Agregar información específica de vacunas (sin duplicados)
+    if (insufficientVaccines.length > 0) {
+      const deficit = totalVaccinesRequired - totalVaccinesAvailable;
+      const uniqueVaccineNames = [...new Set(insufficientVaccines.map((v: any) => v.vaccineName))];
+      message += `Vacunas afectadas: ${uniqueVaccineNames.join(', ')}. Total faltante: ${deficit.toLocaleString()} unidades (necesario ${totalVaccinesRequired.toLocaleString()}, disponible ${totalVaccinesAvailable.toLocaleString()}). `;
+    }
+
+    // Agregar información específica de jeringas (sin duplicados)
+    if (insufficientSyringes.length > 0) {
+      const deficit = totalSyringesRequired - totalSyringesAvailable;
+      const uniqueSyringeNames = [...new Set(insufficientSyringes.map((s: any) => s.syringeType))];
+      message += `Jeringas afectadas: ${uniqueSyringeNames.join(', ')}. Total faltante: ${deficit.toLocaleString()} unidades (necesario ${totalSyringesRequired.toLocaleString()}, disponible ${totalSyringesAvailable.toLocaleString()}). `;
+    }
+
+    // Agregar información específica de lotes vencidos
+    if (hasExpiredLots) {
+      message += 'Además, hay lotes vencidos que deben actualizarse: ';
+      const expiredDetails = [];
+
+      if (expiredLots.vaccines.length > 0) {
+        const expiredVaccineNames = [...new Set(expiredLots.vaccines.map((lot: any) => lot.itemName))];
+        expiredDetails.push(`vacunas (${expiredVaccineNames.join(', ')})`);
+      }
+
+      if (expiredLots.syringes.length > 0) {
+        const expiredSyringeNames = [...new Set(expiredLots.syringes.map((lot: any) => lot.itemName))];
+        expiredDetails.push(`jeringas (${expiredSyringeNames.join(', ')})`);
+      }
+
+      message += expiredDetails.join(' y ') + '. ';
+    }
+
+    // Agregar recomendación
+    message += 'Por favor, ingrese nuevos lotes de stock para continuar con la generación del vale.';
+
+    // Mostrar toast profesional
+    toast.error(
+      'Stock Insuficiente',
+      message,
+      {
+        duration: 15000, // Aumentado para leer los nombres específicos
+        style: {
+          background: '#DC2626',
+          color: 'white',
+          fontWeight: '500',
+          fontSize: '14px',
+          maxWidth: '550px', // Aumentado para acomodar más texto
+          whiteSpace: 'normal',
+          lineHeight: '1.4',
+          padding: '18px',
+          borderRadius: '10px',
+          boxShadow: '0 6px 20px rgba(220, 38, 38, 0.25)',
+          fontFamily: 'system-ui, -apple-system, sans-serif'
+        }
+      }
+    );
   };
 
   // Funciones auxiliares para el manejo de grupos
@@ -616,6 +743,7 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
             <button
               onClick={handleConfirm}
               disabled={
+                isValidatingStock ||
                 !hayOpcionesDisponibles() ||
                 (config.tipoVale === 'solo_adicionales' && (
                   config.gruposEntregasSeleccionados.length === 0 ||
@@ -625,8 +753,26 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
               }
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
             >
-              <FileText className="h-4 w-4 mr-2" />
-              {!hayOpcionesDisponibles() ? 'No hay opciones disponibles' : 'Generar Vale'}
+              {isValidatingStock ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Validando Stock...
+                </>
+              ) : (
+                <>
+                  {!hayOpcionesDisponibles() ? (
+                    <>
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                      No hay opciones disponibles
+                    </>
+                  ) : (
+                    <>
+                      <ShieldAlert className="h-4 w-4 mr-2" />
+                      Generar Vale
+                    </>
+                  )}
+                </>
+              )}
             </button>
           </div>
         </div>

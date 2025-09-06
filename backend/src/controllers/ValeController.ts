@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ValeService, GenerarValeDto, ValesFilters } from '@/services/ValeService';
 import { ValeExportService } from '@/services/ValeExportService';
+import { StockValidationService, VaccineRequirement } from '@/services/StockValidationService';
 import { ResponseUtil } from '@/utils/response';
 import { validateUUID } from '@/utils/validation';
 import { EstadoVale } from '@prisma/client';
@@ -51,6 +52,64 @@ export class ValeController {
       ResponseUtil.success(res, result.data, 'Vale generado exitosamente');
     } catch (error) {
       console.error('Error en ValeController.generarVale:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Validar stock disponible antes de generar vale
+   * POST /api/vales/validar-stock
+   */
+  static async validarStock(req: Request, res: Response): Promise<void> {
+    try {
+      const { centroAcopioId, mes, anio, tipoVale, entregasAdicionalesSeleccionadas, gruposEntregasSeleccionados } = req.body;
+
+      // Validaciones básicas
+      if (!centroAcopioId || !validateUUID(centroAcopioId)) {
+        ResponseUtil.error(res, 'ID de centro de acopio inválido', 400);
+        return;
+      }
+
+      if (!mes || mes < 1 || mes > 12) {
+        ResponseUtil.error(res, 'Mes debe estar entre 1 y 12', 400);
+        return;
+      }
+
+      if (!anio || anio < 2020) {
+        ResponseUtil.error(res, 'Año inválido', 400);
+        return;
+      }
+
+      // Obtener movimientos para el vale según el tipo especificado
+      const movimientos = await ValeService.obtenerMovimientosParaVale(
+        centroAcopioId,
+        mes,
+        anio,
+        tipoVale || 'completo',
+        entregasAdicionalesSeleccionadas,
+        gruposEntregasSeleccionados
+      );
+
+      if (movimientos.length === 0) {
+        ResponseUtil.error(res, 'No hay movimientos con entregas para validar', 400);
+        return;
+      }
+
+      // Preparar requerimientos de vacunas
+      const vaccineRequirements: VaccineRequirement[] = movimientos.map(mov => ({
+        vaccineId: mov.vacunaId,
+        quantity: (mov.entrega || 0) + (mov.entregasAdicionales?.reduce((sum, ea) => sum + ea.cantidad, 0) || 0)
+      }));
+
+      // Validar stock
+      const stockValidation = await StockValidationService.validateStockForVoucher(
+        vaccineRequirements,
+        centroAcopioId
+      );
+
+      ResponseUtil.success(res, stockValidation, 'Validación de stock completada');
+    } catch (error) {
+      console.error('Error en ValeController.validarStock:', error);
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }

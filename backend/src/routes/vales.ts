@@ -29,6 +29,21 @@ const router = Router();
 router.post('/generar', ValeController.generarVale);
 
 /**
+ * @route POST /api/vales/validar-stock
+ * @desc Validar stock disponible antes de generar vale
+ * @access Public (TODO: Proteger con autenticación)
+ * @body {object} data - Datos para validación de stock
+ * @example
+ * {
+ *   "centroAcopioId": "uuid",
+ *   "mes": 1,
+ *   "anio": 2024,
+ *   "tipoVale": "solo_base"
+ * }
+ */
+router.post('/validar-stock', ValeController.validarStock);
+
+/**
  * @route POST /api/vales/vista-previa
  * @desc Obtener vista previa de vale sin generar ni afectar stocks
  * @access Public (TODO: Proteger con autenticación)
