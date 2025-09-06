@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { MovimientosService, MovimientosFilters, CreateMovimientoDto, UpdateMovimientoDto, CreateEntregaAdicionalDto } from '@/services/MovimientosService';
+import { MovimientosExportService, MovimientosExportConfig } from '@/services/MovimientosExportService';
 import { ResponseUtil } from '@/utils/response';
 import { validateUUID } from '@/utils/validation';
 import { prisma } from '@/config/database';
@@ -785,6 +786,135 @@ export class MovimientosController {
 
     } catch (error) {
       console.error('Error en MovimientosController.generarReporteErrores:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Exportar movimientos por vacuna específica a Excel
+   * POST /api/movimientos/exportar/vacuna/:vacunaId
+   */
+  static async exportarPorVacuna(req: Request, res: Response): Promise<void> {
+    try {
+      const { vacunaId } = req.params;
+      const { mes, anio, centroAcopioId, establecimientoId, incluirEstablecimientosSinMovimiento, responsableReporte, observaciones } = req.body;
+
+      // Validar parámetros
+      if (!validateUUID(vacunaId)) {
+        errorResponse(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      const mesNum = parseInt(mes, 10);
+      if (isNaN(mesNum) || mesNum < 1 || mesNum > 12) {
+        errorResponse(res, 'El mes debe estar entre 1 y 12', 400);
+        return;
+      }
+
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      if (!responsableReporte || responsableReporte.trim() === '') {
+        errorResponse(res, 'Responsable del reporte es requerido', 400);
+        return;
+      }
+
+      // Configurar exportación
+      const config: MovimientosExportConfig = {
+        mes: mesNum,
+        anio: anioNum,
+        vacunaId: vacunaId,
+        centroAcopioId: centroAcopioId && centroAcopioId !== 'todos' ? centroAcopioId : undefined,
+        establecimientoId: establecimientoId && establecimientoId !== 'todos' ? establecimientoId : undefined,
+        incluirEstablecimientosSinMovimiento: incluirEstablecimientosSinMovimiento === true,
+        responsableReporte: responsableReporte.trim(),
+        observaciones: observaciones?.trim()
+      };
+
+      // Generar exportación
+      const result = await MovimientosExportService.exportByVacuna(config);
+
+      if (!result.success || !result.data) {
+        errorResponse(res, result.error || 'Error al generar exportación', 500);
+        return;
+      }
+
+      const { workbook, filename } = result.data;
+
+      // Configurar headers para descarga
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+      // Escribir el workbook al response
+      await workbook.xlsx.write(res);
+      res.end();
+
+    } catch (error) {
+      console.error('Error en MovimientosController.exportarPorVacuna:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Exportar todas las vacunas a Excel (hojas separadas)
+   * POST /api/movimientos/exportar/todas-vacunas
+   */
+  static async exportarTodasVacunas(req: Request, res: Response): Promise<void> {
+    try {
+      const { mes, anio, centroAcopioId, establecimientoId, incluirEstablecimientosSinMovimiento, responsableReporte, observaciones } = req.body;
+
+      // Validar parámetros
+      const mesNum = parseInt(mes, 10);
+      if (isNaN(mesNum) || mesNum < 1 || mesNum > 12) {
+        errorResponse(res, 'El mes debe estar entre 1 y 12', 400);
+        return;
+      }
+
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      if (!responsableReporte || responsableReporte.trim() === '') {
+        errorResponse(res, 'Responsable del reporte es requerido', 400);
+        return;
+      }
+
+      // Configurar exportación
+      const config: MovimientosExportConfig = {
+        mes: mesNum,
+        anio: anioNum,
+        centroAcopioId: centroAcopioId && centroAcopioId !== 'todos' ? centroAcopioId : undefined,
+        establecimientoId: establecimientoId && establecimientoId !== 'todos' ? establecimientoId : undefined,
+        incluirEstablecimientosSinMovimiento: incluirEstablecimientosSinMovimiento === true,
+        responsableReporte: responsableReporte.trim(),
+        observaciones: observaciones?.trim()
+      };
+
+      // Generar exportación
+      const result = await MovimientosExportService.exportAllVacunas(config);
+
+      if (!result.success || !result.data) {
+        errorResponse(res, result.error || 'Error al generar exportación', 500);
+        return;
+      }
+
+      const { workbook, filename } = result.data;
+
+      // Configurar headers para descarga
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+      // Escribir el workbook al response
+      await workbook.xlsx.write(res);
+      res.end();
+
+    } catch (error) {
+      console.error('Error en MovimientosController.exportarTodasVacunas:', error);
       errorResponse(res, 'Error interno del servidor', 500);
     }
   }

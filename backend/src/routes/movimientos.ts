@@ -87,6 +87,39 @@ router.post('/reporte-errores',
   MovimientosController.generarReporteErrores
 );
 
+// =====================================================
+// RUTAS DE EXPORTACIÓN
+// =====================================================
+
+/**
+ * @route POST /api/movimientos/exportar/vacuna/:vacunaId
+ * @desc Exportar movimientos por vacuna específica a Excel
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {string} vacunaId - ID de la vacuna
+ * @body {number} mes - Mes (1-12)
+ * @body {number} anio - Año de movimientos
+ * @body {string} [centroAcopioId] - ID del centro de acopio (opcional)
+ * @body {string} [establecimientoId] - ID del establecimiento específico (opcional)
+ * @body {boolean} [incluirEstablecimientosSinMovimiento] - Incluir establecimientos sin movimiento
+ * @body {string} responsableReporte - Nombre del responsable del reporte
+ * @body {string} [observaciones] - Observaciones adicionales
+ */
+router.post('/exportar/vacuna/:vacunaId', MovimientosController.exportarPorVacuna);
+
+/**
+ * @route POST /api/movimientos/exportar/todas-vacunas
+ * @desc Exportar todas las vacunas a Excel (hojas separadas)
+ * @access Public (TODO: Proteger con autenticación)
+ * @body {number} mes - Mes (1-12)
+ * @body {number} anio - Año de movimientos
+ * @body {string} [centroAcopioId] - ID del centro de acopio (opcional)
+ * @body {string} [establecimientoId] - ID del establecimiento específico (opcional)
+ * @body {boolean} [incluirEstablecimientosSinMovimiento] - Incluir establecimientos sin movimiento
+ * @body {string} responsableReporte - Nombre del responsable del reporte
+ * @body {string} [observaciones] - Observaciones adicionales
+ */
+router.post('/exportar/todas-vacunas', MovimientosController.exportarTodasVacunas);
+
 /**
  * @route GET /api/movimientos/estadisticas
  * @desc Obtener estadísticas de movimientos

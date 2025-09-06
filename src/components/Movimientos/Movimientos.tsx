@@ -47,6 +47,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useAutoSync } from '../../hooks/useAutoSync';
 import { debounce } from '../../utils/debounce';
 import { PlanificacionService } from '../../services/planificacionService';
+import { MovimientosExportService, MovimientosExportConfig } from '../../services/movimientosExportService';
 import {
   ordenarEstablecimientos,
   getEstiloEstablecimiento,
@@ -220,6 +221,9 @@ const Movimientos: React.FC = () => {
   const [pendingEntregasChanges, setPendingEntregasChanges] = useState<{[key: string]: boolean}>({});
   const entregasDebounceTimeouts = useRef<{[key: string]: NodeJS.Timeout}>({});
   const [isProcessingEntrega, setIsProcessingEntrega] = useState(false);
+
+  // Estados para exportación
+  const [isExporting, setIsExporting] = useState(false);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -1169,6 +1173,69 @@ const Movimientos: React.FC = () => {
     }
   };
 
+  // Función para manejar la exportación
+  const handleExportar = async () => {
+    try {
+      setIsExporting(true);
+
+      // Validar que se haya seleccionado una vacuna
+      if (!selectedVacuna) {
+        toast.error('❌ Seleccione una vacuna para exportar');
+        return;
+      }
+
+      // Obtener información de la vacuna seleccionada
+      const vacunaSeleccionada = vacunasActivas.find(v => v.id === selectedVacuna);
+      if (!vacunaSeleccionada) {
+        toast.error('❌ Vacuna no encontrada');
+        return;
+      }
+
+      // Crear configuración de exportación
+      const config: MovimientosExportConfig = MovimientosExportService.crearConfiguracionDesdeFiltros(
+        selectedMes,
+        selectedAnio,
+        selectedVacuna,
+        selectedCentroAcopio !== 'todos' ? selectedCentroAcopio : undefined,
+        undefined, // establecimientoId - no se filtra por establecimiento específico
+        user?.nombres && user?.apellidos ? `${user.nombres} ${user.apellidos}` : 'Usuario del Sistema',
+        `Exportación de movimientos - ${vacunaSeleccionada.nombre} - ${meses[selectedMes - 1]} ${selectedAnio}`
+      );
+
+      console.log('🔄 Iniciando exportación con configuración:', config);
+
+      // Mostrar toast de inicio
+      toast.info('📊 Generando archivo Excel...', 'Esto puede tomar unos momentos');
+
+      // Exportar y descargar
+      await MovimientosExportService.exportarYDescargarPorVacuna(
+        selectedVacuna,
+        config,
+        vacunaSeleccionada.nombre
+      );
+
+      // Mostrar toast de éxito
+      toast.success(
+        '✅ Exportación completada',
+        `Movimientos de ${vacunaSeleccionada.nombre} exportados exitosamente`,
+        { duration: 4000 }
+      );
+
+    } catch (error: any) {
+      console.error('❌ Error en exportación:', error);
+
+      if (error.message.includes('validación')) {
+        toast.error('❌ Error de validación', error.message);
+      } else if (error.message.includes('conexión')) {
+        toast.error('❌ Error de conexión', 'Verifique su conexión a internet');
+      } else {
+        toast.error('❌ Error en exportación', 'No se pudo generar el archivo Excel');
+      }
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header Premium */}
@@ -1237,11 +1304,27 @@ const Movimientos: React.FC = () => {
                 Importar Movimientos
               </button>
               <button
-                className="flex items-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                title="Funcionalidad de exportación en desarrollo"
+                onClick={handleExportar}
+                disabled={isExporting || !selectedVacuna}
+                className={`flex items-center px-4 py-2.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform ${
+                  isExporting || !selectedVacuna
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:-translate-y-0.5'
+                }`}
+                title={
+                  !selectedVacuna
+                    ? 'Seleccione una vacuna para exportar'
+                    : isExporting
+                      ? 'Generando archivo Excel...'
+                      : 'Exportar movimientos a Excel'
+                }
               >
-                <Download className="h-4 w-4 mr-2" />
-                Exportar
+                {isExporting ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                {isExporting ? 'Exportando...' : 'Exportar'}
               </button>
             </div>
           </div>
