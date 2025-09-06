@@ -117,6 +117,8 @@ const Movimientos: React.FC = () => {
 
   const getCurrentValue = (establecimientoId: string, campo: string, originalValue: number): number => {
     const key = getFieldKey(establecimientoId, campo);
+    // CRÍTICO: Si no existe valor temporal, usar el valor original
+    // Esto permite que la cancelación funcione correctamente eliminando el valor temporal
     return tempValues[key] !== undefined ? tempValues[key] : originalValue;
   };
 
@@ -241,6 +243,10 @@ const Movimientos: React.FC = () => {
   // Estados para exportación
   const [isExporting, setIsExporting] = useState(false);
 
+  // Estados para manejo avanzado de validación de vales
+  const voucherValidationTimeouts = useRef<{[key: string]: NodeJS.Timeout}>({});
+  const [isTyping, setIsTyping] = useState<{[key: string]: boolean}>({});
+
   // Cargar datos iniciales
   useEffect(() => {
     const loadInitialData = async () => {
@@ -329,6 +335,11 @@ const Movimientos: React.FC = () => {
 
       // Limpiar timeouts de entregas adicionales
       Object.values(entregasDebounceTimeouts.current).forEach(timeout => {
+        if (timeout) clearTimeout(timeout);
+      });
+
+      // Limpiar timeouts de validación de vales
+      Object.values(voucherValidationTimeouts.current).forEach(timeout => {
         if (timeout) clearTimeout(timeout);
       });
     };
@@ -527,40 +538,68 @@ const Movimientos: React.FC = () => {
       clearTimeout(debounceTimeouts.current[key]);
     }
 
-    // VERIFICACIÓN CRÍTICA: Comprobar INMEDIATAMENTE si necesita confirmación
-    // para prevenir cualquier auto-guardado no deseado
-    if (campo === 'entrega' && selectedVacuna) {
+    // Marcar que el usuario está escribiendo
+    setIsTyping(prev => ({
+      ...prev,
+      [key]: true
+    }));
+
+    // Limpiar timeouts anteriores de validación de vales
+    if (voucherValidationTimeouts.current[key]) {
+      clearTimeout(voucherValidationTimeouts.current[key]);
+    }
+
+    // Para campos de entrega, usar validación avanzada con debounce profesional
+    if ((campo === 'entrega' || campo === 'entregaBase') && selectedVacuna) {
+      handleAdvancedVoucherValidation(establecimientoId, campo, newValue, key);
+    } else {
+      // Para otros campos, configurar auto-guardado normal
+      debounceTimeouts.current[key] = setTimeout(() => {
+        setIsTyping(prev => ({
+          ...prev,
+          [key]: false
+        }));
+        handleSaveFieldValue(establecimientoId, campo, newValue);
+      }, 2000);
+    }
+  };
+
+  // Función avanzada para validación de vales con debounce profesional
+  const handleAdvancedVoucherValidation = (establecimientoId: string, campo: string, newValue: number, key: string) => {
+    // Configurar timeout para validación de vales (más largo para permitir completar la escritura)
+    const voucherTimeout = setTimeout(async () => {
+      // Marcar que ya no está escribiendo
+      setIsTyping(prev => ({
+        ...prev,
+        [key]: false
+      }));
+
+      // Verificar si necesita validación de vales
       const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
       const esCreacion = !movimientoExistente?.tieneMovimiento;
       const valorOriginal = movimientoExistente?.[campo as keyof typeof movimientoExistente] as number || 0;
 
-      // Si es modificación de entrega y el valor cambió, verificar vales INMEDIATAMENTE
+      // Solo verificar para modificaciones donde el valor realmente cambió
       if (!esCreacion && valorOriginal !== newValue) {
-        // Verificar vales de forma asíncrona pero sin esperar
-        checkForVoucherConfirmation(establecimientoId, campo, newValue).then(necesitaConfirmacion => {
-          if (necesitaConfirmacion) {
-            // Si necesita confirmación, cancelar cualquier auto-guardado pendiente
-            if (debounceTimeouts.current[key]) {
-              clearTimeout(debounceTimeouts.current[key]);
-              delete debounceTimeouts.current[key];
-            }
-            // El modal ya se mostró en checkForVoucherConfirmation
-            return;
-          } else {
-            // Si no necesita confirmación, configurar auto-guardado normal
-            debounceTimeouts.current[key] = setTimeout(() => {
-              handleSaveFieldValue(establecimientoId, campo, newValue);
-            }, 2000);
-          }
-        });
-        return; // Salir temprano para evitar configurar timeout normal
-      }
-    }
+        const necesitaConfirmacion = await checkForVoucherConfirmation(establecimientoId, campo, newValue);
 
-    // Configurar timeout normal para campos que no requieren verificación de vales
-    debounceTimeouts.current[key] = setTimeout(() => {
-      handleSaveFieldValue(establecimientoId, campo, newValue);
-    }, 2000);
+        if (!necesitaConfirmacion) {
+          // Si no necesita confirmación, configurar auto-guardado
+          debounceTimeouts.current[key] = setTimeout(() => {
+            handleSaveFieldValue(establecimientoId, campo, newValue);
+          }, 500); // Tiempo más corto ya que la validación ya se hizo
+        }
+        // Si necesita confirmación, el modal ya se mostró y no se configura auto-guardado
+      } else {
+        // Para creaciones o valores sin cambio, configurar auto-guardado normal
+        debounceTimeouts.current[key] = setTimeout(() => {
+          handleSaveFieldValue(establecimientoId, campo, newValue);
+        }, 500);
+      }
+    }, 1500); // 1.5 segundos para permitir completar la escritura
+
+    // Guardar el timeout para poder cancelarlo si es necesario
+    voucherValidationTimeouts.current[key] = voucherTimeout;
   };
 
   // Función para verificar si se necesita confirmación antes de guardar
@@ -792,10 +831,17 @@ const Movimientos: React.FC = () => {
       delete debounceTimeouts.current[key];
     }
 
-    // Revertir el valor temporal al original
+    // CRÍTICO: Cancelar cualquier timeout de validación de vales pendiente
+    if (voucherValidationTimeouts.current[key]) {
+      clearTimeout(voucherValidationTimeouts.current[key]);
+      delete voucherValidationTimeouts.current[key];
+    }
+
+    // CORRECCIÓN CRÍTICA: Eliminar completamente el valor temporal para revertir al original
+    // NO establecer el valor temporal al original, sino eliminarlo completamente
     setTempValues(prev => {
       const newTemp = { ...prev };
-      newTemp[key] = pendingModification.valorOriginal;
+      delete newTemp[key]; // Eliminar completamente para que getCurrentValue use el valor original
       return newTemp;
     });
 
@@ -804,6 +850,13 @@ const Movimientos: React.FC = () => {
       const newPending = { ...prev };
       delete newPending[key];
       return newPending;
+    });
+
+    // Limpiar estado de escritura
+    setIsTyping(prev => {
+      const newTyping = { ...prev };
+      delete newTyping[key];
+      return newTyping;
     });
 
     // Cerrar modal
@@ -821,20 +874,44 @@ const Movimientos: React.FC = () => {
     }
   };
 
-  // Función para manejar cuando el usuario sale del campo (onBlur)
+  // Función profesional para manejar cuando el usuario sale del campo (onBlur)
   const handleFieldBlur = async (establecimientoId: string, campo: string) => {
     const key = getFieldKey(establecimientoId, campo);
     const tempValue = tempValues[key];
 
-    if (tempValue !== undefined && pendingChanges[key]) {
-      // Verificar si necesita confirmación antes del guardado en blur
-      const necesitaConfirmacion = await checkForVoucherConfirmation(establecimientoId, campo, tempValue);
+    // Limpiar timeouts de validación de vales si existen
+    if (voucherValidationTimeouts.current[key]) {
+      clearTimeout(voucherValidationTimeouts.current[key]);
+      delete voucherValidationTimeouts.current[key];
+    }
 
-      if (!necesitaConfirmacion) {
-        // Solo guardar si no necesita confirmación
+    // Marcar que ya no está escribiendo
+    setIsTyping(prev => ({
+      ...prev,
+      [key]: false
+    }));
+
+    if (tempValue !== undefined && pendingChanges[key]) {
+      // Para campos de entrega, verificar si necesita confirmación
+      if ((campo === 'entrega' || campo === 'entregaBase') && selectedVacuna) {
+        const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
+        const esCreacion = !movimientoExistente?.tieneMovimiento;
+        const valorOriginal = movimientoExistente?.[campo as keyof typeof movimientoExistente] as number || 0;
+
+        // Solo verificar para modificaciones donde el valor realmente cambió
+        if (!esCreacion && valorOriginal !== tempValue) {
+          const necesitaConfirmacion = await checkForVoucherConfirmation(establecimientoId, campo, tempValue);
+          if (!necesitaConfirmacion) {
+            handleSaveFieldValue(establecimientoId, campo, tempValue);
+          }
+        } else {
+          // Para creaciones o valores sin cambio, guardar directamente
+          handleSaveFieldValue(establecimientoId, campo, tempValue);
+        }
+      } else {
+        // Para otros campos, guardar directamente
         handleSaveFieldValue(establecimientoId, campo, tempValue);
       }
-      // Si necesita confirmación, el modal ya se habrá mostrado por checkForVoucherConfirmation
     }
   };
 
@@ -1103,6 +1180,7 @@ const Movimientos: React.FC = () => {
     }
 
     // Configurar nuevo timeout para auto-guardar después de 2 segundos de inactividad
+    // (Las entregas adicionales no necesitan verificación de vales ya que son modificaciones menores)
     entregasDebounceTimeouts.current[key] = setTimeout(() => {
       handleSaveEntregaAdicionalValue(entregaId, newValue);
     }, 2000);
@@ -2260,9 +2338,13 @@ const Movimientos: React.FC = () => {
                             title={(() => {
                               const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
                               const fieldKey = tieneEntregasAdicionales ? 'entregaBase' : 'entrega';
+                              const key = getFieldKey(movimiento.establecimientoId, fieldKey);
+                              const isUserTyping = isTyping[key];
                               const hasPending = hasPendingChange(movimiento.establecimientoId, fieldKey);
 
-                              if (hasPending) {
+                              if (isUserTyping) {
+                                return 'Escribiendo... - Complete la entrada para validar';
+                              } else if (hasPending) {
                                 return 'Cambios pendientes - Se guardará automáticamente';
                               } else if (tieneEntregasAdicionales) {
                                 return 'Entrega base (editable) - Valor original de planificación';
@@ -2276,10 +2358,22 @@ const Movimientos: React.FC = () => {
                           {(() => {
                             const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
                             const fieldKey = tieneEntregasAdicionales ? 'entregaBase' : 'entrega';
-                            return hasPendingChange(movimiento.establecimientoId, fieldKey) && (
-                              <div className="absolute -top-2 -right-2 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-sm border-2 border-white"
-                                   title="Cambios pendientes"></div>
-                            );
+                            const key = getFieldKey(movimiento.establecimientoId, fieldKey);
+                            const isUserTyping = isTyping[key];
+                            const hasPending = hasPendingChange(movimiento.establecimientoId, fieldKey);
+
+                            if (isUserTyping) {
+                              return (
+                                <div className="absolute -top-2 -right-2 w-3 h-3 bg-blue-400 rounded-full animate-bounce shadow-sm border-2 border-white"
+                                     title="Escribiendo..."></div>
+                              );
+                            } else if (hasPending) {
+                              return (
+                                <div className="absolute -top-2 -right-2 w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-sm border-2 border-white"
+                                     title="Cambios pendientes"></div>
+                              );
+                            }
+                            return null;
                           })()}
                         </div>
                         {movimiento.entregasAdicionales?.map((entrega) => (
