@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import {
   FileText,
@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { mockEstablecimientos, mockVacunas } from '../../data/mockData';
 import { Establecimiento, Vacuna } from '../../types';
+import { usePlanificacionReportes } from '../../hooks/usePlanificacionReportes';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 import { useReportes } from '../../hooks/useReportes';
@@ -1459,15 +1460,176 @@ interface PlanificacionReportesTabProps {
 const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
   filtros,
   setFiltros,
+  centrosAcopio,
   vacunas,
   onGenerarReporte,
 }) => {
+  const {
+    reportes,
+    estado,
+    filtros: filtrosPlanificacion,
+    generarProgramacionAnual,
+    generarCumplimientoMetas,
+    generarProyeccionDemanda,
+    generarDistribucionGeografica,
+    exportarProgramacionAnual,
+    exportarCumplimientoMetas,
+    exportarProyeccionDemanda,
+    exportarDistribucionGeografica,
+    actualizarFiltros,
+    limpiarError,
+    tieneDatos
+  } = usePlanificacionReportes();
+
+  const { toast } = useToastContext();
+  const [reporteActivo, setReporteActivo] = useState<string | null>(null);
+
+  // Inicializar filtros
+  useEffect(() => {
+    actualizarFiltros({
+      anio: new Date().getFullYear(),
+      vacunaId: filtros.vacuna !== 'todas' ? filtros.vacuna : undefined,
+      centroAcopioId: filtros.centroAcopio !== 'todos' ? filtros.centroAcopio : undefined
+    });
+  }, [filtros.vacuna, filtros.centroAcopio, actualizarFiltros]);
+
   const reportesPlanificacion = [
-    { id: 'programacion_anual', nombre: 'Programación Anual', descripcion: 'Plan anual por vacuna', icon: Target },
-    { id: 'cumplimiento_metas', nombre: 'Cumplimiento de Metas', descripcion: 'Avance vs programado', icon: CheckCircle },
-    { id: 'proyeccion_demanda', nombre: 'Proyección de Demanda', descripcion: 'Estimación de necesidades', icon: TrendingUp },
-    { id: 'distribucion_geografica', nombre: 'Distribución Geográfica', descripcion: 'Análisis por zonas', icon: BarChart3 }
+    {
+      id: 'programacion_anual',
+      nombre: 'Programación Anual',
+      descripcion: 'Plan anual por vacuna',
+      icon: Target,
+      color: 'purple',
+      datos: reportes.programacionAnual,
+      generar: () => handleGenerarReporte('programacion_anual'),
+      exportar: () => handleExportarReporte('programacion_anual')
+    },
+    {
+      id: 'cumplimiento_metas',
+      nombre: 'Cumplimiento de Metas',
+      descripcion: 'Avance vs programado',
+      icon: CheckCircle,
+      color: 'green',
+      datos: reportes.cumplimientoMetas,
+      generar: () => handleGenerarReporte('cumplimiento_metas'),
+      exportar: () => handleExportarReporte('cumplimiento_metas')
+    },
+    {
+      id: 'proyeccion_demanda',
+      nombre: 'Proyección de Demanda',
+      descripcion: 'Estimación de necesidades',
+      icon: TrendingUp,
+      color: 'yellow',
+      datos: reportes.proyeccionDemanda,
+      generar: () => handleGenerarReporte('proyeccion_demanda'),
+      exportar: () => handleExportarReporte('proyeccion_demanda')
+    },
+    {
+      id: 'distribucion_geografica',
+      nombre: 'Distribución Geográfica',
+      descripcion: 'Análisis por zonas',
+      icon: BarChart3,
+      color: 'red',
+      datos: reportes.distribucionGeografica,
+      generar: () => handleGenerarReporte('distribucion_geografica'),
+      exportar: () => handleExportarReporte('distribucion_geografica')
+    }
   ];
+
+  const handleGenerarReporte = async (tipoReporte: string) => {
+    try {
+      setReporteActivo(tipoReporte);
+
+      // Construir filtros basados en el estado actual
+      const filtrosPlanificacionActuales = {
+        anio: filtrosPlanificacion.anio || new Date().getFullYear(),
+        vacunaId: filtros.vacuna !== 'todas' ? filtros.vacuna : undefined,
+        centroAcopioId: filtros.centroAcopio !== 'todos' ? filtros.centroAcopio : undefined,
+        incluirInactivos: false
+      };
+
+      let resultado: any[] | null = null;
+
+      switch (tipoReporte) {
+        case 'programacion_anual':
+          resultado = await generarProgramacionAnual(filtrosPlanificacionActuales);
+          break;
+        case 'cumplimiento_metas':
+          resultado = await generarCumplimientoMetas(filtrosPlanificacionActuales);
+          break;
+        case 'proyeccion_demanda':
+          resultado = await generarProyeccionDemanda(filtrosPlanificacionActuales);
+          break;
+        case 'distribucion_geografica':
+          resultado = await generarDistribucionGeografica(filtrosPlanificacionActuales);
+          break;
+      }
+
+      // Verificar si no hay datos disponibles y mostrar toast
+      if (resultado && Array.isArray(resultado) && resultado.length === 0) {
+        toast.warning(
+          'Sin datos disponibles',
+          'No hay datos disponibles para los filtros seleccionados',
+          { duration: 4000 }
+        );
+      } else if (resultado && resultado.length > 0) {
+        toast.success(
+          'Reporte generado',
+          `Se generaron ${resultado.length} registros exitosamente`,
+          { duration: 3000 }
+        );
+      }
+    } catch (error) {
+      console.error('Error al generar reporte:', error);
+      toast.error(
+        'Error al generar reporte',
+        'Ocurrió un error al generar el reporte. Inténtalo nuevamente.',
+        { duration: 5000 }
+      );
+    } finally {
+      setReporteActivo(null);
+    }
+  };
+
+  const handleExportarReporte = async (tipoReporte: string) => {
+    try {
+      const config = {
+        anio: filtrosPlanificacion.anio || new Date().getFullYear(),
+        vacunaId: filtros.vacuna !== 'todas' ? filtros.vacuna : undefined,
+        centroAcopioId: filtros.centroAcopio !== 'todos' ? filtros.centroAcopio : undefined,
+        responsableReporte: 'Usuario del Sistema',
+        observaciones: `Reporte generado desde el módulo de reportes de planificación - Filtros aplicados: Año ${filtrosPlanificacion.anio || new Date().getFullYear()}, Vacuna: ${filtros.vacuna === 'todas' ? 'Todas' : vacunas.find(v => v.id === filtros.vacuna)?.nombre || 'Específica'}, Centro de Acopio: ${filtros.centroAcopio === 'todos' ? 'Todos' : 'Específico'}`
+      };
+
+      switch (tipoReporte) {
+        case 'programacion_anual':
+          await exportarProgramacionAnual(config);
+          break;
+        case 'cumplimiento_metas':
+          await exportarCumplimientoMetas(config);
+          break;
+        case 'proyeccion_demanda':
+          await exportarProyeccionDemanda(config);
+          break;
+        case 'distribucion_geografica':
+          await exportarDistribucionGeografica(config);
+          break;
+      }
+
+      toast.success(
+        'Exportación exitosa',
+        'El archivo Excel se ha descargado correctamente',
+        { duration: 3000 }
+      );
+    } catch (error) {
+      console.error('Error al exportar reporte:', error);
+      toast.error(
+        'Error al exportar',
+        'Ocurrió un error al exportar el reporte. Inténtalo nuevamente.',
+        { duration: 5000 }
+      );
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -1477,12 +1639,17 @@ const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
 
       {/* Filtros Simplificados */}
       <div className="bg-gray-50 rounded-xl p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Año</label>
-            <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <select
+              value={filtrosPlanificacion.anio || new Date().getFullYear()}
+              onChange={(e) => actualizarFiltros({ anio: parseInt(e.target.value) })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
               <option value="2024">2024</option>
               <option value="2025">2025</option>
+              <option value="2026">2026</option>
             </select>
           </div>
           <div>
@@ -1495,6 +1662,19 @@ const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
               <option value="todas">Todas</option>
               {vacunas.map((vacuna: Vacuna) => (
                 <option key={vacuna.id} value={vacuna.id}>{vacuna.nombre}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Centro</label>
+            <select
+              value={filtros.centroAcopio}
+              onChange={(e) => setFiltros({...filtros, centroAcopio: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="todos">Todos</option>
+              {centrosAcopio.map((centro: Establecimiento) => (
+                <option key={centro.id} value={centro.id}>{centro.nombre}</option>
               ))}
             </select>
           </div>
@@ -1512,36 +1692,92 @@ const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
         </div>
       </div>
 
+      {/* Mostrar errores si existen */}
+      {estado.error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error al generar reporte</h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{estado.error}</p>
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={limpiarError}
+                  className="bg-red-100 px-2 py-1 rounded text-sm text-red-800 hover:bg-red-200"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Reportes Disponibles */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {reportesPlanificacion.map((reporte) => {
           const Icon = reporte.icon;
+          const colorClasses = {
+            purple: { bg: 'bg-purple-100', text: 'text-purple-600', button: 'bg-purple-600 hover:bg-purple-700' },
+            green: { bg: 'bg-green-100', text: 'text-green-600', button: 'bg-green-600 hover:bg-green-700' },
+            yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600', button: 'bg-yellow-600 hover:bg-yellow-700' },
+            red: { bg: 'bg-red-100', text: 'text-red-600', button: 'bg-red-600 hover:bg-red-700' }
+          };
+          const colors = colorClasses[reporte.color as keyof typeof colorClasses] || colorClasses.purple;
+
           return (
             <div key={reporte.id} className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center mb-4">
-                <div className="bg-purple-100 p-3 rounded-lg">
-                  <Icon className="h-6 w-6 text-purple-600" />
+                <div className={`${colors.bg} p-3 rounded-lg`}>
+                  <Icon className={`h-6 w-6 ${colors.text}`} />
                 </div>
                 <div className="ml-4">
                   <h3 className="font-semibold text-gray-900">{reporte.nombre}</h3>
                   <p className="text-sm text-gray-600">{reporte.descripcion}</p>
+                  {reporte.datos && reporte.datos.length > 0 && (
+                    <p className="text-xs text-green-600 mt-1">
+                      {reporte.datos.length} registros disponibles
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex space-x-3">
                 <button
-                  onClick={() => alert('Vista previa del reporte...')}
-                  className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  onClick={reporte.generar}
+                  disabled={reporteActivo === reporte.id}
+                  className={`flex-1 py-2 px-4 rounded-lg transition-colors text-sm font-medium ${
+                    reporteActivo === reporte.id
+                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      : `${colors.button} text-white`
+                  }`}
                 >
-                  <Eye className="h-4 w-4 mr-2 inline" />
-                  Vista Previa
+                  {reporteActivo === reporte.id ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Generando...
+                    </div>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2 inline" />
+                      Generar
+                    </>
+                  )}
                 </button>
-                <button
-                  onClick={() => onGenerarReporte(filtros.formato)}
-                  className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                >
-                  <Download className="h-4 w-4 mr-2 inline" />
-                  Generar
-                </button>
+                {reporte.datos && reporte.datos.length > 0 && (
+                  <button
+                    onClick={reporte.exportar}
+                    className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  >
+                    <Download className="h-4 w-4 mr-2 inline" />
+                    Exportar Excel
+                  </button>
+                )}
               </div>
             </div>
           );

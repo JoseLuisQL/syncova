@@ -378,21 +378,25 @@ export const getColoresCentroAcopioExcel = (centroAcopio: string) => {
 /**
  * Ordena una lista de establecimientos según el orden específico definido
  */
-export const ordenarEstablecimientos = <T extends { nombre: string }>(establecimientos: T[]): T[] => {
+export const ordenarEstablecimientos = <T extends { nombre: string | null | undefined }>(establecimientos: T[]): T[] => {
   return establecimientos.sort((a, b) => {
-    const indexA = ORDEN_ESTABLECIMIENTOS.indexOf(a.nombre);
-    const indexB = ORDEN_ESTABLECIMIENTOS.indexOf(b.nombre);
-    
+    // Manejar casos donde el nombre puede ser null o undefined
+    const nombreA = a.nombre || '';
+    const nombreB = b.nombre || '';
+
+    const indexA = ORDEN_ESTABLECIMIENTOS.indexOf(nombreA);
+    const indexB = ORDEN_ESTABLECIMIENTOS.indexOf(nombreB);
+
     // Si ambos están en la lista, usar el orden definido
     if (indexA !== -1 && indexB !== -1) {
       return indexA - indexB;
     }
-    
+
     // Si solo uno está en la lista, ese va primero
     if (indexA !== -1) return -1;
     if (indexB !== -1) return 1;
-    
+
     // Si ninguno está en la lista, ordenar alfabéticamente
-    return a.nombre.localeCompare(b.nombre);
+    return nombreA.localeCompare(nombreB);
   });
 };
