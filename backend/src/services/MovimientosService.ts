@@ -39,6 +39,7 @@ export interface UpdateMovimientoDto {
   salida?: number;
   transSalida?: number;
   entrega?: number;
+  entregaBase?: number;
   observaciones?: string;
   fechaMovimiento?: Date;
   usuarioId?: string;
@@ -452,6 +453,9 @@ export class MovimientosService {
 
       // Actualizar en transacción para incluir redistribución y sincronización
       const result = await prisma.$transaction(async (tx) => {
+        // Variable para controlar si se ejecutó redistribución
+        let redistribucionEjecutada = false;
+
         // REDISTRIBUCIÓN AUTOMÁTICA: Si cambió la entrega, redistribuir automáticamente
         if (data.entrega !== undefined && data.entrega !== existingMovimiento.entrega) {
           const redistribucionResult = await this.redistribuirEntregasAutomaticamente(
@@ -464,6 +468,9 @@ export class MovimientosService {
           if (!redistribucionResult.success) {
             throw new Error(redistribucionResult.error);
           }
+
+          // Marcar que se ejecutó redistribución (incluye sincronización automática)
+          redistribucionEjecutada = true;
         }
 
         // LÓGICA ESPECIAL: Si se actualiza entregaBase y hay entregas adicionales, recalcular entrega total
@@ -494,7 +501,10 @@ export class MovimientosService {
         });
 
         // SINCRONIZACIÓN BIDIRECCIONAL: Actualizar planificación si cambió la entrega
-        if (data.entrega !== undefined && data.entrega !== existingMovimiento.entrega) {
+        // CORRECCIÓN: Solo sincronizar si NO se ejecutó redistribución (evita doble sincronización)
+        if (data.entrega !== undefined &&
+            data.entrega !== existingMovimiento.entrega &&
+            !redistribucionEjecutada) {
           const diferenciaCantidad = data.entrega - existingMovimiento.entrega;
           await this.sincronizarConPlanificacion(tx, movimiento, diferenciaCantidad);
         }
@@ -611,6 +621,12 @@ export class MovimientosService {
       if (Math.abs(diferencia) > 10000) {
         throw new Error(`La diferencia de redistribución (${Math.abs(diferencia)}) excede el límite máximo permitido (10,000 unidades)`);
       }
+
+      // SINCRONIZACIÓN: Primero sincronizar el cambio del movimiento original
+      await this.sincronizarConPlanificacion(tx, {
+        ...movimientoOriginal,
+        entrega: nuevaEntrega
+      }, diferencia);
 
       if (diferencia > 0) {
         // CASO 1: INCREMENTO - Descontar de meses siguientes
@@ -1084,9 +1100,9 @@ export class MovimientosService {
           }
         });
 
-        // PASO 5: SINCRONIZACIÓN AUTOMÁTICA: Actualizar planificación anual
-        // Solo sincronizar la diferencia de la entrega adicional
-        await this.sincronizarConPlanificacion(tx, movimiento, data.cantidad);
+        // PASO 5: SINCRONIZACIÓN AUTOMÁTICA: Ya manejada por redistribución
+        // La redistribución automática ya sincronizó el cambio con la planificación
+        // No es necesario sincronizar nuevamente para evitar doble conteo
 
         return entregaAdicional;
       });
@@ -1204,11 +1220,9 @@ export class MovimientosService {
           }
         });
 
-        // PASO 4: SINCRONIZACIÓN AUTOMÁTICA: Actualizar planificación anual
-        // Solo sincronizar la diferencia
-        if (diferenciaCantidad !== 0) {
-          await this.sincronizarConPlanificacion(tx, entregaExistente.movimientoVacuna, diferenciaCantidad);
-        }
+        // PASO 4: SINCRONIZACIÓN AUTOMÁTICA: Ya manejada por redistribución
+        // La redistribución automática ya sincronizó el cambio con la planificación
+        // No es necesario sincronizar nuevamente para evitar doble conteo
 
         return entregaActualizada;
       });
@@ -1300,8 +1314,9 @@ export class MovimientosService {
           data: updateData
         });
 
-        // PASO 6: SINCRONIZACIÓN AUTOMÁTICA: Actualizar planificación anual
-        await this.sincronizarConPlanificacion(tx, entregaExistente.movimientoVacuna, -entregaExistente.cantidad);
+        // PASO 6: SINCRONIZACIÓN AUTOMÁTICA: Ya manejada por redistribución
+        // La redistribución automática ya sincronizó el cambio con la planificación
+        // No es necesario sincronizar nuevamente para evitar doble conteo
       });
 
       // 🚀 TRIGGER AUTOMÁTICO: Sincronizar vales en tiempo real
