@@ -22,6 +22,8 @@ import kardexRoutes from '@/routes/kardex';
 import reportesRoutes from '@/routes/reportes';
 import planificacionReportesRoutes from '@/routes/planificacionReportes';
 import authRoutes from '@/routes/auth';
+import rolesRoutes from '@/routes/roles';
+import permissionsRoutes from '@/routes/permissions';
 
 /**
  * Función principal para inicializar el servidor
@@ -56,6 +58,8 @@ async function startServer(): Promise<void> {
             vacunas: '/api/vacunas',
             jeringas: '/api/jeringas',
             usuarios: '/api/usuarios',
+            roles: '/api/roles',
+            permissions: '/api/permissions',
             'lotes-vacunas': '/api/lotes-vacunas',
             'lotes-jeringas': '/api/lotes-jeringas',
             planificacion: '/api/planificacion',
@@ -82,6 +86,8 @@ async function startServer(): Promise<void> {
     app.use('/api/vacunas', vacunasRoutes);
     app.use('/api/jeringas', jeringasRoutes);
     app.use('/api/usuarios', usuariosRoutes);
+    app.use('/api/roles', rolesRoutes);
+    app.use('/api/permissions', permissionsRoutes);
     app.use('/api/lotes-vacunas', lotesVacunasRoutes);
     app.use('/api/lotes-jeringas', lotesJeringasRoutes);
     app.use('/api/planificacion', planificacionRoutes);

@@ -30,11 +30,14 @@ import {
   PieChart,
   TrendingUp
 } from 'lucide-react';
-import { Usuario, Establecimiento, CreateUsuarioDto, UpdateUsuarioDto, ChangePasswordDto } from '../../types';
+import { Usuario, Establecimiento, CreateUsuarioDto, UpdateUsuarioDto, ChangePasswordDto, Role } from '../../types';
 import { useUsuarios } from '../../hooks/useUsuarios';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useToastContext } from '../../contexts/ToastContext';
 import { logger } from '../../utils/debug';
+import { RoleService } from '../../services/roleService';
+import RolesManagement from './RolesManagement';
+import PermissionsManagement from './PermissionsManagement';
 
 // Configuración de secciones organizadas jerárquicamente
 interface SectionConfig {
@@ -113,6 +116,10 @@ const Usuarios: React.FC = () => {
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
   const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
 
+  // Estados para roles
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(false);
+
   // Hooks personalizados
   const {
     usuarios,
@@ -138,6 +145,24 @@ const Usuarios: React.FC = () => {
 
   const { establecimientos, loadEstablecimientos } = useEstablecimientos();
   const { toast } = useToastContext();
+
+  // Función para cargar roles
+  const loadRoles = async () => {
+    try {
+      setLoadingRoles(true);
+      const result = await RoleService.getAll({
+        includePermissions: false,
+        limit: 100
+      });
+      setRoles(result.roles);
+      logger.debug('Roles cargados para usuarios:', result.roles);
+    } catch (error) {
+      logger.error('Error al cargar roles:', error);
+      toast.error('Error al cargar roles', 'No se pudieron cargar los roles disponibles');
+    } finally {
+      setLoadingRoles(false);
+    }
+  };
 
   // Agrupar secciones por categoría
   const sectionsByCategory = USER_SECTIONS.reduce((acc, section) => {
@@ -171,6 +196,11 @@ const Usuarios: React.FC = () => {
     loadEstablecimientos();
   }, []); // Removido 'loadEstablecimientos' de dependencias
 
+  // Cargar roles al montar el componente
+  useEffect(() => {
+    loadRoles();
+  }, []); // Cargar roles una vez al montar
+
   // Manejar errores con toast
   useEffect(() => {
     if (createError) {
@@ -189,13 +219,6 @@ const Usuarios: React.FC = () => {
       toast.error(`Error al cambiar estado: ${estadoError}`);
     }
   }, [createError, updateError, deleteError, passwordError, estadoError, toast]);
-
-  const roles = [
-    { id: 'administrador', nombre: 'Administrador', descripcion: 'Acceso completo al sistema', color: 'bg-red-100 text-red-800', usuarios: usuarios.filter(u => u.rol === 'administrador').length },
-    { id: 'coordinador', nombre: 'Coordinador', descripcion: 'Gestión y supervisión general', color: 'bg-blue-100 text-blue-800', usuarios: usuarios.filter(u => u.rol === 'coordinador').length },
-    { id: 'responsable_acopio', nombre: 'Responsable de Acopio', descripcion: 'Gestión de centros de acopio', color: 'bg-green-100 text-green-800', usuarios: usuarios.filter(u => u.rol === 'responsable_acopio').length },
-    { id: 'operador', nombre: 'Operador', descripcion: 'Operaciones básicas del sistema', color: 'bg-yellow-100 text-yellow-800', usuarios: usuarios.filter(u => u.rol === 'operador').length },
-  ];
 
   // Los usuarios ya vienen filtrados del backend
   const filteredUsers = usuarios;
@@ -505,11 +528,19 @@ const Usuarios: React.FC = () => {
           )}
           
           {activeSection === 'roles' && (
-            <RolesTab roles={roles} usuarios={usuarios} />
+            <div className="p-6">
+              <RolesManagement
+                onNavigateToPermissions={() => setActiveSection('permisos')}
+              />
+            </div>
           )}
-          
+
           {activeSection === 'permisos' && (
-            <PermisosTab />
+            <div className="p-6">
+              <PermissionsManagement
+                onNavigateToRoles={() => setActiveSection('roles')}
+              />
+            </div>
           )}
           
           {activeSection === 'auditoria' && (
@@ -954,192 +985,13 @@ const GestionUsuariosTab: React.FC<GestionUsuariosTabProps> = ({
   );
 };
 
-// Tab de Roles
-const RolesTab: React.FC<{ roles: any[], usuarios: Usuario[] }> = ({ roles }) => {
-  return (
-    <div className="space-y-6">
-      {/* Stats de Roles */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {roles.map((rol) => (
-          <div key={rol.id} className="bg-white rounded-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{rol.nombre}</h3>
-                <p className="text-sm text-gray-600 mt-1">{rol.descripcion}</p>
-                <div className="mt-3">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${rol.color}`}>
-                    {rol.usuarios} usuario(s)
-                  </span>
-                </div>
-              </div>
-              <Shield className="h-8 w-8 text-gray-400" />
-            </div>
-          </div>
-        ))}
-      </div>
 
-      {/* Matriz de Permisos por Rol */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Matriz de Permisos por Rol</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-900">Módulo/Función</th>
-                {roles.map((rol) => (
-                  <th key={rol.id} className="text-center py-3 px-4 font-medium text-gray-900">
-                    {rol.nombre}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {[
-                { modulo: 'Dashboard', permisos: ['Ver', 'Ver', 'Ver', 'Ver'] },
-                { modulo: 'Establecimientos', permisos: ['Completo', 'Completo', 'Ver', 'Ver'] },
-                { modulo: 'Inventario', permisos: ['Completo', 'Completo', 'Editar', 'Ver'] },
-                { modulo: 'Movimientos', permisos: ['Completo', 'Completo', 'Editar', 'Ver'] },
-                { modulo: 'Planificación', permisos: ['Completo', 'Completo', 'Ver', 'Ver'] },
-                { modulo: 'Kardex', permisos: ['Completo', 'Ver', 'Ver', 'Ver'] },
-                { modulo: 'Reportes', permisos: ['Completo', 'Completo', 'Ver', 'Ver'] },
-                { modulo: 'Alertas', permisos: ['Completo', 'Ver', 'Ver', 'Ver'] },
-                { modulo: 'Usuarios', permisos: ['Completo', 'Ver', 'No', 'No'] },
-                { modulo: 'Configuración', permisos: ['Completo', 'Parcial', 'No', 'No'] },
-              ].map((item, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="py-3 px-4 font-medium text-gray-900">{item.modulo}</td>
-                  {item.permisos.map((permiso, pIndex) => (
-                    <td key={pIndex} className="py-3 px-4 text-center">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        permiso === 'Completo' ? 'bg-green-100 text-green-800' :
-                        permiso === 'Editar' || permiso === 'Parcial' ? 'bg-yellow-100 text-yellow-800' :
-                        permiso === 'Ver' ? 'bg-blue-100 text-blue-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {permiso}
-                      </span>
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      {/* Gestión de Roles */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Gestión de Roles</h3>
-          <button className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Rol
-          </button>
-        </div>
-        <div className="space-y-4">
-          {roles.map((rol) => (
-            <div key={rol.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-              <div className="flex items-center space-x-4">
-                <Shield className="h-8 w-8 text-purple-600" />
-                <div>
-                  <h4 className="font-medium text-gray-900">{rol.nombre}</h4>
-                  <p className="text-sm text-gray-600">{rol.descripcion}</p>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${rol.color} mt-1`}>
-                    {rol.usuarios} usuario(s) asignado(s)
-                  </span>
-                </div>
-              </div>
-              <div className="flex space-x-2">
-                <button className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded">
-                  <Edit className="h-4 w-4" />
-                </button>
-                <button className="text-purple-600 hover:text-purple-900 p-2 hover:bg-purple-50 rounded">
-                  <Settings className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
 
-// Tab de Permisos
-const PermisosTab: React.FC = () => {
-  const modulos = [
-    { id: 'dashboard', nombre: 'Dashboard', descripcion: 'Visualización de métricas y estadísticas', icono: BarChart3 },
-    { id: 'establecimientos', nombre: 'Establecimientos', descripcion: 'Gestión de centros de acopio y establecimientos', icono: Building2 },
-    { id: 'inventario', nombre: 'Inventario', descripcion: 'Control de vacunas, jeringas y stock', icono: UsersIcon },
-    { id: 'movimientos', nombre: 'Movimientos', descripcion: 'Registro de entregas y transferencias', icono: Activity },
-    { id: 'planificacion', nombre: 'Planificación', descripcion: 'Programación anual de vacunas', icono: Calendar },
-    { id: 'kardex', nombre: 'Kardex', descripcion: 'Historial detallado de movimientos', icono: FileText },
-    { id: 'reportes', nombre: 'Reportes', descripcion: 'Generación de informes y análisis', icono: BarChart3 },
-    { id: 'alertas', nombre: 'Alertas', descripcion: 'Sistema de notificaciones automáticas', icono: AlertTriangle },
-    { id: 'usuarios', nombre: 'Usuarios', descripcion: 'Gestión de usuarios y permisos', icono: UsersIcon },
-    { id: 'configuracion', nombre: 'Configuración', descripcion: 'Configuración general del sistema', icono: Settings },
-  ];
 
-  const permisos = ['Ver', 'Crear', 'Editar', 'Eliminar', 'Exportar', 'Configurar'];
 
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Configuración Detallada de Permisos</h3>
-        <p className="text-gray-600 mb-6">
-          Configure los permisos específicos para cada módulo del sistema. Los permisos se asignan por rol de usuario.
-        </p>
 
-        <div className="space-y-6">
-          {modulos.map((modulo) => {
-            const Icono = modulo.icono;
-            return (
-              <div key={modulo.id} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <Icono className="h-6 w-6 text-purple-600" />
-                    <div>
-                      <h4 className="font-medium text-gray-900">{modulo.nombre}</h4>
-                      <p className="text-sm text-gray-600">{modulo.descripcion}</p>
-                    </div>
-                  </div>
-                  <button className="text-purple-600 hover:text-purple-900">
-                    <Settings className="h-5 w-5" />
-                  </button>
-                </div>
-                
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  {permisos.map((permiso) => (
-                    <div key={permiso} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`${modulo.id}-${permiso}`}
-                        className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                        defaultChecked={Math.random() > 0.3}
-                      />
-                      <label htmlFor={`${modulo.id}-${permiso}`} className="text-sm text-gray-700">
-                        {permiso}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
 
-        <div className="flex justify-end space-x-3 mt-6 pt-6 border-t">
-          <button className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            Cancelar
-          </button>
-          <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-            Guardar Permisos
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Tab de Auditoría
 const AuditoriaTab: React.FC<{ usuarios: Usuario[] }> = ({ usuarios }) => {
@@ -1416,19 +1268,25 @@ const ReportesUsuariosTab: React.FC<{ usuarios: Usuario[], roles: any[] }> = ({ 
         <h3 className="text-lg font-medium text-gray-900 mb-4">Distribución de Usuarios por Rol</h3>
         <div className="space-y-4">
           {roles.map((rol) => {
-            const porcentaje = Math.round((rol.usuarios / usuarios.length) * 100);
+            const usuariosConRol = usuarios.filter(u => u.rol === rol.codigo).length;
+            const porcentaje = usuarios.length > 0 ? Math.round((usuariosConRol / usuarios.length) * 100) : 0;
+            const colorClass = rol.codigo === 'administrador' ? 'bg-red-100 text-red-800' :
+                              rol.codigo === 'coordinador' ? 'bg-blue-100 text-blue-800' :
+                              rol.codigo === 'responsable_acopio' ? 'bg-green-100 text-green-800' :
+                              'bg-yellow-100 text-yellow-800';
+
             return (
-              <div key={rol.id} className="flex items-center justify-between">
+              <div key={rol.codigo} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${rol.color}`}>
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${colorClass}`}>
                     {rol.nombre}
                   </span>
-                  <span className="text-sm text-gray-600">{rol.usuarios} usuarios</span>
+                  <span className="text-sm text-gray-600">{usuariosConRol} usuarios</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-purple-600 h-2 rounded-full" 
+                    <div
+                      className="bg-purple-600 h-2 rounded-full"
                       style={{ width: `${porcentaje}%` }}
                     ></div>
                   </div>
@@ -1447,7 +1305,7 @@ const ReportesUsuariosTab: React.FC<{ usuarios: Usuario[], roles: any[] }> = ({ 
 interface UsuarioModalProps {
   usuario: Usuario | null;
   establecimientos: Establecimiento[];
-  roles: any[];
+  roles: Role[];
   onClose: () => void;
   onSubmit: (data: any) => void;
   isLoading?: boolean;
@@ -1568,8 +1426,8 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
                   onChange={(e) => setFormData({...formData, rol: e.target.value as any})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
-                  {roles.map((rol) => (
-                    <option key={rol.id} value={rol.id}>
+                  {roles.filter(rol => rol.estado === 'activo').map((rol) => (
+                    <option key={rol.codigo} value={rol.codigo}>
                       {rol.nombre}
                     </option>
                   ))}

@@ -2,6 +2,7 @@ import { prisma } from '@/config/database';
 import { IUsuario, CreateUsuarioDto, UpdateUsuarioDto, ChangePasswordDto, EstadoGeneral, RolUsuario, ServiceResult } from '@/types';
 import { createError } from '@/middleware/errorHandler';
 import { PasswordUtils } from '@/utils/password';
+import { RoleService } from './RoleService';
 
 /**
  * Servicio para gestión de usuarios
@@ -213,6 +214,35 @@ export class UsuarioService {
         throw createError.badRequest(`Contraseña inválida: ${passwordValidation.errors.join(', ')}`);
       }
 
+      // Obtener el rol por código
+      const roleResult = await RoleService.getByCodigo(data.rol);
+      if (!roleResult.success || !roleResult.data) {
+        throw createError.badRequest('Rol no encontrado');
+      }
+
+      // Mapear código de rol a enum RolUsuario para compatibilidad
+      // Solo mapear si el código existe en el enum, sino usar 'operador' como valor por defecto
+      let rolEnum: RolUsuario;
+
+      switch (data.rol) {
+        case 'administrador':
+          rolEnum = 'administrador' as RolUsuario;
+          break;
+        case 'coordinador':
+          rolEnum = 'coordinador' as RolUsuario;
+          break;
+        case 'responsable_acopio':
+          rolEnum = 'responsable_acopio' as RolUsuario;
+          break;
+        case 'operador':
+          rolEnum = 'operador' as RolUsuario;
+          break;
+        default:
+          // Para roles personalizados que no están en el enum, usar 'operador' como valor por defecto
+          rolEnum = 'operador' as RolUsuario;
+          break;
+      }
+
       // Encriptar contraseña
       const passwordHash = await PasswordUtils.hashPassword(data.password);
 
@@ -223,7 +253,8 @@ export class UsuarioService {
           email: data.email,
           usuario: data.usuario,
           passwordHash,
-          rol: data.rol,
+          rol: rolEnum, // Valor del enum para compatibilidad
+          roleId: roleResult.data.id, // Nueva relación con tabla roles
           establecimientoId: data.establecimientoId
         },
         include: {

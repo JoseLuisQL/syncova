@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { UsuarioService } from '@/services/UsuarioService';
+import { RoleService } from '@/services/RoleService';
 import { CreateUsuarioDto, UpdateUsuarioDto, ChangePasswordDto, EstadoGeneral, RolUsuario } from '@/types';
 import { successResponse, errorResponse, paginatedResponse } from '@/utils/response';
 import { validateRequired, validateEnum, validateUUID } from '@/utils/validation';
@@ -203,8 +204,15 @@ export class UsuarioController {
         return;
       }
 
-      // Validar rol
-      if (!['administrador', 'coordinador', 'responsable_acopio', 'operador'].includes(data.rol)) {
+      // Validar rol dinámicamente contra la base de datos
+      try {
+        const roleResult = await RoleService.getByCodigo(data.rol);
+        if (!roleResult.success || !roleResult.data || roleResult.data.estado !== 'activo') {
+          errorResponse(res, 'Rol inválido o inactivo', 400);
+          return;
+        }
+      } catch (error) {
+        console.error('Error al validar rol:', error);
         errorResponse(res, 'Rol inválido', 400);
         return;
       }
@@ -246,10 +254,19 @@ export class UsuarioController {
 
       console.log('📝 Datos recibidos para actualizar usuario:', JSON.stringify(data, null, 2));
 
-      // Validar rol si se proporciona
-      if (data.rol && !['administrador', 'coordinador', 'responsable_acopio', 'operador'].includes(data.rol)) {
-        errorResponse(res, 'Rol inválido', 400);
-        return;
+      // Validar rol dinámicamente si se proporciona
+      if (data.rol) {
+        try {
+          const roleExists = await RoleService.getByCodigo(data.rol);
+          if (!roleExists || roleExists.estado !== 'activo') {
+            errorResponse(res, 'Rol inválido o inactivo', 400);
+            return;
+          }
+        } catch (error) {
+          console.error('Error al validar rol:', error);
+          errorResponse(res, 'Rol inválido', 400);
+          return;
+        }
       }
 
       // Validar estado si se proporciona

@@ -309,7 +309,7 @@ export interface CreateUsuarioDto {
   email: string;
   usuario: string;
   password: string;
-  rol: RolUsuario;
+  rol: string; // Código del rol para buscar en la tabla roles
   establecimientoId?: string;
 }
 
@@ -328,15 +328,7 @@ export interface ChangePasswordDto {
   newPassword: string;
 }
 
-export interface CreateUsuarioDto {
-  nombres: string;
-  apellidos: string;
-  email: string;
-  usuario: string;
-  password: string;
-  rol: RolUsuario;
-  establecimientoId?: string;
-}
+
 
 export interface UpdateUsuarioDto {
   nombres?: string;
@@ -569,6 +561,7 @@ export interface AuthenticatedRequest extends Request {
     usuario: string;
     rol: RolUsuario;
     establecimientoId?: string;
+    permissions?: string[]; // Códigos de permisos del usuario
   };
 }
 
@@ -774,4 +767,81 @@ export interface JeringasCalculadas {
   multiplicador: number;
   prioridad: number;
   origen: 'defecto' | 'centro';
+}
+
+// =====================================================
+// ROLES AND PERMISSIONS INTERFACES
+// =====================================================
+
+export interface IRole {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  codigo: string;
+  estado: EstadoGeneral;
+  esDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  // Información adicional incluida en respuestas
+  _count?: {
+    usuarios: number;
+    rolePermissions: number;
+  };
+  permissions?: IPermission[];
+}
+
+export interface IPermission {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  codigo: string;
+  recurso: string;
+  accion: string;
+  categoria: string;
+  estado: EstadoGeneral;
+  createdAt: Date;
+  updatedAt: Date;
+  // Información adicional incluida en respuestas
+  _count?: {
+    rolePermissions: number;
+  };
+}
+
+export interface CreateRoleDto {
+  nombre: string;
+  descripcion?: string;
+  codigo: string;
+  estado?: EstadoGeneral;
+}
+
+export interface UpdateRoleDto {
+  nombre?: string;
+  descripcion?: string;
+  codigo?: string;
+  estado?: EstadoGeneral;
+}
+
+export interface CreatePermissionDto {
+  nombre: string;
+  descripcion?: string;
+  codigo: string;
+  recurso: string;
+  accion: string;
+  categoria: string;
+  estado?: EstadoGeneral;
+}
+
+export interface UpdatePermissionDto {
+  nombre?: string;
+  descripcion?: string;
+  codigo?: string;
+  recurso?: string;
+  accion?: string;
+  categoria?: string;
+  estado?: EstadoGeneral;
+}
+
+export interface RolePermissionAssignment {
+  roleId: string;
+  permissionIds: string[];
 }

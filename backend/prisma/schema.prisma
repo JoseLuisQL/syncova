@@ -266,7 +266,8 @@ model Usuario {
   email             String           @unique @db.VarChar(255)
   usuario           String           @unique @db.VarChar(100)
   passwordHash      String           @map("password_hash") @db.VarChar(255)
-  rol               RolUsuario
+  rol               RolUsuario       // Mantener para compatibilidad
+  roleId            String?          @map("role_id") @db.Uuid // Nueva relación con tabla roles
   establecimientoId String?          @map("establecimiento_id") @db.Uuid
   estado            EstadoGeneral    @default(activo)
   ultimoAcceso      DateTime?        @map("ultimo_acceso") @db.Timestamptz(6)
@@ -275,12 +276,14 @@ model Usuario {
 
   // Relaciones
   establecimiento   Establecimiento? @relation(fields: [establecimientoId], references: [id])
+  role              Role?            @relation("UsuarioRole", fields: [roleId], references: [id])
   movimientos       MovimientoVacuna[]
   entregas          EntregaAdicional[]
   vales             ValeEntrega[]
   kardex            Kardex[]
   alertas           Alerta[]
 
+  @@index([roleId], name: "idx_usuario_role")
   @@map("usuarios")
 }
 
@@ -502,4 +505,65 @@ model ConfiguracionJeringaVacunaCentro {
   @@index([activo], name: "idx_config_centro_activo")
   @@index([centroAcopioId, vacunaId, prioridad], name: "idx_config_centro_prioridad")
   @@map("configuracion_jeringa_vacuna_centro")
+}
+
+// =====================================================
+// ROLES AND PERMISSIONS SYSTEM
+// =====================================================
+
+model Role {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre      String   @unique @db.VarChar(100)
+  descripcion String?  @db.VarChar(500)
+  codigo      String   @unique @db.VarChar(50) // Para compatibilidad con RolUsuario enum
+  estado      EstadoGeneral @default(activo)
+  esDefault   Boolean  @default(false) @map("es_default") // Indica si es un rol por defecto del sistema
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  rolePermissions RolePermission[]
+  usuarios        Usuario[] @relation("UsuarioRole")
+
+  @@index([codigo], name: "idx_role_codigo")
+  @@index([estado], name: "idx_role_estado")
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre      String   @unique @db.VarChar(100)
+  descripcion String?  @db.VarChar(500)
+  codigo      String   @unique @db.VarChar(100) // ej: "usuarios:read", "reportes:write"
+  recurso     String   @db.VarChar(50) // ej: "usuarios", "reportes", "planificacion"
+  accion      String   @db.VarChar(50) // ej: "read", "write", "delete", "export"
+  categoria   String   @db.VarChar(50) // Para agrupar permisos en la UI
+  estado      EstadoGeneral @default(activo)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  rolePermissions RolePermission[]
+
+  @@index([codigo], name: "idx_permission_codigo")
+  @@index([recurso], name: "idx_permission_recurso")
+  @@index([categoria], name: "idx_permission_categoria")
+  @@index([estado], name: "idx_permission_estado")
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relaciones
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId], name: "unique_role_permission")
+  @@index([roleId], name: "idx_role_permission_role")
+  @@index([permissionId], name: "idx_role_permission_permission")
+  @@map("role_permissions")
 }

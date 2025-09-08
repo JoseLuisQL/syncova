@@ -910,3 +910,132 @@ export interface Alerta {
   usuarioId?: string;
   parametros?: Record<string, any>;
 }
+
+// =====================================================
+// ROLES AND PERMISSIONS TYPES
+// =====================================================
+
+export interface Role {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  codigo: string;
+  estado: 'activo' | 'inactivo';
+  esDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  // Información adicional incluida en respuestas
+  _count?: {
+    usuarios: number;
+    rolePermissions: number;
+  };
+  permissions?: Permission[];
+}
+
+export interface Permission {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  codigo: string;
+  recurso: string;
+  accion: string;
+  categoria: string;
+  estado: 'activo' | 'inactivo';
+  createdAt: Date;
+  updatedAt: Date;
+  // Información adicional incluida en respuestas
+  _count?: {
+    rolePermissions: number;
+  };
+}
+
+// DTOs para el backend - Roles
+export interface CreateRoleDto {
+  nombre: string;
+  descripcion?: string;
+  codigo: string;
+  estado?: 'activo' | 'inactivo';
+}
+
+export interface UpdateRoleDto {
+  nombre?: string;
+  descripcion?: string;
+  codigo?: string;
+  estado?: 'activo' | 'inactivo';
+}
+
+// DTOs para el backend - Permissions
+export interface CreatePermissionDto {
+  nombre: string;
+  descripcion?: string;
+  codigo: string;
+  recurso: string;
+  accion: string;
+  categoria: string;
+  estado?: 'activo' | 'inactivo';
+}
+
+export interface UpdatePermissionDto {
+  nombre?: string;
+  descripcion?: string;
+  codigo?: string;
+  recurso?: string;
+  accion?: string;
+  categoria?: string;
+  estado?: 'activo' | 'inactivo';
+}
+
+// Interfaces para asignación de permisos
+export interface RolePermissionAssignment {
+  roleId: string;
+  permissionIds: string[];
+}
+
+// Interfaces para estadísticas
+export interface RoleStats {
+  total: number;
+  activos: number;
+  inactivos: number;
+  porDefecto: number;
+  personalizados: number;
+  conUsuarios: number;
+}
+
+export interface PermissionStats {
+  total: number;
+  activos: number;
+  inactivos: number;
+  porCategoria: Record<string, number>;
+  porRecurso: Record<string, number>;
+  asignados: number;
+}
+
+// Interfaces para filtros
+export interface RoleFilters {
+  estado?: 'activo' | 'inactivo' | 'todos';
+  search?: string;
+  includePermissions?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+export interface PermissionFilters {
+  estado?: 'activo' | 'inactivo' | 'todos';
+  search?: string;
+  categoria?: string;
+  recurso?: string;
+  accion?: string;
+  page?: number;
+  limit?: number;
+}
+
+// Interfaces para respuestas paginadas
+export interface RolesResponse {
+  roles: Role[];
+  total: number;
+}
+
+export interface PermissionsResponse {
+  permissions: Permission[];
+  total: number;
+}
