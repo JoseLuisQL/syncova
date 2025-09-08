@@ -912,6 +912,59 @@ export interface Alerta {
 }
 
 // =====================================================
+// INTERFACES DE PROGRAMACIÓN ANUAL CENARES
+// =====================================================
+
+export interface ProgramacionAnualCenares {
+  id: string;
+  vacunaId?: string;
+  jeringaId?: string;
+  anio: number;
+  programadoQ1: number;
+  programadoQ2: number;
+  programadoQ3: number;
+  programadoQ4: number;
+  createdAt: Date;
+  updatedAt: Date;
+  // Relaciones incluidas
+  vacuna?: {
+    id: string;
+    nombre: string;
+    tipo: string;
+    presentacion: string;
+  };
+  jeringa?: {
+    id: string;
+    tipo: string;
+    capacidad: string;
+    color: string;
+  };
+}
+
+export interface CreateProgramacionAnualCenaresDto {
+  vacunaId?: string;
+  jeringaId?: string;
+  anio: number;
+  programadoQ1?: number;
+  programadoQ2?: number;
+  programadoQ3?: number;
+  programadoQ4?: number;
+}
+
+export interface UpdateProgramacionAnualCenaresDto {
+  programadoQ1?: number;
+  programadoQ2?: number;
+  programadoQ3?: number;
+  programadoQ4?: number;
+}
+
+export interface ProgramacionAnualCenaresFilters {
+  anio?: number;
+  vacunaId?: string;
+  jeringaId?: string;
+}
+
+// =====================================================
 // ROLES AND PERMISSIONS TYPES
 // =====================================================
 

@@ -194,6 +194,7 @@ model Vacuna {
   valesDetalle              ValeDetalle[]
   configuracionesDefecto    ConfiguracionJeringaVacunaDefecto[]
   configuracionesCentro     ConfiguracionJeringaVacunaCentro[]
+  programacionesCenares     ProgramacionAnualCenares[] @relation("ProgramacionCenaresVacuna")
 
   @@map("vacunas")
 }
@@ -211,6 +212,7 @@ model Jeringa {
   lotes                     LoteJeringa[]
   configuracionesDefecto    ConfiguracionJeringaVacunaDefecto[]
   configuracionesCentro     ConfiguracionJeringaVacunaCentro[]
+  programacionesCenares     ProgramacionAnualCenares[] @relation("ProgramacionCenaresJeringa")
 
   @@map("jeringas")
 }
@@ -304,6 +306,31 @@ model PlanificacionAnual {
 
   @@unique([establecimientoId, vacunaId, anio], name: "uk_planificacion_establecimiento_vacuna_anio")
   @@map("planificacion_anual")
+}
+
+model ProgramacionAnualCenares {
+  id            String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  vacunaId      String?       @map("vacuna_id") @db.Uuid
+  jeringaId     String?       @map("jeringa_id") @db.Uuid
+  anio          Int
+  programadoQ1  Int           @default(0) @map("programado_q1")
+  programadoQ2  Int           @default(0) @map("programado_q2")
+  programadoQ3  Int           @default(0) @map("programado_q3")
+  programadoQ4  Int           @default(0) @map("programado_q4")
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  vacuna        Vacuna?       @relation("ProgramacionCenaresVacuna", fields: [vacunaId], references: [id])
+  jeringa       Jeringa?      @relation("ProgramacionCenaresJeringa", fields: [jeringaId], references: [id])
+
+  // Constraints: debe tener vacuna O jeringa, pero no ambos
+  @@unique([vacunaId, anio], name: "uk_programacion_cenares_vacuna_anio")
+  @@unique([jeringaId, anio], name: "uk_programacion_cenares_jeringa_anio")
+  @@index([anio], name: "idx_programacion_cenares_anio")
+  @@index([vacunaId], name: "idx_programacion_cenares_vacuna")
+  @@index([jeringaId], name: "idx_programacion_cenares_jeringa")
+  @@map("programacion_anual_cenares")
 }
 
 model MovimientoVacuna {

@@ -640,6 +640,46 @@ export interface ConfiguracionSistema {
 }
 
 // =====================================================
+// INTERFACES DE PROGRAMACIÓN ANUAL CENARES
+// =====================================================
+
+export interface IProgramacionAnualCenares {
+  id: string;
+  vacunaId?: string;
+  jeringaId?: string;
+  anio: number;
+  programadoQ1: number;
+  programadoQ2: number;
+  programadoQ3: number;
+  programadoQ4: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateProgramacionAnualCenaresDto {
+  vacunaId?: string;
+  jeringaId?: string;
+  anio: number;
+  programadoQ1?: number;
+  programadoQ2?: number;
+  programadoQ3?: number;
+  programadoQ4?: number;
+}
+
+export interface UpdateProgramacionAnualCenaresDto {
+  programadoQ1?: number;
+  programadoQ2?: number;
+  programadoQ3?: number;
+  programadoQ4?: number;
+}
+
+export interface ProgramacionAnualCenaresFilters {
+  anio?: number;
+  vacunaId?: string;
+  jeringaId?: string;
+}
+
+// =====================================================
 // INTERFACES DE VALES DE ENTREGA
 // =====================================================
 

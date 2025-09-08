@@ -21,6 +21,7 @@ import valesRoutes from '@/routes/vales';
 import kardexRoutes from '@/routes/kardex';
 import reportesRoutes from '@/routes/reportes';
 import planificacionReportesRoutes from '@/routes/planificacionReportes';
+import programacionAnualCenaresRoutes from '@/routes/programacionAnualCenares';
 import authRoutes from '@/routes/auth';
 import rolesRoutes from '@/routes/roles';
 import permissionsRoutes from '@/routes/permissions';
@@ -68,6 +69,7 @@ async function startServer(): Promise<void> {
             vales: '/api/vales',
             kardex: '/api/kardex',
             reportes: '/api/reportes',
+            'programacion-anual-cenares': '/api/programacion-anual-cenares',
             alertas: '/api/alertas',
           },
         },
@@ -97,6 +99,7 @@ async function startServer(): Promise<void> {
     app.use('/api/kardex', kardexRoutes);
     app.use('/api/reportes', reportesRoutes);
     app.use('/api/reportes/planificacion', planificacionReportesRoutes);
+    app.use('/api/programacion-anual-cenares', programacionAnualCenaresRoutes);
 
     // TODO: Agregar más rutas según se implementen
     // app.use('/api/alertas', alertasRoutes);
