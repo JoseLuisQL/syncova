@@ -24,7 +24,8 @@ import {
   Search,
   ArrowRightLeft,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
+  Truck
 } from 'lucide-react';
 import { mockEstablecimientos, mockVacunas } from '../../data/mockData';
 import { Establecimiento, Vacuna } from '../../types';
@@ -41,6 +42,7 @@ import {
   FiltrosKardexDetallado,
   ConfiguracionExportacion
 } from '../../types/reportes';
+import ProgramacionSeguimientoAnualTab from './ProgramacionSeguimientoAnualTab';
 
 // Configuración de secciones organizadas jerárquicamente
 interface SectionConfig {
@@ -48,7 +50,7 @@ interface SectionConfig {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   path: string;
-  category: 'generacion' | 'automatizacion' | 'configuracion';
+  category: 'generacion' | 'automatizacion' | 'configuracion' | 'entrega-cenares';
   description?: string;
 }
 
@@ -98,21 +100,35 @@ const REPORTS_SECTIONS: SectionConfig[] = [
   },
   
   // Sección Configuración
-  { 
-    id: 'configuracion', 
-    label: 'Configuración', 
-    icon: Settings, 
-    path: '/reportes/configuracion', 
+  {
+    id: 'configuracion',
+    label: 'Configuración',
+    icon: Settings,
+    path: '/reportes/configuracion',
     category: 'configuracion',
     description: 'Ajustes del sistema'
+  },
+
+  // Sección Entrega CENARES
+  {
+    id: 'programacion-seguimiento-anual',
+    label: 'Programación y Seguimiento Anual',
+    icon: Calendar,
+    path: '/reportes/programacion-seguimiento-anual',
+    category: 'entrega-cenares',
+    description: 'Programación y seguimiento anual de entregas'
   }
 ];
 
 const CATEGORY_CONFIG = {
   generacion: { label: 'Generación de Reportes', icon: FileText, color: 'emerald' },
+  'entrega-cenares': { label: 'Entrega CENARES', icon: Truck, color: 'blue' },
   automatizacion: { label: 'Automatización', icon: Clock, color: 'purple' },
   configuracion: { label: 'Configuración', icon: Settings, color: 'amber' }
 };
+
+// Orden deseado de las categorías
+const CATEGORY_ORDER = ['generacion', 'entrega-cenares', 'automatizacion', 'configuracion'];
 
 const Reportes: React.FC = () => {
   const { navigateToModule } = useAppNavigation();
@@ -232,7 +248,10 @@ const Reportes: React.FC = () => {
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-full px-6">
           <div className="grid grid-cols-4 gap-1">
-            {Object.entries(sectionsByCategory).map(([categoryKey, sections]) => {
+            {CATEGORY_ORDER.map((categoryKey) => {
+              const sections = sectionsByCategory[categoryKey] || [];
+              if (sections.length === 0) return null;
+
               const category = CATEGORY_CONFIG[categoryKey as keyof typeof CATEGORY_CONFIG];
               const CategoryIcon = category.icon;
               
@@ -290,6 +309,7 @@ const Reportes: React.FC = () => {
             <Route path="ejecutivo" element={<EjecutivoReportesTab filtros={filtros} setFiltros={setFiltros} onGenerarReporte={handleExportarReporte} />} />
             <Route path="programados" element={<ReportesProgramadosTab reportesProgramados={reportesProgramados} setReportesProgramados={setReportesProgramados} />} />
             <Route path="configuracion" element={<ConfiguracionReportesTab />} />
+            <Route path="programacion-seguimiento-anual" element={<ProgramacionSeguimientoAnualTab filtros={filtros} setFiltros={setFiltros} centrosAcopio={centrosAcopio} vacunas={vacunas} onGenerarReporte={handleExportarReporte} />} />
           </Routes>
         </div>
       </div>
