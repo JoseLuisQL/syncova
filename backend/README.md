@@ -1,6 +1,6 @@
 # 🏥 SIVAC Backend - Sistema de Gestión de Vacunas
 
-Backend API para el Sistema de Gestión de Vacunas de DIRESA Apurímac II, desarrollado con Node.js, TypeScript, Express y Prisma.
+Backend API para el Sistema de Gestión de Vacunas de DISA Apurímac II, desarrollado con Node.js, TypeScript, Express y Prisma.
 
 ## 🚀 Características
 
@@ -286,7 +286,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 👥 Equipo
 
-- **DIRESA Apurímac II** - Cliente
+- **DISA Apurímac II** - Cliente
 - **Desarrollador** - Implementación
 
 ## 📞 Soporte

@@ -39,7 +39,7 @@ const PageTitle: React.FC = () => {
  */
 const getMetaDescription = (module: string, subModule?: string | null): string => {
   const descriptions: Record<string, string> = {
-    dashboard: 'Panel principal del Sistema Integral de Gestión de Vacunas SIVAC - DIRESA Apurímac II',
+    dashboard: 'Panel principal del Sistema Integral de Gestión de Vacunas SIVAC - DISA Apurímac II',
     establecimientos: 'Gestión de establecimientos de salud, redes, microredes y centros de acopio',
     inventario: 'Control de inventario de vacunas y jeringas con gestión de lotes y vencimientos',
     movimientos: 'Registro y seguimiento de movimientos de vacunas entre establecimientos',
@@ -81,7 +81,7 @@ const getMetaDescription = (module: string, subModule?: string | null): string =
  * Obtener palabras clave meta basadas en el módulo actual
  */
 const getMetaKeywords = (module: string, subModule?: string | null): string => {
-  const baseKeywords = 'SIVAC, vacunas, DIRESA, Apurímac, salud, inmunización, gestión, inventario';
+  const baseKeywords = 'SIVAC, vacunas, DISA, Apurímac, salud, inmunización, gestión, inventario';
 
   const moduleKeywords: Record<string, string> = {
     dashboard: 'dashboard, panel, estadísticas',

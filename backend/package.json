@@ -36,7 +36,7 @@
     "typescript",
     "prisma"
   ],
-  "author": "DIRESA Apurímac II",
+  "author": "DISA Apurímac II",
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.7.1",

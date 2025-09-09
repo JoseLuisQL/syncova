@@ -20,7 +20,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
               <p className="text-sm text-gray-600 mt-1">
-                Sistema Integral de Gestión de Vacunas - DIRESA Apurímac II
+                Sistema Integral de Gestión de Vacunas - DISA Apurímac II
               </p>
             </div>
           </div>

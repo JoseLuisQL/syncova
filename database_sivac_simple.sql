@@ -443,7 +443,7 @@ CREATE TRIGGER update_configuracion_sistema_updated_at BEFORE UPDATE ON configur
 -- Insertar configuraciones básicas del sistema
 INSERT INTO configuracion_sistema (clave, valor, descripcion, tipo_dato, categoria, es_publico) VALUES
 ('sistema_nombre', 'SIVAC - Sistema de Gestión de Vacunas', 'Nombre del sistema', 'string', 'general', true),
-('institucion_nombre', 'DIRESA Apurímac II', 'Nombre de la institución', 'string', 'general', true),
+('institucion_nombre', 'DISA Apurímac II', 'Nombre de la institución', 'string', 'general', true),
 ('timezone', 'America/Lima', 'Zona horaria del sistema', 'string', 'general', false),
 ('stock_minimo_default', '100', 'Stock mínimo por defecto para alertas', 'number', 'alertas', false),
 ('dias_alerta_vencimiento', '30', 'Días antes del vencimiento para generar alerta', 'number', 'alertas', false);

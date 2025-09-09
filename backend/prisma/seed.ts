@@ -555,7 +555,7 @@ async function main() {
       },
       {
         clave: 'institucion_nombre',
-        valor: 'DIRESA Apurímac II',
+        valor: 'DISA Apurímac II',
         descripcion: 'Nombre de la institución',
         tipoDato: 'string',
         categoria: 'general',

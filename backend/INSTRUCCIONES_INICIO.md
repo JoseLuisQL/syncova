@@ -158,7 +158,7 @@ GET /api/configuracion/sistema/info
   "data": {
     "configuraciones": {
       "sistema_nombre": "SIVAC - Sistema de Gestión de Vacunas",
-      "institucion_nombre": "DIRESA Apurímac II",
+      "institucion_nombre": "DISA Apurímac II",
       "sistema_version": "1.0.0",
       "items_per_page": 10,
       "theme_default": "light",

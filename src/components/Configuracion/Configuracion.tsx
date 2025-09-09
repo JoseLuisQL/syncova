@@ -129,7 +129,7 @@ const Configuracion: React.FC = () => {
     // Configuraciones Generales (simplificado)
     general: {
       nombreSistema: 'SIVAC - Sistema de Gestión de Vacunas',
-      nombreInstitucion: 'DIRESA Apurímac II',
+      nombreInstitucion: 'DISA Apurímac II',
       direccion: 'Jr. Lima 123, Andahuaylas, Apurímac',
       telefono: '+51 983 456 789',
       email: 'contacto@saludapurimac.gob.pe',

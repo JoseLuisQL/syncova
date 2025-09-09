@@ -280,7 +280,7 @@ const LoginForm: React.FC = () => {
         {/* Footer */}
         <div className="text-center">
           <p className="text-xs text-gray-500">
-            DIRESA Apurímac II - Sistema SIVAC v1.0
+            DISA Apurímac II - Sistema SIVAC v1.0
           </p>
         </div>
       </div>

@@ -107,7 +107,7 @@ const Sidebar: React.FC = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">
-                DIRESA Apurímac II
+                DISA Apurímac II
               </p>
               <p className="text-xs text-slate-400 truncate">
                 Estrategia Sanitaria
