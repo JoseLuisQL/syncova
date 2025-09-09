@@ -5,9 +5,10 @@ import App from './App.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  // StrictMode deshabilitado temporalmente para evitar doble montaje en desarrollo
+  // <StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </StrictMode>
+  // </StrictMode>
 );
