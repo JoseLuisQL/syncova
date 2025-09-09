@@ -1804,14 +1804,13 @@ export class PlanificacionService {
           // Calcular meta anual
           const metaAnual = distribucionMensual.reduce((sum, val) => sum + val, 0);
 
-          // Solo procesar si hay meta anual > 0
-          if (metaAnual > 0) {
-            registros.push({
-              establecimientoId: establecimiento.id,
-              metaAnual,
-              distribucionMensual
-            });
-          }
+          // Procesar todos los registros, incluyendo aquellos con meta anual = 0
+          // Esto permite que los valores 0 del archivo de importación reemplacen valores existentes
+          registros.push({
+            establecimientoId: establecimiento.id,
+            metaAnual,
+            distribucionMensual
+          });
 
           filasProcesadas++;
 
@@ -1980,16 +1979,15 @@ export class PlanificacionService {
               // Calcular meta anual
               const metaAnual = distribucionMensual.reduce((sum, val) => sum + val, 0);
 
-              // Solo procesar si hay meta anual > 0
-              if (metaAnual > 0) {
-                // Necesitamos obtener el ID del establecimiento
-                // Por simplicidad, usaremos el código como identificador temporal
-                registros.push({
-                  establecimientoId: codigo, // Temporal, se resolverá en importar
-                  metaAnual,
-                  distribucionMensual
-                });
-              }
+              // Procesar todos los registros, incluyendo aquellos con meta anual = 0
+              // Esto permite que los valores 0 del archivo de importación reemplacen valores existentes
+              // Necesitamos obtener el ID del establecimiento
+              // Por simplicidad, usaremos el código como identificador temporal
+              registros.push({
+                establecimientoId: codigo, // Temporal, se resolverá en importar
+                metaAnual,
+                distribucionMensual
+              });
 
             } catch (error) {
               erroresHoja.push(`Fila ${rowNumber}: Error al procesar - ${error instanceof Error ? error.message : 'Error desconocido'}`);
