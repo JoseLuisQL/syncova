@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Loader2, Save, AlertCircle } from 'lucide-react';
+import { Loader2, Save, AlertCircle, Package, Syringe } from 'lucide-react';
 import { ProgramacionAnualCenaresService } from '../../services/programacionAnualCenaresService';
 import { toast } from 'react-hot-toast';
 
@@ -239,7 +239,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
     return (
       <>
         {/* Programado (Editable) */}
-        <td className="px-2 py-3 text-center border-r border-gray-100 relative">
+        <td className="px-3 py-4 text-center border-r border-gray-100 relative">
           <div className="relative">
             <input
               type="number"
@@ -248,41 +248,53 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
               onChange={(e) => handleTempValueChange(itemIndex, quarter, parseInt(e.target.value) || 0)}
               onBlur={() => handleFieldBlur(itemIndex, quarter)}
               disabled={isUpdating}
-              className={`w-20 px-2 py-1 text-center text-sm border rounded focus:outline-none focus:ring-2 focus:ring-${color}-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-all ${
+              className={`w-24 px-3 py-2 text-center text-sm font-semibold border rounded-lg focus:outline-none focus:ring-2 focus:ring-${color}-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-all shadow-sm ${
                 isPendingChange
                   ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-200'
-                  : 'border-gray-300 hover:border-blue-400'
+                  : 'border-gray-300 hover:border-blue-400 bg-white'
               }`}
               title={isPendingChange ? 'Cambios pendientes - Se guardará automáticamente' : ''}
             />
             {isPendingChange && (
-              <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse shadow-sm"></div>
             )}
           </div>
         </td>
 
         {/* Entregado (CENARES) - Read Only */}
-        <td className="px-2 py-3 text-sm text-center text-gray-700 border-r border-gray-100">
-          {entregado.toLocaleString()}
+        <td className="px-3 py-4 text-sm text-center text-gray-800 border-r border-gray-100 font-semibold">
+          <div className="bg-gray-50 rounded-lg px-2 py-1">
+            {entregado.toLocaleString()}
+          </div>
         </td>
 
         {/* Diferencia - Calculated */}
-        <td className={`px-2 py-3 text-sm text-center font-medium border-r border-gray-100 ${
-          diferencia >= 0 ? 'text-green-600' : 'text-red-600'
+        <td className={`px-3 py-4 text-sm text-center font-bold border-r border-gray-100 ${
+          diferencia >= 0 ? 'text-green-700' : 'text-red-700'
         }`}>
-          {diferencia.toLocaleString()}
+          <div className={`rounded-lg px-2 py-1 ${
+            diferencia >= 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+          }`}>
+            {diferencia.toLocaleString()}
+          </div>
         </td>
 
         {/* Consumido - Read Only */}
-        <td className="px-2 py-3 text-sm text-center text-gray-700 border-r border-gray-100">
-          {consumido.toLocaleString()}
+        <td className="px-3 py-4 text-sm text-center text-gray-800 border-r border-gray-100 font-semibold">
+          <div className="bg-gray-50 rounded-lg px-2 py-1">
+            {consumido.toLocaleString()}
+          </div>
         </td>
 
         {/* Saldo - Calculated */}
-        <td className={`px-2 py-3 text-sm text-center font-semibold border-r border-gray-200 ${
-          saldo >= 0 ? 'text-blue-600' : 'text-red-600'
+        <td className={`px-3 py-4 text-sm text-center font-bold border-r border-gray-200 ${
+          saldo >= 0 ? 'text-blue-700' : 'text-red-700'
         }`}>
-          {saldo.toLocaleString()}
+          <div className={`rounded-lg px-2 py-1 shadow-sm ${
+            saldo >= 0 ? 'bg-blue-50 border border-blue-200' : 'bg-red-50 border border-red-200'
+          }`}>
+            {saldo.toLocaleString()}
+          </div>
         </td>
       </>
     );
@@ -290,150 +302,189 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-        <span className="ml-2 text-gray-600">Cargando datos de programación...</span>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl">
+        <div className="flex flex-col justify-center items-center py-16">
+          <div className="bg-blue-100 p-4 rounded-full mb-4">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Cargando Programación Anual</h3>
+          <p className="text-gray-600">Obteniendo datos de programación y seguimiento...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center py-12">
-        <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Error al cargar datos</h3>
-        <p className="text-gray-600 mb-4">{error}</p>
-        <button
-          onClick={loadData}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Reintentar
-        </button>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl">
+        <div className="flex flex-col items-center py-16">
+          <div className="bg-red-100 p-4 rounded-full mb-4">
+            <AlertCircle className="h-8 w-8 text-red-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error al cargar datos</h3>
+          <p className="text-gray-600 mb-6 text-center max-w-md">{error}</p>
+          <button
+            onClick={loadData}
+            className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            <Package className="h-4 w-4 mr-2" />
+            Reintentar carga
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl">
+      {/* Header Premium */}
+      <div className="px-6 py-6 border-b border-gray-200 bg-gradient-to-r from-slate-50 to-blue-50">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Programación y Seguimiento Anual CENARES {anio}
-          </h3>
+          <div className="flex items-center space-x-3">
+            <div className="bg-blue-600 p-2 rounded-lg shadow-sm">
+              <Package className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Programación y Seguimiento Anual CENARES {anio}
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Los valores de programación se guardan automáticamente al modificarlos
+              </p>
+            </div>
+          </div>
           {isUpdating && (
-            <div className="flex items-center text-amber-600">
+            <div className="flex items-center text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              <span className="text-sm">Guardando...</span>
+              <span className="text-sm font-medium">Guardando...</span>
             </div>
           )}
         </div>
-        <p className="text-sm text-gray-600 mt-1">
-          Los valores de programación se guardan automáticamente al modificarlos
-        </p>
       </div>
 
       {/* Table Container with Horizontal Scroll */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1400px]">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-gradient-to-r from-slate-800 to-slate-900 text-white">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 border-r border-gray-200">
-                Descripción del Ítem
+              <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider sticky left-0 bg-gradient-to-r from-slate-800 to-slate-900 z-10 border-r border-slate-700">
+                <div className="flex items-center">
+                  <Package className="h-4 w-4 mr-2" />
+                  Descripción del Ítem
+                </div>
               </th>
-              <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+              <th className="px-4 py-4 text-center text-sm font-bold uppercase tracking-wider border-r border-slate-700">
                 Saldo {anio - 1}
               </th>
-              
+
               {/* Q1 Columns */}
-              <th colSpan={5} className="px-3 py-2 text-center text-xs font-medium text-blue-600 uppercase tracking-wider border-r border-gray-300 bg-blue-50">
+              <th colSpan={5} className="px-3 py-3 text-center text-sm font-bold text-blue-100 uppercase tracking-wider border-r border-slate-600 bg-gradient-to-r from-blue-600 to-blue-700">
                 1° Trimestre
               </th>
               
               {/* Q2 Columns */}
-              <th colSpan={5} className="px-3 py-2 text-center text-xs font-medium text-green-600 uppercase tracking-wider border-r border-gray-300 bg-green-50">
+              <th colSpan={5} className="px-3 py-3 text-center text-sm font-bold text-green-100 uppercase tracking-wider border-r border-slate-600 bg-gradient-to-r from-green-600 to-green-700">
                 2° Trimestre
               </th>
-              
+
               {/* Q3 Columns */}
-              <th colSpan={5} className="px-3 py-2 text-center text-xs font-medium text-orange-600 uppercase tracking-wider border-r border-gray-300 bg-orange-50">
+              <th colSpan={5} className="px-3 py-3 text-center text-sm font-bold text-orange-100 uppercase tracking-wider border-r border-slate-600 bg-gradient-to-r from-orange-600 to-orange-700">
                 3° Trimestre
               </th>
-              
+
               {/* Q4 Columns */}
-              <th colSpan={5} className="px-3 py-2 text-center text-xs font-medium text-purple-600 uppercase tracking-wider border-r border-gray-300 bg-purple-50">
+              <th colSpan={5} className="px-3 py-3 text-center text-sm font-bold text-purple-100 uppercase tracking-wider border-r border-slate-600 bg-gradient-to-r from-purple-600 to-purple-700">
                 4° Trimestre
               </th>
-              
+
               {/* Annual Totals */}
-              <th colSpan={3} className="px-3 py-2 text-center text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-100">
+              <th colSpan={3} className="px-3 py-3 text-center text-sm font-bold text-slate-100 uppercase tracking-wider bg-gradient-to-r from-slate-700 to-slate-800">
                 Total Anual
               </th>
             </tr>
-            
+
             {/* Sub-headers */}
-            <tr className="bg-gray-50">
-              <th className="px-4 py-2 sticky left-0 bg-gray-50 z-10 border-r border-gray-200"></th>
-              <th className="px-3 py-2 border-r border-gray-200"></th>
-              
+            <tr className="bg-gradient-to-r from-slate-700 to-slate-800 text-white">
+              <th className="px-6 py-3 sticky left-0 bg-gradient-to-r from-slate-700 to-slate-800 z-10 border-r border-slate-600"></th>
+              <th className="px-4 py-3 border-r border-slate-600"></th>
+
               {/* Q1 Sub-headers */}
               {['Programado', 'Entregado (CENARES)', 'Diferencia', 'Consumido', 'Saldo'].map((header, idx) => (
-                <th key={`q1-${idx}`} className="px-2 py-2 text-xs font-medium text-gray-600 border-r border-gray-100">
+                <th key={`q1-${idx}`} className="px-3 py-3 text-xs font-semibold text-blue-100 border-r border-slate-600">
                   {header}
                 </th>
               ))}
-              
+
               {/* Q2 Sub-headers */}
               {['Programado', 'Entregado (CENARES)', 'Diferencia', 'Consumido', 'Saldo'].map((header, idx) => (
-                <th key={`q2-${idx}`} className="px-2 py-2 text-xs font-medium text-gray-600 border-r border-gray-100">
+                <th key={`q2-${idx}`} className="px-3 py-3 text-xs font-semibold text-green-100 border-r border-slate-600">
                   {header}
                 </th>
               ))}
-              
+
               {/* Q3 Sub-headers */}
               {['Programado', 'Entregado (CENARES)', 'Diferencia', 'Consumido', 'Saldo'].map((header, idx) => (
-                <th key={`q3-${idx}`} className="px-2 py-2 text-xs font-medium text-gray-600 border-r border-gray-100">
+                <th key={`q3-${idx}`} className="px-3 py-3 text-xs font-semibold text-orange-100 border-r border-slate-600">
                   {header}
                 </th>
               ))}
-              
+
               {/* Q4 Sub-headers */}
               {['Programado', 'Entregado (CENARES)', 'Diferencia', 'Consumido', 'Saldo'].map((header, idx) => (
-                <th key={`q4-${idx}`} className="px-2 py-2 text-xs font-medium text-gray-600 border-r border-gray-100">
+                <th key={`q4-${idx}`} className="px-3 py-3 text-xs font-semibold text-purple-100 border-r border-slate-600">
                   {header}
                 </th>
               ))}
-              
+
               {/* Annual Totals Sub-headers */}
               {['Total Prog.', 'Total Entr.', 'Dif. Total'].map((header, idx) => (
-                <th key={`total-${idx}`} className="px-2 py-2 text-xs font-medium text-gray-600 border-r border-gray-100">
+                <th key={`total-${idx}`} className="px-3 py-3 text-xs font-semibold text-slate-100 border-r border-slate-600">
                   {header}
                 </th>
               ))}
             </tr>
           </thead>
           
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-gray-100">
             {items.map((item, itemIndex) => {
               const totalProgramado = item.programacion.q1 + item.programacion.q2 + item.programacion.q3 + item.programacion.q4;
               const totalEntregado = item.entregas.q1 + item.entregas.q2 + item.entregas.q3 + item.entregas.q4;
               const diferenciaTotal = totalProgramado - totalEntregado;
-              
+
               return (
-                <tr key={item.id} className="hover:bg-gray-50">
+                <tr key={item.id} className="hover:bg-slate-50 transition-colors duration-200 border-b border-gray-100">
                   {/* Item Description */}
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r border-gray-200">
-                    <div className="flex items-center">
-                      <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
-                        item.tipo === 'vacuna' ? 'bg-blue-500' : 'bg-green-500'
-                      }`}></span>
-                      {item.descripcion}
+                  <td className="px-6 py-4 text-sm font-semibold text-gray-900 sticky left-0 bg-white z-10 border-r border-gray-100">
+                    <div className="flex items-center space-x-3">
+                      <div className={`p-2 rounded-lg border ${
+                        item.tipo === 'vacuna'
+                          ? 'bg-blue-50 border-blue-200 text-blue-600'
+                          : 'bg-green-50 border-green-200 text-green-600'
+                      }`}>
+                        {item.tipo === 'vacuna' ? <Package className="h-4 w-4" /> : <Syringe className="h-4 w-4" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-gray-900 truncate">
+                          {item.descripcion}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            item.tipo === 'vacuna'
+                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                              : 'bg-green-100 text-green-800 border border-green-200'
+                          }`}>
+                            {item.tipo === 'vacuna' ? 'Vacuna' : 'Jeringa'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </td>
-                  
+
                   {/* Previous Year Balance */}
-                  <td className="px-3 py-3 text-sm text-center text-gray-700 border-r border-gray-200 font-semibold">
-                    {item.saldoAnterior.toLocaleString()}
+                  <td className="px-4 py-4 text-sm text-center text-gray-800 border-r border-gray-100 font-bold bg-slate-50">
+                    <div className="bg-white rounded-lg px-2 py-1 shadow-sm">
+                      {item.saldoAnterior.toLocaleString()}
+                    </div>
                   </td>
                   
                   {/* Q1 Columns */}
@@ -449,16 +500,24 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
                   {renderQuarterColumns(item, itemIndex, 'q4', 'purple')}
                   
                   {/* Annual Totals */}
-                  <td className="px-3 py-3 text-sm text-center font-semibold text-gray-900 border-r border-gray-100">
-                    {totalProgramado.toLocaleString()}
+                  <td className="px-4 py-4 text-sm text-center font-bold text-slate-900 border-r border-gray-100 bg-slate-50">
+                    <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
+                      {totalProgramado.toLocaleString()}
+                    </div>
                   </td>
-                  <td className="px-3 py-3 text-sm text-center font-semibold text-gray-900 border-r border-gray-100">
-                    {totalEntregado.toLocaleString()}
+                  <td className="px-4 py-4 text-sm text-center font-bold text-slate-900 border-r border-gray-100 bg-slate-50">
+                    <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
+                      {totalEntregado.toLocaleString()}
+                    </div>
                   </td>
-                  <td className={`px-3 py-3 text-sm text-center font-semibold border-r border-gray-100 ${
-                    diferenciaTotal >= 0 ? 'text-green-600' : 'text-red-600'
+                  <td className={`px-4 py-4 text-sm text-center font-bold border-r border-gray-100 bg-slate-50 ${
+                    diferenciaTotal >= 0 ? 'text-green-700' : 'text-red-700'
                   }`}>
-                    {diferenciaTotal.toLocaleString()}
+                    <div className={`rounded-lg px-3 py-2 shadow-sm ${
+                      diferenciaTotal >= 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                    }`}>
+                      {diferenciaTotal.toLocaleString()}
+                    </div>
                   </td>
                 </tr>
               );
@@ -467,15 +526,22 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
         </table>
       </div>
       
-      {/* Footer */}
-      <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-        <div className="flex items-center justify-between text-sm text-gray-600">
-          <div>
-            Total de ítems: {items.length} ({items.filter(i => i.tipo === 'vacuna').length} vacunas, {items.filter(i => i.tipo === 'jeringa').length} jeringas)
+      {/* Footer Premium */}
+      <div className="px-6 py-6 border-t border-gray-200 bg-gradient-to-r from-slate-50 to-blue-50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
+              <Package className="h-4 w-4 text-blue-600" />
+              <span>Total de ítems: <span className="text-blue-600">{items.length}</span></span>
+            </div>
+            <div className="text-sm text-gray-600">
+              (<span className="font-medium text-blue-600">{items.filter(i => i.tipo === 'vacuna').length}</span> vacunas,
+              <span className="font-medium text-green-600 ml-1">{items.filter(i => i.tipo === 'jeringa').length}</span> jeringas)
+            </div>
           </div>
-          <div className="flex items-center">
-            <Save className="h-4 w-4 mr-1" />
-            Auto-guardado activado
+          <div className="flex items-center space-x-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+            <Save className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium text-green-700">Auto-guardado activado</span>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Calendar
+  Filter,
+  BarChart3
 } from 'lucide-react';
 import { Establecimiento, Vacuna } from '../../types';
 import { FiltrosReporteBase } from '../../types/reportes';
@@ -28,35 +29,58 @@ const ProgramacionSeguimientoAnualTab: React.FC<ProgramacionSeguimientoAnualTabP
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+    <div className="space-y-6 p-6">
+      {/* Header Premium */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 shadow-sm">
         <div className="flex items-center mb-4">
-          <div className="bg-blue-500 p-3 rounded-lg">
-            <Calendar className="h-6 w-6 text-white" />
+          <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
+            <BarChart3 className="h-8 w-8 text-white" />
           </div>
           <div className="ml-4">
-            <h2 className="text-xl font-bold text-gray-900">Programación y Seguimiento Anual</h2>
-            <p className="text-gray-600">Gestión y monitoreo de entregas CENARES</p>
+            <h2 className="text-2xl font-bold text-gray-900">Programación y Seguimiento Anual</h2>
+            <p className="text-gray-600">Gestión integral y monitoreo de entregas CENARES</p>
           </div>
         </div>
       </div>
 
-      {/* Year Filter */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-center">
-          <div className="w-64">
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-center">
-              Año de Programación
-            </label>
+      {/* Filters Premium */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <Filter className="h-5 w-5 mr-2 text-blue-600" />
+          Filtros de Programación
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Año de Programación</label>
             <select
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-lg font-semibold"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-semibold bg-white shadow-sm transition-all duration-200 hover:border-blue-400"
               value={selectedAnio}
               onChange={(e) => handleYearChange(parseInt(e.target.value))}
             >
               {yearOptions.map(year => (
                 <option key={year} value={year}>{year}</option>
               ))}
+            </select>
+          </div>
+
+          {/* Placeholder for future filters */}
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Centro de Acopio</label>
+            <select
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all duration-200 hover:border-blue-400"
+              disabled
+            >
+              <option>Todos los centros</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Tipo de Ítem</label>
+            <select
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all duration-200 hover:border-blue-400"
+              disabled
+            >
+              <option>Todos los tipos</option>
             </select>
           </div>
         </div>
@@ -70,7 +94,6 @@ const ProgramacionSeguimientoAnualTab: React.FC<ProgramacionSeguimientoAnualTabP
           console.log('Data changed for year:', selectedAnio);
         }}
       />
-
     </div>
   );
 };
