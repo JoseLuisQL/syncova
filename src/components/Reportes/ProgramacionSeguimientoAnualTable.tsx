@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Loader2, Save, AlertCircle, Package, Syringe } from 'lucide-react';
+import { Loader2, Save, AlertCircle, Package, Syringe, FileSpreadsheet, Download } from 'lucide-react';
 import { ProgramacionAnualCenaresService } from '../../services/programacionAnualCenaresService';
+import { ProgramacionSeguimientoAnualExportService } from '../../services/programacionSeguimientoAnualExportService';
 import { toast } from 'react-hot-toast';
 
 interface TableItem {
@@ -50,6 +51,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
   const [tempValues, setTempValues] = useState<{ [key: string]: number }>({});
   const [pendingChanges, setPendingChanges] = useState<{ [key: string]: boolean }>({});
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const debounceTimeouts = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   // Load data when component mounts or year changes
@@ -227,6 +229,44 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
     return pendingChanges[key] || false;
   };
 
+  // Handle export functionality
+  const handleExportarExcel = async () => {
+    try {
+      setIsExporting(true);
+
+      // Verificar que hay datos para exportar
+      if (!items || items.length === 0) {
+        toast.error('No hay datos disponibles para exportar');
+        return;
+      }
+
+      // Crear configuración de exportación
+      const config = ProgramacionSeguimientoAnualExportService.crearConfiguracionDesdeFiltros(
+        anio,
+        'Usuario del Sistema',
+        `Reporte generado desde el módulo de Programación y Seguimiento Anual CENARES - Año ${anio}`
+      );
+
+      // Validar configuración
+      const errores = ProgramacionSeguimientoAnualExportService.validarConfiguracion(config);
+      if (errores.length > 0) {
+        toast.error(`Error en la configuración: ${errores[0]}`);
+        return;
+      }
+
+      // Exportar y descargar
+      await ProgramacionSeguimientoAnualExportService.exportarYDescargar(config);
+
+      toast.success('Exportación completada exitosamente');
+
+    } catch (error: any) {
+      console.error('Error al exportar:', error);
+      toast.error(error.message || 'Error al exportar el reporte');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // Render quarter columns
   const renderQuarterColumns = (item: TableItem, itemIndex: number, quarter: string, color: string) => {
     const currentValue = getCurrentValue(itemIndex, quarter);
@@ -353,12 +393,33 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
               </p>
             </div>
           </div>
-          {isUpdating && (
-            <div className="flex items-center text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              <span className="text-sm font-medium">Guardando...</span>
-            </div>
-          )}
+          <div className="flex items-center space-x-3">
+            {/* Export Button */}
+            <button
+              onClick={handleExportarExcel}
+              disabled={isExporting || loading || items.length === 0}
+              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Exportando...
+                </>
+              ) : (
+                <>
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Exportar Excel
+                </>
+              )}
+            </button>
+
+            {isUpdating && (
+              <div className="flex items-center text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <span className="text-sm font-medium">Guardando...</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -542,6 +603,60 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
           <div className="flex items-center space-x-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
             <Save className="h-4 w-4 text-green-600" />
             <span className="text-sm font-medium text-green-700">Auto-guardado activado</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Export Section - Professional Design */}
+      <div className="border-t border-gray-200 bg-white p-6">
+        <div className="flex items-center justify-center">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 shadow-sm max-w-2xl w-full">
+            <div className="flex items-center mb-4">
+              <div className="bg-blue-100 p-3 rounded-lg mr-4">
+                <Download className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">📊 Exportar Programación y Seguimiento Anual</h3>
+                <p className="text-sm text-gray-600">Generar reporte Excel profesional con todos los datos</p>
+              </div>
+            </div>
+
+            {/* Export Button - Centered and Prominent */}
+            <div className="flex justify-center">
+              <button
+                onClick={handleExportarExcel}
+                disabled={isExporting || loading || items.length === 0}
+                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg font-medium shadow-lg"
+              >
+                {isExporting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                    Exportando...
+                  </>
+                ) : (
+                  <>
+                    <FileSpreadsheet className="h-5 w-5 mr-3" />
+                    Exportar Programación y Seguimiento Anual CENARES {anio}
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Information Section */}
+            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start">
+                <Package className="h-5 w-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-blue-800">
+                  <p className="font-medium mb-1">Información sobre la exportación:</p>
+                  <ul className="list-disc list-inside space-y-1 text-blue-700">
+                    <li>El reporte incluirá todos los datos de programación y seguimiento por trimestre</li>
+                    <li>Se exportará en formato Excel con diseño profesional y corporativo</li>
+                    <li>Incluye separación por vacunas y jeringas con colores diferenciados</li>
+                    <li>La descarga comenzará automáticamente una vez completada la exportación</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import { ProgramacionAnualCenaresService } from '../services/ProgramacionAnualCenaresService';
+import { ProgramacionSeguimientoAnualExportService, ProgramacionSeguimientoAnualExportConfig } from '../services/ProgramacionSeguimientoAnualExportService';
 import { ResponseUtil } from '../utils/response';
 import { validateUUID } from '../utils/validation';
-import { 
-  CreateProgramacionAnualCenaresDto, 
+import {
+  CreateProgramacionAnualCenaresDto,
   UpdateProgramacionAnualCenaresDto,
-  ProgramacionAnualCenaresFilters 
+  ProgramacionAnualCenaresFilters
 } from '../types';
 
 /**
@@ -261,6 +262,68 @@ export class ProgramacionAnualCenaresController {
       ResponseUtil.success(res, result.data, 'Datos de tabla completa obtenidos exitosamente');
     } catch (error) {
       console.error('Error en ProgramacionAnualCenaresController.getDatosTablaCompleta:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Exportar programación y seguimiento anual a Excel
+   * POST /api/programacion-anual-cenares/exportar
+   */
+  static async exportarProgramacionSeguimientoAnual(req: Request, res: Response): Promise<void> {
+    try {
+      const {
+        anio,
+        responsableReporte,
+        observaciones
+      } = req.body;
+
+      // Validaciones
+      if (!anio || isNaN(parseInt(anio)) || parseInt(anio) < 2020 || parseInt(anio) > 2050) {
+        ResponseUtil.error(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      if (!responsableReporte || typeof responsableReporte !== 'string' || responsableReporte.trim().length === 0) {
+        ResponseUtil.error(res, 'El responsable del reporte es requerido', 400);
+        return;
+      }
+
+      if (observaciones && typeof observaciones !== 'string') {
+        ResponseUtil.error(res, 'Las observaciones deben ser texto', 400);
+        return;
+      }
+
+      // Configurar exportación
+      const config: ProgramacionSeguimientoAnualExportConfig = {
+        anio: parseInt(anio),
+        responsableReporte: responsableReporte.trim(),
+        observaciones: observaciones?.trim()
+      };
+
+      // Generar exportación
+      const result = await ProgramacionSeguimientoAnualExportService.exportarProgramacionSeguimientoAnual(config);
+
+      if (!result.success || !result.data) {
+        ResponseUtil.error(res, result.error || 'Error al generar exportación', 500);
+        return;
+      }
+
+      // Generar buffer del archivo
+      const buffer = await result.data.workbook.xlsx.writeBuffer();
+
+      // Configurar headers para descarga
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${result.data.filename}"`);
+      res.setHeader('Content-Length', buffer.byteLength.toString());
+
+      // Enviar archivo
+      res.send(buffer);
+
+      console.log(`✅ Exportación de Programación y Seguimiento Anual completada: ${result.data.filename}`);
+
+    } catch (error) {
+      console.error('Error en ProgramacionAnualCenaresController.exportarProgramacionSeguimientoAnual:', error);
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }

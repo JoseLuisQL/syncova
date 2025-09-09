@@ -50,6 +50,16 @@ router.post('/', ProgramacionAnualCenaresController.create);
 router.put('/:id', ProgramacionAnualCenaresController.update);
 
 /**
+ * @route POST /api/programacion-anual-cenares/exportar
+ * @desc Exportar programación y seguimiento anual a Excel
+ * @access Public (TODO: Proteger con autenticación)
+ * @body {number} anio - Año de programación
+ * @body {string} responsableReporte - Responsable del reporte
+ * @body {string} [observaciones] - Observaciones adicionales
+ */
+router.post('/exportar', ProgramacionAnualCenaresController.exportarProgramacionSeguimientoAnual);
+
+/**
  * @route DELETE /api/programacion-anual-cenares/:id
  * @desc Eliminar programación
  * @access Public (TODO: Proteger con autenticación)
