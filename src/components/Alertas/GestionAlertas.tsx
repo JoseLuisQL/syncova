@@ -18,17 +18,37 @@ import {
   Monitor
 } from 'lucide-react';
 import { Alerta } from '../../types';
+import { useAlertas } from '../../hooks/useAlertas';
 import NuevaAlertaModal from './NuevaAlertaModal';
 
 interface GestionAlertasProps {
-  alertas: Alerta[];
-  setAlertas: React.Dispatch<React.SetStateAction<Alerta[]>>;
+  // Props opcionales para compatibilidad
+  onRefresh?: () => void;
 }
 
 const GestionAlertas: React.FC<GestionAlertasProps> = ({
-  alertas,
-  setAlertas,
+  onRefresh,
 }) => {
+  // Usar el hook de alertas para obtener datos y operaciones CRUD
+  const {
+    alertas,
+    isLoading,
+    error,
+    createAlerta,
+    updateAlerta,
+    deleteAlerta,
+    markAsRead,
+    markMultipleAsRead,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    isMarkingAsRead,
+    createError,
+    updateError,
+    deleteError,
+    loadAlertas,
+    markAsReadError
+  } = useAlertas();
   const [filtroTipo, setFiltroTipo] = useState<string>('todos');
   const [filtroNivel, setFiltroNivel] = useState<string>('todos');
   const [filtroEstado, setFiltroEstado] = useState<string>('todos');
@@ -88,9 +108,17 @@ const GestionAlertas: React.FC<GestionAlertasProps> = ({
     return nivelInfo ? nivelInfo.bgColor : 'bg-gray-100';
   };
 
-  const formatearFecha = (fecha: Date) => {
+  const formatearFecha = (fecha: Date | string) => {
+    if (!fecha) return 'Fecha no disponible';
+
+    // Convertir string a Date si es necesario
+    const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
+
+    // Verificar que la fecha sea válida
+    if (isNaN(fechaObj.getTime())) return 'Fecha inválida';
+
     const ahora = new Date();
-    const diferencia = ahora.getTime() - fecha.getTime();
+    const diferencia = ahora.getTime() - fechaObj.getTime();
     const minutos = Math.floor(diferencia / (1000 * 60));
     const horas = Math.floor(diferencia / (1000 * 60 * 60));
     const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
@@ -99,25 +127,41 @@ const GestionAlertas: React.FC<GestionAlertasProps> = ({
     if (minutos < 60) return `Hace ${minutos} minuto${minutos > 1 ? 's' : ''}`;
     if (horas < 24) return `Hace ${horas} hora${horas > 1 ? 's' : ''}`;
     if (dias < 7) return `Hace ${dias} día${dias > 1 ? 's' : ''}`;
-    
-    return fecha.toLocaleDateString();
+
+    return fechaObj.toLocaleDateString();
   };
 
-  const marcarComoLeida = (alertaId: string) => {
-    setAlertas(prev => prev.map(alerta => 
-      alerta.id === alertaId ? { ...alerta, leida: true } : alerta
-    ));
+  const marcarComoLeida = async (alertaId: string) => {
+    try {
+      await markAsRead(alertaId);
+      // El hook se encarga de actualizar el estado local
+    } catch (error) {
+      console.error('Error al marcar alerta como leída:', error);
+      alert('Error al marcar la alerta como leída');
+    }
   };
 
-  const marcarComoNoLeida = (alertaId: string) => {
-    setAlertas(prev => prev.map(alerta => 
-      alerta.id === alertaId ? { ...alerta, leida: false } : alerta
-    ));
+  const marcarComoNoLeida = async (alertaId: string) => {
+    try {
+      await updateAlerta(alertaId, { leida: false });
+      // El hook se encarga de actualizar el estado local
+    } catch (error) {
+      console.error('Error al marcar alerta como no leída:', error);
+      alert('Error al marcar la alerta como no leída');
+    }
   };
 
-  const eliminarAlerta = (alertaId: string) => {
+  const eliminarAlerta = async (alertaId: string) => {
     if (window.confirm('¿Está seguro de eliminar esta alerta?')) {
-      setAlertas(prev => prev.filter(alerta => alerta.id !== alertaId));
+      try {
+        const success = await deleteAlerta(alertaId);
+        if (!success) {
+          alert('Error al eliminar la alerta');
+        }
+      } catch (error) {
+        console.error('Error al eliminar alerta:', error);
+        alert('Error al eliminar la alerta');
+      }
     }
   };
 
@@ -137,17 +181,31 @@ const GestionAlertas: React.FC<GestionAlertasProps> = ({
     setSelectedAlertas([]);
   };
 
-  const marcarSeleccionadasComoLeidas = () => {
-    setAlertas(prev => prev.map(alerta => 
-      selectedAlertas.includes(alerta.id) ? { ...alerta, leida: true } : alerta
-    ));
-    setSelectedAlertas([]);
+  const marcarSeleccionadasComoLeidas = async () => {
+    try {
+      const success = await markMultipleAsRead(selectedAlertas);
+      if (success) {
+        setSelectedAlertas([]);
+      } else {
+        alert('Error al marcar las alertas como leídas');
+      }
+    } catch (error) {
+      console.error('Error al marcar alertas como leídas:', error);
+      alert('Error al marcar las alertas como leídas');
+    }
   };
 
-  const eliminarSeleccionadas = () => {
+  const eliminarSeleccionadas = async () => {
     if (window.confirm(`¿Está seguro de eliminar ${selectedAlertas.length} alertas seleccionadas?`)) {
-      setAlertas(prev => prev.filter(alerta => !selectedAlertas.includes(alerta.id)));
-      setSelectedAlertas([]);
+      try {
+        // Eliminar una por una (el backend no tiene endpoint para eliminación múltiple)
+        const promises = selectedAlertas.map(id => deleteAlerta(id));
+        await Promise.all(promises);
+        setSelectedAlertas([]);
+      } catch (error) {
+        console.error('Error al eliminar alertas:', error);
+        alert('Error al eliminar las alertas seleccionadas');
+      }
     }
   };
 
@@ -383,9 +441,17 @@ const GestionAlertas: React.FC<GestionAlertasProps> = ({
       {showModalNuevaAlerta && (
         <NuevaAlertaModal
           onClose={() => setShowModalNuevaAlerta(false)}
-          onCrear={(nuevaAlerta) => {
-            setAlertas(prev => [nuevaAlerta, ...prev]);
-            setShowModalNuevaAlerta(false);
+          onCrear={async (alertaData) => {
+            try {
+              await createAlerta(alertaData);
+              setShowModalNuevaAlerta(false);
+              // Recargar las alertas para mostrar la nueva
+              await loadAlertas();
+              if (onRefresh) onRefresh();
+            } catch (error) {
+              console.error('Error al crear alerta:', error);
+              // El error ya se maneja en el hook useAlertas
+            }
           }}
           tiposAlerta={tiposAlerta}
           nivelesAlerta={nivelesAlerta}

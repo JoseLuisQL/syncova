@@ -25,6 +25,7 @@ import programacionAnualCenaresRoutes from '@/routes/programacionAnualCenares';
 import authRoutes from '@/routes/auth';
 import rolesRoutes from '@/routes/roles';
 import permissionsRoutes from '@/routes/permissions';
+import alertasRoutes from '@/routes/alertas';
 
 /**
  * Función principal para inicializar el servidor
@@ -71,6 +72,7 @@ async function startServer(): Promise<void> {
             reportes: '/api/reportes',
             'programacion-anual-cenares': '/api/programacion-anual-cenares',
             alertas: '/api/alertas',
+            alertas: '/api/alertas',
           },
         },
         timestamp: new Date().toISOString(),
@@ -100,9 +102,7 @@ async function startServer(): Promise<void> {
     app.use('/api/reportes', reportesRoutes);
     app.use('/api/reportes/planificacion', planificacionReportesRoutes);
     app.use('/api/programacion-anual-cenares', programacionAnualCenaresRoutes);
-
-    // TODO: Agregar más rutas según se implementen
-    // app.use('/api/alertas', alertasRoutes);
+    app.use('/api/alertas', alertasRoutes);
 
     // Configurar manejo de errores (debe ir al final)
     setupErrorHandling(app);

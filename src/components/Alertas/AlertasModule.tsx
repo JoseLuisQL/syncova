@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import {
   Bell,
@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 import { Alerta } from '../../types';
-import { mockAlertas } from '../../data/mockData';
+import { useAlertas } from '../../hooks/useAlertas';
 import DashboardAlertas from './DashboardAlertas';
 import GestionAlertas from './GestionAlertas';
 import ConfiguracionAlertas from './ConfiguracionAlertas';
@@ -78,7 +78,16 @@ const CATEGORY_CONFIG = {
 const AlertasModule: React.FC = () => {
   const { navigateToModule } = useAppNavigation();
   const { currentSubModule } = useCurrentRoute();
-  const [alertas, setAlertas] = useState<Alerta[]>(mockAlertas);
+
+  // Usar el hook de alertas para datos reales
+  const {
+    alertas,
+    stats,
+    isLoading,
+    error,
+    refreshData
+  } = useAlertas();
+  // Configuración local para el módulo (esto podría moverse a un contexto o backend en el futuro)
   const [configuracionAlertas, setConfiguracionAlertas] = useState({
     notificacionesEmail: true,
     notificacionesSMS: false,
@@ -99,64 +108,12 @@ const AlertasModule: React.FC = () => {
     }
   });
 
-  // Generar alertas adicionales para demostración
+  // Manejar errores de carga
   useEffect(() => {
-    const alertasAdicionales: Alerta[] = [
-      {
-        id: '5',
-        tipo: 'sistema',
-        titulo: 'Temperatura fuera de rango',
-        descripcion: 'La temperatura del refrigerador principal está en 10°C (fuera del rango 2-8°C)',
-        nivel: 'error',
-        fechaCreacion: new Date('2024-12-15T14:30:00'),
-        leida: false,
-        parametros: { temperatura: 10, rangoMin: 2, rangoMax: 8, equipoId: 'REF-001' },
-      },
-      {
-        id: '6',
-        tipo: 'sistema',
-        titulo: 'Fallo de conexión',
-        descripcion: 'Se perdió la conexión con el sensor de temperatura del C.S. Andahuaylas',
-        nivel: 'warning',
-        fechaCreacion: new Date('2024-12-15T13:45:00'),
-        leida: false,
-        usuarioId: '3',
-        parametros: { establecimientoId: '9', sensorId: 'TEMP-002', ultimaConexion: '2024-12-15T13:30:00' },
-      },
-      {
-        id: '7',
-        tipo: 'sistema',
-        titulo: 'Intento de acceso no autorizado',
-        descripcion: 'Se detectaron 3 intentos fallidos de acceso desde IP 192.168.1.100',
-        nivel: 'error',
-        fechaCreacion: new Date('2024-12-15T12:15:00'),
-        leida: true,
-        parametros: { ip: '192.168.1.100', intentos: 3, ultimoIntento: '2024-12-15T12:10:00' },
-      },
-      {
-        id: '8',
-        tipo: 'sistema',
-        titulo: 'Mantenimiento programado',
-        descripcion: 'Mantenimiento del servidor programado para mañana a las 02:00 AM',
-        nivel: 'info',
-        fechaCreacion: new Date('2024-12-15T10:00:00'),
-        leida: false,
-        parametros: { fechaMantenimiento: '2024-12-16T02:00:00', duracionEstimada: 120 },
-      },
-      {
-        id: '9',
-        tipo: 'sistema',
-        titulo: 'Respaldo completado exitosamente',
-        descripcion: 'El respaldo automático diario se completó correctamente (2.3 GB)',
-        nivel: 'success',
-        fechaCreacion: new Date('2024-12-15T03:00:00'),
-        leida: true,
-        parametros: { tamaño: '2.3 GB', duracion: '45 minutos', ubicacion: 'backup-server-01' },
-      }
-    ];
-
-    setAlertas(prev => [...prev, ...alertasAdicionales]);
-  }, []);
+    if (error) {
+      console.error('Error al cargar alertas:', error);
+    }
+  }, [error]);
 
   // Agrupar secciones por categoría
   const sectionsByCategory = ALERTS_SECTIONS.reduce((acc, section) => {
@@ -167,20 +124,84 @@ const AlertasModule: React.FC = () => {
     return acc;
   }, {} as Record<string, SectionConfig[]>);
 
-  // Calcular estadísticas
-  const estadisticasAlertas = {
-    total: alertas.length,
-    noLeidas: alertas.filter(a => !a.leida).length,
-    criticas: alertas.filter(a => a.nivel === 'error').length,
-    advertencias: alertas.filter(a => a.nivel === 'warning').length,
-    informativas: alertas.filter(a => a.nivel === 'info').length,
-    exitosas: alertas.filter(a => a.nivel === 'success').length,
-    hoy: alertas.filter(a => {
-      const hoy = new Date();
-      const fechaAlerta = new Date(a.fechaCreacion);
-      return fechaAlerta.toDateString() === hoy.toDateString();
-    }).length
-  };
+  // Usar estadísticas del backend o calcular localmente como fallback
+  const estadisticasAlertas = useMemo(() => {
+    // Asegurar que alertas sea un array válido
+    const alertasArray = Array.isArray(alertas) ? alertas : [];
+
+    if (stats) {
+      return {
+        total: stats.total,
+        noLeidas: stats.noLeidas,
+        criticas: stats.porNivel.error,
+        advertencias: stats.porNivel.warning,
+        informativas: stats.porNivel.info,
+        exitosas: stats.porNivel.success,
+        vencidas: stats.vencidas,
+        proximasVencer: stats.proximasVencer,
+        porTipo: stats.porTipo,
+        porNivel: stats.porNivel,
+        hoy: alertasArray.filter(a => {
+          const hoy = new Date();
+          const fechaAlerta = new Date(a.fechaCreacion);
+          return fechaAlerta.toDateString() === hoy.toDateString();
+        }).length
+      };
+    }
+
+    // Fallback: calcular estadísticas localmente si no hay datos del backend
+    const total = alertasArray.length;
+    const noLeidas = alertasArray.filter(a => !a.leida).length;
+    const criticas = alertasArray.filter(a => a.nivel === 'error').length;
+    const advertencias = alertasArray.filter(a => a.nivel === 'warning').length;
+    const informativas = alertasArray.filter(a => a.nivel === 'info').length;
+    const exitosas = alertasArray.filter(a => a.nivel === 'success').length;
+
+    const now = new Date();
+    const vencidas = alertasArray.filter(a => a.fechaVencimiento && a.fechaVencimiento < now).length;
+    const proximoVencimiento = new Date();
+    proximoVencimiento.setDate(now.getDate() + 7);
+    const proximasVencer = alertasArray.filter(a =>
+      a.fechaVencimiento &&
+      a.fechaVencimiento >= now &&
+      a.fechaVencimiento <= proximoVencimiento
+    ).length;
+
+    const porTipo = {
+      vencimiento: alertasArray.filter(a => a.tipo === 'vencimiento').length,
+      stock_bajo: alertasArray.filter(a => a.tipo === 'stock_bajo').length,
+      discrepancia: alertasArray.filter(a => a.tipo === 'discrepancia').length,
+      sistema: alertasArray.filter(a => a.tipo === 'sistema').length
+    };
+
+    const porNivel = {
+      error: criticas,
+      warning: advertencias,
+      info: informativas,
+      success: exitosas
+    };
+
+    return {
+      total,
+      noLeidas,
+      criticas,
+      advertencias,
+      informativas,
+      exitosas,
+      vencidas,
+      proximasVencer,
+      porTipo,
+      porNivel,
+      hoy: alertasArray.filter(a => {
+        const hoy = new Date();
+        const fechaAlerta = new Date(a.fechaCreacion);
+        return fechaAlerta.toDateString() === hoy.toDateString();
+      }).length
+    };
+  }, [alertas, stats]);
+
+  // Asegurar que alertas sea siempre un array válido para los componentes hijos
+  const alertasSeguras = Array.isArray(alertas) ? alertas : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -280,26 +301,31 @@ const AlertasModule: React.FC = () => {
             <Route
               path="dashboard"
               element={
-                <DashboardAlertas 
-                  alertas={alertas}
+                <DashboardAlertas
+                  alertas={alertasSeguras}
                   estadisticas={estadisticasAlertas}
+                  isLoading={isLoading}
+                  error={error}
+                  onRefresh={refreshData}
                 />
               }
             />
             <Route
               path="alertas"
               element={
-                <GestionAlertas 
-                  alertas={alertas}
-                  setAlertas={setAlertas}
+                <GestionAlertas
+                  onRefresh={refreshData}
                 />
               }
             />
             <Route
               path="reportes"
               element={
-                <ReportesAlertas 
-                  alertas={alertas}
+                <ReportesAlertas
+                  alertas={alertasSeguras}
+                  estadisticas={estadisticasAlertas}
+                  isLoading={isLoading}
+                  error={error}
                 />
               }
             />

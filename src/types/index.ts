@@ -898,17 +898,75 @@ export interface Kardex {
   fechaMovimiento: Date;
 }
 
+// =====================================================
+// TIPOS PARA ALERTAS
+// =====================================================
+
+export type TipoAlerta = 'vencimiento' | 'stock_bajo' | 'discrepancia' | 'sistema';
+export type NivelAlerta = 'info' | 'warning' | 'error' | 'success';
+
 export interface Alerta {
   id: string;
-  tipo: 'vencimiento' | 'stock_bajo' | 'discrepancia' | 'sistema';
+  tipo: TipoAlerta;
   titulo: string;
   descripcion: string;
-  nivel: 'info' | 'warning' | 'error' | 'success';
+  nivel: NivelAlerta;
   fechaCreacion: Date;
   fechaVencimiento?: Date;
   leida: boolean;
   usuarioId?: string;
   parametros?: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
+  // Información del usuario incluida en respuestas
+  usuario?: {
+    id: string;
+    nombres: string;
+    apellidos: string;
+    usuario: string;
+  };
+}
+
+export interface CreateAlertaDto {
+  tipo: TipoAlerta;
+  titulo: string;
+  descripcion: string;
+  nivel: NivelAlerta;
+  fechaVencimiento?: Date;
+  usuarioId?: string;
+  parametros?: Record<string, any>;
+}
+
+export interface UpdateAlertaDto {
+  tipo?: TipoAlerta;
+  titulo?: string;
+  descripcion?: string;
+  nivel?: NivelAlerta;
+  fechaVencimiento?: Date;
+  leida?: boolean;
+  usuarioId?: string;
+  parametros?: Record<string, any>;
+}
+
+export interface AlertaFilters {
+  tipo?: TipoAlerta | 'todos';
+  nivel?: NivelAlerta | 'todos';
+  leida?: boolean | 'todos';
+  usuarioId?: string;
+  fechaDesde?: Date;
+  fechaHasta?: Date;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface AlertaStats {
+  total: number;
+  porTipo: Record<TipoAlerta, number>;
+  porNivel: Record<NivelAlerta, number>;
+  noLeidas: number;
+  vencidas: number;
+  proximasVencer: number;
 }
 
 // =====================================================

@@ -76,9 +76,17 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = ({
     return nivelInfo ? nivelInfo.color : 'text-gray-600';
   };
 
-  const formatearFecha = (fecha: Date) => {
+  const formatearFecha = (fecha: Date | string) => {
+    // Asegurar que tenemos un objeto Date válido
+    const fechaObj = fecha instanceof Date ? fecha : new Date(fecha);
+
+    // Verificar que la fecha es válida
+    if (isNaN(fechaObj.getTime())) {
+      return 'Fecha inválida';
+    }
+
     const ahora = new Date();
-    const diferencia = ahora.getTime() - fecha.getTime();
+    const diferencia = ahora.getTime() - fechaObj.getTime();
     const minutos = Math.floor(diferencia / (1000 * 60));
     const horas = Math.floor(diferencia / (1000 * 60 * 60));
     const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
@@ -87,8 +95,8 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = ({
     if (minutos < 60) return `Hace ${minutos} minuto${minutos > 1 ? 's' : ''}`;
     if (horas < 24) return `Hace ${horas} hora${horas > 1 ? 's' : ''}`;
     if (dias < 7) return `Hace ${dias} día${dias > 1 ? 's' : ''}`;
-    
-    return fecha.toLocaleDateString();
+
+    return fechaObj.toLocaleDateString();
   };
 
   const alertasRecientes = alertas.slice(0, 5);
