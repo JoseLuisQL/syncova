@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { dashboardService } from '@/services/dashboardService';
-import type { CentroAcopioStatus, AlertaReciente, ActividadReciente } from '@/types/dashboard';
+import { apiClient } from '../config/api';
+import type { CentroAcopioStatus, AlertaReciente, ActividadReciente } from '../services/dashboardService';
 
 interface PaginationInfo {
   page: number;
@@ -42,15 +42,14 @@ export const usePaginatedCentrosAcopio = (initialLimit: number = 5): UsePaginate
     setError(null);
     
     try {
-      const response = await fetch(`/api/dashboard/centros-acopio?page=${page}&limit=${initialLimit}`);
-      const result = await response.json();
+      const response = await apiClient.get(`/dashboard/centros-acopio?page=${page}&limit=${initialLimit}`);
       
-      if (result.success) {
-        const paginatedData = result.data as PaginatedResponse<CentroAcopioStatus>;
+      if (response.data.success) {
+        const paginatedData = response.data.data as PaginatedResponse<CentroAcopioStatus>;
         setData(paginatedData.data);
         setPagination(paginatedData.pagination);
       } else {
-        setError(result.message || 'Error al cargar centros de acopio');
+        setError(response.data.message || 'Error al cargar centros de acopio');
       }
     } catch (err) {
       setError('Error de conexión al cargar centros de acopio');
@@ -102,15 +101,14 @@ export const usePaginatedAlertas = (initialLimit: number = 3): UsePaginatedSecti
     setError(null);
     
     try {
-      const response = await fetch(`/api/dashboard/alertas?page=${page}&limit=${initialLimit}`);
-      const result = await response.json();
+      const response = await apiClient.get(`/dashboard/alertas?page=${page}&limit=${initialLimit}`);
       
-      if (result.success) {
-        const paginatedData = result.data as PaginatedResponse<AlertaReciente>;
+      if (response.data.success) {
+        const paginatedData = response.data.data as PaginatedResponse<AlertaReciente>;
         setData(paginatedData.data);
         setPagination(paginatedData.pagination);
       } else {
-        setError(result.message || 'Error al cargar alertas');
+        setError(response.data.message || 'Error al cargar alertas');
       }
     } catch (err) {
       setError('Error de conexión al cargar alertas');
@@ -162,15 +160,14 @@ export const usePaginatedActividad = (initialLimit: number = 5): UsePaginatedSec
     setError(null);
     
     try {
-      const response = await fetch(`/api/dashboard/actividad?page=${page}&limit=${initialLimit}`);
-      const result = await response.json();
+      const response = await apiClient.get(`/dashboard/actividad?page=${page}&limit=${initialLimit}`);
       
-      if (result.success) {
-        const paginatedData = result.data as PaginatedResponse<ActividadReciente>;
+      if (response.data.success) {
+        const paginatedData = response.data.data as PaginatedResponse<ActividadReciente>;
         setData(paginatedData.data);
         setPagination(paginatedData.pagination);
       } else {
-        setError(result.message || 'Error al cargar actividad');
+        setError(response.data.message || 'Error al cargar actividad');
       }
     } catch (err) {
       setError('Error de conexión al cargar actividad');
