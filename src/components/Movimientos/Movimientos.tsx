@@ -1930,7 +1930,7 @@ const Movimientos: React.FC = () => {
           </div>
         )}
 
-        {/* Tabla de Movimientos Premium */}
+        {/* Tabla de Movimientos Premium con Scroll Profesional */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
@@ -1956,215 +1956,234 @@ const Movimientos: React.FC = () => {
             </div>
           </div>
 
-        <div className="overflow-x-auto overflow-y-visible shadow-sm">
-          <table className="min-w-full divide-y divide-gray-300 bg-white" role="table" aria-label="Movimientos de Vacunas">
-            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
-              <tr role="row">
-                <th
-                  className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[280px]"
-                  scope="col"
-                  aria-sort="none"
-                >
-                  Establecimiento
-                </th>
-                <th
-                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[120px]"
-                  scope="col"
-                  aria-label="Saldo Anterior"
-                >
-                  Saldo Anterior
-                </th>
-                <th
-                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[130px]"
-                  scope="col"
-                  aria-label="Transferencia Ingreso"
-                >
-                  Trans. Ingreso
-                </th>
-                <th
-                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[120px]"
-                  scope="col"
-                  aria-label="Total Saldo"
-                >
-                  Total Saldo
-                </th>
-                <th
-                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[100px]"
-                  scope="col"
-                  aria-label="Salida"
-                >
-                  Salida
-                </th>
-                <th
-                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[130px]"
-                  scope="col"
-                  aria-label="Transferencia Salida"
-                >
-                  Trans. Salida
-                </th>
-                <th
-                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[100px]"
-                  scope="col"
-                  aria-label="Saldo Final"
-                >
-                  Saldo
-                </th>
-                <th
-                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[140px]"
-                  scope="col"
-                  aria-label="Entrega"
-                >
-                  Entrega
-                </th>
-                <th
-                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[100px]"
-                  scope="col"
-                  aria-label="Stock Disponible"
-                >
-                  Stock
-                </th>
-                <th
-                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[140px]"
-                  scope="col"
-                  aria-label="Promedio de Consumo"
-                >
-                  Promedio Consumo
-                </th>
-                <th
-                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300 min-w-[130px]"
-                  scope="col"
-                  aria-label="Disponibilidad en Meses"
-                >
-                  Disponibilidad
-                </th>
-                <th
-                  className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider min-w-[120px]"
-                  scope="col"
-                  aria-label="Acciones Disponibles"
-                >
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {datosTabla.length === 0 ? (
-                <tr>
-                  <td colSpan={12} className="px-6 py-8 text-center text-gray-500">
-                    {isLoading ? (
-                      <div className="flex items-center justify-center">
-                        <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                        Cargando movimientos...
-                      </div>
-                    ) : (
-                      <div>
-                        <Package className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                        <p>No hay establecimientos para mostrar</p>
-                        <p className="text-sm">Seleccione filtros válidos para ver los movimientos</p>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ) : (
-                <>
-                  {/* TOTALES ROW - Enhanced with better visual hierarchy */}
-                  <tr
-                    className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-4 border-blue-500 border-b-2 border-blue-300 sticky top-[73px] z-10 shadow-sm"
-                    role="row"
-                    aria-label="Fila de totales generales"
-                  >
-                    <td className="px-6 py-5 text-base font-bold text-gray-900 border-r border-blue-200">
-                      <div>
-                        <div className="text-base font-bold text-gray-900">TOTALES GENERALES</div>
-                        <div className="text-sm text-gray-600 font-medium">
-                          {datosTabla.length} establecimientos registrados
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-5 text-center border-r border-blue-200">
-                      <div className="text-lg font-bold text-blue-700 tabular-nums">
-                        {totalesGenerales.saldoAnterior.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-gray-500 font-medium">unidades</div>
-                    </td>
-                    <td className="px-4 py-5 text-center border-r border-blue-200">
-                      <div className="text-lg font-bold text-green-700 tabular-nums">
-                        {totalesGenerales.transIngreso.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-gray-500 font-medium">ingresos</div>
-                    </td>
-                    <td className="px-4 py-5 text-center border-r border-blue-200">
-                      <div className="text-lg font-bold text-blue-700 tabular-nums bg-blue-100 px-3 py-1 rounded-lg">
-                        {totalesGenerales.totalSaldo.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-gray-500 font-medium mt-1">total</div>
-                    </td>
-                    <td className="px-4 py-5 text-center border-r border-blue-200">
-                      <div className="text-lg font-bold text-orange-700 tabular-nums">
-                        {totalesGenerales.salida.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-gray-500 font-medium">salidas</div>
-                    </td>
-                    <td className="px-4 py-5 text-center border-r border-blue-200">
-                      <div className="text-lg font-bold text-purple-700 tabular-nums">
-                        {totalesGenerales.transSalida.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-gray-500 font-medium">transferencias</div>
-                    </td>
-                    <td className="px-4 py-5 text-center border-r border-blue-200">
-                      <div className="text-lg font-bold text-green-700 tabular-nums bg-green-100 px-3 py-1 rounded-lg">
-                        {totalesGenerales.saldo.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-gray-500 font-medium mt-1">saldo final</div>
-                    </td>
-                    <td className="px-4 py-5 text-center border-r border-blue-200">
-                      <div className="text-lg font-bold text-emerald-700 tabular-nums bg-emerald-100 px-3 py-1 rounded-lg">
-                        {totalesGenerales.entrega.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-gray-500 font-medium mt-1">entregas</div>
-                    </td>
-                    <td className="px-4 py-5 text-center border-r border-blue-200">
-                      <div className="text-lg font-bold text-indigo-700 tabular-nums">
-                        {totalesGenerales.stock.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-gray-500 font-medium">stock total</div>
-                    </td>
-                    <td className="px-4 py-5 text-center border-r border-blue-200">
-                      <div className="text-sm font-medium text-gray-500">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100">
-                          N/A
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-5 text-center border-r border-blue-200">
-                      <div className="text-sm font-medium text-gray-500">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100">
-                          N/A
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-5 text-center">
-                      <div className="text-sm font-medium text-gray-500">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100">
-                          N/A
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
+          {/* Contenedor de tabla con scroll profesional */}
+          <div className="relative">
+            {/* Cabecera fija */}
+            <div className="sticky-header">
+              <div className="overflow-x-auto">
+                <table className="professional-table-layout" role="table" aria-label="Cabecera de Movimientos de Vacunas">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                    <tr role="row">
+                      <th
+                        className="col-establecimiento px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300"
+                        scope="col"
+                        aria-sort="none"
+                      >
+                        Establecimiento
+                      </th>
+                      <th
+                        className="col-saldo-anterior px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300"
+                        scope="col"
+                        aria-label="Saldo Anterior"
+                      >
+                        Saldo Anterior
+                      </th>
+                      <th
+                        className="col-trans-ingreso px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300"
+                        scope="col"
+                        aria-label="Transferencia Ingreso"
+                      >
+                        Trans. Ingreso
+                      </th>
+                      <th
+                        className="col-total-saldo px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300"
+                        scope="col"
+                        aria-label="Total Saldo"
+                      >
+                        Total Saldo
+                      </th>
+                      <th
+                        className="col-salida px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300"
+                        scope="col"
+                        aria-label="Salida"
+                      >
+                        Salida
+                      </th>
+                      <th
+                        className="col-trans-salida px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300"
+                        scope="col"
+                        aria-label="Transferencia Salida"
+                      >
+                        Trans. Salida
+                      </th>
+                      <th
+                        className="col-saldo px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300"
+                        scope="col"
+                        aria-label="Saldo Final"
+                      >
+                        Saldo
+                      </th>
+                      <th
+                        className="col-entrega px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300"
+                        scope="col"
+                        aria-label="Entrega"
+                      >
+                        Entrega
+                      </th>
+                      <th
+                        className="col-stock px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300"
+                        scope="col"
+                        aria-label="Stock Disponible"
+                      >
+                        Stock
+                      </th>
+                      <th
+                        className="col-promedio px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300"
+                        scope="col"
+                        aria-label="Promedio de Consumo"
+                      >
+                        Promedio Consumo
+                      </th>
+                      <th
+                        className="col-disponibilidad px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider border-r border-gray-300"
+                        scope="col"
+                        aria-label="Disponibilidad en Meses"
+                      >
+                        Disponibilidad
+                      </th>
+                      <th
+                        className="col-acciones px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider"
+                        scope="col"
+                        aria-label="Acciones Disponibles"
+                      >
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
 
-                  {/* Health establishments data rows */}
-                  {datosTabla.map((movimiento) => {
-                  // Obtener estilo profesional basado en centro de acopio
-                  const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento);
-                  const { colores, icono, centro } = estiloEstablecimiento;
-
-                  return (
+            {/* Fila de totales fija */}
+            <div className="sticky-totals">
+              <div className="overflow-x-auto">
+                <table className="professional-table-layout">
+                  <tbody>
                     <tr
-                      key={`${movimiento.establecimientoId}-${selectedVacuna}-${selectedMes}-${selectedAnio}`}
-                      className={`${colores.bg} hover:bg-gray-50 hover:shadow-sm border-b border-gray-200 ${colores.border} transition-all duration-200 ease-in-out group`}
+                      className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-4 border-blue-500 border-b-2 border-blue-300"
                       role="row"
-                      aria-label={`Datos de ${movimiento.establecimiento.nombre}`}
+                      aria-label="Fila de totales generales"
                     >
-                      <td className="px-6 py-5 whitespace-nowrap border-r border-gray-300" role="gridcell">
+                      <td className="col-establecimiento px-6 py-5 text-base font-bold text-gray-900 border-r border-blue-200">
+                        <div>
+                          <div className="text-base font-bold text-gray-900">TOTALES GENERALES</div>
+                          <div className="text-sm text-gray-600 font-medium">
+                            {datosTabla.length} establecimientos registrados
+                          </div>
+                        </div>
+                      </td>
+                      <td className="col-saldo-anterior px-4 py-5 text-center border-r border-blue-200">
+                        <div className="text-lg font-bold text-blue-700 tabular-nums">
+                          {totalesGenerales.saldoAnterior.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500 font-medium">unidades</div>
+                      </td>
+                      <td className="col-trans-ingreso px-4 py-5 text-center border-r border-blue-200">
+                        <div className="text-lg font-bold text-green-700 tabular-nums">
+                          {totalesGenerales.transIngreso.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500 font-medium">ingresos</div>
+                      </td>
+                      <td className="col-total-saldo px-4 py-5 text-center border-r border-blue-200">
+                        <div className="text-lg font-bold text-blue-700 tabular-nums bg-blue-100 px-3 py-1 rounded-lg">
+                          {totalesGenerales.totalSaldo.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500 font-medium mt-1">total</div>
+                      </td>
+                      <td className="col-salida px-4 py-5 text-center border-r border-blue-200">
+                        <div className="text-lg font-bold text-orange-700 tabular-nums">
+                          {totalesGenerales.salida.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500 font-medium">salidas</div>
+                      </td>
+                      <td className="col-trans-salida px-4 py-5 text-center border-r border-blue-200">
+                        <div className="text-lg font-bold text-purple-700 tabular-nums">
+                          {totalesGenerales.transSalida.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500 font-medium">transferencias</div>
+                      </td>
+                      <td className="col-saldo px-4 py-5 text-center border-r border-blue-200">
+                        <div className="text-lg font-bold text-green-700 tabular-nums bg-green-100 px-3 py-1 rounded-lg">
+                          {totalesGenerales.saldo.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500 font-medium mt-1">saldo final</div>
+                      </td>
+                      <td className="col-entrega px-4 py-5 text-center border-r border-blue-200">
+                        <div className="text-lg font-bold text-emerald-700 tabular-nums bg-emerald-100 px-3 py-1 rounded-lg">
+                          {totalesGenerales.entrega.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500 font-medium mt-1">entregas</div>
+                      </td>
+                      <td className="col-stock px-4 py-5 text-center border-r border-blue-200">
+                        <div className="text-lg font-bold text-indigo-700 tabular-nums">
+                          {totalesGenerales.stock.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500 font-medium">stock total</div>
+                      </td>
+                      <td className="col-promedio px-4 py-5 text-center border-r border-blue-200">
+                        <div className="text-sm font-medium text-gray-500">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100">
+                            N/A
+                          </span>
+                        </div>
+                      </td>
+                      <td className="col-disponibilidad px-4 py-5 text-center border-r border-blue-200">
+                        <div className="text-sm font-medium text-gray-500">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100">
+                            N/A
+                          </span>
+                        </div>
+                      </td>
+                      <td className="col-acciones px-4 py-5 text-center">
+                        <div className="text-sm font-medium text-gray-500">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full bg-gray-100">
+                            N/A
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Contenido scrolleable */}
+            <div className="max-h-[calc(100vh-400px)] min-h-[400px] scroll-container scrollbar-thin">
+              <table className="professional-table-layout divide-y divide-gray-200 bg-white" role="table" aria-label="Datos de Movimientos de Vacunas">
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {datosTabla.length === 0 ? (
+                    <tr>
+                      <td colSpan={12} className="px-6 py-8 text-center text-gray-500">
+                        {isLoading ? (
+                          <div className="flex items-center justify-center">
+                            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                            Cargando movimientos...
+                          </div>
+                        ) : (
+                          <div>
+                            <Package className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                            <p>No hay establecimientos para mostrar</p>
+                            <p className="text-sm">Seleccione filtros válidos para ver los movimientos</p>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ) : (
+                    <>
+                      {/* Health establishments data rows */}
+                      {datosTabla.map((movimiento) => {
+                        // Obtener estilo profesional basado en centro de acopio
+                        const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento);
+                        const { colores, icono, centro } = estiloEstablecimiento;
+
+                        return (
+                          <tr
+                            key={`${movimiento.establecimientoId}-${selectedVacuna}-${selectedMes}-${selectedAnio}`}
+                            className={`${colores.bg} hover:bg-gray-50 hover:shadow-sm border-b border-gray-200 ${colores.border} transition-all duration-200 ease-in-out group`}
+                            role="row"
+                            aria-label={`Datos de ${movimiento.establecimiento.nombre}`}
+                          >
+                      <td className="col-establecimiento px-6 py-5 border-r border-gray-300" role="gridcell">
                         <div className="flex items-center space-x-3">
                           <div className={`w-4 h-4 rounded-full flex-shrink-0 transition-all duration-200 ${
                             movimiento.tieneMovimiento
@@ -2195,13 +2214,13 @@ const Movimientos: React.FC = () => {
                           </div>
                         </div>
                       </td>
-                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                    <td className="col-saldo-anterior px-4 py-5 text-center border-r border-gray-300" role="gridcell">
                       <div className="text-lg font-bold text-blue-700 tabular-nums">
                         {movimiento.saldoAnterior.toLocaleString()}
                       </div>
                       <div className="text-xs text-gray-500 font-medium">unidades</div>
                     </td>
-                    <td className="px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
+                    <td className="col-trans-ingreso px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
                       <div className="relative inline-block">
                         <input
                           type="number"
@@ -2225,13 +2244,13 @@ const Movimientos: React.FC = () => {
                       </div>
                       <div className="text-xs text-gray-500 font-medium mt-1">ingresos</div>
                     </td>
-                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                    <td className="col-total-saldo px-4 py-5 text-center border-r border-gray-300" role="gridcell">
                       <div className="text-lg font-bold text-blue-700 tabular-nums bg-blue-100 px-3 py-2 rounded-lg inline-block shadow-sm">
                         {movimiento.totalSaldo.toLocaleString()}
                       </div>
                       <div className="text-xs text-gray-500 font-medium mt-1">total</div>
                     </td>
-                    <td className="px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
+                    <td className="col-salida px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
                       <div className="relative inline-block">
                         <input
                           type="number"
@@ -2255,7 +2274,7 @@ const Movimientos: React.FC = () => {
                       </div>
                       <div className="text-xs text-gray-500 font-medium mt-1">salidas</div>
                     </td>
-                    <td className="px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
+                    <td className="col-trans-salida px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
                       <div className="relative inline-block">
                         <input
                           type="number"
@@ -2279,13 +2298,13 @@ const Movimientos: React.FC = () => {
                       </div>
                       <div className="text-xs text-gray-500 font-medium mt-1">transferencias</div>
                     </td>
-                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                    <td className="col-saldo px-4 py-5 text-center border-r border-gray-300" role="gridcell">
                       <div className="text-lg font-bold text-green-700 tabular-nums bg-green-100 px-3 py-2 rounded-lg inline-block shadow-sm">
                         {movimiento.saldo.toLocaleString()}
                       </div>
                       <div className="text-xs text-gray-500 font-medium mt-1">saldo final</div>
                     </td>
-                    <td className="px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
+                    <td className="col-entrega px-4 py-5 text-center border-r border-gray-300 relative" role="gridcell">
                       <div className="flex items-center justify-center space-x-2 flex-wrap gap-2">
                         <div className="relative">
                           <input
@@ -2424,19 +2443,19 @@ const Movimientos: React.FC = () => {
                       </div>
                       <div className="text-xs text-gray-500 font-medium mt-1">entregas</div>
                     </td>
-                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                    <td className="col-stock px-4 py-5 text-center border-r border-gray-300" role="gridcell">
                       <div className="text-lg font-bold text-indigo-700 tabular-nums">
                         {movimiento.stock.toLocaleString()}
                       </div>
                       <div className="text-xs text-gray-500 font-medium">stock</div>
                     </td>
-                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                    <td className="col-promedio px-4 py-5 text-center border-r border-gray-300" role="gridcell">
                       <div className="text-lg font-bold text-yellow-700 tabular-nums">
                         {movimiento.promedioConsumo.toLocaleString()}
                       </div>
                       <div className="text-xs text-gray-500 font-medium">promedio</div>
                     </td>
-                    <td className="px-4 py-5 text-center border-r border-gray-300" role="gridcell">
+                    <td className="col-disponibilidad px-4 py-5 text-center border-r border-gray-300" role="gridcell">
                       <div className={`inline-flex flex-col items-center px-4 py-2 rounded-xl font-bold shadow-sm border-2 transition-all duration-200 ${
                         movimiento.disponibilidad >= 2
                           ? 'bg-green-100 text-green-800 border-green-300' :
@@ -2452,7 +2471,7 @@ const Movimientos: React.FC = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-5 text-center" role="gridcell">
+                    <td className="col-acciones px-4 py-5 text-center" role="gridcell">
                       <div className="flex items-center justify-center space-x-3">
                         <button
                           onClick={() => setSelectedMovimiento(movimiento)}
@@ -2482,16 +2501,16 @@ const Movimientos: React.FC = () => {
                       </div>
                     </td>
                   </tr>
-                  );
-                })
-                }
-                </>
-              )}
-            </tbody>
-
-          </table>
+                          );
+                        })
+                      }
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
 
       {/* Modal de Detalle del Movimiento */}
       {selectedMovimiento && (

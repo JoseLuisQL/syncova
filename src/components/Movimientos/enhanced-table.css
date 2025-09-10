@@ -292,19 +292,215 @@
   outline-offset: 2px;
 }
 
+/* Professional Scrollbar Styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f3f4f6;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.scrollbar-thin::-webkit-scrollbar-corner {
+  background: #f3f4f6;
+}
+
+/* Enhanced sticky positioning for professional scroll */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: white;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.sticky-totals {
+  position: sticky;
+  top: 73px;
+  z-index: 10;
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+/* Smooth scroll behavior */
+.scroll-container {
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+/* Enhanced table layout for professional appearance */
+.professional-table-layout {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.professional-table-layout th,
+.professional-table-layout td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Column width synchronization for perfect alignment */
+.col-establecimiento { width: 280px; min-width: 280px; }
+.col-saldo-anterior { width: 120px; min-width: 120px; }
+.col-trans-ingreso { width: 130px; min-width: 130px; }
+.col-total-saldo { width: 120px; min-width: 120px; }
+.col-salida { width: 100px; min-width: 100px; }
+.col-trans-salida { width: 130px; min-width: 130px; }
+.col-saldo { width: 100px; min-width: 100px; }
+.col-entrega { width: 140px; min-width: 140px; }
+.col-stock { width: 100px; min-width: 100px; }
+.col-promedio { width: 140px; min-width: 140px; }
+.col-disponibilidad { width: 130px; min-width: 130px; }
+.col-acciones { width: 120px; min-width: 120px; }
+
+/* Enhanced visual feedback for scrollable content */
+.scroll-container {
+  position: relative;
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.scroll-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 5;
+}
+
+.scroll-container:hover::before {
+  opacity: 1;
+}
+
+/* Professional scroll shadow effects */
+.scroll-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.scroll-container:hover::after {
+  opacity: 1;
+}
+
+/* Enhanced table row hover effects for better UX */
+.professional-table-layout tbody tr:hover {
+  background-color: rgba(249, 250, 251, 0.8);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Improved focus states for accessibility */
+.professional-table-layout tbody tr:focus-within {
+  background-color: rgba(59, 130, 246, 0.05);
+  outline: 2px solid rgba(59, 130, 246, 0.3);
+  outline-offset: -2px;
+}
+
+/* Responsive adjustments for sticky elements */
+@media (max-width: 1024px) {
+  .sticky-totals {
+    top: 65px;
+  }
+
+  /* Adjust column widths for tablets */
+  .col-establecimiento { width: 240px; min-width: 240px; }
+  .col-trans-ingreso { width: 110px; min-width: 110px; }
+  .col-trans-salida { width: 110px; min-width: 110px; }
+  .col-promedio { width: 120px; min-width: 120px; }
+  .col-disponibilidad { width: 110px; min-width: 110px; }
+}
+
+@media (max-width: 768px) {
+  .sticky-totals {
+    top: 60px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  /* Adjust column widths for mobile */
+  .col-establecimiento { width: 200px; min-width: 200px; }
+  .col-saldo-anterior { width: 100px; min-width: 100px; }
+  .col-trans-ingreso { width: 100px; min-width: 100px; }
+  .col-total-saldo { width: 100px; min-width: 100px; }
+  .col-salida { width: 80px; min-width: 80px; }
+  .col-trans-salida { width: 100px; min-width: 100px; }
+  .col-saldo { width: 80px; min-width: 80px; }
+  .col-entrega { width: 120px; min-width: 120px; }
+  .col-stock { width: 80px; min-width: 80px; }
+  .col-promedio { width: 100px; min-width: 100px; }
+  .col-disponibilidad { width: 100px; min-width: 100px; }
+  .col-acciones { width: 100px; min-width: 100px; }
+
+  /* Adjust scroll container height for mobile */
+  .scroll-container {
+    max-height: calc(100vh - 300px);
+    min-height: 300px;
+  }
+}
+
 /* Print styles */
 @media print {
   .enhanced-table-container {
     box-shadow: none;
     border: 1px solid #000;
   }
-  
+
   .enhanced-data-row:hover {
     background-color: transparent;
     transform: none;
   }
-  
+
   .enhanced-action-btn {
     display: none;
+  }
+
+  .sticky-header,
+  .sticky-totals {
+    position: static;
+    box-shadow: none;
+  }
+
+  .scroll-container {
+    max-height: none;
+    overflow: visible;
   }
 }

@@ -29,6 +29,7 @@ import {
   Wrench,
   TrendingUp
 } from 'lucide-react';
+import './enhanced-planning-table.css';
 import {
   Establecimiento,
   Vacuna,
@@ -1132,123 +1133,143 @@ const ProgramacionPorVacunaTab: React.FC<ProgramacionPorVacunaTabProps> = ({
         </div>
       )}
 
-      {/* Tabla de Programación Premium */}
+      {/* Tabla de Programación Premium con Scroll Profesional */}
       {datosVacuna && (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead className="bg-gradient-to-r from-slate-800 to-slate-900 text-white">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider border-r border-slate-700">
-                    <div className="flex items-center">
-                      <Building2 className="h-4 w-4 mr-2" />
-                      Establecimiento
-                    </div>
-                  </th>
-                  {mesesCortos.map((mes, index) => (
-                    <th key={index} className="px-3 py-4 text-center text-sm font-bold uppercase tracking-wider border-r border-slate-700">
-                      {mes}
-                    </th>
-                  ))}
-                  <th className="px-6 py-4 text-center text-sm font-bold uppercase tracking-wider bg-slate-900">
-                    <div className="flex items-center justify-center">
-                      <Calculator className="h-4 w-4 mr-2" />
-                      TOTAL
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Fila Total DISA Premium */}
-                <tr className="bg-gradient-to-r from-emerald-100 to-green-100 font-bold border-b-2 border-emerald-300">
-                  <td className="px-6 py-4 text-sm font-bold text-emerald-900 border-r border-emerald-200">
-                    <div className="flex items-center">
-                      <BarChart3 className="h-4 w-4 mr-2 text-emerald-700" />
-                      TOTAL DISA
-                    </div>
-                  </td>
-                  {mesesCortos.map((_, mesIndex) => (
-                    <td key={mesIndex} className="px-3 py-4 text-center text-sm font-bold text-emerald-900 border-r border-emerald-200">
-                      <div className="bg-white rounded-lg px-2 py-1 shadow-sm">
-                        {calcularTotalMes(mesIndex).toLocaleString()}
-                      </div>
-                    </td>
-                  ))}
-                  <td className="px-6 py-4 text-center text-sm font-bold text-emerald-900 bg-gradient-to-r from-emerald-200 to-green-200">
-                    <div className="bg-white rounded-lg px-3 py-2 shadow-md text-lg">
-                      {calcularTotalGeneral().toLocaleString()}
-                    </div>
-                  </td>
-                </tr>
+          {/* Contenedor de tabla con scroll profesional */}
+          <div className="relative">
+            {/* Cabecera fija */}
+            <div className="planning-sticky-header">
+              <div className="overflow-x-auto">
+                <table className="planning-professional-table-layout" role="table" aria-label="Cabecera de Programación de Vacunas">
+                  <thead className="bg-gradient-to-r from-slate-800 to-slate-900 text-white">
+                    <tr>
+                      <th className="planning-col-establecimiento px-6 py-4 text-left text-sm font-bold uppercase tracking-wider border-r border-slate-700">
+                        <div className="flex items-center">
+                          <Building2 className="h-4 w-4 mr-2" />
+                          Establecimiento
+                        </div>
+                      </th>
+                      {mesesCortos.map((mes, index) => (
+                        <th key={index} className="planning-col-mes px-3 py-4 text-center text-sm font-bold uppercase tracking-wider border-r border-slate-700">
+                          {mes}
+                        </th>
+                      ))}
+                      <th className="planning-col-total px-6 py-4 text-center text-sm font-bold uppercase tracking-wider bg-slate-900">
+                        <div className="flex items-center justify-center">
+                          <Calculator className="h-4 w-4 mr-2" />
+                          TOTAL
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
 
-                {/* Filas de establecimientos con diseño premium */}
-                {datosVacuna?.establecimientos.map((estData: any, estIndex: number) => {
-                  // Obtener estilo profesional basado en centro de acopio
-                  const estiloEstablecimiento = getEstiloEstablecimiento(estData.establecimiento);
-                  const { colores, icono, centro } = estiloEstablecimiento;
-
-                  return (
-                    <tr key={estIndex} className={`${colores.bg} hover:bg-slate-50 border-b border-gray-100 transition-colors duration-200`}>
-                      <td className={`px-6 py-4 text-sm font-medium ${colores.text} border-r border-gray-100`}>
-                        <div className="flex items-center space-x-3">
-                          <div className={`p-2 rounded-lg ${colores.bg} ${colores.border} border`}>
-                            <span className="text-lg">{icono}</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-gray-900 truncate">
-                              {estData.establecimiento.nombre}
-                            </div>
-                            {selectedCentroAcopio === 'todos' && (
-                              <div className="text-xs text-gray-500 mt-1">
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colores.bg} ${colores.text} border ${colores.border}`}>
-                                  {centro !== 'DEFAULT' ? centro : 'Regional'}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+            {/* Fila de totales fija */}
+            <div className="planning-sticky-totals">
+              <div className="overflow-x-auto">
+                <table className="planning-professional-table-layout">
+                  <tbody>
+                    <tr className="planning-totals-row bg-gradient-to-r from-emerald-100 to-green-100 font-bold border-b-2 border-emerald-300">
+                      <td className="planning-col-establecimiento px-6 py-4 text-sm font-bold text-emerald-900 border-r border-emerald-200">
+                        <div className="flex items-center">
+                          <BarChart3 className="h-4 w-4 mr-2 text-emerald-700" />
+                          TOTAL DISA
                         </div>
                       </td>
-                      {estData.distribucionMensual.map((valor: number, mesIndex: number) => {
-                        const currentValue = getCurrentValue(estIndex, mesIndex, valor);
-                        const isPending = hasPendingChange(estIndex, mesIndex);
+                      {mesesCortos.map((_, mesIndex) => (
+                        <td key={mesIndex} className="planning-col-mes px-3 py-4 text-center text-sm font-bold text-emerald-900 border-r border-emerald-200">
+                          <div className="bg-white rounded-lg px-2 py-1 shadow-sm">
+                            {calcularTotalMes(mesIndex).toLocaleString()}
+                          </div>
+                        </td>
+                      ))}
+                      <td className="planning-col-total px-6 py-4 text-center text-sm font-bold text-emerald-900 bg-gradient-to-r from-emerald-200 to-green-200">
+                        <div className="bg-white rounded-lg px-3 py-2 shadow-md text-lg">
+                          {calcularTotalGeneral().toLocaleString()}
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-                        return (
-                          <td key={mesIndex} className="px-3 py-4 text-center border-r border-gray-100 relative">
-                            <div className="relative">
-                              <input
-                                type="number"
-                                min="0"
-                                value={currentValue}
-                                onChange={(e) => handleTempValueChange(estIndex, mesIndex, parseInt(e.target.value) || 0)}
-                                onBlur={() => handleFieldBlur(estIndex, mesIndex)}
-                                disabled={isUpdating}
-                                className={`w-16 px-2 py-2 text-center text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-all ${
-                                  isPending
-                                    ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-200'
-                                    : 'border-gray-300 hover:border-blue-400'
-                                }`}
-                                title={isPending ? 'Cambios pendientes - Se guardará automáticamente' : ''}
-                              />
-                              {isPending && (
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse shadow-sm"
-                                     title="Cambios pendientes">
-                                  <div className="w-full h-full bg-amber-400 rounded-full animate-ping"></div>
+            {/* Contenido scrolleable */}
+            <div className="max-h-[calc(100vh-450px)] min-h-[400px] planning-scroll-container planning-scrollbar-thin">
+              <table className="planning-professional-table-layout bg-white" role="table" aria-label="Datos de Programación de Vacunas">
+                <tbody>
+                  {/* Filas de establecimientos con diseño premium */}
+                  {datosVacuna?.establecimientos.map((estData: any, estIndex: number) => {
+                    // Obtener estilo profesional basado en centro de acopio
+                    const estiloEstablecimiento = getEstiloEstablecimiento(estData.establecimiento);
+                    const { colores, icono, centro } = estiloEstablecimiento;
+
+                    return (
+                      <tr key={estIndex} className={`${estIndex === 0 ? 'planning-first-establishment-row' : ''} ${colores.bg} hover:bg-slate-50 border-b border-gray-100 transition-colors duration-200`}>
+                        <td className={`planning-col-establecimiento px-6 py-4 text-sm font-medium ${colores.text} border-r border-gray-100`}>
+                          <div className="flex items-center space-x-3">
+                            <div className={`p-2 rounded-lg ${colores.bg} ${colores.border} border`}>
+                              <span className="text-lg">{icono}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-gray-900 truncate">
+                                {estData.establecimiento.nombre}
+                              </div>
+                              {selectedCentroAcopio === 'todos' && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colores.bg} ${colores.text} border ${colores.border}`}>
+                                    {centro !== 'DEFAULT' ? centro : 'Regional'}
+                                  </span>
                                 </div>
                               )}
                             </div>
-                          </td>
-                        );
-                      })}
-                      <td className="px-6 py-4 text-center text-sm font-bold bg-gradient-to-r from-slate-100 to-gray-100 border-l-2 border-slate-300">
-                        <div className="bg-white rounded-lg px-3 py-2 shadow-sm font-bold text-gray-900">
-                          {estData.total.toLocaleString()}
-                        </div>
-                      </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                          </div>
+                        </td>
+                        {estData.distribucionMensual.map((valor: number, mesIndex: number) => {
+                          const currentValue = getCurrentValue(estIndex, mesIndex, valor);
+                          const isPending = hasPendingChange(estIndex, mesIndex);
+
+                          return (
+                            <td key={mesIndex} className="planning-col-mes px-3 py-4 text-center border-r border-gray-100 relative">
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={currentValue}
+                                  onChange={(e) => handleTempValueChange(estIndex, mesIndex, parseInt(e.target.value) || 0)}
+                                  onBlur={() => handleFieldBlur(estIndex, mesIndex)}
+                                  disabled={isUpdating}
+                                  className={`planning-enhanced-input w-16 px-2 py-2 text-center text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-all ${
+                                    isPending
+                                      ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-200'
+                                      : 'border-gray-300 hover:border-blue-400'
+                                  }`}
+                                  title={isPending ? 'Cambios pendientes - Se guardará automáticamente' : ''}
+                                />
+                                {isPending && (
+                                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse shadow-sm"
+                                       title="Cambios pendientes">
+                                    <div className="w-full h-full bg-amber-400 rounded-full animate-ping"></div>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          );
+                        })}
+                        <td className="planning-col-total px-6 py-4 text-center text-sm font-bold bg-gradient-to-r from-slate-100 to-gray-100 border-l-2 border-slate-300">
+                          <div className="bg-white rounded-lg px-3 py-2 shadow-sm font-bold text-gray-900">
+                            {estData.total.toLocaleString()}
+                          </div>
+                        </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       )}
