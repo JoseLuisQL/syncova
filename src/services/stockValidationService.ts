@@ -1,4 +1,4 @@
-import { ApiResponse } from './api';
+import { ApiResponse, apiClient } from '../config/api';
 
 /**
  * Interfaz para validación de stock
@@ -72,7 +72,6 @@ export interface StockValidationRequest {
  * Servicio para validación de stock antes de generar vales
  */
 export class StockValidationService {
-  private static readonly BASE_URL = '/api/vales';
 
   /**
    * Validar stock disponible antes de generar vale
@@ -81,33 +80,35 @@ export class StockValidationService {
     request: StockValidationRequest
   ): Promise<ApiResponse<StockValidationResult>> {
     try {
-      const response = await fetch(`${this.BASE_URL}/validar-stock`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return {
-          success: false,
-          error: data.message || 'Error al validar stock'
-        };
-      }
+      const response = await apiClient.post('/vales/validar-stock', request);
 
       return {
         success: true,
-        data: data.data
+        data: response.data.data
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error validating stock:', error);
-      return {
-        success: false,
-        error: 'Error de conexión al validar stock'
-      };
+      
+      // Manejar diferentes tipos de errores
+      if (error.response) {
+        // Error de respuesta del servidor
+        return {
+          success: false,
+          error: error.response.data?.message || 'Error al validar stock'
+        };
+      } else if (error.request) {
+        // Error de conexión
+        return {
+          success: false,
+          error: 'Error de conexión al validar stock. Verifique que el servidor esté ejecutándose.'
+        };
+      } else {
+        // Otros errores
+        return {
+          success: false,
+          error: 'Error inesperado al validar stock'
+        };
+      }
     }
   }
 
