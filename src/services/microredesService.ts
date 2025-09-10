@@ -1,6 +1,7 @@
 import { Microred, CreateMicroredDto, UpdateMicroredDto, MicroredFilters } from '../types';
+import { getApiBaseUrl } from '../utils/apiConfig';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = getApiBaseUrl();
 
 interface ApiResponse<T> {
   success: boolean;

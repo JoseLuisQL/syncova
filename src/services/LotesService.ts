@@ -1,3 +1,5 @@
+import { getApiBaseUrl } from '../utils/apiConfig';
+
 /**
  * Servicio para gestión de lotes
  * Maneja operaciones relacionadas con lotes de vacunas y jeringas
@@ -26,7 +28,7 @@ export interface PaginatedResponse<T> {
 }
 
 export class LotesService {
-  private static readonly BASE_URL = 'http://localhost:3001/api';
+  private static readonly BASE_URL = getApiBaseUrl();
 
   /**
    * Obtener lotes de vacunas

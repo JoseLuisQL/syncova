@@ -1,4 +1,5 @@
-import { Kardex, Vacuna, Jeringa, Establecimiento } from '../types';
+import { Vacuna, Jeringa, Establecimiento } from '../types';
+import { getApiBaseUrl } from '../utils/apiConfig';
 
 /**
  * Interfaces para el servicio de Kardex
@@ -146,7 +147,7 @@ export interface PaginatedResponse<T> {
  * Maneja todas las operaciones relacionadas con movimientos de kardex
  */
 export class KardexService {
-  private static readonly BASE_URL = 'http://localhost:3001/api';
+  private static readonly BASE_URL = getApiBaseUrl();
 
   /**
    * Obtener todos los movimientos de kardex con filtros
@@ -176,14 +177,14 @@ export class KardexService {
         throw new Error(`Error HTTP: ${response.status}`);
       }
 
-      const result: PaginatedResponse<KardexResponse> = await response.json();
+      const result: ApiResponse<KardexResponse> = await response.json();
       
       if (!result.success) {
         throw new Error(result.message || 'Error al obtener movimientos de kardex');
       }
 
       // Convertir fechas de string a Date
-      const movimientosConFechas = result.data.movimientos.map(mov => ({
+      const movimientosConFechas = result.data.movimientos.map((mov: any) => ({
         ...mov,
         fechaMovimiento: new Date(mov.fechaMovimiento),
         createdAt: new Date(mov.createdAt),
@@ -300,7 +301,7 @@ export class KardexService {
       }
 
       // La respuesta puede ser paginada o directa
-      const jeringas = result.data.jeringas || result.data || [];
+      const jeringas = (result.data as any).jeringas || result.data || [];
       return jeringas.map((jeringa: any) => ({
         ...jeringa,
         nombre: jeringa.tipo, // Mapear 'tipo' a 'nombre' para consistencia
@@ -416,7 +417,7 @@ export class KardexService {
       }
 
       // Manejar tanto respuesta paginada como directa
-      const lotes = result.data.lotes || result.data || [];
+      const lotes = (result.data as any).lotes || result.data || [];
       return lotes.map((lote: any) => ({
         ...lote,
         fechaIngreso: new Date(lote.fechaIngreso),
@@ -457,7 +458,7 @@ export class KardexService {
       }
 
       // Manejar tanto respuesta paginada como directa
-      const lotes = result.data.lotes || result.data || [];
+      const lotes = (result.data as any).lotes || result.data || [];
       return lotes.map((lote: any) => ({
         ...lote,
         fechaIngreso: new Date(lote.fechaIngreso),
