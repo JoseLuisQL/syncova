@@ -79,7 +79,7 @@ class ValeExportService {
       // Crear hoja principal
       const worksheet = workbook.addWorksheet('Vale de Entrega');
 
-      // Configurar columnas
+      // Configurar columnas con anchos optimizados para jeringas
       worksheet.columns = [
         { header: 'Nº', key: 'numero', width: 5 },
         { header: 'Establecimiento', key: 'establecimiento', width: 30 },
@@ -639,13 +639,7 @@ class ValeExportService {
     console.log('📋 Entregas adicionales encontradas en vale:', Array.from(entregasAdicionalesEnVale));
 
     // Lista estándar de jeringas (mantener para jeringas)
-    const jeringasEstandar = [
-      'Jeringa autoretractil 1cc 27 G x 1/2"',
-      'Jeringa autoretractil 1cc 25 G x 5/8"',
-      'Jeringa autoretractil 1cc 25 G x 1"',
-      'Jeringa 5cc con aguja 21 G X 1 1/2"',
-      'Jeringa 3 mL con aguja 23 G X 1"'
-    ];
+    // Lista estándar de jeringas removida - ahora se usan nombres dinámicos
 
     // Agrupar datos por establecimiento
     const establecimientosMap = new Map();
@@ -779,8 +773,8 @@ class ValeExportService {
     });
 
     const jeringasEncontradas = Array.from(jeringasConsolidadoMap.entries())
-      .filter(([nombre, cantidad]) => cantidad > 0) // Solo jeringas con cantidad > 0
-      .map(([nombre, cantidad]) => nombre)
+      .filter(([, cantidad]) => cantidad > 0) // Solo jeringas con cantidad > 0
+      .map(([nombre]) => nombre)
       .sort();
     console.log(`📋 Procesando ${jeringasEncontradas.length} tipos de jeringas con cantidad > 0`);
 
@@ -788,7 +782,7 @@ class ValeExportService {
     const consolidado = vacunasEncontradas.map((vacunaNombre, index) => {
       // Buscar la vacuna en el consolidadoMap por nombre
       let cantidad = 0;
-      for (const [vacunaId, vacunaData] of consolidadoMap.entries()) {
+      for (const [, vacunaData] of consolidadoMap.entries()) {
         if (vacunaData.nombre === vacunaNombre) {
           cantidad = vacunaData.cantidad;
           break;
@@ -912,14 +906,14 @@ class ValeExportService {
       { width: 22 },  // B - Biológicos
       { width: 10 },  // C - Cantidad
       { width: 2 },   // D - Separador
-      { width: 28 },  // E - Jeringas
+      { width: 38 },  // E - Jeringas (incrementado para nombres completos)
       { width: 10 },  // F - Cantidad
       { width: 3 },   // G - Separador central
       { width: 5 },   // H - Nº
       { width: 22 },  // I - Biológicos
       { width: 10 },  // J - Cantidad
       { width: 2 },   // K - Separador
-      { width: 28 },  // L - Jeringas
+      { width: 38 },  // L - Jeringas (incrementado para nombres completos)
       { width: 10 }   // M - Cantidad
     ];
 
@@ -1106,7 +1100,7 @@ class ValeExportService {
       { col: 'A', text: 'Nº', width: 5 },
       { col: 'B', text: '💉 Biológicos', width: 22 },
       { col: 'C', text: 'Cantidad', width: 10 },
-      { col: 'E', text: '💊 Jeringas', width: 28 },
+      { col: 'E', text: '💊 Jeringas', width: 38 },
       { col: 'F', text: 'Cantidad', width: 10 }
     ];
 
@@ -1340,14 +1334,16 @@ class ValeExportService {
             };
             cellCant.alignment = { horizontal: 'center', vertical: 'middle' };
 
-            // Jeringas (solo las primeras 5 filas)
-            if (fila < datos.jeringasEstandar.length) {
-              const cellJer = worksheet.getCell((cols[4] || 'E') + filaActual);
-              cellJer.value = datos.jeringasEstandar[fila];
-              cellJer.font = { size: 9, name: 'Segoe UI', color: { argb: 'FF374151' } };
-              cellJer.alignment = { horizontal: 'left', vertical: 'middle' };
-
+            // Jeringas con nombres dinámicos completos
+            if (fila < establecimiento.jeringas.length) {
               const jeringa = establecimiento.jeringas[fila];
+              const cellJer = worksheet.getCell((cols[4] || 'E') + filaActual);
+              
+              // Usar el nombre real de la jeringa, no el estático
+              cellJer.value = jeringa.nombre || `Jeringa ${fila + 1}`;
+              cellJer.font = { size: 9, name: 'Segoe UI', color: { argb: 'FF374151' } };
+              cellJer.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+
               const jeringaCant = jeringa ? jeringa.cantidad : 0;
               const cellJerCant = worksheet.getCell((cols[5] || 'F') + filaActual);
               cellJerCant.value = jeringaCant;
@@ -1395,8 +1391,8 @@ class ValeExportService {
             };
           });
 
-          // Ajustar altura de fila
-          worksheet.getRow(filaActual).height = 16;
+          // Ajustar altura de fila para acomodar nombres largos de jeringas
+          worksheet.getRow(filaActual).height = 20;
         }
         filaActual++;
       }
@@ -1661,7 +1657,7 @@ class ValeExportService {
        .text('No', margin, currentY, { width: 25 })
        .text('Biologicos', margin + 30, currentY, { width: 120 })
        .text('Cant', margin + 155, currentY, { width: 35 })
-       .text('Jeringas', margin + 195, currentY, { width: 120 })
+       .text('Jeringas', margin + 195, currentY, { width: 140 })
        .text('Cant', margin + 320, currentY, { width: 35 });
 
     currentY += 20;
@@ -1695,13 +1691,15 @@ class ValeExportService {
          .font(hasQuantity ? 'Helvetica-Bold' : 'Helvetica')
          .text(item.cantidad.toString(), margin + 155, currentY, { width: 35 });
 
-      // Jeringas (solo las primeras 5)
-      if (index < datos.jeringasEstandar.length) {
+      // Jeringas con nombres dinámicos completos
+      if (index < datos.jeringasConsolidado.length) {
+        const jeringaData = datos.jeringasConsolidado[index];
         doc.fillColor('#374151')
            .font('Helvetica')
-           .text(this.limpiarTexto(datos.jeringasEstandar[index]), margin + 195, currentY, { width: 120 })
-           .fillColor('#6B7280')
-           .text('0', margin + 320, currentY, { width: 35 }); // Cantidad de jeringas
+           .text(this.limpiarTexto(jeringaData.nombre), margin + 195, currentY, { width: 140 })
+           .fillColor(jeringaData.cantidad > 0 ? '#059669' : '#6B7280')
+           .font(jeringaData.cantidad > 0 ? 'Helvetica-Bold' : 'Helvetica')
+           .text(jeringaData.cantidad.toString(), margin + 340, currentY, { width: 35 });
       }
 
       currentY += 12;
@@ -1759,7 +1757,7 @@ class ValeExportService {
          .text('No', margin + offsetX, currentY, { width: 18 })
          .text('Biologicos', margin + offsetX + 20, currentY, { width: 85 })
          .text('Cant', margin + offsetX + 108, currentY, { width: 25 })
-         .text('Jeringas', margin + offsetX + 138, currentY, { width: 85 })
+         .text('Jeringas', margin + offsetX + 138, currentY, { width: 100 })
          .text('Cant', margin + offsetX + 228, currentY, { width: 25 });
 
       currentY += 16;
@@ -1795,17 +1793,18 @@ class ValeExportService {
            .font(hasQuantity ? 'Helvetica-Bold' : 'Helvetica')
            .text(vacuna.cantidad.toString(), margin + offsetX + 108, currentY, { width: 25 });
 
-        // Jeringas (solo las primeras 5)
-        if (vacIndex < datos.jeringasEstandar.length) {
+        // Jeringas con nombres dinámicos completos
+        if (vacIndex < establecimiento.jeringas.length) {
           const jeringa = establecimiento.jeringas[vacIndex];
           const jeringaCant = jeringa ? jeringa.cantidad : 0;
+          const jeringaNombre = jeringa ? jeringa.nombre : `Jeringa ${vacIndex + 1}`;
 
           doc.fillColor('#374151')
              .font('Helvetica')
-             .text(this.limpiarTexto(datos.jeringasEstandar[vacIndex]), margin + offsetX + 138, currentY, { width: 85 })
+             .text(this.limpiarTexto(jeringaNombre), margin + offsetX + 138, currentY, { width: 100 })
              .fillColor(jeringaCant > 0 ? '#059669' : '#9CA3AF')
              .font(jeringaCant > 0 ? 'Helvetica-Bold' : 'Helvetica')
-             .text(jeringaCant.toString(), margin + offsetX + 228, currentY, { width: 25 });
+             .text(jeringaCant.toString(), margin + offsetX + 243, currentY, { width: 25 });
         }
 
         // Observaciones con diseño especial
