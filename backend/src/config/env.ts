@@ -28,7 +28,7 @@ const envSchema = Joi.object({
     .description('Tiempo de expiración del JWT'),
   
   CORS_ORIGIN: Joi.string()
-    .default('http://localhost:5173,http://localhost:5174')
+    .default('*')
     .description('Orígenes permitidos para CORS (separados por comas)'),
   
   RATE_LIMIT_WINDOW_MS: Joi.number()

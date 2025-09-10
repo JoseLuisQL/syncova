@@ -118,16 +118,18 @@ async function startServer(): Promise<void> {
       throw new Error('La base de datos no está disponible');
     }
 
-    // Iniciar servidor
-    const server = app.listen(config.port, () => {
+    // Iniciar servidor en todas las interfaces de red
+    const server = app.listen(config.port, '0.0.0.0', () => {
       console.log(`
 🚀 Servidor SIVAC iniciado exitosamente
 📍 Entorno: ${config.env}
-🌐 URL: http://localhost:${config.port}
+🌐 URL Local: http://localhost:${config.port}
+🌐 URL Red: http://0.0.0.0:${config.port}
 📊 API: http://localhost:${config.port}/api
 🏥 Salud: http://localhost:${config.port}/health
 📝 Versión: ${config.api.version}
 ⏰ Iniciado: ${new Date().toISOString()}
+📡 Disponible en toda la red local
       `);
     });
 

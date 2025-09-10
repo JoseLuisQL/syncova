@@ -2,8 +2,30 @@ import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 
 /**
  * Configuración base para las llamadas API
+ * Detecta automáticamente si se accede desde la red local o localhost
  */
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const getApiBaseUrl = () => {
+  // Si hay una variable de entorno definida, usarla
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Detectar si estamos accediendo desde la red local
+  const currentHost = window.location.hostname;
+  
+  // Si el hostname es una IP de red local (no localhost), usar esa IP para la API
+  if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+    return `http://${currentHost}:3001/api`;
+  }
+  
+  // Por defecto, usar localhost
+  return 'http://localhost:3001/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Debug: mostrar la URL que se está usando
+console.log('🔗 API Base URL configurada:', API_BASE_URL);
 
 /**
  * Instancia de axios configurada para el backend SIVAC
@@ -185,3 +207,4 @@ export const handleApiError = (error: AxiosError): string => {
 };
 
 export default apiClient;
+console.log('API Base URL:', getApiBaseUrl());

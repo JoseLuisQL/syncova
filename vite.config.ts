@@ -14,12 +14,9 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    host: '0.0.0.0', // Permite conexiones desde cualquier IP
+    port: 5173,
+    // Removemos el proxy ya que ahora el frontend detecta automáticamente la API
+    // El proxy solo funciona en localhost, no desde la red
   },
 });

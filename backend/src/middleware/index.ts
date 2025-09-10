@@ -27,7 +27,7 @@ export const setupMiddlewares = (app: Application): void => {
 
   // Configuración de CORS
   app.use(cors({
-    origin: config.cors.origin,
+    origin: config.cors.origin.includes('*') ? true : config.cors.origin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
