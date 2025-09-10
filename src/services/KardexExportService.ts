@@ -1,4 +1,5 @@
 import { KardexFilters } from './KardexService';
+import { apiClient } from '../config/api';
 
 /**
  * Configuración para exportación del kardex
@@ -29,7 +30,7 @@ export interface KardexExportStats {
  * Servicio para exportación del Kardex desde el frontend
  */
 export class KardexExportService {
-  private static readonly API_BASE = '/api/kardex';
+  private static readonly API_BASE = '/kardex';
 
   /**
    * Exportar kardex a Excel
@@ -44,21 +45,12 @@ export class KardexExportService {
         throw new Error('Las fechas de inicio y fin son requeridas para la exportación');
       }
 
-      const response = await fetch(`${this.API_BASE}/export/excel`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(config),
+      const response = await apiClient.post(`${this.API_BASE}/export/excel`, config, {
+        responseType: 'blob',
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Error HTTP: ${response.status}`);
-      }
-
       // Obtener el nombre del archivo desde los headers
-      const contentDisposition = response.headers.get('Content-Disposition');
+      const contentDisposition = response.headers['content-disposition'];
       let filename = 'kardex_export.xlsx';
       
       if (contentDisposition) {
@@ -69,7 +61,9 @@ export class KardexExportService {
       }
 
       // Descargar el archivo
-      const blob = await response.blob();
+      const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -93,21 +87,12 @@ export class KardexExportService {
     try {
       console.log('🔄 Iniciando exportación de Kardex a PDF');
 
-      const response = await fetch(`${this.API_BASE}/export/pdf`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(config),
+      const response = await apiClient.post(`${this.API_BASE}/export/pdf`, config, {
+        responseType: 'blob',
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Error HTTP: ${response.status}`);
-      }
-
       // Obtener el nombre del archivo desde los headers
-      const contentDisposition = response.headers.get('Content-Disposition');
+      const contentDisposition = response.headers['content-disposition'];
       let filename = 'kardex_export.pdf';
       
       if (contentDisposition) {
@@ -118,7 +103,9 @@ export class KardexExportService {
       }
 
       // Descargar el archivo
-      const blob = await response.blob();
+      const blob = new Blob([response.data], { 
+        type: 'application/pdf' 
+      });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -142,21 +129,12 @@ export class KardexExportService {
     try {
       console.log('🔄 Iniciando exportación de Kardex a CSV');
 
-      const response = await fetch(`${this.API_BASE}/export/csv`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(config),
+      const response = await apiClient.post(`${this.API_BASE}/export/csv`, config, {
+        responseType: 'blob',
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Error HTTP: ${response.status}`);
-      }
-
       // Obtener el nombre del archivo desde los headers
-      const contentDisposition = response.headers.get('Content-Disposition');
+      const contentDisposition = response.headers['content-disposition'];
       let filename = 'kardex_export.csv';
       
       if (contentDisposition) {
@@ -167,7 +145,9 @@ export class KardexExportService {
       }
 
       // Descargar el archivo
-      const blob = await response.blob();
+      const blob = new Blob([response.data], { 
+        type: 'text/csv' 
+      });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -203,15 +183,8 @@ export class KardexExportService {
         });
       }
 
-      const response = await fetch(`${this.API_BASE}/export/stats?${params.toString()}`);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Error HTTP: ${response.status}`);
-      }
-
-      const result = await response.json();
-      return result.data;
+      const response = await apiClient.get(`${this.API_BASE}/export/stats?${params.toString()}`);
+      return response.data.data;
     } catch (error) {
       console.error('❌ Error al obtener estadísticas de exportación:', error);
       throw error;
