@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useStockEvents } from '../../utils/stockEventEmitter';
 import {
   Receipt,
   Search,
@@ -230,6 +231,7 @@ const Vales: React.FC<ValesProps> = ({
   onClose
 }) => {
   const { toast } = useToastContext();
+  const { emitValeGenerated } = useStockEvents();
 
   // Hooks para gestión de datos
   const {
@@ -550,6 +552,10 @@ const Vales: React.FC<ValesProps> = ({
           `Vale ${result.vale.numero} creado con ${result.resumen.totalVacunas} vacunas para ${result.resumen.totalEstablecimientos} establecimientos. Los stocks han sido actualizados automáticamente.`,
           { duration: 6000 }
         );
+
+        // EMITIR EVENTO PARA ACTUALIZACIÓN AUTOMÁTICA DE STOCK
+        console.log('📡 Emitiendo evento de vale generado para actualización automática de stock...');
+        emitValeGenerated(selectedCentroAcopio, selectedMes, selectedAnio);
 
         // SOLUCIÓN DIRECTA: Actualización inmediata y verificación
         console.log('🔄 Iniciando actualización inmediata después de generar vale...');

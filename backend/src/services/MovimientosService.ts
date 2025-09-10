@@ -2,6 +2,7 @@ import { prisma } from '@/config/database';
 import { ServiceResult } from '@/types';
 import { IMovimientoVacuna, IEntregaAdicional } from '@/types';
 import { ValeService } from './ValeService';
+import { StockInicialService } from './StockInicialService';
 import * as ExcelJS from 'exceljs';
 
 /**
@@ -1545,10 +1546,13 @@ export class MovimientosService {
     mes: number,
     anio: number
   ): Promise<ServiceResult<{
-    stockInicial: number;
+    stockInicialHistorico: number | null;
+    fechaCapturaStockInicial: Date | null;
+    stockActual: number;
     totalEntregas: number;
     stockDisponible: number;
     estado: 'bueno' | 'medio' | 'critico';
+    tieneHistorialInicial: boolean;
     lotes: Array<{
       id: string;
       numero: string;
@@ -1558,16 +1562,34 @@ export class MovimientosService {
     }>;
   }>> {
     try {
+      console.log(`📊 [MovimientosService] Obteniendo stock disponible para vacuna ${vacunaId}, período ${mes}/${anio}`);
+
       // Validar que la vacuna existe
       const vacuna = await prisma.vacuna.findUnique({
-        where: { id: vacunaId }
+        where: { id: vacunaId },
+        select: { id: true, nombre: true }
       });
 
       if (!vacuna) {
         throw new Error('Vacuna no encontrada');
       }
 
-      // Obtener lotes disponibles para la vacuna
+      // PASO 1: Obtener stock inicial histórico (si existe)
+      const stockInicialResult = await StockInicialService.obtenerStockInicial(vacunaId, mes, anio);
+      let stockInicialHistorico: number | null = null;
+      let fechaCapturaStockInicial: Date | null = null;
+      let tieneHistorialInicial = false;
+
+      if (stockInicialResult.success && stockInicialResult.data) {
+        stockInicialHistorico = stockInicialResult.data.stockInicial;
+        fechaCapturaStockInicial = stockInicialResult.data.fechaCaptura;
+        tieneHistorialInicial = true;
+        console.log(`📈 [MovimientosService] Stock inicial histórico encontrado: ${stockInicialHistorico} unidades (capturado: ${fechaCapturaStockInicial})`);
+      } else {
+        console.log(`ℹ️  [MovimientosService] No se encontró stock inicial histórico para ${mes}/${anio}`);
+      }
+
+      // PASO 2: Obtener lotes disponibles actuales para la vacuna
       const lotes = await prisma.loteVacuna.findMany({
         where: {
           vacunaId,
@@ -1581,12 +1603,11 @@ export class MovimientosService {
         }
       });
 
-      // Calcular stock inicial (suma de todos los lotes)
-      const stockInicial = lotes.reduce((sum, lote) => sum + lote.cantidadActual, 0);
+      // PASO 3: Calcular stock actual (suma de todos los lotes disponibles)
+      const stockActual = lotes.reduce((sum, lote) => sum + lote.cantidadActual, 0);
+      console.log(`📦 [MovimientosService] Stock actual: ${stockActual} unidades en ${lotes.length} lotes`);
 
-      // CORRECCIÓN: Obtener total de entregas SOLO para el mes/año especificado
-      // El campo 'entrega' ya incluye la suma de entrega_base + entregas_adicionales
-      // por lo que NO debemos sumar las entregas adicionales por separado
+      // PASO 4: Obtener total de entregas para el mes/año especificado
       const totalEntregas = await prisma.movimientoVacuna.aggregate({
         where: {
           vacunaId,
@@ -1598,41 +1619,58 @@ export class MovimientosService {
         }
       });
 
-      // CORRECCIÓN: No sumar entregas adicionales por separado ya que están incluidas en el campo 'entrega'
-      // El backend actualiza automáticamente el campo 'entrega' cuando se crean/modifican entregas adicionales
       const totalEntregasCalculado = totalEntregas._sum.entrega || 0;
-      const stockDisponible = stockInicial - totalEntregasCalculado; // Permitir valores negativos para mostrar advertencias
+      console.log(`📤 [MovimientosService] Total entregas en ${mes}/${anio}: ${totalEntregasCalculado} unidades`);
 
-      // Determinar estado del stock basado en el stock disponible
+      // PASO 5: Calcular stock disponible
+      // Si tenemos historial inicial, usarlo como base; si no, usar stock actual
+      const baseCalculo = tieneHistorialInicial ? stockInicialHistorico! : stockActual;
+      const stockDisponible = baseCalculo - totalEntregasCalculado;
+
+      console.log(`🧮 [MovimientosService] Cálculo stock disponible: ${baseCalculo} (base) - ${totalEntregasCalculado} (entregas) = ${stockDisponible}`);
+
+      // PASO 6: Determinar estado basado en el stock disponible
       let estado: 'bueno' | 'medio' | 'critico';
+      
       if (stockDisponible < 0) {
         estado = 'critico'; // Stock negativo = crítico
-      } else if (stockDisponible <= stockInicial * 0.2) { // Menos del 20% del stock inicial
+      } else if (stockDisponible <= baseCalculo * 0.2) { // Menos del 20% del stock base
         estado = 'critico';
-      } else if (stockDisponible <= stockInicial * 0.5) { // Menos del 50% del stock inicial
+      } else if (stockDisponible <= baseCalculo * 0.5) { // Menos del 50% del stock base
         estado = 'medio';
       } else {
         estado = 'bueno';
       }
 
+      const resultado = {
+        stockInicialHistorico,
+        fechaCapturaStockInicial,
+        stockActual,
+        totalEntregas: totalEntregasCalculado,
+        stockDisponible,
+        estado,
+        tieneHistorialInicial,
+        lotes: lotes.map(lote => ({
+          id: lote.id,
+          numero: lote.numero,
+          cantidadActual: lote.cantidadActual,
+          fechaVencimiento: lote.fechaVencimiento,
+          estado: lote.estado
+        }))
+      };
+
+      console.log(`✅ [MovimientosService] Stock disponible calculado exitosamente para ${vacuna.nombre}`);
+      console.log(`   - Stock inicial histórico: ${stockInicialHistorico || 'N/A'}`);
+      console.log(`   - Stock actual: ${stockActual}`);
+      console.log(`   - Stock disponible: ${stockDisponible} (${estado})`);
+
       return {
         success: true,
-        data: {
-          stockInicial,
-          totalEntregas: totalEntregasCalculado,
-          stockDisponible,
-          estado,
-          lotes: lotes.map(lote => ({
-            id: lote.id,
-            numero: lote.numero,
-            cantidadActual: lote.cantidadActual,
-            fechaVencimiento: lote.fechaVencimiento,
-            estado: lote.estado
-          }))
-        }
+        data: resultado
       };
+
     } catch (error) {
-      console.error('Error al obtener stock disponible:', error);
+      console.error('❌ [MovimientosService] Error obteniendo stock disponible:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Error al obtener stock disponible'

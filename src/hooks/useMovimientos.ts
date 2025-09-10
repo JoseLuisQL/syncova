@@ -203,10 +203,13 @@ export const useMovimientos = () => {
     mes: number,
     anio: number
   ): Promise<{
-    stockInicial: number;
+    stockInicialHistorico: number | null;
+    fechaCapturaStockInicial: Date | null;
+    stockActual: number;
     totalEntregas: number;
     stockDisponible: number;
     estado: 'bueno' | 'medio' | 'critico';
+    tieneHistorialInicial: boolean;
     lotes: Array<{
       id: string;
       numero: string;
@@ -223,6 +226,42 @@ export const useMovimientos = () => {
 
     return result || null;
   }, [stockApi]);
+
+  /**
+   * Forzar actualización del stock disponible
+   * Útil para actualizar en tiempo real después de generar vales
+   */
+  const forceRefreshStock = useCallback(async (
+    vacunaId: string,
+    mes: number,
+    anio: number
+  ): Promise<{
+    stockInicialHistorico: number | null;
+    fechaCapturaStockInicial: Date | null;
+    stockActual: number;
+    totalEntregas: number;
+    stockDisponible: number;
+    estado: 'bueno' | 'medio' | 'critico';
+    tieneHistorialInicial: boolean;
+    lotes: Array<{
+      id: string;
+      numero: string;
+      cantidadActual: number;
+      fechaVencimiento: Date;
+      estado: string;
+    }>;
+  } | null> => {
+    logger.debug('🔄 Forzando actualización de stock disponible:', { vacunaId, mes, anio });
+
+    // Usar una instancia nueva del API para forzar la recarga
+    const freshResult = await MovimientosService.getStockDisponible(vacunaId, mes, anio);
+    
+    if (freshResult) {
+      logger.debug('✅ Stock actualizado exitosamente');
+    }
+
+    return freshResult || null;
+  }, []);
 
   /**
    * Sincronizar saldo anterior del siguiente mes
@@ -521,6 +560,7 @@ export const useMovimientos = () => {
     loadStats,
     generarDesdePlanificacion,
     getStockDisponible,
+    forceRefreshStock,
     sincronizarSaldoAnterior,
 
     // Entregas adicionales

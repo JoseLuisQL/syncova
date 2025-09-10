@@ -294,10 +294,13 @@ export class MovimientosService {
     mes: number,
     anio: number
   ): Promise<{
-    stockInicial: number;
+    stockInicialHistorico: number | null;
+    fechaCapturaStockInicial: Date | null;
+    stockActual: number;
     totalEntregas: number;
     stockDisponible: number;
     estado: 'bueno' | 'medio' | 'critico';
+    tieneHistorialInicial: boolean;
     lotes: Array<{
       id: string;
       numero: string;
@@ -310,10 +313,13 @@ export class MovimientosService {
       logger.debug('Obteniendo stock disponible:', { vacunaId, mes, anio });
 
       const response = await apiClient.get<ApiResponse<{
-        stockInicial: number;
+        stockInicialHistorico: number | null;
+        fechaCapturaStockInicial: Date | null;
+        stockActual: number;
         totalEntregas: number;
         stockDisponible: number;
         estado: 'bueno' | 'medio' | 'critico';
+        tieneHistorialInicial: boolean;
         lotes: Array<{
           id: string;
           numero: string;

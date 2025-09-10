@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useStockEvents } from '../../utils/stockEventEmitter';
 import {
   Plus,
   Download,
@@ -74,6 +75,7 @@ const Movimientos: React.FC = () => {
     createMovimiento,
     updateMovimiento,
     getStockDisponible,
+    forceRefreshStock,
     createEntregaAdicional,
     updateEntregaAdicional,
     deleteEntregaAdicional,
@@ -87,6 +89,9 @@ const Movimientos: React.FC = () => {
     isDownloadingTemplate,
     isImportingExcel
   } = useMovimientos();
+
+  // Hook para eventos de stock
+  const { onValeGenerated } = useStockEvents();
 
   const {
     establecimientos,
@@ -183,10 +188,13 @@ const Movimientos: React.FC = () => {
 
   // Estados para stock disponible
   const [stockInfo, setStockInfo] = useState<{
-    stockInicial: number;
+    stockInicialHistorico: number | null;
+    fechaCapturaStockInicial: Date | null;
+    stockActual: number;
     totalEntregas: number;
     stockDisponible: number;
     estado: 'bueno' | 'medio' | 'critico';
+    tieneHistorialInicial: boolean;
     lotes: Array<{
       id: string;
       numero: string;
@@ -324,6 +332,69 @@ const Movimientos: React.FC = () => {
 
     loadStock();
   }, [selectedVacuna, selectedMes, selectedAnio, vacunasActivas]); // Agregado vacunasActivas para las notificaciones
+
+  // 📡 EFECTO PARA ACTUALIZACIÓN AUTOMÁTICA EN TIEMPO REAL
+  // Escucha eventos de generación de vales y actualiza el stock automáticamente
+  useEffect(() => {
+    const unsubscribe = onValeGenerated(async (event) => {
+      console.log('🔄 [Movimientos] Recibido evento de vale generado:', event);
+      
+      // Verificar si estamos en el mismo período que se generó el vale
+      if (event.mes === selectedMes && event.anio === selectedAnio) {
+        console.log('✅ [Movimientos] Período coincidente - Actualizando stock automáticamente...');
+        
+        // Si hay una vacuna seleccionada, actualizar su stock
+        if (selectedVacuna) {
+          try {
+            setIsLoadingStock(true);
+            setStockError(null);
+            
+            // Usar forceRefreshStock para obtener datos frescos
+            const freshStock = await forceRefreshStock(selectedVacuna, selectedMes, selectedAnio);
+            
+            if (freshStock) {
+              setStockInfo(freshStock);
+              console.log('✅ [Movimientos] Stock actualizado automáticamente:', freshStock);
+              
+              // Mostrar notificación sutil de actualización
+              toast.info(
+                'Stock actualizado automáticamente',
+                `Los datos de stock se han actualizado después de generar el vale.`,
+                { 
+                  duration: 4000,
+                  style: {
+                    background: '#3B82F6',
+                    color: 'white'
+                  }
+                }
+              );
+            }
+          } catch (error: any) {
+            console.error('❌ [Movimientos] Error actualizando stock automáticamente:', error);
+            setStockError('Error al actualizar stock automáticamente');
+          } finally {
+            setIsLoadingStock(false);
+          }
+        }
+        
+        // También recargar los movimientos para reflejar los cambios
+        console.log('🔄 [Movimientos] Recargando movimientos después de generar vale...');
+        const filters = {
+          vacunaId: selectedVacuna,
+          mes: selectedMes,
+          anio: selectedAnio,
+          centroAcopioId: selectedCentroAcopio !== 'todos' ? selectedCentroAcopio : undefined
+        };
+        
+        await loadMovimientos(filters);
+      } else {
+        console.log(`ℹ️  [Movimientos] Vale generado para período diferente: ${event.mes}/${event.anio} vs ${selectedMes}/${selectedAnio}`);
+      }
+    });
+
+    // Cleanup al desmontar el componente
+    return unsubscribe;
+  }, [onValeGenerated, selectedVacuna, selectedMes, selectedAnio, selectedCentroAcopio, forceRefreshStock, loadMovimientos, toast]);
 
   // Limpiar timeouts al desmontar el componente
   useEffect(() => {
@@ -1817,15 +1888,38 @@ const Movimientos: React.FC = () => {
             <div className="px-6 py-6">
 
               {stockInfo ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Stock Inicial Premium */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  {/* Stock Inicial Histórico Premium */}
+                  <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 border-2 border-indigo-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-indigo-800">
+                          {stockInfo.tieneHistorialInicial ? stockInfo.stockInicialHistorico?.toLocaleString() : 'N/A'}
+                        </div>
+                        <div className="text-sm text-indigo-600 font-semibold mt-1">
+                          Stock Inicial {stockInfo.tieneHistorialInicial ? '(Histórico)' : '(Sin historial)'}
+                        </div>
+                        {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial && (
+                          <div className="text-xs text-indigo-500 mt-1">
+                            Capturado: {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="bg-indigo-600 p-3 rounded-xl shadow-lg">
+                        <Package className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stock Actual Premium */}
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-200 shadow-sm hover:shadow-md transition-all duration-200">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-2xl font-bold text-blue-800">
-                          {stockInfo.stockInicial.toLocaleString()}
+                          {stockInfo.stockActual.toLocaleString()}
                         </div>
-                        <div className="text-sm text-blue-600 font-semibold mt-1">Stock Inicial</div>
+                        <div className="text-sm text-blue-600 font-semibold mt-1">Stock Actual</div>
+                        <div className="text-xs text-blue-500 mt-1">En lotes disponibles</div>
                       </div>
                       <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
                         <Package className="h-6 w-6 text-white" />

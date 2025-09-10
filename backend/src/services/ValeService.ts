@@ -5,6 +5,7 @@ import { EstadoVale, TipoMovimientoKardex, TipoVale } from '@prisma/client';
 import { ConfiguracionJeringaVacunaService } from './ConfiguracionJeringaVacunaService';
 import { StockValidationService, VaccineRequirement } from './StockValidationService';
 import { AlmacenCentralService } from './AlmacenCentralService';
+import { StockInicialService } from './StockInicialService';
 
 /**
  * Interface para modificaciones de vale
@@ -1315,6 +1316,53 @@ export class ValeService {
         }
 
         console.log(`✅ [ValeService] Validación de stock exitosa`);
+
+        // PASO 2.6: CAPTURAR STOCK INICIAL DE TODAS LAS VACUNAS DE FORMA INTELIGENTE
+        console.log(`📊 [ValeService] Capturando stock inicial de todas las vacunas activas...`);
+        
+        // Obtener TODAS las vacunas activas del sistema, no solo las del vale
+        const todasLasVacunas = await tx.vacuna.findMany({
+          where: { estado: 'activo' },
+          select: { id: true, nombre: true }
+        });
+        
+        console.log(`🔍 [ValeService] Encontradas ${todasLasVacunas.length} vacunas activas para evaluar stock inicial`);
+        
+        // Capturar stock inicial para TODAS las vacunas activas de forma inteligente
+        const resultadosStockInicial = await StockInicialService.capturarStockInicialBatch(
+          todasLasVacunas.map(vacuna => ({ vacunaId: vacuna.id })),
+          data.mes,
+          data.anio,
+          `Stock inicial capturado automáticamente para todas las vacunas antes de generar vale ${numeroVale}`
+        );
+        
+        if (resultadosStockInicial.success) {
+          const capturas = resultadosStockInicial.data?.filter(r => r.resultado.success && r.resultado.data) || [];
+          const errores = resultadosStockInicial.data?.filter(r => !r.resultado.success) || [];
+          
+          if (capturas.length > 0) {
+            console.log(`✅ [ValeService] Stock inicial capturado para ${capturas.length} de ${todasLasVacunas.length} vacunas`);
+            capturas.forEach(captura => {
+              const vacuna = todasLasVacunas.find(v => v.id === captura.vacunaId);
+              console.log(`   - ${vacuna?.nombre}: ${captura.resultado.data?.stockInicial || 0} unidades`);
+            });
+          }
+          
+          if (errores.length > 0) {
+            console.warn(`⚠️ [ValeService] ${errores.length} vacunas con errores en captura de stock inicial`);
+            errores.forEach(error => {
+              const vacuna = todasLasVacunas.find(v => v.id === error.vacunaId);
+              console.warn(`   - ${vacuna?.nombre}: ${error.resultado.error}`);
+            });
+          }
+          
+          if (capturas.length === 0) {
+            console.log(`ℹ️  [ValeService] No se requirió captura de stock inicial (ya existe historial previo para todas las vacunas)`);
+          }
+        } else {
+          console.warn(`⚠️ [ValeService] Error en captura batch de stock inicial: ${resultadosStockInicial.error}`);
+          // No detenemos la generación del vale por este error
+        }
 
         // PASO 3: Obtener usuario válido (si es temporal, usar el primero disponible)
         let usuarioIdFinal = data.usuarioId;

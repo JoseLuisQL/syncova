@@ -195,6 +195,7 @@ model Vacuna {
   configuracionesDefecto    ConfiguracionJeringaVacunaDefecto[]
   configuracionesCentro     ConfiguracionJeringaVacunaCentro[]
   programacionesCenares     ProgramacionAnualCenares[] @relation("ProgramacionCenaresVacuna")
+  stocksInicialesMensuales  StockInicialMensual[]
 
   @@map("vacunas")
 }
@@ -483,6 +484,26 @@ model ConfiguracionSistema {
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("configuracion_sistema")
+}
+
+model StockInicialMensual {
+  id                String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  vacunaId          String        @map("vacuna_id") @db.Uuid
+  mes               Int
+  anio              Int
+  stockInicial      Int           @map("stock_inicial")
+  fechaCaptura      DateTime      @default(now()) @map("fecha_captura") @db.Timestamptz(6)
+  observaciones     String?       @db.Text
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relaciones
+  vacuna            Vacuna        @relation(fields: [vacunaId], references: [id])
+
+  // Constraints
+  @@unique([vacunaId, mes, anio], name: "uk_stock_inicial_vacuna_mes_anio")
+  @@index([vacunaId], name: "idx_stock_inicial_vacuna")
+  @@index([mes, anio], name: "idx_stock_inicial_periodo")
+  @@map("stock_inicial_mensual")
 }
 
 model ConfiguracionJeringaVacunaDefecto {
