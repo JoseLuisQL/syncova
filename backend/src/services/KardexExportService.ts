@@ -673,8 +673,8 @@ class KardexExportService {
     try {
       console.log(`📋 Creando hoja para: ${itemNombre} (${movimientos.length} movimientos)`);
 
-      // Crear hoja con nombre seguro para Excel
-      const nombreHoja = this.limpiarNombreHoja(itemNombre);
+      // Crear hoja con nombre seguro y único para Excel
+      const nombreHoja = this.generarNombreHojaUnico(workbook, itemNombre);
       const worksheet = workbook.addWorksheet(nombreHoja);
 
       // Configurar diseño profesional de la hoja
@@ -744,11 +744,54 @@ class KardexExportService {
   }
 
   /**
+   * Generar nombre de hoja único para Excel
+   * Maneja duplicados agregando sufijos numéricos y respeta el límite de 31 caracteres
+   */
+  private static generarNombreHojaUnico(workbook: ExcelJS.Workbook, itemNombre: string): string {
+    // Limpiar el nombre base
+    let nombreBase = this.limpiarNombreHoja(itemNombre);
+    let nombreFinal = nombreBase;
+    let contador = 1;
+
+    // Verificar si el nombre ya existe en el workbook
+    while (this.existeNombreHoja(workbook, nombreFinal)) {
+      // Calcular espacio disponible para el sufijo
+      const sufijo = ` (${contador})`;
+      const espacioDisponible = 31 - sufijo.length;
+
+      // Truncar el nombre base si es necesario para hacer espacio al sufijo
+      const nombreTruncado = nombreBase.substring(0, espacioDisponible).trim();
+      nombreFinal = `${nombreTruncado}${sufijo}`;
+
+      contador++;
+
+      // Protección contra bucles infinitos (aunque es muy improbable)
+      if (contador > 999) {
+        // Usar timestamp como último recurso
+        const timestamp = Date.now().toString().slice(-6);
+        nombreFinal = `Item_${timestamp}`;
+        break;
+      }
+    }
+
+    console.log(`📝 Nombre de hoja generado: "${itemNombre}" -> "${nombreFinal}"`);
+    return nombreFinal;
+  }
+
+  /**
+   * Verificar si un nombre de hoja ya existe en el workbook
+   */
+  private static existeNombreHoja(workbook: ExcelJS.Workbook, nombreHoja: string): boolean {
+    return workbook.worksheets.some(worksheet => worksheet.name === nombreHoja);
+  }
+
+  /**
    * Limpiar nombre de hoja para Excel (máximo 31 caracteres, sin caracteres especiales)
    */
   private static limpiarNombreHoja(nombre: string): string {
     return nombre
-      .replace(/[\\\/\?\*\[\]]/g, '') // Remover caracteres no permitidos en Excel
+      .replace(/[\\\/\?\*\[\]:]/g, '') // Remover caracteres no permitidos en Excel (agregado ':')
+      .replace(/\s+/g, ' ') // Normalizar espacios múltiples
       .substring(0, 31) // Máximo 31 caracteres
       .trim();
   }
