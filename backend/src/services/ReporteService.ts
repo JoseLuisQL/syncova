@@ -63,6 +63,13 @@ export interface EficienciaDistribucionFilters extends ReporteMovimientosFilters
   calcularTendencias?: boolean;
 }
 
+export interface MovimientosPorEESSFilters {
+  fechaInicio: Date;
+  fechaFin: Date;
+  centroAcopioId?: string;
+  incluirInactivos?: boolean;
+}
+
 /**
  * Interfaces para resultados de reportes
  */
@@ -230,6 +237,22 @@ export interface EficienciaDistribucionItem {
     variacionPorcentual: number;
   };
   alertas: string[];
+}
+
+export interface MovimientosPorEESSItem {
+  establecimientoId: string;
+  establecimientoNombre: string;
+  centroAcopioId: string;
+  centroAcopioNombre: string;
+  vacunas: {
+    [vacunaId: string]: {
+      vacunaId: string;
+      vacunaNombre: string;
+      totalEntrega: number;
+      totalSalidas: number;
+      stock: number; // Stock del último mes del rango
+    };
+  };
 }
 
 /**
@@ -1722,5 +1745,221 @@ export class ReporteService {
     }
 
     return alertas;
+  }
+
+  /**
+   * Generar reporte de movimientos por EESS
+   */
+  static async generarMovimientosPorEESS(
+    filters: MovimientosPorEESSFilters
+  ): Promise<ServiceResult<MovimientosPorEESSItem[]>> {
+    try {
+      console.log('🔄 Generando reporte de movimientos por EESS:', filters);
+
+      const {
+        fechaInicio,
+        fechaFin,
+        centroAcopioId,
+        incluirInactivos = false
+      } = filters;
+
+      // Validar fechas
+      if (!fechaInicio || !fechaFin) {
+        return {
+          success: false,
+          error: 'Las fechas de inicio y fin son requeridas'
+        };
+      }
+
+      // Calcular rango de meses basado en las fechas
+      // Manejar tanto strings como Date objects
+      let fechaInicioObj: Date;
+      let fechaFinObj: Date;
+
+      if (fechaInicio instanceof Date) {
+        fechaInicioObj = new Date(fechaInicio);
+        fechaInicioObj.setUTCHours(0, 0, 0, 0);
+      } else {
+        fechaInicioObj = new Date(fechaInicio + 'T00:00:00.000Z');
+      }
+
+      if (fechaFin instanceof Date) {
+        fechaFinObj = new Date(fechaFin);
+        fechaFinObj.setUTCHours(23, 59, 59, 999);
+      } else {
+        fechaFinObj = new Date(fechaFin + 'T23:59:59.999Z');
+      }
+
+      const mesInicio = fechaInicioObj.getUTCMonth() + 1;
+      const anioInicio = fechaInicioObj.getUTCFullYear();
+      const mesFin = fechaFinObj.getUTCMonth() + 1;
+      const anioFin = fechaFinObj.getUTCFullYear();
+
+      console.log('📅 Procesamiento de fechas:');
+      console.log(`  - Fecha inicio: ${fechaInicio instanceof Date ? fechaInicio.toISOString() : fechaInicio} -> ${fechaInicioObj.toISOString()} -> Mes: ${mesInicio}, Año: ${anioInicio}`);
+      console.log(`  - Fecha fin: ${fechaFin instanceof Date ? fechaFin.toISOString() : fechaFin} -> ${fechaFinObj.toISOString()} -> Mes: ${mesFin}, Año: ${anioFin}`);
+
+      // Construir condiciones WHERE
+      const whereConditions: any = {
+        OR: []
+      };
+
+      // Agregar condiciones para cada mes en el rango
+      console.log('🔍 Construyendo condiciones de consulta por mes:');
+      for (let anio = anioInicio; anio <= anioFin; anio++) {
+        const mesInicioAnio = anio === anioInicio ? mesInicio : 1;
+        const mesFinAnio = anio === anioFin ? mesFin : 12;
+
+        for (let mes = mesInicioAnio; mes <= mesFinAnio; mes++) {
+          console.log(`  - Incluyendo: Año ${anio}, Mes ${mes}`);
+          whereConditions.OR.push({
+            mes: mes,
+            anio: anio
+          });
+        }
+      }
+
+      // Filtro por centro de acopio si se especifica
+      if (centroAcopioId && centroAcopioId !== 'todos') {
+        whereConditions.establecimiento = {
+          centroAcopioId
+        };
+      }
+
+      // Filtro por estado si no incluir inactivos
+      if (!incluirInactivos) {
+        whereConditions.vacuna = {
+          estado: 'activo'
+        };
+        whereConditions.establecimiento = {
+          ...whereConditions.establecimiento,
+          estado: 'activo'
+        };
+      }
+
+      console.log('📋 Condiciones de consulta:', JSON.stringify(whereConditions, null, 2));
+
+      // Obtener todos los movimientos en el rango de fechas
+      const movimientos = await prisma.movimientoVacuna.findMany({
+        where: whereConditions,
+        include: {
+          establecimiento: {
+            include: {
+              centroAcopio: true
+            }
+          },
+          vacuna: true
+        },
+        orderBy: [
+          { establecimiento: { nombre: 'asc' } },
+          { vacuna: { nombre: 'asc' } },
+          { anio: 'asc' },
+          { mes: 'asc' }
+        ]
+      });
+
+      console.log(`📊 Se encontraron ${movimientos.length} movimientos`);
+
+      // Agrupar por establecimiento
+      const establecimientosMap = new Map<string, any>();
+
+      for (const mov of movimientos) {
+        const establecimientoId = mov.establecimientoId;
+
+        if (!establecimientosMap.has(establecimientoId)) {
+          establecimientosMap.set(establecimientoId, {
+            establecimientoId: mov.establecimientoId,
+            establecimientoNombre: mov.establecimiento.nombre,
+            centroAcopioId: mov.establecimiento.centroAcopio?.id || '',
+            centroAcopioNombre: mov.establecimiento.centroAcopio?.nombre || 'Sin Centro',
+            vacunas: new Map<string, any>()
+          });
+        }
+
+        const establecimiento = establecimientosMap.get(establecimientoId)!;
+        const vacunaId = mov.vacunaId;
+
+        if (!establecimiento.vacunas.has(vacunaId)) {
+          establecimiento.vacunas.set(vacunaId, {
+            vacunaId: mov.vacunaId,
+            vacunaNombre: mov.vacuna.nombre,
+            totalEntrega: 0,
+            totalSalidas: 0,
+            stock: 0,
+            movimientosPorMes: []
+          });
+        }
+
+        const vacunaData = establecimiento.vacunas.get(vacunaId)!;
+
+        // Acumular entregas y salidas
+        vacunaData.totalEntrega += mov.entrega;
+        vacunaData.totalSalidas += (mov.salida + mov.transSalida);
+
+        // Guardar movimiento para calcular stock del último mes
+        vacunaData.movimientosPorMes.push({
+          mes: mov.mes,
+          anio: mov.anio,
+          saldoAnterior: mov.saldoAnterior,
+          transIngreso: mov.transIngreso,
+          salida: mov.salida,
+          transSalida: mov.transSalida,
+          entrega: mov.entrega
+        });
+      }
+
+      // Procesar datos finales y calcular stock del último mes
+      const reporteData: MovimientosPorEESSItem[] = [];
+
+      for (const [establecimientoId, establecimiento] of establecimientosMap) {
+        const vacunasProcessed: { [vacunaId: string]: any } = {};
+
+        for (const [vacunaId, vacunaData] of establecimiento.vacunas) {
+          // Ordenar movimientos por año y mes para encontrar el último
+          const movimientosOrdenados = vacunaData.movimientosPorMes.sort((a: any, b: any) => {
+            if (a.anio !== b.anio) return b.anio - a.anio;
+            return b.mes - a.mes;
+          });
+
+          // Calcular stock del último mes: SALDO_ANTERIOR + TRANS_INGRESO - SALIDA - TRANS_SALIDA + ENTREGA
+          let stockUltimoMes = 0;
+          if (movimientosOrdenados.length > 0) {
+            const ultimoMov = movimientosOrdenados[0];
+            stockUltimoMes = ultimoMov.saldoAnterior + ultimoMov.transIngreso -
+                           ultimoMov.salida - ultimoMov.transSalida + ultimoMov.entrega;
+          }
+
+          vacunasProcessed[vacunaId] = {
+            vacunaId: vacunaData.vacunaId,
+            vacunaNombre: vacunaData.vacunaNombre,
+            totalEntrega: vacunaData.totalEntrega,
+            totalSalidas: vacunaData.totalSalidas,
+            stock: stockUltimoMes
+          };
+        }
+
+        reporteData.push({
+          establecimientoId: establecimiento.establecimientoId,
+          establecimientoNombre: establecimiento.establecimientoNombre,
+          centroAcopioId: establecimiento.centroAcopioId,
+          centroAcopioNombre: establecimiento.centroAcopioNombre,
+          vacunas: vacunasProcessed
+        });
+      }
+
+      console.log(`✅ Reporte de movimientos por EESS generado: ${reporteData.length} establecimientos`);
+
+      return {
+        success: true,
+        data: reporteData
+      };
+
+    } catch (error) {
+      console.error('❌ Error al generar reporte de movimientos por EESS:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al generar reporte de movimientos por EESS'
+      };
+    }
   }
 }

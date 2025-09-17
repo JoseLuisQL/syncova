@@ -382,6 +382,15 @@ export const useReportes = (): UseReportesReturn => {
     );
   }, [ejecutarConCarga]);
 
+  const exportarMovimientosPorEESS = useCallback(async (
+    filtros: { fechaInicio: string; fechaFin: string; centroAcopioId?: string },
+    config: ConfiguracionExportacion
+  ) => {
+    await ejecutarConCarga(
+      () => ReportesService.exportarMovimientosPorEESS(filtros, config)
+    );
+  }, [ejecutarConCarga]);
+
   /**
    * Exportar reporte a Excel
    */
@@ -559,6 +568,7 @@ export const useReportes = (): UseReportesReturn => {
     exportarConsumoHistorico,
     exportarEntregasPorEstablecimiento,
     exportarEficienciaDistribucion,
+    exportarMovimientosPorEESS,
     limpiarReportes,
     actualizarFiltros,
 

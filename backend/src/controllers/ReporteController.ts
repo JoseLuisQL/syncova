@@ -9,7 +9,8 @@ import {
   MovimientosMensualesFilters,
   ConsumoHistoricoFilters,
   EntregasPorEstablecimientoFilters,
-  EficienciaDistribucionFilters
+  EficienciaDistribucionFilters,
+  MovimientosPorEESSFilters
 } from '@/services/ReporteService';
 import {
   ReporteExportService,
@@ -1149,6 +1150,127 @@ export class ReporteController {
       res.send(buffer);
     } catch (error) {
       console.error('Error en ReporteController.exportarEficienciaDistribucion:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  // =====================================================
+  // MÉTODOS PARA REPORTES DE MOVIMIENTOS POR EESS
+  // =====================================================
+
+  /**
+   * Generar reporte de movimientos por EESS
+   * POST /api/reportes/movimientos-por-eess
+   */
+  static async generarMovimientosPorEESS(req: Request, res: Response): Promise<void> {
+    try {
+      const {
+        centroAcopioId,
+        fechaInicio,
+        fechaFin
+      } = req.body;
+
+      // Validaciones requeridas
+      if (!fechaInicio || !fechaFin) {
+        ResponseUtil.error(res, 'Las fechas de inicio y fin son requeridas', 400);
+        return;
+      }
+
+      // Validar fechas
+      const fechaInicioDate = new Date(fechaInicio);
+      const fechaFinDate = new Date(fechaFin);
+
+      if (isNaN(fechaInicioDate.getTime()) || isNaN(fechaFinDate.getTime())) {
+        ResponseUtil.error(res, 'Formato de fecha inválido', 400);
+        return;
+      }
+
+      if (fechaInicioDate > fechaFinDate) {
+        ResponseUtil.error(res, 'La fecha de inicio debe ser menor a la fecha de fin', 400);
+        return;
+      }
+
+      // Validar centro de acopio si se proporciona
+      if (centroAcopioId && !validateUUID(centroAcopioId)) {
+        ResponseUtil.error(res, 'ID de centro de acopio inválido', 400);
+        return;
+      }
+
+      // Construir filtros
+      const filters: MovimientosPorEESSFilters = {
+        centroAcopioId,
+        fechaInicio: fechaInicioDate,
+        fechaFin: fechaFinDate
+      };
+
+      const result = await ReporteService.generarMovimientosPorEESS(filters);
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al generar reporte de movimientos por EESS', 500);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, 'Reporte de movimientos por EESS generado exitosamente');
+    } catch (error) {
+      console.error('Error en ReporteController.generarMovimientosPorEESS:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Exportar reporte de movimientos por EESS a Excel
+   * POST /api/reportes/movimientos-por-eess/exportar
+   */
+  static async exportarMovimientosPorEESS(req: Request, res: Response): Promise<void> {
+    try {
+      const { filtros, config } = req.body;
+
+      // Validar configuración de exportación
+      if (!config || !config.responsableReporte) {
+        ResponseUtil.error(res, 'Configuración de exportación requerida', 400);
+        return;
+      }
+
+      // Generar datos del reporte
+      const reporteResult = await ReporteService.generarMovimientosPorEESS(filtros);
+      if (!reporteResult.success) {
+        ResponseUtil.error(res, reporteResult.error || 'Error al generar datos del reporte', 500);
+        return;
+      }
+
+      // Configuración por defecto para exportación
+      const exportConfig: ReporteExportConfig = {
+        incluirDetalles: config.incluirDetalles !== false,
+        incluirGraficos: config.incluirGraficos === true,
+        incluirEstadisticas: config.incluirEstadisticas !== false,
+        formatoFecha: 'dd/mm/yyyy',
+        responsableReporte: config.responsableReporte,
+        observaciones: config.observaciones
+      };
+
+      // Exportar a Excel
+      const exportResult = await ReporteExportService.exportarMovimientosPorEESS(
+        reporteResult.data!,
+        exportConfig
+      );
+
+      if (!exportResult.success) {
+        ResponseUtil.error(res, exportResult.error || 'Error al exportar reporte', 500);
+        return;
+      }
+
+      // Generar buffer del archivo
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+
+      // Configurar headers para descarga
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${exportResult.data!.filename}"`);
+      res.setHeader('Content-Length', buffer.byteLength);
+
+      // Enviar archivo
+      res.send(buffer);
+    } catch (error) {
+      console.error('Error en ReporteController.exportarMovimientosPorEESS:', error);
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }

@@ -9,7 +9,8 @@ import {
   MovimientoMensualItem,
   ConsumoHistoricoItem,
   EntregaPorEstablecimientoItem,
-  EficienciaDistribucionItem
+  EficienciaDistribucionItem,
+  MovimientosPorEESSItem
 } from './ReporteService';
 
 /**
@@ -2535,5 +2536,349 @@ export class ReporteExportService {
     if (config.observaciones) {
       worksheet.getRow(9).height = 22;
     }
+  }
+
+  /**
+   * Exportar reporte de movimientos por EESS a Excel
+   */
+  static async exportarMovimientosPorEESS(
+    data: MovimientosPorEESSItem[],
+    config: ReporteExportConfig
+  ): Promise<ServiceResult<ReporteExcelResult>> {
+    try {
+      console.log('🔄 Exportando reporte de movimientos por EESS a Excel');
+
+      // Crear workbook con diseño profesional
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC - Sistema de Vacunación';
+      workbook.created = new Date();
+      workbook.company = 'Gobierno Regional de Apurímac';
+
+      // Crear hoja principal
+      const worksheet = workbook.addWorksheet('Movimientos por EESS');
+
+      // Agregar encabezado del reporte
+      this.agregarEncabezadoMovimientosPorEESS(worksheet, config);
+
+      // Obtener todas las vacunas únicas para crear las columnas
+      const vacunasUnicas = new Set<string>();
+      const vacunasInfo = new Map<string, { id: string; nombre: string }>();
+
+      data.forEach(item => {
+        Object.values(item.vacunas).forEach(vacuna => {
+          vacunasUnicas.add(vacuna.vacunaId);
+          vacunasInfo.set(vacuna.vacunaId, {
+            id: vacuna.vacunaId,
+            nombre: vacuna.vacunaNombre
+          });
+        });
+      });
+
+      const vacunasArray = Array.from(vacunasUnicas).sort((a, b) => {
+        const nombreA = vacunasInfo.get(a)?.nombre || '';
+        const nombreB = vacunasInfo.get(b)?.nombre || '';
+        return nombreA.localeCompare(nombreB);
+      });
+
+      // Configurar columnas dinámicamente
+      this.configurarColumnasMovimientosPorEESS(worksheet, vacunasArray, vacunasInfo, config);
+
+      // Agregar datos con formato horizontal
+      this.agregarDatosMovimientosPorEESS(worksheet, data, vacunasArray, config);
+
+      // Aplicar estilos profesionales
+      this.aplicarEstilosMovimientosPorEESS(worksheet, vacunasArray);
+
+      // Generar nombre de archivo
+      const fecha = new Date().toISOString().split('T')[0];
+      const filename = `Movimientos_por_EESS_${fecha}.xlsx`;
+
+      console.log('✅ Reporte de movimientos por EESS exportado exitosamente');
+
+      return {
+        success: true,
+        data: {
+          workbook,
+          filename,
+          size: 0 // Se calculará al escribir
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de movimientos por EESS:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al exportar reporte de movimientos por EESS'
+      };
+    }
+  }
+
+  /**
+   * Agregar encabezado para reporte de movimientos por EESS
+   */
+  private static agregarEncabezadoMovimientosPorEESS(worksheet: ExcelJS.Worksheet, config: ReporteExportConfig): void {
+    // Título principal
+    worksheet.mergeCells('A1:E1');
+    const titleCell = worksheet.getCell('A1');
+    titleCell.value = '📊 REPORTE DE MOVIMIENTOS POR ESTABLECIMIENTOS DE SALUD (EESS)';
+    titleCell.font = {
+      bold: true,
+      size: 16,
+      color: { argb: 'FFFFFFFF' },
+      name: 'Segoe UI'
+    };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF1565C0' }
+    };
+
+    // Información del reporte
+    worksheet.mergeCells('A2:E2');
+    const infoCell = worksheet.getCell('A2');
+    infoCell.value = `Generado el: ${new Date().toLocaleDateString('es-PE')} | Responsable: ${config.responsableReporte}`;
+    infoCell.font = { size: 10, name: 'Segoe UI', color: { argb: 'FF6B7280' } };
+    infoCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Observaciones si existen
+    if (config.observaciones) {
+      worksheet.mergeCells('A3:E3');
+      const obsCell = worksheet.getCell('A3');
+      obsCell.value = `Observaciones: ${config.observaciones}`;
+      obsCell.font = { size: 9, name: 'Segoe UI', italic: true, color: { argb: 'FF6B7280' } };
+      obsCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    }
+
+    // Espacio
+    worksheet.getRow(4).height = 10;
+  }
+
+  /**
+   * Configurar columnas para reporte de movimientos por EESS
+   */
+  private static configurarColumnasMovimientosPorEESS(
+    worksheet: ExcelJS.Worksheet,
+    vacunasArray: string[],
+    vacunasInfo: Map<string, { id: string; nombre: string }>,
+    config: ReporteExportConfig
+  ): void {
+    const headerRow1 = config.observaciones ? 6 : 5; // Primera fila de encabezados
+    const headerRow2 = headerRow1 + 1; // Segunda fila de encabezados
+
+    // Quitar líneas de cuadrícula
+    worksheet.views = [{ showGridLines: false }];
+
+    // Configurar columnas base (EESS)
+    worksheet.getColumn(1).width = 40; // EESS
+
+    let currentCol = 2;
+
+    // Para cada vacuna, crear 3 columnas (Total Entrega, Total Salidas, Stock)
+    vacunasArray.forEach((vacunaId, index) => {
+      const vacunaInfo = vacunasInfo.get(vacunaId);
+      const vacunaNombre = vacunaInfo?.nombre || `Vacuna ${index + 1}`;
+
+      // Configurar ancho de las 3 columnas para esta vacuna
+      worksheet.getColumn(currentCol).width = 15;     // Total Entrega
+      worksheet.getColumn(currentCol + 1).width = 15; // Total Salidas
+      worksheet.getColumn(currentCol + 2).width = 12; // Stock
+
+      // Primera fila de encabezados: nombre de la vacuna (merge 3 columnas)
+      const startCol = currentCol;
+      const endCol = currentCol + 2;
+
+      worksheet.mergeCells(headerRow1, startCol, headerRow1, endCol);
+      const vacunaHeaderCell = worksheet.getCell(headerRow1, startCol);
+      vacunaHeaderCell.value = vacunaNombre;
+      vacunaHeaderCell.font = {
+        bold: true,
+        size: 11,
+        color: { argb: 'FFFFFFFF' },
+        name: 'Segoe UI'
+      };
+      vacunaHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      vacunaHeaderCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF1976D2' }
+      };
+
+      // Segunda fila de encabezados: columnas específicas
+      const subHeaders = ['Total Entrega', 'Total Salidas', 'Stock'];
+      subHeaders.forEach((subHeader, subIndex) => {
+        const cell = worksheet.getCell(headerRow2, currentCol + subIndex);
+        cell.value = subHeader;
+        cell.font = {
+          bold: true,
+          size: 10,
+          color: { argb: 'FFFFFFFF' },
+          name: 'Segoe UI'
+        };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF2196F3' }
+        };
+      });
+
+      currentCol += 3;
+    });
+
+    // Configurar encabezado de EESS
+    worksheet.mergeCells(headerRow1, 1, headerRow2, 1);
+    const eessHeaderCell = worksheet.getCell(headerRow1, 1);
+    eessHeaderCell.value = 'EESS';
+    eessHeaderCell.font = {
+      bold: true,
+      size: 12,
+      color: { argb: 'FFFFFFFF' },
+      name: 'Segoe UI'
+    };
+    eessHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    eessHeaderCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF0D47A1' }
+    };
+
+    // Aplicar bordes a todos los encabezados
+    for (let row = headerRow1; row <= headerRow2; row++) {
+      for (let col = 1; col <= currentCol - 1; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FF9CA3AF' } },
+          left: { style: 'thin', color: { argb: 'FF9CA3AF' } },
+          bottom: { style: 'thin', color: { argb: 'FF9CA3AF' } },
+          right: { style: 'thin', color: { argb: 'FF9CA3AF' } }
+        };
+      }
+    }
+
+    // Ajustar altura de filas de encabezado
+    worksheet.getRow(headerRow1).height = 25;
+    worksheet.getRow(headerRow2).height = 20;
+  }
+
+  /**
+   * Agregar datos para reporte de movimientos por EESS
+   */
+  private static agregarDatosMovimientosPorEESS(
+    worksheet: ExcelJS.Worksheet,
+    data: MovimientosPorEESSItem[],
+    vacunasArray: string[],
+    config: ReporteExportConfig
+  ): void {
+    const startRow = (config.observaciones ? 7 : 6) + 1; // Fila después de los encabezados
+
+    data.forEach((item, index) => {
+      const row = worksheet.getRow(startRow + index);
+
+      // Primera columna: nombre del establecimiento
+      const eessCell = row.getCell(1);
+      eessCell.value = item.establecimientoNombre;
+      eessCell.font = {
+        size: 10,
+        name: 'Segoe UI',
+        bold: true
+      };
+      eessCell.alignment = { horizontal: 'left', vertical: 'middle' };
+
+      let currentCol = 2;
+
+      // Para cada vacuna, agregar las 3 columnas de datos
+      vacunasArray.forEach(vacunaId => {
+        const vacunaData = item.vacunas[vacunaId];
+
+        if (vacunaData) {
+          // Total Entrega
+          const entregaCell = row.getCell(currentCol);
+          entregaCell.value = vacunaData.totalEntrega;
+          entregaCell.numFmt = '#,##0';
+          entregaCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+          // Total Salidas
+          const salidasCell = row.getCell(currentCol + 1);
+          salidasCell.value = vacunaData.totalSalidas;
+          salidasCell.numFmt = '#,##0';
+          salidasCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+          // Stock
+          const stockCell = row.getCell(currentCol + 2);
+          stockCell.value = vacunaData.stock;
+          stockCell.numFmt = '#,##0';
+          stockCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+          // Colorear stock según nivel
+          if (vacunaData.stock <= 0) {
+            stockCell.font = { color: { argb: 'FFDC2626' }, bold: true };
+          } else if (vacunaData.stock < 50) {
+            stockCell.font = { color: { argb: 'FFF59E0B' }, bold: true };
+          } else {
+            stockCell.font = { color: { argb: 'FF059669' } };
+          }
+        } else {
+          // Si no hay datos para esta vacuna, poner 0
+          for (let i = 0; i < 3; i++) {
+            const cell = row.getCell(currentCol + i);
+            cell.value = 0;
+            cell.numFmt = '#,##0';
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            cell.font = { color: { argb: 'FF9CA3AF' } };
+          }
+        }
+
+        currentCol += 3;
+      });
+
+      // Aplicar estilos a toda la fila
+      for (let col = 1; col < currentCol; col++) {
+        const cell = row.getCell(col);
+        cell.font = {
+          ...cell.font,
+          size: 10,
+          name: 'Segoe UI'
+        };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+        };
+      }
+
+      // Alternar colores de fila para mejor legibilidad
+      if (index % 2 === 1) {
+        for (let col = 1; col < currentCol; col++) {
+          const cell = row.getCell(col);
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF9FAFB' }
+          };
+        }
+      }
+
+      row.height = 20;
+    });
+  }
+
+  /**
+   * Aplicar estilos profesionales para reporte de movimientos por EESS
+   */
+  private static aplicarEstilosMovimientosPorEESS(
+    worksheet: ExcelJS.Worksheet,
+    vacunasArray: string[]
+  ): void {
+    // Congelar paneles para mantener encabezados visibles
+    worksheet.views = [{
+      state: 'frozen',
+      xSplit: 1, // Congelar primera columna (EESS)
+      ySplit: 2  // Congelar primeras dos filas de encabezados
+    }];
+
+    // Los estilos específicos ya se aplican en los métodos anteriores
+    // Este método se mantiene para compatibilidad y futuras mejoras
   }
 }

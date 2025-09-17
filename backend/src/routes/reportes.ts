@@ -50,6 +50,9 @@ router.get('/entregas-por-establecimiento', ReporteController.generarEntregasPor
 // GET /api/reportes/eficiencia-distribucion - Generar reporte de eficiencia de distribución
 router.get('/eficiencia-distribucion', ReporteController.generarEficienciaDistribucion);
 
+// POST /api/reportes/movimientos-por-eess - Generar reporte de movimientos por EESS
+router.post('/movimientos-por-eess', ReporteController.generarMovimientosPorEESS);
+
 /**
  * Rutas para exportar reportes de movimientos
  */
@@ -65,6 +68,9 @@ router.post('/entregas-por-establecimiento/exportar', ReporteController.exportar
 
 // POST /api/reportes/eficiencia-distribucion/exportar - Exportar reporte de eficiencia de distribución
 router.post('/eficiencia-distribucion/exportar', ReporteController.exportarEficienciaDistribucion);
+
+// POST /api/reportes/movimientos-por-eess/exportar - Exportar reporte de movimientos por EESS
+router.post('/movimientos-por-eess/exportar', ReporteController.exportarMovimientosPorEESS);
 
 /**
  * Rutas para exportación de reportes (archivos Excel)

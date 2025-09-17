@@ -34,6 +34,7 @@ import { useToastContext } from '../../contexts/ToastContext';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 import { useReportes } from '../../hooks/useReportes';
 import { KardexService } from '../../services/KardexService';
+import MovimientosPorEESSModal, { MovimientosPorEESSFiltros } from './MovimientosPorEESSModal';
 import { useKardexFiltros } from '../../hooks/useKardexData';
 import {
   FiltrosReporteBase,
@@ -1175,6 +1176,7 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
     exportarConsumoHistorico,
     exportarEntregasPorEstablecimiento,
     exportarEficienciaDistribucion,
+    exportarMovimientosPorEESS,
     limpiarError
   } = useReportes();
 
@@ -1182,6 +1184,7 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
   const { toast } = useToastContext();
 
   const [reporteActivo, setReporteActivo] = React.useState<string | null>(null);
+  const [showMovimientosPorEESSModal, setShowMovimientosPorEESSModal] = React.useState(false);
 
   const handleExportarReporte = async (tipoReporte: string) => {
     try {
@@ -1272,6 +1275,16 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
       datos: reportes.eficienciaDistribucion,
       generar: () => handleGenerarReporte('eficiencia_distribucion'),
       exportar: () => handleExportarReporte('eficiencia_distribucion')
+    },
+    {
+      id: 'movimientos_por_eess',
+      nombre: 'Movimientos por EESS',
+      descripcion: 'Reporte de movimientos agrupados por Establecimientos de Salud',
+      icon: Truck,
+      color: 'indigo',
+      datos: null, // Este reporte no genera datos previos, va directo a Excel
+      generar: () => setShowMovimientosPorEESSModal(true),
+      exportar: null // No tiene exportar separado, se hace desde el modal
     }
   ];
 
@@ -1328,6 +1341,31 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
       console.error('Error al generar reporte:', error);
     } finally {
       setReporteActivo(null);
+    }
+  };
+
+  const handleExportarMovimientosPorEESS = async (filtros: MovimientosPorEESSFiltros) => {
+    try {
+      // Llamar al servicio de reportes para exportar
+      const config = {
+        incluirDetalles: true,
+        incluirGraficos: false,
+        incluirEstadisticas: true,
+        formatoFecha: 'dd/mm/yyyy' as const,
+        responsableReporte: 'Sistema SIVAC',
+        observaciones: `Reporte generado para el período del ${filtros.fechaInicio} al ${filtros.fechaFin}`
+      };
+
+      console.log('🔄 Exportando Movimientos por EESS con filtros:', filtros);
+
+      // Llamar al método del hook useReportes
+      await exportarMovimientosPorEESS(filtros, config);
+
+      toast.success('Reporte de Movimientos por EESS exportado exitosamente');
+    } catch (error) {
+      console.error('Error al exportar Movimientos por EESS:', error);
+      toast.error('Error al exportar el reporte. Por favor, inténtelo nuevamente.');
+      throw error;
     }
   };
 
@@ -1449,7 +1487,7 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
                     </>
                   )}
                 </button>
-                {reporte.datos && reporte.datos.length > 0 && (
+                {reporte.datos && reporte.datos.length > 0 && reporte.exportar && (
                   <button
                     onClick={reporte.exportar}
                     className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
@@ -1464,7 +1502,14 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
         })}
       </div>
 
-
+      {/* Modal para Movimientos por EESS */}
+      {showMovimientosPorEESSModal && (
+        <MovimientosPorEESSModal
+          onClose={() => setShowMovimientosPorEESSModal(false)}
+          onExportar={handleExportarMovimientosPorEESS}
+          centrosAcopio={centrosAcopio}
+        />
+      )}
     </div>
   );
 };

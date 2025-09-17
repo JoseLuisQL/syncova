@@ -80,6 +80,12 @@ export interface EficienciaDistribucionFilters {
   calcularTendencias?: boolean;
 }
 
+export interface MovimientosPorEESSFilters {
+  fechaInicio: string;
+  fechaFin: string;
+  centroAcopioId?: string;
+}
+
 /**
  * Interfaces para resultados de reportes
  */
@@ -252,6 +258,22 @@ export interface EficienciaDistribucionItem {
     variacionPorcentual: number;
   };
   alertas: string[];
+}
+
+export interface MovimientosPorEESSItem {
+  establecimientoId: string;
+  establecimientoNombre: string;
+  centroAcopioId: string;
+  centroAcopioNombre: string;
+  vacunas: {
+    [vacunaId: string]: {
+      vacunaId: string;
+      vacunaNombre: string;
+      totalEntrega: number;
+      totalSalidas: number;
+      stock: number;
+    };
+  };
 }
 
 /**
@@ -900,6 +922,69 @@ export class ReportesService {
       console.log('✅ Reporte de eficiencia de distribución exportado exitosamente');
     } catch (error) {
       console.error('❌ Error al exportar reporte de eficiencia de distribución:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Generar reporte de movimientos por EESS
+   */
+  static async generarMovimientosPorEESS(
+    filters: MovimientosPorEESSFilters
+  ): Promise<MovimientosPorEESSItem[]> {
+    try {
+      console.log('🔄 Generando reporte de movimientos por EESS:', filters);
+
+      const response = await apiClient.post<ApiResponse<MovimientosPorEESSItem[]>>(
+        `${this.BASE_URL}/movimientos-por-eess`,
+        filters
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error al generar reporte de movimientos por EESS');
+      }
+
+      console.log('✅ Reporte de movimientos por EESS generado exitosamente');
+      return response.data.data;
+    } catch (error) {
+      console.error('❌ Error al generar reporte de movimientos por EESS:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Exportar reporte de movimientos por EESS a Excel
+   */
+  static async exportarMovimientosPorEESS(
+    filtros: MovimientosPorEESSFilters,
+    config: ReporteExportConfig
+  ): Promise<void> {
+    try {
+      console.log('🔄 Exportando reporte de movimientos por EESS a Excel:', filtros);
+
+      const response = await apiClient.post(
+        `${this.BASE_URL}/movimientos-por-eess/exportar`,
+        { filtros, config },
+        { responseType: 'blob' }
+      );
+
+      // Crear y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `movimientos_por_eess_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ Reporte de movimientos por EESS exportado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de movimientos por EESS:', error);
       throw this.handleError(error);
     }
   }
