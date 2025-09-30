@@ -362,6 +362,13 @@ export class ProgramacionAnualCenaresService {
       // Obtener saldo del año anterior (Q4)
       const saldosAnteriores = await this.obtenerSaldosAnoAnterior(anio - 1);
 
+      // AJUSTE ESPECIAL PARA AÑO 2025: Sobrescribir saldos 2024 con valores estáticos
+      // Esto es necesario porque los datos históricos de 2024 no pueden modificarse en la base de datos
+      // y se requieren valores específicos para que los cálculos de 2025 sean correctos
+      if (anio === 2025) {
+        await this.aplicarSaldos2024Estaticos(saldosAnteriores, vacunas, jeringas);
+      }
+
       // Obtener entregas CENARES por trimestre
       const entregasCenares = await this.obtenerEntregasCenaresPorTrimestre(anio);
 
@@ -579,6 +586,90 @@ export class ProgramacionAnualCenaresService {
     } catch (error) {
       console.error('Error al obtener saldos año anterior:', error);
       return saldosMap;
+    }
+  }
+
+  /**
+   * Aplicar saldos estáticos de 2024 para el año 2025
+   * Este método sobrescribe los saldos calculados con valores fijos necesarios
+   * para ajustar los cálculos del año 2025 debido a que los datos históricos
+   * de 2024 no pueden modificarse en la base de datos.
+   */
+  private static async aplicarSaldos2024Estaticos(
+    saldosMap: Map<string, number>,
+    vacunas: any[],
+    jeringas: any[]
+  ): Promise<void> {
+    try {
+      // Mapeo de nombres de vacunas a valores de saldo 2024
+      // Los nombres deben coincidir exactamente con las siglas en la base de datos
+      const saldos2024: { [key: string]: number } = {
+        'AMA': 152,
+        'APO': 0,
+        'BCG': 250,
+        'DPT': 199,
+        'DPTA': 318,
+        'Dt Adulto': 0,
+        'Dt Pediatrico': 2,
+        'HEPATITIS A': 0,
+        'HVB Adulto': 0,
+        'HVB Pediatrico': 84,
+        'Influenza Adulto': 0,
+        'Influenza Pediatrica': 0,
+        'IPV': 1252,
+        'Neumococo': 1208,
+        'Pentavalente': 716,
+        'Rotavirus': 494,
+        'SPR X 1 DOSIS': 0,
+        'SPR X 5 DOSIS': 0,
+        'Varicela': 262,
+        'VPH': 389
+      };
+
+      // Aplicar saldos estáticos a las vacunas que coincidan
+      for (const vacuna of vacunas) {
+        const nombreVacuna = vacuna.nombre.trim();
+
+        // Buscar coincidencia exacta (case-sensitive primero)
+        if (saldos2024.hasOwnProperty(nombreVacuna)) {
+          saldosMap.set(vacuna.id, saldos2024[nombreVacuna]);
+          console.log(`✅ Saldo 2024 estático aplicado para ${nombreVacuna}: ${saldos2024[nombreVacuna]}`);
+        } else {
+          // Intentar coincidencia case-insensitive
+          const nombreNormalizado = nombreVacuna.toUpperCase().trim();
+          let encontrado = false;
+
+          for (const [nombreSaldo, valor] of Object.entries(saldos2024)) {
+            const nombreSaldoNormalizado = nombreSaldo.toUpperCase().trim();
+
+            // Coincidencia exacta case-insensitive
+            if (nombreNormalizado === nombreSaldoNormalizado) {
+              saldosMap.set(vacuna.id, valor);
+              console.log(`✅ Saldo 2024 estático aplicado (case-insensitive) para ${nombreVacuna} -> ${nombreSaldo}: ${valor}`);
+              encontrado = true;
+              break;
+            }
+
+            // Coincidencia parcial (contiene)
+            if (nombreNormalizado.includes(nombreSaldoNormalizado) ||
+                nombreSaldoNormalizado.includes(nombreNormalizado)) {
+              saldosMap.set(vacuna.id, valor);
+              console.log(`✅ Saldo 2024 estático aplicado (coincidencia parcial) para ${nombreVacuna} -> ${nombreSaldo}: ${valor}`);
+              encontrado = true;
+              break;
+            }
+          }
+
+          if (!encontrado) {
+            console.log(`⚠️ No se encontró saldo 2024 estático para: ${nombreVacuna}`);
+          }
+        }
+      }
+
+      console.log('✅ Saldos 2024 estáticos aplicados exitosamente para el año 2025');
+    } catch (error) {
+      console.error('❌ Error al aplicar saldos 2024 estáticos:', error);
+      // No lanzar error, continuar con los saldos calculados
     }
   }
 
