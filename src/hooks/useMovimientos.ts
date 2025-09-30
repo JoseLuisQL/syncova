@@ -197,6 +197,7 @@ export const useMovimientos = () => {
 
   /**
    * Obtener stock disponible por vacuna
+   * Incluye ajuste automático del stock inicial cuando se detectan ingresos de lotes en el mes
    */
   const getStockDisponible = useCallback(async (
     vacunaId: string,
@@ -204,6 +205,8 @@ export const useMovimientos = () => {
     anio: number
   ): Promise<{
     stockInicialHistorico: number | null;
+    stockInicialOriginal: number | null;
+    ingresosLotesDelMes: number;
     fechaCapturaStockInicial: Date | null;
     stockActual: number;
     totalEntregas: number;

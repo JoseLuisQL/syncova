@@ -1540,6 +1540,7 @@ export class MovimientosService {
 
   /**
    * Obtener stock disponible por vacuna
+   * Incluye ajuste automático del stock inicial cuando se detectan ingresos de lotes en el mes
    */
   static async getStockDisponible(
     vacunaId: string,
@@ -1547,6 +1548,8 @@ export class MovimientosService {
     anio: number
   ): Promise<ServiceResult<{
     stockInicialHistorico: number | null;
+    stockInicialOriginal: number | null;
+    ingresosLotesDelMes: number;
     fechaCapturaStockInicial: Date | null;
     stockActual: number;
     totalEntregas: number;
@@ -1577,16 +1580,56 @@ export class MovimientosService {
       // PASO 1: Obtener stock inicial histórico (si existe)
       const stockInicialResult = await StockInicialService.obtenerStockInicial(vacunaId, mes, anio);
       let stockInicialHistorico: number | null = null;
+      let stockInicialOriginal: number | null = null; // Guardar el valor original antes de ajustes
       let fechaCapturaStockInicial: Date | null = null;
       let tieneHistorialInicial = false;
 
       if (stockInicialResult.success && stockInicialResult.data) {
         stockInicialHistorico = stockInicialResult.data.stockInicial;
+        stockInicialOriginal = stockInicialResult.data.stockInicial; // Guardar valor original
         fechaCapturaStockInicial = stockInicialResult.data.fechaCaptura;
         tieneHistorialInicial = true;
         console.log(`📈 [MovimientosService] Stock inicial histórico encontrado: ${stockInicialHistorico} unidades (capturado: ${fechaCapturaStockInicial})`);
       } else {
         console.log(`ℹ️  [MovimientosService] No se encontró stock inicial histórico para ${mes}/${anio}`);
+      }
+
+      // PASO 1.5: Detectar ingresos de nuevos lotes en el mes filtrado
+      // Si hay stock inicial histórico, debemos sumar los ingresos de lotes que ocurrieron en el mismo mes
+      let ingresosLotesDelMes = 0;
+
+      if (tieneHistorialInicial) {
+        // Calcular el rango de fechas para el mes/año especificado
+        const fechaInicioMes = new Date(anio, mes - 1, 1); // Primer día del mes
+        const fechaFinMes = new Date(anio, mes, 0); // Último día del mes
+
+        console.log(`🔍 [MovimientosService] Buscando ingresos de lotes entre ${fechaInicioMes.toISOString().split('T')[0]} y ${fechaFinMes.toISOString().split('T')[0]}`);
+
+        // Obtener la suma de cantidades iniciales de lotes ingresados en el mes
+        const lotesIngresadosEnMes = await prisma.loteVacuna.aggregate({
+          where: {
+            vacunaId,
+            fechaIngreso: {
+              gte: fechaInicioMes,
+              lte: fechaFinMes
+            }
+          },
+          _sum: {
+            cantidadInicial: true
+          }
+        });
+
+        ingresosLotesDelMes = lotesIngresadosEnMes._sum.cantidadInicial || 0;
+
+        if (ingresosLotesDelMes > 0) {
+          console.log(`📦 [MovimientosService] Ingresos de lotes detectados en ${mes}/${anio}: ${ingresosLotesDelMes} unidades`);
+          console.log(`🔄 [MovimientosService] Ajustando stock inicial: ${stockInicialOriginal} + ${ingresosLotesDelMes} = ${stockInicialOriginal! + ingresosLotesDelMes}`);
+
+          // Ajustar el stock inicial histórico sumando los ingresos del mes
+          stockInicialHistorico = stockInicialOriginal! + ingresosLotesDelMes;
+        } else {
+          console.log(`ℹ️  [MovimientosService] No se detectaron ingresos de lotes en ${mes}/${anio}`);
+        }
       }
 
       // PASO 2: Obtener lotes disponibles actuales para la vacuna
@@ -1644,6 +1687,8 @@ export class MovimientosService {
 
       const resultado = {
         stockInicialHistorico,
+        stockInicialOriginal,
+        ingresosLotesDelMes,
         fechaCapturaStockInicial,
         stockActual,
         totalEntregas: totalEntregasCalculado,
@@ -1660,7 +1705,9 @@ export class MovimientosService {
       };
 
       console.log(`✅ [MovimientosService] Stock disponible calculado exitosamente para ${vacuna.nombre}`);
-      console.log(`   - Stock inicial histórico: ${stockInicialHistorico || 'N/A'}`);
+      console.log(`   - Stock inicial original: ${stockInicialOriginal || 'N/A'}`);
+      console.log(`   - Ingresos de lotes del mes: ${ingresosLotesDelMes}`);
+      console.log(`   - Stock inicial ajustado: ${stockInicialHistorico || 'N/A'}`);
       console.log(`   - Stock actual: ${stockActual}`);
       console.log(`   - Stock disponible: ${stockDisponible} (${estado})`);
 

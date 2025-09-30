@@ -189,6 +189,8 @@ const Movimientos: React.FC = () => {
   // Estados para stock disponible
   const [stockInfo, setStockInfo] = useState<{
     stockInicialHistorico: number | null;
+    stockInicialOriginal: number | null;
+    ingresosLotesDelMes: number;
     fechaCapturaStockInicial: Date | null;
     stockActual: number;
     totalEntregas: number;
@@ -1892,7 +1894,7 @@ const Movimientos: React.FC = () => {
                   {/* Stock Inicial Histórico Premium */}
                   <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 border-2 border-indigo-200 shadow-sm hover:shadow-md transition-all duration-200">
                     <div className="flex items-center justify-between">
-                      <div>
+                      <div className="flex-1">
                         <div className="text-2xl font-bold text-indigo-800">
                           {stockInfo.tieneHistorialInicial ? stockInfo.stockInicialHistorico?.toLocaleString() : 'N/A'}
                         </div>
@@ -1902,6 +1904,17 @@ const Movimientos: React.FC = () => {
                         {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial && (
                           <div className="text-xs text-indigo-500 mt-1">
                             Capturado: {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString()}
+                          </div>
+                        )}
+                        {/* Mostrar información de ingresos de lotes si existen */}
+                        {stockInfo.tieneHistorialInicial && stockInfo.ingresosLotesDelMes > 0 && (
+                          <div className="mt-2 pt-2 border-t border-indigo-300">
+                            <div className="text-xs text-indigo-600 font-medium">
+                              Base: {stockInfo.stockInicialOriginal?.toLocaleString()}
+                            </div>
+                            <div className="text-xs text-green-600 font-medium">
+                              + Ingresos: {stockInfo.ingresosLotesDelMes.toLocaleString()}
+                            </div>
                           </div>
                         )}
                       </div>
