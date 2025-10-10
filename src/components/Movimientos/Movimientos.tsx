@@ -1924,22 +1924,6 @@ const Movimientos: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Stock Actual Premium */}
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-200 shadow-sm hover:shadow-md transition-all duration-200">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-2xl font-bold text-blue-800">
-                          {stockInfo.stockActual.toLocaleString()}
-                        </div>
-                        <div className="text-sm text-blue-600 font-semibold mt-1">Stock Actual</div>
-                        <div className="text-xs text-blue-500 mt-1">En lotes disponibles</div>
-                      </div>
-                      <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
-                        <Package className="h-6 w-6 text-white" />
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Total Entregas Premium */}
                   <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border-2 border-orange-200 shadow-sm hover:shadow-md transition-all duration-200">
                     <div className="flex items-center justify-between">
@@ -1997,6 +1981,94 @@ const Movimientos: React.FC = () => {
                           <AlertTriangle className="h-6 w-6 text-white" />
                         )}
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Stock Actual Premium con Lotes */}
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-2 border-blue-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div className="flex items-start justify-between gap-6">
+                      {/* Sección Izquierda: Información Principal */}
+                      <div className="flex items-center justify-between flex-1 min-w-0">
+                        <div>
+                          <div className="text-2xl font-bold text-blue-800">
+                            {stockInfo.stockActual.toLocaleString()}
+                          </div>
+                          <div className="text-sm text-blue-600 font-semibold mt-1">Stock Actual</div>
+                          <div className="text-xs text-blue-500 mt-1">
+                            {stockInfo.lotes.filter(l => l.cantidadActual > 0).length} lote{stockInfo.lotes.filter(l => l.cantidadActual > 0).length !== 1 ? 's' : ''} disponible{stockInfo.lotes.filter(l => l.cantidadActual > 0).length !== 1 ? 's' : ''}
+                          </div>
+                        </div>
+                        <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
+                          <Package className="h-6 w-6 text-white" />
+                        </div>
+                      </div>
+
+                      {/* Sección Derecha: Lista de Lotes Minimalista */}
+                      {stockInfo.lotes.filter(l => l.cantidadActual > 0).length > 0 && (
+                        <div className="flex-1 min-w-0 pl-6 border-l border-blue-300/50">
+                          <div className="text-[10px] font-bold text-blue-600/70 mb-2.5 uppercase tracking-wider">
+                            Lotes (FEFO)
+                          </div>
+                          <div className="space-y-2 max-h-20 overflow-y-auto pr-2 custom-scrollbar">
+                            {stockInfo.lotes
+                              .filter(lote => lote.cantidadActual > 0)
+                              .sort((a, b) => new Date(a.fechaVencimiento).getTime() - new Date(b.fechaVencimiento).getTime())
+                              .map((lote, index) => {
+                                const fechaVenc = new Date(lote.fechaVencimiento);
+                                const hoy = new Date();
+                                const diasParaVencer = Math.ceil((fechaVenc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+                                const esPrimerLote = index === 0;
+
+                                return (
+                                  <div
+                                    key={lote.id}
+                                    className={`flex items-center justify-between gap-3 px-3 py-1.5 rounded-lg transition-all duration-200 ${
+                                      esPrimerLote
+                                        ? 'bg-blue-600 shadow-sm'
+                                        : 'bg-white/80 hover:bg-white'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                      <span
+                                        className={`text-xs font-bold truncate cursor-help lote-tooltip ${
+                                          esPrimerLote ? 'text-white' : 'text-blue-900'
+                                        }`}
+                                        title={lote.numero}
+                                        data-tooltip={lote.numero}
+                                      >
+                                        {lote.numero}
+                                      </span>
+                                      {esPrimerLote && (
+                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white/20 text-white whitespace-nowrap">
+                                          1°
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-3 whitespace-nowrap">
+                                      <span className={`text-xs font-bold tabular-nums ${
+                                        esPrimerLote ? 'text-white' : 'text-blue-700'
+                                      }`}>
+                                        {lote.cantidadActual.toLocaleString()}
+                                      </span>
+                                      <span className={`text-[11px] font-semibold tabular-nums ${
+                                        esPrimerLote ? 'text-blue-100' :
+                                        diasParaVencer <= 30 ? 'text-red-600' :
+                                        diasParaVencer <= 90 ? 'text-yellow-600' :
+                                        'text-gray-500'
+                                      }`}>
+                                        {fechaVenc.toLocaleDateString('es-PE', {
+                                          day: '2-digit',
+                                          month: 'short',
+                                          year: 'numeric'
+                                        }).replace('.', '')}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
