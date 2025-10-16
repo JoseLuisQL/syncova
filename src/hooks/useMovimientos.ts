@@ -350,6 +350,39 @@ export const useMovimientos = () => {
   }, [deleteEntregaApi, loadMovimientos]);
 
   /**
+   * 🚀 NUEVA FUNCIONALIDAD: Actualizar stock inicial del siguiente mes automáticamente
+   * 
+   * Calcula el disponible actual (Stock Inicial - Entregas) y lo registra como
+   * stock_inicial del siguiente mes en la tabla stock_inicial_mensual
+   * 
+   * @param vacunaId - ID de la vacuna
+   * @param mes - Mes actual (1-12)
+   * @param anio - Año actual
+   * @returns Información del registro creado/actualizado
+   */
+  const actualizarStockSiguienteMes = useCallback(async (
+    vacunaId: string,
+    mes: number,
+    anio: number
+  ): Promise<{
+    mesActual: { mes: number; anio: number; stockInicial: number; entregas: number; disponible: number };
+    mesSiguiente: { mes: number; anio: number; stockInicialRegistrado: number };
+    mensaje: string;
+  } | null> => {
+    logger.debug('🚀 Actualizando stock inicial siguiente mes:', { vacunaId, mes, anio });
+
+    const result = await stockApi.execute(() =>
+      MovimientosService.actualizarStockInicialSiguienteMes(vacunaId, mes, anio)
+    );
+
+    if (result) {
+      logger.info('✅ Stock inicial siguiente mes actualizado exitosamente:', result);
+    }
+
+    return result || null;
+  }, [stockApi]);
+
+  /**
    * Función de utilidad para refrescar datos
    */
   const refresh = useCallback(async () => {
@@ -565,6 +598,7 @@ export const useMovimientos = () => {
     getStockDisponible,
     forceRefreshStock,
     sincronizarSaldoAnterior,
+    actualizarStockSiguienteMes, // 🚀 NUEVA FUNCIONALIDAD
 
     // Entregas adicionales
     createEntregaAdicional,

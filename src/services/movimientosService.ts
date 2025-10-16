@@ -571,4 +571,49 @@ export class MovimientosService {
       throw handleApiError(error as AxiosError);
     }
   }
+
+  /**
+   * 🚀 NUEVA FUNCIONALIDAD: Actualizar stock inicial del siguiente mes automáticamente
+   * 
+   * Calcula el disponible actual (Stock Inicial - Entregas) y lo registra como
+   * stock_inicial del siguiente mes en la tabla stock_inicial_mensual
+   * 
+   * @param vacunaId - ID de la vacuna
+   * @param mes - Mes actual (1-12)
+   * @param anio - Año actual
+   * @returns Información del registro creado/actualizado
+   */
+  static async actualizarStockInicialSiguienteMes(
+    vacunaId: string,
+    mes: number,
+    anio: number
+  ): Promise<{
+    mesActual: { mes: number; anio: number; stockInicial: number; entregas: number; disponible: number };
+    mesSiguiente: { mes: number; anio: number; stockInicialRegistrado: number };
+    mensaje: string;
+  }> {
+    try {
+      logger.debug('Actualizando stock inicial siguiente mes:', { vacunaId, mes, anio });
+
+      const response = await apiClient.post<ApiResponse<{
+        mesActual: { mes: number; anio: number; stockInicial: number; entregas: number; disponible: number };
+        mesSiguiente: { mes: number; anio: number; stockInicialRegistrado: number };
+        mensaje: string;
+      }>>(`${this.BASE_PATH}/actualizar-stock-siguiente-mes`, {
+        vacunaId,
+        mes,
+        anio
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al actualizar stock inicial del siguiente mes');
+      }
+
+      logger.debug('Stock inicial siguiente mes actualizado exitosamente:', response.data.data);
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al actualizar stock inicial siguiente mes:', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
 }

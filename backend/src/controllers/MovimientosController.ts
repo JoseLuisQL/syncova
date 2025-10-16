@@ -918,4 +918,69 @@ export class MovimientosController {
       errorResponse(res, 'Error interno del servidor', 500);
     }
   }
+
+  /**
+   * 🚀 NUEVA FUNCIONALIDAD: Actualizar stock inicial del siguiente mes automáticamente
+   * POST /api/movimientos/actualizar-stock-siguiente-mes
+   * 
+   * Calcula el disponible actual (Stock Inicial - Entregas) y lo registra como
+   * stock_inicial del siguiente mes en la tabla stock_inicial_mensual
+   */
+  static async actualizarStockInicialSiguienteMes(req: Request, res: Response): Promise<void> {
+    try {
+      const { vacunaId, mes, anio } = req.body;
+
+      // Validar parámetros requeridos
+      if (!vacunaId) {
+        ResponseUtil.error(res, 'ID de vacuna es requerido', 400);
+        return;
+      }
+
+      if (!validateUUID(vacunaId)) {
+        ResponseUtil.error(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      if (!mes) {
+        ResponseUtil.error(res, 'Mes es requerido', 400);
+        return;
+      }
+
+      if (!anio) {
+        ResponseUtil.error(res, 'Año es requerido', 400);
+        return;
+      }
+
+      // Validar mes
+      const mesNum = parseInt(mes, 10);
+      if (isNaN(mesNum) || mesNum < 1 || mesNum > 12) {
+        ResponseUtil.error(res, 'El mes debe estar entre 1 y 12', 400);
+        return;
+      }
+
+      // Validar año
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        ResponseUtil.error(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      // Llamar al servicio
+      const result = await MovimientosService.actualizarStockInicialSiguienteMes(
+        vacunaId,
+        mesNum,
+        anioNum
+      );
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al actualizar stock inicial del siguiente mes', 400);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, result.message || 'Stock inicial del siguiente mes actualizado exitosamente');
+    } catch (error) {
+      console.error('Error en MovimientosController.actualizarStockInicialSiguienteMes:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
 }

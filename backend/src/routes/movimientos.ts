@@ -159,6 +159,21 @@ router.post('/generar-desde-planificacion/:planificacionId', MovimientosControll
 router.post('/sincronizar-saldo-anterior', MovimientosController.sincronizarSaldoAnterior);
 
 /**
+ * @route POST /api/movimientos/actualizar-stock-siguiente-mes
+ * @desc 🚀 NUEVA FUNCIONALIDAD: Actualizar stock inicial del siguiente mes automáticamente
+ * @desc Calcula el disponible actual (Stock Inicial - Entregas) y lo registra como
+ * @desc stock_inicial del siguiente mes en la tabla stock_inicial_mensual
+ * @access Public (TODO: Proteger con autenticación)
+ * @body {string} vacunaId - ID de la vacuna
+ * @body {number} mes - Mes actual (1-12)
+ * @body {number} anio - Año actual
+ * @example
+ * // Ejemplo: Mes actual Abril (4), Stock Inicial: 234, Entregas: 147, Disponible: 87
+ * // Resultado: Se registra 87 como stock inicial de Mayo en stock_inicial_mensual
+ */
+router.post('/actualizar-stock-siguiente-mes', MovimientosController.actualizarStockInicialSiguienteMes);
+
+/**
  * @route GET /api/movimientos
  * @desc Obtener todos los movimientos con filtros opcionales
  * @access Public (TODO: Proteger con autenticación)

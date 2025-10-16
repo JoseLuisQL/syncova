@@ -3099,4 +3099,199 @@ export class MovimientosService {
     };
     return colores[tipoError as keyof typeof colores] || 'FFFFFF';
   }
+
+  /**
+   * 🚀 NUEVA FUNCIONALIDAD: Actualizar stock inicial del siguiente mes automáticamente
+   * 
+   * Calcula el disponible actual (Stock Inicial - Entregas) y lo registra como
+   * stock_inicial del siguiente mes en la tabla stock_inicial_mensual
+   * 
+   * @param vacunaId - ID de la vacuna
+   * @param mes - Mes actual (1-12)
+   * @param anio - Año actual
+   * @returns Información del registro creado/actualizado
+   * 
+   * Ejemplo:
+   * - Mes actual: Abril (4)
+   * - Stock Inicial: 234
+   * - Entregas: 147
+   * - Disponible: 87
+   * - Resultado: Se registra 87 como stock inicial de Mayo en stock_inicial_mensual
+   */
+  static async actualizarStockInicialSiguienteMes(
+    vacunaId: string,
+    mes: number,
+    anio: number
+  ): Promise<ServiceResult<{
+    mesActual: { mes: number; anio: number; stockInicial: number; entregas: number; disponible: number };
+    mesSiguiente: { mes: number; anio: number; stockInicialRegistrado: number };
+    mensaje: string;
+  }>> {
+    try {
+      console.log(`🔄 [MovimientosService] Actualizando stock inicial siguiente mes para vacuna ${vacunaId}, período ${mes}/${anio}`);
+
+      // Validaciones de entrada
+      if (!vacunaId) {
+        return {
+          success: false,
+          error: 'ID de vacuna requerido'
+        };
+      }
+
+      if (mes < 1 || mes > 12) {
+        return {
+          success: false,
+          error: 'El mes debe estar entre 1 y 12'
+        };
+      }
+
+      if (anio < 2020 || anio > 2050) {
+        return {
+          success: false,
+          error: 'El año debe estar entre 2020 y 2050'
+        };
+      }
+
+      // Verificar que la vacuna existe
+      const vacuna = await prisma.vacuna.findUnique({
+        where: { id: vacunaId },
+        select: { id: true, nombre: true }
+      });
+
+      if (!vacuna) {
+        return {
+          success: false,
+          error: 'Vacuna no encontrada'
+        };
+      }
+
+      // PASO 1: Obtener el stock disponible actual usando el método existente
+      const stockDisponibleResult = await this.getStockDisponible(vacunaId, mes, anio);
+
+      if (!stockDisponibleResult.success || !stockDisponibleResult.data) {
+        return {
+          success: false,
+          error: stockDisponibleResult.error || 'No se pudo obtener el stock disponible'
+        };
+      }
+
+      const {
+        stockInicialHistorico,
+        totalEntregas,
+        stockDisponible
+      } = stockDisponibleResult.data;
+
+      // Validar que exista stock inicial histórico
+      if (stockInicialHistorico === null) {
+        return {
+          success: false,
+          error: `No existe stock inicial histórico registrado para ${vacuna.nombre} en ${mes}/${anio}. Debe capturar el stock inicial primero.`
+        };
+      }
+
+      console.log(`📊 [MovimientosService] Datos actuales para ${vacuna.nombre}:`);
+      console.log(`   - Stock Inicial (Histórico): ${stockInicialHistorico}`);
+      console.log(`   - Total Entregas: ${totalEntregas}`);
+      console.log(`   - Disponible: ${stockDisponible}`);
+
+      // PASO 2: Calcular el mes y año siguiente
+      let mesSiguiente = mes + 1;
+      let anioSiguiente = anio;
+
+      if (mesSiguiente > 12) {
+        mesSiguiente = 1;
+        anioSiguiente++;
+      }
+
+      // Validar que el año siguiente no exceda límites
+      if (anioSiguiente > 2050) {
+        return {
+          success: false,
+          error: `No se puede registrar stock inicial para el año ${anioSiguiente}. Límite máximo: 2050`
+        };
+      }
+
+      console.log(`📅 [MovimientosService] Mes siguiente: ${mesSiguiente}/${anioSiguiente}`);
+
+      // PASO 3: Verificar si ya existe un registro para el mes siguiente
+      const registroExistente = await prisma.stockInicialMensual.findUnique({
+        where: {
+          uk_stock_inicial_vacuna_mes_anio: {
+            vacunaId,
+            mes: mesSiguiente,
+            anio: anioSiguiente
+          }
+        }
+      });
+
+      let operacion: 'creado' | 'actualizado';
+
+      if (registroExistente) {
+        // CASO 1: Actualizar registro existente
+        await prisma.stockInicialMensual.update({
+          where: { id: registroExistente.id },
+          data: {
+            stockInicial: stockDisponible,
+            observaciones: `Stock inicial actualizado automáticamente desde disponible de ${mes}/${anio}`,
+            fechaCaptura: new Date()
+          }
+        });
+
+        operacion = 'actualizado';
+        console.log(`✅ [MovimientosService] Registro actualizado: ${stockDisponible} unidades para ${vacuna.nombre} en ${mesSiguiente}/${anioSiguiente}`);
+      } else {
+        // CASO 2: Crear nuevo registro
+        await prisma.stockInicialMensual.create({
+          data: {
+            vacunaId,
+            mes: mesSiguiente,
+            anio: anioSiguiente,
+            stockInicial: stockDisponible,
+            observaciones: `Stock inicial capturado automáticamente desde disponible de ${mes}/${anio}`
+          }
+        });
+
+        operacion = 'creado';
+        console.log(`✅ [MovimientosService] Nuevo registro creado: ${stockDisponible} unidades para ${vacuna.nombre} en ${mesSiguiente}/${anioSiguiente}`);
+      }
+
+      // Preparar mensaje de respuesta profesional
+      const mesesNombres = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      ];
+
+      const mesActualNombre = mesesNombres[mes - 1];
+      const mesSiguienteNombre = mesesNombres[mesSiguiente - 1];
+
+      const mensaje = `Stock inicial del mes ${mesSiguienteNombre} ${anioSiguiente} ${operacion} exitosamente con ${stockDisponible.toLocaleString()} unidades (disponible de ${mesActualNombre} ${anio})`;
+
+      return {
+        success: true,
+        data: {
+          mesActual: {
+            mes,
+            anio,
+            stockInicial: stockInicialHistorico,
+            entregas: totalEntregas,
+            disponible: stockDisponible
+          },
+          mesSiguiente: {
+            mes: mesSiguiente,
+            anio: anioSiguiente,
+            stockInicialRegistrado: stockDisponible
+          },
+          mensaje
+        },
+        message: mensaje
+      };
+
+    } catch (error) {
+      console.error('❌ [MovimientosService] Error actualizando stock inicial siguiente mes:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al actualizar stock inicial del siguiente mes'
+      };
+    }
+  }
 }

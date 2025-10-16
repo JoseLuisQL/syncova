@@ -87,7 +87,8 @@ const Movimientos: React.FC = () => {
     importarDesdeExcelMasivo,
     generarReporteErrores,
     isDownloadingTemplate,
-    isImportingExcel
+    isImportingExcel,
+    actualizarStockSiguienteMes // 🚀 NUEVA FUNCIONALIDAD
   } = useMovimientos();
 
   // Hook para eventos de stock
@@ -257,6 +258,9 @@ const Movimientos: React.FC = () => {
   const voucherValidationTimeouts = useRef<{[key: string]: NodeJS.Timeout}>({});
   const [isTyping, setIsTyping] = useState<{[key: string]: boolean}>({});
 
+  // 🚀 Estado para actualización de stock siguiente mes
+  const [isUpdatingStockSiguienteMes, setIsUpdatingStockSiguienteMes] = useState(false);
+
   // Cargar datos iniciales
   useEffect(() => {
     const loadInitialData = async () => {
@@ -417,6 +421,43 @@ const Movimientos: React.FC = () => {
       });
     };
   }, []);
+
+  // 🚀 NUEVA FUNCIONALIDAD: Manejar actualización de stock inicial siguiente mes
+  const handleActualizarStockSiguienteMes = async () => {
+    if (!selectedVacuna || !stockInfo) {
+      toast.error('❌ Error • Debe seleccionar una vacuna y tener stock disponible cargado');
+      return;
+    }
+
+    try {
+      setIsUpdatingStockSiguienteMes(true);
+
+      const resultado = await actualizarStockSiguienteMes(selectedVacuna, selectedMes, selectedAnio);
+
+      if (resultado) {
+        const vacunaNombre = vacunasActivas.find(v => v.id === selectedVacuna)?.nombre || 'Vacuna';
+        const mesActualNombre = meses[selectedMes - 1];
+        const mesSiguienteNombre = meses[resultado.mesSiguiente.mes - 1];
+
+        toast.success(
+          `✅ ${resultado.mensaje}`,
+          `${vacunaNombre} • ${mesActualNombre}: ${resultado.mesActual.disponible.toLocaleString()} unidades → ${mesSiguienteNombre}: ${resultado.mesSiguiente.stockInicialRegistrado.toLocaleString()} unidades`,
+          { duration: 6000 }
+        );
+
+        // Recargar stock disponible para reflejar los cambios
+        await updateStockInRealTime(false);
+      } else {
+        toast.error('❌ Error al actualizar stock inicial del siguiente mes');
+      }
+    } catch (error: any) {
+      console.error('Error al actualizar stock siguiente mes:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error al actualizar stock inicial del siguiente mes';
+      toast.error(`❌ Error • ${errorMessage}`, '', { duration: 6000 });
+    } finally {
+      setIsUpdatingStockSiguienteMes(false);
+    }
+  };
 
   // Datos derivados
 
@@ -2071,6 +2112,38 @@ const Movimientos: React.FC = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* 🚀 NUEVO BOTÓN: Actualizar Stock Siguiente Mes */}
+                  {stockInfo.tieneHistorialInicial && (
+                    <div className="col-span-full mt-6 pt-6 border-t border-gray-200">
+                      <button
+                        onClick={handleActualizarStockSiguienteMes}
+                        disabled={isUpdatingStockSiguienteMes}
+                        className={`w-full px-6 py-3.5 rounded-xl font-semibold text-white text-sm shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center space-x-2 ${
+                          isUpdatingStockSiguienteMes
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800'
+                        }`}
+                      >
+                        {isUpdatingStockSiguienteMes ? (
+                          <>
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            <span>Actualizando Stock...</span>
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="h-5 w-5" />
+                            <span>Actualizar Stock Siguiente Mes</span>
+                          </>
+                        )}
+                      </button>
+                      <div className="mt-3 text-center">
+                        <p className="text-xs text-gray-600">
+                          Registra el disponible actual ({stockInfo.stockDisponible.toLocaleString()} unidades) como stock inicial del mes {meses[selectedMes === 12 ? 0 : selectedMes]} {selectedMes === 12 ? selectedAnio + 1 : selectedAnio}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : stockError ? (
                 <div className="text-center py-8">
