@@ -825,4 +825,121 @@ export class PlanificacionController {
       errorResponse(res, 'Error interno del servidor', 500);
     }
   }
+
+  /**
+   * Verificar disponibilidad de entregas en próximos meses
+   * GET /api/planificacion/verificar-disponibilidad/:establecimientoId/:vacunaId/:mes/:anio
+   */
+  static async verificarDisponibilidadEntregas(req: Request, res: Response): Promise<void> {
+    try {
+      const { establecimientoId, vacunaId, mes, anio } = req.params;
+
+      // Validaciones
+      if (!validateUUID(establecimientoId)) {
+        errorResponse(res, 'ID de establecimiento inválido', 400);
+        return;
+      }
+
+      if (!validateUUID(vacunaId)) {
+        errorResponse(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      const mesNum = parseInt(mes, 10);
+      if (isNaN(mesNum) || mesNum < 1 || mesNum > 12) {
+        errorResponse(res, 'El mes debe estar entre 1 y 12', 400);
+        return;
+      }
+
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      const result = await PlanificacionService.verificarDisponibilidadEntregas(
+        establecimientoId,
+        vacunaId,
+        mesNum,
+        anioNum
+      );
+
+      if (!result.success) {
+        errorResponse(res, result.error || 'Error al verificar disponibilidad', 500);
+        return;
+      }
+
+      successResponse(res, result.data, 'Disponibilidad verificada exitosamente');
+    } catch (error) {
+      console.error('Error en PlanificacionController.verificarDisponibilidadEntregas:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Registrar entrega en mes actual cuando no hay disponibilidad futura
+   * POST /api/planificacion/registrar-mes-actual
+   */
+  static async registrarEntregaMesActual(req: Request, res: Response): Promise<void> {
+    try {
+      const { establecimientoId, vacunaId, mesActual, anio, cantidad, usuarioId } = req.body;
+
+      // Validaciones
+      if (!establecimientoId || !validateUUID(establecimientoId)) {
+        errorResponse(res, 'ID de establecimiento inválido', 400);
+        return;
+      }
+
+      if (!vacunaId || !validateUUID(vacunaId)) {
+        errorResponse(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      if (!mesActual || mesActual < 1 || mesActual > 12) {
+        errorResponse(res, 'El mes debe estar entre 1 y 12', 400);
+        return;
+      }
+
+      if (!anio || anio < 2020 || anio > 2050) {
+        errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      if (!cantidad || cantidad <= 0) {
+        errorResponse(res, 'La cantidad debe ser mayor a 0', 400);
+        return;
+      }
+
+      // Obtener usuarioId si no se proporciona
+      let userIdToUse = usuarioId;
+      if (!userIdToUse || userIdToUse === 'temp-user-id' || !validateUUID(userIdToUse)) {
+        const usuarioAdmin = await prisma.usuario.findFirst({
+          where: { rol: 'administrador', estado: 'activo' }
+        });
+
+        if (usuarioAdmin) {
+          userIdToUse = usuarioAdmin.id;
+        }
+      }
+
+      const result = await PlanificacionService.registrarEntregaMesActual(
+        establecimientoId,
+        vacunaId,
+        mesActual,
+        anio,
+        cantidad,
+        userIdToUse
+      );
+
+      if (!result.success) {
+        errorResponse(res, result.error || 'Error al registrar entrega', 400);
+        return;
+      }
+
+      successResponse(res, result.data, 'Entrega registrada exitosamente en mes actual', 201);
+    } catch (error) {
+      console.error('Error en PlanificacionController.registrarEntregaMesActual:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
 }

@@ -498,4 +498,89 @@ export class PlanificacionService {
       throw handleApiError(error as AxiosError);
     }
   }
+
+  /**
+   * Verificar disponibilidad de entregas en próximos meses
+   */
+  static async verificarDisponibilidadEntregas(
+    establecimientoId: string,
+    vacunaId: string,
+    mesActual: number,
+    anio: number
+  ): Promise<{
+    tieneDisponibilidad: boolean;
+    mesActual: number;
+    disponibilidadRestante: number;
+    mesesConDisponibilidad: number[];
+    planificacionId?: string;
+    mensaje: string;
+  }> {
+    try {
+      logger.debug('Verificando disponibilidad de entregas:', { establecimientoId, vacunaId, mesActual, anio });
+
+      const response = await apiClient.get<ApiResponse<{
+        tieneDisponibilidad: boolean;
+        mesActual: number;
+        disponibilidadRestante: number;
+        mesesConDisponibilidad: number[];
+        planificacionId?: string;
+        mensaje: string;
+      }>>(`${this.BASE_PATH}/verificar-disponibilidad/${establecimientoId}/${vacunaId}/${mesActual}/${anio}`);
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.error || 'Error al verificar disponibilidad');
+      }
+
+      logger.debug('Verificación de disponibilidad exitosa:', response.data.data);
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al verificar disponibilidad de entregas:', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
+
+  /**
+   * Registrar entrega en mes actual cuando no hay disponibilidad futura
+   */
+  static async registrarEntregaMesActual(
+    establecimientoId: string,
+    vacunaId: string,
+    mesActual: number,
+    anio: number,
+    cantidad: number,
+    usuarioId?: string
+  ): Promise<{
+    planificacionActualizada: boolean;
+    cantidadRegistrada: number;
+    distribucionMensualNueva: number[];
+    mensaje: string;
+  }> {
+    try {
+      logger.debug('Registrando entrega en mes actual:', { establecimientoId, vacunaId, mesActual, anio, cantidad });
+
+      const response = await apiClient.post<ApiResponse<{
+        planificacionActualizada: boolean;
+        cantidadRegistrada: number;
+        distribucionMensualNueva: number[];
+        mensaje: string;
+      }>>(`${this.BASE_PATH}/registrar-mes-actual`, {
+        establecimientoId,
+        vacunaId,
+        mesActual,
+        anio,
+        cantidad,
+        usuarioId
+      });
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.error || 'Error al registrar entrega');
+      }
+
+      logger.debug('Entrega registrada exitosamente en mes actual:', response.data.data);
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al registrar entrega en mes actual:', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
 }

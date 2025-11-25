@@ -1127,11 +1127,13 @@ export class MovimientosService {
 
   /**
    * Actualizar entrega adicional con redistribución automática
+   * @param skipRedistribucion Si es true, actualiza sin redistribuir (útil cuando ya se actualizó la planificación manualmente)
    */
   static async updateEntregaAdicional(
     id: string,
     cantidad: number,
-    motivo?: string
+    motivo?: string,
+    skipRedistribucion?: boolean
   ): Promise<ServiceResult<IEntregaAdicional>> {
     try {
       // Validaciones de entrada para entregas adicionales
@@ -1184,10 +1186,10 @@ export class MovimientosService {
 
       const diferenciaCantidad = cantidad - entregaExistente.cantidad;
 
-      // Actualizar en transacción con redistribución automática
+      // Actualizar en transacción con o sin redistribución automática
       const result = await prisma.$transaction(async (tx) => {
-        // PASO 1: REDISTRIBUCIÓN AUTOMÁTICA para entregas adicionales
-        if (diferenciaCantidad !== 0) {
+        // PASO 1: REDISTRIBUCIÓN AUTOMÁTICA para entregas adicionales (solo si no se solicita omitir)
+        if (diferenciaCantidad !== 0 && !skipRedistribucion) {
           const usuarioId = await this.getSystemUser();
           const redistribucionResult = await this.redistribuirEntregasAutomaticamente(
             tx,

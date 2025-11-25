@@ -48,6 +48,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useAutoSync } from '../../hooks/useAutoSync';
 import { debounce } from '../../utils/debounce';
 import { PlanificacionService } from '../../services/planificacionService';
+import { MovimientosService } from '../../services/movimientosService';
 import { MovimientosExportService, MovimientosExportConfig } from '../../services/movimientosExportService';
 import { ValesService } from '../../services/valesService';
 import {
@@ -62,6 +63,7 @@ import Vales from '../Vales/Vales';
 import ValesErrorBoundary from '../Vales/ValesErrorBoundary';
 import ImportarModal from './ImportarModal';
 import ConfirmacionModificacionModal from './ConfirmacionModificacionModal';
+import ConfirmacionSinDisponibilidadModal from './ConfirmacionSinDisponibilidadModal';
 
 const Movimientos: React.FC = () => {
   // Hooks para gestión de datos
@@ -71,6 +73,7 @@ const Movimientos: React.FC = () => {
     isCreating,
     isUpdating,
     error,
+    entregaError,
     loadMovimientos,
     createMovimiento,
     updateMovimiento,
@@ -185,6 +188,17 @@ const Movimientos: React.FC = () => {
       numero: string;
       fechaGeneracion: Date;
     }>;
+  } | null>(null);
+
+  // Estados para modal de confirmación sin disponibilidad
+  const [showSinDisponibilidadModal, setShowSinDisponibilidadModal] = useState<boolean>(false);
+  const [pendingSinDisponibilidad, setPendingSinDisponibilidad] = useState<{
+    establecimientoId: string;
+    campo: string;
+    valor: number;
+    establecimientoNombre: string;
+    tipoEntrega: 'base' | 'adicional';
+    entregaAdicionalId?: string;
   } | null>(null);
 
   // Estados para stock disponible
@@ -773,12 +787,65 @@ const Movimientos: React.FC = () => {
     return false; // No necesita confirmación
   };
 
+  // Función para verificar disponibilidad de entregas antes de guardar
+  const verificarDisponibilidadAntesDeGuardar = async (
+    establecimientoId: string,
+    campo: string,
+    value: number
+  ): Promise<boolean> => {
+    // Solo verificar para entregas base (campo 'entrega')
+    if (campo !== 'entrega' || !selectedVacuna || value <= 0) {
+      return true; // Permitir guardar sin verificación
+    }
+
+    try {
+      // Verificar disponibilidad en la planificación
+      const disponibilidad = await PlanificacionService.verificarDisponibilidadEntregas(
+        establecimientoId,
+        selectedVacuna,
+        selectedMes,
+        selectedAnio
+      );
+
+      // Si NO tiene disponibilidad, mostrar el modal de confirmación
+      if (!disponibilidad.tieneDisponibilidad) {
+        const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
+        const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+
+        setPendingSinDisponibilidad({
+          establecimientoId,
+          campo,
+          valor: value,
+          establecimientoNombre: nombreEstablecimiento,
+          tipoEntrega: 'base'
+        });
+        setShowSinDisponibilidadModal(true);
+
+        return false; // Bloquear el guardado normal
+      }
+
+      return true; // Tiene disponibilidad, permitir guardar normalmente
+    } catch (error) {
+      console.error('Error al verificar disponibilidad:', error);
+      // En caso de error, permitir guardar (para no bloquear el flujo)
+      return true;
+    }
+  };
+
   // Función para guardar un campo específico (ahora con verificación previa)
   const handleSaveFieldValue = async (establecimientoId: string, campo: string, value: number) => {
     const key = getFieldKey(establecimientoId, campo);
 
     try {
       setIsAutoSaving(true);
+
+      // NUEVA FUNCIONALIDAD: Verificar disponibilidad antes de guardar entregas
+      const puedeGuardar = await verificarDisponibilidadAntesDeGuardar(establecimientoId, campo, value);
+      if (!puedeGuardar) {
+        // No guardar, el modal se mostrará
+        setIsAutoSaving(false);
+        return;
+      }
 
       // Limpiar timeout si existe
       if (debounceTimeouts.current[key]) {
@@ -834,38 +901,67 @@ const Movimientos: React.FC = () => {
     const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
     const esCreacion = !movimientoExistente?.tieneMovimiento;
 
-    // Actualizar en el backend
-    await handleActualizarCampoMovimiento(establecimientoId, campo as keyof UpdateMovimientoDto, value);
+    // Intentar actualizar en el backend (con redistribución automática)
+    try {
+      await handleActualizarCampoMovimiento(establecimientoId, campo as keyof UpdateMovimientoDto, value);
 
-    // Limpiar estado temporal
-    setTempValues(prev => {
-      const newTemp = { ...prev };
-      delete newTemp[key];
-      return newTemp;
-    });
+      // Limpiar estado temporal
+      setTempValues(prev => {
+        const newTemp = { ...prev };
+        delete newTemp[key];
+        return newTemp;
+      });
 
-    setPendingChanges(prev => {
-      const newPending = { ...prev };
-      delete newPending[key];
-      return newPending;
-    });
+      setPendingChanges(prev => {
+        const newPending = { ...prev };
+        delete newPending[key];
+        return newPending;
+      });
 
-    // Mostrar toast de confirmación profesional
-    const campoNombre = {
-      'transIngreso': 'Trans. Ingreso',
-      'salida': 'Salida',
-      'transSalida': 'Trans. Salida',
-      'entrega': 'Entrega'
-    }[campo] || campo;
+      // Mostrar toast de confirmación profesional
+      const campoNombre = {
+        'transIngreso': 'Trans. Ingreso',
+        'salida': 'Salida',
+        'transSalida': 'Trans. Salida',
+        'entrega': 'Entrega'
+      }[campo] || campo;
 
-    if (esCreacion) {
-      toast.success(
-        `✅ Movimiento creado • ${nombreEstablecimiento} • ${campoNombre}: ${value.toLocaleString()}`
-      );
-    } else {
-      const mensajeBase = `✅ ${campoNombre} actualizado • ${nombreEstablecimiento} • Valor: ${value.toLocaleString()}`;
-      const mensajeSincronizacion = campo === 'entrega' ? ' • Sincronizado con planificación' : '';
-      toast.success(mensajeBase + mensajeSincronizacion);
+      if (esCreacion) {
+        toast.success(
+          `✅ Movimiento creado • ${nombreEstablecimiento} • ${campoNombre}: ${value.toLocaleString()}`
+        );
+      } else {
+        const mensajeBase = `✅ ${campoNombre} actualizado • ${nombreEstablecimiento} • Valor: ${value.toLocaleString()}`;
+        const mensajeSincronizacion = campo === 'entrega' ? ' • Sincronizado con planificación' : '';
+        toast.success(mensajeBase + mensajeSincronizacion);
+      }
+    } catch (redistributionError: any) {
+      // Detectar error específico de redistribución (sin disponibilidad)
+      const errorMessage = redistributionError?.response?.data?.message || redistributionError?.response?.data?.error || redistributionError?.message || '';
+      
+      // Si el error es de falta de disponibilidad para redistribuir, mostrar el modal
+      if (errorMessage.includes('No hay cantidades suficientes') || 
+          errorMessage.includes('Faltan') || 
+          errorMessage.includes('redistribuir')) {
+        
+        console.log('🚨 Error de redistribución detectado en entrega base, mostrando modal de sin disponibilidad');
+        
+        // Mostrar el modal de sin disponibilidad
+        setPendingSinDisponibilidad({
+          establecimientoId,
+          campo,
+          valor: value,
+          establecimientoNombre: nombreEstablecimiento,
+          tipoEntrega: 'base'
+        });
+        setShowSinDisponibilidadModal(true);
+        
+        // NO lanzar el error, solo salir
+        return;
+      }
+      
+      // Si es otro tipo de error, re-lanzarlo
+      throw redistributionError;
     }
 
     // FUNCIONALIDAD NUEVA: Recargar datos automáticamente después de actualizar campos que afectan el stock
@@ -985,6 +1081,216 @@ const Movimientos: React.FC = () => {
   const handleCloseConfirmationModal = () => {
     if (!isAutoSaving) {
       handleCancelModification();
+    }
+  };
+
+  // Funciones para manejar el modal de sin disponibilidad
+  const handleConfirmSinDisponibilidad = async () => {
+    if (!pendingSinDisponibilidad || !selectedVacuna) return;
+
+    try {
+      setIsAutoSaving(true);
+      setIsProcessingEntrega(true);
+
+      // Llamar al servicio para registrar en mes actual (actualiza la planificación)
+      const resultado = await PlanificacionService.registrarEntregaMesActual(
+        pendingSinDisponibilidad.establecimientoId,
+        selectedVacuna,
+        selectedMes,
+        selectedAnio,
+        pendingSinDisponibilidad.valor,
+        user?.id
+      );
+
+      // Ahora procesar según el tipo de entrega
+      if (pendingSinDisponibilidad.tipoEntrega === 'adicional' && pendingSinDisponibilidad.entregaAdicionalId) {
+        // Para entregas adicionales: actualizar la entrega adicional en la BD
+        // IMPORTANTE: Usar axios directamente para actualizar SOLO la cantidad, sin redistribución
+        console.log('🔄 Actualizando entrega adicional en BD (sin redistribución)...');
+        
+        try {
+          // Actualizar directamente con axios, evitando la redistribución automática
+          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+          const token = localStorage.getItem('token');
+          
+          const response = await fetch(`${apiUrl}/movimientos/entregas-adicionales/${pendingSinDisponibilidad.entregaAdicionalId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              cantidad: pendingSinDisponibilidad.valor,
+              skipRedistribucion: true // Flag para evitar redistribución
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error('Error al actualizar entrega adicional');
+          }
+          
+          console.log('✅ Entrega adicional actualizada en BD');
+          
+        } catch (updateError) {
+          console.error('Error al actualizar entrega adicional:', updateError);
+          // Continuar de todas formas, ya que la planificación ya se actualizó
+        }
+
+        // Mostrar toast de éxito específico para entrega adicional
+        toast.success(
+          `✅ Entrega adicional registrada exitosamente • ${pendingSinDisponibilidad.establecimientoNombre} • ${pendingSinDisponibilidad.valor.toLocaleString()} unidades • Planificación actualizada automáticamente`,
+          '',
+          { duration: 6000 }
+        );
+
+        // 🚀 TRIGGER AUTOMÁTICO: Sincronizar vales para entrega adicional
+        onEntregaAdicionalChanged(pendingSinDisponibilidad.establecimientoId, selectedVacuna, selectedMes, selectedAnio);
+      } else {
+        // Para entregas base: el movimiento ya se actualizó con la sincronización automática
+        // Solo mostrar toast de éxito
+        toast.success(
+          `✅ Entrega base registrada exitosamente • ${pendingSinDisponibilidad.establecimientoNombre} • ${pendingSinDisponibilidad.valor.toLocaleString()} unidades • Planificación actualizada automáticamente`,
+          '',
+          { duration: 6000 }
+        );
+
+        // 🚀 TRIGGER AUTOMÁTICO: Sincronizar vales para entrega base
+        onEntregaBaseChanged(pendingSinDisponibilidad.establecimientoId, selectedVacuna, selectedMes, selectedAnio);
+      }
+
+      // Recargar datos para reflejar los cambios
+      if (selectedVacuna) {
+        const filters = {
+          vacunaId: selectedVacuna,
+          mes: selectedMes,
+          anio: selectedAnio,
+          ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
+        };
+        await loadMovimientos(filters);
+        await updateStockInRealTime(false);
+      }
+
+      // Cerrar modal y limpiar estado
+      setShowSinDisponibilidadModal(false);
+      setPendingSinDisponibilidad(null);
+
+      // Limpiar valores temporales según el tipo
+      if (pendingSinDisponibilidad.tipoEntrega === 'adicional' && pendingSinDisponibilidad.entregaAdicionalId) {
+        // Limpiar valores temporales de entrega adicional
+        const key = getEntregaFieldKey(pendingSinDisponibilidad.entregaAdicionalId);
+        setTempEntregasValues(prev => {
+          const newTemp = { ...prev };
+          delete newTemp[key];
+          return newTemp;
+        });
+        setPendingEntregasChanges(prev => {
+          const newPending = { ...prev };
+          delete newPending[key];
+          return newPending;
+        });
+      } else {
+        // Limpiar valores temporales de entrega base
+        const key = getFieldKey(pendingSinDisponibilidad.establecimientoId, pendingSinDisponibilidad.campo);
+        setTempValues(prev => {
+          const newTemp = { ...prev };
+          delete newTemp[key];
+          return newTemp;
+        });
+        setPendingChanges(prev => {
+          const newPending = { ...prev };
+          delete newPending[key];
+          return newPending;
+        });
+      }
+
+    } catch (error: any) {
+      console.error('Error al confirmar registro sin disponibilidad:', error);
+      const tipoEntregaTexto = pendingSinDisponibilidad.tipoEntrega === 'adicional' ? 'entrega adicional' : 'entrega base';
+      toast.error(
+        `❌ Error al registrar ${tipoEntregaTexto} • ${pendingSinDisponibilidad.establecimientoNombre} • ${error.message || 'Error desconocido'}`,
+        '',
+        { duration: 6000 }
+      );
+    } finally {
+      setIsAutoSaving(false);
+      setIsProcessingEntrega(false);
+    }
+  };
+
+  const handleCancelSinDisponibilidad = () => {
+    if (!pendingSinDisponibilidad) return;
+
+    // Limpiar según el tipo de entrega
+    if (pendingSinDisponibilidad.tipoEntrega === 'adicional' && pendingSinDisponibilidad.entregaAdicionalId) {
+      // Para entregas adicionales
+      const key = getEntregaFieldKey(pendingSinDisponibilidad.entregaAdicionalId);
+
+      // Cancelar cualquier timeout pendiente
+      if (entregasDebounceTimeouts.current[key]) {
+        clearTimeout(entregasDebounceTimeouts.current[key]);
+        delete entregasDebounceTimeouts.current[key];
+      }
+
+      // Eliminar completamente el valor temporal para revertir al original
+      setTempEntregasValues(prev => {
+        const newTemp = { ...prev };
+        delete newTemp[key];
+        return newTemp;
+      });
+
+      setPendingEntregasChanges(prev => {
+        const newPending = { ...prev };
+        delete newPending[key];
+        return newPending;
+      });
+    } else {
+      // Para entregas base
+      const key = getFieldKey(pendingSinDisponibilidad.establecimientoId, pendingSinDisponibilidad.campo);
+
+      // Cancelar cualquier timeout pendiente
+      if (debounceTimeouts.current[key]) {
+        clearTimeout(debounceTimeouts.current[key]);
+        delete debounceTimeouts.current[key];
+      }
+
+      if (voucherValidationTimeouts.current[key]) {
+        clearTimeout(voucherValidationTimeouts.current[key]);
+        delete voucherValidationTimeouts.current[key];
+      }
+
+      // Eliminar completamente el valor temporal para revertir al original
+      setTempValues(prev => {
+        const newTemp = { ...prev };
+        delete newTemp[key];
+        return newTemp;
+      });
+
+      setPendingChanges(prev => {
+        const newPending = { ...prev };
+        delete newPending[key];
+        return newPending;
+      });
+
+      setIsTyping(prev => {
+        const newTyping = { ...prev };
+        delete newTyping[key];
+        return newTyping;
+      });
+    }
+
+    // Cerrar modal
+    setShowSinDisponibilidadModal(false);
+    setPendingSinDisponibilidad(null);
+
+    const tipoEntregaTexto = pendingSinDisponibilidad.tipoEntrega === 'adicional' ? 'entrega adicional' : 'entrega base';
+    toast.info(
+      `🔄 Registro de ${tipoEntregaTexto} cancelado • ${pendingSinDisponibilidad.establecimientoNombre} • Valor revertido`
+    );
+  };
+
+  const handleCloseSinDisponibilidadModal = () => {
+    if (!isAutoSaving) {
+      handleCancelSinDisponibilidad();
     }
   };
 
@@ -1300,6 +1606,52 @@ const Movimientos: React.FC = () => {
     }, 2000);
   };
 
+  // Función para verificar disponibilidad antes de guardar entregas adicionales
+  const verificarDisponibilidadAntesDeGuardarEntrega = async (
+    entregaId: string,
+    value: number,
+    movimientoAsociado: any
+  ): Promise<boolean> => {
+    // Solo verificar si hay valor positivo
+    if (!selectedVacuna || value <= 0 || !movimientoAsociado) {
+      return true; // Permitir guardar sin verificación
+    }
+
+    try {
+      // Verificar disponibilidad en la planificación
+      const disponibilidad = await PlanificacionService.verificarDisponibilidadEntregas(
+        movimientoAsociado.establecimientoId,
+        selectedVacuna,
+        selectedMes,
+        selectedAnio
+      );
+
+      // Si NO tiene disponibilidad, mostrar el modal de confirmación
+      if (!disponibilidad.tieneDisponibilidad) {
+        const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
+        const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+
+        setPendingSinDisponibilidad({
+          establecimientoId: movimientoAsociado.establecimientoId,
+          campo: 'entregaAdicional',
+          valor: value,
+          establecimientoNombre: nombreEstablecimiento,
+          tipoEntrega: 'adicional',
+          entregaAdicionalId: entregaId
+        });
+        setShowSinDisponibilidadModal(true);
+
+        return false; // Bloquear el guardado normal
+      }
+
+      return true; // Tiene disponibilidad, permitir guardar normalmente
+    } catch (error) {
+      console.error('Error al verificar disponibilidad para entrega adicional:', error);
+      // En caso de error, permitir guardar (para no bloquear el flujo)
+      return true;
+    }
+  };
+
   const handleSaveEntregaAdicionalValue = async (entregaId: string, value: number) => {
     const key = getEntregaFieldKey(entregaId);
 
@@ -1317,6 +1669,14 @@ const Movimientos: React.FC = () => {
         m.entregasAdicionales?.some(e => e.id === entregaId)
       );
       const entregaAdicionalActual = movimientoAsociado?.entregasAdicionales?.find(e => e.id === entregaId);
+
+      // NUEVA FUNCIONALIDAD: Verificar disponibilidad antes de guardar entregas adicionales
+      const puedeGuardar = await verificarDisponibilidadAntesDeGuardarEntrega(entregaId, value, movimientoAsociado);
+      if (!puedeGuardar) {
+        // No guardar, el modal se mostrará
+        setIsProcessingEntrega(false);
+        return;
+      }
 
       if (movimientoAsociado && entregaAdicionalActual) {
         const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
@@ -1336,27 +1696,93 @@ const Movimientos: React.FC = () => {
         }
       }
 
-      // Actualizar en el backend (con redistribución automática)
-      await updateEntregaAdicional(entregaId, { cantidad: value });
+      // Intentar actualizar en el backend (con redistribución automática)
+      // NOTA: Llamar directamente al servicio para poder capturar el error inmediatamente
+      try {
+        console.log('🔍 [DEBUG] Llamando a MovimientosService.updateEntregaAdicional directamente...');
+        
+        await MovimientosService.updateEntregaAdicional(entregaId, { cantidad: value });
+        
+        console.log('✅ [SUCCESS] updateEntregaAdicional exitoso');
+        
+        // Recargar movimientos para reflejar cambios
+        await loadMovimientos();
+        
+        // 🚀 TRIGGER AUTOMÁTICO: Sincronizar vales cuando cambia entrega adicional
+        if (movimientoAsociado) {
+          onEntregaAdicionalChanged(
+            movimientoAsociado.establecimientoId,
+            movimientoAsociado.vacunaId,
+            movimientoAsociado.mes,
+            movimientoAsociado.anio
+          );
 
-      // 🚀 TRIGGER AUTOMÁTICO: Sincronizar vales cuando cambia entrega adicional
-      if (movimientoAsociado) {
-        onEntregaAdicionalChanged(
-          movimientoAsociado.establecimientoId,
-          movimientoAsociado.vacunaId,
-          movimientoAsociado.mes,
-          movimientoAsociado.anio
-        );
+          // Mostrar mensaje de éxito para redistribución
+          const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
+          const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
 
-        // Mostrar mensaje de éxito para redistribución
-        const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
-        const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+          toast.success(
+            'Redistribución completada',
+            `${nombreEstablecimiento} • Entrega adicional actualizada • Entregas redistribuidas automáticamente`,
+            { duration: 4000 }
+          );
+        }
+      } catch (redistributionError: any) {
+        console.log('🚨 [DETECTED] Error capturado!', redistributionError);
+        
+        // Extraer mensaje de error (puede ser string, Error, o AxiosError)
+        let errorMessage = '';
+        
+        if (typeof redistributionError === 'string') {
+          errorMessage = redistributionError;
+        } else if (redistributionError?.response?.data?.message) {
+          errorMessage = redistributionError.response.data.message;
+        } else if (redistributionError?.response?.data?.error) {
+          errorMessage = redistributionError.response.data.error;
+        } else if (redistributionError?.message) {
+          errorMessage = redistributionError.message;
+        }
+        
+        console.log('🔍 [DEBUG] Error message extraído:', errorMessage);
+        
+        // Detectar error de redistribución por el mensaje
+        if (errorMessage.includes('No hay cantidades suficientes') || 
+            errorMessage.includes('Faltan') || 
+            errorMessage.includes('redistribuir')) {
+          
+          console.log('🚨 [SUCCESS] Error de redistribución confirmado! Mostrando modal');
+          
+          // Mostrar el modal de sin disponibilidad
+          const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado!.establecimientoId);
+          const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+          
+          console.log('🚨 [SUCCESS] Configurando modal con:', {
+            establecimientoId: movimientoAsociado!.establecimientoId,
+            nombreEstablecimiento,
+            valor: value,
+            tipoEntrega: 'adicional'
+          });
 
-        toast.success(
-          'Redistribución completada',
-          `${nombreEstablecimiento} • Entrega adicional actualizada • Entregas redistribuidas automáticamente`,
-          { duration: 4000 }
-        );
+          setPendingSinDisponibilidad({
+            establecimientoId: movimientoAsociado!.establecimientoId,
+            campo: 'entregaAdicional',
+            valor: value,
+            establecimientoNombre: nombreEstablecimiento,
+            tipoEntrega: 'adicional',
+            entregaAdicionalId: entregaId
+          });
+          setShowSinDisponibilidadModal(true);
+          
+          console.log('🚨 [SUCCESS] Modal configurado para mostrarse');
+          
+          // No marcar como procesando para que el modal pueda mostrarse
+          setIsProcessingEntrega(false);
+          return; // Salir sin mostrar error
+        }
+        
+        // Si no es error de redistribución, re-lanzar para manejo normal
+        console.log('⚠️ [DEBUG] Error NO es de redistribución, re-lanzando');
+        throw redistributionError;
       }
 
       // Limpiar estado temporal
@@ -3160,6 +3586,22 @@ const Movimientos: React.FC = () => {
           cantidadNueva={pendingModification.valorNuevo}
           valesAfectados={pendingModification.valesAfectados}
           isProcessing={isAutoSaving}
+        />
+      )}
+
+      {/* Modal de Confirmación Sin Disponibilidad */}
+      {showSinDisponibilidadModal && pendingSinDisponibilidad && (
+        <ConfirmacionSinDisponibilidadModal
+          isOpen={showSinDisponibilidadModal}
+          onClose={handleCloseSinDisponibilidadModal}
+          onConfirm={handleConfirmSinDisponibilidad}
+          establecimientoNombre={pendingSinDisponibilidad.establecimientoNombre}
+          vacunaNombre={vacunasActivas.find(v => v.id === selectedVacuna)?.nombre || 'Vacuna'}
+          cantidad={pendingSinDisponibilidad.valor}
+          mesActual={meses[selectedMes - 1]}
+          anio={selectedAnio}
+          isProcessing={isAutoSaving}
+          tipoEntrega={pendingSinDisponibilidad.tipoEntrega}
         />
       )}
       </div>

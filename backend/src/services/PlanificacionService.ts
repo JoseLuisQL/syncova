@@ -2239,6 +2239,250 @@ export class PlanificacionService {
   }
 
   /**
+   * Verificar disponibilidad de entregas en próximos meses
+   * y permitir registrar en mes actual si no hay disponibilidad
+   */
+  static async verificarDisponibilidadEntregas(
+    establecimientoId: string,
+    vacunaId: string,
+    mesActual: number,
+    anio: number
+  ): Promise<ServiceResult<{
+    tieneDisponibilidad: boolean;
+    mesActual: number;
+    disponibilidadRestante: number;
+    mesesConDisponibilidad: number[];
+    planificacionId?: string;
+    mensaje: string;
+  }>> {
+    try {
+      // Buscar la planificación existente
+      const planificacion = await prisma.planificacionAnual.findUnique({
+        where: {
+          uk_planificacion_establecimiento_vacuna_anio: {
+            establecimientoId,
+            vacunaId,
+            anio
+          }
+        },
+        select: {
+          id: true,
+          distribucionMensual: true,
+          metaAnual: true
+        }
+      });
+
+      if (!planificacion) {
+        return {
+          success: false,
+          error: 'No existe planificación para este establecimiento y vacuna en el año especificado'
+        };
+      }
+
+      // Verificar disponibilidad en los meses siguientes al mes actual
+      const distribucion = planificacion.distribucionMensual as number[];
+      const mesesConDisponibilidad: number[] = [];
+      let disponibilidadRestante = 0;
+
+      // Revisar desde el mes actual hasta diciembre
+      for (let mes = mesActual; mes <= 12; mes++) {
+        const cantidadMes = distribucion[mes - 1] || 0;
+        if (cantidadMes > 0) {
+          mesesConDisponibilidad.push(mes);
+          disponibilidadRestante += cantidadMes;
+        }
+      }
+
+      const tieneDisponibilidad = disponibilidadRestante > 0;
+      const mensaje = tieneDisponibilidad
+        ? `Hay ${disponibilidadRestante} unidades disponibles en ${mesesConDisponibilidad.length} mes(es) restante(s)`
+        : 'Ya no hay entregas disponibles o programadas para este año. Todas las entregas ya fueron asignadas.';
+
+      return {
+        success: true,
+        data: {
+          tieneDisponibilidad,
+          mesActual,
+          disponibilidadRestante,
+          mesesConDisponibilidad,
+          planificacionId: planificacion.id,
+          mensaje
+        }
+      };
+    } catch (error) {
+      console.error('Error al verificar disponibilidad de entregas:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al verificar disponibilidad'
+      };
+    }
+  }
+
+  /**
+   * Registrar entrega en mes actual cuando no hay disponibilidad futura
+   * Actualiza la planificación mensual asignando la cantidad al mes actual
+   */
+  static async registrarEntregaMesActual(
+    establecimientoId: string,
+    vacunaId: string,
+    mesActual: number,
+    anio: number,
+    cantidad: number,
+    usuarioId?: string
+  ): Promise<ServiceResult<{
+    planificacionActualizada: boolean;
+    cantidadRegistrada: number;
+    distribucionMensualNueva: number[];
+    mensaje: string;
+  }>> {
+    try {
+      // Validaciones
+      if (cantidad <= 0) {
+        return {
+          success: false,
+          error: 'La cantidad debe ser mayor a 0'
+        };
+      }
+
+      if (mesActual < 1 || mesActual > 12) {
+        return {
+          success: false,
+          error: 'El mes debe estar entre 1 y 12'
+        };
+      }
+
+      // Buscar la planificación existente
+      const planificacion = await prisma.planificacionAnual.findUnique({
+        where: {
+          uk_planificacion_establecimiento_vacuna_anio: {
+            establecimientoId,
+            vacunaId,
+            anio
+          }
+        }
+      });
+
+      if (!planificacion) {
+        return {
+          success: false,
+          error: 'No existe planificación para este establecimiento'
+        };
+      }
+
+      // Actualizar la distribución mensual agregando la cantidad al mes actual
+      const distribucionActual = planificacion.distribucionMensual as number[];
+      const nuevaDistribucion = [...distribucionActual];
+      nuevaDistribucion[mesActual - 1] = (nuevaDistribucion[mesActual - 1] || 0) + cantidad;
+
+      // Calcular nueva meta anual
+      const nuevaMetaAnual = nuevaDistribucion.reduce((sum, val) => sum + val, 0);
+
+      // Actualizar la planificación
+      await prisma.planificacionAnual.update({
+        where: { id: planificacion.id },
+        data: {
+          distribucionMensual: nuevaDistribucion,
+          metaAnual: nuevaMetaAnual,
+          updatedAt: new Date()
+        }
+      });
+
+      // Sincronizar automáticamente con movimientos si se proporciona usuarioId
+      if (usuarioId) {
+        try {
+          await this.sincronizarUnMesConMovimientos(
+            planificacion.id,
+            mesActual,
+            anio,
+            usuarioId
+          );
+        } catch (syncError) {
+          console.warn('Error al sincronizar con movimientos:', syncError);
+          // No interrumpir el flujo si falla la sincronización
+        }
+      }
+
+      return {
+        success: true,
+        data: {
+          planificacionActualizada: true,
+          cantidadRegistrada: cantidad,
+          distribucionMensualNueva: nuevaDistribucion,
+          mensaje: `Se registraron ${cantidad} unidades en el mes actual y se actualizó la planificación automáticamente`
+        }
+      };
+    } catch (error) {
+      console.error('Error al registrar entrega en mes actual:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al registrar entrega'
+      };
+    }
+  }
+
+  /**
+   * Sincronizar un mes específico con movimientos
+   * Método auxiliar para sincronización parcial
+   */
+  private static async sincronizarUnMesConMovimientos(
+    planificacionId: string,
+    mes: number,
+    anio: number,
+    usuarioId: string
+  ): Promise<void> {
+    const planificacion = await prisma.planificacionAnual.findUnique({
+      where: { id: planificacionId }
+    });
+
+    if (!planificacion) {
+      throw new Error('Planificación no encontrada');
+    }
+
+    const distribucion = planificacion.distribucionMensual as number[];
+    const entregaProgramada = distribucion[mes - 1] || 0;
+
+    // Buscar movimiento existente
+    const movimientoExistente = await prisma.movimientoVacuna.findUnique({
+      where: {
+        uk_movimiento_establecimiento_vacuna_mes_anio: {
+          establecimientoId: planificacion.establecimientoId,
+          vacunaId: planificacion.vacunaId,
+          mes,
+          anio
+        }
+      }
+    });
+
+    if (movimientoExistente) {
+      // Actualizar movimiento existente
+      await prisma.movimientoVacuna.update({
+        where: { id: movimientoExistente.id },
+        data: {
+          entrega: entregaProgramada,
+          usuarioId: usuarioId || movimientoExistente.usuarioId
+        }
+      });
+    } else if (entregaProgramada > 0) {
+      // Crear nuevo movimiento
+      await prisma.movimientoVacuna.create({
+        data: {
+          establecimientoId: planificacion.establecimientoId,
+          vacunaId: planificacion.vacunaId,
+          mes,
+          anio,
+          saldoAnterior: 0,
+          transIngreso: 0,
+          salida: 0,
+          transSalida: 0,
+          entrega: entregaProgramada,
+          fechaMovimiento: new Date(),
+          usuarioId: usuarioId
+        }
+      });
+    }
+  }
+
+  /**
    * Verificar si existe planificación para un establecimiento específico
    */
   static async verificarExistenciaPlanificacion(

@@ -154,6 +154,30 @@ router.post('/:id/sincronizar-movimientos', PlanificacionController.sincronizarC
 router.get('/verificar/:establecimientoId/:vacunaId/:anio', PlanificacionController.verificarExistenciaPlanificacion);
 
 /**
+ * @route GET /api/planificacion/verificar-disponibilidad/:establecimientoId/:vacunaId/:mes/:anio
+ * @desc Verificar disponibilidad de entregas en próximos meses
+ * @access Public (TODO: Proteger con autenticación)
+ * @param {string} establecimientoId - ID del establecimiento
+ * @param {string} vacunaId - ID de la vacuna
+ * @param {number} mes - Mes actual (1-12)
+ * @param {number} anio - Año de planificación
+ */
+router.get('/verificar-disponibilidad/:establecimientoId/:vacunaId/:mes/:anio', PlanificacionController.verificarDisponibilidadEntregas);
+
+/**
+ * @route POST /api/planificacion/registrar-mes-actual
+ * @desc Registrar entrega en mes actual cuando no hay disponibilidad futura
+ * @access Public (TODO: Proteger con autenticación)
+ * @body {string} establecimientoId - ID del establecimiento
+ * @body {string} vacunaId - ID de la vacuna
+ * @body {number} mesActual - Mes actual (1-12)
+ * @body {number} anio - Año de planificación
+ * @body {number} cantidad - Cantidad a registrar
+ * @body {string} [usuarioId] - ID del usuario (opcional)
+ */
+router.post('/registrar-mes-actual', PlanificacionController.registrarEntregaMesActual);
+
+/**
  * @route POST /api/planificacion/exportar/vacuna/:vacunaId
  * @desc Exportar planificación por vacuna específica a Excel
  * @access Public (TODO: Proteger con autenticación)

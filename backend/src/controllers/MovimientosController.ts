@@ -359,7 +359,7 @@ export class MovimientosController {
   static async updateEntregaAdicional(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { cantidad, motivo } = req.body;
+      const { cantidad, motivo, skipRedistribucion } = req.body;
 
       if (!validateUUID(id)) {
         ResponseUtil.error(res, 'ID de entrega adicional inválido', 400);
@@ -371,7 +371,7 @@ export class MovimientosController {
         return;
       }
 
-      const result = await MovimientosService.updateEntregaAdicional(id, cantidad, motivo);
+      const result = await MovimientosService.updateEntregaAdicional(id, cantidad, motivo, skipRedistribucion);
 
       if (!result.success) {
         ResponseUtil.error(res, result.error || 'Error al actualizar entrega adicional', result.error === 'Entrega adicional no encontrada' ? 404 : 400);
