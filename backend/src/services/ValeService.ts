@@ -1293,12 +1293,33 @@ export class ValeService {
         }
 
         // PASO 2.5: Validar stock disponible antes de proceder
-        console.log(`🔍 [ValeService] Validando stock disponible para ${movimientos.length} movimientos...`);
+        console.log(`🔍 [ValeService] Validando stock disponible para ${movimientos.length} movimientos (tipo: ${tipoVale})...`);
 
-        const vaccineRequirements: VaccineRequirement[] = movimientos.map(mov => ({
-          vaccineId: mov.vacunaId,
-          quantity: (mov.entrega || 0) + (mov.entregasAdicionales?.reduce((sum, ea) => sum + ea.cantidad, 0) || 0)
-        }));
+        // Calcular requerimientos SEGÚN EL TIPO DE VALE
+        const vaccineRequirements: VaccineRequirement[] = movimientos.map(mov => {
+          let quantity = 0;
+          
+          switch (tipoVale) {
+            case 'solo_base':
+              // Solo entrega base programada
+              quantity = mov.entrega || 0;
+              break;
+            case 'solo_adicionales':
+              // Solo entregas adicionales
+              quantity = mov.entregasAdicionales?.reduce((sum: number, ea: any) => sum + ea.cantidad, 0) || 0;
+              break;
+            case 'completo':
+            default:
+              // Entrega base + entregas adicionales
+              quantity = (mov.entrega || 0) + (mov.entregasAdicionales?.reduce((sum: number, ea: any) => sum + ea.cantidad, 0) || 0);
+              break;
+          }
+          
+          return {
+            vaccineId: mov.vacunaId,
+            quantity
+          };
+        }).filter(req => req.quantity > 0);
 
         const stockValidation = await StockValidationService.validateStockForVoucher(
           vaccineRequirements,

@@ -81,11 +81,12 @@ export class ValeController {
       }
 
       // Obtener movimientos para el vale según el tipo especificado
+      const tipoValeEfectivo = tipoVale || 'completo';
       const movimientos = await ValeService.obtenerMovimientosParaVale(
         centroAcopioId,
         mes,
         anio,
-        tipoVale || 'completo',
+        tipoValeEfectivo,
         entregasAdicionalesSeleccionadas,
         gruposEntregasSeleccionados
       );
@@ -95,11 +96,31 @@ export class ValeController {
         return;
       }
 
-      // Preparar requerimientos de vacunas
-      const vaccineRequirements: VaccineRequirement[] = movimientos.map(mov => ({
-        vaccineId: mov.vacunaId,
-        quantity: (mov.entrega || 0) + (mov.entregasAdicionales?.reduce((sum, ea) => sum + ea.cantidad, 0) || 0)
-      }));
+      // Preparar requerimientos de vacunas SEGÚN EL TIPO DE VALE
+      const vaccineRequirements: VaccineRequirement[] = movimientos.map(mov => {
+        let quantity = 0;
+        
+        switch (tipoValeEfectivo) {
+          case 'solo_base':
+            // Solo entrega base programada
+            quantity = mov.entrega || 0;
+            break;
+          case 'solo_adicionales':
+            // Solo entregas adicionales (filtradas por grupos si aplica)
+            quantity = mov.entregasAdicionales?.reduce((sum, ea) => sum + ea.cantidad, 0) || 0;
+            break;
+          case 'completo':
+          default:
+            // Entrega base + entregas adicionales
+            quantity = (mov.entrega || 0) + (mov.entregasAdicionales?.reduce((sum, ea) => sum + ea.cantidad, 0) || 0);
+            break;
+        }
+        
+        return {
+          vaccineId: mov.vacunaId,
+          quantity
+        };
+      }).filter(req => req.quantity > 0);
 
       // Validar stock
       const stockValidation = await StockValidationService.validateStockForVoucher(
