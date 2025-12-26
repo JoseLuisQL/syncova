@@ -1,349 +1,213 @@
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import {
-  Network,
-  GitBranch,
-  Building2,
-  Building,
-  Home,
-  ChevronRight,
-  Plus,
-  FolderOpen,
-  Settings
-} from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Building2, Home, ChevronRight } from 'lucide-react';
 import Establecimientos from './Establecimientos';
 import Redes from '../Redes/Redes';
 import Microredes from '../Microredes/Microredes';
 import CentrosAcopio from '../CentrosAcopio/CentrosAcopio';
-import { useAppNavigation, useCurrentRoute, useUrlState } from '../../hooks/useRouting';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`establecimientos-tabpanel-${index}`}
-      aria-labelledby={`establecimientos-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <div className="py-6">
-          {children}
-        </div>
-      )}
-    </div>
-  );
-}
+import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
+import { SECTIONS_CONFIG, COMPONENT_STYLES } from './constants';
 
 const EstablecimientosModule: React.FC = () => {
   const { navigateToModule } = useAppNavigation();
   const { currentSubModule, searchParams } = useCurrentRoute();
+  const location = useLocation();
 
-  // Estado de navegación sincronizado con URL
   const [navigationState, setNavigationState] = useState({
     selectedRedId: '',
     selectedRedNombre: '',
     selectedMicroredId: '',
     selectedMicroredNombre: '',
     selectedCentroAcopioId: '',
-    selectedCentroAcopioNombre: ''
+    selectedCentroAcopioNombre: '',
   });
 
-  // Sincronizar estado con parámetros de URL
   useEffect(() => {
-    const redId = searchParams.get('redId') || '';
-    const redNombre = searchParams.get('redNombre') || '';
-    const microredId = searchParams.get('microredId') || '';
-    const microredNombre = searchParams.get('microredNombre') || '';
-    const centroAcopioId = searchParams.get('centroAcopioId') || '';
-    const centroAcopioNombre = searchParams.get('centroAcopioNombre') || '';
-
     setNavigationState({
-      selectedRedId: redId,
-      selectedRedNombre: redNombre,
-      selectedMicroredId: microredId,
-      selectedMicroredNombre: microredNombre,
-      selectedCentroAcopioId: centroAcopioId,
-      selectedCentroAcopioNombre: centroAcopioNombre
+      selectedRedId: searchParams.get('redId') || '',
+      selectedRedNombre: searchParams.get('redNombre') || '',
+      selectedMicroredId: searchParams.get('microredId') || '',
+      selectedMicroredNombre: searchParams.get('microredNombre') || '',
+      selectedCentroAcopioId: searchParams.get('centroAcopioId') || '',
+      selectedCentroAcopioNombre: searchParams.get('centroAcopioNombre') || '',
     });
   }, [searchParams]);
 
-  // Navigation handlers
-  const handleNavigateToMicroredes = (redId: string, redNombre: string) => {
-    const params = {
-      redId,
-      redNombre
-    };
-    navigateToModule('establecimientos', 'microredes', params);
-  };
+  const handleNavigateToMicroredes = useCallback((redId: string, redNombre: string) => {
+    navigateToModule('establecimientos', 'microredes', { redId, redNombre });
+  }, [navigateToModule]);
 
-  const handleNavigateToCentrosAcopio = (microredId: string, microredNombre: string) => {
-    const params = {
+  const handleNavigateToCentrosAcopio = useCallback((microredId: string, microredNombre: string) => {
+    navigateToModule('establecimientos', 'centros-acopio', {
       redId: navigationState.selectedRedId,
       redNombre: navigationState.selectedRedNombre,
       microredId,
-      microredNombre
-    };
-    navigateToModule('establecimientos', 'centros-acopio', params);
-  };
+      microredNombre,
+    });
+  }, [navigateToModule, navigationState.selectedRedId, navigationState.selectedRedNombre]);
 
-  const handleNavigateToEstablecimientos = (centroAcopioId: string, centroAcopioNombre: string) => {
-    const params = {
+  const handleNavigateToEstablecimientos = useCallback((centroAcopioId: string, centroAcopioNombre: string) => {
+    navigateToModule('establecimientos', 'establecimientos', {
       redId: navigationState.selectedRedId,
       redNombre: navigationState.selectedRedNombre,
       microredId: navigationState.selectedMicroredId,
       microredNombre: navigationState.selectedMicroredNombre,
       centroAcopioId,
-      centroAcopioNombre
-    };
-    navigateToModule('establecimientos', 'establecimientos', params);
-  };
+      centroAcopioNombre,
+    });
+  }, [navigateToModule, navigationState]);
 
-// Configuración de secciones organizadas jerárquicamente
-interface SectionConfig {
-  id: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  path: string;
-  category: 'estructura' | 'gestion';
-  description?: string;
-}
+  const handleResetNavigation = useCallback(() => {
+    navigateToModule('establecimientos', 'redes');
+    setNavigationState({
+      selectedRedId: '',
+      selectedRedNombre: '',
+      selectedMicroredId: '',
+      selectedMicroredNombre: '',
+      selectedCentroAcopioId: '',
+      selectedCentroAcopioNombre: '',
+    });
+  }, [navigateToModule]);
 
-const ESTABLISHMENT_SECTIONS: SectionConfig[] = [
-  // Sección Estructura
-  { 
-    id: 'redes', 
-    label: 'Redes', 
-    icon: Network, 
-    path: '/establecimientos/redes', 
-    category: 'estructura',
-    description: 'Redes de salud'
-  },
-  { 
-    id: 'microredes', 
-    label: 'Microredes', 
-    icon: GitBranch, 
-    path: '/establecimientos/microredes', 
-    category: 'estructura',
-    description: 'Agrupaciones territoriales'
-  },
-  
-  // Sección Gestión
-  { 
-    id: 'centros-acopio', 
-    label: 'Centros de Acopio', 
-    icon: Building2, 
-    path: '/establecimientos/centros-acopio', 
-    category: 'gestion',
-    description: 'Puntos de distribución'
-  },
-  { 
-    id: 'establecimientos', 
-    label: 'Establecimientos', 
-    icon: Building, 
-    path: '/establecimientos/establecimientos', 
-    category: 'gestion',
-    description: 'Centros de atención'
-  }
-];
+  const activeSection = useMemo(() => 
+    currentSubModule || 'redes',
+  [currentSubModule]);
 
-const CATEGORY_CONFIG = {
-  estructura: { label: 'Estructura Organizacional', icon: FolderOpen, color: 'blue' },
-  gestion: { label: 'Gestión Operativa', icon: Settings, color: 'emerald' }
-};
+  const breadcrumbs = useMemo(() => {
+    const items: Array<{ key: string; label: string; icon?: React.ComponentType<{ className?: string }>; onClick?: () => void }> = [
+      { key: 'home', label: 'Establecimientos', icon: Home, onClick: handleResetNavigation },
+    ];
 
-  // Agrupar secciones por categoría
-  const sectionsByCategory = ESTABLISHMENT_SECTIONS.reduce((acc, section) => {
-    if (!acc[section.category]) {
-      acc[section.category] = [];
-    }
-    acc[section.category].push(section);
-    return acc;
-  }, {} as Record<string, SectionConfig[]>);
-
-  const getCurrentBreadcrumb = () => {
-    // Encontrar el tab actual basado en currentSubModule
-    const currentTabData = ESTABLISHMENT_SECTIONS.find(tab => tab.id === currentSubModule) || ESTABLISHMENT_SECTIONS[0];
-    const breadcrumbItems = [];
-
-    // Always start with the module home
-    breadcrumbItems.push(
-      <li key="home" className="inline-flex items-center">
-        <button
-          onClick={() => {
-            navigateToModule('establecimientos', 'redes');
-            setNavigationState({
-              selectedRedId: '',
-              selectedRedNombre: '',
-              selectedMicroredId: '',
-              selectedMicroredNombre: '',
-              selectedCentroAcopioId: '',
-              selectedCentroAcopioNombre: ''
-            });
-          }}
-          className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600"
-        >
-          <Home className="w-4 h-4 mr-2" />
-          Establecimientos
-        </button>
-      </li>
-    );
-
-    // Add current tab
-    breadcrumbItems.push(
-      <li key="current">
-        <div className="flex items-center">
-          <ChevronRight className="w-4 h-4 text-gray-400" />
-          <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2 flex items-center">
-            <currentTabData.icon className="w-4 h-4 mr-2" />
-            {currentTabData.label}
-          </span>
-        </div>
-      </li>
-    );
-
-    // Add navigation context if available
-    const currentTabIndex = ESTABLISHMENT_SECTIONS.findIndex(tab => tab.id === currentSubModule);
-
-    if (navigationState.selectedRedNombre && currentTabIndex >= 1) {
-      breadcrumbItems.splice(-1, 0,
-        <li key="red">
-          <div className="flex items-center">
-            <ChevronRight className="w-4 h-4 text-gray-400" />
-            <button
-              onClick={() => navigateToModule('establecimientos', 'redes')}
-              className="ml-1 text-sm font-medium text-blue-600 hover:text-blue-800 md:ml-2"
-            >
-              Red: {navigationState.selectedRedNombre}
-            </button>
-          </div>
-        </li>
-      );
+    const currentSection = SECTIONS_CONFIG.find(s => s.id === activeSection);
+    if (currentSection) {
+      items.push({
+        key: 'current',
+        label: currentSection.label,
+        icon: currentSection.icon,
+      });
     }
 
-    if (navigationState.selectedMicroredNombre && currentTabIndex >= 2) {
-      breadcrumbItems.splice(-1, 0,
-        <li key="microred">
-          <div className="flex items-center">
-            <ChevronRight className="w-4 h-4 text-gray-400" />
-            <button
-              onClick={() => navigateToModule('establecimientos', 'microredes')}
-              className="ml-1 text-sm font-medium text-blue-600 hover:text-blue-800 md:ml-2"
-            >
-              Microred: {navigationState.selectedMicroredNombre}
-            </button>
-          </div>
-        </li>
-      );
+    const sectionIndex = SECTIONS_CONFIG.findIndex(s => s.id === activeSection);
+
+    if (navigationState.selectedRedNombre && sectionIndex >= 1) {
+      items.splice(-1, 0, {
+        key: 'red',
+        label: `Red: ${navigationState.selectedRedNombre}`,
+        onClick: () => navigateToModule('establecimientos', 'microredes', {
+          redId: navigationState.selectedRedId,
+          redNombre: navigationState.selectedRedNombre,
+        }),
+      });
     }
 
-    if (navigationState.selectedCentroAcopioNombre && currentTabIndex >= 3) {
-      breadcrumbItems.splice(-1, 0,
-        <li key="centro">
-          <div className="flex items-center">
-            <ChevronRight className="w-4 h-4 text-gray-400" />
-            <button
-              onClick={() => navigateToModule('establecimientos', 'centros-acopio')}
-              className="ml-1 text-sm font-medium text-blue-600 hover:text-blue-800 md:ml-2"
-            >
-              Centro: {navigationState.selectedCentroAcopioNombre}
-            </button>
-          </div>
-        </li>
-      );
+    if (navigationState.selectedMicroredNombre && sectionIndex >= 2) {
+      items.splice(-1, 0, {
+        key: 'microred',
+        label: `Microred: ${navigationState.selectedMicroredNombre}`,
+        onClick: () => navigateToModule('establecimientos', 'centros-acopio', {
+          redId: navigationState.selectedRedId,
+          redNombre: navigationState.selectedRedNombre,
+          microredId: navigationState.selectedMicroredId,
+          microredNombre: navigationState.selectedMicroredNombre,
+        }),
+      });
     }
 
-    return (
-      <nav className="flex mb-4" aria-label="Breadcrumb">
-        <ol className="inline-flex items-center space-x-1 md:space-x-3">
-          {breadcrumbItems}
-        </ol>
-      </nav>
-    );
-  };
+    if (navigationState.selectedCentroAcopioNombre && sectionIndex >= 3) {
+      items.splice(-1, 0, {
+        key: 'centro',
+        label: `Centro: ${navigationState.selectedCentroAcopioNombre}`,
+      });
+    }
+
+    return items;
+  }, [activeSection, navigationState, navigateToModule, handleResetNavigation]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header Premium */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-full px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
-                <Building2 className="h-8 w-8 text-white" />
+    <main className={COMPONENT_STYLES.pageBackground}>
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-20">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Title */}
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-teal-600 to-cyan-600 shadow-lg">
+                <Building2 className="h-7 w-7 text-white" aria-hidden="true" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Establecimientos</h1>
-                <p className="text-gray-600">Gestión integral de la estructura de salud</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  Gestion de Establecimientos
+                </h1>
+                <p className="text-sm text-gray-600 hidden sm:block">
+                  Estructura organizacional del sistema de salud
+                </p>
               </div>
             </div>
-            {/* Breadcrumbs */}
-            <div className="hidden md:block">
-              {getCurrentBreadcrumb()}
-            </div>
+
+            {/* Breadcrumbs - Desktop */}
+            <nav aria-label="Breadcrumb" className="hidden lg:block">
+              <ol className="flex items-center gap-1">
+                {breadcrumbs.map((item, index) => {
+                  const Icon = item.icon;
+                  const isLast = index === breadcrumbs.length - 1;
+
+                  return (
+                    <li key={item.key} className="flex items-center">
+                      {index > 0 && (
+                        <ChevronRight className="h-4 w-4 text-gray-400 mx-1" aria-hidden="true" />
+                      )}
+                      {item.onClick && !isLast ? (
+                        <button
+                          onClick={item.onClick}
+                          className="flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 font-medium"
+                        >
+                          {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
+                          <span className="max-w-[120px] truncate">{item.label}</span>
+                        </button>
+                      ) : (
+                        <span className={`flex items-center gap-1.5 text-sm ${isLast ? 'text-gray-500 font-normal' : 'text-gray-900 font-medium'}`}>
+                          {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
+                          <span className="max-w-[120px] truncate">{item.label}</span>
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Navigation Premium */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-full px-6">
-          <div className="grid grid-cols-2 gap-1">
-            {Object.entries(sectionsByCategory).map(([categoryKey, sections]) => {
-              const category = CATEGORY_CONFIG[categoryKey as keyof typeof CATEGORY_CONFIG];
-              const CategoryIcon = category.icon;
-              
+      {/* Navigation Tabs */}
+      <nav className="bg-white border-b border-gray-100 sticky top-[73px] z-10" aria-label="Secciones">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
+            {SECTIONS_CONFIG.map((section) => {
+              const Icon = section.icon;
+              const isActive = activeSection === section.id;
+
               return (
-                <div key={categoryKey} className="relative group">
-                  {/* Category Header */}
-                  <div className={`flex items-center justify-center py-4 border-b-4 border-${category.color}-500 bg-${category.color}-50`}>
-                    <CategoryIcon className={`h-5 w-5 text-${category.color}-600 mr-2`} />
-                    <span className={`font-semibold text-${category.color}-800`}>{category.label}</span>
-                  </div>
-                  
-                  {/* Section Buttons */}
-                  <div className="bg-white">
-                    {sections.map((section) => {
-                      const Icon = section.icon;
-                      const isActive = currentSubModule === section.id || (!currentSubModule && section.id === 'redes');
-                      
-                      return (
-                        <button
-                          key={section.id}
-                          onClick={() => navigateToModule('establecimientos', section.id)}
-                          className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                            isActive ? `bg-${category.color}-50 border-l-4 border-l-${category.color}-500` : ''
-                          }`}
-                        >
-                          <Icon className={`h-4 w-4 mr-3 ${isActive ? `text-${category.color}-600` : 'text-gray-500'}`} />
-                          <div className="flex-1">
-                            <div className={`font-medium text-sm ${isActive ? `text-${category.color}-800` : 'text-gray-900'}`}>
-                              {section.label}
-                            </div>
-                            <div className="text-xs text-gray-500">{section.description}</div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                <button
+                  key={section.id}
+                  onClick={() => navigateToModule('establecimientos', section.id)}
+                  className={`${COMPONENT_STYLES.nav.tab} ${
+                    isActive ? COMPONENT_STYLES.nav.tabActive : COMPONENT_STYLES.nav.tabInactive
+                  } flex-shrink-0`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  <span className="whitespace-nowrap">{section.label}</span>
+                </button>
               );
             })}
           </div>
         </div>
-      </div>
+      </nav>
 
-      {/* Content Area Premium */}
-      <div className="max-w-full px-6 py-6">
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      {/* Content */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <Routes>
             <Route path="/" element={<Navigate to="redes" replace />} />
             <Route
@@ -382,7 +246,7 @@ const CATEGORY_CONFIG = {
           </Routes>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 
