@@ -121,6 +121,9 @@ const Movimientos: React.FC = () => {
   const [showEntregasAdicionalesModal, setShowEntregasAdicionalesModal] = useState(false);
   const [movimientoParaEntregas, setMovimientoParaEntregas] = useState<MovimientoCalculado | null>(null);
 
+  // Estado para fila seleccionada (persistente al cambiar pestañas/modales)
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+
   // ============================================================================
   // ESTADOS DE MODIFICACIÓN PENDIENTE
   // ============================================================================
@@ -1416,6 +1419,8 @@ const Movimientos: React.FC = () => {
             setMovimientoParaEntregas(mov);
             setShowEntregasAdicionalesModal(true);
           }}
+          selectedRowId={selectedRowId}
+          onRowSelect={setSelectedRowId}
         />
       </div>
 

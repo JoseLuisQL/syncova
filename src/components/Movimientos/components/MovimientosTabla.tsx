@@ -38,6 +38,8 @@ interface MovimientosTablaProps {
   onEliminarEntregaAdicional: (entregaId: string) => void;
   onVerDetalle: (movimiento: MovimientoCalculado & { tieneMovimiento: boolean }) => void;
   onGestionarEntregas: (movimiento: MovimientoCalculado & { tieneMovimiento: boolean }) => void;
+  selectedRowId: string | null;
+  onRowSelect: (id: string | null) => void;
 }
 
 export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
@@ -65,6 +67,8 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
   onEliminarEntregaAdicional,
   onVerDetalle,
   onGestionarEntregas,
+  selectedRowId,
+  onRowSelect,
 }) => {
   const isDisabled = isCreating || isUpdating || isAutoSaving;
 
@@ -77,8 +81,13 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
     const isPending = hasPendingChange(movimiento.establecimientoId, campo);
     const styles = INPUT_FIELD_STYLES[campo];
 
+    const handleInteraction = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onRowSelect(movimiento.establecimientoId);
+    };
+
     return (
-      <div className="relative inline-block">
+      <div className="relative inline-block" onClick={handleInteraction}>
         <input
           type="number"
           min="0"
@@ -112,8 +121,13 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
     const isUserTyping = isTyping[key];
     const styles = INPUT_FIELD_STYLES.entrega;
 
+    const handleInteraction = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onRowSelect(movimiento.establecimientoId);
+    };
+
     return (
-      <div className="flex items-center justify-center gap-1.5 flex-wrap">
+      <div className="flex items-center justify-center gap-1.5 flex-wrap" onClick={handleInteraction}>
         {/* Input principal de entrega */}
         <div className="relative">
           <input
@@ -304,22 +318,37 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
               datosTabla.map((movimiento) => {
                 const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento);
                 const { colores, centro } = estiloEstablecimiento;
+                const isSelected = selectedRowId === movimiento.establecimientoId;
 
                 return (
                   <tr
                     key={`${movimiento.establecimientoId}-${selectedMes}-${selectedAnio}`}
-                    className={`${COMPONENT_STYLES.table.row} ${colores.bg} group`}
+                    onClick={() => onRowSelect(movimiento.establecimientoId)}
+                    className={`
+                      ${COMPONENT_STYLES.table.row} 
+                      ${colores.bg} 
+                      group 
+                      cursor-pointer 
+                      transition-all 
+                      duration-200
+                      ${isSelected 
+                        ? 'ring-2 ring-inset ring-teal-500 bg-teal-50/80 shadow-[inset_0_0_0_1px_rgba(20,184,166,0.3)] relative z-[1]' 
+                        : 'hover:bg-gray-100/80 hover:shadow-sm'
+                      }
+                    `}
                   >
                     {/* Establecimiento */}
-                    <td className="px-4 py-3">
+                    <td className={`px-4 py-3 ${isSelected ? 'border-l-4 border-l-teal-500' : 'border-l-4 border-l-transparent'}`}>
                       <div className="flex items-center gap-2">
-                        <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                          movimiento.tieneMovimiento
-                            ? 'bg-emerald-500 ring-2 ring-emerald-200'
-                            : 'bg-gray-300 ring-2 ring-gray-200'
+                        <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 transition-all duration-200 ${
+                          isSelected
+                            ? 'bg-teal-500 ring-2 ring-teal-300 scale-110'
+                            : movimiento.tieneMovimiento
+                              ? 'bg-emerald-500 ring-2 ring-emerald-200'
+                              : 'bg-gray-300 ring-2 ring-gray-200'
                         }`} />
                         <div className="min-w-0">
-                          <div className={`text-sm font-semibold ${colores.text} truncate group-hover:text-gray-900`}>
+                          <div className={`text-sm font-semibold truncate transition-colors duration-200 ${isSelected ? 'text-teal-700' : colores.text} group-hover:text-gray-900`}>
                             {movimiento.establecimiento.nombre}
                           </div>
                           <div className="text-xs text-gray-500">
@@ -404,7 +433,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                     </td>
 
                     {/* Acciones */}
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-3" onClick={(e) => { e.stopPropagation(); onRowSelect(movimiento.establecimientoId); }}>
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => onVerDetalle(movimiento)}
