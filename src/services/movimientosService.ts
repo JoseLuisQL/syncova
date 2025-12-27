@@ -259,7 +259,8 @@ export class MovimientosService {
       return response.data.data;
     } catch (error) {
       logger.error('Error al actualizar entrega adicional:', error);
-      throw handleApiError(error as AxiosError);
+      // Preservar el error original para que el componente pueda acceder a response.data
+      throw error;
     }
   }
 

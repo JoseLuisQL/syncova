@@ -855,6 +855,49 @@ const Movimientos: React.FC = () => {
   // ============================================================================
   // HANDLERS DE ENTREGAS ADICIONALES
   // ============================================================================
+
+  // Función para verificar disponibilidad antes de guardar entregas adicionales
+  const verificarDisponibilidadAntesDeGuardarEntrega = async (
+    entregaId: string,
+    value: number,
+    movimientoAsociado: any
+  ): Promise<boolean> => {
+    if (!selectedVacuna || value <= 0 || !movimientoAsociado) {
+      return true;
+    }
+
+    try {
+      const disponibilidad = await PlanificacionService.verificarDisponibilidadEntregas(
+        movimientoAsociado.establecimientoId,
+        selectedVacuna,
+        selectedMes,
+        selectedAnio
+      );
+
+      if (!disponibilidad.tieneDisponibilidad) {
+        const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
+        const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
+
+        setPendingSinDisponibilidad({
+          establecimientoId: movimientoAsociado.establecimientoId,
+          campo: 'entregaAdicional',
+          valor: value,
+          establecimientoNombre: nombreEstablecimiento,
+          tipoEntrega: 'adicional',
+          entregaAdicionalId: entregaId
+        });
+        setShowSinDisponibilidadModal(true);
+
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error al verificar disponibilidad para entrega adicional:', error);
+      return true;
+    }
+  };
+
   const handleTempEntregaValueChange = async (entregaId: string, newValue: number) => {
     const key = getEntregaFieldKey(entregaId);
 
@@ -897,6 +940,13 @@ const Movimientos: React.FC = () => {
   const handleSaveEntregaAdicionalValue = async (entregaId: string, value: number) => {
     const key = getEntregaFieldKey(entregaId);
 
+    // No guardar si el valor es 0 o menor
+    if (value <= 0) {
+      setTempEntregasValues(prev => { const n = { ...prev }; delete n[key]; return n; });
+      setPendingEntregasChanges(prev => { const n = { ...prev }; delete n[key]; return n; });
+      return;
+    }
+
     try {
       setIsProcessingEntrega(true);
 
@@ -908,6 +958,13 @@ const Movimientos: React.FC = () => {
       const movimientoAsociado = movimientos.find(m =>
         m.entregasAdicionales?.some(e => e.id === entregaId)
       );
+
+      // Verificar disponibilidad antes de guardar
+      const puedeGuardar = await verificarDisponibilidadAntesDeGuardarEntrega(entregaId, value, movimientoAsociado);
+      if (!puedeGuardar) {
+        setIsProcessingEntrega(false);
+        return;
+      }
 
       await MovimientosService.updateEntregaAdicional(entregaId, { cantidad: value });
       await loadMovimientos();
@@ -930,10 +987,14 @@ const Movimientos: React.FC = () => {
       await updateStockInRealTime();
     } catch (redistributionError: any) {
       const errorMessage = redistributionError?.response?.data?.message || redistributionError?.response?.data?.error || redistributionError?.message || '';
+      
+      console.log('[DEBUG] Error completo:', redistributionError?.response?.data);
+      console.log('[DEBUG] Mensaje de error:', errorMessage);
 
       if (errorMessage.includes('No hay cantidades suficientes') ||
         errorMessage.includes('Faltan') ||
-        errorMessage.includes('redistribuir')) {
+        errorMessage.includes('redistribuir') ||
+        errorMessage.includes('no tiene planificación')) {
 
         const movimientoAsociado = movimientos.find(m => m.entregasAdicionales?.some(e => e.id === entregaId));
         const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado!.establecimientoId);
@@ -950,7 +1011,7 @@ const Movimientos: React.FC = () => {
         setIsProcessingEntrega(false);
         return;
       }
-      toast.error(`Error al guardar entrega adicional - ${errorMessage}`);
+      toast.error(`Error al guardar entrega adicional - ${errorMessage || 'Error desconocido'}`);
     } finally {
       setIsProcessingEntrega(false);
     }
