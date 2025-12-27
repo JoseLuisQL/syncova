@@ -25,7 +25,6 @@ import ConfirmacionSinDisponibilidadModal from './ConfirmacionSinDisponibilidadM
 import { COMPONENT_STYLES, MESES } from './constants';
 import {
   MovimientosHeaderCompact,
-  MovimientosStock,
   MovimientosTabla,
   MovimientoDetalle,
   EntregasAdicionalesModal,
@@ -1329,7 +1328,7 @@ const Movimientos: React.FC = () => {
   // ============================================================================
   return (
     <main className={COMPONENT_STYLES.pageBackground}>
-      {/* Header Compacto con Filtros Integrados */}
+      {/* Header Compacto con Filtros y Stock Integrados */}
       <MovimientosHeaderCompact
         // Filtros
         selectedCentroAcopio={selectedCentroAcopio}
@@ -1345,6 +1344,14 @@ const Movimientos: React.FC = () => {
         onVacunaChange={setSelectedVacuna}
         onMesChange={setSelectedMes}
         onAnioChange={setSelectedAnio}
+        // Stock
+        stockInfo={stockInfo}
+        stockError={stockError}
+        isLoadingStock={isLoadingStock}
+        isUpdatingStock={isUpdatingStock}
+        isUpdatingStockSiguienteMes={isUpdatingStockSiguienteMes}
+        onRetryStock={handleRetryStock}
+        onActualizarStockSiguienteMes={handleActualizarStockSiguienteMes}
         // Acciones
         pendingChangesCount={pendingChangesCount}
         isAutoSaving={isAutoSaving}
@@ -1377,21 +1384,6 @@ const Movimientos: React.FC = () => {
             mensaje="Tienes cambios pendientes que se guardarán automáticamente"
             count={pendingChangesCount}
             accion={{ label: 'Guardar ahora', onClick: handleSaveAllPendingChanges }}
-          />
-        )}
-
-        {/* Stock */}
-        {selectedVacuna && (
-          <MovimientosStock
-            stockInfo={stockInfo}
-            stockError={stockError}
-            isLoadingStock={isLoadingStock}
-            isUpdatingStock={isUpdatingStock}
-            isUpdatingStockSiguienteMes={isUpdatingStockSiguienteMes}
-            selectedMes={selectedMes}
-            selectedAnio={selectedAnio}
-            onRetry={handleRetryStock}
-            onActualizarStockSiguienteMes={handleActualizarStockSiguienteMes}
           />
         )}
 
