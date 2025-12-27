@@ -193,11 +193,12 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
 
   return (
     <section className={COMPONENT_STYLES.section.container} aria-label="Tabla de Movimientos">
-      {/* Tabla */}
-      <div className="overflow-x-auto">
-        <table className="w-full" role="table">
-          {/* Header de la tabla */}
-          <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
+      {/* Contenedor con scroll propio para la tabla */}
+      <div className="relative overflow-hidden rounded-lg border border-gray-200">
+        <div className="overflow-auto max-h-[calc(100vh-280px)] min-h-[400px]">
+          <table className="w-full border-collapse" role="table">
+            {/* Header de la tabla - Sticky */}
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-[1] shadow-sm">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider border-b border-gray-200 min-w-[200px]">
                 Establecimiento
@@ -236,52 +237,51 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 Acciones
               </th>
             </tr>
-          </thead>
-
-          <tbody className="divide-y divide-gray-100">
-            {/* Fila de totales */}
+            {/* Fila de totales - Sticky debajo del header */}
             <tr className="bg-gradient-to-r from-teal-50 to-cyan-50 border-b-2 border-teal-300 font-semibold">
-              <td className="px-4 py-3">
+              <td className="px-4 py-3 bg-gradient-to-r from-teal-50 to-cyan-50">
                 <div className="font-bold text-gray-900">TOTALES</div>
                 <div className="text-xs text-gray-600">{datosTabla.length} establecimientos</div>
               </td>
-              <td className="px-3 py-3 text-center text-sm font-bold text-teal-700 tabular-nums">
+              <td className="px-3 py-3 text-center text-sm font-bold text-teal-700 tabular-nums bg-gradient-to-r from-teal-50 to-cyan-50">
                 {totalesGenerales.saldoAnterior.toLocaleString()}
               </td>
-              <td className="px-3 py-3 text-center text-sm font-bold text-teal-700 tabular-nums">
+              <td className="px-3 py-3 text-center text-sm font-bold text-teal-700 tabular-nums bg-gradient-to-r from-teal-50 to-cyan-50">
                 {totalesGenerales.transIngreso.toLocaleString()}
               </td>
-              <td className="px-3 py-3 text-center bg-teal-100/50">
+              <td className="px-3 py-3 text-center bg-teal-100/80">
                 <span className="px-2 py-1 bg-teal-600 text-white text-sm font-bold rounded-lg tabular-nums">
                   {totalesGenerales.totalSaldo.toLocaleString()}
                 </span>
               </td>
-              <td className="px-3 py-3 text-center text-sm font-bold text-cyan-700 tabular-nums">
+              <td className="px-3 py-3 text-center text-sm font-bold text-cyan-700 tabular-nums bg-gradient-to-r from-teal-50 to-cyan-50">
                 {totalesGenerales.salida.toLocaleString()}
               </td>
-              <td className="px-3 py-3 text-center text-sm font-bold text-cyan-700 tabular-nums">
+              <td className="px-3 py-3 text-center text-sm font-bold text-cyan-700 tabular-nums bg-gradient-to-r from-teal-50 to-cyan-50">
                 {totalesGenerales.transSalida.toLocaleString()}
               </td>
-              <td className="px-3 py-3 text-center bg-emerald-100/50">
+              <td className="px-3 py-3 text-center bg-emerald-100/80">
                 <span className="px-2 py-1 bg-emerald-600 text-white text-sm font-bold rounded-lg tabular-nums">
                   {totalesGenerales.saldo.toLocaleString()}
                 </span>
               </td>
-              <td className="px-3 py-3 text-center">
+              <td className="px-3 py-3 text-center bg-gradient-to-r from-teal-50 to-cyan-50">
                 <span className="px-2 py-1 bg-teal-600 text-white text-sm font-bold rounded-lg tabular-nums">
                   {totalesGenerales.entrega.toLocaleString()}
                 </span>
               </td>
-              <td className="px-3 py-3 text-center bg-cyan-100/50">
+              <td className="px-3 py-3 text-center bg-cyan-100/80">
                 <span className="px-2 py-1 bg-cyan-600 text-white text-sm font-bold rounded-lg tabular-nums">
                   {totalesGenerales.stock.toLocaleString()}
                 </span>
               </td>
-              <td className="px-3 py-3 text-center text-sm text-gray-400">-</td>
-              <td className="px-3 py-3 text-center text-sm text-gray-400">-</td>
-              <td className="px-3 py-3 text-center text-sm text-gray-400">-</td>
+              <td className="px-3 py-3 text-center text-sm text-gray-400 bg-gradient-to-r from-teal-50 to-cyan-50">-</td>
+              <td className="px-3 py-3 text-center text-sm text-gray-400 bg-gradient-to-r from-teal-50 to-cyan-50">-</td>
+              <td className="px-3 py-3 text-center text-sm text-gray-400 bg-gradient-to-r from-teal-50 to-cyan-50">-</td>
             </tr>
+          </thead>
 
+          <tbody className="divide-y divide-gray-100">
             {/* Filas de datos */}
             {datosTabla.length === 0 ? (
               <tr>
@@ -430,8 +430,9 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 );
               })
             )}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   );
