@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
-import { BarChart3, Package, Plus, X, Eye, Zap, Loader2 } from 'lucide-react';
-import { COMPONENT_STYLES, INPUT_FIELD_STYLES, MESES } from '../constants';
+import { Package, Plus, X, Eye, Zap, Loader2 } from 'lucide-react';
+import { COMPONENT_STYLES, INPUT_FIELD_STYLES } from '../constants';
 import { MovimientoCalculado } from '../../../types';
 import { getEstiloEstablecimiento } from '../../../utils/centroAcopioUtils';
 
@@ -193,31 +193,6 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
 
   return (
     <section className={COMPONENT_STYLES.section.container} aria-label="Tabla de Movimientos">
-      {/* Header */}
-      <div className={COMPONENT_STYLES.section.header}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-teal-600 to-cyan-600 p-2.5 rounded-xl shadow-lg">
-              <BarChart3 className="h-5 w-5 text-white" aria-hidden="true" />
-            </div>
-            <div>
-              <h3 className={COMPONENT_STYLES.section.headerTitle}>
-                Movimientos - {MESES[selectedMes - 1]} {selectedAnio}
-              </h3>
-              <p className={COMPONENT_STYLES.section.headerSubtitle}>
-                {datosTabla.length} establecimientos • Total entregas: {totalesGenerales.entrega.toLocaleString()}
-              </p>
-            </div>
-          </div>
-          {isLoading && (
-            <div className="flex items-center text-teal-600">
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              <span className="text-sm font-medium">Cargando...</span>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Tabla */}
       <div className="overflow-x-auto">
         <table className="w-full" role="table">
