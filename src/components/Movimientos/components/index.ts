@@ -1,4 +1,5 @@
 export { MovimientosHeader } from './MovimientosHeader';
+export { MovimientosHeaderCompact } from './MovimientosHeaderCompact';
 export { MovimientosFiltros } from './MovimientosFiltros';
 export { MovimientosStock } from './MovimientosStock';
 export { MovimientosTabla } from './MovimientosTabla';

@@ -24,8 +24,7 @@ import ConfirmacionSinDisponibilidadModal from './ConfirmacionSinDisponibilidadM
 
 import { COMPONENT_STYLES, MESES } from './constants';
 import {
-  MovimientosHeader,
-  MovimientosFiltros,
+  MovimientosHeaderCompact,
   MovimientosStock,
   MovimientosTabla,
   MovimientoDetalle,
@@ -1330,14 +1329,27 @@ const Movimientos: React.FC = () => {
   // ============================================================================
   return (
     <main className={COMPONENT_STYLES.pageBackground}>
-      {/* Header */}
-      <MovimientosHeader
+      {/* Header Compacto con Filtros Integrados */}
+      <MovimientosHeaderCompact
+        // Filtros
+        selectedCentroAcopio={selectedCentroAcopio}
+        selectedVacuna={selectedVacuna}
+        selectedMes={selectedMes}
+        selectedAnio={selectedAnio}
+        centrosAcopio={centrosAcopio}
+        vacunasActivas={vacunasActivas}
+        isLoadingEstablecimientos={isLoadingEstablecimientos}
+        isLoadingVacunas={isLoadingActivas}
+        datosTablaLength={datosTabla.length}
+        onCentroAcopioChange={setSelectedCentroAcopio}
+        onVacunaChange={setSelectedVacuna}
+        onMesChange={setSelectedMes}
+        onAnioChange={setSelectedAnio}
+        // Acciones
         pendingChangesCount={pendingChangesCount}
         isAutoSaving={isAutoSaving}
         isLoading={isLoading}
         isExporting={isExporting}
-        selectedVacuna={selectedVacuna}
-        selectedCentroAcopio={selectedCentroAcopio}
         onSaveChanges={handleSaveAllPendingChanges}
         onRefresh={handleRefresh}
         onExport={handleExportar}
@@ -1367,23 +1379,6 @@ const Movimientos: React.FC = () => {
             accion={{ label: 'Guardar ahora', onClick: handleSaveAllPendingChanges }}
           />
         )}
-
-        {/* Filtros */}
-        <MovimientosFiltros
-          selectedCentroAcopio={selectedCentroAcopio}
-          selectedVacuna={selectedVacuna}
-          selectedMes={selectedMes}
-          selectedAnio={selectedAnio}
-          centrosAcopio={centrosAcopio}
-          vacunasActivas={vacunasActivas}
-          isLoadingEstablecimientos={isLoadingEstablecimientos}
-          isLoadingVacunas={isLoadingActivas}
-          datosTablaLength={datosTabla.length}
-          onCentroAcopioChange={setSelectedCentroAcopio}
-          onVacunaChange={setSelectedVacuna}
-          onMesChange={setSelectedMes}
-          onAnioChange={setSelectedAnio}
-        />
 
         {/* Stock */}
         {selectedVacuna && (
