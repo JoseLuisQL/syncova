@@ -1369,25 +1369,9 @@ const Movimientos: React.FC = () => {
 
       {/* Content */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Alertas de Estado */}
+        {/* Alertas de Estado - Solo errores */}
         {error && (
           <AlertaEstado tipo="error" mensaje={error} />
-        )}
-
-        {(isCreating || isUpdating || isAutoSaving) && (
-          <AlertaEstado
-            tipo="loading"
-            mensaje={isCreating ? 'Creando movimiento...' : isUpdating ? 'Actualizando movimiento...' : 'Guardando cambios automáticamente...'}
-          />
-        )}
-
-        {pendingChangesCount > 0 && !isAutoSaving && (
-          <AlertaEstado
-            tipo="pending"
-            mensaje="Tienes cambios pendientes que se guardarán automáticamente"
-            count={pendingChangesCount}
-            accion={{ label: 'Guardar ahora', onClick: handleSaveAllPendingChanges }}
-          />
         )}
 
         {/* Tabla */}
