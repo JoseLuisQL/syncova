@@ -1,22 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import {
   X,
   FileText,
-  Package,
   Plus,
   CheckCircle,
   AlertCircle,
   Building2,
   Calendar,
   Loader2,
-  ChevronRight,
   RefreshCw,
   AlertTriangle,
-  ShieldAlert
+  Package
 } from 'lucide-react';
 import { ValesService, EntregaAdicionalInfo, ValeTypeSelectionConfig, GrupoEntregaAdicional } from '../../services/valesService';
-import { StockValidationService, StockValidationRequest } from '../../services/stockValidationService';
+import { StockValidationService, StockValidationRequest, StockValidationResult } from '../../services/stockValidationService';
 import { useToastContext } from '../../contexts/ToastContext';
+import { MESES } from './constants';
 
 interface ValeTypeSelectionModalProps {
   isOpen: boolean;
@@ -28,6 +27,125 @@ interface ValeTypeSelectionModalProps {
   anio: number;
 }
 
+// Componente de opción de tipo de vale
+const TipoValeOption = memo<{
+  titulo: string;
+  descripcion: string;
+  icon: React.ElementType;
+  isSelected: boolean;
+  isDisabled: boolean;
+  disabledReason?: string;
+  badge?: string;
+  badgeColor?: string;
+  onClick: () => void;
+}>(({ titulo, descripcion, icon: Icon, isSelected, isDisabled, disabledReason, badge, badgeColor, onClick }) => (
+  <div
+    onClick={() => !isDisabled && onClick()}
+    className={`border-2 rounded-xl p-4 transition-all ${
+      isDisabled
+        ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+        : isSelected
+          ? 'border-teal-500 bg-teal-50 cursor-pointer shadow-md'
+          : 'border-gray-200 hover:border-teal-300 hover:bg-teal-50/30 cursor-pointer'
+    }`}
+  >
+    <div className="flex items-start gap-4">
+      {/* Radio button */}
+      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
+        isSelected && !isDisabled
+          ? 'border-teal-600 bg-teal-600'
+          : 'border-gray-300'
+      }`}>
+        {isSelected && !isDisabled && (
+          <div className="w-2 h-2 rounded-full bg-white" />
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Icon className={`h-5 w-5 ${isDisabled ? 'text-gray-400' : 'text-teal-600'}`} />
+          <h4 className={`font-semibold ${isDisabled ? 'text-gray-500' : 'text-gray-900'}`}>
+            {titulo}
+          </h4>
+          {badge && (
+            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${badgeColor || 'bg-gray-100 text-gray-600'}`}>
+              {badge}
+            </span>
+          )}
+        </div>
+        <p className={`text-sm mt-1 ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
+          {isDisabled && disabledReason ? disabledReason : descripcion}
+        </p>
+      </div>
+    </div>
+  </div>
+));
+
+TipoValeOption.displayName = 'TipoValeOption';
+
+// Componente de grupo de entrega adicional
+const GrupoEntregaCard = memo<{
+  grupo: GrupoEntregaAdicional;
+  isSelected: boolean;
+  onToggle: () => void;
+}>(({ grupo, isSelected, onToggle }) => (
+  <div
+    onClick={onToggle}
+    className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
+      isSelected
+        ? 'border-amber-500 bg-amber-50 shadow-sm'
+        : 'border-gray-200 hover:border-amber-300 hover:bg-amber-50/30'
+    }`}
+  >
+    <div className="flex items-start gap-3">
+      <input
+        type="checkbox"
+        checked={isSelected}
+        onChange={onToggle}
+        className="mt-1 h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+        onClick={e => e.stopPropagation()}
+      />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h5 className="font-semibold text-gray-900">
+            Entrega Adicional #{grupo.numeroEntrega}
+          </h5>
+          <span className="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
+            {grupo.totalVacunas.toLocaleString()} vacunas
+          </span>
+          <span className="px-2 py-0.5 text-xs font-medium bg-cyan-100 text-cyan-700 rounded-full">
+            {grupo.totalEstablecimientos} establec.
+          </span>
+        </div>
+        {grupo.entregas.length > 0 && (
+          <div className="mt-2 text-sm text-gray-600">
+            <p className="font-medium text-gray-700 mb-1">Incluye:</p>
+            <div className="space-y-1">
+              {grupo.entregas.slice(0, 2).map(entrega => (
+                <div key={entrega.id} className="flex items-center gap-1.5 text-xs">
+                  <span className="text-gray-700 truncate max-w-[150px]">{entrega.establecimientoNombre}</span>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-600 truncate max-w-[120px]">{entrega.vacunaNombre}</span>
+                  <span className="text-gray-400">•</span>
+                  <span className="font-medium text-amber-700">{entrega.cantidad}</span>
+                </div>
+              ))}
+              {grupo.entregas.length > 2 && (
+                <p className="text-xs text-gray-500 italic">
+                  +{grupo.entregas.length - 2} más...
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+));
+
+GrupoEntregaCard.displayName = 'GrupoEntregaCard';
+
 const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
   isOpen,
   onClose,
@@ -38,9 +156,9 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
   anio
 }) => {
   const { toast } = useToastContext();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isValidatingStock, setIsValidatingStock] = useState(false);
-  const [entregasAdicionales, setEntregasAdicionales] = useState<EntregaAdicionalInfo[]>([]);
   const [gruposEntregasAdicionales, setGruposEntregasAdicionales] = useState<GrupoEntregaAdicional[]>([]);
   const [gruposGenerados, setGruposGenerados] = useState<number[]>([]);
   const [tiposGenerados, setTiposGenerados] = useState<string[]>([]);
@@ -50,153 +168,112 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
     gruposEntregasSeleccionados: []
   });
 
-  // Constantes
-  const meses = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-  ];
+  // Grupos disponibles (no generados)
+  const gruposDisponibles = useMemo(() =>
+    gruposEntregasAdicionales.filter(g => !gruposGenerados.includes(g.numeroEntrega)),
+    [gruposEntregasAdicionales, gruposGenerados]
+  );
 
-  // Cargar datos necesarios - SIEMPRE refrescar cuando se abre el modal
+  // Verificar disponibilidad de tipos
+  const isBaseDisponible = useMemo(() => !tiposGenerados.includes('solo_base'), [tiposGenerados]);
+  const isAdicionalesDisponible = useMemo(() => gruposDisponibles.length > 0, [gruposDisponibles]);
+  const hayOpcionesDisponibles = useMemo(() => isBaseDisponible || isAdicionalesDisponible, [isBaseDisponible, isAdicionalesDisponible]);
+
+  // Cargar datos cuando se abre el modal
   useEffect(() => {
-    if (isOpen) {
-      console.log('🔄 Modal abierto - Cargando datos frescos...');
-      loadData();
-    }
-  }, [isOpen, centroAcopioId, mes, anio]);
+    if (!isOpen) return;
 
-  // También refrescar cuando cambian los parámetros críticos
-  useEffect(() => {
-    if (isOpen) {
-      console.log('🔄 Parámetros cambiaron - Recargando datos...');
-      loadData();
-    }
-  }, [centroAcopioId, mes, anio]);
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const [tiposRes, gruposGenRes, entregasRes] = await Promise.all([
+          ValesService.getTiposValesGenerados(centroAcopioId, mes, anio),
+          ValesService.getGruposEntregasAdicionalesGenerados(centroAcopioId, mes, anio),
+          ValesService.getEntregasAdicionalesDisponibles(centroAcopioId, mes, anio)
+        ]);
 
-  const loadData = async () => {
-    console.log(`🔄 Cargando datos frescos para modal - Centro: ${centroAcopioId}, Período: ${mes}/${anio}`);
-    setIsLoading(true);
-    try {
-      // Cargar tipos de vales ya generados
-      const tiposResponse = await ValesService.getTiposValesGenerados(centroAcopioId, mes, anio);
-      if (tiposResponse.success && tiposResponse.data) {
-        setTiposGenerados(tiposResponse.data);
-        console.log('✅ Tipos de vales ya generados:', tiposResponse.data);
-      } else {
-        console.warn('⚠️ Error al obtener tipos generados:', tiposResponse.error);
+        setTiposGenerados(tiposRes.success && tiposRes.data ? tiposRes.data : []);
+        setGruposGenerados(gruposGenRes.success && gruposGenRes.data ? gruposGenRes.data : []);
+
+        if (entregasRes.success && entregasRes.data) {
+          // Agrupar entregas por número
+          const gruposMap = new Map<number, GrupoEntregaAdicional>();
+
+          entregasRes.data.forEach((entrega: EntregaAdicionalInfo) => {
+            const num = entrega.numeroEntrega;
+            if (!gruposMap.has(num)) {
+              gruposMap.set(num, { numeroEntrega: num, totalVacunas: 0, totalEstablecimientos: 0, entregas: [] });
+            }
+            const grupo = gruposMap.get(num)!;
+            grupo.totalVacunas += entrega.cantidad;
+            grupo.entregas.push(entrega);
+          });
+
+          gruposMap.forEach(grupo => {
+            grupo.totalEstablecimientos = new Set(grupo.entregas.map(e => e.establecimientoId)).size;
+          });
+
+          setGruposEntregasAdicionales(
+            Array.from(gruposMap.values()).sort((a, b) => a.numeroEntrega - b.numeroEntrega)
+          );
+        } else {
+          setGruposEntregasAdicionales([]);
+        }
+
+        // Resetear configuración
+        setConfig({
+          tipoVale: 'solo_base',
+          entregasAdicionalesSeleccionadas: [],
+          gruposEntregasSeleccionados: []
+        });
+      } catch {
+        toast.error('Error', 'No se pudieron cargar los datos');
         setTiposGenerados([]);
-      }
-
-      // Cargar grupos de entregas adicionales ya generados
-      const gruposGeneradosResponse = await ValesService.getGruposEntregasAdicionalesGenerados(centroAcopioId, mes, anio);
-      if (gruposGeneradosResponse.success && gruposGeneradosResponse.data) {
-        setGruposGenerados(gruposGeneradosResponse.data);
-        console.log('✅ Grupos de entregas adicionales ya generados:', gruposGeneradosResponse.data);
-      } else {
-        console.warn('⚠️ Error al obtener grupos generados:', gruposGeneradosResponse.error);
         setGruposGenerados([]);
-      }
-
-      // Cargar entregas adicionales disponibles
-      const entregasResponse = await ValesService.getEntregasAdicionalesDisponibles(centroAcopioId, mes, anio);
-      if (entregasResponse.success && entregasResponse.data) {
-        setEntregasAdicionales(entregasResponse.data);
-
-        // Agrupar entregas adicionales por número
-        const gruposMap = new Map<number, GrupoEntregaAdicional>();
-
-        entregasResponse.data.forEach((entrega: EntregaAdicionalInfo) => {
-          const numeroEntrega = entrega.numeroEntrega;
-
-          if (!gruposMap.has(numeroEntrega)) {
-            gruposMap.set(numeroEntrega, {
-              numeroEntrega,
-              totalVacunas: 0,
-              totalEstablecimientos: 0,
-              entregas: []
-            });
-          }
-
-          const grupo = gruposMap.get(numeroEntrega)!;
-          grupo.totalVacunas += entrega.cantidad;
-          grupo.entregas.push(entrega);
-        });
-
-        // Calcular total de establecimientos únicos por grupo
-        gruposMap.forEach(grupo => {
-          const establecimientosUnicos = new Set(grupo.entregas.map(e => e.establecimientoId));
-          grupo.totalEstablecimientos = establecimientosUnicos.size;
-        });
-
-        const gruposArray = Array.from(gruposMap.values()).sort((a, b) => a.numeroEntrega - b.numeroEntrega);
-        setGruposEntregasAdicionales(gruposArray);
-
-        console.log('✅ Grupos de entregas adicionales disponibles:', gruposArray);
-        console.log('📊 Resumen de grupos:');
-        gruposArray.forEach(grupo => {
-          const yaGenerado = gruposGeneradosResponse.data?.includes(grupo.numeroEntrega);
-          console.log(`  - Grupo #${grupo.numeroEntrega}: ${grupo.totalVacunas} vacunas, ${grupo.totalEstablecimientos} establecimientos ${yaGenerado ? '(YA GENERADO)' : '(DISPONIBLE)'}`);
-        });
-      } else {
-        setEntregasAdicionales([]);
         setGruposEntregasAdicionales([]);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error: any) {
-      console.error('Error cargando datos:', error);
-      toast.error('Error al cargar datos necesarios');
-      setEntregasAdicionales([]);
-      setGruposEntregasAdicionales([]);
-      setGruposGenerados([]);
-      setTiposGenerados([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  const handleTipoValeChange = (tipo: 'solo_base' | 'solo_adicionales') => {
-    // Validaciones específicas por tipo
-    if (tipo === 'solo_adicionales') {
-      if (getGruposDisponibles().length === 0) {
-        toast.warning('No hay grupos de entregas adicionales disponibles');
-        return;
-      }
-    } else {
-      if (tiposGenerados.includes(tipo)) {
-        toast.warning(`El vale de tipo "${tipo}" ya ha sido generado`);
-        return;
-      }
+    loadData();
+  }, [isOpen, centroAcopioId, mes, anio, toast]);
+
+  // Handlers
+  const handleTipoChange = useCallback((tipo: 'solo_base' | 'solo_adicionales') => {
+    if (tipo === 'solo_base' && !isBaseDisponible) {
+      toast.warning('No disponible', 'El vale base ya fue generado');
+      return;
+    }
+    if (tipo === 'solo_adicionales' && !isAdicionalesDisponible) {
+      toast.warning('No disponible', 'No hay grupos de entregas adicionales disponibles');
+      return;
     }
 
-    setConfig(prev => ({
+    setConfig({
       tipoVale: tipo,
       entregasAdicionalesSeleccionadas: [],
       gruposEntregasSeleccionados: tipo === 'solo_adicionales'
-        ? getGruposDisponibles().map(g => g.numeroEntrega)
+        ? gruposDisponibles.map(g => g.numeroEntrega)
         : []
-    }));
-  };
+    });
+  }, [isBaseDisponible, isAdicionalesDisponible, gruposDisponibles, toast]);
 
-  const handleGrupoEntregaToggle = (numeroEntrega: number) => {
+  const handleGrupoToggle = useCallback((numeroEntrega: number) => {
     setConfig(prev => {
       const isSelected = prev.gruposEntregasSeleccionados.includes(numeroEntrega);
       const nuevosGrupos = isSelected
-        ? prev.gruposEntregasSeleccionados.filter(num => num !== numeroEntrega)
+        ? prev.gruposEntregasSeleccionados.filter(n => n !== numeroEntrega)
         : [...prev.gruposEntregasSeleccionados, numeroEntrega];
 
-      // También actualizar las entregas individuales para compatibilidad
-      const entregasDelGrupo = gruposEntregasAdicionales
-        .find(g => g.numeroEntrega === numeroEntrega)?.entregas || [];
-
+      const grupo = gruposEntregasAdicionales.find(g => g.numeroEntrega === numeroEntrega);
       let nuevasEntregas = prev.entregasAdicionalesSeleccionadas;
 
-      if (isSelected) {
-        // Remover entregas del grupo
-        nuevasEntregas = nuevasEntregas.filter(id =>
-          !entregasDelGrupo.some(e => e.id === id)
-        );
-      } else {
-        // Agregar entregas del grupo
-        const idsDelGrupo = entregasDelGrupo.map(e => e.id);
-        nuevasEntregas = [...nuevasEntregas, ...idsDelGrupo];
+      if (grupo) {
+        const idsGrupo = grupo.entregas.map(e => e.id);
+        nuevasEntregas = isSelected
+          ? nuevasEntregas.filter(id => !idsGrupo.includes(id))
+          : [...nuevasEntregas, ...idsGrupo];
       }
 
       return {
@@ -205,34 +282,16 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
         entregasAdicionalesSeleccionadas: nuevasEntregas
       };
     });
-  };
+  }, [gruposEntregasAdicionales]);
 
-  const handleConfirm = async () => {
-    // Validaciones específicas por tipo
-    if (config.tipoVale === 'solo_adicionales') {
-      if (config.gruposEntregasSeleccionados.length === 0) {
-        toast.error('Debe seleccionar al menos un grupo de entregas adicionales');
-        return;
-      }
-      if (getGruposDisponibles().length === 0) {
-        toast.error('No hay grupos de entregas adicionales disponibles para generar');
-        return;
-      }
-    } else {
-      // Para otros tipos, verificar disponibilidad tradicional
-      if (!isTipoDisponible(config.tipoVale)) {
-        toast.error(`El vale de tipo "${config.tipoVale}" ya ha sido generado`);
-        return;
-      }
+  const handleConfirm = useCallback(async () => {
+    // Validaciones
+    if (config.tipoVale === 'solo_adicionales' && config.gruposEntregasSeleccionados.length === 0) {
+      toast.error('Selección requerida', 'Seleccione al menos un grupo de entregas adicionales');
+      return;
     }
 
-    // Validar stock antes de confirmar
-    await validateStockBeforeConfirm();
-  };
-
-  const validateStockBeforeConfirm = async () => {
     setIsValidatingStock(true);
-
     try {
       const validationRequest: StockValidationRequest = {
         centroAcopioId,
@@ -246,466 +305,219 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
       const result = await StockValidationService.validateStockForVoucher(validationRequest);
 
       if (!result.success) {
-        toast.error(
-          'Error de validación',
-          result.error || 'Error al validar stock disponible',
-          { duration: 8000 }
-        );
+        toast.error('Error de validación', result.error || 'Error al validar stock');
         return;
       }
 
-      const validation = result.data!;
+      const validation = result.data as StockValidationResult;
 
-      // Verificar si hay errores de stock o lotes vencidos
       if (!validation.success) {
-        showStockValidationErrors(validation);
+        showStockErrors(validation);
         return;
       }
 
-      // Si todo está bien, proceder con la confirmación
       onConfirm(config);
       onClose();
-
-    } catch (error) {
-      console.error('Error validating stock:', error);
-      toast.error(
-        'Error de conexión',
-        'No se pudo validar el stock disponible. Intente nuevamente.',
-        { duration: 8000 }
-      );
+    } catch {
+      toast.error('Error de conexión', 'No se pudo validar el stock disponible');
     } finally {
       setIsValidatingStock(false);
     }
-  };
+  }, [config, centroAcopioId, mes, anio, onConfirm, onClose, toast]);
 
-  const showStockValidationErrors = (validation: any) => {
+  const showStockErrors = useCallback((validation: StockValidationResult) => {
     const { stockDetails, expiredLots } = validation;
 
-    // Verificar vacunas con stock insuficiente
-    const insufficientVaccines = stockDetails.vaccines.filter((v: any) => !v.sufficient);
-    const insufficientSyringes = stockDetails.syringes.filter((s: any) => !s.sufficient);
-    const hasExpiredLots = expiredLots.vaccines.length > 0 || expiredLots.syringes.length > 0;
-
-    // Calcular totales
-    const totalVaccinesRequired = insufficientVaccines.reduce((sum: number, v: any) => sum + v.requiredQuantity, 0);
-    const totalVaccinesAvailable = insufficientVaccines.reduce((sum: number, v: any) => sum + v.availableQuantity, 0);
-    const totalSyringesRequired = insufficientSyringes.reduce((sum: number, s: any) => sum + s.requiredQuantity, 0);
-    const totalSyringesAvailable = insufficientSyringes.reduce((sum: number, s: any) => sum + s.availableQuantity, 0);
-
-    // Crear mensaje profesional continuo
-    let message = 'Stock insuficiente para generar el vale. ';
-
-    // Agregar información específica de vacunas (sin duplicados)
-    if (insufficientVaccines.length > 0) {
-      const deficit = totalVaccinesRequired - totalVaccinesAvailable;
-      const uniqueVaccineNames = [...new Set(insufficientVaccines.map((v: any) => v.vaccineName))];
-      message += `Vacunas afectadas: ${uniqueVaccineNames.join(', ')}. Total faltante: ${deficit.toLocaleString()} unidades (necesario ${totalVaccinesRequired.toLocaleString()}, disponible ${totalVaccinesAvailable.toLocaleString()}). `;
+    interface StockItem {
+      sufficient: boolean;
+      requiredQuantity: number;
+      availableQuantity: number;
+      vaccineName?: string;
+      syringeType?: string;
     }
 
-    // Agregar información específica de jeringas (sin duplicados)
-    if (insufficientSyringes.length > 0) {
-      const deficit = totalSyringesRequired - totalSyringesAvailable;
-      const uniqueSyringeNames = [...new Set(insufficientSyringes.map((s: any) => s.syringeType))];
-      message += `Jeringas afectadas: ${uniqueSyringeNames.join(', ')}. Total faltante: ${deficit.toLocaleString()} unidades (necesario ${totalSyringesRequired.toLocaleString()}, disponible ${totalSyringesAvailable.toLocaleString()}). `;
+    interface ExpiredLot {
+      itemName: string;
     }
 
-    // Agregar información específica de lotes vencidos
-    if (hasExpiredLots) {
-      message += 'Además, hay lotes vencidos que deben actualizarse: ';
-      const expiredDetails = [];
+    const insuffVac = stockDetails.vaccines.filter((v: StockItem) => !v.sufficient);
+    const insuffSyr = stockDetails.syringes.filter((s: StockItem) => !s.sufficient);
 
-      if (expiredLots.vaccines.length > 0) {
-        const expiredVaccineNames = [...new Set(expiredLots.vaccines.map((lot: any) => lot.itemName))];
-        expiredDetails.push(`vacunas (${expiredVaccineNames.join(', ')})`);
-      }
+    let msg = 'Stock insuficiente. ';
 
-      if (expiredLots.syringes.length > 0) {
-        const expiredSyringeNames = [...new Set(expiredLots.syringes.map((lot: any) => lot.itemName))];
-        expiredDetails.push(`jeringas (${expiredSyringeNames.join(', ')})`);
-      }
-
-      message += expiredDetails.join(' y ') + '. ';
+    if (insuffVac.length > 0) {
+      const names = [...new Set(insuffVac.map((v: StockItem) => v.vaccineName))].join(', ');
+      const deficit = insuffVac.reduce((s: number, v: StockItem) => s + v.requiredQuantity - v.availableQuantity, 0);
+      msg += `Vacunas: ${names} (faltan ${deficit.toLocaleString()}). `;
     }
 
-    // Agregar recomendación
-    message += 'Por favor, ingrese nuevos lotes de stock para continuar con la generación del vale.';
+    if (insuffSyr.length > 0) {
+      const names = [...new Set(insuffSyr.map((s: StockItem) => s.syringeType))].join(', ');
+      const deficit = insuffSyr.reduce((s: number, j: StockItem) => s + j.requiredQuantity - j.availableQuantity, 0);
+      msg += `Jeringas: ${names} (faltan ${deficit.toLocaleString()}). `;
+    }
 
-    // Mostrar toast profesional
-    toast.error(
-      'Stock Insuficiente',
-      message,
-      {
-        duration: 15000, // Aumentado para leer los nombres específicos
-        style: {
-          background: '#DC2626',
-          color: 'white',
-          fontWeight: '500',
-          fontSize: '14px',
-          maxWidth: '550px', // Aumentado para acomodar más texto
-          whiteSpace: 'normal',
-          lineHeight: '1.4',
-          padding: '18px',
-          borderRadius: '10px',
-          boxShadow: '0 6px 20px rgba(220, 38, 38, 0.25)',
-          fontFamily: 'system-ui, -apple-system, sans-serif'
-        }
-      }
+    if (expiredLots.vaccines.length > 0 || expiredLots.syringes.length > 0) {
+      const expNames = [
+        ...expiredLots.vaccines.map((l: ExpiredLot) => l.itemName),
+        ...expiredLots.syringes.map((l: ExpiredLot) => l.itemName)
+      ];
+      msg += `Lotes vencidos: ${[...new Set(expNames)].join(', ')}.`;
+    }
+
+    toast.error('Stock Insuficiente', msg, { duration: 12000 });
+  }, [toast]);
+
+  const handleRefresh = useCallback(() => {
+    if (!isLoading) {
+      setConfig({
+        tipoVale: 'solo_base',
+        entregasAdicionalesSeleccionadas: [],
+        gruposEntregasSeleccionados: []
+      });
+      // Trigger reload by updating a dependency (the effect will re-run)
+      setIsLoading(true);
+      setTimeout(() => setIsLoading(false), 0);
+    }
+  }, [isLoading]);
+
+  // Totales seleccionados
+  const totalesSeleccionados = useMemo(() => {
+    if (config.tipoVale !== 'solo_adicionales') return null;
+    const grupos = gruposEntregasAdicionales.filter(g =>
+      config.gruposEntregasSeleccionados.includes(g.numeroEntrega)
     );
-  };
-
-  // Funciones auxiliares para el manejo de grupos
-  const getGruposDisponibles = (): GrupoEntregaAdicional[] => {
-    return gruposEntregasAdicionales.filter(grupo =>
-      !gruposGenerados.includes(grupo.numeroEntrega)
-    );
-  };
-
-  const isGrupoGenerado = (numeroEntrega: number): boolean => {
-    return gruposGenerados.includes(numeroEntrega);
-  };
-
-  const getGrupoInfo = (numeroEntrega: number): GrupoEntregaAdicional | undefined => {
-    return gruposEntregasAdicionales.find(g => g.numeroEntrega === numeroEntrega);
-  };
-
-  // Funciones para verificar disponibilidad
-  const isTipoDisponible = (tipo: string) => {
-    // Para entregas adicionales, verificar si hay grupos disponibles
-    if (tipo === 'solo_adicionales') {
-      return getGruposDisponibles().length > 0;
-    }
-    // Para otros tipos, verificar si no han sido generados
-    return !tiposGenerados.includes(tipo);
-  };
-
-  const getTipoValeDescription = (tipo: string) => {
-    const baseDescription = {
-      'solo_base': 'Solo incluye las entregas base programadas en la planificación anual',
-      'solo_adicionales': 'Solo incluye las entregas adicionales seleccionadas'
-    }[tipo] || '';
-
-    // Para entregas adicionales, mostrar información específica de grupos
-    if (tipo === 'solo_adicionales') {
-      if (getGruposDisponibles().length === 0 && gruposEntregasAdicionales.length > 0) {
-        return `${baseDescription} (Todos los grupos ya generados)`;
-      } else if (gruposEntregasAdicionales.length === 0) {
-        return `${baseDescription} (Sin entregas adicionales disponibles)`;
-      }
-      return baseDescription;
-    }
-
-    // Para otros tipos, verificar si ya fueron generados
-    if (tiposGenerados.includes(tipo)) {
-      return `${baseDescription} (Ya generado)`;
-    }
-
-    return baseDescription;
-  };
-
-  const getOpcionesDisponibles = () => {
-    const opciones = [];
-
-    if (!tiposGenerados.includes('solo_base')) {
-      opciones.push('solo_base');
-    }
-    // Permitir "solo_adicionales" si hay grupos disponibles (no generados)
-    if (getGruposDisponibles().length > 0) {
-      opciones.push('solo_adicionales');
-    }
-
-    return opciones;
-  };
-
-  const hayOpcionesDisponibles = () => {
-    return getOpcionesDisponibles().length > 0;
-  };
+    return {
+      grupos: grupos.length,
+      vacunas: grupos.reduce((s, g) => s + g.totalVacunas, 0)
+    };
+  }, [config, gruposEntregasAdicionales]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn">
-      <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col overflow-hidden transform transition-all duration-300 animate-slideUp">
+    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
-          <div className="flex items-center space-x-4">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <FileText className="h-6 w-6 text-blue-600" />
+        <header className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-cyan-50 flex-shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 bg-gradient-to-br from-teal-600 to-cyan-600 rounded-xl shadow-lg">
+              <FileText className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                Seleccionar Tipo de Vale de Entrega
-              </h2>
-              <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600">
-                <div className="flex items-center">
-                  <Building2 className="h-4 w-4 mr-1" />
-                  <span>{centroAcopioNombre}</span>
-                </div>
-                <span>•</span>
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-1" />
-                  <span>{meses[mes - 1]} {anio}</span>
-                </div>
+              <h2 className="text-lg font-bold text-gray-900">Generar Nuevo Vale</h2>
+              <div className="flex items-center gap-3 mt-0.5 text-sm text-gray-600">
+                <span className="flex items-center gap-1">
+                  <Building2 className="h-3.5 w-3.5" />
+                  {centroAcopioNombre}
+                </span>
+                <span className="text-gray-400">•</span>
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {MESES[mes - 1]} {anio}
+                </span>
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <button
-              onClick={loadData}
+              onClick={handleRefresh}
               disabled={isLoading}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
-              title="Actualizar datos"
+              className="p-2 hover:bg-white/80 rounded-lg transition-colors disabled:opacity-50"
+              title="Actualizar"
             >
-              <RefreshCw className={`h-5 w-5 text-gray-500 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 text-gray-500 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-            >
+            <button onClick={onClose} className="p-2 hover:bg-white/80 rounded-lg transition-colors">
               <X className="h-5 w-5 text-gray-500" />
             </button>
           </div>
-        </div>
+        </header>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600 mr-3" />
-              <span className="text-gray-600">Cargando entregas adicionales disponibles...</span>
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+              <Loader2 className="h-8 w-8 animate-spin text-teal-600 mb-3" />
+              <p>Cargando datos...</p>
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Información */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-start">
-                  <AlertCircle className="h-5 w-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+              {/* Info */}
+              <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
+                <div className="flex gap-3">
+                  <AlertCircle className="h-5 w-5 text-teal-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-semibold text-blue-900 mb-1">
-                      Seleccione el tipo de vale que desea generar
-                    </h3>
-                    <p className="text-blue-800 text-sm">
-                      Puede generar un vale completo con todas las entregas, solo entregas base, 
-                      o únicamente entregas adicionales específicas según sus necesidades operativas.
+                    <h3 className="font-semibold text-teal-900">Seleccione el tipo de vale</h3>
+                    <p className="text-sm text-teal-700 mt-1">
+                      Puede generar un vale con entregas base programadas o entregas adicionales.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Opciones de tipo de vale */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Tipo de Vale</h3>
+              {/* Opciones de tipo */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-gray-700">Tipo de Vale</h3>
 
-                {/* Solo Entregas Base */}
-                <div
-                  className={`border-2 rounded-lg p-4 transition-all ${
-                    tiposGenerados.includes('solo_base')
-                      ? 'border-gray-300 bg-gray-100 cursor-not-allowed opacity-60'
-                      : config.tipoVale === 'solo_base'
-                        ? 'border-green-500 bg-green-50 cursor-pointer'
-                        : 'border-gray-200 hover:border-gray-300 cursor-pointer'
-                  }`}
-                  onClick={() => !tiposGenerados.includes('solo_base') && handleTipoValeChange('solo_base')}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                        config.tipoVale === 'solo_base' && !tiposGenerados.includes('solo_base')
-                          ? 'border-green-500 bg-green-500'
-                          : 'border-gray-300'
-                      }`}>
-                        {config.tipoVale === 'solo_base' && !tiposGenerados.includes('solo_base') && (
-                          <div className="w-full h-full rounded-full bg-white scale-50"></div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h4 className={`font-semibold ${tiposGenerados.includes('solo_base') ? 'text-gray-500' : 'text-gray-900'}`}>
-                            Solo Entregas Base
-                          </h4>
-                          {tiposGenerados.includes('solo_base') && (
-                            <span className="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded-full">
-                              Ya generado
-                            </span>
-                          )}
-                        </div>
-                        <p className={`text-sm ${tiposGenerados.includes('solo_base') ? 'text-gray-500' : 'text-gray-600'}`}>
-                          {getTipoValeDescription('solo_base')}
-                        </p>
-                      </div>
-                    </div>
-                    <CheckCircle className={`h-5 w-5 ${!isTipoDisponible('solo_base') ? 'text-gray-400' : 'text-gray-400'}`} />
-                  </div>
-                </div>
+                <TipoValeOption
+                  tipo="solo_base"
+                  titulo="Entregas Base"
+                  descripcion="Incluye las entregas programadas en la planificación anual"
+                  icon={CheckCircle}
+                  isSelected={config.tipoVale === 'solo_base'}
+                  isDisabled={!isBaseDisponible}
+                  disabledReason="Ya fue generado para este período"
+                  badge={!isBaseDisponible ? 'Generado' : undefined}
+                  badgeColor="bg-gray-200 text-gray-600"
+                  onClick={() => handleTipoChange('solo_base')}
+                />
 
-                {/* Solo Entregas Adicionales */}
-                <div
-                  className={`border-2 rounded-lg p-4 transition-all ${
-                    getGruposDisponibles().length === 0
-                      ? 'border-gray-300 bg-gray-100 cursor-not-allowed opacity-60'
-                      : config.tipoVale === 'solo_adicionales'
-                        ? 'border-orange-500 bg-orange-50 cursor-pointer'
-                        : 'border-gray-200 hover:border-gray-300 cursor-pointer'
-                  }`}
-                  onClick={() => getGruposDisponibles().length > 0 && handleTipoValeChange('solo_adicionales')}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                        config.tipoVale === 'solo_adicionales' && getGruposDisponibles().length > 0
-                          ? 'border-orange-500 bg-orange-500'
-                          : 'border-gray-300'
-                      }`}>
-                        {config.tipoVale === 'solo_adicionales' && getGruposDisponibles().length > 0 && (
-                          <div className="w-full h-full rounded-full bg-white scale-50"></div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h4 className={`font-semibold ${getGruposDisponibles().length === 0 ? 'text-gray-500' : 'text-gray-900'}`}>
-                            Solo Entregas Adicionales
-                          </h4>
-                          {getGruposDisponibles().length === 0 && gruposEntregasAdicionales.length > 0 && (
-                            <span className="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded-full">
-                              Todos los grupos ya generados
-                            </span>
-                          )}
-                          {getGruposDisponibles().length === 0 && gruposEntregasAdicionales.length === 0 && (
-                            <span className="px-2 py-1 text-xs bg-yellow-200 text-yellow-700 rounded-full">
-                              Sin entregas adicionales
-                            </span>
-                          )}
-                          {getGruposDisponibles().length > 0 && (
-                            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
-                              {getGruposDisponibles().length} grupo(s) disponible(s)
-                            </span>
-                          )}
-                        </div>
-                        <p className={`text-sm ${getGruposDisponibles().length === 0 ? 'text-gray-500' : 'text-gray-600'}`}>
-                          {getTipoValeDescription('solo_adicionales')}
-                        </p>
-                      </div>
-                    </div>
-                    <Plus className={`h-5 w-5 ${getGruposDisponibles().length === 0 ? 'text-gray-400' : 'text-gray-400'}`} />
-                  </div>
-                </div>
+                <TipoValeOption
+                  tipo="solo_adicionales"
+                  titulo="Entregas Adicionales"
+                  descripcion="Incluye entregas adicionales no programadas"
+                  icon={Plus}
+                  isSelected={config.tipoVale === 'solo_adicionales'}
+                  isDisabled={!isAdicionalesDisponible}
+                  disabledReason={
+                    gruposEntregasAdicionales.length === 0
+                      ? 'No hay entregas adicionales para este período'
+                      : 'Todos los grupos ya fueron generados'
+                  }
+                  badge={isAdicionalesDisponible ? `${gruposDisponibles.length} disponibles` : undefined}
+                  badgeColor="bg-cyan-100 text-cyan-700"
+                  onClick={() => handleTipoChange('solo_adicionales')}
+                />
               </div>
 
-              {/* Mensaje cuando no hay opciones disponibles */}
-              {!isLoading && !hayOpcionesDisponibles() && (
-                <div className="mt-6 text-center py-8 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <AlertCircle className="h-8 w-8 text-yellow-600 mx-auto mb-3" />
-                  <h3 className="font-semibold text-yellow-900 mb-2">
-                    No hay tipos de vales disponibles
-                  </h3>
-                  <p className="text-yellow-800 text-sm mb-4">
-                    Todos los tipos de vales ya han sido generados para este período.
+              {/* Sin opciones disponibles */}
+              {!hayOpcionesDisponibles && (
+                <div className="text-center py-8 bg-amber-50 border border-amber-200 rounded-xl">
+                  <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto mb-3" />
+                  <h3 className="font-semibold text-amber-900 mb-1">Sin opciones disponibles</h3>
+                  <p className="text-sm text-amber-700">
+                    Todos los tipos de vales ya fueron generados para este período.
                   </p>
-                  <div className="space-y-2 text-xs text-yellow-700">
-                    <p><strong>Tipos ya generados:</strong></p>
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {tiposGenerados.map(tipo => (
-                        <span key={tipo} className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full">
-                          {tipo === 'solo_base' ? 'Solo Base' :
-                           'Solo Adicionales'}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               )}
 
-              {/* Lista de grupos de entregas adicionales (solo si se selecciona "solo_adicionales") */}
-              {config.tipoVale === 'solo_adicionales' && (
-                <div className="mt-6">
-                  <h4 className="text-md font-semibold text-gray-900 mb-4">
-                    Seleccionar Grupos de Entregas Adicionales
-                  </h4>
-                  {getGruposDisponibles().length === 0 ? (
-                    <div className="text-center py-8 bg-gray-50 rounded-lg">
-                      <AlertCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-600 font-medium">
-                        No hay grupos de entregas adicionales disponibles
-                      </p>
-                      <p className="text-gray-500 text-sm mt-1">
-                        {gruposEntregasAdicionales.length === 0
-                          ? 'No existen entregas adicionales para este período'
-                          : 'Todos los grupos ya han sido generados en vales anteriores'
-                        }
-                      </p>
-                      {gruposGenerados.length > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs text-gray-500 mb-2">Grupos ya generados:</p>
-                          <div className="flex flex-wrap justify-center gap-1">
-                            {gruposGenerados.map(numero => (
-                              <span key={numero} className="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded-full">
-                                Grupo #{numero}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-3 max-h-60 overflow-y-auto">
-                      {getGruposDisponibles().map((grupo) => (
-                        <div
-                          key={grupo.numeroEntrega}
-                          className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                            config.gruposEntregasSeleccionados.includes(grupo.numeroEntrega)
-                              ? 'border-orange-500 bg-orange-50'
-                              : 'border-gray-200 hover:border-orange-200'
-                          }`}
-                          onClick={() => handleGrupoEntregaToggle(grupo.numeroEntrega)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              <input
-                                type="checkbox"
-                                checked={config.gruposEntregasSeleccionados.includes(grupo.numeroEntrega)}
-                                onChange={() => handleGrupoEntregaToggle(grupo.numeroEntrega)}
-                                className="mr-3 h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
-                              />
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-3">
-                                  <h5 className="font-semibold text-gray-900">
-                                    Entrega Adicional #{grupo.numeroEntrega}
-                                  </h5>
-                                  <span className="px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full font-medium">
-                                    {grupo.totalVacunas.toLocaleString()} vacunas
-                                  </span>
-                                  <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full font-medium">
-                                    {grupo.totalEstablecimientos} establecimiento(s)
-                                  </span>
-                                </div>
-                                <div className="mt-2 text-sm text-gray-600">
-                                  <p className="font-medium">Incluye entregas para:</p>
-                                  <div className="mt-1 space-y-1">
-                                    {grupo.entregas.slice(0, 3).map((entrega, index) => (
-                                      <div key={entrega.id} className="flex items-center space-x-2">
-                                        <span className="text-gray-700">{entrega.establecimientoNombre}</span>
-                                        <span className="text-gray-500">•</span>
-                                        <span className="text-gray-600">{entrega.vacunaNombre}</span>
-                                        <span className="text-gray-500">•</span>
-                                        <span className="font-medium text-orange-600">
-                                          {entrega.cantidad.toLocaleString()} unidades
-                                        </span>
-                                      </div>
-                                    ))}
-                                    {grupo.entregas.length > 3 && (
-                                      <p className="text-xs text-gray-500 italic">
-                                        ... y {grupo.entregas.length - 3} entrega(s) más
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-gray-400" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+              {/* Grupos de entregas adicionales */}
+              {config.tipoVale === 'solo_adicionales' && gruposDisponibles.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-gray-700">
+                    Grupos de Entregas Adicionales
+                  </h3>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {gruposDisponibles.map(grupo => (
+                      <GrupoEntregaCard
+                        key={grupo.numeroEntrega}
+                        grupo={grupo}
+                        isSelected={config.gruposEntregasSeleccionados.includes(grupo.numeroEntrega)}
+                        onToggle={() => handleGrupoToggle(grupo.numeroEntrega)}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -713,30 +525,21 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+        <footer className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between flex-shrink-0">
           <div className="text-sm text-gray-600">
-            {config.tipoVale === 'solo_adicionales' && config.gruposEntregasSeleccionados.length > 0 && (
-              <div className="space-y-1">
-                <span className="font-medium">
-                  {config.gruposEntregasSeleccionados.length} grupo(s) seleccionado(s):
+            {totalesSeleccionados && totalesSeleccionados.grupos > 0 && (
+              <span className="flex items-center gap-2">
+                <Package className="h-4 w-4 text-amber-600" />
+                <span>
+                  {totalesSeleccionados.grupos} grupo(s) • {totalesSeleccionados.vacunas.toLocaleString()} vacunas
                 </span>
-                <div className="flex flex-wrap gap-1">
-                  {config.gruposEntregasSeleccionados.map(numero => {
-                    const grupo = getGrupoInfo(numero);
-                    return (
-                      <span key={numero} className="px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full">
-                        Grupo #{numero} ({grupo?.totalVacunas.toLocaleString() || 0} vacunas)
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
+              </span>
             )}
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancelar
             </button>
@@ -744,38 +547,27 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
               onClick={handleConfirm}
               disabled={
                 isValidatingStock ||
-                !hayOpcionesDisponibles() ||
-                (config.tipoVale === 'solo_adicionales' && (
-                  config.gruposEntregasSeleccionados.length === 0 ||
-                  getGruposDisponibles().length === 0
-                )) ||
-                (config.tipoVale !== 'solo_adicionales' && !isTipoDisponible(config.tipoVale))
+                isLoading ||
+                !hayOpcionesDisponibles ||
+                (config.tipoVale === 'solo_adicionales' && config.gruposEntregasSeleccionados.length === 0) ||
+                (config.tipoVale === 'solo_base' && !isBaseDisponible)
               }
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 rounded-lg shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isValidatingStock ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Validando Stock...
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Validando...
                 </>
               ) : (
                 <>
-                  {!hayOpcionesDisponibles() ? (
-                    <>
-                      <AlertTriangle className="h-4 w-4 mr-2" />
-                      No hay opciones disponibles
-                    </>
-                  ) : (
-                    <>
-                      <ShieldAlert className="h-4 w-4 mr-2" />
-                      Generar Vale
-                    </>
-                  )}
+                  <CheckCircle className="h-4 w-4" />
+                  Generar Vale
                 </>
               )}
             </button>
           </div>
-        </div>
+        </footer>
       </div>
     </div>
   );

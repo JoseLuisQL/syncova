@@ -1502,7 +1502,7 @@ const Movimientos: React.FC = () => {
 
       {showValesModal && (
         <div className={COMPONENT_STYLES.modal.overlay}>
-          <div className={COMPONENT_STYLES.modal.containerFullscreen}>
+          <div className="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl">
             <ValesErrorBoundary>
               <Vales
                 initialCentroAcopioId={selectedCentroAcopio !== 'todos' ? selectedCentroAcopio : undefined}
