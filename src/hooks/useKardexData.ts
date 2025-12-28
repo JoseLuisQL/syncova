@@ -65,14 +65,11 @@ interface KardexDataActions {
 }
 
 /**
- * Filtros por defecto
+ * Filtros por defecto - 20 items por página según ISO 25010 (carga cognitiva óptima)
  */
 const FILTROS_DEFECTO: KardexFilters = {
   page: 1,
-  limit: 100, // Aumentado a 100 elementos por página para mostrar más datos
-  // Removidas las fechas por defecto para mostrar todos los registros históricos
-  // fechaInicio: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0], // Inicio del año actual
-  // fechaFin: new Date().toISOString().split('T')[0] // Fecha actual
+  limit: 20, // 20 elementos por página para mejor usabilidad según ISO 25010
 };
 
 /**
