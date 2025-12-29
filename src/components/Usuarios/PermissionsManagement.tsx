@@ -225,7 +225,7 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
-          <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+          <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
           <span className="text-gray-600">Cargando permisos...</span>
         </div>
       </div>
@@ -255,43 +255,43 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
     <div className="space-y-6">
       {/* Header con estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl p-4 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-indigo-100 text-sm">Total Permisos</p>
+              <p className="text-teal-100 text-sm">Total Permisos</p>
               <p className="text-2xl font-bold">{stats.total}</p>
             </div>
-            <Key className="h-8 w-8 text-indigo-200" />
+            <Key className="h-8 w-8 text-teal-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-4 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm">Activos</p>
+              <p className="text-emerald-100 text-sm">Activos</p>
               <p className="text-2xl font-bold">{stats.activos}</p>
             </div>
-            <CheckCircle className="h-8 w-8 text-green-200" />
+            <CheckCircle className="h-8 w-8 text-emerald-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-rose-500 to-rose-600 rounded-xl p-4 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-red-100 text-sm">Inactivos</p>
+              <p className="text-rose-100 text-sm">Inactivos</p>
               <p className="text-2xl font-bold">{stats.inactivos}</p>
             </div>
-            <XCircle className="h-8 w-8 text-red-200" />
+            <XCircle className="h-8 w-8 text-rose-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-xl p-4 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-100 text-sm">Asignados</p>
+              <p className="text-cyan-100 text-sm">Asignados</p>
               <p className="text-2xl font-bold">{stats.asignados}</p>
             </div>
-            <Shield className="h-8 w-8 text-purple-200" />
+            <Shield className="h-8 w-8 text-cyan-200" />
           </div>
         </div>
       </div>
@@ -308,7 +308,7 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
                 placeholder="Buscar permisos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-full lg:w-64"
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent w-full lg:w-64"
               />
             </div>
 
@@ -317,7 +317,7 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
               {onNavigateToRoles && (
                 <button
                   onClick={onNavigateToRoles}
-                  className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  className="flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
                 >
                   <Shield className="h-4 w-4 mr-2" />
                   Gestionar Roles
@@ -332,7 +332,7 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
             <select
               value={filterEstado}
               onChange={(e) => setFilterEstado(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             >
               <option value="todos">Todos los estados</option>
               <option value="activo">Activos</option>
@@ -343,7 +343,7 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
             <select
               value={filterCategoria}
               onChange={(e) => setFilterCategoria(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             >
               <option value="todas">Todas las categorías</option>
               {categorias.map(categoria => (
@@ -357,7 +357,7 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
             <select
               value={filterRecurso}
               onChange={(e) => setFilterRecurso(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             >
               <option value="todos">Todos los recursos</option>
               {recursos.map(recurso => (
@@ -371,7 +371,7 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
             <select
               value={filterAccion}
               onChange={(e) => setFilterAccion(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             >
               <option value="todas">Todas las acciones</option>
               {acciones.map(accion => (
