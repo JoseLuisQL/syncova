@@ -1,11 +1,9 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { ChevronRight, Home } from 'lucide-react';
 import { useCurrentRoute, useAppNavigation } from '../../hooks/useRouting';
+import { BREADCRUMBS_STYLES } from '../Layout/constants';
 
-/**
- * Componente de breadcrumbs para navegación
- */
-const Breadcrumbs: React.FC = () => {
+const Breadcrumbs: React.FC = memo(() => {
   const { breadcrumbs } = useCurrentRoute();
   const { navigateToHome } = useAppNavigation();
 
@@ -14,26 +12,21 @@ const Breadcrumbs: React.FC = () => {
   }
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
-      {/* Home link */}
+    <nav className={BREADCRUMBS_STYLES.nav} aria-label="Breadcrumb">
       <button
         onClick={navigateToHome}
-        className="flex items-center hover:text-blue-600 transition-colors"
+        className={BREADCRUMBS_STYLES.homeButton}
+        aria-label="Ir al Dashboard"
       >
-        <Home className="w-4 h-4 mr-1" />
-        Dashboard
+        <Home className={BREADCRUMBS_STYLES.homeIcon} />
       </button>
 
-      {/* Breadcrumb items */}
-      {breadcrumbs.map((crumb, index) => (
+      {breadcrumbs.map((crumb) => (
         <React.Fragment key={crumb.path}>
-          <ChevronRight className="w-4 h-4 text-gray-400" />
+          <ChevronRight className={BREADCRUMBS_STYLES.separator} aria-hidden="true" />
           <span
-            className={`${
-              crumb.isLast
-                ? 'text-gray-900 font-medium'
-                : 'text-gray-600 hover:text-blue-600 cursor-pointer'
-            }`}
+            className={crumb.isLast ? BREADCRUMBS_STYLES.itemLast : BREADCRUMBS_STYLES.item}
+            aria-current={crumb.isLast ? 'page' : undefined}
           >
             {crumb.label}
           </span>
@@ -41,6 +34,8 @@ const Breadcrumbs: React.FC = () => {
       ))}
     </nav>
   );
-};
+});
+
+Breadcrumbs.displayName = 'Breadcrumbs';
 
 export default Breadcrumbs;
