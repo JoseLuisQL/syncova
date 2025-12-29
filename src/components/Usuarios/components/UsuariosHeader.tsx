@@ -1,6 +1,12 @@
 import React, { memo } from 'react';
-import { Users, UserPlus, RefreshCw, Download, Loader2 } from 'lucide-react';
+import { Users, UserPlus, RefreshCw, Download, Loader2, LucideIcon } from 'lucide-react';
 import { COMPONENT_STYLES, USER_SECTIONS, SectionId } from '../constants';
+
+interface SectionItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+}
 
 interface UsuariosHeaderProps {
   activeSection: SectionId;
@@ -10,6 +16,9 @@ interface UsuariosHeaderProps {
   onExportar: () => void;
   isLoading: boolean;
   isCreating: boolean;
+  sections?: SectionItem[];
+  canCreateUser?: boolean;
+  canExportUsers?: boolean;
 }
 
 const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
@@ -20,7 +29,12 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
   onExportar,
   isLoading,
   isCreating,
+  sections,
+  canCreateUser = true,
+  canExportUsers = true,
 }) => {
+  const displaySections = sections || USER_SECTIONS;
+  
   return (
     <>
       {/* Header Principal */}
@@ -56,27 +70,31 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
                 <span className="hidden sm:inline">Actualizar</span>
               </button>
 
-              <button
-                onClick={onExportar}
-                className={COMPONENT_STYLES.button.secondary}
-                title="Exportar usuarios"
-              >
-                <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">Exportar</span>
-              </button>
+              {canExportUsers && (
+                <button
+                  onClick={onExportar}
+                  className={COMPONENT_STYLES.button.secondary}
+                  title="Exportar usuarios"
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="hidden sm:inline">Exportar</span>
+                </button>
+              )}
 
-              <button
-                onClick={onNuevoUsuario}
-                disabled={isCreating}
-                className={COMPONENT_STYLES.button.primary}
-              >
-                {isCreating ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <UserPlus className="h-5 w-5" />
-                )}
-                <span>Nuevo Usuario</span>
-              </button>
+              {canCreateUser && (
+                <button
+                  onClick={onNuevoUsuario}
+                  disabled={isCreating}
+                  className={COMPONENT_STYLES.button.primary}
+                >
+                  {isCreating ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <UserPlus className="h-5 w-5" />
+                  )}
+                  <span>Nuevo Usuario</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -86,7 +104,7 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
       <nav className={COMPONENT_STYLES.nav.container} aria-label="Secciones">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
-            {USER_SECTIONS.map((section) => {
+            {displaySections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.id;
 

@@ -801,6 +801,7 @@ export interface AuthUser {
   email: string;
   usuario: string;
   rol: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
+  roleId?: string;
   establecimientoId?: string;
   estado: 'activo' | 'inactivo';
   ultimoAcceso?: Date;
@@ -811,6 +812,7 @@ export interface AuthUser {
     nombre: string;
     tipo: string;
   };
+  permissions?: string[];
 }
 
 export interface AuthResponse {

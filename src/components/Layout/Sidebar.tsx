@@ -1,6 +1,7 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
+import { usePermissions } from '../../hooks/usePermissions';
 import { Activity, ChevronLeft, ChevronRight, Building } from 'lucide-react';
 import { MENU_SECTIONS } from './constants';
 
@@ -8,6 +9,15 @@ const Sidebar: React.FC = memo(() => {
   const { sidebarCollapsed, setSidebarCollapsed } = useApp();
   const { navigateToModule } = useAppNavigation();
   const { currentModule } = useCurrentRoute();
+  const { canAccessModule } = usePermissions();
+
+  // Filtrar secciones y items según permisos del usuario
+  const filteredMenuSections = useMemo(() => {
+    return MENU_SECTIONS.map(section => ({
+      ...section,
+      items: section.items.filter(item => canAccessModule(item.id))
+    })).filter(section => section.items.length > 0);
+  }, [canAccessModule]);
 
   return (
     <aside
@@ -69,7 +79,7 @@ const Sidebar: React.FC = memo(() => {
 
       {/* Navegación */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-3">
-        {MENU_SECTIONS.map((section, sectionIndex) => (
+        {filteredMenuSections.map((section, sectionIndex) => (
           <div key={section.title} className={sectionIndex > 0 ? 'mt-5' : ''}>
             {/* Título de sección */}
             <div 

@@ -1,7 +1,8 @@
 import React, { useMemo, useCallback } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAlertas } from '../../hooks/useAlertas';
-import { COMPONENT_STYLES } from './constants';
+import { usePermissions } from '../../hooks/usePermissions';
+import { COMPONENT_STYLES, ALERTS_SECTIONS } from './constants';
 import { AlertasHeader } from './components';
 import DashboardAlertas from './DashboardAlertas';
 import GestionAlertas from './GestionAlertas';
@@ -9,6 +10,7 @@ import ConfiguracionAlertas from './ConfiguracionAlertas';
 import ReportesAlertas from './ReportesAlertas';
 
 const AlertasModule: React.FC = () => {
+  const { canAccessSection } = usePermissions();
   const {
     alertas,
     stats,
@@ -16,6 +18,11 @@ const AlertasModule: React.FC = () => {
     error,
     refreshData,
   } = useAlertas();
+
+  // Filtrar secciones según permisos
+  const filteredSections = useMemo(() => {
+    return ALERTS_SECTIONS.filter(section => canAccessSection('alertas', section.id));
+  }, [canAccessSection]);
 
   const alertasSeguras = useMemo(() => 
     Array.isArray(alertas) ? alertas : [], 
@@ -80,6 +87,7 @@ const AlertasModule: React.FC = () => {
         noLeidas={estadisticas.noLeidas}
         isLoading={isLoading}
         onRefresh={handleRefresh}
+        sections={filteredSections}
       />
 
       <div className="w-full px-4 sm:px-6 lg:px-8 py-6">

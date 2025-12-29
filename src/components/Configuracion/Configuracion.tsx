@@ -1,7 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useToastContext } from '../../contexts/ToastContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import { useConfiguracion } from './hooks/useConfiguracion';
-import { COMPONENT_STYLES } from './constants';
+import { COMPONENT_STYLES, CONFIG_SECTIONS } from './constants';
 import {
   ConfiguracionHeader,
   ConfiguracionSidebar,
@@ -17,6 +18,13 @@ import {
 
 const Configuracion: React.FC = () => {
   const { toast } = useToastContext();
+  const { canAccessSection } = usePermissions();
+  
+  // Filtrar secciones según permisos
+  const filteredSections = useMemo(() => {
+    return CONFIG_SECTIONS.filter(section => canAccessSection('configuracion', section.id));
+  }, [canAccessSection]);
+  
   const {
     config,
     activeSection,
@@ -185,6 +193,7 @@ const Configuracion: React.FC = () => {
         <ConfiguracionSidebar
           activeSection={activeSection}
           onSectionChange={setActiveSection}
+          sections={filteredSections}
         />
 
         {/* Main Content */}

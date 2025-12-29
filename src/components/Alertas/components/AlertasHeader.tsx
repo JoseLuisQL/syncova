@@ -1,22 +1,31 @@
 import React, { memo } from 'react';
-import { Bell, RefreshCw, Loader2 } from 'lucide-react';
+import { Bell, RefreshCw, Loader2, LucideIcon } from 'lucide-react';
 import { COMPONENT_STYLES, ALERTS_SECTIONS } from '../constants';
 import { useAppNavigation, useCurrentRoute } from '../../../hooks/useRouting';
+
+interface SectionItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+}
 
 interface AlertasHeaderProps {
   noLeidas: number;
   isLoading?: boolean;
   onRefresh?: () => void;
+  sections?: SectionItem[];
 }
 
 export const AlertasHeader: React.FC<AlertasHeaderProps> = memo(({
   noLeidas,
   isLoading = false,
   onRefresh,
+  sections,
 }) => {
   const { navigateToModule } = useAppNavigation();
   const { currentSubModule } = useCurrentRoute();
   const activeSection = currentSubModule || 'dashboard';
+  const displaySections = sections || ALERTS_SECTIONS;
 
   return (
     <>
@@ -68,7 +77,7 @@ export const AlertasHeader: React.FC<AlertasHeaderProps> = memo(({
       <nav className="bg-white border-b border-gray-100 sticky top-[73px] z-10" aria-label="Secciones">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
-            {ALERTS_SECTIONS.map((section) => {
+            {displaySections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.id;
 

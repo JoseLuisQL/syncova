@@ -13,6 +13,7 @@ import { useLotesVacunas } from '../../hooks/useLotesVacunas';
 import { useLotesJeringas } from '../../hooks/useLotesJeringas';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 import { useToastContext } from '../../contexts/ToastContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import { INVENTORY_SECTIONS, COMPONENT_STYLES } from './constants';
 import { CreateLoteVacunaDto, CreateLoteJeringaDto } from '../../types';
 
@@ -21,12 +22,21 @@ const Inventario: React.FC = () => {
   const { currentSubModule } = useCurrentRoute();
   const [showNuevoIngreso, setShowNuevoIngreso] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { canAccessSection, hasPermission } = usePermissions();
 
   const { vacunasActivas, loadVacunasActivas, isLoadingActivas: isLoadingVacunas } = useVacunas();
   const { jeringasActivas, loadJeringasActivas, isLoadingActivas: isLoadingJeringas } = useJeringas();
   const { createLote: createLoteVacuna } = useLotesVacunas();
   const { createLote: createLoteJeringa } = useLotesJeringas();
   const { toast } = useToastContext();
+
+  // Filtrar secciones según permisos
+  const filteredSections = useMemo(() => {
+    return INVENTORY_SECTIONS.filter(section => canAccessSection('inventario', section.id));
+  }, [canAccessSection]);
+
+  // Verificar si puede registrar ingresos
+  const canRegisterIngreso = hasPermission('inventario:ingreso');
 
   React.useEffect(() => {
     if (showNuevoIngreso) {
@@ -120,13 +130,15 @@ const Inventario: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={handleOpenNuevoIngreso}
-              className={COMPONENT_STYLES.button.primary}
-            >
-              <Plus className="h-5 w-5" aria-hidden="true" />
-              <span>Nuevo Ingreso</span>
-            </button>
+            {canRegisterIngreso && (
+              <button
+                onClick={handleOpenNuevoIngreso}
+                className={COMPONENT_STYLES.button.primary}
+              >
+                <Plus className="h-5 w-5" aria-hidden="true" />
+                <span>Nuevo Ingreso</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -135,7 +147,7 @@ const Inventario: React.FC = () => {
       <nav className="bg-white border-b border-gray-100 sticky top-[73px] z-10" aria-label="Secciones">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
-            {INVENTORY_SECTIONS.map((section) => {
+            {filteredSections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.id;
 

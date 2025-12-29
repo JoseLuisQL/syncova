@@ -1,25 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Plus,
   Search,
-  Edit,
-  Trash2,
   Key,
-  Settings,
   CheckCircle,
   XCircle,
   Shield,
   AlertTriangle,
   RefreshCw,
   Loader2,
-  BarChart3,
-  Activity,
-  Clock,
-  Database,
-  Tag,
-  Filter
+  Clock
 } from 'lucide-react';
-import { Permission, CreatePermissionDto, UpdatePermissionDto } from '../../types';
+import { Permission } from '../../types';
 import { PermissionService } from '../../services/permissionService';
 import { useToastContext } from '../../contexts/ToastContext';
 import { logger } from '../../utils/debug';
@@ -59,7 +50,7 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
   const [recursos, setRecursos] = useState<string[]>([]);
   const [acciones, setAcciones] = useState<string[]>([]);
 
-  const { addToast } = useToastContext();
+  const { toast } = useToastContext();
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -100,11 +91,7 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al cargar permisos';
       setError(errorMessage);
-      addToast({
-        type: 'error',
-        title: 'Error',
-        message: errorMessage
-      });
+      toast.error(errorMessage);
       logger.error('Error al cargar permisos:', error);
     } finally {
       setLoading(false);
@@ -153,12 +140,12 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
     try {
       setIsDeleting(true);
       await PermissionService.delete(permission.id);
-      addToast('success', 'Éxito', 'Permiso eliminado correctamente');
+      toast.success('Permiso eliminado correctamente');
       await loadPermissions();
       await loadStats();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al eliminar permiso';
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al eliminar permiso:', error);
     } finally {
       setIsDeleting(false);
@@ -172,12 +159,12 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
     try {
       const nuevoEstado = permission.estado === 'activo' ? 'inactivo' : 'activo';
       await PermissionService.changeEstado(permission.id, nuevoEstado);
-      addToast('success', 'Éxito', `Permiso ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} correctamente`);
+      toast.success(`Permiso ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} correctamente`);
       await loadPermissions();
       await loadStats();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al cambiar estado';
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al cambiar estado:', error);
     }
   };

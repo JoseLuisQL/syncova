@@ -8,14 +8,11 @@ import {
   Settings,
   CheckCircle,
   XCircle,
-  Eye,
   Users,
   Key,
   AlertTriangle,
   RefreshCw,
   Loader2,
-  BarChart3,
-  Activity,
   Clock,
   Database
 } from 'lucide-react';
@@ -24,6 +21,7 @@ import { RoleService } from '../../services/roleService';
 import { PermissionService } from '../../services/permissionService';
 import { useToastContext } from '../../contexts/ToastContext';
 import { logger } from '../../utils/debug';
+import { COMPONENT_STYLES } from './constants';
 import RoleModal from './RoleModal';
 import PermissionsModal from './PermissionsModal';
 
@@ -68,7 +66,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     conUsuarios: 0
   });
 
-  const { addToast } = useToastContext();
+  const { toast } = useToastContext();
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -106,7 +104,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al cargar roles';
       setError(errorMessage);
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al cargar roles:', error);
     } finally {
       setLoading(false);
@@ -135,7 +133,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
       setPermissions(result.permissions);
     } catch (error) {
       logger.error('Error al cargar permisos:', error);
-      addToast('error', 'Error', 'Error al cargar permisos disponibles');
+      toast.error('Error al cargar permisos disponibles');
     } finally {
       setLoadingPermissions(false);
     }
@@ -152,7 +150,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
       setSelectedPermissions(result.map(p => p.id));
     } catch (error) {
       logger.error('Error al cargar permisos del rol:', error);
-      addToast('error', 'Error', 'Error al cargar permisos del rol');
+      toast.error('Error al cargar permisos del rol');
     } finally {
       setLoadingPermissions(false);
     }
@@ -166,11 +164,11 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
       if (editingRole) {
         setIsUpdating(true);
         await RoleService.update(editingRole.id, formData as UpdateRoleDto);
-        addToast('success', 'Éxito', 'Rol actualizado correctamente');
+        toast.success('Rol actualizado correctamente');
       } else {
         setIsCreating(true);
         await RoleService.create(formData as CreateRoleDto);
-        addToast('success', 'Éxito', 'Rol creado correctamente');
+        toast.success('Rol creado correctamente');
       }
       
       setShowModal(false);
@@ -179,7 +177,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
       await loadStats();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al guardar rol';
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al guardar rol:', error);
     } finally {
       setIsCreating(false);
@@ -198,12 +196,12 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     try {
       setIsDeleting(true);
       await RoleService.delete(role.id);
-      addToast('success', 'Éxito', 'Rol eliminado correctamente');
+      toast.success('Rol eliminado correctamente');
       await loadRoles();
       await loadStats();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al eliminar rol';
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al eliminar rol:', error);
     } finally {
       setIsDeleting(false);
@@ -217,12 +215,12 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     try {
       const nuevoEstado = role.estado === 'activo' ? 'inactivo' : 'activo';
       await RoleService.changeEstado(role.id, nuevoEstado);
-      addToast('success', 'Éxito', `Rol ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} correctamente`);
+      toast.success(`Rol ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} correctamente`);
       await loadRoles();
       await loadStats();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al cambiar estado';
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al cambiar estado:', error);
     }
   };
@@ -254,12 +252,12 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     try {
       setLoadingPermissions(true);
       await RoleService.assignPermissions(selectedRole.id, selectedPermissions);
-      addToast('success', 'Éxito', 'Permisos asignados correctamente');
+      toast.success('Permisos asignados correctamente');
       setShowPermissionsModal(false);
       setSelectedRole(null);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al asignar permisos';
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al asignar permisos:', error);
     } finally {
       setLoadingPermissions(false);

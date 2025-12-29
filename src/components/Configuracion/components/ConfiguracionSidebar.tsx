@@ -1,25 +1,38 @@
-import React, { memo, useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import React, { memo, useState, useMemo } from 'react';
+import { Menu, X, LucideIcon } from 'lucide-react';
 import { CONFIG_SECTIONS, CATEGORY_LABELS, COMPONENT_STYLES } from '../constants';
+
+interface SectionItem {
+  id: string;
+  label: string;
+  description: string;
+  icon: LucideIcon;
+  category: string;
+}
 
 interface ConfiguracionSidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
+  sections?: SectionItem[];
 }
 
 export const ConfiguracionSidebar: React.FC<ConfiguracionSidebarProps> = memo(({
   activeSection,
   onSectionChange,
+  sections,
 }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const displaySections = sections || CONFIG_SECTIONS;
 
-  const sectionsByCategory = CONFIG_SECTIONS.reduce((acc, section) => {
-    if (!acc[section.category]) {
-      acc[section.category] = [];
-    }
-    acc[section.category].push(section);
-    return acc;
-  }, {} as Record<string, typeof CONFIG_SECTIONS>);
+  const sectionsByCategory = useMemo(() => {
+    return displaySections.reduce((acc, section) => {
+      if (!acc[section.category]) {
+        acc[section.category] = [];
+      }
+      acc[section.category].push(section);
+      return acc;
+    }, {} as Record<string, typeof displaySections>);
+  }, [displaySections]);
 
   const categories = Object.keys(sectionsByCategory) as Array<keyof typeof CATEGORY_LABELS>;
 

@@ -3,8 +3,9 @@ import { Usuario, CreateUsuarioDto, UpdateUsuarioDto, ChangePasswordDto, Role } 
 import { useUsuarios } from '../../hooks/useUsuarios';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useToastContext } from '../../contexts/ToastContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import { RoleService } from '../../services/roleService';
-import { COMPONENT_STYLES, SectionId } from './constants';
+import { COMPONENT_STYLES, SectionId, USER_SECTIONS } from './constants';
 import {
   UsuariosHeader,
   UsuariosFiltros,
@@ -17,6 +18,18 @@ import RolesManagement from './RolesManagement';
 import PermissionsManagement from './PermissionsManagement';
 
 const Usuarios: React.FC = () => {
+  // Permisos
+  const { canAccessSection, hasPermission } = usePermissions();
+  
+  // Filtrar secciones según permisos
+  const filteredSections = useMemo(() => {
+    return USER_SECTIONS.filter(section => canAccessSection('usuarios', section.id));
+  }, [canAccessSection]);
+
+  // Permisos específicos
+  const canCreateUser = hasPermission('usuarios:usuarios:write');
+  const canExportUsers = hasPermission('usuarios:usuarios:export');
+
   // Estados de navegación
   const [activeSection, setActiveSection] = useState<SectionId>('usuarios');
 
@@ -263,6 +276,9 @@ const Usuarios: React.FC = () => {
         onExportar={handleExportar}
         isLoading={isLoading}
         isCreating={isCreating}
+        sections={filteredSections}
+        canCreateUser={canCreateUser}
+        canExportUsers={canExportUsers}
       />
 
       {/* Contenido */}
@@ -314,12 +330,12 @@ const Usuarios: React.FC = () => {
           {activeSection === 'roles' && (
             <div className="p-6">
               <RolesManagement
-                onNavigateToPermissions={() => setActiveSection('auditoria')}
+                onNavigateToPermissions={() => setActiveSection('permisos')}
               />
             </div>
           )}
 
-          {activeSection === 'auditoria' && (
+          {activeSection === 'permisos' && (
             <div className="p-6">
               <PermissionsManagement
                 onNavigateToRoles={() => setActiveSection('roles')}

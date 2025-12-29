@@ -298,17 +298,33 @@ export class UsuarioService {
       // Validaciones de negocio para la actualización
       await this.validateUsuarioData(data, id);
 
+      // Preparar datos de actualización
+      const updateData: any = {
+        nombres: data.nombres,
+        apellidos: data.apellidos,
+        email: data.email,
+        usuario: data.usuario,
+        establecimientoId: data.establecimientoId,
+        estado: data.estado
+      };
+
+      // Si se está cambiando el rol, actualizar tanto rol como roleId
+      if (data.rol) {
+        updateData.rol = data.rol;
+        
+        // Buscar el role en la tabla roles y actualizar roleId
+        const role = await prisma.role.findUnique({
+          where: { codigo: data.rol }
+        });
+        
+        if (role) {
+          updateData.roleId = role.id;
+        }
+      }
+
       const usuario = await prisma.usuario.update({
         where: { id },
-        data: {
-          nombres: data.nombres,
-          apellidos: data.apellidos,
-          email: data.email,
-          usuario: data.usuario,
-          rol: data.rol,
-          establecimientoId: data.establecimientoId,
-          estado: data.estado
-        },
+        data: updateData,
         include: {
           establecimiento: {
             select: {

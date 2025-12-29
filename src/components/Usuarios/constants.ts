@@ -1,7 +1,7 @@
 import {
   Users,
   Shield,
-  Activity,
+  Key,
   CheckCircle,
 } from 'lucide-react';
 
@@ -79,17 +79,17 @@ export const USER_SECTIONS = [
   },
   {
     id: 'roles',
-    label: 'Roles y Permisos',
-    description: 'Configuración de acceso',
+    label: 'Roles',
+    description: 'Gestión de roles',
     icon: Shield,
     path: '/usuarios/roles',
   },
   {
-    id: 'auditoria',
-    label: 'Auditoría',
-    description: 'Registro de actividad',
-    icon: Activity,
-    path: '/usuarios/auditoria',
+    id: 'permisos',
+    label: 'Permisos',
+    description: 'Permisos del sistema',
+    icon: Key,
+    path: '/usuarios/permisos',
   },
 ] as const;
 
@@ -184,9 +184,10 @@ export const COMPONENT_STYLES = {
   },
 
   modal: {
-    overlay: 'fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4',
+    overlay: 'fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 overflow-y-auto',
     container: 'bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl',
     containerMedium: 'bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl',
+    containerLarge: 'bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl',
     header: 'px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100',
     headerTitle: 'text-lg font-bold text-gray-900',
     body: 'px-6 py-5 overflow-y-auto max-h-[calc(90vh-180px)]',

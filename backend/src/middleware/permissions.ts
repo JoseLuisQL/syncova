@@ -128,7 +128,7 @@ export const validatePermissions = (allowedRoles: string[]) => {
       // Mapear roles del sistema a roles permitidos
       const roleMapping: Record<string, RolUsuario[]> = {
         'admin': ['administrador'],
-        'supervisor': ['administrador', 'coordinador'],
+        'supervisor': ['administrador', 'coordinador', 'responsable_acopio'],
         'operador': ['administrador', 'coordinador', 'responsable_acopio', 'operador'],
         'responsable': ['administrador', 'coordinador', 'responsable_acopio'],
         'coordinador': ['administrador', 'coordinador'],

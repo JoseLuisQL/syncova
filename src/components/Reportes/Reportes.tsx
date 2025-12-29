@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Clock, Loader2 } from 'lucide-react';
 import { useKardexFiltros } from '../../hooks/useKardexData';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
+import { usePermissions } from '../../hooks/usePermissions';
 import { COMPONENT_STYLES, REPORTS_SECTIONS } from './constants';
 import { ReportesHeader, ReportesNav } from './components';
 import { InventarioTab, MovimientosTab, PlanificacionTab, ConfiguracionTab, CenaresTab } from './components/tabs';
@@ -21,6 +22,7 @@ interface ReporteProgramado {
 const Reportes: React.FC = () => {
   const { navigateToModule } = useAppNavigation();
   const { currentSubModule } = useCurrentRoute();
+  const { canAccessSection } = usePermissions();
 
   const {
     vacunas: vacunasReales,
@@ -61,6 +63,11 @@ const Reportes: React.FC = () => {
 
   const centrosAcopio = useMemo(() => centrosAcopioReales, [centrosAcopioReales]);
   const vacunas = useMemo(() => vacunasReales, [vacunasReales]);
+
+  // Filtrar secciones según permisos
+  const filteredSections = useMemo(() => {
+    return REPORTS_SECTIONS.filter(section => canAccessSection('reportes', section.id));
+  }, [canAccessSection]);
 
   const activeSection = useMemo(() => {
     if (currentSubModule === 'programacion-seguimiento-anual') return 'cenares';
@@ -114,6 +121,7 @@ const Reportes: React.FC = () => {
       <ReportesNav
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
+        sections={filteredSections}
       />
 
       {/* Content */}

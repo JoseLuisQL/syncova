@@ -257,8 +257,8 @@ export class UsuarioController {
       // Validar rol dinámicamente si se proporciona
       if (data.rol) {
         try {
-          const roleExists = await RoleService.getByCodigo(data.rol);
-          if (!roleExists || roleExists.estado !== 'activo') {
+          const roleResult = await RoleService.getByCodigo(data.rol);
+          if (!roleResult.success || !roleResult.data || roleResult.data.estado !== 'activo') {
             errorResponse(res, 'Rol inválido o inactivo', 400);
             return;
           }
