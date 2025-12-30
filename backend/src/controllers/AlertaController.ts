@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { AlertaService, CreateAlertaDto, UpdateAlertaDto, AlertaFilters } from '@/services/AlertaService';
+import { AlertaAutomaticaService } from '@/services/AlertaAutomaticaService';
 import { ResponseUtil } from '@/utils/response';
 import { validateUUID } from '@/utils/validation';
-import { AuthenticatedRequest } from '@/middleware/auth';
+import { AuthenticatedRequest } from '@/types';
 
 /**
  * Controlador para gestión de alertas del sistema
@@ -316,6 +317,93 @@ export class AlertaController {
       ResponseUtil.success(res, result.data, `${result.data?.count || 0} alertas antiguas eliminadas exitosamente`);
     } catch (error) {
       console.error('Error en AlertaController.cleanupOldAlerts:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Generar alertas automáticas (vencimiento y stock bajo)
+   * POST /api/alertas/generar-automaticas
+   */
+  static async generateAutomatic(req: Request, res: Response): Promise<void> {
+    try {
+      const { diasAnticipacion = 30, porcentajeMinimo = 20 } = req.body;
+
+      const result = await AlertaAutomaticaService.generarAlertas(
+        Number(diasAnticipacion),
+        Number(porcentajeMinimo)
+      );
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al generar alertas automáticas', 500);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, `Se generaron ${result.data?.alertasGeneradas || 0} alertas automáticas`);
+    } catch (error) {
+      console.error('Error en AlertaController.generateAutomatic:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Limpiar alertas antiguas leídas
+   * DELETE /api/alertas/limpiar-antiguas
+   */
+  static async cleanupResolved(req: Request, res: Response): Promise<void> {
+    try {
+      const { days = '30' } = req.query;
+      const diasAntiguedad = parseInt(days as string, 10);
+
+      const result = await AlertaAutomaticaService.limpiarAlertasAntiguas(diasAntiguedad);
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al limpiar alertas antiguas', 500);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, `Se eliminaron ${result.data?.eliminadas || 0} alertas antiguas`);
+    } catch (error) {
+      console.error('Error en AlertaController.cleanupResolved:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Verificar y generar alertas automáticas, luego devolver alertas no leídas
+   * GET /api/alertas/verificar-y-generar
+   * Endpoint optimizado para polling del frontend
+   */
+  static async verifyAndGenerate(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user) {
+        ResponseUtil.error(res, 'Usuario no autenticado', 401);
+        return;
+      }
+
+      const { diasAnticipacion = 30, stockMinimo = 100 } = req.query;
+
+      // Generar nuevas alertas automáticas
+      const generationResult = await AlertaAutomaticaService.generarAlertas(
+        Number(diasAnticipacion),
+        Number(stockMinimo)
+      );
+
+      // Obtener alertas no leídas actualizadas
+      const unreadResult = await AlertaService.getUnreadByUser(req.user.id);
+
+      if (!unreadResult.success) {
+        ResponseUtil.error(res, unreadResult.error || 'Error al obtener alertas', 500);
+        return;
+      }
+
+      ResponseUtil.success(res, {
+        alertas: unreadResult.data,
+        generadas: generationResult.success ? generationResult.data?.alertasGeneradas || 0 : 0,
+        detalles: generationResult.success ? generationResult.data?.detalles || [] : []
+      }, 'Verificación completada');
+    } catch (error) {
+      console.error('Error en AlertaController.verifyAndGenerate:', error);
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }

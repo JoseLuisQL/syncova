@@ -20,12 +20,37 @@ router.get('/stats', authenticate, AlertaController.getStats);
 router.get('/no-leidas', authenticate, AlertaController.getUnreadForUser);
 
 /**
+ * @route GET /api/alertas/verificar-y-generar
+ * @desc Verificar lotes/stock, generar alertas y devolver no leídas
+ * @access Private (Usuario autenticado)
+ * @query {number} [diasAnticipacion=30] - Días de anticipación para vencimiento
+ * @query {number} [porcentajeMinimo=20] - Porcentaje mínimo de stock
+ */
+router.get('/verificar-y-generar', authenticate, AlertaController.verifyAndGenerate);
+
+/**
  * @route DELETE /api/alertas/limpiar-antiguas
  * @desc Limpiar alertas antiguas (más de X días)
  * @access Private (Solo Administradores)
  * @query {number} [days=30] - Número de días para considerar alertas como antiguas
  */
 router.delete('/limpiar-antiguas', authenticate, validatePermissions(['admin']), AlertaController.cleanupOldAlerts);
+
+/**
+ * @route POST /api/alertas/generar-automaticas
+ * @desc Generar alertas automáticas (vencimiento y stock bajo)
+ * @access Private (Solo Administradores y Coordinadores)
+ * @body {number} [diasAnticipacion=30] - Días de anticipación para alertas de vencimiento
+ * @body {number} [porcentajeMinimo=20] - Porcentaje mínimo de stock para alertas
+ */
+router.post('/generar-automaticas', authenticate, validatePermissions(['admin', 'supervisor']), AlertaController.generateAutomatic);
+
+/**
+ * @route DELETE /api/alertas/limpiar-resueltas
+ * @desc Limpiar alertas que ya no aplican (lotes vencidos, stock recuperado)
+ * @access Private (Solo Administradores)
+ */
+router.delete('/limpiar-resueltas', authenticate, validatePermissions(['admin']), AlertaController.cleanupResolved);
 
 /**
  * @route PUT /api/alertas/leer-multiples

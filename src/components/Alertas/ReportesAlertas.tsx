@@ -1,7 +1,8 @@
-import React, { memo, useMemo } from 'react';
-import { Download, FileText, Loader2, BarChart3, TrendingUp, Target } from 'lucide-react';
+import React, { memo, useMemo, useState, useCallback } from 'react';
+import { Download, Loader2, BarChart3, TrendingUp, Target, FileSpreadsheet } from 'lucide-react';
+import ExcelJS from 'exceljs';
 import { Alerta } from '../../types';
-import { COMPONENT_STYLES, TIPOS_ALERTA } from './constants';
+import { COMPONENT_STYLES, TIPOS_ALERTA, NIVELES_ALERTA } from './constants';
 
 interface ReportesAlertasProps {
   alertas: Alerta[];
@@ -12,8 +13,9 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
   alertas,
   isLoading = false,
 }) => {
-  const [filtroFecha, setFiltroFecha] = React.useState('7');
-  const [filtroTipo, setFiltroTipo] = React.useState('todos');
+  const [filtroFecha, setFiltroFecha] = useState('7');
+  const [filtroTipo, setFiltroTipo] = useState('todos');
+  const [isExporting, setIsExporting] = useState(false);
 
   const alertasFiltradas = useMemo(() => {
     const diasAtras = parseInt(filtroFecha);
@@ -48,13 +50,140 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
     });
   }, [alertasFiltradas]);
 
-  const handleExportExcel = () => {
-    alert('Funcionalidad de exportacion a Excel disponible cuando se conecte al backend');
-  };
+  const handleExportExcel = useCallback(async () => {
+    if (alertasFiltradas.length === 0) {
+      alert('No hay alertas para exportar');
+      return;
+    }
 
-  const handleExportPDF = () => {
-    alert('Funcionalidad de exportacion a PDF disponible cuando se conecte al backend');
-  };
+    setIsExporting(true);
+    try {
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC';
+      workbook.created = new Date();
+
+      // Hoja de Alertas
+      const wsAlertas = workbook.addWorksheet('Alertas', {
+        properties: { tabColor: { argb: '0D9488' } }
+      });
+
+      // Configurar columnas
+      wsAlertas.columns = [
+        { header: 'Fecha', key: 'fecha', width: 18 },
+        { header: 'Tipo', key: 'tipo', width: 15 },
+        { header: 'Nivel', key: 'nivel', width: 12 },
+        { header: 'Titulo', key: 'titulo', width: 40 },
+        { header: 'Descripcion', key: 'descripcion', width: 60 },
+        { header: 'Estado', key: 'estado', width: 12 },
+      ];
+
+      // Estilo del encabezado
+      wsAlertas.getRow(1).eachCell(cell => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: '0D9488' }
+        };
+        cell.font = { bold: true, color: { argb: 'FFFFFF' } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = {
+          bottom: { style: 'thin', color: { argb: '000000' } }
+        };
+      });
+      wsAlertas.getRow(1).height = 24;
+
+      // Agregar datos
+      alertasFiltradas.forEach((alerta, index) => {
+        const tipoLabel = TIPOS_ALERTA.find(t => t.id === alerta.tipo)?.label || alerta.tipo;
+        const nivelLabel = NIVELES_ALERTA.find(n => n.id === alerta.nivel)?.label || alerta.nivel;
+
+        const row = wsAlertas.addRow({
+          fecha: new Date(alerta.fechaCreacion).toLocaleString('es-PE'),
+          tipo: tipoLabel,
+          nivel: nivelLabel,
+          titulo: alerta.titulo,
+          descripcion: alerta.descripcion,
+          estado: alerta.leida ? 'Leida' : 'No leida'
+        });
+
+        // Alternar colores de fila
+        if (index % 2 === 0) {
+          row.eachCell(cell => {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'F0FDFA' }
+            };
+          });
+        }
+
+        // Color por nivel
+        const nivelCell = row.getCell('nivel');
+        switch (alerta.nivel) {
+          case 'error':
+            nivelCell.font = { color: { argb: 'DC2626' }, bold: true };
+            break;
+          case 'warning':
+            nivelCell.font = { color: { argb: 'D97706' }, bold: true };
+            break;
+          case 'success':
+            nivelCell.font = { color: { argb: '059669' }, bold: true };
+            break;
+          default:
+            nivelCell.font = { color: { argb: '0891B2' } };
+        }
+      });
+
+      // Hoja de Resumen
+      const wsResumen = workbook.addWorksheet('Resumen', {
+        properties: { tabColor: { argb: '14B8A6' } }
+      });
+
+      wsResumen.columns = [
+        { header: 'Metrica', key: 'metrica', width: 30 },
+        { header: 'Valor', key: 'valor', width: 20 },
+      ];
+
+      wsResumen.getRow(1).eachCell(cell => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: '14B8A6' }
+        };
+        cell.font = { bold: true, color: { argb: 'FFFFFF' } };
+      });
+
+      wsResumen.addRow({ metrica: 'Periodo analizado', valor: `Ultimos ${filtroFecha} dias` });
+      wsResumen.addRow({ metrica: 'Total alertas', valor: estadisticasHistorial.totalPeriodo });
+      wsResumen.addRow({ metrica: 'Promedio diario', valor: estadisticasHistorial.promedioDiario });
+      wsResumen.addRow({ metrica: 'Tipo mas frecuente', valor: estadisticasHistorial.tipoMasFrecuente.tipo });
+      wsResumen.addRow({ metrica: '', valor: '' });
+      wsResumen.addRow({ metrica: 'DISTRIBUCION POR TIPO', valor: '' });
+
+      distribucionTipo.forEach(tipo => {
+        wsResumen.addRow({ metrica: tipo.label, valor: `${tipo.cantidad} (${tipo.porcentaje.toFixed(1)}%)` });
+      });
+
+      // Generar y descargar
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `reporte_alertas_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error al exportar:', error);
+      alert('Error al generar el archivo Excel');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [alertasFiltradas, filtroFecha, estadisticasHistorial, distribucionTipo]);
 
   return (
     <div className="p-6 space-y-6">
@@ -173,22 +302,21 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
 
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h3 className="text-base font-semibold text-gray-900 mb-4">Exportar Reporte</h3>
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={handleExportExcel}
-                className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors"
-              >
-                <Download className="h-4 w-4" />
-                Exportar Excel
-              </button>
-              <button
-                onClick={handleExportPDF}
-                className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 text-white rounded-xl hover:bg-rose-700 transition-colors"
-              >
-                <FileText className="h-4 w-4" />
-                Exportar PDF
-              </button>
-            </div>
+            <button
+              onClick={handleExportExcel}
+              disabled={isExporting || alertasFiltradas.length === 0}
+              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileSpreadsheet className="h-4 w-4" />
+              )}
+              <span>Exportar a Excel</span>
+            </button>
+            {alertasFiltradas.length === 0 && (
+              <p className="mt-2 text-sm text-gray-500">No hay alertas en el periodo seleccionado</p>
+            )}
           </div>
         </>
       )}

@@ -2,6 +2,7 @@ import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { AlertasProvider } from './contexts/AlertasContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
@@ -14,8 +15,10 @@ function App() {
     <AppProvider>
       <ToastProvider>
         <AuthProvider>
-          <PageTitle />
-          <AppContent />
+          <AlertasProvider>
+            <PageTitle />
+            <AppContent />
+          </AlertasProvider>
         </AuthProvider>
       </ToastProvider>
     </AppProvider>

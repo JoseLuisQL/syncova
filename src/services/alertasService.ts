@@ -286,4 +286,54 @@ export class AlertasService {
       throw handleApiError(error as AxiosError);
     }
   }
+
+  /**
+   * Generar alertas automáticas (vencimiento y stock bajo)
+   */
+  static async generarAutomaticas(diasAnticipacion: number = 30, stockMinimo: number = 100): Promise<{
+    alertasGeneradas: number;
+    alertasVencimiento: number;
+    alertasStockBajo: number;
+    detalles: string[];
+  }> {
+    try {
+      logger.debug('Generando alertas automáticas', { diasAnticipacion, stockMinimo });
+
+      const response = await apiClient.post<ApiResponse<{
+        alertasGeneradas: number;
+        alertasVencimiento: number;
+        alertasStockBajo: number;
+        detalles: string[];
+      }>>(`${this.BASE_PATH}/generar-automaticas`, { diasAnticipacion, porcentajeMinimo: stockMinimo });
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.error || 'Error al generar alertas automáticas');
+      }
+
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al generar alertas automáticas', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
+
+  /**
+   * Limpiar alertas antiguas leídas
+   */
+  static async limpiarAntiguas(dias: number = 30): Promise<{ eliminadas: number }> {
+    try {
+      logger.debug('Limpiando alertas antiguas', { dias });
+
+      const response = await apiClient.delete<ApiResponse<{ eliminadas: number }>>(`${this.BASE_PATH}/limpiar-resueltas?days=${dias}`);
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.error || 'Error al limpiar alertas antiguas');
+      }
+
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al limpiar alertas antiguas', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
 }
