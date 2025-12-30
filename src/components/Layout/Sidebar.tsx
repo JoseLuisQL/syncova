@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { useApp } from '../../context/AppContext';
+import { useApp } from '../../contexts/AppContext';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 import { usePermissions } from '../../hooks/usePermissions';
 import { Activity, ChevronLeft, ChevronRight, Building } from 'lucide-react';

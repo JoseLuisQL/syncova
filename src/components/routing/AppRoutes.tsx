@@ -13,7 +13,6 @@ import Reportes from '../Reportes/Reportes';
 import AlertasModule from '../Alertas/AlertasModule';
 import Usuarios from '../Usuarios/Usuarios';
 import Configuracion from '../Configuracion/Configuracion';
-import VacunasDebug from '../Debug/VacunasDebug';
 
 /**
  * Componente de rutas principales de la aplicación
@@ -124,16 +123,6 @@ const AppRoutes: React.FC = () => {
         } 
       />
       
-      {/* Debug */}
-      <Route
-        path="/debug"
-        element={
-          <ProtectedRoute requiredRoles={['administrador']}>
-            <VacunasDebug />
-          </ProtectedRoute>
-        }
-      />
-
       {/* Ruta 404 - redirigir al dashboard */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

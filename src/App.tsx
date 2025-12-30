@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppProvider, useApp } from './context/AppContext';
+import { AppProvider, useApp } from './contexts/AppContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { AlertasProvider } from './contexts/AlertasContext';
