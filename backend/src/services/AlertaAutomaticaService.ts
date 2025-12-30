@@ -297,7 +297,7 @@ export class AlertaAutomaticaService {
           descripcion,
           nivel,
           usuarioId,
-          parametros
+          parametros: parametros as any
         }
       });
 

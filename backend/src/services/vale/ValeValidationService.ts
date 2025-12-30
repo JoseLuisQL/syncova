@@ -274,9 +274,7 @@ export class ValeValidationService {
       }
 
       let centroAcopioId: string;
-      if (establecimiento.tipo === 'centro_acopio') {
-        centroAcopioId = establecimiento.id;
-      } else if (establecimiento.centroAcopioId) {
+      if (establecimiento.centroAcopioId) {
         centroAcopioId = establecimiento.centroAcopioId;
       } else {
         return {

@@ -3,7 +3,7 @@ import { ServiceResult } from '@/types';
 import { createError } from '@/utils/errors';
 import { EstadoVale, TipoMovimientoKardex } from '@prisma/client';
 import { ValeValidationService } from './ValeValidationService';
-import { ValeQueryService, ValeEntregaConRelaciones } from './ValeQueryService';
+import { ValeQueryService, ValeEntregaConRelaciones, MovimientoParaVale } from './ValeQueryService';
 import { ValeStockService, StockAfectacion } from './ValeStockService';
 import { StockValidationService, VaccineRequirement } from '../StockValidationService';
 import { StockInicialService } from '../StockInicialService';
@@ -138,7 +138,7 @@ export class ValeGenerationService {
   /**
    * Calculate total vaccine quantity (scheduled + additional)
    */
-  private static calcularCantidadTotal(movimiento: any): { programada: number; adicional: number; total: number } {
+  private static calcularCantidadTotal(movimiento: MovimientoParaVale): { programada: number; adicional: number; total: number } {
     const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
     
     let cantidadProgramada = 0;
@@ -147,7 +147,7 @@ export class ValeGenerationService {
     if (tieneEntregasAdicionales) {
       cantidadProgramada = movimiento.entregaBase ?? movimiento.entrega;
       cantidadAdicional = movimiento.entregasAdicionales.reduce(
-        (sum: number, entrega: any) => sum + entrega.cantidad,
+        (sum: number, entrega) => sum + entrega.cantidad,
         0
       );
     } else {
@@ -659,7 +659,7 @@ export class ValeGenerationService {
         let stockTotalVacunas: { [vacunaId: string]: number } = {};
 
         const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
-        const almacenCentralId = almacenCentralResult.success ? almacenCentralResult.data : null;
+        const almacenCentralId = almacenCentralResult.success && almacenCentralResult.data ? almacenCentralResult.data : null;
 
         for (const kardex of stocksVacunasAfectados) {
           const loteActual = await tx.loteVacuna.findUnique({
@@ -678,8 +678,8 @@ export class ValeGenerationService {
           }
 
           const nuevaCantidad = loteActual.cantidadActual + kardex.cantidad;
-          const saldoAnteriorMovimiento = stockTotalVacunas[kardex.itemId];
-          const saldoNuevoMovimiento = stockTotalVacunas[kardex.itemId] + kardex.cantidad;
+          const saldoAnteriorMovimiento = stockTotalVacunas[kardex.itemId] ?? 0;
+          const saldoNuevoMovimiento = (stockTotalVacunas[kardex.itemId] ?? 0) + kardex.cantidad;
 
           console.log(`🔄 [ValeGenerationService] Revirtiendo vacuna - Lote: ${kardex.loteId}, Cantidad: +${kardex.cantidad}, Stock total: ${saldoAnteriorMovimiento} → ${saldoNuevoMovimiento}`);
 
@@ -735,8 +735,8 @@ export class ValeGenerationService {
           }
 
           const nuevaCantidad = loteActual.cantidadActual + kardex.cantidad;
-          const saldoAnteriorMovimiento = stockTotalJeringas[kardex.itemId];
-          const saldoNuevoMovimiento = stockTotalJeringas[kardex.itemId] + kardex.cantidad;
+          const saldoAnteriorMovimiento = stockTotalJeringas[kardex.itemId] ?? 0;
+          const saldoNuevoMovimiento = (stockTotalJeringas[kardex.itemId] ?? 0) + kardex.cantidad;
 
           console.log(`🔄 [ValeGenerationService] Revirtiendo jeringa - Lote: ${kardex.loteId}, Cantidad: +${kardex.cantidad}, Stock total: ${saldoAnteriorMovimiento} → ${saldoNuevoMovimiento}`);
 

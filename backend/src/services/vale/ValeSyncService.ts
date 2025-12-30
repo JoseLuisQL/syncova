@@ -1,6 +1,6 @@
 import { prisma } from '@/config/database';
 import { ServiceResult } from '@/types';
-import { ValeEntregaConRelaciones } from './ValeQueryService';
+import { ValeEntregaConRelaciones, MovimientoParaVale } from './ValeQueryService';
 import { ValeStockService, StockAfectacion } from './ValeStockService';
 import { ModificacionVale } from './ValeGenerationService';
 
@@ -13,7 +13,7 @@ export class ValeSyncService {
   /**
    * Calculate total vaccine quantity
    */
-  private static calcularCantidadTotal(movimiento: any): { programada: number; adicional: number; total: number } {
+  private static calcularCantidadTotal(movimiento: MovimientoParaVale): { programada: number; adicional: number; total: number } {
     const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
     
     let cantidadProgramada = 0;
@@ -22,7 +22,7 @@ export class ValeSyncService {
     if (tieneEntregasAdicionales) {
       cantidadProgramada = movimiento.entregaBase ?? movimiento.entrega;
       cantidadAdicional = movimiento.entregasAdicionales.reduce(
-        (sum: number, entrega: any) => sum + entrega.cantidad,
+        (sum: number, entrega) => sum + entrega.cantidad,
         0
       );
     } else {
@@ -64,8 +64,8 @@ export class ValeSyncService {
     anio: number,
     tipoVale: 'completo' | 'solo_base' | 'solo_adicionales' = 'completo',
     numerosEntregasAdicionalesOriginales: number[] = []
-  ) {
-    let whereConditions: any = {
+  ): Promise<MovimientoParaVale[]> {
+    const whereConditions: Record<string, unknown> = {
       mes,
       anio,
       establecimiento: {
@@ -78,18 +78,30 @@ export class ValeSyncService {
 
     switch (tipoVale) {
       case 'solo_base':
-        whereConditions.entrega = { gt: 0 };
+        whereConditions['entrega'] = { gt: 0 };
         break;
       case 'solo_adicionales':
-        whereConditions.entregasAdicionales = { some: {} };
+        whereConditions['entregasAdicionales'] = { some: {} };
         break;
       case 'completo':
       default:
-        whereConditions.OR = [
+        whereConditions['OR'] = [
           { entrega: { gt: 0 } },
           { entregasAdicionales: { some: {} } }
         ];
         break;
+    }
+
+    // Build entregasAdicionales include dynamically to avoid undefined where clause
+    let entregasAdicionalesInclude: Record<string, unknown> = {
+      orderBy: { numeroEntrega: 'asc' }
+    };
+
+    if (numerosEntregasAdicionalesOriginales.length > 0) {
+      entregasAdicionalesInclude = {
+        where: { numeroEntrega: { in: numerosEntregasAdicionalesOriginales } },
+        orderBy: { numeroEntrega: 'asc' }
+      };
     }
 
     const movimientos = await prisma.movimientoVacuna.findMany({
@@ -111,12 +123,7 @@ export class ValeSyncService {
             dosisPorFrasco: true
           }
         },
-        entregasAdicionales: {
-          where: numerosEntregasAdicionalesOriginales.length > 0
-            ? { numeroEntrega: { in: numerosEntregasAdicionalesOriginales } }
-            : undefined,
-          orderBy: { numeroEntrega: 'asc' }
-        }
+        entregasAdicionales: entregasAdicionalesInclude
       },
       orderBy: [
         { establecimiento: { nombre: 'asc' } },
@@ -124,7 +131,7 @@ export class ValeSyncService {
       ]
     });
 
-    return movimientos;
+    return movimientos as MovimientoParaVale[];
   }
 
   /**
@@ -487,9 +494,7 @@ export class ValeSyncService {
       }
 
       let centroAcopioId: string;
-      if (establecimiento.tipo === 'centro_acopio') {
-        centroAcopioId = establecimiento.id;
-      } else if (establecimiento.centroAcopioId) {
+      if (establecimiento.centroAcopioId) {
         centroAcopioId = establecimiento.centroAcopioId;
       } else {
         return {
@@ -633,9 +638,7 @@ export class ValeSyncService {
       }
 
       let centroAcopioId: string;
-      if (establecimiento.tipo === 'centro_acopio') {
-        centroAcopioId = establecimiento.id;
-      } else if (establecimiento.centroAcopioId) {
+      if (establecimiento.centroAcopioId) {
         centroAcopioId = establecimiento.centroAcopioId;
       } else {
         return {

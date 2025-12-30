@@ -28,9 +28,7 @@ async function getUserPermissions(userId: string): Promise<string[]> {
           include: {
             rolePermissions: {
               include: {
-                permission: {
-                  where: { estado: 'activo' }
-                }
+                permission: true
               }
             }
           }
@@ -42,7 +40,9 @@ async function getUserPermissions(userId: string): Promise<string[]> {
       return [];
     }
 
-    const permissions = user.role.rolePermissions.map(rp => rp.permission.codigo);
+    const permissions = user.role.rolePermissions
+      .filter(rp => rp.permission.estado === 'activo')
+      .map(rp => rp.permission.codigo);
 
     // Actualizar cache
     userPermissionsCache.set(userId, {

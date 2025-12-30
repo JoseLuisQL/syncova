@@ -292,9 +292,9 @@ export class ConfiguracionController {
       if (errors.length > 0) {
         ResponseUtil.error(
           res,
-          'Algunas configuraciones no pudieron ser actualizadas',
+          `Algunas configuraciones no pudieron ser actualizadas: ${errors.length} errores`,
           400,
-          { errors, updated: results }
+          JSON.stringify({ errors, updated: results })
         );
         return;
       }

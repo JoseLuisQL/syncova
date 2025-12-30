@@ -64,6 +64,35 @@ export interface ValesFilters {
   limit?: number;
 }
 
+export interface MovimientoParaVale {
+  id: string;
+  establecimientoId: string;
+  vacunaId: string;
+  mes: number;
+  anio: number;
+  entrega: number;
+  entregaBase: number | null;
+  establecimiento: {
+    id: string;
+    nombre: string;
+    codigo: string;
+    tipo: string;
+  };
+  vacuna: {
+    id: string;
+    nombre: string;
+    presentacion: string;
+    dosisPorFrasco: number;
+  };
+  entregasAdicionales: Array<{
+    id: string;
+    numeroEntrega: number;
+    cantidad: number;
+    fechaEntrega: Date;
+    motivo: string | null;
+  }>;
+}
+
 /**
  * Service for Vale query operations
  * Handles all read operations for vales
@@ -543,8 +572,8 @@ export class ValeQueryService {
     tipoVale: 'completo' | 'solo_base' | 'solo_adicionales' = 'completo',
     entregasAdicionalesSeleccionadas?: string[],
     gruposEntregasSeleccionados?: number[]
-  ) {
-    let whereConditions: any = {
+  ): Promise<MovimientoParaVale[]> {
+    const whereConditions: Record<string, unknown> = {
       mes,
       anio,
       establecimiento: {
@@ -557,18 +586,37 @@ export class ValeQueryService {
 
     switch (tipoVale) {
       case 'solo_base':
-        whereConditions.entrega = { gt: 0 };
+        whereConditions['entrega'] = { gt: 0 };
         break;
       case 'solo_adicionales':
-        whereConditions.entregasAdicionales = { some: {} };
+        whereConditions['entregasAdicionales'] = { some: {} };
         break;
       case 'completo':
       default:
-        whereConditions.OR = [
+        whereConditions['OR'] = [
           { entrega: { gt: 0 } },
           { entregasAdicionales: { some: {} } }
         ];
         break;
+    }
+
+    // Build entregasAdicionales include dynamically to avoid undefined where clause
+    let entregasAdicionalesInclude: Record<string, unknown> = {
+      orderBy: { numeroEntrega: 'asc' }
+    };
+
+    if (tipoVale === 'solo_adicionales') {
+      if (gruposEntregasSeleccionados && gruposEntregasSeleccionados.length > 0) {
+        entregasAdicionalesInclude = {
+          where: { numeroEntrega: { in: gruposEntregasSeleccionados } },
+          orderBy: { numeroEntrega: 'asc' }
+        };
+      } else if (entregasAdicionalesSeleccionadas) {
+        entregasAdicionalesInclude = {
+          where: { id: { in: entregasAdicionalesSeleccionadas } },
+          orderBy: { numeroEntrega: 'asc' }
+        };
+      }
     }
 
     const movimientos = await prisma.movimientoVacuna.findMany({
@@ -590,16 +638,7 @@ export class ValeQueryService {
             dosisPorFrasco: true
           }
         },
-        entregasAdicionales: {
-          where: tipoVale === 'solo_adicionales' ? (
-            gruposEntregasSeleccionados && gruposEntregasSeleccionados.length > 0
-              ? { numeroEntrega: { in: gruposEntregasSeleccionados } }
-              : entregasAdicionalesSeleccionadas
-                ? { id: { in: entregasAdicionalesSeleccionadas } }
-                : undefined
-          ) : undefined,
-          orderBy: { numeroEntrega: 'asc' }
-        }
+        entregasAdicionales: entregasAdicionalesInclude
       },
       orderBy: [
         { establecimiento: { nombre: 'asc' } },
@@ -613,14 +652,14 @@ export class ValeQueryService {
           mov.entregasAdicionales && mov.entregasAdicionales.some(ea =>
             gruposEntregasSeleccionados.includes(ea.numeroEntrega)
           )
-        );
+        ) as MovimientoParaVale[];
       } else if (entregasAdicionalesSeleccionadas) {
         return movimientos.filter(mov =>
           mov.entregasAdicionales && mov.entregasAdicionales.length > 0
-        );
+        ) as MovimientoParaVale[];
       }
     }
 
-    return movimientos;
+    return movimientos as MovimientoParaVale[];
   }
 }

@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { prisma } from '@/config/database';
 import { config } from '@/config/env';
 import { PasswordUtils } from '@/utils/password';
@@ -421,11 +421,11 @@ export class AuthService {
 
     const accessToken = jwt.sign(payload, this.JWT_SECRET, {
       expiresIn: this.ACCESS_TOKEN_EXPIRES_IN
-    });
+    } as SignOptions);
 
     const refreshToken = jwt.sign(payload, this.JWT_SECRET, {
       expiresIn: this.REFRESH_TOKEN_EXPIRES_IN
-    });
+    } as SignOptions);
 
     return {
       accessToken,

@@ -610,11 +610,12 @@ export class KardexController {
 
         // Validar y convertir fechas si se proporcionan
         if (filtros.fechaInicio) {
-          if (typeof filtros.fechaInicio === 'string') {
+          const fechaInicioVal = filtros.fechaInicio as unknown;
+          if (typeof fechaInicioVal === 'string') {
             // Manejar formato YYYY-MM-DD del frontend
-            const fechaStr = filtros.fechaInicio.includes('T')
-              ? filtros.fechaInicio
-              : `${filtros.fechaInicio}T00:00:00.000Z`;
+            const fechaStr = (fechaInicioVal as string).includes('T')
+              ? fechaInicioVal as string
+              : `${fechaInicioVal}T00:00:00.000Z`;
             const fecha = new Date(fechaStr);
             if (isNaN(fecha.getTime())) {
               ResponseUtil.error(res, 'Fecha de inicio inválida en filtros', 400);
@@ -625,11 +626,12 @@ export class KardexController {
         }
 
         if (filtros.fechaFin) {
-          if (typeof filtros.fechaFin === 'string') {
+          const fechaFinVal = filtros.fechaFin as unknown;
+          if (typeof fechaFinVal === 'string') {
             // Manejar formato YYYY-MM-DD del frontend
-            const fechaStr = filtros.fechaFin.includes('T')
-              ? filtros.fechaFin
-              : `${filtros.fechaFin}T23:59:59.999Z`;
+            const fechaStr = (fechaFinVal as string).includes('T')
+              ? fechaFinVal as string
+              : `${fechaFinVal}T23:59:59.999Z`;
             const fecha = new Date(fechaStr);
             if (isNaN(fecha.getTime())) {
               ResponseUtil.error(res, 'Fecha de fin inválida en filtros', 400);

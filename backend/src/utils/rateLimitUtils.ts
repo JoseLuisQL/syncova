@@ -8,7 +8,7 @@ export class RateLimitUtils {
    * Limpiar rate limiting para una IP específica (solo en desarrollo)
    */
   static clearRateLimitForIP(ip: string): void {
-    if (process.env.NODE_ENV !== 'development') {
+    if (process.env['NODE_ENV'] !== 'development') {
       console.warn('⚠️ Limpieza de rate limiting solo disponible en desarrollo');
       return;
     }
@@ -46,8 +46,8 @@ export class RateLimitUtils {
    * Middleware para logging de rate limiting en desarrollo
    */
   static developmentLogger() {
-    return (req: Request, res: Response, next: Function) => {
-      if (process.env.NODE_ENV === 'development') {
+    return (req: Request, _res: Response, next: Function) => {
+      if (process.env['NODE_ENV'] === 'development') {
         const info = RateLimitUtils.getRateLimitInfo(req);
         
         // Solo loggear si hay headers de rate limiting
@@ -63,8 +63,8 @@ export class RateLimitUtils {
 /**
  * Endpoint para limpiar rate limiting en desarrollo
  */
-export const clearRateLimitEndpoint = (req: Request, res: Response) => {
-  if (process.env.NODE_ENV !== 'development') {
+export const clearRateLimitEndpoint = (req: Request, res: Response): Response | void => {
+  if (process.env['NODE_ENV'] !== 'development') {
     return res.status(403).json({
       success: false,
       message: 'Endpoint solo disponible en desarrollo',

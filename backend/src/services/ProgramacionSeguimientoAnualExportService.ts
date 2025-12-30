@@ -191,9 +191,7 @@ export class ProgramacionSeguimientoAnualExportService {
         header: 0.3,
         footer: 0.3
       },
-      printTitlesRow: '11:12', // Repetir encabezados en cada página
-      firstHeader: '&C&"Segoe UI,Bold"&14PROGRAMACIÓN Y SEGUIMIENTO ANUAL CENARES',
-      firstFooter: '&L&"Segoe UI"&10Generado: &D &T&R&"Segoe UI"&10Página &P de &N'
+      printTitlesRow: '11:12' // Repetir encabezados en cada página
     };
   }
 

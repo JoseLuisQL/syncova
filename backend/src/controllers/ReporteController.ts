@@ -454,14 +454,14 @@ export class ReporteController {
       console.log('✅ Exportación exitosa, generando buffer...');
 
       // Generar buffer del archivo Excel
-      const buffer = await exportResult.data.workbook.xlsx.writeBuffer();
+      const buffer = await exportResult.data.workbook.xlsx.writeBuffer() as unknown as Uint8Array;
 
-      console.log(`📁 Archivo generado: ${exportResult.data.filename} (${buffer.length} bytes)`);
+      console.log(`📁 Archivo generado: ${exportResult.data.filename} (${buffer.byteLength} bytes)`);
 
       // Configurar headers para descarga de archivo Excel
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename="${exportResult.data.filename}"`);
-      res.setHeader('Content-Length', buffer.length.toString());
+      res.setHeader('Content-Length', buffer.byteLength.toString());
 
       // Enviar el buffer del archivo
       res.send(buffer);
@@ -536,11 +536,11 @@ export class ReporteController {
       }
 
       // Configurar respuesta para descarga
-      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer() as unknown as Uint8Array;
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename="${exportResult.data!.filename}"`);
-      res.setHeader('Content-Length', buffer.length);
+      res.setHeader('Content-Length', buffer.byteLength);
 
       res.send(buffer);
     } catch (error) {
@@ -592,11 +592,11 @@ export class ReporteController {
       }
 
       // Configurar respuesta para descarga
-      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer() as unknown as Uint8Array;
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename="${exportResult.data!.filename}"`);
-      res.setHeader('Content-Length', buffer.length);
+      res.setHeader('Content-Length', buffer.byteLength);
 
       res.send(buffer);
     } catch (error) {
@@ -648,11 +648,11 @@ export class ReporteController {
       }
 
       // Configurar respuesta para descarga
-      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer() as unknown as Uint8Array;
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename="${exportResult.data!.filename}"`);
-      res.setHeader('Content-Length', buffer.length);
+      res.setHeader('Content-Length', buffer.byteLength);
 
       res.send(buffer);
     } catch (error) {
@@ -705,12 +705,12 @@ export class ReporteController {
       }
 
       // Generar buffer del archivo Excel
-      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer() as unknown as Uint8Array;
 
       // Configurar headers para descarga
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename="${exportResult.data!.filename}"`);
-      res.setHeader('Content-Length', buffer.length);
+      res.setHeader('Content-Length', buffer.byteLength);
 
       res.send(buffer);
     } catch (error) {
@@ -1013,7 +1013,7 @@ export class ReporteController {
       }
 
       // Generar buffer del archivo
-      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer() as unknown as Uint8Array;
 
       // Configurar headers para descarga
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -1055,7 +1055,7 @@ export class ReporteController {
       }
 
       // Generar buffer del archivo
-      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer() as unknown as Uint8Array;
 
       // Configurar headers para descarga
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -1097,7 +1097,7 @@ export class ReporteController {
       }
 
       // Generar buffer del archivo
-      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer() as unknown as Uint8Array;
 
       // Configurar headers para descarga
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -1139,7 +1139,7 @@ export class ReporteController {
       }
 
       // Generar buffer del archivo
-      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer() as unknown as Uint8Array;
 
       // Configurar headers para descarga
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -1260,7 +1260,7 @@ export class ReporteController {
       }
 
       // Generar buffer del archivo
-      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer();
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer() as unknown as Uint8Array;
 
       // Configurar headers para descarga
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

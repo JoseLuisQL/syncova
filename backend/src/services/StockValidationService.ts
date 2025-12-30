@@ -320,7 +320,7 @@ export class StockValidationService {
 
     } catch (error) {
       console.error('Error validating syringe stock:', error);
-      errors.push(`Error validando stock de jeringas para ${vaccine?.nombre || 'vacuna desconocida'}`);
+      errors.push(`Error validando stock de jeringas para vacuna ${requirement.vaccineId}`);
     }
 
     return { details, errors, warnings };

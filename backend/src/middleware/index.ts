@@ -188,11 +188,12 @@ export const validateContentType = (req: express.Request, res: express.Response,
     const contentType = req.headers['content-type'];
     
     if (!contentType || !contentType.includes('application/json')) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'Content-Type debe ser application/json',
         timestamp: new Date().toISOString(),
       });
+      return;
     }
   }
   

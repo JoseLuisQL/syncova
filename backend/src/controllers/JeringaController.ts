@@ -62,14 +62,9 @@ export class JeringaController {
 
       paginatedResponse(res, {
         data: jeringas,
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum),
-          hasNext: pageNum * limitNum < total,
-          hasPrev: pageNum > 1
-        },
+        page: pageNum,
+        limit: limitNum,
+        total,
         message: 'Jeringas obtenidas exitosamente'
       });
     } catch (error) {
