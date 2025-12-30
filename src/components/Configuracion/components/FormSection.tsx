@@ -8,10 +8,11 @@ interface FormSectionProps {
   icon: React.ComponentType<{ className?: string }>;
   iconColor?: string;
   children: React.ReactNode;
-  onSave: () => void;
-  onReset: () => void;
+  onSave?: () => void;
+  onReset?: () => void;
   isSaving?: boolean;
   hasChanges?: boolean;
+  showFooter?: boolean;
 }
 
 export const FormSection: React.FC<FormSectionProps> = memo(({
@@ -24,6 +25,7 @@ export const FormSection: React.FC<FormSectionProps> = memo(({
   onReset,
   isSaving = false,
   hasChanges = false,
+  showFooter = true,
 }) => {
   const [iconBg, iconText] = iconColor.split(' ');
 
@@ -57,28 +59,30 @@ export const FormSection: React.FC<FormSectionProps> = memo(({
       </div>
 
       {/* Footer */}
-      <div className={COMPONENT_STYLES.section.footer}>
-        <button
-          onClick={onReset}
-          disabled={isSaving}
-          className={COMPONENT_STYLES.button.secondary}
-        >
-          <RotateCcw className="h-4 w-4" />
-          Restablecer
-        </button>
-        <button
-          onClick={onSave}
-          disabled={isSaving}
-          className={COMPONENT_STYLES.button.primary}
-        >
-          {isSaving ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
+      {showFooter && onSave && onReset && (
+        <div className={COMPONENT_STYLES.section.footer}>
+          <button
+            onClick={onReset}
+            disabled={isSaving}
+            className={COMPONENT_STYLES.button.secondary}
+          >
+            <RotateCcw className="h-4 w-4" />
+            Restablecer
+          </button>
+          <button
+            onClick={onSave}
+            disabled={isSaving}
+            className={COMPONENT_STYLES.button.primary}
+          >
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
           {isSaving ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
+      )}
     </div>
   );
 });

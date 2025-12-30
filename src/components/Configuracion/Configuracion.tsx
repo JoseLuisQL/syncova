@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useConfiguracion } from './hooks/useConfiguracion';
@@ -7,13 +8,8 @@ import {
   ConfiguracionHeader,
   ConfiguracionSidebar,
   ConfiguracionGeneral,
-  ConfiguracionSeguridad,
   ConfiguracionSistema,
-  ConfiguracionNotificaciones,
-  ConfiguracionRespaldos,
-  ConfiguracionMantenimiento,
-  ConfiguracionIntegraciones,
-  ConfiguracionAvanzada,
+  ConfiguracionAlertas,
 } from './components';
 
 const Configuracion: React.FC = () => {
@@ -28,15 +24,15 @@ const Configuracion: React.FC = () => {
   const {
     config,
     activeSection,
+    isLoading,
     isSaving,
     hasChanges,
+    error,
     setActiveSection,
     updateField,
-    updateNestedField,
     saveSection,
     resetSection,
-    exportConfig,
-    importConfig,
+    refreshConfig,
   } = useConfiguracion();
 
   const handleSave = useCallback(async (section: string) => {
@@ -50,31 +46,8 @@ const Configuracion: React.FC = () => {
 
   const handleReset = useCallback((section: string) => {
     resetSection(section);
-    toast.info(`Configuracion de ${section} restablecida a valores por defecto`);
+    toast.info(`Configuracion de ${section} restablecida`);
   }, [resetSection, toast]);
-
-  const handleExport = useCallback(() => {
-    exportConfig();
-    toast.success('Configuracion exportada exitosamente');
-  }, [exportConfig, toast]);
-
-  const handleImport = useCallback(async () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const success = await importConfig(file);
-        if (success) {
-          toast.success('Configuracion importada exitosamente');
-        } else {
-          toast.error('Error al importar la configuracion. Verifique el formato del archivo.');
-        }
-      }
-    };
-    input.click();
-  }, [importConfig, toast]);
 
   const renderActiveSection = () => {
     const commonProps = {
@@ -94,13 +67,13 @@ const Configuracion: React.FC = () => {
           />
         );
 
-      case 'seguridad':
+      case 'alertas':
         return (
-          <ConfiguracionSeguridad
-            config={config.seguridad}
-            onUpdate={(field, value) => updateField('seguridad', field, value)}
-            onSave={() => handleSave('seguridad')}
-            onReset={() => handleReset('seguridad')}
+          <ConfiguracionAlertas
+            config={config.alertas}
+            onUpdate={(field, value) => updateField('alertas', field, value)}
+            onSave={() => handleSave('alertas')}
+            onReset={() => handleReset('alertas')}
             {...commonProps}
           />
         );
@@ -116,74 +89,46 @@ const Configuracion: React.FC = () => {
           />
         );
 
-      case 'notificaciones':
-        return (
-          <ConfiguracionNotificaciones
-            config={config.notificaciones}
-            onUpdate={(field, value) => updateField('notificaciones', field, value)}
-            onSave={() => handleSave('notificaciones')}
-            onReset={() => handleReset('notificaciones')}
-            {...commonProps}
-          />
-        );
-
-      case 'respaldos':
-        return (
-          <ConfiguracionRespaldos
-            config={config.respaldos}
-            onUpdate={(field, value) => updateField('respaldos', field, value)}
-            onSave={() => handleSave('respaldos')}
-            onReset={() => handleReset('respaldos')}
-            {...commonProps}
-          />
-        );
-
-      case 'mantenimiento':
-        return (
-          <ConfiguracionMantenimiento
-            config={config.mantenimiento}
-            onUpdate={(field, value) => updateField('mantenimiento', field, value)}
-            onSave={() => handleSave('mantenimiento')}
-            onReset={() => handleReset('mantenimiento')}
-            {...commonProps}
-          />
-        );
-
-      case 'integraciones':
-        return (
-          <ConfiguracionIntegraciones
-            config={config.integraciones}
-            onUpdateNested={(subsection, field, value) =>
-              updateNestedField('integraciones', subsection, field, value)
-            }
-            onSave={() => handleSave('integraciones')}
-            onReset={() => handleReset('integraciones')}
-            {...commonProps}
-          />
-        );
-
-      case 'avanzado':
-        return (
-          <ConfiguracionAvanzada
-            config={config.avanzado}
-            onUpdate={(field, value) => updateField('avanzado', field, value)}
-            onSave={() => handleSave('avanzado')}
-            onReset={() => handleReset('avanzado')}
-            {...commonProps}
-          />
-        );
-
       default:
         return null;
     }
   };
 
+  if (isLoading) {
+    return (
+      <main className={COMPONENT_STYLES.pageBackground}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+            <p className="text-gray-600">Cargando configuracion...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className={COMPONENT_STYLES.pageBackground}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="bg-white rounded-xl p-6 shadow-lg max-w-md text-center">
+            <p className="text-rose-600 mb-4">{error}</p>
+            <button
+              onClick={refreshConfig}
+              className={COMPONENT_STYLES.button.primary}
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className={COMPONENT_STYLES.pageBackground}>
       {/* Header */}
       <ConfiguracionHeader
-        onExport={handleExport}
-        onImport={handleImport}
         hasChanges={hasChanges}
       />
 

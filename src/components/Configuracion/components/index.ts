@@ -1,11 +1,6 @@
 export { default as ConfiguracionHeader } from './ConfiguracionHeader';
 export { default as ConfiguracionSidebar } from './ConfiguracionSidebar';
 export { default as ConfiguracionGeneral } from './ConfiguracionGeneral';
-export { default as ConfiguracionSeguridad } from './ConfiguracionSeguridad';
 export { default as ConfiguracionSistema } from './ConfiguracionSistema';
-export { default as ConfiguracionNotificaciones } from './ConfiguracionNotificaciones';
-export { default as ConfiguracionRespaldos } from './ConfiguracionRespaldos';
-export { default as ConfiguracionMantenimiento } from './ConfiguracionMantenimiento';
-export { default as ConfiguracionIntegraciones } from './ConfiguracionIntegraciones';
-export { default as ConfiguracionAvanzada } from './ConfiguracionAvanzada';
-export { FormSection, ToggleField, InputField, SelectField } from './FormSection';
+export { default as ConfiguracionAlertas } from './ConfiguracionAlertas';
+export { FormSection, InputField, SelectField, ToggleField } from './FormSection';

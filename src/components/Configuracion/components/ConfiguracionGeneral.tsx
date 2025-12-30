@@ -4,16 +4,15 @@ import { FormSection, InputField, SelectField } from './FormSection';
 
 interface ConfiguracionGeneralProps {
   config: {
-    nombreSistema: string;
-    nombreInstitucion: string;
-    direccion: string;
-    telefono: string;
-    email: string;
+    sistemaNombre: string;
+    institucionNombre: string;
+    institucionDireccion: string;
+    institucionTelefono: string;
+    institucionEmail: string;
     timezone: string;
-    idioma: string;
     formatoFecha: string;
   };
-  onUpdate: (field: string, value: any) => void;
+  onUpdate: (field: string, value: string) => void;
   onSave: () => void;
   onReset: () => void;
   isSaving?: boolean;
@@ -49,13 +48,13 @@ export const ConfiguracionGeneral: React.FC<ConfiguracionGeneralProps> = memo(({
 
           <InputField
             label="Nombre del Sistema"
-            value={config.nombreSistema}
-            onChange={(value) => onUpdate('nombreSistema', value)}
+            value={config.sistemaNombre || ''}
+            onChange={(value) => onUpdate('sistemaNombre', value)}
           />
 
           <SelectField
             label="Zona Horaria"
-            value={config.timezone}
+            value={config.timezone || 'America/Lima'}
             onChange={(value) => onUpdate('timezone', value)}
             options={[
               { value: 'America/Lima', label: 'Lima (UTC-5)' },
@@ -66,7 +65,7 @@ export const ConfiguracionGeneral: React.FC<ConfiguracionGeneralProps> = memo(({
 
           <SelectField
             label="Formato de Fecha"
-            value={config.formatoFecha}
+            value={config.formatoFecha || 'DD/MM/YYYY'}
             onChange={(value) => onUpdate('formatoFecha', value)}
             options={[
               { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
@@ -85,27 +84,27 @@ export const ConfiguracionGeneral: React.FC<ConfiguracionGeneralProps> = memo(({
 
           <InputField
             label="Nombre de la Institucion"
-            value={config.nombreInstitucion}
-            onChange={(value) => onUpdate('nombreInstitucion', value)}
+            value={config.institucionNombre || ''}
+            onChange={(value) => onUpdate('institucionNombre', value)}
           />
 
           <InputField
             label="Direccion"
-            value={config.direccion}
-            onChange={(value) => onUpdate('direccion', value)}
+            value={config.institucionDireccion || ''}
+            onChange={(value) => onUpdate('institucionDireccion', value)}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InputField
               label="Telefono"
-              value={config.telefono}
-              onChange={(value) => onUpdate('telefono', value)}
+              value={config.institucionTelefono || ''}
+              onChange={(value) => onUpdate('institucionTelefono', value)}
             />
             <InputField
               label="Email"
               type="email"
-              value={config.email}
-              onChange={(value) => onUpdate('email', value)}
+              value={config.institucionEmail || ''}
+              onChange={(value) => onUpdate('institucionEmail', value)}
             />
           </div>
         </div>

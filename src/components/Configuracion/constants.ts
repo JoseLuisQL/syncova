@@ -1,11 +1,6 @@
 import {
-  Shield,
-  Server,
   Bell,
-  Database,
-  RefreshCw,
-  Link,
-  Zap,
+  Server,
   Building2,
 } from 'lucide-react';
 
@@ -72,79 +67,43 @@ export const COLORS = {
   },
 } as const;
 
-// Configuración de secciones del módulo Configuración
+// Configuración de secciones del módulo Configuración - Simplificado a 3 secciones esenciales
 export interface ConfigSection {
   id: string;
   label: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
-  category: 'general' | 'seguridad' | 'sistema' | 'avanzado';
+  category: 'general' | 'alertas' | 'sistema';
 }
 
 export const CONFIG_SECTIONS: ConfigSection[] = [
   {
     id: 'general',
     label: 'General',
-    description: 'Información básica del sistema',
+    description: 'Informacion de la institucion',
     icon: Building2,
     category: 'general',
   },
   {
-    id: 'notificaciones',
-    label: 'Notificaciones',
-    description: 'Alertas y comunicaciones',
+    id: 'alertas',
+    label: 'Alertas',
+    description: 'Umbrales y notificaciones',
     icon: Bell,
-    category: 'general',
-  },
-  {
-    id: 'seguridad',
-    label: 'Seguridad',
-    description: 'Políticas de acceso',
-    icon: Shield,
-    category: 'seguridad',
-  },
-  {
-    id: 'respaldos',
-    label: 'Respaldos',
-    description: 'Copias de seguridad',
-    icon: Database,
-    category: 'seguridad',
+    category: 'alertas',
   },
   {
     id: 'sistema',
     label: 'Sistema',
-    description: 'Parámetros de funcionamiento',
+    description: 'Informacion del sistema',
     icon: Server,
     category: 'sistema',
-  },
-  {
-    id: 'mantenimiento',
-    label: 'Mantenimiento',
-    description: 'Tareas programadas',
-    icon: RefreshCw,
-    category: 'sistema',
-  },
-  {
-    id: 'integraciones',
-    label: 'Integraciones',
-    description: 'APIs y servicios externos',
-    icon: Link,
-    category: 'avanzado',
-  },
-  {
-    id: 'avanzado',
-    label: 'Avanzado',
-    description: 'Configuraciones técnicas',
-    icon: Zap,
-    category: 'avanzado',
   },
 ];
 
 export const CATEGORY_LABELS = {
   general: 'General',
-  seguridad: 'Seguridad',
+  alertas: 'Alertas',
   sistema: 'Sistema',
-  avanzado: 'Avanzado',
 } as const;
 
 // Estilos de componentes reutilizables
@@ -255,72 +214,46 @@ export const COMPONENT_STYLES = {
   },
 } as const;
 
+// Claves de configuración en la base de datos
+export const CONFIG_KEYS = {
+  // General
+  SISTEMA_NOMBRE: 'sistema_nombre',
+  INSTITUCION_NOMBRE: 'institucion_nombre',
+  INSTITUCION_DIRECCION: 'institucion_direccion',
+  INSTITUCION_TELEFONO: 'institucion_telefono',
+  INSTITUCION_EMAIL: 'institucion_email',
+  TIMEZONE: 'timezone',
+  FORMATO_FECHA: 'formato_fecha',
+  
+  // Alertas
+  ALERTAS_DIAS_ANTICIPACION: 'alertas_dias_anticipacion',
+  ALERTAS_STOCK_MINIMO: 'alertas_stock_minimo',
+  ALERTAS_DIAS_RETENCION: 'alertas_dias_retencion',
+  
+  // Sistema
+  SISTEMA_VERSION: 'sistema_version',
+  TIEMPO_SESION: 'tiempo_sesion',
+} as const;
+
 // Valores por defecto de configuración
 export const DEFAULT_CONFIG = {
   general: {
-    nombreSistema: 'SIVAC - Sistema de Gestión de Vacunas',
-    nombreInstitucion: 'DISA Apurímac II',
-    direccion: 'Jr. Lima 123, Andahuaylas, Apurímac',
-    telefono: '+51 983 456 789',
-    email: 'contacto@saludapurimac.gob.pe',
+    sistemaNombre: 'SIVAC - Sistema de Gestion de Vacunas',
+    institucionNombre: 'DISA Apurimac II',
+    institucionDireccion: 'Jr. Lima 123, Andahuaylas, Apurimac',
+    institucionTelefono: '+51 983 456 789',
+    institucionEmail: 'contacto@saludapurimac.gob.pe',
     timezone: 'America/Lima',
-    idioma: 'es',
     formatoFecha: 'DD/MM/YYYY',
   },
+  alertas: {
+    diasAnticipacion: 30,
+    stockMinimo: 100,
+    diasRetencion: 30,
+  },
   sistema: {
-    versionSistema: '2.1.0',
-    entornoEjecucion: 'produccion',
-    maxUsuariosConcurrentes: 50,
+    version: '2.1.0',
     tiempoSesion: 480,
-    autoGuardado: true,
-    cacheDatos: true,
-  },
-  seguridad: {
-    autenticacionDosFactor: false,
-    longitudMinimaPassword: 8,
-    complejidadPassword: true,
-    expiracionPassword: 90,
-    intentosMaximoLogin: 5,
-    encriptacionDatos: true,
-    auditoriaSesiones: true,
-  },
-  notificaciones: {
-    emailHabilitado: true,
-    alertasStock: true,
-    alertasVencimiento: true,
-    notificacionesUsuarios: true,
-    frecuenciaAlertas: 'diaria',
-  },
-  integraciones: {
-    apiHisMinsa: {
-      habilitado: false,
-      url: '',
-      apiKey: '',
-    },
-    siga: {
-      habilitado: false,
-      servidor: '',
-      puerto: 443,
-    },
-  },
-  respaldos: {
-    automatico: true,
-    frecuencia: 'diaria',
-    hora: '02:00',
-    retencionDias: 30,
-    ubicacionRespaldo: '/backups',
-  },
-  mantenimiento: {
-    limpiezaAutomatica: true,
-    optimizacionBD: 'semanal',
-    limpiezaLogs: true,
-    monitoreoCPU: true,
-  },
-  avanzado: {
-    modoDebug: false,
-    nivelLog: 'info',
-    compresionDatos: true,
-    conexionesBDMaximas: 20,
   },
 } as const;
 
