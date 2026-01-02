@@ -379,7 +379,8 @@ export class PlanificacionService {
       }>>(`${this.BASE_PATH}/importar/vacuna/${vacunaId}/anio/${anio}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
-        }
+        },
+        timeout: 300000 // 5 minutos para importaciones
       });
 
       if (!response.data.success || !response.data.data) {
@@ -420,7 +421,8 @@ export class PlanificacionService {
       }>>(`${this.BASE_PATH}/importar/masivo/anio/${anio}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
-        }
+        },
+        timeout: 600000 // 10 minutos para importaciones masivas
       });
 
       if (!response.data.success || !response.data.data) {

@@ -668,6 +668,62 @@ export class MovimientosWriteService {
         }
       }
 
+      // SINCRONIZACIÓN AUTOMÁTICA: Actualizar saldoAnterior de enero con stock de diciembre del año anterior
+      if (planificacion.anio > 2020) {
+        try {
+          const mesAnteriorAnio = planificacion.anio - 1;
+          const mesAnterior = 12; // Diciembre
+
+          // Buscar movimiento de diciembre del año anterior
+          const movimientoDiciembre = await prisma.movimientoVacuna.findUnique({
+            where: {
+              uk_movimiento_establecimiento_vacuna_mes_anio: {
+                establecimientoId: planificacion.establecimientoId,
+                vacunaId: planificacion.vacunaId,
+                mes: mesAnterior,
+                anio: mesAnteriorAnio
+              }
+            }
+          });
+
+          if (movimientoDiciembre) {
+            // Calcular stock final de diciembre (saldoAnterior + transIngreso - salida - transSalida + entrega)
+            const stockFinalDiciembre =
+              movimientoDiciembre.saldoAnterior +
+              movimientoDiciembre.transIngreso -
+              movimientoDiciembre.salida -
+              movimientoDiciembre.transSalida +
+              movimientoDiciembre.entrega;
+
+            // Buscar movimiento de enero del año actual
+            const movimientoEnero = await prisma.movimientoVacuna.findUnique({
+              where: {
+                uk_movimiento_establecimiento_vacuna_mes_anio: {
+                  establecimientoId: planificacion.establecimientoId,
+                  vacunaId: planificacion.vacunaId,
+                  mes: 1,
+                  anio: planificacion.anio
+                }
+              }
+            });
+
+            if (movimientoEnero && movimientoEnero.saldoAnterior !== stockFinalDiciembre) {
+              await prisma.movimientoVacuna.update({
+                where: { id: movimientoEnero.id },
+                data: {
+                  saldoAnterior: stockFinalDiciembre,
+                  updatedAt: new Date()
+                }
+              });
+              console.log(`✅ [SaldoAnterior] Enero ${planificacion.anio} actualizado con stock de Dic ${mesAnteriorAnio}: ${stockFinalDiciembre} - Establecimiento: ${planificacion.establecimiento.nombre}`);
+            }
+          }
+        } catch (syncError) {
+          console.warn(`⚠️ [SaldoAnterior] Error al sincronizar saldo anterior de enero ${planificacion.anio}:`, syncError);
+          // No interrumpir el flujo principal si falla la sincronización
+        }
+      }
+
       return {
         success: true,
         data: {
