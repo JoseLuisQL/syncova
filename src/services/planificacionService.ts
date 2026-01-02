@@ -583,4 +583,36 @@ export class PlanificacionService {
       throw handleApiError(error as AxiosError);
     }
   }
+
+  /**
+   * Obtener años disponibles con planificaciones registradas
+   */
+  static async getAniosDisponibles(): Promise<{
+    anios: number[];
+    anioActual: number;
+  }> {
+    try {
+      logger.debug('Obteniendo años disponibles');
+
+      const response = await apiClient.get<ApiResponse<{
+        anios: number[];
+        anioActual: number;
+      }>>(`${this.BASE_PATH}/anios-disponibles`);
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error al obtener años disponibles');
+      }
+
+      logger.debug('Años disponibles obtenidos:', response.data.data);
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al obtener años disponibles:', error);
+      // Fallback: devolver año actual y siguiente si hay error
+      const currentYear = new Date().getFullYear();
+      return {
+        anios: [currentYear - 1, currentYear, currentYear + 1],
+        anioActual: currentYear
+      };
+    }
+  }
 }

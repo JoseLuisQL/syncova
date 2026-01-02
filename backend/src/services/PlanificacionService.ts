@@ -2522,4 +2522,47 @@ export class PlanificacionService {
       };
     }
   }
+
+  /**
+   * Obtener años disponibles con planificaciones registradas
+   */
+  static async getAniosDisponibles(): Promise<ServiceResult<number[]>> {
+    try {
+      const currentYear = new Date().getFullYear();
+      
+      // Obtener años únicos de planificaciones existentes
+      const aniosConPlanificacion = await prisma.planificacionAnual.findMany({
+        select: {
+          anio: true
+        },
+        distinct: ['anio'],
+        orderBy: {
+          anio: 'asc'
+        }
+      });
+
+      const aniosSet = new Set<number>();
+      
+      // Agregar años con planificaciones
+      aniosConPlanificacion.forEach(p => aniosSet.add(p.anio));
+      
+      // Siempre incluir año actual y siguiente para permitir nueva planificación
+      aniosSet.add(currentYear);
+      aniosSet.add(currentYear + 1);
+
+      // Convertir a array y ordenar
+      const anios = Array.from(aniosSet).sort((a, b) => a - b);
+
+      return {
+        success: true,
+        data: anios
+      };
+    } catch (error) {
+      console.error('Error al obtener años disponibles:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al obtener años disponibles'
+      };
+    }
+  }
 }

@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Settings, Building2, Package, Calendar, Loader2 } from 'lucide-react';
-import { COMPONENT_STYLES, MESES, ANIOS_DISPONIBLES } from '../constants';
+import { COMPONENT_STYLES, MESES } from '../constants';
 import { Vacuna, CentroAcopio } from '../../../types';
 import { COLORES_CENTROS_ACOPIO } from '../../../utils/centroAcopioUtils';
 
@@ -11,6 +11,7 @@ interface MovimientosFiltrosProps {
   selectedAnio: number;
   centrosAcopio: CentroAcopio[];
   vacunasActivas: Vacuna[];
+  aniosDisponibles?: number[];
   isLoadingEstablecimientos: boolean;
   isLoadingVacunas: boolean;
   datosTablaLength: number;
@@ -27,6 +28,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
   selectedAnio,
   centrosAcopio,
   vacunasActivas,
+  aniosDisponibles = [],
   isLoadingEstablecimientos,
   isLoadingVacunas,
   datosTablaLength,
@@ -140,7 +142,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
               onChange={(e) => onAnioChange(Number(e.target.value))}
               className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan}`}
             >
-              {ANIOS_DISPONIBLES.map((anio) => (
+              {aniosDisponibles.map((anio) => (
                 <option key={anio} value={anio}>
                   {anio}
                 </option>

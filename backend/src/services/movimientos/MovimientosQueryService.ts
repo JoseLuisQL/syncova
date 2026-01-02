@@ -395,4 +395,47 @@ export class MovimientosQueryService {
            movimiento.entrega -
            entregasAdicionalesTotal;
   }
+
+  /**
+   * Obtener años disponibles con movimientos registrados
+   */
+  static async getAniosDisponibles(): Promise<ServiceResult<number[]>> {
+    try {
+      const currentYear = new Date().getFullYear();
+      
+      // Obtener años únicos de movimientos existentes
+      const aniosConMovimientos = await prisma.movimientoVacuna.findMany({
+        select: {
+          anio: true
+        },
+        distinct: ['anio'],
+        orderBy: {
+          anio: 'asc'
+        }
+      });
+
+      const aniosSet = new Set<number>();
+      
+      // Agregar años con movimientos
+      aniosConMovimientos.forEach(m => aniosSet.add(m.anio));
+      
+      // Siempre incluir año actual y siguiente
+      aniosSet.add(currentYear);
+      aniosSet.add(currentYear + 1);
+
+      // Convertir a array y ordenar
+      const anios = Array.from(aniosSet).sort((a, b) => a - b);
+
+      return {
+        success: true,
+        data: anios
+      };
+    } catch (error) {
+      console.error('Error al obtener años disponibles:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al obtener años disponibles'
+      };
+    }
+  }
 }

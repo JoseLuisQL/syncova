@@ -109,6 +109,8 @@ const Movimientos: React.FC = () => {
   const [selectedVacuna, setSelectedVacuna] = useState<string>('');
   const [selectedMes, setSelectedMes] = useState<number>(new Date().getMonth() + 1);
   const [selectedAnio, setSelectedAnio] = useState<number>(new Date().getFullYear());
+  const [aniosDisponibles, setAniosDisponibles] = useState<number[]>([]);
+  const [isLoadingAnios, setIsLoadingAnios] = useState(true);
 
   // ============================================================================
   // ESTADOS DE MODALES
@@ -320,6 +322,32 @@ const Movimientos: React.FC = () => {
   // ============================================================================
   // EFECTOS
   // ============================================================================
+  
+  // Cargar años disponibles desde la API
+  useEffect(() => {
+    const fetchAniosDisponibles = async () => {
+      try {
+        setIsLoadingAnios(true);
+        const response = await MovimientosService.getAniosDisponibles();
+        setAniosDisponibles(response.anios);
+        // Establecer el año actual si está disponible
+        if (response.anios.includes(response.anioActual)) {
+          setSelectedAnio(response.anioActual);
+        } else if (response.anios.length > 0) {
+          setSelectedAnio(response.anios[response.anios.length - 1]);
+        }
+      } catch (error) {
+        console.error('Error al cargar años disponibles:', error);
+        const currentYear = new Date().getFullYear();
+        setAniosDisponibles([currentYear - 1, currentYear, currentYear + 1]);
+      } finally {
+        setIsLoadingAnios(false);
+      }
+    };
+
+    fetchAniosDisponibles();
+  }, []);
+
   useEffect(() => {
     const loadInitialData = async () => {
       try {
@@ -1401,8 +1429,10 @@ const Movimientos: React.FC = () => {
         selectedAnio={selectedAnio}
         centrosAcopio={centrosAcopio}
         vacunasActivas={vacunasActivas}
+        aniosDisponibles={aniosDisponibles}
         isLoadingEstablecimientos={isLoadingEstablecimientos}
         isLoadingVacunas={isLoadingActivas}
+        isLoadingAnios={isLoadingAnios}
         datosTablaLength={datosTabla.length}
         onCentroAcopioChange={setSelectedCentroAcopio}
         onVacunaChange={setSelectedVacuna}

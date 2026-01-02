@@ -8,6 +8,13 @@ import { uploadSingleExcel, handleUploadError } from '@/middleware/upload';
 const router = Router();
 
 /**
+ * @route GET /api/movimientos/anios-disponibles
+ * @desc Obtener años disponibles con movimientos registrados
+ * @access Public (TODO: Proteger con autenticación)
+ */
+router.get('/anios-disponibles', MovimientosController.getAniosDisponibles);
+
+/**
  * @route GET /api/movimientos/plantilla/vacuna/:vacunaId/anio/:anio
  * @desc Descargar plantilla Excel para importación por vacuna específica
  * @access Public (TODO: Proteger con autenticación)

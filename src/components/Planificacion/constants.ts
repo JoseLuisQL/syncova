@@ -190,8 +190,9 @@ export const MESES = [
 
 export const MESES_CORTOS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'] as const;
 
-// Configuración de años disponibles
-export const ANIOS_DISPONIBLES = [2024, 2025, 2026] as const;
+// Configuración de años disponibles (año actual + año anterior y siguiente)
+const currentYear = new Date().getFullYear();
+export const ANIOS_DISPONIBLES = [currentYear - 1, currentYear, currentYear + 1] as const;
 
 // Estilos para inputs editables
 export const INPUT_FIELD_STYLES = {

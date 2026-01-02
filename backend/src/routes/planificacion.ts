@@ -8,6 +8,13 @@ import { uploadSingleExcel, handleUploadError } from '@/middleware/upload';
 const router = Router();
 
 /**
+ * @route GET /api/planificacion/anios-disponibles
+ * @desc Obtener años disponibles con planificaciones registradas
+ * @access Public (TODO: Proteger con autenticación)
+ */
+router.get('/anios-disponibles', PlanificacionController.getAniosDisponibles);
+
+/**
  * @route GET /api/planificacion/estadisticas
  * @desc Obtener estadísticas de planificación
  * @access Public (TODO: Proteger con autenticación)

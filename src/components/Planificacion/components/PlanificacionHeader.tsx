@@ -11,7 +11,6 @@ import {
   Filter,
   ChevronDown,
 } from 'lucide-react';
-import { ANIOS_DISPONIBLES } from '../constants';
 import { Vacuna, CentroAcopio } from '../../../types';
 
 interface PlanificacionHeaderProps {
@@ -21,6 +20,7 @@ interface PlanificacionHeaderProps {
   selectedVacuna: string;
   centrosAcopio: CentroAcopio[];
   vacunas: Vacuna[];
+  aniosDisponibles: number[];
   establecimientosCount: number;
   totalGeneral: number;
   onAnioChange: (anio: number) => void;
@@ -28,6 +28,7 @@ interface PlanificacionHeaderProps {
   onVacunaChange: (id: string) => void;
   // Estados
   isLoading: boolean;
+  isLoadingAnios?: boolean;
   isUpdating: boolean;
   isImporting: boolean;
   isExporting: boolean;
@@ -45,12 +46,14 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
   selectedVacuna,
   centrosAcopio,
   vacunas,
+  aniosDisponibles,
   establecimientosCount,
   totalGeneral,
   onAnioChange,
   onCentroAcopioChange,
   onVacunaChange,
   isLoading,
+  isLoadingAnios,
   isUpdating,
   isImporting,
   isExporting,
@@ -146,11 +149,13 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                     <select
                       value={selectedAnio}
                       onChange={(e) => onAnioChange(Number(e.target.value))}
+                      disabled={isLoadingAnios}
                       className="w-full pl-12 pr-8 py-2.5 text-sm font-medium bg-white rounded-xl border border-gray-200
                                  focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400
-                                 hover:border-teal-300 hover:shadow-sm transition-all duration-200 cursor-pointer appearance-none"
+                                 hover:border-teal-300 hover:shadow-sm transition-all duration-200 cursor-pointer appearance-none
+                                 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {ANIOS_DISPONIBLES.map((anio) => (
+                      {aniosDisponibles.map((anio) => (
                         <option key={anio} value={anio}>{anio}</option>
                       ))}
                     </select>

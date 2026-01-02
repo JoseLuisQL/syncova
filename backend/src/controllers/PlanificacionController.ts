@@ -942,4 +942,27 @@ export class PlanificacionController {
       errorResponse(res, 'Error interno del servidor', 500);
     }
   }
+
+  /**
+   * Obtener años disponibles con planificaciones registradas
+   * GET /api/planificacion/anios-disponibles
+   */
+  static async getAniosDisponibles(_req: Request, res: Response): Promise<void> {
+    try {
+      const result = await PlanificacionService.getAniosDisponibles();
+
+      if (!result.success) {
+        errorResponse(res, result.error || 'Error al obtener años disponibles', 500);
+        return;
+      }
+
+      successResponse(res, {
+        anios: result.data,
+        anioActual: new Date().getFullYear()
+      }, 'Años disponibles obtenidos exitosamente');
+    } catch (error) {
+      console.error('Error en PlanificacionController.getAniosDisponibles:', error);
+      errorResponse(res, 'Error interno del servidor', 500);
+    }
+  }
 }

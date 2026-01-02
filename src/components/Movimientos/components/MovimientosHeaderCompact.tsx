@@ -18,7 +18,7 @@ import {
   AlertTriangle,
   ArrowRight,
 } from 'lucide-react';
-import { MESES, ANIOS_DISPONIBLES } from '../constants';
+import { MESES } from '../constants';
 import { Vacuna, CentroAcopio } from '../../../types';
 import { COLORES_CENTROS_ACOPIO } from '../../../utils/centroAcopioUtils';
 
@@ -49,8 +49,10 @@ interface MovimientosHeaderCompactProps {
   selectedAnio: number;
   centrosAcopio: CentroAcopio[];
   vacunasActivas: Vacuna[];
+  aniosDisponibles: number[];
   isLoadingEstablecimientos: boolean;
   isLoadingVacunas: boolean;
+  isLoadingAnios?: boolean;
   datosTablaLength: number;
   onCentroAcopioChange: (value: string) => void;
   onVacunaChange: (value: string) => void;
@@ -84,8 +86,10 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   selectedAnio,
   centrosAcopio,
   vacunasActivas,
+  aniosDisponibles,
   isLoadingEstablecimientos,
   isLoadingVacunas,
+  isLoadingAnios,
   datosTablaLength,
   onCentroAcopioChange,
   onVacunaChange,
@@ -237,11 +241,13 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                     <select
                       value={selectedAnio}
                       onChange={(e) => onAnioChange(Number(e.target.value))}
+                      disabled={isLoadingAnios}
                       className="w-full pl-12 pr-8 py-2.5 text-sm font-medium bg-white rounded-xl border border-gray-200
                                  focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400
-                                 hover:border-cyan-300 hover:shadow-sm transition-all duration-200 cursor-pointer appearance-none"
+                                 hover:border-cyan-300 hover:shadow-sm transition-all duration-200 cursor-pointer appearance-none
+                                 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {ANIOS_DISPONIBLES.map((anio) => (
+                      {aniosDisponibles.map((anio) => (
                         <option key={anio} value={anio}>{anio}</option>
                       ))}
                     </select>

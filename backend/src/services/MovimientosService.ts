@@ -194,4 +194,11 @@ export class MovimientosService {
   static async generarReporteErrores(erroresPorVacuna: any[]): Promise<ServiceResult<ExcelJS.Workbook>> {
     return MovimientosExcelService.generarReporteErrores(erroresPorVacuna);
   }
+
+  /**
+   * Obtener años disponibles con movimientos registrados
+   */
+  static async getAniosDisponibles(): Promise<ServiceResult<number[]>> {
+    return MovimientosQueryService.getAniosDisponibles();
+  }
 }

@@ -25,7 +25,9 @@ import ImportarModal from './ImportarModal';
 
 const Planificacion: React.FC = () => {
   // Estados de filtros
-  const [selectedAnio, setSelectedAnio] = useState<number>(2025);
+  const [selectedAnio, setSelectedAnio] = useState<number>(new Date().getFullYear());
+  const [aniosDisponibles, setAniosDisponibles] = useState<number[]>([]);
+  const [isLoadingAnios, setIsLoadingAnios] = useState(true);
   const [selectedCentroAcopio, setSelectedCentroAcopio] = useState<string>('todos');
   const [selectedVacuna, setSelectedVacuna] = useState<string>('');
   const [showModalImportar, setShowModalImportar] = useState(false);
@@ -82,6 +84,33 @@ const Planificacion: React.FC = () => {
 
     return ordenarEstablecimientos(filtrados);
   }, [establecimientos, selectedCentroAcopio]);
+
+  // Cargar años disponibles desde la API
+  useEffect(() => {
+    const fetchAniosDisponibles = async () => {
+      try {
+        setIsLoadingAnios(true);
+        const response = await PlanificacionService.getAniosDisponibles();
+        setAniosDisponibles(response.anios);
+        // Establecer el año actual si está disponible
+        if (response.anios.includes(response.anioActual)) {
+          setSelectedAnio(response.anioActual);
+        } else if (response.anios.length > 0) {
+          // Usar el último año disponible
+          setSelectedAnio(response.anios[response.anios.length - 1]);
+        }
+      } catch (error) {
+        console.error('Error al cargar años disponibles:', error);
+        // Fallback
+        const currentYear = new Date().getFullYear();
+        setAniosDisponibles([currentYear - 1, currentYear, currentYear + 1]);
+      } finally {
+        setIsLoadingAnios(false);
+      }
+    };
+
+    fetchAniosDisponibles();
+  }, []);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -649,12 +678,14 @@ const Planificacion: React.FC = () => {
         selectedVacuna={selectedVacuna}
         centrosAcopio={centrosAcopio}
         vacunas={vacunas}
+        aniosDisponibles={aniosDisponibles}
         establecimientosCount={datosVacuna?.establecimientos.length || 0}
         totalGeneral={calcularTotalGeneral()}
         onAnioChange={setSelectedAnio}
         onCentroAcopioChange={setSelectedCentroAcopio}
         onVacunaChange={setSelectedVacuna}
         isLoading={isLoading}
+        isLoadingAnios={isLoadingAnios}
         isUpdating={isUpdating}
         isImporting={isImporting}
         isExporting={isExporting}
