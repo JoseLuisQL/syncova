@@ -143,18 +143,12 @@ export const usePermissions = () => {
    * Verifica si el usuario puede acceder a un módulo del menú
    */
   const canAccessModule = useCallback((moduleId: string): boolean => {
-    // Si el usuario no tiene permisos cargados, permitir acceso a todos los módulos
-    // Esto evita que el sidebar quede vacío mientras se cargan los permisos
-    if (!permissions || permissions.length === 0) {
-      return true;
-    }
-    
     const requiredPermissions = MODULE_PERMISSIONS[moduleId];
     if (!requiredPermissions || requiredPermissions.length === 0) {
       return true; // Si no hay permisos definidos, se permite acceso
     }
     return hasAnyPermission(requiredPermissions);
-  }, [permissions, hasAnyPermission]);
+  }, [hasAnyPermission]);
 
   /**
    * Verifica si el usuario puede acceder a una sección de un módulo
