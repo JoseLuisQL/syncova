@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { MESES } from '../constants';
 import { Vacuna, CentroAcopio } from '../../../types';
-import { COLORES_CENTROS_ACOPIO } from '../../../utils/centroAcopioUtils';
 
 interface StockInfo {
   stockInicialHistorico: number | null;
@@ -133,7 +132,6 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const coloresAcopio = COLORES_CENTROS_ACOPIO;
   const centroNombre = selectedCentroAcopio === 'todos'
     ? 'Todos los centros'
     : centrosAcopio.find(c => c.id === selectedCentroAcopio)?.nombre || '';
@@ -186,14 +184,11 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                                  disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
                     >
                       <option value="todos">Todos</option>
-                      {centrosAcopio.map((centro) => {
-                        const colores = coloresAcopio[centro.nombre as keyof typeof coloresAcopio] || coloresAcopio['DEFAULT'];
-                        return (
-                          <option key={centro.id} value={centro.id}>
-                            {colores.icon} {centro.nombre}
-                          </option>
-                        );
-                      })}
+                      {centrosAcopio.map((centro) => (
+                        <option key={centro.id} value={centro.id}>
+                          {centro.nombre}
+                        </option>
+                      ))}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                   </div>

@@ -2,7 +2,6 @@ import React, { memo } from 'react';
 import { Settings, Building2, Package, Calendar, Loader2 } from 'lucide-react';
 import { COMPONENT_STYLES, MESES } from '../constants';
 import { Vacuna, CentroAcopio } from '../../../types';
-import { COLORES_CENTROS_ACOPIO } from '../../../utils/centroAcopioUtils';
 
 interface MovimientosFiltrosProps {
   selectedCentroAcopio: string;
@@ -37,7 +36,6 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
   onMesChange,
   onAnioChange,
 }) => {
-  const coloresAcopio = COLORES_CENTROS_ACOPIO;
 
   return (
     <section className={COMPONENT_STYLES.filter.container} aria-label="Filtros">
@@ -78,14 +76,11 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
               className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal}`}
             >
               <option value="todos">Todos los Centros</option>
-              {centrosAcopio.map((centro) => {
-                const colores = coloresAcopio[centro.nombre as keyof typeof coloresAcopio] || coloresAcopio['DEFAULT'];
-                return (
-                  <option key={centro.id} value={centro.id}>
-                    {colores.icon} {centro.nombre}
-                  </option>
-                );
-              })}
+              {centrosAcopio.map((centro) => (
+                <option key={centro.id} value={centro.id}>
+                  {centro.nombre}
+                </option>
+              ))}
             </select>
           </div>
 
