@@ -27,8 +27,8 @@ const Usuarios: React.FC = () => {
   }, [canAccessSection]);
 
   // Permisos específicos
-  const canCreateUser = hasPermission('usuarios:usuarios:write');
-  const canExportUsers = hasPermission('usuarios:usuarios:export');
+  const canCreateUser = hasPermission('usuarios:write');
+  const canExportUsers = hasPermission('usuarios:read');
 
   // Estados de navegación
   const [activeSection, setActiveSection] = useState<SectionId>('usuarios');
