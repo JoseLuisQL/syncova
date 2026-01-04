@@ -1,11 +1,11 @@
 import React, { useState, useEffect, memo } from 'react';
 import { X, Loader2, Eye, EyeOff } from 'lucide-react';
-import { Usuario, Establecimiento, Role } from '../../../types';
+import { Usuario, CentroAcopio, Role } from '../../../types';
 import { COMPONENT_STYLES } from '../constants';
 
 interface UsuarioModalProps {
   usuario: Usuario | null;
-  establecimientos: Establecimiento[];
+  centrosAcopio: CentroAcopio[];
   roles: Role[];
   isOpen: boolean;
   isLoading: boolean;
@@ -15,7 +15,7 @@ interface UsuarioModalProps {
 
 const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
   usuario,
-  establecimientos,
+  centrosAcopio,
   roles,
   isOpen,
   isLoading,
@@ -29,7 +29,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
     usuario: '',
     password: '',
     rol: 'operador',
-    establecimientoId: '',
+    centroAcopioId: '',
     estado: 'activo',
   });
 
@@ -45,7 +45,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
         usuario: usuario.usuario || '',
         password: '',
         rol: usuario.rol || 'operador',
-        establecimientoId: usuario.establecimientoId || '',
+        centroAcopioId: usuario.centroAcopioId || '',
         estado: usuario.estado || 'activo',
       });
     } else {
@@ -56,7 +56,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
         usuario: '',
         password: '',
         rol: 'operador',
-        establecimientoId: '',
+        centroAcopioId: '',
         estado: 'activo',
       });
     }
@@ -234,21 +234,21 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
               </select>
             </div>
 
-            {/* Establecimiento */}
+            {/* Centro de Acopio */}
             <div>
               <label className={COMPONENT_STYLES.input.label}>
-                Establecimiento {formData.rol === 'responsable_acopio' && '*'}
+                Centro de Acopio {formData.rol === 'responsable_acopio' && '*'}
               </label>
               <select
-                value={formData.establecimientoId}
-                onChange={(e) => handleChange('establecimientoId', e.target.value)}
+                value={formData.centroAcopioId}
+                onChange={(e) => handleChange('centroAcopioId', e.target.value)}
                 className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
                 required={formData.rol === 'responsable_acopio'}
               >
                 <option value="">Sin asignar</option>
-                {establecimientos.filter(est => est.estado === 'activo').map((est) => (
-                  <option key={est.id} value={est.id}>
-                    {est.nombre}
+                {centrosAcopio.filter(ca => ca.estado === 'activo').map((ca) => (
+                  <option key={ca.id} value={ca.id}>
+                    {ca.nombre}
                   </option>
                 ))}
               </select>

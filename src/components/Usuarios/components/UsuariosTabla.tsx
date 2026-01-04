@@ -10,14 +10,14 @@ import {
   Users,
   Building2,
 } from 'lucide-react';
-import { Usuario, Role, Establecimiento } from '../../../types';
+import { Usuario, Role, CentroAcopio } from '../../../types';
 import { COMPONENT_STYLES, ROLE_COLORS } from '../constants';
 
 interface UsuariosTablaProps {
   usuarios: Usuario[];
   selectedUsers: string[];
   roles: Role[];
-  establecimientos: Establecimiento[];
+  centrosAcopio: CentroAcopio[];
   isLoading: boolean;
   pagination: {
     page: number;
@@ -40,7 +40,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
   usuarios,
   selectedUsers,
   roles,
-  establecimientos,
+  centrosAcopio,
   isLoading,
   pagination,
   onSelectUser,
@@ -62,10 +62,10 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
     return ROLE_COLORS[rol] || ROLE_COLORS.default;
   };
 
-  const getEstablecimientoNombre = (establecimientoId?: string) => {
-    if (!establecimientoId) return '-';
-    const establecimiento = establecimientos.find(e => e.id === establecimientoId);
-    return establecimiento?.nombre || '-';
+  const getCentroAcopioNombre = (centroAcopioId?: string) => {
+    if (!centroAcopioId) return '-';
+    const centroAcopio = centrosAcopio.find(ca => ca.id === centroAcopioId);
+    return centroAcopio?.nombre || '-';
   };
 
   return (
@@ -143,11 +143,11 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                       <span className={`${COMPONENT_STYLES.badge.role} ${getRolColor(usuario.rol)}`}>
                         {getRolLabel(usuario.rol)}
                       </span>
-                      {usuario.establecimientoId && (
+                      {usuario.centroAcopioId && (
                         <div className="flex items-center text-xs text-gray-500">
                           <Building2 className="h-3 w-3 mr-1" />
                           <span className="truncate max-w-[150px]">
-                            {getEstablecimientoNombre(usuario.establecimientoId)}
+                            {getCentroAcopioNombre(usuario.centroAcopioId)}
                           </span>
                         </div>
                       )}

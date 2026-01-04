@@ -61,11 +61,11 @@ export class UsuarioService {
         prisma.usuario.findMany({
           where,
           include: {
-            establecimiento: {
+            centroAcopio: {
               select: {
                 id: true,
                 nombre: true,
-                tipo: true
+                codigo: true
               }
             }
           },
@@ -100,11 +100,11 @@ export class UsuarioService {
       const usuario = await prisma.usuario.findUnique({
         where: { id },
         include: {
-          establecimiento: {
+          centroAcopio: {
             select: {
               id: true,
               nombre: true,
-              tipo: true
+              codigo: true
             }
           }
         }
@@ -135,11 +135,11 @@ export class UsuarioService {
       const usuarios = await prisma.usuario.findMany({
         where: { estado: 'activo' },
         include: {
-          establecimiento: {
+          centroAcopio: {
             select: {
               id: true,
               nombre: true,
-              tipo: true
+              codigo: true
             }
           }
         },
@@ -173,11 +173,11 @@ export class UsuarioService {
           estado: 'activo'
         },
         include: {
-          establecimiento: {
+          centroAcopio: {
             select: {
               id: true,
               nombre: true,
-              tipo: true
+              codigo: true
             }
           }
         },
@@ -255,14 +255,14 @@ export class UsuarioService {
           passwordHash,
           rol: rolEnum, // Valor del enum para compatibilidad
           roleId: roleResult.data.id, // Nueva relación con tabla roles
-          establecimientoId: data.establecimientoId
+          centroAcopioId: data.centroAcopioId
         },
         include: {
-          establecimiento: {
+          centroAcopio: {
             select: {
               id: true,
               nombre: true,
-              tipo: true
+              codigo: true
             }
           }
         }
@@ -304,7 +304,7 @@ export class UsuarioService {
         apellidos: data.apellidos,
         email: data.email,
         usuario: data.usuario,
-        establecimientoId: data.establecimientoId,
+        centroAcopioId: data.centroAcopioId,
         estado: data.estado
       };
 
@@ -326,11 +326,11 @@ export class UsuarioService {
         where: { id },
         data: updateData,
         include: {
-          establecimiento: {
+          centroAcopio: {
             select: {
               id: true,
               nombre: true,
-              tipo: true
+              codigo: true
             }
           }
         }
@@ -464,11 +464,11 @@ export class UsuarioService {
         where: { id },
         data: { estado },
         include: {
-          establecimiento: {
+          centroAcopio: {
             select: {
               id: true,
               nombre: true,
-              tipo: true
+              codigo: true
             }
           }
         }
@@ -603,24 +603,24 @@ export class UsuarioService {
       }
     }
 
-    // Validar que responsable_acopio tenga establecimiento
-    if (data.rol === 'responsable_acopio' && !data.establecimientoId) {
-      throw createError.badRequest('Los usuarios con rol "responsable_acopio" deben tener un establecimiento asignado');
+    // Validar que responsable_acopio tenga centro de acopio
+    if (data.rol === 'responsable_acopio' && !data.centroAcopioId) {
+      throw createError.badRequest('Los usuarios con rol "responsable_acopio" deben tener un centro de acopio asignado');
     }
 
-    // Validar que el establecimiento existe si se proporciona
-    if (data.establecimientoId) {
-      const establecimiento = await prisma.establecimiento.findUnique({
-        where: { id: data.establecimientoId }
+    // Validar que el centro de acopio existe si se proporciona
+    if (data.centroAcopioId) {
+      const centroAcopio = await prisma.centroAcopio.findUnique({
+        where: { id: data.centroAcopioId }
       });
 
-      if (!establecimiento) {
-        throw createError.badRequest('El establecimiento especificado no existe');
+      if (!centroAcopio) {
+        throw createError.badRequest('El centro de acopio especificado no existe');
       }
 
-      // Validar que el establecimiento esté activo
-      if (establecimiento.estado !== 'activo') {
-        throw createError.badRequest('No se puede asignar un establecimiento inactivo');
+      // Validar que el centro de acopio esté activo
+      if (centroAcopio.estado !== 'activo') {
+        throw createError.badRequest('No se puede asignar un centro de acopio inactivo');
       }
     }
 

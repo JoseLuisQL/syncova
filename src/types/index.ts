@@ -736,16 +736,16 @@ export interface Usuario {
   email: string;
   usuario: string;
   rol: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
-  establecimientoId?: string;
+  centroAcopioId?: string;
   estado: 'activo' | 'inactivo';
   ultimoAcceso?: Date;
   createdAt: Date;
   updatedAt: Date;
   // Información adicional incluida en respuestas del backend
-  establecimiento?: {
+  centroAcopio?: {
     id: string;
     nombre: string;
-    tipo: string;
+    codigo: string;
   };
 }
 
@@ -757,7 +757,7 @@ export interface CreateUsuarioDto {
   usuario: string;
   password: string;
   rol: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
-  establecimientoId?: string;
+  centroAcopioId?: string;
 }
 
 export interface UpdateUsuarioDto {
@@ -766,7 +766,7 @@ export interface UpdateUsuarioDto {
   email?: string;
   usuario?: string;
   rol?: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
-  establecimientoId?: string;
+  centroAcopioId?: string;
   estado?: 'activo' | 'inactivo';
 }
 

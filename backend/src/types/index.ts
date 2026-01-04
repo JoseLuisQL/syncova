@@ -334,7 +334,7 @@ export interface CreateUsuarioDto {
   usuario: string;
   password: string;
   rol: string; // Código del rol para buscar en la tabla roles
-  establecimientoId?: string;
+  centroAcopioId?: string;
 }
 
 export interface UpdateUsuarioDto {
@@ -343,26 +343,13 @@ export interface UpdateUsuarioDto {
   email?: string;
   usuario?: string;
   rol?: RolUsuario;
-  establecimientoId?: string;
+  centroAcopioId?: string;
   estado?: EstadoGeneral;
 }
 
 export interface ChangePasswordDto {
   currentPassword?: string;
   newPassword: string;
-}
-
-
-
-export interface UpdateUsuarioDto {
-  nombres?: string;
-  apellidos?: string;
-  email?: string;
-  usuario?: string;
-  password?: string;
-  rol?: RolUsuario;
-  establecimientoId?: string;
-  estado?: EstadoGeneral;
 }
 
 export interface CreateLoteVacunaDto {

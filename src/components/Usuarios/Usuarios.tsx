@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Usuario, CreateUsuarioDto, UpdateUsuarioDto, ChangePasswordDto, Role } from '../../types';
 import { useUsuarios } from '../../hooks/useUsuarios';
-import { useEstablecimientos } from '../../hooks/useEstablecimientos';
+import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
 import { useToastContext } from '../../contexts/ToastContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { RoleService } from '../../services/roleService';
@@ -68,7 +68,7 @@ const Usuarios: React.FC = () => {
     isUpdating,
   } = useUsuarios();
 
-  const { establecimientos, loadEstablecimientos } = useEstablecimientos();
+  const { centrosAcopio, fetchCentrosAcopio } = useCentrosAcopio({ estado: 'activo', limit: 1000 });
   const { toast } = useToastContext();
 
   // Cargar roles
@@ -83,7 +83,7 @@ const Usuarios: React.FC = () => {
 
   // Efectos iniciales
   useEffect(() => {
-    loadEstablecimientos();
+    fetchCentrosAcopio();
     loadRoles();
   }, []);
 
@@ -185,7 +185,7 @@ const Usuarios: React.FC = () => {
           email: formData.email,
           usuario: formData.usuario,
           rol: formData.rol,
-          establecimientoId: formData.establecimientoId || undefined,
+          centroAcopioId: formData.centroAcopioId || undefined,
           estado: formData.estado,
         };
 
@@ -203,7 +203,7 @@ const Usuarios: React.FC = () => {
           usuario: formData.usuario,
           password: formData.password,
           rol: formData.rol,
-          establecimientoId: formData.establecimientoId || undefined,
+          centroAcopioId: formData.centroAcopioId || undefined,
         };
 
         const success = await createUsuario(createData);
@@ -313,7 +313,7 @@ const Usuarios: React.FC = () => {
                 usuarios={usuarios}
                 selectedUsers={selectedUsers}
                 roles={roles}
-                establecimientos={establecimientos}
+                centrosAcopio={centrosAcopio}
                 isLoading={isLoading}
                 pagination={pagination}
                 onSelectUser={handleSelectUser}
@@ -348,7 +348,7 @@ const Usuarios: React.FC = () => {
       {/* Modales */}
       <UsuarioModal
         usuario={editingUser}
-        establecimientos={establecimientos}
+        centrosAcopio={centrosAcopio}
         roles={roles}
         isOpen={showModal}
         isLoading={isCreating || isUpdating}
