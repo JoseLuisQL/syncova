@@ -11,6 +11,7 @@ export interface ConfiguracionState {
     institucionEmail: string;
     timezone: string;
     formatoFecha: string;
+    anioNombre: string;
   };
   alertas: {
     diasAnticipacion: number;
@@ -58,6 +59,7 @@ const mapConfigToState = (dbConfigs: ConfiguracionSistema[]): ConfiguracionState
       institucionEmail: getValue(CONFIG_KEYS.INSTITUCION_EMAIL, DEFAULT_CONFIG.general.institucionEmail) as string,
       timezone: getValue(CONFIG_KEYS.TIMEZONE, DEFAULT_CONFIG.general.timezone) as string,
       formatoFecha: getValue(CONFIG_KEYS.FORMATO_FECHA, DEFAULT_CONFIG.general.formatoFecha) as string,
+      anioNombre: getValue(CONFIG_KEYS.ANIO_NOMBRE, DEFAULT_CONFIG.general.anioNombre) as string,
     },
     alertas: {
       diasAnticipacion: getValue(CONFIG_KEYS.ALERTAS_DIAS_ANTICIPACION, DEFAULT_CONFIG.alertas.diasAnticipacion) as number,
@@ -81,6 +83,7 @@ const mapSectionToDbKeys = (section: string, data: Record<string, unknown>): Arr
       institucionEmail: CONFIG_KEYS.INSTITUCION_EMAIL,
       timezone: CONFIG_KEYS.TIMEZONE,
       formatoFecha: CONFIG_KEYS.FORMATO_FECHA,
+      anioNombre: CONFIG_KEYS.ANIO_NOMBRE,
     },
     alertas: {
       diasAnticipacion: CONFIG_KEYS.ALERTAS_DIAS_ANTICIPACION,

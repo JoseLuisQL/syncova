@@ -1,7 +1,8 @@
 import {
   apiClient,
   ApiResponse,
-  handleApiError
+  handleApiError,
+  getApiBaseUrl
 } from '../config/api';
 import { AxiosError } from 'axios';
 import { logger } from '../utils/debug';
@@ -227,5 +228,80 @@ export class ConfiguracionService {
     } catch {
       return defaultValue;
     }
+  }
+
+  /**
+   * Subir logo institucional
+   */
+  static async uploadLogo(file: File): Promise<{ url: string; filename: string }> {
+    try {
+      logger.debug('Subiendo logo institucional');
+      const formData = new FormData();
+      formData.append('logo', file);
+
+      const response = await apiClient.post<ApiResponse<{ url: string; filename: string }>>(
+        `${this.BASE_PATH}/logo`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error al subir logo');
+      }
+
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al subir logo', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
+
+  /**
+   * Obtener información del logo
+   */
+  static async getLogo(): Promise<{ url: string; exists: boolean } | null> {
+    try {
+      logger.debug('Obteniendo logo institucional');
+      const response = await apiClient.get<ApiResponse<{ url: string; exists: boolean }>>(
+        `${this.BASE_PATH}/logo`
+      );
+
+      if (!response.data.success || !response.data.data) {
+        return null;
+      }
+
+      return response.data.data;
+    } catch (error) {
+      logger.debug('No hay logo configurado');
+      return null;
+    }
+  }
+
+  /**
+   * Eliminar logo institucional
+   */
+  static async deleteLogo(): Promise<boolean> {
+    try {
+      logger.debug('Eliminando logo institucional');
+      const response = await apiClient.delete<ApiResponse<void>>(
+        `${this.BASE_PATH}/logo`
+      );
+
+      return response.data.success;
+    } catch (error) {
+      logger.error('Error al eliminar logo', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
+
+  /**
+   * Obtener URL del logo para mostrar
+   */
+  static getLogoFileUrl(): string {
+    return `${getApiBaseUrl()}${this.BASE_PATH}/logo/file`;
   }
 }

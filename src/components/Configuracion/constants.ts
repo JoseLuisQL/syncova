@@ -224,6 +224,8 @@ export const CONFIG_KEYS = {
   INSTITUCION_EMAIL: 'institucion_email',
   TIMEZONE: 'timezone',
   FORMATO_FECHA: 'formato_fecha',
+  ANIO_NOMBRE: 'anio_nombre',
+  LOGO_PATH: 'logo_path',
   
   // Alertas
   ALERTAS_DIAS_ANTICIPACION: 'alertas_dias_anticipacion',
@@ -245,6 +247,7 @@ export const DEFAULT_CONFIG = {
     institucionEmail: 'contacto@saludapurimac.gob.pe',
     timezone: 'America/Lima',
     formatoFecha: 'DD/MM/YYYY',
+    anioNombre: '',
   },
   alertas: {
     diasAnticipacion: 30,

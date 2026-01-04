@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { ConfiguracionController } from '@/controllers/ConfiguracionController';
 import { authenticate, authorize, checkPermissions } from '@/middleware/auth';
 import { validate, validateParams, validateUUID, sanitizeInput } from '@/middleware/validation';
+import { uploadSingleLogo, handleLogoUploadError } from '@/middleware/uploadLogo';
 import Joi from 'joi';
 
 const router = Router();
@@ -84,6 +85,25 @@ router.get('/categorias',
   ConfiguracionController.getCategories
 );
 
+/**
+ * @route GET /api/configuracion/logo
+ * @desc Obtener información del logo institucional
+ * @access Public
+ */
+router.get('/logo',
+  sanitizeInput,
+  ConfiguracionController.getLogo
+);
+
+/**
+ * @route GET /api/configuracion/logo/file
+ * @desc Obtener archivo de imagen del logo
+ * @access Public
+ */
+router.get('/logo/file',
+  ConfiguracionController.getLogoFile
+);
+
 // =====================================================
 // RUTAS PROTEGIDAS (requieren autenticación)
 // =====================================================
@@ -140,6 +160,30 @@ router.post('/',
   sanitizeInput,
   validate(createConfigSchema),
   ConfiguracionController.create
+);
+
+/**
+ * @route POST /api/configuracion/logo
+ * @desc Subir logo institucional
+ * @access Private (Administrador)
+ */
+router.post('/logo',
+  authorize(['administrador']),
+  checkPermissions('write:configuracion'),
+  uploadSingleLogo,
+  handleLogoUploadError,
+  ConfiguracionController.uploadLogo
+);
+
+/**
+ * @route DELETE /api/configuracion/logo
+ * @desc Eliminar logo institucional
+ * @access Private (Administrador)
+ */
+router.delete('/logo',
+  authorize(['administrador']),
+  checkPermissions('delete:configuracion'),
+  ConfiguracionController.deleteLogo
 );
 
 /**

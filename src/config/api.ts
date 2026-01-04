@@ -5,7 +5,7 @@ import { STORAGE_KEYS, API_TIMEOUTS, DEFAULT_PORTS, SYSTEM_EVENTS } from '../con
  * Configuración base para las llamadas API
  * Detecta automáticamente si se accede desde la red local o localhost
  */
-const getApiBaseUrl = () => {
+export const getApiBaseUrl = () => {
   // Si hay una variable de entorno definida, usarla
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
