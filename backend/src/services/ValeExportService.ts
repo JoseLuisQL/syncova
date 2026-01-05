@@ -1,7 +1,10 @@
 import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
+import fs from 'fs';
 import { ValeService } from './ValeService';
 import { ConfiguracionJeringaVacunaService } from './ConfiguracionJeringaVacunaService';
+import { ConfiguracionService } from './ConfiguracionService';
+import { getLogoPath } from '@/middleware/uploadLogo';
 import { ServiceResult } from '@/types';
 
 /**
@@ -45,10 +48,34 @@ export interface ValeExportStats {
 }
 
 /**
+ * Datos dinámicos para el encabezado de exportación
+ */
+interface HeaderData {
+  institucionNombre: string;
+  anioNombre: string;
+  logoPath: string | null;
+}
+
+/**
  * Servicio para exportación de Vales de Entrega
  * Maneja la generación de archivos Excel y PDF con configuraciones personalizadas
  */
 class ValeExportService {
+
+  /**
+   * Obtener datos dinámicos para el encabezado
+   */
+  private static async getHeaderData(): Promise<HeaderData> {
+    const institucionNombre = await ConfiguracionService.getValue('institucion_nombre', 'DISA APURIMAC II');
+    const anioNombre = await ConfiguracionService.getValue('anio_nombre', '');
+    const logoPath = getLogoPath();
+
+    return {
+      institucionNombre: institucionNombre || 'DISA APURIMAC II',
+      anioNombre: anioNombre || '',
+      logoPath
+    };
+  }
 
   /**
    * Exportar vale a Excel
@@ -79,6 +106,9 @@ class ValeExportService {
       // Crear hoja principal
       const worksheet = workbook.addWorksheet('Vale de Entrega');
 
+      // Obtener datos dinámicos del encabezado
+      const headerData = await this.getHeaderData();
+
       // Configurar columnas con anchos optimizados para jeringas
       worksheet.columns = [
         { header: 'Nº', key: 'numero', width: 5 },
@@ -92,7 +122,7 @@ class ValeExportService {
       ];
 
       // Agregar encabezado del vale
-      this.agregarEncabezadoExcel(worksheet, vale, config);
+      await this.agregarEncabezadoExcel(workbook, worksheet, vale, config, headerData);
 
       // Procesar y agregar datos
       const datosParaExportar = await this.procesarDatosParaExportacion(vale, config);
@@ -167,6 +197,9 @@ class ValeExportService {
       // Crear hoja principal
       const worksheet = workbook.addWorksheet('Vales Combinados');
 
+      // Obtener datos dinámicos del encabezado
+      const headerData = await this.getHeaderData();
+
       // Configurar columnas
       worksheet.columns = [
         { header: 'Nº', key: 'numero', width: 5 },
@@ -180,7 +213,7 @@ class ValeExportService {
       ];
 
       // Agregar encabezado del vale combinado
-      this.agregarEncabezadoExcel(worksheet, valeCombinado, config);
+      await this.agregarEncabezadoExcel(workbook, worksheet, valeCombinado, config, headerData);
 
       // Procesar y agregar datos combinados
       const datosParaExportar = await this.procesarDatosParaExportacion(valeCombinado, config);
@@ -235,6 +268,9 @@ class ValeExportService {
 
       const vale = valeResult.data;
 
+      // Obtener datos de cabecera dinámicos
+      const headerData = await this.getHeaderData();
+
       // Crear documento PDF
       const doc = new PDFDocument({ margin: 50 });
       const buffers: Buffer[] = [];
@@ -242,7 +278,7 @@ class ValeExportService {
       doc.on('data', buffers.push.bind(buffers));
 
       // Agregar contenido al PDF
-      this.agregarEncabezadoPDF(doc, vale, config);
+      this.agregarEncabezadoPDF(doc, vale, config, headerData);
 
       // Procesar y agregar datos
       const datosParaExportar = await this.procesarDatosParaExportacion(vale, config);
@@ -924,7 +960,13 @@ class ValeExportService {
   };
 
   // Métodos auxiliares para Excel y PDF con estructura profesional
-  private static agregarEncabezadoExcel(worksheet: ExcelJS.Worksheet, vale: any, config: ValeExportConfig) {
+  private static async agregarEncabezadoExcel(
+    workbook: ExcelJS.Workbook,
+    worksheet: ExcelJS.Worksheet,
+    vale: any,
+    config: ValeExportConfig,
+    headerData: HeaderData
+  ) {
     // CONFIGURACIÓN PROFESIONAL DE LA HOJA
     worksheet.views = [{
       showGridLines: false,
@@ -949,77 +991,101 @@ class ValeExportService {
       { width: 10 }   // M - Cantidad
     ];
 
-    // ENCABEZADO INSTITUCIONAL PROFESIONAL (SIN EMOJIS)
-    // Fondo para encabezado
-    for (let row = 1; row <= 6; row++) {
+    // ENCABEZADO INSTITUCIONAL CON LOGO Y DATOS DINÁMICOS
+    // Configurar alturas de filas del encabezado
+    worksheet.getRow(1).height = 22;
+    worksheet.getRow(2).height = 18;
+    worksheet.getRow(3).height = 16;
+    worksheet.getRow(4).height = 5;  // Espaciador pequeño
+    worksheet.getRow(5).height = 24;
+
+    // Fondo para encabezado (filas 1-3)
+    for (let row = 1; row <= 3; row++) {
       for (let col = 1; col <= 13; col++) {
         const cell = worksheet.getCell(row, col);
         cell.fill = {
           type: 'pattern',
           pattern: 'solid',
-          fgColor: { argb: this.COLORS.gray50 }
+          fgColor: { argb: this.COLORS.primaryLight }
         };
       }
     }
 
-    // Encabezado institucional
-    worksheet.mergeCells('A1:M1');
-    const headerCell1 = worksheet.getCell('A1');
-    headerCell1.value = 'GOBIERNO REGIONAL DE APURÍMAC';
+    // Verificar si existe logo
+    const hasLogo = headerData.logoPath && fs.existsSync(headerData.logoPath);
+
+    if (hasLogo) {
+      try {
+        const logoBuffer = fs.readFileSync(headerData.logoPath!);
+        const logoExtension = headerData.logoPath!.toLowerCase().endsWith('.png') ? 'png' : 'jpeg';
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const imageId = workbook.addImage({
+          buffer: logoBuffer as any,
+          extension: logoExtension,
+        });
+
+        // Logo en columna A, ocupando las 3 primeras filas
+        // Tamaño cuadrado para mantener proporciones (65x65)
+        worksheet.addImage(imageId, {
+          tl: { col: 0.1, row: 0.1 },
+          ext: { width: 65, height: 65 }
+        });
+
+        // Ajustar columna A para el logo
+        worksheet.getColumn('A').width = 10;
+      } catch (error) {
+        console.error('Error al agregar logo al Excel:', error);
+      }
+    }
+
+    // Columnas para texto: si hay logo empiezan en B, sino en A
+    const colInicio = hasLogo ? 'B' : 'A';
+
+    // Nombre de la Institución (dinámico)
+    worksheet.mergeCells(`${colInicio}1:M1`);
+    const headerCell1 = worksheet.getCell(`${colInicio}1`);
+    headerCell1.value = headerData.institucionNombre.toUpperCase();
     headerCell1.font = {
       bold: true,
-      size: 14,
+      size: 13,
       color: { argb: this.COLORS.institutional },
       name: 'Calibri'
     };
-    headerCell1.alignment = { horizontal: 'center', vertical: 'middle' };
-    headerCell1.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: this.COLORS.primaryLight }
-    };
+    headerCell1.alignment = { horizontal: hasLogo ? 'left' : 'center', vertical: 'middle' };
 
-    worksheet.mergeCells('A2:M2');
-    const headerCell2 = worksheet.getCell('A2');
-    headerCell2.value = 'DIRECCIÓN SUB REGIONAL DE SALUD CHANKA ANDAHUAYLAS';
+    // Estrategia Sanitaria (estático)
+    worksheet.mergeCells(`${colInicio}2:M2`);
+    const headerCell2 = worksheet.getCell(`${colInicio}2`);
+    headerCell2.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRIO';
     headerCell2.font = {
       bold: true,
-      size: 11,
-      color: { argb: this.COLORS.primaryDark },
-      name: 'Calibri'
-    };
-    headerCell2.alignment = { horizontal: 'center', vertical: 'middle' };
-    headerCell2.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: this.COLORS.gray50 }
-    };
-
-    worksheet.mergeCells('A3:M3');
-    const headerCell3 = worksheet.getCell('A3');
-    headerCell3.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRÍO';
-    headerCell3.font = {
-      bold: true,
-      size: 10,
+      size: 9,
       color: { argb: this.COLORS.primary },
       name: 'Calibri'
     };
-    headerCell3.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerCell2.alignment = { horizontal: hasLogo ? 'left' : 'center', vertical: 'middle' };
 
+    // Nombre del Año (dinámico)
+    worksheet.mergeCells(`${colInicio}3:M3`);
+    const headerCell3 = worksheet.getCell(`${colInicio}3`);
+    if (headerData.anioNombre) {
+      headerCell3.value = `"${headerData.anioNombre}"`;
+      headerCell3.font = {
+        italic: true,
+        size: 8,
+        color: { argb: this.COLORS.gray500 },
+        name: 'Calibri'
+      };
+      headerCell3.alignment = { horizontal: hasLogo ? 'left' : 'center', vertical: 'middle' };
+    }
+
+    // Fila 4 vacía como espaciador
     worksheet.mergeCells('A4:M4');
-    const headerCell4 = worksheet.getCell('A4');
-    headerCell4.value = '"Año de la Universalización de la Salud"';
-    headerCell4.font = {
-      italic: true,
-      size: 9,
-      color: { argb: this.COLORS.gray500 },
-      name: 'Calibri'
-    };
-    headerCell4.alignment = { horizontal: 'center', vertical: 'middle' };
 
     // Título principal profesional
-    worksheet.mergeCells('A6:M6');
-    const titleCell = worksheet.getCell('A6');
+    worksheet.mergeCells('A5:M5');
+    const titleCell = worksheet.getCell('A5');
     titleCell.value = 'VALE DE ENTREGA DE VACUNAS Y JERINGAS';
     titleCell.font = {
       bold: true,
@@ -1035,8 +1101,8 @@ class ValeExportService {
     };
 
     // Información del vale
-    worksheet.mergeCells('A8:F8');
-    const infoCell1 = worksheet.getCell('A8');
+    worksheet.mergeCells('A7:F7');
+    const infoCell1 = worksheet.getCell('A7');
     infoCell1.value = `Centro de Acopio: ${vale.centroAcopio.nombre}`;
     infoCell1.font = {
       bold: true,
@@ -1051,8 +1117,8 @@ class ValeExportService {
       fgColor: { argb: this.COLORS.gray100 }
     };
 
-    worksheet.mergeCells('H8:M8');
-    const infoCell2 = worksheet.getCell('H8');
+    worksheet.mergeCells('H7:M7');
+    const infoCell2 = worksheet.getCell('H7');
     infoCell2.value = `Responsable: ${config.responsableRecojo}`;
     infoCell2.font = {
       bold: true,
@@ -1067,8 +1133,8 @@ class ValeExportService {
       fgColor: { argb: this.COLORS.gray100 }
     };
 
-    worksheet.mergeCells('A9:F9');
-    const infoCell3 = worksheet.getCell('A9');
+    worksheet.mergeCells('A8:F8');
+    const infoCell3 = worksheet.getCell('A8');
     infoCell3.value = `Fecha: ${new Date().toLocaleDateString('es-PE', {
       weekday: 'long',
       year: 'numeric',
@@ -1089,8 +1155,8 @@ class ValeExportService {
     };
 
     // Número de vale
-    worksheet.mergeCells('H9:M9');
-    const infoCell4 = worksheet.getCell('H9');
+    worksheet.mergeCells('H8:M8');
+    const infoCell4 = worksheet.getCell('H8');
     infoCell4.value = `N° Vale: ${vale.numero || 'S/N'}`;
     infoCell4.font = {
       bold: true,
@@ -1106,7 +1172,7 @@ class ValeExportService {
     };
 
     // Aplicar bordes sutiles
-    for (let row = 1; row <= 9; row++) {
+    for (let row = 1; row <= 8; row++) {
       for (let col = 1; col <= 13; col++) {
         const cell = worksheet.getCell(row, col);
         cell.border = {
@@ -1119,17 +1185,18 @@ class ValeExportService {
     }
 
     // Ajustar altura de filas
-    worksheet.getRow(1).height = 24;
-    worksheet.getRow(2).height = 18;
-    worksheet.getRow(3).height = 16;
-    worksheet.getRow(4).height = 14;
-    worksheet.getRow(6).height = 26;
+    if (!hasLogo) {
+      worksheet.getRow(1).height = 24;
+      worksheet.getRow(2).height = 18;
+      worksheet.getRow(3).height = 16;
+    }
+    worksheet.getRow(5).height = 26;
+    worksheet.getRow(7).height = 20;
     worksheet.getRow(8).height = 20;
-    worksheet.getRow(9).height = 20;
   }
 
   private static agregarDatosExcel(worksheet: ExcelJS.Worksheet, datos: any, _config: ValeExportConfig) {
-    let filaActual = 12;
+    let filaActual = 10;
 
     // SECCIÓN CONSOLIDADO GENERAL - DISEÑO PROFESIONAL
     worksheet.mergeCells(`A${filaActual}:F${filaActual}`);
@@ -1580,62 +1647,79 @@ class ValeExportService {
     }];
   }
 
-  private static agregarEncabezadoPDF(doc: PDFKit.PDFDocument, vale: any, config: ValeExportConfig) {
+  private static agregarEncabezadoPDF(doc: PDFKit.PDFDocument, vale: any, config: ValeExportConfig, headerData: HeaderData) {
     const pageWidth = doc.page.width;
     const margin = 40;
     const contentWidth = pageWidth - (margin * 2);
 
-    // Fondo sutil para el encabezado
-    doc.rect(margin - 5, 25, contentWidth + 10, 95)
+    // Variables para posicionamiento dinámico según si hay logo
+    const hasLogo = headerData.logoPath && fs.existsSync(headerData.logoPath);
+    const headerHeight = hasLogo ? 85 : 75;
+    const logoWidth = 65;
+    const logoHeight = 65;
+    const logoX = margin + 5;
+    const logoY = 28;
+    const textStartX = hasLogo ? margin + logoWidth + 15 : margin;
+    const textWidth = hasLogo ? contentWidth - logoWidth - 15 : contentWidth;
+
+    // Fondo sutil para el encabezado - PRIMERO para que no cubra el logo
+    doc.rect(margin - 5, 25, contentWidth + 10, headerHeight)
        .fillAndStroke('#F0FDFA', '#CCFBF1');
 
-    // ENCABEZADO INSTITUCIONAL - Colores teal consistentes
+    // Agregar logo DESPUÉS del fondo
+    if (hasLogo) {
+      try {
+        doc.image(headerData.logoPath!, logoX, logoY, {
+          width: logoWidth,
+          height: logoHeight,
+          fit: [logoWidth, logoHeight]
+        });
+      } catch (error) {
+        console.error('Error al agregar logo al PDF:', error);
+      }
+    }
+
+    // ENCABEZADO INSTITUCIONAL - Nombre de institución dinámico
     doc.fontSize(13)
        .fillColor('#115E59')
        .font('Helvetica-Bold')
-       .text('GOBIERNO REGIONAL DE APURIMAC', margin, 35, {
-         align: 'center',
-         width: contentWidth
-       });
-
-    doc.fontSize(10)
-       .fillColor('#0F766E')
-       .font('Helvetica-Bold')
-       .text('DIRECCION SUB REGIONAL DE SALUD CHANKA ANDAHUAYLAS', margin, 52, {
-         align: 'center',
-         width: contentWidth
+       .text(this.limpiarTexto(headerData.institucionNombre), textStartX, 35, {
+         align: hasLogo ? 'left' : 'center',
+         width: textWidth
        });
 
     doc.fontSize(9)
        .fillColor('#0D9488')
        .font('Helvetica-Bold')
-       .text('ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRIO', margin, 67, {
-         align: 'center',
-         width: contentWidth
+       .text('ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRIO', textStartX, 52, {
+         align: hasLogo ? 'left' : 'center',
+         width: textWidth
        });
 
+    // Nombre del año dinámico
     doc.fontSize(8)
        .fillColor('#6B7280')
        .font('Helvetica-Oblique')
-       .text('"Ano de la Universalizacion de la Salud"', margin, 82, {
-         align: 'center',
-         width: contentWidth
+       .text(`"${this.limpiarTexto(headerData.anioNombre)}"`, textStartX, 67, {
+         align: hasLogo ? 'left' : 'center',
+         width: textWidth
        });
 
     // TÍTULO PRINCIPAL - Color teal
-    doc.rect(margin - 5, 100, contentWidth + 10, 22)
+    const titleY = headerHeight + 30;
+    doc.rect(margin - 5, titleY, contentWidth + 10, 22)
        .fillAndStroke('#0D9488', '#0F766E');
 
     doc.fontSize(12)
        .fillColor('white')
        .font('Helvetica-Bold')
-       .text('VALE DE ENTREGA DE VACUNAS Y JERINGAS', margin, 106, {
+       .text('VALE DE ENTREGA DE VACUNAS Y JERINGAS', margin, titleY + 6, {
          align: 'center',
          width: contentWidth
        });
 
     // INFORMACIÓN DEL VALE
-    const infoY = 130;
+    const infoY = titleY + 30;
     doc.rect(margin - 5, infoY, contentWidth + 10, 42)
        .fillAndStroke('#F9FAFB', '#E5E7EB');
 
@@ -1659,7 +1743,7 @@ class ValeExportService {
        .fillColor('#0D9488')
        .text(`N° Vale: ${vale.numero || 'S/N'}`, margin + contentWidth/2, infoY + 20);
 
-    return 180;
+    return infoY + 50; // Retorna posición Y para continuar con los datos
   }
 
   private static agregarDatosPDF(doc: PDFKit.PDFDocument, datos: any, _config: ValeExportConfig) {
