@@ -6,3 +6,4 @@ export { MovimientosTabla } from './MovimientosTabla';
 export { MovimientoDetalle } from './MovimientoDetalle';
 export { EntregasAdicionalesModal } from './EntregasAdicionalesModal';
 export { AlertaEstado } from './AlertaEstado';
+export { ValeIndicator } from './ValeIndicator';

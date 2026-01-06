@@ -522,6 +522,8 @@ export interface MovimientoConRelaciones extends MovimientoVacuna {
     email: string;
   };
   entregasAdicionales: EntregaAdicional[];
+  entregaBaseTieneVale?: boolean;
+  valeNumeroEntregaBase?: string;
 }
 
 // Movimiento calculado con campos derivados (para la tabla)
@@ -587,6 +589,8 @@ export interface EntregaAdicional {
   motivo?: string;
   usuarioId: string;
   createdAt: Date;
+  tieneValeGenerado?: boolean;
+  valeNumero?: string;
 }
 
 export interface CreateEntregaAdicionalDto {

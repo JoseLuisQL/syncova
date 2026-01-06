@@ -128,7 +128,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
 
     return (
       <div className="flex items-center justify-center gap-1.5 flex-wrap" onClick={handleInteraction}>
-        {/* Input principal de entrega */}
+        {/* Input principal de entrega con indicador de vale */}
         <div className="relative">
           <input
             type="number"
@@ -143,17 +143,31 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
             className={`w-20 px-2 py-1.5 text-center text-sm font-semibold border-2 rounded-lg 
                        focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed 
                        transition-all duration-200 tabular-nums ${
-              isPending ? styles.pending : `${styles.normal} ${styles.focus}`
+              movimiento.entregaBaseTieneVale
+                ? 'border-teal-400 bg-teal-50 text-teal-700 focus:ring-teal-300 focus:border-teal-500'
+                : isPending 
+                  ? styles.pending 
+                  : `${styles.normal} ${styles.focus}`
             }`}
             disabled={isDisabled}
-            title={isUserTyping ? 'Escribiendo...' : isPending ? 'Cambios pendientes' : 'Entrega base'}
+            title={isUserTyping ? 'Escribiendo...' : isPending ? 'Cambios pendientes' : movimiento.entregaBaseTieneVale ? `Vale: ${movimiento.valeNumeroEntregaBase}` : 'Entrega base'}
             aria-label={`Entrega para ${movimiento.establecimiento.nombre}`}
           />
           {isUserTyping && (
             <div className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-teal-400 rounded-full animate-bounce border border-white" />
           )}
-          {!isUserTyping && isPending && (
+          {!isUserTyping && isPending && !movimiento.entregaBaseTieneVale && (
             <div className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-amber-400 rounded-full animate-pulse border border-white" />
+          )}
+          {!isUserTyping && !isPending && movimiento.entregaBaseTieneVale && (
+            <div 
+              className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-teal-500 rounded-full flex items-center justify-center border border-white shadow-sm"
+              title={`Vale: ${movimiento.valeNumeroEntregaBase}`}
+            >
+              <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
           )}
         </div>
 
@@ -161,27 +175,49 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         {movimiento.entregasAdicionales?.map((entrega) => (
           <div 
             key={entrega.id} 
-            className="flex items-center gap-0.5 bg-amber-50 rounded-lg px-1.5 py-0.5 border border-amber-200"
+            className={`flex items-center gap-0.5 rounded-lg px-1.5 py-0.5 border transition-all duration-200 ${
+              entrega.tieneValeGenerado
+                ? 'bg-teal-50 border-teal-300'
+                : 'bg-amber-50 border-amber-200'
+            }`}
           >
-            <input
-              type="number"
-              min="0"
-              value={getCurrentEntregaValue(entrega.id, entrega.cantidad)}
-              onChange={(e) => onTempEntregaValueChange(entrega.id, parseInt(e.target.value) || 0)}
-              onBlur={() => onEntregaFieldBlur(entrega.id)}
-              className={`w-16 px-1.5 py-1 text-center text-sm font-semibold border-2 rounded-lg 
-                         focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed 
-                         transition-all duration-200 tabular-nums ${
-                hasPendingEntregaChange(entrega.id)
-                  ? INPUT_FIELD_STYLES.entregaAdicional.pending
-                  : `${INPUT_FIELD_STYLES.entregaAdicional.normal} ${INPUT_FIELD_STYLES.entregaAdicional.focus}`
-              }`}
-              disabled={isDisabled || isProcessingEntrega}
-              title={`Entrega adicional #${entrega.numeroEntrega}`}
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                value={getCurrentEntregaValue(entrega.id, entrega.cantidad)}
+                onChange={(e) => onTempEntregaValueChange(entrega.id, parseInt(e.target.value) || 0)}
+                onBlur={() => onEntregaFieldBlur(entrega.id)}
+                className={`w-16 px-1.5 py-1 text-center text-sm font-semibold border-2 rounded-lg 
+                           focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed 
+                           transition-all duration-200 tabular-nums ${
+                  entrega.tieneValeGenerado
+                    ? 'border-teal-400 bg-teal-50 text-teal-700 focus:ring-teal-300 focus:border-teal-500'
+                    : hasPendingEntregaChange(entrega.id)
+                      ? INPUT_FIELD_STYLES.entregaAdicional.pending
+                      : `${INPUT_FIELD_STYLES.entregaAdicional.normal} ${INPUT_FIELD_STYLES.entregaAdicional.focus}`
+                }`}
+                disabled={isDisabled || isProcessingEntrega}
+                title={entrega.tieneValeGenerado ? `Vale: ${entrega.valeNumero}` : `Entrega adicional #${entrega.numeroEntrega}`}
+              />
+              {entrega.tieneValeGenerado && (
+                <div 
+                  className="absolute -top-1 -right-1 w-3 h-3 bg-teal-500 rounded-full flex items-center justify-center border border-white shadow-sm"
+                  title={`Vale: ${entrega.valeNumero}`}
+                >
+                  <svg className="w-1.5 h-1.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+            </div>
             <button
               onClick={() => onEliminarEntregaAdicional(entrega.id)}
-              className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded transition-colors disabled:opacity-50"
+              className={`p-1 rounded transition-colors disabled:opacity-50 ${
+                entrega.tieneValeGenerado
+                  ? 'text-emerald-500 hover:text-emerald-700 hover:bg-emerald-100'
+                  : 'text-rose-500 hover:text-rose-700 hover:bg-rose-50'
+              }`}
               disabled={isDisabled || isProcessingEntrega}
               title="Eliminar"
             >

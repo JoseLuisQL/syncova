@@ -333,5 +333,12 @@ export const STOCK_CARDS_CONFIG = [
   },
 ] as const;
 
+// Estilos para indicador de vale generado
+export const VALE_INDICATOR_STYLES = {
+  container: 'inline-flex items-center justify-center p-0.5 bg-emerald-50/80 border border-emerald-200 rounded-full transition-all duration-200 hover:bg-emerald-100 hover:border-emerald-300',
+  icon: 'h-3.5 w-3.5 text-emerald-600',
+  tooltip: 'text-xs text-emerald-700',
+} as const;
+
 export type ColorScheme = keyof typeof COLORS;
 export type StockEstado = keyof typeof STOCK_ESTADOS;

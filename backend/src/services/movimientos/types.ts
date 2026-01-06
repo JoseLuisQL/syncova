@@ -51,6 +51,11 @@ export interface CreateEntregaAdicionalDto {
   usuarioId: string;
 }
 
+export interface EntregaAdicionalConVale extends IEntregaAdicional {
+  tieneValeGenerado?: boolean;
+  valeNumero?: string;
+}
+
 export interface MovimientoConRelaciones extends IMovimientoVacuna {
   establecimiento: {
     id: string;
@@ -72,7 +77,9 @@ export interface MovimientoConRelaciones extends IMovimientoVacuna {
     apellidos: string;
     email: string;
   };
-  entregasAdicionales: IEntregaAdicional[];
+  entregasAdicionales: EntregaAdicionalConVale[];
+  entregaBaseTieneVale?: boolean;
+  valeNumeroEntregaBase?: string;
 }
 
 /**

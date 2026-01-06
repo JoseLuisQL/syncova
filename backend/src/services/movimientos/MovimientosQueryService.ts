@@ -138,10 +138,13 @@ export class MovimientosQueryService {
       const establecimientosUnicos = [...new Set(movimientos.map(m => (m as any).establecimiento?.nombre || 'Sin nombre'))];
       console.log(`🏥 Establecimientos con movimientos: ${establecimientosUnicos.length}`, establecimientosUnicos);
 
+      // Enriquecer movimientos con información de vales generados
+      const movimientosEnriquecidos = await this.enriquecerConInfoVales(movimientos as any[], mes, anio, centroAcopioId);
+
       return {
         success: true,
         data: {
-          movimientos: movimientos as MovimientoConRelaciones[],
+          movimientos: movimientosEnriquecidos as MovimientoConRelaciones[],
           total
         }
       };
@@ -436,6 +439,104 @@ export class MovimientosQueryService {
         success: false,
         error: error instanceof Error ? error.message : 'Error al obtener años disponibles'
       };
+    }
+  }
+
+  /**
+   * Enriquece los movimientos con información sobre vales generados
+   * Verifica si la entrega base y/o las entregas adicionales ya tienen vale
+   */
+  private static async enriquecerConInfoVales(
+    movimientos: any[],
+    mes?: number,
+    anio?: number,
+    centroAcopioId?: string
+  ): Promise<any[]> {
+    if (!mes || !anio || movimientos.length === 0) {
+      return movimientos;
+    }
+
+    try {
+      // Obtener todos los vales del período (sin filtrar por centro si es "todos")
+      const whereVales: any = { mes, anio };
+      if (centroAcopioId && centroAcopioId !== 'todos') {
+        whereVales.centroAcopioId = centroAcopioId;
+      }
+
+      console.log(`🔍 [enriquecerConInfoVales] Buscando vales para mes=${mes}, anio=${anio}, centroAcopioId=${centroAcopioId || 'todos'}`);
+
+      const valesDelPeriodo = await prisma.valeEntrega.findMany({
+        where: whereVales,
+        select: {
+          id: true,
+          numero: true,
+          tipoVale: true,
+          centroAcopioId: true,
+          detalles: {
+            select: {
+              establecimientoId: true,
+              vacunaId: true,
+              cantidadProgramada: true,
+              cantidadAdicional: true,
+              numeroEntregaAdicional: true
+            }
+          }
+        }
+      });
+
+      console.log(`🔍 [enriquecerConInfoVales] Vales encontrados: ${valesDelPeriodo.length}`);
+
+      if (valesDelPeriodo.length === 0) {
+        return movimientos;
+      }
+
+      // Crear mapa de entregas base con vale: key = "establecimientoId-vacunaId"
+      const entregasBaseConVale = new Map<string, string>();
+      // Crear mapa de entregas adicionales con vale: key = "establecimientoId-vacunaId-numeroEntrega"
+      const entregasAdicionalesConVale = new Map<string, string>();
+
+      for (const vale of valesDelPeriodo) {
+        for (const detalle of vale.detalles) {
+          // Entrega base: tiene cantidadProgramada > 0 y NO tiene numeroEntregaAdicional
+          if (detalle.cantidadProgramada > 0 && (detalle.numeroEntregaAdicional === null || detalle.numeroEntregaAdicional === 0)) {
+            const key = `${detalle.establecimientoId}-${detalle.vacunaId}`;
+            entregasBaseConVale.set(key, vale.numero);
+          }
+          // Entrega adicional: tiene cantidadAdicional > 0 y tiene numeroEntregaAdicional
+          if (detalle.cantidadAdicional > 0 && detalle.numeroEntregaAdicional && detalle.numeroEntregaAdicional > 0) {
+            const key = `${detalle.establecimientoId}-${detalle.vacunaId}-${detalle.numeroEntregaAdicional}`;
+            entregasAdicionalesConVale.set(key, vale.numero);
+          }
+        }
+      }
+
+      console.log(`🔍 [enriquecerConInfoVales] Entregas base con vale: ${entregasBaseConVale.size}, Entregas adicionales con vale: ${entregasAdicionalesConVale.size}`);
+
+      // Enriquecer cada movimiento
+      return movimientos.map(mov => {
+        const keyBase = `${mov.establecimientoId}-${mov.vacunaId}`;
+        const valeNumeroBase = entregasBaseConVale.get(keyBase);
+        
+        const entregasAdicionalesEnriquecidas = mov.entregasAdicionales?.map((ea: any) => {
+          const keyAdicional = `${mov.establecimientoId}-${mov.vacunaId}-${ea.numeroEntrega}`;
+          const valeNumero = entregasAdicionalesConVale.get(keyAdicional);
+          return {
+            ...ea,
+            tieneValeGenerado: !!valeNumero,
+            valeNumero: valeNumero || null
+          };
+        }) || [];
+
+        return {
+          ...mov,
+          entregaBaseTieneVale: !!valeNumeroBase,
+          valeNumeroEntregaBase: valeNumeroBase || null,
+          entregasAdicionales: entregasAdicionalesEnriquecidas
+        };
+      });
+    } catch (error) {
+      console.error('Error al enriquecer movimientos con info de vales:', error);
+      return movimientos;
     }
   }
 }

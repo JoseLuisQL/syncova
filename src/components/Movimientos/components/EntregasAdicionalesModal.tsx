@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { X, Package, Plus, Trash2, Loader2 } from 'lucide-react';
 import { COMPONENT_STYLES, INPUT_FIELD_STYLES } from '../constants';
 import { MovimientoCalculado } from '../../../types';
+import { ValeIndicator } from './ValeIndicator';
 
 interface EntregasAdicionalesModalProps {
   movimiento: MovimientoCalculado & { tieneMovimiento: boolean };
@@ -108,17 +109,35 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
                 {movimiento.entregasAdicionales.map((entrega) => (
                   <div 
                     key={entrega.id}
-                    className="bg-amber-50 border border-amber-200 rounded-xl p-4"
+                    className={`rounded-xl p-4 transition-all duration-300 ${
+                      entrega.tieneValeGenerado 
+                        ? 'bg-gradient-to-r from-emerald-50/80 to-teal-50/60 border-2 border-emerald-300 shadow-sm' 
+                        : 'bg-amber-50 border border-amber-200'
+                    }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="bg-amber-100 rounded-full p-2">
-                          <Package className="h-5 w-5 text-amber-600" />
+                        <div className={`rounded-full p-2.5 shadow-sm ${
+                          entrega.tieneValeGenerado 
+                            ? 'bg-gradient-to-br from-emerald-400 to-teal-500' 
+                            : 'bg-amber-100'
+                        }`}>
+                          <Package className={`h-5 w-5 ${
+                            entrega.tieneValeGenerado 
+                              ? 'text-white' 
+                              : 'text-amber-600'
+                          }`} />
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900">
-                            Entrega #{entrega.numeroEntrega}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-gray-900">
+                              Entrega #{entrega.numeroEntrega}
+                            </p>
+                            <ValeIndicator 
+                              tieneVale={entrega.tieneValeGenerado || false} 
+                              valeNumero={entrega.valeNumero}
+                            />
+                          </div>
                           <p className="text-sm text-gray-600">
                             {new Date(entrega.fechaEntrega).toLocaleDateString('es-ES', {
                               year: 'numeric',
@@ -129,12 +148,19 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
                           {entrega.motivo && (
                             <p className="text-sm text-gray-500 mt-1">{entrega.motivo}</p>
                           )}
+                          {entrega.tieneValeGenerado && entrega.valeNumero && (
+                            <span className="inline-flex items-center gap-1 mt-2 px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
+                              Vale: {entrega.valeNumero}
+                            </span>
+                          )}
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
                         <div className="text-right relative">
-                          <label className="block text-sm text-gray-600 mb-1">Cantidad</label>
+                          <label className={`block text-sm mb-1 font-medium ${
+                            entrega.tieneValeGenerado ? 'text-emerald-700' : 'text-gray-600'
+                          }`}>Cantidad</label>
                           <input
                             type="number"
                             min="0"
@@ -144,20 +170,26 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
                             className={`w-24 px-3 py-2 text-center text-sm font-semibold border-2 rounded-xl 
                                        focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed 
                                        transition-all duration-200 ${
-                              hasPendingEntregaChange(entrega.id)
-                                ? INPUT_FIELD_STYLES.entregaAdicional.pending
-                                : `${INPUT_FIELD_STYLES.entregaAdicional.normal} ${INPUT_FIELD_STYLES.entregaAdicional.focus}`
+                              entrega.tieneValeGenerado
+                                ? 'border-emerald-400 bg-white focus:ring-emerald-300 focus:border-emerald-500'
+                                : hasPendingEntregaChange(entrega.id)
+                                  ? INPUT_FIELD_STYLES.entregaAdicional.pending
+                                  : `${INPUT_FIELD_STYLES.entregaAdicional.normal} ${INPUT_FIELD_STYLES.entregaAdicional.focus}`
                             }`}
                             disabled={isCreating || isUpdating || isProcessing}
                           />
-                          {hasPendingEntregaChange(entrega.id) && (
+                          {hasPendingEntregaChange(entrega.id) && !entrega.tieneValeGenerado && (
                             <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full animate-pulse" />
                           )}
                         </div>
 
                         <button
                           onClick={() => onEliminarEntrega(entrega.id)}
-                          className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50"
+                          className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${
+                            entrega.tieneValeGenerado
+                              ? 'text-emerald-500 hover:text-emerald-700 hover:bg-emerald-100'
+                              : 'text-rose-500 hover:text-rose-700 hover:bg-rose-50'
+                          }`}
                           disabled={isCreating || isUpdating || isProcessing}
                           title="Eliminar entrega adicional"
                         >
