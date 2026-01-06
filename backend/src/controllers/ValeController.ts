@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ValeService, GenerarValeDto, ValesFilters } from '@/services/ValeService';
 import { ValeExportService } from '@/services/ValeExportService';
+import { ValeImpactService } from '@/services/vale/ValeImpactService';
 import { StockValidationService, VaccineRequirement } from '@/services/StockValidationService';
 import { ResponseUtil } from '@/utils/response';
 import { validateUUID } from '@/utils/validation';
@@ -957,6 +958,71 @@ export class ValeController {
 
     } catch (error) {
       console.error('Error en ValeController.getExportPreview:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
+   * Calcular impacto de modificación de entrega
+   * GET /api/vales/calcular-impacto-modificacion
+   */
+  static async calcularImpactoModificacion(req: Request, res: Response): Promise<void> {
+    try {
+      const { establecimientoId, vacunaId, mes, anio, cantidadActual, cantidadNueva } = req.query;
+
+      // Validaciones básicas
+      if (!establecimientoId || !validateUUID(establecimientoId as string)) {
+        ResponseUtil.error(res, 'ID de establecimiento inválido', 400);
+        return;
+      }
+
+      if (!vacunaId || !validateUUID(vacunaId as string)) {
+        ResponseUtil.error(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      const mesNum = parseInt(mes as string);
+      const anioNum = parseInt(anio as string);
+      const cantidadActualNum = parseInt(cantidadActual as string);
+      const cantidadNuevaNum = parseInt(cantidadNueva as string);
+
+      if (!mesNum || mesNum < 1 || mesNum > 12) {
+        ResponseUtil.error(res, 'Mes debe estar entre 1 y 12', 400);
+        return;
+      }
+
+      if (!anioNum || anioNum < 2020) {
+        ResponseUtil.error(res, 'Año inválido', 400);
+        return;
+      }
+
+      if (isNaN(cantidadActualNum) || cantidadActualNum < 0) {
+        ResponseUtil.error(res, 'Cantidad actual inválida', 400);
+        return;
+      }
+
+      if (isNaN(cantidadNuevaNum) || cantidadNuevaNum < 0) {
+        ResponseUtil.error(res, 'Cantidad nueva inválida', 400);
+        return;
+      }
+
+      const result = await ValeImpactService.calcularImpactoModificacion(
+        establecimientoId as string,
+        vacunaId as string,
+        mesNum,
+        anioNum,
+        cantidadActualNum,
+        cantidadNuevaNum
+      );
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al calcular impacto', 400);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, 'Impacto de modificación calculado exitosamente');
+    } catch (error) {
+      console.error('Error en ValeController.calcularImpactoModificacion:', error);
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }

@@ -14,7 +14,7 @@ import { useAutoSync } from '../../hooks/useAutoSync';
 import { PlanificacionService } from '../../services/planificacionService';
 import { MovimientosService } from '../../services/movimientosService';
 import { MovimientosExportService, MovimientosExportConfig } from '../../services/movimientosExportService';
-import { ValesService } from '../../services/valesService';
+import { ValesService, ImpactoModificacion } from '../../services/valesService';
 import { ordenarEstablecimientos, COLORES_CENTROS_ACOPIO } from '../../utils/centroAcopioUtils';
 import Vales from '../Vales/Vales';
 import ValesErrorBoundary from '../Vales/ValesErrorBoundary';
@@ -137,6 +137,9 @@ const Movimientos: React.FC = () => {
     establecimientoNombre: string;
     valesAfectados: Array<{ numero: string; fechaGeneracion: Date }>;
   } | null>(null);
+
+  const [impactoModificacion, setImpactoModificacion] = useState<ImpactoModificacion | null>(null);
+  const [isLoadingImpacto, setIsLoadingImpacto] = useState(false);
 
   const [pendingSinDisponibilidad, setPendingSinDisponibilidad] = useState<{
     establecimientoId: string;
@@ -558,7 +561,32 @@ const Movimientos: React.FC = () => {
               fechaGeneracion: vale.fechaGeneracion
             }))
           });
+          
+          // Mostrar modal y cargar impacto en paralelo
           setShowConfirmacionModal(true);
+          setIsLoadingImpacto(true);
+          setImpactoModificacion(null);
+
+          // Calcular impacto detallado
+          try {
+            const impactoResult = await ValesService.calcularImpactoModificacion(
+              establecimientoId,
+              selectedVacuna,
+              selectedMes,
+              selectedAnio,
+              valorOriginal,
+              value
+            );
+            
+            if (impactoResult.success && impactoResult.data) {
+              setImpactoModificacion(impactoResult.data);
+            }
+          } catch (impactoError) {
+            console.error('Error calculando impacto:', impactoError);
+          } finally {
+            setIsLoadingImpacto(false);
+          }
+
           return true;
         }
       } catch (err) {
@@ -1162,6 +1190,7 @@ const Movimientos: React.FC = () => {
 
       setShowConfirmacionModal(false);
       setPendingModification(null);
+      setImpactoModificacion(null);
     } catch (err: any) {
       toast.error(`Error al modificar entrega - ${pendingModification.establecimientoNombre}`);
     } finally {
@@ -1190,6 +1219,7 @@ const Movimientos: React.FC = () => {
 
     setShowConfirmacionModal(false);
     setPendingModification(null);
+    setImpactoModificacion(null);
 
     toast.info(`Modificación cancelada - ${pendingModification.establecimientoNombre}`);
   };
@@ -1586,14 +1616,11 @@ const Movimientos: React.FC = () => {
       {showConfirmacionModal && pendingModification && (
         <ConfirmacionModificacionModal
           isOpen={showConfirmacionModal}
-          onClose={() => !isAutoSaving && handleCancelModification()}
+          onClose={() => !isAutoSaving && !isLoadingImpacto && handleCancelModification()}
           onConfirm={handleConfirmModification}
           onCancel={handleCancelModification}
-          establecimientoNombre={pendingModification.establecimientoNombre}
-          vacunaNombre={vacunasActivas.find(v => v.id === selectedVacuna)?.nombre || 'Vacuna'}
-          cantidadOriginal={pendingModification.valorOriginal}
-          cantidadNueva={pendingModification.valorNuevo}
-          valesAfectados={pendingModification.valesAfectados}
+          impacto={impactoModificacion}
+          isLoading={isLoadingImpacto}
           isProcessing={isAutoSaving}
         />
       )}

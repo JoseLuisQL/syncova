@@ -56,12 +56,12 @@ export class ValeValidationService {
 
     // Smart validation based on existing vales content
     const tipoVale = data.tipoVale || 'completo';
-    const tiposGenerados = await this.getTiposValesGenerados(data.centroAcopioId, data.mes, data.anio);
+    const tiposGenerados = await ValeValidationService.getTiposValesGenerados(data.centroAcopioId, data.mes, data.anio);
 
     // Validate based on type to generate
     if (tipoVale === 'solo_adicionales') {
       if (data.gruposEntregasSeleccionados && data.gruposEntregasSeleccionados.length > 0) {
-        const gruposGenerados = await this.getGruposEntregasAdicionalesGenerados(data.centroAcopioId, data.mes, data.anio);
+        const gruposGenerados = await ValeValidationService.getGruposEntregasAdicionalesGenerados(data.centroAcopioId, data.mes, data.anio);
 
         const gruposYaGenerados = data.gruposEntregasSeleccionados.filter(grupo =>
           gruposGenerados.includes(grupo)
@@ -252,7 +252,7 @@ export class ValeValidationService {
     vacunaId: string,
     mes: number,
     anio: number
-  ): Promise<ServiceResult<{ existenVales: boolean; valesCount: number }>> {
+  ): Promise<ServiceResult<{ existenVales: boolean; valesCount: number; valesEncontrados: Array<{ id: string; numero: string; fechaGeneracion: Date }> }>> {
     try {
       console.log(`🔍 [ValeValidationService] Verificando vales existentes para establecimiento ${establecimientoId}, vacuna ${vacunaId}, ${mes}/${anio}`);
 
@@ -283,7 +283,7 @@ export class ValeValidationService {
         };
       }
 
-      const valesCount = await prisma.valeEntrega.count({
+      const vales = await prisma.valeEntrega.findMany({
         where: {
           centroAcopioId,
           mes,
@@ -295,18 +295,28 @@ export class ValeValidationService {
               vacunaId
             }
           }
+        },
+        select: {
+          id: true,
+          numero: true,
+          fechaGeneracion: true
         }
       });
 
-      const existenVales = valesCount > 0;
+      const existenVales = vales.length > 0;
 
-      console.log(`📋 [ValeValidationService] ${existenVales ? 'Encontrados' : 'No se encontraron'} ${valesCount} vales para el establecimiento ${establecimiento.nombre}`);
+      console.log(`📋 [ValeValidationService] ${existenVales ? 'Encontrados' : 'No se encontraron'} ${vales.length} vales para el establecimiento ${establecimiento.nombre}`);
 
       return {
         success: true,
         data: {
           existenVales,
-          valesCount
+          valesCount: vales.length,
+          valesEncontrados: vales.map(v => ({
+            id: v.id,
+            numero: v.numero,
+            fechaGeneracion: v.fechaGeneracion
+          }))
         }
       };
     } catch (error) {

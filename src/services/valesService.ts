@@ -142,6 +142,61 @@ export interface StockAfectacion {
   saldoNuevo: number;
 }
 
+export interface LoteVacunaImpacto {
+  id: string;
+  numero: string;
+  cantidadActual: number;
+  cantidadDespues: number;
+  fechaVencimiento: Date;
+}
+
+export interface LoteJeringaImpacto {
+  id: string;
+  tipo: string;
+  capacidad: string;
+  numero: string;
+  cantidadActual: number;
+  cantidadDespues: number;
+}
+
+export interface ValeAfectadoImpacto {
+  id: string;
+  numero: string;
+  fechaGeneracion: Date;
+  cantidadAnterior: number;
+  cantidadNueva: number;
+}
+
+export interface ImpactoModificacion {
+  resumen: {
+    establecimientoNombre: string;
+    vacunaNombre: string;
+    cantidadActual: number;
+    cantidadNueva: number;
+    diferencia: number;
+  };
+  impactoVacunas: {
+    diferencia: number;
+    accion: 'restaurar' | 'deducir';
+    lotesAfectados: LoteVacunaImpacto[];
+    stockTotalActual: number;
+    stockTotalDespues: number;
+  };
+  impactoJeringas: {
+    diferencia: number;
+    accion: 'restaurar' | 'deducir';
+    lotesAfectados: LoteJeringaImpacto[];
+    stockTotalActual: number;
+    stockTotalDespues: number;
+  };
+  kardex: {
+    registrosNuevos: number;
+    tipoMovimiento: 'ingreso' | 'salida';
+  };
+  valesAfectados: ValeAfectadoImpacto[];
+  advertencias: string[];
+}
+
 export interface VistaPrevia {
   centroAcopio: {
     id: string;
@@ -550,6 +605,35 @@ export class ValesService {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Error en sincronización automática'
+      };
+    }
+  }
+
+  /**
+   * Calcular el impacto de modificar una entrega sobre stocks y vales
+   * Para mostrar información detallada en el modal de confirmación
+   */
+  static async calcularImpactoModificacion(
+    establecimientoId: string,
+    vacunaId: string,
+    mes: number,
+    anio: number,
+    cantidadActual: number,
+    cantidadNueva: number
+  ): Promise<ApiResponse<ImpactoModificacion>> {
+    try {
+      console.log(`🔍 [ValesService] Calculando impacto de modificación para establecimiento ${establecimientoId}`);
+
+      const response = await apiClient.get(`${this.BASE_URL}/calcular-impacto-modificacion`, {
+        params: { establecimientoId, vacunaId, mes, anio, cantidadActual, cantidadNueva }
+      });
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al calcular impacto de modificación:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Error al calcular impacto de modificación'
       };
     }
   }

@@ -645,6 +645,10 @@ export class ValeStockService {
       orderBy: { fechaVencimiento: 'asc' }
     });
 
+    // Obtener stock total ANTES de cualquier modificación
+    let stockTotalActual = await this.obtenerStockTotalVacuna(tx, vacunaId);
+    console.log(`📊 [ValeStockService] Stock total inicial de vacuna ${vacunaId} para restauración: ${stockTotalActual} unidades`);
+
     let cantidadRestaurar = cantidad;
 
     for (const lote of lotes) {
@@ -661,15 +665,19 @@ export class ValeStockService {
 
       if (ultimoMovimiento) {
         const cantidadARestaurar = Math.min(cantidadRestaurar, ultimoMovimiento.cantidad);
-        const nuevoSaldo = lote.cantidadActual + cantidadARestaurar;
+        const nuevoSaldoLote = lote.cantidadActual + cantidadARestaurar;
 
         await tx.loteVacuna.update({
           where: { id: lote.id },
           data: {
-            cantidadActual: nuevoSaldo,
-            estado: nuevoSaldo > 0 ? 'disponible' : 'agotado'
+            cantidadActual: nuevoSaldoLote,
+            estado: nuevoSaldoLote > 0 ? 'disponible' : 'agotado'
           }
         });
+
+        // Calcular saldos basados en stock TOTAL
+        const saldoAnteriorMovimiento = stockTotalActual;
+        const saldoNuevoMovimiento = stockTotalActual + cantidadARestaurar;
 
         await tx.kardex.create({
           data: {
@@ -678,8 +686,8 @@ export class ValeStockService {
             loteId: lote.id,
             tipoMovimiento: TipoMovimientoKardex.ingreso,
             cantidad: cantidadARestaurar,
-            saldoAnterior: lote.cantidadActual,
-            saldoActual: nuevoSaldo,
+            saldoAnterior: saldoAnteriorMovimiento,
+            saldoActual: saldoNuevoMovimiento,
             documento: 'VALE_ENTREGA_AJUSTE',
             numeroDocumento: valeNumero,
             observaciones: `Restauración por ajuste de vale ${valeNumero}`,
@@ -688,9 +696,15 @@ export class ValeStockService {
           }
         });
 
+        // Actualizar stock total para el siguiente lote
+        stockTotalActual = saldoNuevoMovimiento;
         cantidadRestaurar -= cantidadARestaurar;
+
+        console.log(`✅ [ValeStockService] Restauración secuencial: Lote ${lote.numero} - +${cantidadARestaurar} unidades (${saldoAnteriorMovimiento} → ${saldoNuevoMovimiento})`);
       }
     }
+
+    console.log(`📊 [ValeStockService] Stock total final de vacuna ${vacunaId}: ${stockTotalActual} unidades`);
   }
 
   /**
@@ -725,6 +739,10 @@ export class ValeStockService {
 
       console.log(`🔄 [ValeStockService] Restaurando jeringa: ${jeringaConfig.jeringaId}, cantidad: ${cantidadARestaurar}`);
 
+      // Obtener stock total ANTES de cualquier modificación
+      let stockTotalActual = await this.obtenerStockTotalJeringa(tx, jeringaConfig.jeringaId);
+      console.log(`📊 [ValeStockService] Stock total inicial de jeringa ${jeringaConfig.jeringaId} para restauración: ${stockTotalActual} unidades`);
+
       const lotesJeringa = await tx.loteJeringa.findMany({
         where: {
           jeringaId: jeringaConfig.jeringaId,
@@ -750,15 +768,19 @@ export class ValeStockService {
 
         if (ultimoMovimiento) {
           const cantidadARestaurarLote = Math.min(jeringasRestantes, ultimoMovimiento.cantidad);
-          const nuevoSaldo = lote.cantidadActual + cantidadARestaurarLote;
+          const nuevoSaldoLote = lote.cantidadActual + cantidadARestaurarLote;
 
           await tx.loteJeringa.update({
             where: { id: lote.id },
             data: {
-              cantidadActual: nuevoSaldo,
-              estado: nuevoSaldo > 0 ? 'disponible' : 'agotado'
+              cantidadActual: nuevoSaldoLote,
+              estado: nuevoSaldoLote > 0 ? 'disponible' : 'agotado'
             }
           });
+
+          // Calcular saldos basados en stock TOTAL
+          const saldoAnteriorMovimiento = stockTotalActual;
+          const saldoNuevoMovimiento = stockTotalActual + cantidadARestaurarLote;
 
           await tx.kardex.create({
             data: {
@@ -767,8 +789,8 @@ export class ValeStockService {
               loteId: lote.id,
               tipoMovimiento: TipoMovimientoKardex.ingreso,
               cantidad: cantidadARestaurarLote,
-              saldoAnterior: lote.cantidadActual,
-              saldoActual: nuevoSaldo,
+              saldoAnterior: saldoAnteriorMovimiento,
+              saldoActual: saldoNuevoMovimiento,
               documento: 'VALE_ENTREGA_AJUSTE',
               numeroDocumento: valeNumero,
               observaciones: `Restauración por ajuste de vale ${valeNumero} - Vacuna: ${vacunaId}`,
@@ -777,10 +799,15 @@ export class ValeStockService {
             }
           });
 
+          // Actualizar stock total para el siguiente lote
+          stockTotalActual = saldoNuevoMovimiento;
           jeringasRestantes -= cantidadARestaurarLote;
-          console.log(`✅ [ValeStockService] Restaurado lote ${lote.id}: +${cantidadARestaurarLote}, nuevo saldo: ${nuevoSaldo}`);
+
+          console.log(`✅ [ValeStockService] Restauración secuencial: Lote ${lote.numero} - +${cantidadARestaurarLote} unidades (${saldoAnteriorMovimiento} → ${saldoNuevoMovimiento})`);
         }
       }
+
+      console.log(`📊 [ValeStockService] Stock total final de jeringa ${jeringaConfig.jeringaId}: ${stockTotalActual} unidades`);
 
       if (jeringasRestantes > 0) {
         console.warn(`⚠️ [ValeStockService] No se pudo restaurar completamente la jeringa ${jeringaConfig.jeringaId}. Faltaron: ${jeringasRestantes}`);

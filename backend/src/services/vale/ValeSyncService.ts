@@ -175,7 +175,7 @@ export class ValeSyncService {
       }
 
       const result = await prisma.$transaction(async (tx) => {
-        const tipoVale = this.determinarTipoVale(valeExistente.detalles);
+        const tipoVale = ValeSyncService.determinarTipoVale(valeExistente.detalles);
         console.log(`🔍 [ValeSyncService] Vale ${valeExistente.numero} identificado como tipo: ${tipoVale}`);
 
         const entregasAdicionalesOriginales = new Set<number>();
@@ -185,7 +185,7 @@ export class ValeSyncService {
           }
         });
 
-        const movimientosActuales = await this.obtenerMovimientosParaValeConFiltroEspecifico(
+        const movimientosActuales = await ValeSyncService.obtenerMovimientosParaValeConFiltroEspecifico(
           valeExistente.centroAcopioId,
           valeExistente.mes,
           valeExistente.anio,
@@ -207,7 +207,7 @@ export class ValeSyncService {
         });
 
         for (const movimiento of movimientosActuales) {
-          const cantidades = this.calcularCantidadTotal(movimiento);
+          const cantidades = ValeSyncService.calcularCantidadTotal(movimiento);
 
           if ((tipoVale === 'completo' || tipoVale === 'solo_base') && cantidades.programada > 0) {
             const keyBase = `${movimiento.establecimientoId}-${movimiento.vacunaId}-0`;
@@ -526,7 +526,7 @@ export class ValeSyncService {
 
       for (const vale of valesExistentes) {
         try {
-          const resultado = await this.sincronizarValeConMovimientos(vale.id, usuarioId);
+          const resultado = await ValeSyncService.sincronizarValeConMovimientos(vale.id, usuarioId);
           if (resultado.success && resultado.data) {
             const numModificaciones = resultado.data.modificaciones.length;
             if (numModificaciones > 0) {
@@ -570,7 +570,7 @@ export class ValeSyncService {
       console.log(`🔔 [ValeSyncService] TRIGGER: Movimiento actualizado - iniciando sincronización automática`);
 
       setImmediate(async () => {
-        await this.sincronizarValesAutomaticamente(establecimientoId, vacunaId, mes, anio, usuarioId);
+        await ValeSyncService.sincronizarValesAutomaticamente(establecimientoId, vacunaId, mes, anio, usuarioId);
       });
     } catch (error) {
       console.error('Error en trigger de sincronización automática:', error);
@@ -598,7 +598,7 @@ export class ValeSyncService {
 
       if (movimiento) {
         setImmediate(async () => {
-          await this.sincronizarValesDeEntregasAdicionales(
+          await ValeSyncService.sincronizarValesDeEntregasAdicionales(
             movimiento.establecimientoId,
             movimiento.vacunaId,
             movimiento.mes,
@@ -672,7 +672,7 @@ export class ValeSyncService {
       for (const vale of valesConEntregasAdicionales) {
         try {
           console.log(`🔄 [ValeSyncService] Sincronizando vale ${vale.numero} (${vale.id})`);
-          const resultado = await this.sincronizarValeConMovimientos(vale.id, usuarioId);
+          const resultado = await ValeSyncService.sincronizarValeConMovimientos(vale.id, usuarioId);
           if (resultado.success) {
             valesSincronizados++;
             console.log(`✅ [ValeSyncService] Vale ${vale.numero} sincronizado exitosamente`);
