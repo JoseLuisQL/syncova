@@ -268,7 +268,7 @@ export class ValeGenerationService {
       // REAL GENERATION: Create vale and affect stocks
       const result = await prisma.$transaction(async (tx) => {
         // STEP 1: Generate vale number
-        const numeroVale = await this.generarNumeroVale(data.centroAcopioId, data.mes, data.anio);
+        const numeroVale = await ValeGenerationService.generarNumeroVale(data.centroAcopioId, data.mes, data.anio);
 
         // STEP 2: Get movements for vale according to specified type
         const tipoVale = data.tipoVale || 'completo';
@@ -405,7 +405,7 @@ export class ValeGenerationService {
         // STEP 5.1: Create vale details
         for (const movimiento of movimientos) {
           try {
-            const cantidades = this.calcularCantidadTotal(movimiento);
+            const cantidades = ValeGenerationService.calcularCantidadTotal(movimiento);
             let cantidadTotalParaVale = 0;
 
             if (tipoVale === 'solo_base' || tipoVale === 'completo') {
@@ -465,7 +465,7 @@ export class ValeGenerationService {
           }>();
 
           for (const movimiento of movimientos) {
-            const cantidades = this.calcularCantidadTotal(movimiento);
+            const cantidades = ValeGenerationService.calcularCantidadTotal(movimiento);
             let cantidadTotalParaVale = 0;
 
             if (tipoVale === 'solo_base' || tipoVale === 'completo') {
