@@ -17,6 +17,7 @@ import {
   Boxes,
   AlertTriangle,
   ArrowRight,
+  Settings2,
 } from 'lucide-react';
 import { MESES } from '../constants';
 import { Vacuna, CentroAcopio } from '../../../types';
@@ -75,6 +76,9 @@ interface MovimientosHeaderCompactProps {
   onExport: () => void;
   onImport: () => void;
   onOpenVales: () => void;
+  // Ajuste de Deficit
+  onOpenAjusteDeficit?: () => void;
+  ajusteDeficitDisponible?: boolean;
 }
 
 export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> = memo(({
@@ -112,6 +116,9 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   onExport,
   onImport,
   onOpenVales,
+  // Ajuste de Deficit
+  onOpenAjusteDeficit,
+  ajusteDeficitDisponible = false,
 }) => {
   const [showStockInicialDropdown, setShowStockInicialDropdown] = useState(false);
   const [showStockActualDropdown, setShowStockActualDropdown] = useState(false);
@@ -452,23 +459,40 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                     {/* Disponible */}
                     {(() => {
                       const isDeficit = stockInfo.stockDisponible < 0;
-                      return (
+                      const canAdjust = isDeficit && ajusteDeficitDisponible && onOpenAjusteDeficit;
+                      
+                      const content = (
                         <div className={`flex items-center gap-3 px-4 py-2 rounded-xl border ${
                           isDeficit 
                             ? 'bg-rose-500/40 border-rose-300/50' 
                             : 'bg-emerald-500/40 border-emerald-300/50'
-                        }`}>
+                        } ${canAdjust ? 'cursor-pointer hover:bg-rose-500/60 transition-colors' : ''}`}>
                           <div className={`p-1.5 rounded-lg ${isDeficit ? 'bg-rose-500/50' : 'bg-emerald-500/50'}`}>
                             <TrendingUp className="h-4 w-4 text-white" />
                           </div>
                           <div className="text-left">
                             <div className="text-[10px] font-medium uppercase tracking-wide text-white/90">
-                              {isDeficit ? 'Déficit' : 'Disponible'}
+                              {isDeficit ? 'Deficit' : 'Disponible'}
                             </div>
                             <div className="text-lg font-bold text-white leading-none">{stockInfo.stockDisponible.toLocaleString()}</div>
                           </div>
+                          {canAdjust && (
+                            <div className="flex items-center gap-1 px-2 py-0.5 bg-white/20 rounded-full">
+                              <Settings2 className="h-3 w-3 text-white" />
+                              <span className="text-[10px] text-white font-medium">Ajustar</span>
+                            </div>
+                          )}
                         </div>
                       );
+
+                      if (canAdjust) {
+                        return (
+                          <button onClick={onOpenAjusteDeficit} className="focus:outline-none">
+                            {content}
+                          </button>
+                        );
+                      }
+                      return content;
                     })()}
 
                     <ArrowRight className="h-4 w-4 text-white/50" />
@@ -596,10 +620,15 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               </div>
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${
                 stockInfo.stockDisponible < 0 ? 'bg-rose-500/50 text-white' : 'bg-emerald-500/50 text-white'
-              }`}>
+              } ${stockInfo.stockDisponible < 0 && ajusteDeficitDisponible ? 'cursor-pointer' : ''}`}
+              onClick={stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit ? onOpenAjusteDeficit : undefined}
+              >
                 <TrendingUp className="h-3.5 w-3.5" />
-                {stockInfo.stockDisponible < 0 ? 'Déficit:' : 'Disponible:'} 
+                {stockInfo.stockDisponible < 0 ? 'Deficit:' : 'Disponible:'} 
                 <span className="font-bold">{stockInfo.stockDisponible.toLocaleString()}</span>
+                {stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && (
+                  <Settings2 className="h-3 w-3 ml-1" />
+                )}
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 rounded-lg text-xs font-medium text-white whitespace-nowrap">
                 <Boxes className="h-3.5 w-3.5" />

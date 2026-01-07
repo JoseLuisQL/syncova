@@ -29,7 +29,9 @@ import {
   MovimientoDetalle,
   EntregasAdicionalesModal,
   AlertaEstado,
+  AjusteDeficitModal,
 } from './components';
+import { AjusteEntregasService } from '../../services/ajusteEntregasService';
 
 interface StockInfo {
   stockInicialHistorico: number | null;
@@ -122,6 +124,8 @@ const Movimientos: React.FC = () => {
   const [selectedMovimiento, setSelectedMovimiento] = useState<MovimientoCalculado | null>(null);
   const [showEntregasAdicionalesModal, setShowEntregasAdicionalesModal] = useState(false);
   const [movimientoParaEntregas, setMovimientoParaEntregas] = useState<MovimientoCalculado | null>(null);
+  const [showAjusteDeficitModal, setShowAjusteDeficitModal] = useState(false);
+  const [ajusteDeficitDisponible, setAjusteDeficitDisponible] = useState(false);
 
   // Estado para fila seleccionada (persistente al cambiar pestañas/modales)
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
@@ -411,6 +415,31 @@ const Movimientos: React.FC = () => {
     };
     loadStock();
   }, [selectedVacuna, selectedMes, selectedAnio, vacunasActivas]);
+
+  // Verificar disponibilidad de ajuste de deficit
+  useEffect(() => {
+    const verificarAjusteDeficit = async () => {
+      if (selectedVacuna && stockInfo && stockInfo.stockDisponible < 0) {
+        try {
+          const response = await AjusteEntregasService.verificarDisponibilidad(
+            selectedVacuna,
+            selectedMes,
+            selectedAnio
+          );
+          if (response.success && response.data) {
+            setAjusteDeficitDisponible(response.data.disponible);
+          } else {
+            setAjusteDeficitDisponible(false);
+          }
+        } catch {
+          setAjusteDeficitDisponible(false);
+        }
+      } else {
+        setAjusteDeficitDisponible(false);
+      }
+    };
+    verificarAjusteDeficit();
+  }, [selectedVacuna, selectedMes, selectedAnio, stockInfo]);
 
   useEffect(() => {
     const unsubscribe = onValeGenerated(async (event) => {
@@ -1486,6 +1515,9 @@ const Movimientos: React.FC = () => {
         onExport={handleExportar}
         onImport={() => setShowImportarModal(true)}
         onOpenVales={() => setShowValesModal(true)}
+        // Ajuste de Deficit
+        onOpenAjusteDeficit={() => setShowAjusteDeficitModal(true)}
+        ajusteDeficitDisponible={ajusteDeficitDisponible}
       />
 
       {/* Content */}
@@ -1637,6 +1669,29 @@ const Movimientos: React.FC = () => {
           anio={selectedAnio}
           isProcessing={isAutoSaving}
           tipoEntrega={pendingSinDisponibilidad.tipoEntrega}
+        />
+      )}
+
+      {showAjusteDeficitModal && selectedVacuna && stockInfo && stockInfo.stockDisponible < 0 && (
+        <AjusteDeficitModal
+          isOpen={showAjusteDeficitModal}
+          onClose={() => setShowAjusteDeficitModal(false)}
+          vacunaId={selectedVacuna}
+          vacunaNombre={vacunasActivas.find(v => v.id === selectedVacuna)?.nombre || 'Vacuna'}
+          mes={selectedMes}
+          anio={selectedAnio}
+          deficit={stockInfo.stockDisponible}
+          onAjusteCompletado={async () => {
+            // Reload movements and stock
+            const filters = {
+              vacunaId: selectedVacuna,
+              mes: selectedMes,
+              anio: selectedAnio,
+              ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
+            };
+            await loadMovimientos(filters);
+            await updateStockInRealTime(false);
+          }}
         />
       )}
     </main>
