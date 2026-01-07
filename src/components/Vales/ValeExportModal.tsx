@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, memo } from 'react';
 import {
   X,
   FileText,
@@ -21,16 +21,146 @@ interface ValeExportModalProps {
   vale: ValeEntrega;
   isOpen: boolean;
   onClose: () => void;
-  // Nuevas props para exportación global
-  valesOriginales?: ValeEntrega[]; // Lista de vales originales para exportación global
-  esExportacionGlobal?: boolean; // Flag para indicar si es exportación global
-  esExportacionIndividual?: boolean; // Flag para indicar si es exportación individual desde tabla
+  valesOriginales?: ValeEntrega[];
+  esExportacionGlobal?: boolean;
+  esExportacionIndividual?: boolean;
 }
 
-// Usar la interfaz del servicio con formatoExportacion opcional para el estado local
 interface LocalExportConfig extends Omit<ValeExportConfig, 'formatoExportacion'> {
   formatoExportacion: 'excel' | 'pdf' | null;
 }
+
+// Componente de paso del wizard
+const StepIndicator = memo<{
+  step: number;
+  currentStep: number;
+  title: string;
+  icon: React.ElementType;
+  isLast?: boolean;
+}>(({ step, currentStep, title, icon: Icon, isLast }) => (
+  <div className="flex items-center">
+    <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+      currentStep >= step
+        ? 'bg-teal-600 border-teal-600 text-white'
+        : 'bg-white border-gray-300 text-gray-400'
+    }`}>
+      {currentStep > step ? (
+        <CheckCircle className="h-5 w-5" />
+      ) : (
+        <Icon className="h-4 w-4" />
+      )}
+    </div>
+    <span className={`ml-2 text-sm font-medium ${
+      currentStep >= step ? 'text-teal-600' : 'text-gray-400'
+    }`}>
+      {title}
+    </span>
+    {!isLast && <ArrowRight className="h-4 w-4 text-gray-300 mx-4" />}
+  </div>
+));
+
+StepIndicator.displayName = 'StepIndicator';
+
+// Componente de checkbox personalizado
+const CheckboxOption = memo<{
+  checked: boolean;
+  onChange: () => void;
+  label: string;
+  description?: string;
+  badge?: { text: string; color: string };
+  color?: 'teal' | 'amber';
+}>(({ checked, onChange, label, description, badge, color = 'teal' }) => {
+  const colorClasses = color === 'teal'
+    ? { border: 'border-teal-600', icon: 'text-teal-600', bg: 'hover:bg-teal-50' }
+    : { border: 'border-amber-600', icon: 'text-amber-600', bg: 'hover:bg-amber-50' };
+
+  return (
+    <label className={`flex items-start space-x-3 cursor-pointer p-3 rounded-lg ${colorClasses.bg} transition-colors`}>
+      <button
+        type="button"
+        onClick={onChange}
+        className={`flex items-center justify-center w-5 h-5 rounded border-2 ${colorClasses.border} focus:outline-none focus:ring-2 focus:ring-offset-2`}
+      >
+        {checked && <CheckCircle className={`h-4 w-4 ${colorClasses.icon}`} />}
+      </button>
+      <div className="flex-1">
+        <div className="flex items-center space-x-2">
+          <span className="text-sm font-medium text-gray-900">{label}</span>
+          {badge && (
+            <span className={`px-2 py-0.5 text-xs rounded-full ${badge.color}`}>
+              {badge.text}
+            </span>
+          )}
+        </div>
+        {description && (
+          <p className="text-sm text-gray-600 mt-0.5">{description}</p>
+        )}
+      </div>
+    </label>
+  );
+});
+
+CheckboxOption.displayName = 'CheckboxOption';
+
+// Componente de formato de exportación
+const FormatOption = memo<{
+  format: 'excel' | 'pdf';
+  isExporting: boolean;
+  onExport: (format: 'excel' | 'pdf') => void;
+}>(({ format, isExporting, onExport }) => {
+  const isExcel = format === 'excel';
+  const config = isExcel
+    ? {
+        icon: FileSpreadsheet,
+        title: 'Excel',
+        description: 'Formato editable con tablas y cálculos',
+        badge: 'Recomendado',
+        extension: '.xlsx',
+        colors: 'border-green-200 hover:border-green-400 hover:bg-green-50',
+        iconBg: 'bg-green-100',
+        iconColor: 'text-green-600',
+        badgeColor: 'bg-green-100 text-green-800'
+      }
+    : {
+        icon: FileText,
+        title: 'PDF',
+        description: 'Formato profesional para impresión',
+        badge: 'Oficial',
+        extension: '.pdf',
+        colors: 'border-red-200 hover:border-red-400 hover:bg-red-50',
+        iconBg: 'bg-red-100',
+        iconColor: 'text-red-600',
+        badgeColor: 'bg-red-100 text-red-800'
+      };
+
+  const Icon = config.icon;
+
+  return (
+    <button
+      onClick={() => onExport(format)}
+      disabled={isExporting}
+      className={`p-6 border-2 rounded-xl ${config.colors} transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed`}
+    >
+      <div className="flex items-center space-x-4">
+        <div className={`p-3 ${config.iconBg} rounded-lg`}>
+          <Icon className={`h-8 w-8 ${config.iconColor}`} />
+        </div>
+        <div>
+          <h4 className="text-lg font-semibold text-gray-900">{config.title}</h4>
+          <p className="text-sm text-gray-600">{config.description}</p>
+          <div className="flex items-center space-x-2 mt-2">
+            <span className={`px-2 py-1 text-xs rounded ${config.badgeColor}`}>
+              {config.badge}
+            </span>
+            <span className="text-xs text-gray-500">{config.extension}</span>
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+});
+
+FormatOption.displayName = 'FormatOption';
 
 const ValeExportModal: React.FC<ValeExportModalProps> = ({
   vale,
@@ -41,204 +171,124 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
   esExportacionIndividual = false
 }) => {
   const { toast } = useToastContext();
-  const [currentStep, setCurrentStep] = useState((esExportacionGlobal || esExportacionIndividual) ? 2 : 1);
+  const startStep = (esExportacionGlobal || esExportacionIndividual) ? 2 : 1;
+  const [currentStep, setCurrentStep] = useState(startStep);
   const [isExporting, setIsExporting] = useState(false);
-  
+
   const [config, setConfig] = useState<LocalExportConfig>({
     incluirEntregasBase: true,
-    incluirEntregasAdicionales: esExportacionGlobal || esExportacionIndividual, // Auto-activar para exportaciones desde tabla
+    incluirEntregasAdicionales: esExportacionGlobal || esExportacionIndividual,
     entregasAdicionalesSeleccionadas: [],
     responsableRecojo: `${vale.usuario.nombres} ${vale.usuario.apellidos}`,
     formatoExportacion: null
   });
 
-  // Obtener entregas adicionales disponibles
+  // Entregas adicionales disponibles
   const entregasAdicionalesDisponibles = useMemo(() => {
     if (esExportacionGlobal && valesOriginales.length > 0) {
-      // Para exportación global, analizar todos los vales originales
-      console.log('🔍 Analizando entregas adicionales de', valesOriginales.length, 'vales para exportación global');
       return ValeExportService.obtenerEntregasAdicionalesDisponiblesGlobal(valesOriginales);
-    } else {
-      // Para exportación individual, analizar solo el vale actual
-      return ValeExportService.obtenerEntregasAdicionalesDisponibles(vale);
     }
-  }, [vale, esExportacionGlobal, esExportacionIndividual, valesOriginales]);
+    return ValeExportService.obtenerEntregasAdicionalesDisponibles(vale);
+  }, [vale, esExportacionGlobal, valesOriginales]);
 
-  // Auto-seleccionar todas las entregas adicionales para exportaciones desde tabla
-  React.useEffect(() => {
+  // Auto-seleccionar entregas para exportaciones desde tabla
+  useEffect(() => {
     if ((esExportacionGlobal || esExportacionIndividual) && entregasAdicionalesDisponibles.length > 0) {
-      const todasLasEntregas = entregasAdicionalesDisponibles.map(e => e.numero);
-      console.log('🔄 Auto-seleccionando entregas adicionales para exportación desde tabla:', todasLasEntregas);
-
       setConfig(prev => ({
         ...prev,
         incluirEntregasAdicionales: true,
-        entregasAdicionalesSeleccionadas: todasLasEntregas
+        entregasAdicionalesSeleccionadas: entregasAdicionalesDisponibles.map(e => e.numero)
       }));
     }
   }, [esExportacionGlobal, esExportacionIndividual, entregasAdicionalesDisponibles]);
 
-  // Calcular estadísticas basadas en la configuración usando el servicio
+  // Estadísticas
   const estadisticas = useMemo(() => {
-    const configParaStats: ValeExportConfig = {
-      ...config,
-      formatoExportacion: 'excel' // Valor temporal para el cálculo
-    };
-
+    const configParaStats: ValeExportConfig = { ...config, formatoExportacion: 'excel' };
     if (esExportacionGlobal && valesOriginales.length > 0) {
-      // Para exportación global, calcular estadísticas de todos los vales originales
-      console.log('📊 Calculando estadísticas globales de', valesOriginales.length, 'vales');
       return ValeExportService.calcularEstadisticasGlobal(valesOriginales, configParaStats);
-    } else {
-      // Para exportación individual, calcular estadísticas del vale actual
-      return ValeExportService.calcularEstadisticas(vale, configParaStats);
     }
-  }, [vale, esExportacionGlobal, esExportacionIndividual, valesOriginales, config.incluirEntregasBase, config.incluirEntregasAdicionales, config.entregasAdicionalesSeleccionadas]);
+    return ValeExportService.calcularEstadisticas(vale, configParaStats);
+  }, [vale, esExportacionGlobal, valesOriginales, config]);
 
-  const handleNext = () => {
+  // Handlers
+  const handleNext = useCallback(() => {
     if (currentStep === 1) {
-      // Validación simplificada y robusta
-      const tieneEntregasBase = config.incluirEntregasBase;
-      const tieneEntregasAdicionales = config.entregasAdicionalesSeleccionadas.length > 0;
-
-      // Debe tener al menos una opción seleccionada
-      if (!tieneEntregasBase && !tieneEntregasAdicionales) {
-        toast.error('Debe seleccionar al menos un tipo de entrega para exportar');
-        return;
-      }
-
-      console.log('✅ Validación exitosa:', {
-        entregasBase: tieneEntregasBase,
-        entregasAdicionales: tieneEntregasAdicionales,
-        seleccionadas: config.entregasAdicionalesSeleccionadas
-      });
-    }
-    
-    if (currentStep === 2) {
-      if (!config.responsableRecojo.trim()) {
-        toast.error('Debe especificar un responsable de recojo');
+      const tieneEntregas = config.incluirEntregasBase || config.entregasAdicionalesSeleccionadas.length > 0;
+      if (!tieneEntregas) {
+        toast.error('Debe seleccionar al menos un tipo de entrega');
         return;
       }
     }
-    
-    setCurrentStep(prev => Math.min(prev + 1, 3));
-  };
-
-  const handleBack = () => {
-    // Si es exportación desde tabla, no permitir volver al paso 1
-    if ((esExportacionGlobal || esExportacionIndividual) && currentStep === 2) {
+    if (currentStep === 2 && !config.responsableRecojo.trim()) {
+      toast.error('Debe especificar un responsable de recojo');
       return;
     }
+    setCurrentStep(prev => Math.min(prev + 1, 3));
+  }, [currentStep, config, toast]);
+
+  const handleBack = useCallback(() => {
+    if ((esExportacionGlobal || esExportacionIndividual) && currentStep === 2) return;
     setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
+  }, [esExportacionGlobal, esExportacionIndividual, currentStep]);
 
-  const handleExport = async (formato: 'excel' | 'pdf') => {
+  const handleExport = useCallback(async (formato: 'excel' | 'pdf') => {
     setIsExporting(true);
-    setConfig(prev => ({ ...prev, formatoExportacion: formato }));
-
     try {
-      // Crear configuración completa para el servicio
-      const exportConfig: ValeExportConfig = {
-        incluirEntregasBase: config.incluirEntregasBase,
-        incluirEntregasAdicionales: config.incluirEntregasAdicionales,
-        entregasAdicionalesSeleccionadas: config.entregasAdicionalesSeleccionadas,
-        responsableRecojo: config.responsableRecojo,
-        formatoExportacion: formato
-      };
-
-      // Debug: Ver configuración de exportación
-      console.log('🚀 Configuración de exportación:', exportConfig);
-      console.log('🔍 Entregas adicionales disponibles:', entregasAdicionalesDisponibles);
-      console.log('🔍 Es exportación global:', esExportacionGlobal);
-      console.log('🔍 Cantidad de vales originales:', valesOriginales.length);
-
-      // Validar configuración
+      const exportConfig: ValeExportConfig = { ...config, formatoExportacion: formato };
       const errores = ValeExportService.validarConfiguracion(exportConfig);
+
       if (errores.length > 0) {
-        toast.error(`❌ ${errores.join(', ')}`);
+        toast.error(errores.join(', '));
         return;
       }
 
-      // Exportar y descargar - detectar si es exportación global
       if (esExportacionGlobal && valesOriginales.length > 0) {
-        console.log('🌍 Ejecutando exportación global para', valesOriginales.length, 'vales');
-
-        // Mostrar toast de progreso para exportaciones grandes
         if (valesOriginales.length > 2) {
-          toast.info(
-            `🔄 Procesando exportación`,
-            `Generando archivo combinado de ${valesOriginales.length} vales. Esto puede tomar unos momentos...`,
-            { duration: 5000 }
-          );
+          toast.info('Procesando exportación', `Generando archivo de ${valesOriginales.length} vales...`, { duration: 5000 });
         }
-
         await ValeExportService.exportarYDescargarGlobal(valesOriginales, exportConfig);
-        toast.success(
-          `✅ Exportación global completada`,
-          `📄 Archivo combinado de ${valesOriginales.length} vales generado exitosamente con todas las vacunas incluidas.`,
-          { duration: 8000 }
-        );
+        toast.success('Exportación completada', `Archivo de ${valesOriginales.length} vales generado`, { duration: 6000 });
       } else {
-        console.log('📄 Ejecutando exportación individual para vale:', vale.numero);
         await ValeExportService.exportarYDescargar(vale, exportConfig);
-        toast.success(`✅ Vale exportado exitosamente en formato ${formato.toUpperCase()}`);
+        toast.success(`Vale exportado en formato ${formato.toUpperCase()}`);
       }
-
       onClose();
-    } catch (error: any) {
-      console.error('Error en exportación:', error);
-      toast.error(`❌ Error al exportar vale: ${error.message || error}`);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Error desconocido';
+      toast.error(`Error al exportar: ${msg}`);
     } finally {
       setIsExporting(false);
     }
-  };
+  }, [config, esExportacionGlobal, valesOriginales, vale, onClose, toast]);
 
-  // Funciones para manejar entregas adicionales
-  const handleToggleEntregaAdicional = (numeroEntrega: number) => {
+  const handleToggleEntrega = useCallback((numero: number) => {
     setConfig(prev => {
-      const yaSeleccionada = prev.entregasAdicionalesSeleccionadas.includes(numeroEntrega);
-      const nuevasSeleccionadas = yaSeleccionada
-        ? prev.entregasAdicionalesSeleccionadas.filter(n => n !== numeroEntrega)
-        : [...prev.entregasAdicionalesSeleccionadas, numeroEntrega];
-
-      console.log(`🔄 Toggle entrega ${numeroEntrega}:`, {
-        yaSeleccionada,
-        nuevasSeleccionadas,
-        activarFlag: nuevasSeleccionadas.length > 0
-      });
-
+      const yaSeleccionada = prev.entregasAdicionalesSeleccionadas.includes(numero);
+      const nuevas = yaSeleccionada
+        ? prev.entregasAdicionalesSeleccionadas.filter(n => n !== numero)
+        : [...prev.entregasAdicionalesSeleccionadas, numero];
       return {
         ...prev,
-        entregasAdicionalesSeleccionadas: nuevasSeleccionadas,
-        incluirEntregasAdicionales: nuevasSeleccionadas.length > 0
+        entregasAdicionalesSeleccionadas: nuevas,
+        incluirEntregasAdicionales: nuevas.length > 0
       };
     });
-  };
+  }, []);
 
-  const handleToggleTodasEntregasAdicionales = () => {
-    const todasSeleccionadas = entregasAdicionalesDisponibles.every(entrega =>
-      config.entregasAdicionalesSeleccionadas.includes(entrega.numero)
+  const handleToggleTodas = useCallback(() => {
+    const todasSeleccionadas = entregasAdicionalesDisponibles.every(e =>
+      config.entregasAdicionalesSeleccionadas.includes(e.numero)
     );
+    setConfig(prev => ({
+      ...prev,
+      entregasAdicionalesSeleccionadas: todasSeleccionadas ? [] : entregasAdicionalesDisponibles.map(e => e.numero),
+      incluirEntregasAdicionales: !todasSeleccionadas
+    }));
+  }, [entregasAdicionalesDisponibles, config.entregasAdicionalesSeleccionadas]);
 
-    if (todasSeleccionadas) {
-      // Deseleccionar todas
-      setConfig(prev => ({
-        ...prev,
-        entregasAdicionalesSeleccionadas: [],
-        incluirEntregasAdicionales: false
-      }));
-    } else {
-      // Seleccionar todas
-      setConfig(prev => ({
-        ...prev,
-        entregasAdicionalesSeleccionadas: entregasAdicionalesDisponibles.map(e => e.numero),
-        incluirEntregasAdicionales: true
-      }));
-    }
-  };
-
-  const resetModal = () => {
-    setCurrentStep(1);
+  const handleClose = useCallback(() => {
+    setCurrentStep(startStep);
     setConfig({
       incluirEntregasBase: true,
       incluirEntregasAdicionales: false,
@@ -246,266 +296,165 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
       responsableRecojo: `${vale.usuario.nombres} ${vale.usuario.apellidos}`,
       formatoExportacion: null
     });
-  };
-
-  const handleClose = () => {
-    resetModal();
     onClose();
-  };
+  }, [startStep, vale, onClose]);
 
   if (!isOpen || !vale) return null;
 
+  const isFromTable = esExportacionGlobal || esExportacionIndividual;
+  const totalSteps = isFromTable ? 2 : 3;
+  const displayStep = isFromTable ? currentStep - 1 : currentStep;
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fadeIn p-2 sm:p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-[95vw] sm:max-w-3xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all duration-300 animate-slideUp">
+    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
-          <div className="flex items-center space-x-4">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Download className="h-6 w-6 text-blue-600" />
+        <header className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-cyan-50 flex-shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 bg-gradient-to-br from-teal-600 to-cyan-600 rounded-xl shadow-lg">
+              <Download className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                {esExportacionGlobal ? 'Exportar Vales Combinados' : esExportacionIndividual ? `Exportar Vale "${vale.numero}"` : 'Exportar Vale de Entrega'}
+              <h2 className="text-lg font-bold text-gray-900">
+                {esExportacionGlobal ? 'Exportar Vales Combinados' : `Exportar Vale "${vale.numero}"`}
               </h2>
               <p className="text-sm text-gray-600">
                 {esExportacionGlobal
                   ? `${valesOriginales.length} vales - ${vale.centroAcopio.nombre}`
-                  : `Vale ${vale.numero} - ${vale.centroAcopio.nombre}`
-                }
+                  : `Vale ${vale.numero} - ${vale.centroAcopio.nombre}`}
               </p>
             </div>
           </div>
-          <button
-            onClick={handleClose}
-            className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-          >
+          <button onClick={handleClose} className="p-2 hover:bg-white/80 rounded-lg transition-colors">
             <X className="h-5 w-5 text-gray-500" />
           </button>
-        </div>
+        </header>
 
         {/* Progress Steps */}
-        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            {[
-              { step: 1, title: 'Contenido', icon: Package },
-              { step: 2, title: 'Responsable', icon: User },
-              { step: 3, title: 'Formato', icon: FileText }
-            ].map(({ step, title, icon: Icon }) => (
-              <div key={step} className="flex items-center">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-                  currentStep >= step
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-400'
-                }`}>
-                  {currentStep > step ? (
-                    <CheckCircle className="h-5 w-5" />
-                  ) : (
-                    <Icon className="h-4 w-4" />
-                  )}
-                </div>
-                <span className={`ml-2 text-sm font-medium ${
-                  currentStep >= step ? 'text-blue-600' : 'text-gray-400'
-                }`}>
-                  {title}
-                </span>
-                {step < 3 && (
-                  <ArrowRight className="h-4 w-4 text-gray-300 mx-4" />
-                )}
-              </div>
-            ))}
+        <div className="px-6 py-3 bg-gray-50 border-b border-gray-100 flex-shrink-0">
+          <div className="flex items-center justify-center">
+            {!isFromTable && (
+              <StepIndicator step={1} currentStep={currentStep} title="Contenido" icon={Package} />
+            )}
+            <StepIndicator step={2} currentStep={currentStep} title="Responsable" icon={User} isLast={isFromTable && currentStep < 3} />
+            <StepIndicator step={3} currentStep={currentStep} title="Formato" icon={FileText} isLast />
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* Paso 1: Selección de Contenido (Solo para exportación individual) */}
-          {currentStep === 1 && !esExportacionGlobal && (
+          {/* Paso 1: Contenido */}
+          {currentStep === 1 && !isFromTable && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Seleccione el contenido a exportar
-                </h3>
-                <p className="text-sm text-gray-600 mb-6">
-                  Elija qué tipos de entregas desea incluir en la exportación
-                </p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Seleccione el contenido</h3>
+                <p className="text-sm text-gray-600">Elija qué entregas desea incluir en la exportación</p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Entregas Base */}
-                <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                  <label className="flex items-start space-x-3 cursor-pointer">
-                    <div className="flex items-center h-5">
-                      <button
-                        type="button"
-                        onClick={() => setConfig(prev => ({ ...prev, incluirEntregasBase: !prev.incluirEntregasBase }))}
-                        className="flex items-center justify-center w-5 h-5 rounded border-2 border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      >
-                        {config.incluirEntregasBase && (
-                          <CheckCircle className="h-4 w-4 text-blue-600" />
-                        )}
-                      </button>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium text-gray-900">
-                          Entregas Base (Programadas)
-                        </span>
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                          Recomendado
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Incluye las entregas programadas mensualmente según la planificación
-                      </p>
-                    </div>
-                  </label>
+                <div className="border border-gray-200 rounded-xl p-4">
+                  <CheckboxOption
+                    checked={config.incluirEntregasBase}
+                    onChange={() => setConfig(prev => ({ ...prev, incluirEntregasBase: !prev.incluirEntregasBase }))}
+                    label="Entregas Base (Programadas)"
+                    description="Entregas programadas según la planificación mensual"
+                    badge={{ text: 'Recomendado', color: 'bg-teal-100 text-teal-800' }}
+                    color="teal"
+                  />
                 </div>
 
                 {/* Entregas Adicionales */}
                 {entregasAdicionalesDisponibles.length > 0 && (
-                  <div className="border border-gray-200 rounded-lg p-4 space-y-4">
-                    {/* Header de Entregas Adicionales */}
+                  <div className="border border-gray-200 rounded-xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium text-gray-900">
-                          Entregas Adicionales
-                        </span>
-                        <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-                          Opcional
-                        </span>
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-900">Entregas Adicionales</span>
+                        <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded-full">
                           {entregasAdicionalesDisponibles.length} disponibles
                         </span>
                       </div>
-
                       {entregasAdicionalesDisponibles.length > 1 && (
                         <button
-                          type="button"
-                          onClick={handleToggleTodasEntregasAdicionales}
-                          className="text-xs text-orange-600 hover:text-orange-700 font-medium"
+                          onClick={handleToggleTodas}
+                          className="text-xs text-amber-600 hover:text-amber-700 font-medium"
                         >
-                          {entregasAdicionalesDisponibles.every(entrega =>
-                            config.entregasAdicionalesSeleccionadas.includes(entrega.numero)
-                          ) ? 'Deseleccionar todas' : 'Seleccionar todas'}
+                          {entregasAdicionalesDisponibles.every(e => config.entregasAdicionalesSeleccionadas.includes(e.numero))
+                            ? 'Deseleccionar todas'
+                            : 'Seleccionar todas'}
                         </button>
                       )}
                     </div>
 
-                    <p className="text-sm text-gray-600">
-                      Seleccione las entregas adicionales específicas que desea incluir
-                    </p>
-
-                    {/* Lista de Entregas Adicionales */}
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {entregasAdicionalesDisponibles.map((entrega) => (
+                      {entregasAdicionalesDisponibles.map(entrega => (
                         <div
                           key={entrega.numero}
-                          className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200 hover:bg-orange-100 transition-colors"
+                          className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200"
                         >
-                          <label className="flex items-center space-x-3 cursor-pointer flex-1">
-                            <div className="flex items-center h-5">
-                              <button
-                                type="button"
-                                onClick={() => handleToggleEntregaAdicional(entrega.numero)}
-                                className="flex items-center justify-center w-5 h-5 rounded border-2 border-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                              >
-                                {config.entregasAdicionalesSeleccionadas.includes(entrega.numero) && (
-                                  <CheckCircle className="h-4 w-4 text-orange-600" />
-                                )}
-                              </button>
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2">
-                                <span className="text-sm font-medium text-gray-900">
-                                  {entrega.descripcion}
-                                </span>
-                              </div>
-                              <div className="flex items-center space-x-4 text-xs text-gray-600 mt-1">
-                                <span>{entrega.totalVacunas.toLocaleString()} vacunas</span>
-                                <span>{entrega.totalEstablecimientos} establecimientos</span>
-                              </div>
-                            </div>
-                          </label>
+                          <CheckboxOption
+                            checked={config.entregasAdicionalesSeleccionadas.includes(entrega.numero)}
+                            onChange={() => handleToggleEntrega(entrega.numero)}
+                            label={entrega.descripcion}
+                            description={`${entrega.totalVacunas.toLocaleString()} vacunas • ${entrega.totalEstablecimientos} establecimientos`}
+                            color="amber"
+                          />
                         </div>
                       ))}
                     </div>
 
                     {config.entregasAdicionalesSeleccionadas.length > 0 && (
-                      <div className="bg-orange-100 border border-orange-200 rounded-lg p-3">
-                        <div className="text-sm text-orange-800">
-                          <strong>✅ Seleccionadas:</strong> {config.entregasAdicionalesSeleccionadas.length} de {entregasAdicionalesDisponibles.length} entregas adicionales
-                        </div>
-                        <div className="text-xs text-orange-700 mt-1">
-                          <strong>Entregas:</strong> {config.entregasAdicionalesSeleccionadas.sort((a, b) => a - b).join(', ')}
-                        </div>
-                        <div className="text-xs text-green-700 mt-1 font-medium">
-                          ✓ Listo para exportar
-                        </div>
+                      <div className="bg-amber-100 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+                        <strong>Seleccionadas:</strong> {config.entregasAdicionalesSeleccionadas.length} de {entregasAdicionalesDisponibles.length}
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Mensaje cuando no hay entregas adicionales */}
                 {entregasAdicionalesDisponibles.length === 0 && (
-                  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm font-medium text-gray-500">
-                        Entregas Adicionales
-                      </span>
-                      <span className="px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded-full">
-                        No disponibles
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Este vale no tiene entregas adicionales registradas
-                    </p>
+                  <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                    <span className="text-sm text-gray-500">No hay entregas adicionales para este vale</span>
                   </div>
                 )}
               </div>
 
               {/* Vista Previa */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center space-x-2 mb-3">
-                  <Eye className="h-5 w-5 text-blue-600" />
-                  <span className="font-medium text-blue-900">Vista Previa</span>
+              <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Eye className="h-5 w-5 text-teal-600" />
+                  <span className="font-medium text-teal-900">Vista Previa</span>
                 </div>
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{estadisticas.totalVacunas.toLocaleString()}</div>
-                    <div className="text-blue-800">Vacunas</div>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-teal-600">{estadisticas.totalVacunas.toLocaleString()}</div>
+                    <div className="text-sm text-teal-800">Vacunas</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{estadisticas.totalEstablecimientos}</div>
-                    <div className="text-blue-800">Establecimientos</div>
+                  <div>
+                    <div className="text-2xl font-bold text-teal-600">{estadisticas.totalEstablecimientos}</div>
+                    <div className="text-sm text-teal-800">Establecimientos</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{estadisticas.totalEntregas}</div>
-                    <div className="text-blue-800">Entregas</div>
+                  <div>
+                    <div className="text-2xl font-bold text-teal-600">{estadisticas.totalEntregas}</div>
+                    <div className="text-sm text-teal-800">Entregas</div>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Paso 2: Configuración del Responsable */}
+          {/* Paso 2: Responsable */}
           {currentStep === 2 && (
             <div className="space-y-6">
-              {/* Mensaje especial para exportaciones desde tabla */}
-              {(esExportacionGlobal || esExportacionIndividual) && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                  <div className="flex items-start space-x-3">
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+              {isFromTable && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-semibold text-green-900">
-                        Contenido de exportación seleccionado
-                      </h4>
+                      <h4 className="text-sm font-semibold text-green-900">Contenido seleccionado</h4>
                       <p className="text-sm text-green-800 mt-1">
                         {esExportacionGlobal
-                          ? `Se exportarán ${valesOriginales.length} vale${valesOriginales.length !== 1 ? 's' : ''} seleccionados con todas las entregas disponibles.`
-                          : `Se exportará el vale "${vale.numero}" con todas las entregas disponibles.`
-                        }
+                          ? `Se exportarán ${valesOriginales.length} vales con todas las entregas.`
+                          : `Se exportará el vale "${vale.numero}" con todas las entregas.`}
                       </p>
                     </div>
                   </div>
@@ -513,12 +462,8 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
               )}
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Responsable de Recojo
-                </h3>
-                <p className="text-sm text-gray-600 mb-6">
-                  Configure el responsable que aparecerá en el documento exportado
-                </p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Responsable de Recojo</h3>
+                <p className="text-sm text-gray-600">Configure el responsable del documento</p>
               </div>
 
               <div className="space-y-4">
@@ -529,26 +474,25 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
                   <input
                     type="text"
                     value={config.responsableRecojo}
-                    onChange={(e) => setConfig(prev => ({ ...prev, responsableRecojo: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    onChange={e => setConfig(prev => ({ ...prev, responsableRecojo: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                     placeholder="Ingrese el nombre del responsable"
                   />
                 </div>
 
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-start space-x-2">
-                    <Settings className="h-5 w-5 text-yellow-600 mt-0.5" />
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                  <div className="flex items-start gap-2">
+                    <Settings className="h-5 w-5 text-amber-600 mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-medium text-yellow-900">Configuración Temporal</h4>
-                      <p className="text-sm text-yellow-800 mt-1">
-                        Esta modificación solo afecta al documento exportado. 
-                        El responsable original del vale permanece sin cambios.
+                      <h4 className="text-sm font-medium text-amber-900">Configuración Temporal</h4>
+                      <p className="text-sm text-amber-800 mt-1">
+                        Esta modificación solo afecta al documento exportado.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex space-x-3">
+                <div className="flex gap-3">
                   <button
                     onClick={() => setConfig(prev => ({ ...prev, responsableRecojo: '' }))}
                     className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
@@ -557,7 +501,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
                   </button>
                   <button
                     onClick={() => setConfig(prev => ({ ...prev, responsableRecojo: `${vale.usuario.nombres} ${vale.usuario.apellidos}` }))}
-                    className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                    className="px-4 py-2 text-sm bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors"
                   >
                     Restaurar Original
                   </button>
@@ -566,85 +510,26 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
             </div>
           )}
 
-          {/* Paso 3: Formato de Exportación */}
+          {/* Paso 3: Formato */}
           {currentStep === 3 && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Formato de Exportación
-                </h3>
-                <p className="text-sm text-gray-600 mb-6">
-                  Seleccione el formato en el que desea exportar el vale
-                </p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Formato de Exportación</h3>
+                <p className="text-sm text-gray-600">Seleccione el formato del archivo</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Opción Excel */}
-                <button
-                  onClick={() => handleExport('excel')}
-                  disabled={isExporting}
-                  className="p-6 border-2 border-green-200 rounded-lg hover:border-green-400 hover:bg-green-50 transition-all duration-200 text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-green-100 rounded-lg">
-                      <FileSpreadsheet className="h-8 w-8 text-green-600" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900">Excel</h4>
-                      <p className="text-sm text-gray-600">
-                        Formato editable con tablas y cálculos
-                      </p>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                          Recomendado
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          .xlsx
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </button>
-
-                {/* Opción PDF */}
-                <button
-                  onClick={() => handleExport('pdf')}
-                  disabled={isExporting}
-                  className="p-6 border-2 border-red-200 rounded-lg hover:border-red-400 hover:bg-red-50 transition-all duration-200 text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-red-100 rounded-lg">
-                      <FileText className="h-8 w-8 text-red-600" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900">PDF</h4>
-                      <p className="text-sm text-gray-600">
-                        Formato profesional para impresión
-                      </p>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
-                          Oficial
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          .pdf
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </button>
+                <FormatOption format="excel" isExporting={isExporting} onExport={handleExport} />
+                <FormatOption format="pdf" isExporting={isExporting} onExport={handleExport} />
               </div>
 
               {isExporting && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center space-x-3">
-                    <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
-                    <span className="text-blue-900 font-medium">
-                      Generando exportación...
-                    </span>
+                <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-5 w-5 text-teal-600 animate-spin" />
+                    <span className="text-teal-900 font-medium">Generando exportación...</span>
                   </div>
-                  <p className="text-sm text-blue-700 mt-2">
-                    Por favor espere mientras se procesa el documento
-                  </p>
+                  <p className="text-sm text-teal-700 mt-2">Por favor espere mientras se procesa el documento</p>
                 </div>
               )}
             </div>
@@ -652,44 +537,40 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">
-              Paso {(esExportacionGlobal || esExportacionIndividual) ? currentStep - 1 : currentStep} de {(esExportacionGlobal || esExportacionIndividual) ? 2 : 3}
-            </span>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            {currentStep > 1 && !((esExportacionGlobal || esExportacionIndividual) && currentStep === 2) && (
+        <footer className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50 flex-shrink-0">
+          <span className="text-sm text-gray-600">Paso {displayStep} de {totalSteps}</span>
+
+          <div className="flex items-center gap-3">
+            {currentStep > 1 && !(isFromTable && currentStep === 2) && (
               <button
                 onClick={handleBack}
                 disabled={isExporting}
-                className="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Anterior
               </button>
             )}
-            
+
             {currentStep < 3 && (
               <button
                 onClick={handleNext}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-lg hover:from-teal-700 hover:to-cyan-700 transition-colors"
               >
                 Siguiente
                 <ArrowRight className="h-4 w-4 ml-2" />
               </button>
             )}
-            
+
             <button
               onClick={handleClose}
               disabled={isExporting}
-              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
           </div>
-        </div>
+        </footer>
       </div>
     </div>
   );

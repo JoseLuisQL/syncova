@@ -1,5 +1,6 @@
 import 'express-async-errors';
 import express from 'express';
+import path from 'path';
 import { config } from '@/config/env';
 import { connectDatabase, checkDatabaseHealth } from '@/config/database';
 import { setupMiddlewares, setupErrorHandling, healthCheck } from '@/middleware';
@@ -83,6 +84,10 @@ async function startServer(): Promise<void> {
     // Configurar rutas de la API
     app.use('/api/auth', authRoutes);
     app.use('/api/configuracion', configuracionRoutes);
+
+    // Servir archivos estáticos (uploads)
+    app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
+
     app.use('/api/configuracion-jeringa-vacuna', configuracionJeringaVacunaRoutes);
     app.use('/api/establecimientos', establecimientosRoutes);
     app.use('/api/redes', redesRoutes);

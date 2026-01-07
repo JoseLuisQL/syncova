@@ -466,13 +466,17 @@ export class AlertaService {
 
   /**
    * Obtener alertas no leídas para un usuario específico
+   * Incluye alertas asignadas al usuario Y alertas globales (sin usuario)
    */
   static async getUnreadByUser(usuarioId: string): Promise<ServiceResult<IAlerta[]>> {
     try {
       const alertas = await prisma.alerta.findMany({
         where: {
-          usuarioId,
-          leida: false
+          leida: false,
+          OR: [
+            { usuarioId: usuarioId },
+            { usuarioId: null }
+          ]
         },
         include: {
           usuario: {
@@ -485,8 +489,10 @@ export class AlertaService {
           }
         },
         orderBy: [
+          { nivel: 'asc' },
           { fechaCreacion: 'desc' }
-        ]
+        ],
+        take: 50
       });
 
       return {

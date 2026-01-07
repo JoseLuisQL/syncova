@@ -739,6 +739,24 @@ export class PlanificacionService {
               }
             });
             actualizadas++;
+
+            // SINCRONIZACIÓN AUTOMÁTICA: También sincronizar movimientos en actualizaciones
+            if (usuarioId) {
+              try {
+                const resultMovimientos = await MovimientosService.generarMovimientosDesdeplanificacion(
+                  existingPlanificacion.id,
+                  usuarioId
+                );
+
+                if (!resultMovimientos.success) {
+                  console.warn(`Error al sincronizar movimientos para planificación actualizada ${existingPlanificacion.id}:`, resultMovimientos.error);
+                } else {
+                  console.log(`Sincronización automática: Planificación ${existingPlanificacion.id} - ${resultMovimientos.data?.creados} movimientos creados, ${resultMovimientos.data?.actualizados} actualizados`);
+                }
+              } catch (error) {
+                console.warn(`Error al sincronizar movimientos para planificación actualizada ${existingPlanificacion.id}:`, error);
+              }
+            }
           } else {
             // Crear nueva
             const nuevaPlanificacion = await prisma.planificacionAnual.create({
@@ -1744,7 +1762,7 @@ export class PlanificacionService {
 
       // Leer archivo Excel
       const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(buffer);
+      await workbook.xlsx.load(buffer as any);
 
       const worksheet = workbook.worksheets[0];
       if (!worksheet) {
@@ -1826,12 +1844,18 @@ export class PlanificacionService {
         };
       }
 
-      // Importar usando el método existente
+      // Obtener usuarioId del sistema para sincronización automática con movimientos
+      const usuarioAdmin = await prisma.usuario.findFirst({
+        where: { rol: 'administrador', estado: 'activo' }
+      });
+      const usuarioId = usuarioAdmin?.id;
+
+      // Importar usando el método existente (con usuarioId para sincronización automática)
       const importResult = await this.importarPlanificaciones({
         vacunaId,
         anio,
         registros
-      });
+      }, usuarioId);
 
       if (!importResult.success) {
         return importResult;
@@ -1878,7 +1902,7 @@ export class PlanificacionService {
 
       // Leer archivo Excel
       const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(buffer);
+      await workbook.xlsx.load(buffer as any);
 
       if (workbook.worksheets.length === 0) {
         return {
@@ -1891,6 +1915,12 @@ export class PlanificacionService {
       let totalActualizadas = 0;
       const erroresPorVacuna: { vacuna: string; errores: string[] }[] = [];
       let vacunasProcesadas = 0;
+
+      // Obtener usuarioId del sistema para sincronización automática con movimientos
+      const usuarioAdmin = await prisma.usuario.findFirst({
+        where: { rol: 'administrador', estado: 'activo' }
+      });
+      const usuarioId = usuarioAdmin?.id;
 
       // Obtener todas las vacunas para mapear por nombre
       const vacunas = await prisma.vacuna.findMany({
@@ -2021,13 +2051,13 @@ export class PlanificacionService {
             }
           }
 
-          // Importar registros de esta vacuna
+          // Importar registros de esta vacuna (con usuarioId para sincronización automática)
           if (registrosConIds.length > 0) {
             const importResult = await this.importarPlanificaciones({
               vacunaId,
               anio,
               registros: registrosConIds
-            });
+            }, usuarioId);
 
             if (importResult.success && importResult.data) {
               totalCreadas += importResult.data.creadas;
@@ -2519,6 +2549,49 @@ export class PlanificacionService {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Error al verificar planificación'
+      };
+    }
+  }
+
+  /**
+   * Obtener años disponibles con planificaciones registradas
+   */
+  static async getAniosDisponibles(): Promise<ServiceResult<number[]>> {
+    try {
+      const currentYear = new Date().getFullYear();
+      
+      // Obtener años únicos de planificaciones existentes
+      const aniosConPlanificacion = await prisma.planificacionAnual.findMany({
+        select: {
+          anio: true
+        },
+        distinct: ['anio'],
+        orderBy: {
+          anio: 'asc'
+        }
+      });
+
+      const aniosSet = new Set<number>();
+      
+      // Agregar años con planificaciones
+      aniosConPlanificacion.forEach(p => aniosSet.add(p.anio));
+      
+      // Siempre incluir año actual y siguiente para permitir nueva planificación
+      aniosSet.add(currentYear);
+      aniosSet.add(currentYear + 1);
+
+      // Convertir a array y ordenar
+      const anios = Array.from(aniosSet).sort((a, b) => a - b);
+
+      return {
+        success: true,
+        data: anios
+      };
+    } catch (error) {
+      console.error('Error al obtener años disponibles:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al obtener años disponibles'
       };
     }
   }

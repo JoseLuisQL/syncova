@@ -118,15 +118,6 @@ export class EstablecimientoService {
               nombre: true,
               codigo: true
             }
-          },
-          establecimientos: {
-            select: {
-              id: true,
-              nombre: true,
-              codigo: true,
-              tipo: true,
-              estado: true
-            }
           }
         }
       });
@@ -344,33 +335,34 @@ export class EstablecimientoService {
     try {
       // Verificar que el establecimiento existe
       const establecimiento = await prisma.establecimiento.findUnique({
-        where: { id },
-        include: {
-          establecimientos: true,
-          usuarios: true,
-          planificaciones: true,
-          movimientos: true
-        }
+        where: { id }
       });
 
       if (!establecimiento) {
         throw createError.notFound('Establecimiento no encontrado');
       }
 
-      // Verificar dependencias
-      if (establecimiento.establecimientos.length > 0) {
-        throw createError.conflict('No se puede eliminar el establecimiento porque tiene establecimientos dependientes');
-      }
-
-      if (establecimiento.usuarios.length > 0) {
+      // Verificar dependencias - usuarios
+      const usuariosCount = await prisma.usuario.count({
+        where: { establecimientoId: id }
+      });
+      if (usuariosCount > 0) {
         throw createError.conflict('No se puede eliminar el establecimiento porque tiene usuarios asignados');
       }
 
-      if (establecimiento.planificaciones.length > 0) {
+      // Verificar dependencias - planificaciones
+      const planificacionesCount = await prisma.planificacionAnual.count({
+        where: { establecimientoId: id }
+      });
+      if (planificacionesCount > 0) {
         throw createError.conflict('No se puede eliminar el establecimiento porque tiene planificaciones asociadas');
       }
 
-      if (establecimiento.movimientos.length > 0) {
+      // Verificar dependencias - movimientos
+      const movimientosCount = await prisma.movimientoVacuna.count({
+        where: { establecimientoId: id }
+      });
+      if (movimientosCount > 0) {
         throw createError.conflict('No se puede eliminar el establecimiento porque tiene movimientos registrados');
       }
 

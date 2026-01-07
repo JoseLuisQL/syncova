@@ -8,14 +8,14 @@ export type TipoEstablecimiento = 'centro_salud' | 'puesto_salud' | 'hospital';
 export type EstadoGeneral = 'activo' | 'inactivo';
 export type EstadoPlanificacion = 'borrador' | 'aprobado' | 'ejecutado';
 export type EstadoLote = 'disponible' | 'vencido' | 'agotado';
-export type FormaIngreso = '1° TRIMESTRE' | '2° TRIMESTRE' | '3° TRIMESTRE' | '4° TRIMESTRE';
+export type FormaIngreso = 'PRIMER_TRIMESTRE' | 'SEGUNDO_TRIMESTRE' | 'TERCER_TRIMESTRE' | 'CUARTO_TRIMESTRE';
 export type ComprobanteClase = 'PECOSA' | 'GUIA' | 'TRASLADO' | 'OTROS';
 export type RolUsuario = 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
 export type TipoMovimientoKardex = 'ingreso' | 'salida' | 'transferencia' | 'ajuste';
 export type EstadoVale = 'generado' | 'impreso' | 'entregado';
 export type TipoAlerta = 'vencimiento' | 'stock_bajo' | 'discrepancia' | 'sistema';
 export type NivelAlerta = 'info' | 'warning' | 'error' | 'success';
-export type TipoConfiguracion = 'defecto' | 'centro';
+export type TipoConfiguracion = 'defecto' | 'centro' | 'sistema';
 
 // =====================================================
 // INTERFACES DE ENTIDADES
@@ -200,6 +200,30 @@ export interface IAlerta {
 }
 
 // =====================================================
+// TIPOS PARA ENTREGA ADICIONAL
+// =====================================================
+
+export interface CreateEntregaAdicionalDto {
+  movimientoVacunaId: string;
+  numeroEntrega: number;
+  cantidad: number;
+  fechaEntrega: Date;
+  motivo?: string | null;
+  usuarioId: string;
+}
+
+export interface UpdateEntregaAdicionalDto {
+  cantidad?: number;
+  fechaEntrega?: Date;
+  motivo?: string | null;
+}
+
+export interface EntregaAdicionalConRelaciones extends IEntregaAdicional {
+  movimientoVacuna?: Partial<IMovimientoVacuna> & { id: string; establecimientoId: string; vacunaId: string };
+  usuario?: Partial<IUsuario> & { id: string; nombres: string };
+}
+
+// =====================================================
 // TIPOS PARA DTOs (Data Transfer Objects)
 // =====================================================
 
@@ -310,7 +334,7 @@ export interface CreateUsuarioDto {
   usuario: string;
   password: string;
   rol: string; // Código del rol para buscar en la tabla roles
-  establecimientoId?: string;
+  centroAcopioId?: string;
 }
 
 export interface UpdateUsuarioDto {
@@ -319,26 +343,13 @@ export interface UpdateUsuarioDto {
   email?: string;
   usuario?: string;
   rol?: RolUsuario;
-  establecimientoId?: string;
+  centroAcopioId?: string;
   estado?: EstadoGeneral;
 }
 
 export interface ChangePasswordDto {
   currentPassword?: string;
   newPassword: string;
-}
-
-
-
-export interface UpdateUsuarioDto {
-  nombres?: string;
-  apellidos?: string;
-  email?: string;
-  usuario?: string;
-  password?: string;
-  rol?: RolUsuario;
-  establecimientoId?: string;
-  estado?: EstadoGeneral;
 }
 
 export interface CreateLoteVacunaDto {
@@ -588,6 +599,7 @@ export interface ServiceResult<T = any> {
   success: boolean;
   data?: T;
   error?: string;
+  message?: string;
   errors?: ValidationError[];
 }
 
@@ -716,18 +728,20 @@ export interface IValeDetalle {
 // INTERFACES PARA CONFIGURACIÓN JERINGA-VACUNA
 // =====================================================
 
+import type { Decimal } from '@prisma/client/runtime/library';
+
 export interface IConfiguracionJeringaVacunaDefecto {
   id: string;
   vacunaId: string;
   jeringaId: string;
-  multiplicador: number;
+  multiplicador: number | Decimal;
   prioridad: number;
   activo: boolean;
   createdAt: Date;
   updatedAt: Date;
-  // Relaciones incluidas en respuestas del backend
-  vacuna?: IVacuna;
-  jeringa?: IJeringa;
+  // Relaciones incluidas en respuestas del backend (partial - solo campos selectos)
+  vacuna?: Partial<IVacuna> & Pick<IVacuna, 'id' | 'nombre'>;
+  jeringa?: Partial<IJeringa> & Pick<IJeringa, 'id' | 'tipo'>;
 }
 
 export interface IConfiguracionJeringaVacunaCentro {
@@ -735,15 +749,15 @@ export interface IConfiguracionJeringaVacunaCentro {
   centroAcopioId: string;
   vacunaId: string;
   jeringaId: string;
-  multiplicador: number;
+  multiplicador: number | Decimal;
   prioridad: number;
   activo: boolean;
   createdAt: Date;
   updatedAt: Date;
-  // Relaciones incluidas en respuestas del backend
-  centroAcopio?: ICentroAcopio;
-  vacuna?: IVacuna;
-  jeringa?: IJeringa;
+  // Relaciones incluidas en respuestas del backend (partial - solo campos selectos)
+  centroAcopio?: Partial<ICentroAcopio> & Pick<ICentroAcopio, 'id' | 'nombre'>;
+  vacuna?: Partial<IVacuna> & Pick<IVacuna, 'id' | 'nombre'>;
+  jeringa?: Partial<IJeringa> & Pick<IJeringa, 'id' | 'tipo'>;
 }
 
 export interface CreateConfiguracionDefectoDto {
@@ -791,7 +805,7 @@ export interface ConfiguracionCalculada {
   jeringaId: string;
   multiplicador: number;
   prioridad: number;
-  origen: 'defecto' | 'centro';
+  origen: TipoConfiguracion;
   configuracionId: string;
 }
 
@@ -806,7 +820,7 @@ export interface JeringasCalculadas {
   cantidad: number;
   multiplicador: number;
   prioridad: number;
-  origen: 'defecto' | 'centro';
+  origen: TipoConfiguracion;
 }
 
 // =====================================================

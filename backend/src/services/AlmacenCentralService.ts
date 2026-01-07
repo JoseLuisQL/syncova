@@ -121,29 +121,6 @@ export class AlmacenCentralService {
         success: true,
         data: establecimientoAlmacenNuevo.id
       };
-
-      // Si tiene establecimientos asociados, usar el primero
-      let establecimientoId = almacenCentral.id; // Por defecto usar el ID del centro de acopio
-
-      if (almacenCentral.establecimientos && almacenCentral.establecimientos.length > 0) {
-        establecimientoId = almacenCentral.establecimientos[0].id;
-        console.log(`✅ [AlmacenCentralService] Usando establecimiento asociado: ${establecimientoId}`);
-      } else {
-        console.log(`ℹ️ [AlmacenCentralService] Usando centro de acopio como establecimiento: ${establecimientoId}`);
-      }
-
-      // Guardar en cache
-      this.almacenCentralCache = {
-        id: establecimientoId,
-        nombre: almacenCentral.nombre
-      };
-
-      console.log(`✅ [AlmacenCentralService] Almacén central encontrado: ${almacenCentral.nombre} (${establecimientoId})`);
-
-      return {
-        success: true,
-        data: establecimientoId
-      };
     } catch (error) {
       console.error('❌ [AlmacenCentralService] Error al obtener ID del almacén central:', error);
       return {
@@ -224,15 +201,6 @@ export class AlmacenCentralService {
   }
 
   /**
-   * Limpiar cache del almacén central
-   * Útil cuando se actualiza la información del almacén central
-   */
-  static limpiarCache(): void {
-    this.almacenCentralCache = null;
-    console.log('🧹 [AlmacenCentralService] Cache del almacén central limpiado');
-  }
-
-  /**
    * Crear el almacén central si no existe (para uso en migraciones/seeders)
    * @returns Promise<ServiceResult<string>> - ID del almacén central creado o existente
    */
@@ -241,7 +209,10 @@ export class AlmacenCentralService {
       // Verificar si ya existe
       const existeResult = await this.verificarExistenciaAlmacenCentral();
       if (!existeResult.success) {
-        return existeResult as ServiceResult<string>;
+        return {
+          success: false,
+          error: existeResult.error
+        };
       }
 
       if (existeResult.data) {

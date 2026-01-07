@@ -1,6 +1,7 @@
 import { prisma } from '@/config/database';
 import { ILoteJeringa, CreateLoteJeringaDto, UpdateLoteJeringaDto, EstadoLote, FormaIngreso, ComprobanteClase, ServiceResult } from '@/types';
 import { HttpError } from '@/middleware/errorHandler';
+import { createError } from '@/utils/errors';
 import { TipoMovimientoKardex } from '@prisma/client';
 import { AlmacenCentralService } from './AlmacenCentralService';
 import { KardexService } from './KardexService';

@@ -1,4 +1,9 @@
-/* Enhanced Planning Table Styles with Professional Scroll */
+/* Enhanced Planning Table Styles - Consistent with Movimientos */
+
+/* Smooth transitions for all interactive elements */
+.transition-smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 /* Professional Scrollbar Styles */
 .planning-scrollbar-thin {
@@ -43,8 +48,8 @@
 
 .planning-sticky-totals {
   position: sticky;
-  top: 73px;
-  z-index: 10;
+  top: 57px;
+  z-index: 15;
   background: white;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.2s ease;
@@ -67,6 +72,7 @@
 .planning-professional-table-layout {
   table-layout: fixed;
   width: 100%;
+  border-collapse: collapse;
 }
 
 .planning-professional-table-layout th,
@@ -76,8 +82,8 @@
 }
 
 /* Column width synchronization for perfect alignment */
-.planning-col-establecimiento { width: 300px; min-width: 300px; }
-.planning-col-mes { width: 90px; min-width: 90px; }
+.planning-col-establecimiento { width: 280px; min-width: 280px; }
+.planning-col-mes { width: 85px; min-width: 85px; }
 .planning-col-total { width: 120px; min-width: 120px; }
 
 /* Enhanced visual feedback for scrollable content */
@@ -107,7 +113,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.3), transparent);
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 5;
@@ -137,7 +143,7 @@
 
 /* Enhanced table row hover effects for better UX */
 .planning-professional-table-layout tbody tr:hover {
-  background-color: rgba(249, 250, 251, 0.8);
+  background-color: rgba(240, 253, 250, 0.8);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease-in-out;
@@ -145,8 +151,8 @@
 
 /* Improved focus states for accessibility */
 .planning-professional-table-layout tbody tr:focus-within {
-  background-color: rgba(59, 130, 246, 0.05);
-  outline: 2px solid rgba(59, 130, 246, 0.3);
+  background-color: rgba(20, 184, 166, 0.05);
+  outline: 2px solid rgba(20, 184, 166, 0.3);
   outline-offset: -2px;
 }
 
@@ -159,8 +165,8 @@
 
 .planning-enhanced-input:focus {
   transform: scale(1.02);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+  border-color: #14b8a6;
 }
 
 .planning-enhanced-input:disabled {
@@ -177,25 +183,25 @@
 
 /* Professional hover effects for table cells */
 .planning-professional-table-layout td:hover .planning-enhanced-input {
-  border-color: #6366f1;
-  background-color: #f8fafc;
+  border-color: #14b8a6;
+  background-color: #f0fdfa;
 }
 
 /* Responsive adjustments for sticky elements */
 @media (max-width: 1024px) {
   .planning-sticky-totals {
-    top: 65px;
+    top: 52px;
   }
   
   /* Adjust column widths for tablets */
-  .planning-col-establecimiento { width: 250px; min-width: 250px; }
-  .planning-col-mes { width: 80px; min-width: 80px; }
+  .planning-col-establecimiento { width: 240px; min-width: 240px; }
+  .planning-col-mes { width: 75px; min-width: 75px; }
   .planning-col-total { width: 100px; min-width: 100px; }
 }
 
 @media (max-width: 768px) {
   .planning-sticky-totals {
-    top: 60px;
+    top: 48px;
   }
   
   .planning-scrollbar-thin::-webkit-scrollbar {
@@ -204,14 +210,20 @@
   }
   
   /* Adjust column widths for mobile */
-  .planning-col-establecimiento { width: 200px; min-width: 200px; }
-  .planning-col-mes { width: 70px; min-width: 70px; }
+  .planning-col-establecimiento { width: 180px; min-width: 180px; }
+  .planning-col-mes { width: 65px; min-width: 65px; }
   .planning-col-total { width: 90px; min-width: 90px; }
   
   /* Adjust scroll container height for mobile */
   .planning-scroll-container {
-    max-height: calc(100vh - 300px);
+    max-height: calc(100vh - 280px);
     min-height: 300px;
+  }
+
+  .planning-enhanced-input {
+    width: 55px !important;
+    font-size: 0.75rem;
+    padding: 0.375rem;
   }
 }
 
@@ -239,7 +251,8 @@
 @media (prefers-reduced-motion: reduce) {
   .planning-scroll-container,
   .planning-enhanced-input,
-  .planning-professional-table-layout tbody tr {
+  .planning-professional-table-layout tbody tr,
+  .transition-smooth {
     transition: none;
   }
   
@@ -258,6 +271,11 @@
   .planning-professional-table-layout td {
     border: 1px solid #000;
   }
+
+  .planning-enhanced-input:focus {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+  }
 }
 
 /* Loading states */
@@ -270,4 +288,42 @@
 @keyframes planning-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* Focus indicators for keyboard navigation */
+.planning-enhanced-input:focus,
+button:focus {
+  outline: 2px solid #14b8a6;
+  outline-offset: 2px;
+}
+
+/* Enhanced badge styling */
+.planning-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 2px solid;
+  transition: all 0.2s ease-in-out;
+}
+
+.planning-badge.success {
+  background-color: #dcfce7;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.planning-badge.warning {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.planning-badge.danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
 }

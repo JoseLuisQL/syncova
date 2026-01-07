@@ -522,6 +522,8 @@ export interface MovimientoConRelaciones extends MovimientoVacuna {
     email: string;
   };
   entregasAdicionales: EntregaAdicional[];
+  entregaBaseTieneVale?: boolean;
+  valeNumeroEntregaBase?: string;
 }
 
 // Movimiento calculado con campos derivados (para la tabla)
@@ -587,6 +589,8 @@ export interface EntregaAdicional {
   motivo?: string;
   usuarioId: string;
   createdAt: Date;
+  tieneValeGenerado?: boolean;
+  valeNumero?: string;
 }
 
 export interface CreateEntregaAdicionalDto {
@@ -736,16 +740,16 @@ export interface Usuario {
   email: string;
   usuario: string;
   rol: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
-  establecimientoId?: string;
+  centroAcopioId?: string;
   estado: 'activo' | 'inactivo';
   ultimoAcceso?: Date;
   createdAt: Date;
   updatedAt: Date;
   // Información adicional incluida en respuestas del backend
-  establecimiento?: {
+  centroAcopio?: {
     id: string;
     nombre: string;
-    tipo: string;
+    codigo: string;
   };
 }
 
@@ -757,7 +761,7 @@ export interface CreateUsuarioDto {
   usuario: string;
   password: string;
   rol: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
-  establecimientoId?: string;
+  centroAcopioId?: string;
 }
 
 export interface UpdateUsuarioDto {
@@ -766,7 +770,7 @@ export interface UpdateUsuarioDto {
   email?: string;
   usuario?: string;
   rol?: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
-  establecimientoId?: string;
+  centroAcopioId?: string;
   estado?: 'activo' | 'inactivo';
 }
 
@@ -801,6 +805,7 @@ export interface AuthUser {
   email: string;
   usuario: string;
   rol: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
+  roleId?: string;
   establecimientoId?: string;
   estado: 'activo' | 'inactivo';
   ultimoAcceso?: Date;
@@ -811,6 +816,7 @@ export interface AuthUser {
     nombre: string;
     tipo: string;
   };
+  permissions?: string[];
 }
 
 export interface AuthResponse {

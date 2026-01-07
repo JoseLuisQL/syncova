@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, memo } from 'react';
 import { CheckCircle, AlertTriangle, XCircle, Info, X } from 'lucide-react';
-import '../../styles/toast.css';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -21,131 +20,140 @@ interface ToastProps {
   onClose: (id: string) => void;
 }
 
-const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
+const TOAST_STYLES = {
+  success: {
+    container: 'bg-white border-l-4 border-l-emerald-500',
+    icon: 'text-emerald-500',
+    title: 'text-gray-900',
+    progress: 'bg-emerald-500',
+  },
+  error: {
+    container: 'bg-white border-l-4 border-l-rose-500',
+    icon: 'text-rose-500',
+    title: 'text-gray-900',
+    progress: 'bg-rose-500',
+  },
+  warning: {
+    container: 'bg-white border-l-4 border-l-amber-500',
+    icon: 'text-amber-500',
+    title: 'text-gray-900',
+    progress: 'bg-amber-500',
+  },
+  info: {
+    container: 'bg-white border-l-4 border-l-teal-500',
+    icon: 'text-teal-500',
+    title: 'text-gray-900',
+    progress: 'bg-teal-500',
+  },
+} as const;
+
+const ICONS = {
+  success: CheckCircle,
+  error: XCircle,
+  warning: AlertTriangle,
+  info: Info,
+} as const;
+
+const Toast: React.FC<ToastProps> = memo(({ toast, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
+  const [progress, setProgress] = useState(100);
 
   useEffect(() => {
-    // Animación de entrada
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
+    requestAnimationFrame(() => setIsVisible(true));
   }, []);
 
   useEffect(() => {
-    // Auto-close después del duration
-    if (toast.duration && toast.duration > 0) {
-      const timer = setTimeout(() => {
-        handleClose();
-      }, toast.duration);
-      return () => clearTimeout(timer);
-    }
-  }, [toast.duration]);
+    if (!toast.duration || toast.duration <= 0) return;
 
-  const handleClose = () => {
+    const start = Date.now();
+    let frameId: number;
+
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const remaining = Math.max(0, 100 - (elapsed / toast.duration!) * 100);
+      setProgress(remaining);
+      if (remaining > 0) frameId = requestAnimationFrame(tick);
+    };
+
+    frameId = requestAnimationFrame(tick);
+    const timer = setTimeout(handleClose, toast.duration);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toast.duration, toast.id]);
+
+  const handleClose = useCallback(() => {
     setIsLeaving(true);
-    setTimeout(() => {
-      onClose(toast.id);
-    }, 300);
-  };
+    setTimeout(() => onClose(toast.id), 150);
+  }, [onClose, toast.id]);
 
-  const getToastStyles = () => {
-    let classes = `toast toast-${toast.type}`;
+  const styles = TOAST_STYLES[toast.type];
+  const Icon = ICONS[toast.type];
 
-    if (isLeaving) {
-      classes += ' toast-leaving';
-    }
+  const baseClasses = `
+    relative flex items-start gap-3 px-4 py-3
+    ${styles.container}
+    rounded-lg shadow-md
+    transition-all duration-150 ease-out
+  `;
 
-    return classes;
-  };
-
-  const getIcon = () => {
-    const iconClass = "toast-icon";
-
-    switch (toast.type) {
-      case 'success':
-        return <CheckCircle className={`${iconClass} text-green-600`} />;
-      case 'error':
-        return <XCircle className={`${iconClass} text-red-600`} />;
-      case 'warning':
-        return <AlertTriangle className={`${iconClass} text-yellow-600`} />;
-      case 'info':
-        return <Info className={`${iconClass} text-blue-600`} />;
-      default:
-        return <Info className={`${iconClass} text-gray-600`} />;
-    }
-  };
-
-  const getTitleColor = () => {
-    switch (toast.type) {
-      case 'success':
-        return 'text-green-800';
-      case 'error':
-        return 'text-red-800';
-      case 'warning':
-        return 'text-yellow-800';
-      case 'info':
-        return 'text-blue-800';
-      default:
-        return 'text-gray-800';
-    }
-  };
+  const animationClasses = isVisible && !isLeaving
+    ? 'translate-x-0 opacity-100'
+    : 'translate-x-4 opacity-0';
 
   return (
-    <div className={getToastStyles()}>
-      {/* Icono */}
-      {getIcon()}
+    <div
+      role="alert"
+      aria-live="polite"
+      className={`${baseClasses} ${animationClasses}`}
+    >
+      <Icon className={`h-5 w-5 mt-0.5 flex-shrink-0 ${styles.icon}`} />
 
-      {/* Contenido */}
-      <div className="toast-content">
-        <h4 className={`toast-title ${getTitleColor()}`}>
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-medium ${styles.title}`}>
           {toast.title}
-        </h4>
+        </p>
         {toast.message && (
-          <p className="toast-message">
+          <p className="mt-0.5 text-sm text-gray-500">
             {toast.message}
           </p>
         )}
-
-        {/* Acción opcional */}
         {toast.action && (
-          <div className="toast-action">
-            <button
-              onClick={toast.action.onClick}
-              className={`${
-                toast.type === 'success' ? 'text-green-700 hover:text-green-800' :
-                toast.type === 'error' ? 'text-red-700 hover:text-red-800' :
-                toast.type === 'warning' ? 'text-yellow-700 hover:text-yellow-800' :
-                'text-blue-700 hover:text-blue-800'
-              }`}
-            >
-              {toast.action.label}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={toast.action.onClick}
+            className="mt-2 text-sm font-medium text-teal-600 hover:text-teal-700"
+          >
+            {toast.action.label}
+          </button>
         )}
       </div>
 
-      {/* Botón de cerrar */}
       <button
+        type="button"
         onClick={handleClose}
-        className="toast-close"
-        aria-label="Cerrar notificación"
+        className="flex-shrink-0 p-1 -m-1 text-gray-400 hover:text-gray-500 rounded transition-colors"
+        aria-label="Cerrar"
       >
         <X className="h-4 w-4" />
       </button>
 
-      {/* Barra de progreso para auto-close */}
       {toast.duration && toast.duration > 0 && (
-        <div className="toast-progress">
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-100 overflow-hidden rounded-b-lg">
           <div
-            className={`toast-progress-bar ${toast.type}`}
-            style={{
-              animation: `progress-shrink ${toast.duration}ms linear forwards`
-            }}
+            className={`h-full ${styles.progress} transition-none`}
+            style={{ width: `${progress}%` }}
           />
         </div>
       )}
     </div>
   );
-};
+});
+
+Toast.displayName = 'Toast';
 
 export default Toast;

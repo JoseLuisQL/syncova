@@ -1,176 +1,144 @@
-import React from 'react';
-import {
-  AlertTriangle,
-  Info,
-  AlertCircle,
-  CheckCircle,
-  Bell
-} from 'lucide-react';
-import { usePaginatedAlertas } from '@/hooks/usePaginatedDashboard';
+import React, { memo, useCallback, useMemo } from 'react';
+import { AlertTriangle, AlertCircle, Info, Bell } from 'lucide-react';
+import { usePaginatedAlertas } from '../../hooks/usePaginatedDashboard';
 import Pagination from './Pagination';
-import type { AlertaReciente } from '@/types/dashboard';
+import { EmptyState, SectionSkeleton } from './LoadingStates';
+import { ALERT_LEVEL_CONFIG } from './constants';
+import type { AlertaReciente } from '../../services/dashboardService';
 
-const AlertasSection: React.FC = () => {
-  const { data, pagination, loading, error, currentPage, setPage, refresh } = usePaginatedAlertas(3);
-
-  const getAlertIcon = (tipo: AlertaReciente['tipo'], nivel: AlertaReciente['nivel']) => {
-    if (nivel === 'critico') {
-      return <AlertCircle className="h-5 w-5 text-red-500" />;
-    }
-
-    switch (tipo) {
-      case 'stock_bajo':
-        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
-      case 'vencimiento_proximo':
-        return <AlertTriangle className="h-5 w-5 text-orange-500" />;
-      case 'sistema':
-        return <Info className="h-5 w-5 text-blue-500" />;
-      case 'entrega':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      default:
-        return <Bell className="h-5 w-5 text-gray-500" />;
-    }
-  };
-
-  const getAlertColor = (nivel: AlertaReciente['nivel']) => {
-    switch (nivel) {
-      case 'critico':
-        return 'bg-red-50 border-red-200';
-      case 'alto':
-        return 'bg-orange-50 border-orange-200';
-      case 'medio':
-        return 'bg-yellow-50 border-yellow-200';
-      case 'bajo':
-        return 'bg-blue-50 border-blue-200';
-      default:
-        return 'bg-gray-50 border-gray-200';
-    }
-  };
-
-  const getNivelBadgeColor = (nivel: AlertaReciente['nivel']) => {
-    switch (nivel) {
-      case 'critico':
-        return 'bg-red-100 text-red-800';
-      case 'alto':
-        return 'bg-orange-100 text-orange-800';
-      case 'medio':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'bajo':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const formatFecha = (fecha: Date) => {
-    return new Intl.DateTimeFormat('es-ES', {
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(fecha));
-  };
-
-  if (loading && data.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Alertas Recientes</h3>
-        </div>
-        <div className="p-6">
-          <div className="animate-pulse space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
-                <div className="h-5 w-5 bg-gray-200 rounded-full"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+const getAlertIcon = (tipo: string, nivel: string) => {
+  const iconClass = "h-5 w-5";
+  
+  if (nivel === 'critico') {
+    return <AlertCircle className={`${iconClass} text-rose-500`} />;
   }
-
-  if (error) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Alertas Recientes</h3>
-        </div>
-        <div className="p-6">
-          <div className="text-center py-8">
-            <AlertTriangle className="mx-auto h-12 w-12 text-red-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Error al cargar alertas</h3>
-            <p className="mt-1 text-sm text-gray-500">{error}</p>
-            <div className="mt-6">
-              <button
-                onClick={refresh}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Reintentar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  
+  switch (tipo) {
+    case 'stock_bajo':
+    case 'vencimiento_proximo':
+      return <AlertTriangle className={`${iconClass} text-amber-500`} />;
+    case 'sistema':
+      return <Info className={`${iconClass} text-sky-500`} />;
+    default:
+      return <Bell className={`${iconClass} text-gray-500`} />;
   }
+};
+
+const formatDate = (fecha: Date): string => {
+  const date = new Date(fecha);
+  return new Intl.DateTimeFormat('es-ES', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+};
+
+const AlertaCard: React.FC<{ alerta: AlertaReciente }> = memo(({ alerta }) => {
+  const config = ALERT_LEVEL_CONFIG[alerta.nivel as keyof typeof ALERT_LEVEL_CONFIG] 
+    || ALERT_LEVEL_CONFIG.bajo;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Alertas Recientes</h3>
-        <button
-          onClick={refresh}
-          disabled={loading}
-          className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
-        >
-          {loading ? 'Actualizando...' : 'Actualizar'}
-        </button>
+    <div
+      className={`flex items-start gap-3 p-3.5 ${config.bg} rounded-xl border ${config.border}
+        hover:shadow-sm transition-all duration-200`}
+      role="listitem"
+    >
+      <div className="flex-shrink-0 mt-0.5">
+        {getAlertIcon(alerta.tipo, alerta.nivel)}
       </div>
-      
-      <div className="p-6">
-        {data.length === 0 ? (
-          <div className="text-center py-8">
-            <Bell className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No hay alertas recientes</h3>
-            <p className="mt-1 text-sm text-gray-500">No se encontraron alertas en los últimos 7 días.</p>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm font-medium text-gray-900 line-clamp-2">
+            {alerta.mensaje}
+          </p>
+          <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize flex-shrink-0 ${config.badge}`}>
+            {alerta.nivel}
+          </span>
+        </div>
+        <div className="mt-1.5 flex items-center gap-2 text-xs text-gray-500">
+          <time dateTime={new Date(alerta.fechaCreacion).toISOString()}>
+            {formatDate(alerta.fechaCreacion)}
+          </time>
+          {alerta.establecimiento && (
+            <>
+              <span aria-hidden="true">•</span>
+              <span className="truncate">{alerta.establecimiento}</span>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+AlertaCard.displayName = 'AlertaCard';
+
+const AlertasSection: React.FC = memo(() => {
+  const { data, pagination, loading, error, currentPage, setPage, refresh } = usePaginatedAlertas(4);
+
+  const handleRefresh = useCallback(() => {
+    refresh();
+  }, [refresh]);
+
+  const alertCount = useMemo(() => pagination.total, [pagination.total]);
+
+  return (
+    <section 
+      className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+      aria-label={`Alertas recientes (${alertCount} total)`}
+    >
+      <header className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white">
+        <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-amber-500" aria-hidden="true" />
+          Alertas Recientes
+          {alertCount > 0 && (
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+              {alertCount}
+            </span>
+          )}
+        </h3>
+        <button
+          onClick={handleRefresh}
+          disabled={loading}
+          className="text-xs font-medium text-teal-600 hover:text-teal-700 disabled:opacity-50 
+            disabled:cursor-not-allowed transition-colors"
+          aria-label={loading ? 'Actualizando alertas' : 'Actualizar alertas'}
+        >
+          {loading ? 'Cargando...' : 'Actualizar'}
+        </button>
+      </header>
+
+      <div className="p-4">
+        {loading && data.length === 0 ? (
+          <SectionSkeleton rows={4} />
+        ) : error ? (
+          <div className="text-center py-6">
+            <AlertTriangle className="mx-auto h-10 w-10 text-rose-400 mb-2" aria-hidden="true" />
+            <p className="text-sm font-medium text-gray-900 mb-1">Error al cargar</p>
+            <p className="text-xs text-gray-500 mb-4">{error}</p>
+            <button
+              onClick={handleRefresh}
+              className="text-xs font-medium text-teal-600 hover:text-teal-700"
+            >
+              Reintentar
+            </button>
           </div>
+        ) : data.length === 0 ? (
+          <EmptyState
+            icon={<Bell className="h-full w-full" />}
+            title="Sin alertas"
+            description="No hay alertas en los últimos 7 días"
+          />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2" role="list" aria-label="Lista de alertas">
             {data.map((alerta) => (
-              <div
-                key={alerta.id}
-                className={`flex items-start space-x-4 p-4 rounded-lg border ${getAlertColor(alerta.nivel)}`}
-              >
-                <div className="flex-shrink-0 mt-0.5">
-                  {getAlertIcon(alerta.tipo, alerta.nivel)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {alerta.mensaje}
-                    </p>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getNivelBadgeColor(alerta.nivel)}`}>
-                      {alerta.nivel}
-                    </span>
-                  </div>
-                  <div className="mt-1 flex items-center text-xs text-gray-500 space-x-4">
-                    <span>{formatFecha(alerta.fechaCreacion)}</span>
-                    {alerta.establecimiento && (
-                      <span>• {alerta.establecimiento}</span>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <AlertaCard key={alerta.id} alerta={alerta} />
             ))}
           </div>
         )}
       </div>
-      
+
       {pagination.totalPages > 1 && (
         <Pagination
           currentPage={currentPage}
@@ -180,8 +148,10 @@ const AlertasSection: React.FC = () => {
           itemsPerPage={pagination.limit}
         />
       )}
-    </div>
+    </section>
   );
-};
+});
+
+AlertasSection.displayName = 'AlertasSection';
 
 export default AlertasSection;

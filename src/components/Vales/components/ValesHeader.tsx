@@ -1,0 +1,90 @@
+import React, { memo } from 'react';
+import { Receipt, Plus, RefreshCw, X, Loader2 } from 'lucide-react';
+import { COMPONENT_STYLES } from '../constants';
+
+interface ValesHeaderProps {
+  onGenerarVale: () => void;
+  onSincronizar: () => void;
+  onClose?: () => void;
+  isGenerating: boolean;
+  isSyncing: boolean;
+  centroAcopioSeleccionado: boolean;
+}
+
+export const ValesHeader: React.FC<ValesHeaderProps> = memo(({
+  onGenerarVale,
+  onSincronizar,
+  onClose,
+  isGenerating,
+  isSyncing,
+  centroAcopioSeleccionado,
+}) => {
+  return (
+    <header className={COMPONENT_STYLES.header.container}>
+      <div className={`${onClose ? 'w-full px-4 sm:px-6' : 'max-w-7xl mx-auto px-4 sm:px-6'} py-4`}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Titulo */}
+          <div className="flex items-center gap-4">
+            <div className={COMPONENT_STYLES.header.iconWrapper}>
+              <Receipt className="h-6 w-6 text-white" aria-hidden="true" />
+            </div>
+            <div>
+              <h1 className={COMPONENT_STYLES.header.title}>
+                Vales de Entrega
+              </h1>
+              <p className={COMPONENT_STYLES.header.subtitle}>
+                Gestion de vales por centro de acopio
+              </p>
+            </div>
+          </div>
+
+          {/* Acciones */}
+          <div className="flex items-center gap-3">
+            {/* Boton principal: Generar Vale */}
+            <button
+              onClick={onGenerarVale}
+              disabled={!centroAcopioSeleccionado || isGenerating}
+              className={COMPONENT_STYLES.button.success}
+              title={!centroAcopioSeleccionado ? 'Seleccione un centro de acopio' : 'Generar nuevo vale'}
+            >
+              {isGenerating ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Plus className="h-5 w-5" />
+              )}
+              <span className="hidden sm:inline">
+                {isGenerating ? 'Generando...' : 'Generar Vale'}
+              </span>
+            </button>
+
+            {/* Boton secundario: Sincronizar */}
+            <button
+              onClick={onSincronizar}
+              disabled={!centroAcopioSeleccionado || isSyncing || isGenerating}
+              className={COMPONENT_STYLES.button.secondary}
+              title="Sincronizar vales"
+            >
+              <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">
+                {isSyncing ? 'Sincronizando...' : 'Sincronizar'}
+              </span>
+            </button>
+
+            {/* Boton cerrar (si aplica) */}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Cerrar"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+});
+
+ValesHeader.displayName = 'ValesHeader';

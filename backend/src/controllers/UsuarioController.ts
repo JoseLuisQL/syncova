@@ -217,9 +217,9 @@ export class UsuarioController {
         return;
       }
 
-      // Validar establecimiento si se proporciona
-      if (data.establecimientoId && !validateUUID(data.establecimientoId)) {
-        errorResponse(res, 'ID de establecimiento inválido', 400);
+      // Validar centro de acopio si se proporciona
+      if (data.centroAcopioId && !validateUUID(data.centroAcopioId)) {
+        errorResponse(res, 'ID de centro de acopio inválido', 400);
         return;
       }
 
@@ -257,8 +257,8 @@ export class UsuarioController {
       // Validar rol dinámicamente si se proporciona
       if (data.rol) {
         try {
-          const roleExists = await RoleService.getByCodigo(data.rol);
-          if (!roleExists || roleExists.estado !== 'activo') {
+          const roleResult = await RoleService.getByCodigo(data.rol);
+          if (!roleResult.success || !roleResult.data || roleResult.data.estado !== 'activo') {
             errorResponse(res, 'Rol inválido o inactivo', 400);
             return;
           }
@@ -275,9 +275,9 @@ export class UsuarioController {
         return;
       }
 
-      // Validar establecimiento si se proporciona
-      if (data.establecimientoId && !validateUUID(data.establecimientoId)) {
-        errorResponse(res, 'ID de establecimiento inválido', 400);
+      // Validar centro de acopio si se proporciona
+      if (data.centroAcopioId && !validateUUID(data.centroAcopioId)) {
+        errorResponse(res, 'ID de centro de acopio inválido', 400);
         return;
       }
 

@@ -1,11 +1,51 @@
 import { Router } from 'express';
 import { MovimientosController } from '@/controllers/MovimientosController';
+import { AjusteEntregasController } from '@/controllers/AjusteEntregasController';
 import { uploadSingleExcel, handleUploadError } from '@/middleware/upload';
 
 /**
  * Rutas para gestión de movimientos de vacunas
  */
 const router = Router();
+
+/**
+ * @route GET /api/movimientos/anios-disponibles
+ * @desc Obtener años disponibles con movimientos registrados
+ * @access Public (TODO: Proteger con autenticación)
+ */
+router.get('/anios-disponibles', MovimientosController.getAniosDisponibles);
+
+// =====================================================
+// RUTAS DE AJUSTE AUTOMÁTICO DE ENTREGAS
+// =====================================================
+
+/**
+ * @route GET /api/movimientos/ajuste-entregas/datos/:vacunaId/:mes/:anio
+ * @desc Obtener datos para el modal de ajuste automático de entregas
+ * @access Public (TODO: Proteger con autenticación)
+ */
+router.get('/ajuste-entregas/datos/:vacunaId/:mes/:anio', AjusteEntregasController.obtenerDatosParaAjuste);
+
+/**
+ * @route GET /api/movimientos/ajuste-entregas/verificar/:vacunaId/:mes/:anio
+ * @desc Verificar si el ajuste está disponible para una vacuna/periodo
+ * @access Public (TODO: Proteger con autenticación)
+ */
+router.get('/ajuste-entregas/verificar/:vacunaId/:mes/:anio', AjusteEntregasController.verificarDisponibilidad);
+
+/**
+ * @route POST /api/movimientos/ajuste-entregas/calcular-opciones
+ * @desc Calcular opciones de ajuste automático
+ * @access Public (TODO: Proteger con autenticación)
+ */
+router.post('/ajuste-entregas/calcular-opciones', AjusteEntregasController.calcularOpcionesAjuste);
+
+/**
+ * @route POST /api/movimientos/ajuste-entregas/ejecutar
+ * @desc Ejecutar ajuste automático de entregas
+ * @access Public (TODO: Proteger con autenticación)
+ */
+router.post('/ajuste-entregas/ejecutar', AjusteEntregasController.ejecutarAjuste);
 
 /**
  * @route GET /api/movimientos/plantilla/vacuna/:vacunaId/anio/:anio

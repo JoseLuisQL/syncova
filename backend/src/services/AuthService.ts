@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { prisma } from '@/config/database';
 import { config } from '@/config/env';
 import { PasswordUtils } from '@/utils/password';
@@ -38,7 +38,7 @@ interface AuthTokens {
  * Interface para respuesta de login
  */
 interface LoginResponse {
-  user: Omit<IUsuario, 'passwordHash'>;
+  user: Omit<IUsuario, 'passwordHash'> & { permissions: string[] };
   tokens: AuthTokens;
 }
 
@@ -75,6 +75,19 @@ export class AuthService {
               nombre: true,
               tipo: true
             }
+          },
+          role: {
+            include: {
+              rolePermissions: {
+                include: {
+                  permission: {
+                    select: {
+                      codigo: true
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       });
@@ -104,12 +117,15 @@ export class AuthService {
       });
 
       // Preparar respuesta sin el hash de contraseña
-      const { passwordHash, ...userWithoutPassword } = user;
+      const { passwordHash, role, ...userWithoutPassword } = user;
+
+      // Extraer códigos de permisos del rol
+      const permissions = role?.rolePermissions?.map(rp => rp.permission.codigo) || [];
 
       return {
         success: true,
         data: {
-          user: userWithoutPassword,
+          user: { ...userWithoutPassword, permissions },
           tokens
         }
       };
@@ -335,7 +351,7 @@ export class AuthService {
   /**
    * Obtener información del usuario autenticado
    */
-  static async getProfile(userId: string): Promise<ServiceResult<Omit<IUsuario, 'passwordHash'>>> {
+  static async getProfile(userId: string): Promise<ServiceResult<Omit<IUsuario, 'passwordHash'> & { permissions: string[] }>> {
     try {
       if (!userId) {
         throw createError.badRequest('ID de usuario requerido');
@@ -350,6 +366,19 @@ export class AuthService {
               nombre: true,
               tipo: true
             }
+          },
+          role: {
+            include: {
+              rolePermissions: {
+                include: {
+                  permission: {
+                    select: {
+                      codigo: true
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       });
@@ -362,12 +391,13 @@ export class AuthService {
         throw createError.badRequest('Usuario inactivo');
       }
 
-      // Remover hash de contraseña
-      const { passwordHash, ...userWithoutPassword } = user;
+      // Remover hash de contraseña y extraer permisos
+      const { passwordHash, role, ...userWithoutPassword } = user;
+      const permissions = role?.rolePermissions?.map(rp => rp.permission.codigo) || [];
 
       return {
         success: true,
-        data: userWithoutPassword
+        data: { ...userWithoutPassword, permissions }
       };
     } catch (error) {
       console.error('Error al obtener perfil:', error);
@@ -391,11 +421,11 @@ export class AuthService {
 
     const accessToken = jwt.sign(payload, this.JWT_SECRET, {
       expiresIn: this.ACCESS_TOKEN_EXPIRES_IN
-    });
+    } as SignOptions);
 
     const refreshToken = jwt.sign(payload, this.JWT_SECRET, {
       expiresIn: this.REFRESH_TOKEN_EXPIRES_IN
-    });
+    } as SignOptions);
 
     return {
       accessToken,

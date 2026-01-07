@@ -11,7 +11,7 @@ import {
   ConfiguracionCalculada,
   JeringasCalculadas
 } from '@/types';
-import { createError } from '@/middleware/errorHandler';
+import { createError } from '@/utils/errors';
 
 /**
  * Servicio para gestión de configuraciones jeringa-vacuna

@@ -1,10 +1,11 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
+import { STORAGE_KEYS, API_TIMEOUTS, DEFAULT_PORTS, SYSTEM_EVENTS } from '../constants';
 
 /**
  * Configuración base para las llamadas API
  * Detecta automáticamente si se accede desde la red local o localhost
  */
-const getApiBaseUrl = () => {
+export const getApiBaseUrl = () => {
   // Si hay una variable de entorno definida, usarla
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
@@ -15,11 +16,11 @@ const getApiBaseUrl = () => {
   
   // Si el hostname es una IP de red local (no localhost), usar esa IP para la API
   if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-    return `http://${currentHost}:3001/api`;
+    return `http://${currentHost}:${DEFAULT_PORTS.BACKEND}/api`;
   }
   
   // Por defecto, usar localhost
-  return 'http://localhost:3001/api';
+  return `http://localhost:${DEFAULT_PORTS.BACKEND}/api`;
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -32,7 +33,7 @@ console.log('🔗 API Base URL configurada:', API_BASE_URL);
  */
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30 segundos para operaciones normales
+  timeout: API_TIMEOUTS.DEFAULT,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -43,7 +44,7 @@ export const apiClient: AxiosInstance = axios.create({
  */
 export const apiClientLongTimeout: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 120000, // 2 minutos para operaciones pesadas
+  timeout: API_TIMEOUTS.LONG,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -57,7 +58,7 @@ const setupInterceptors = (client: AxiosInstance) => {
   client.interceptors.request.use(
     (config) => {
       // Agregar token de autenticación si existe
-      const token = localStorage.getItem('sivac_auth_token');
+      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -81,34 +82,34 @@ const setupInterceptors = (client: AxiosInstance) => {
         originalRequest._retry = true;
 
         // Intentar refrescar el token
-        const refreshToken = localStorage.getItem('sivac_refresh_token');
+        const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
         if (refreshToken) {
           try {
             const response = await client.post('/auth/refresh', { refreshToken });
             const { accessToken } = response.data.data;
 
             // Actualizar token en localStorage
-            localStorage.setItem('sivac_auth_token', accessToken);
+            localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
 
             // Reintentar la petición original con el nuevo token
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
             return client(originalRequest);
           } catch (refreshError) {
             // Si falla el refresh, limpiar datos y redirigir a login
-            localStorage.removeItem('sivac_auth_token');
-            localStorage.removeItem('sivac_refresh_token');
-            localStorage.removeItem('sivac_user');
+            localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.USER);
 
             // Emitir evento personalizado para que el contexto de auth maneje el logout
-            window.dispatchEvent(new CustomEvent('auth:logout'));
+            window.dispatchEvent(new CustomEvent(SYSTEM_EVENTS.AUTH_LOGOUT));
           }
         } else {
           // No hay refresh token, limpiar datos
-          localStorage.removeItem('sivac_auth_token');
-          localStorage.removeItem('sivac_user');
+          localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.USER);
 
           // Emitir evento personalizado para logout
-          window.dispatchEvent(new CustomEvent('auth:logout'));
+          window.dispatchEvent(new CustomEvent(SYSTEM_EVENTS.AUTH_LOGOUT));
         }
       } else if (error.response?.status === 403) {
         console.warn('Acceso denegado');

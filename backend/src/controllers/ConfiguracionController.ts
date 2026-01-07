@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import { ConfiguracionService } from '@/services/ConfiguracionService';
 import { ResponseUtil } from '@/utils/response';
 import { AuthenticatedRequest } from '@/types';
+import { getLogoUrl, getLogoPath, deleteExistingLogo } from '@/middleware/uploadLogo';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Controlador para gestión de configuraciones del sistema
@@ -292,9 +295,9 @@ export class ConfiguracionController {
       if (errors.length > 0) {
         ResponseUtil.error(
           res,
-          'Algunas configuraciones no pudieron ser actualizadas',
+          `Algunas configuraciones no pudieron ser actualizadas: ${errors.length} errores`,
           400,
-          { errors, updated: results }
+          JSON.stringify({ errors, updated: results })
         );
         return;
       }
@@ -333,6 +336,141 @@ export class ConfiguracionController {
       );
     } catch (error) {
       console.error('Error en getCategories:', error);
+      ResponseUtil.internalError(res);
+    }
+  }
+
+  /**
+   * Subir logo institucional
+   * POST /api/configuracion/logo
+   */
+  static async uploadLogo(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.file) {
+        ResponseUtil.validationError(res, 'No se proporcionó ningún archivo');
+        return;
+      }
+
+      const logoUrl = getLogoUrl();
+
+      // Guardar la ruta en la configuración
+      await ConfiguracionService.updateByKey('logo_path', logoUrl || '').catch(async () => {
+        // Si no existe, crear la configuración
+        await ConfiguracionService.create({
+          clave: 'logo_path',
+          valor: logoUrl || '',
+          descripcion: 'Ruta del logo institucional',
+          tipoDato: 'string',
+          categoria: 'general',
+          esPublico: true,
+        });
+      });
+
+      ResponseUtil.success(
+        res,
+        { 
+          url: logoUrl,
+          filename: req.file.filename,
+          size: req.file.size,
+          mimetype: req.file.mimetype
+        },
+        'Logo subido exitosamente'
+      );
+    } catch (error) {
+      console.error('Error en uploadLogo:', error);
+      ResponseUtil.internalError(res);
+    }
+  }
+
+  /**
+   * Obtener logo institucional
+   * GET /api/configuracion/logo
+   */
+  static async getLogo(req: Request, res: Response): Promise<void> {
+    try {
+      const logoPath = getLogoPath();
+
+      if (!logoPath) {
+        ResponseUtil.notFound(res, 'No hay logo configurado');
+        return;
+      }
+
+      const logoUrl = getLogoUrl();
+
+      ResponseUtil.success(
+        res,
+        { 
+          url: logoUrl,
+          exists: true 
+        },
+        'Logo obtenido exitosamente'
+      );
+    } catch (error) {
+      console.error('Error en getLogo:', error);
+      ResponseUtil.internalError(res);
+    }
+  }
+
+  /**
+   * Obtener archivo de logo (imagen directa)
+   * GET /api/configuracion/logo/file
+   */
+  static async getLogoFile(req: Request, res: Response): Promise<void> {
+    try {
+      const logoPath = getLogoPath();
+
+      if (!logoPath || !fs.existsSync(logoPath)) {
+        res.status(404).json({
+          success: false,
+          message: 'No hay logo configurado',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const ext = path.extname(logoPath).toLowerCase();
+      const mimeTypes: Record<string, string> = {
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg'
+      };
+
+      // Headers CORS para permitir acceso desde el frontend
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET');
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      res.setHeader('Content-Type', mimeTypes[ext] || 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      
+      const stream = fs.createReadStream(logoPath);
+      stream.pipe(res);
+    } catch (error) {
+      console.error('Error en getLogoFile:', error);
+      ResponseUtil.internalError(res);
+    }
+  }
+
+  /**
+   * Eliminar logo institucional
+   * DELETE /api/configuracion/logo
+   */
+  static async deleteLogo(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const deleted = deleteExistingLogo();
+
+      if (!deleted) {
+        ResponseUtil.notFound(res, 'No hay logo para eliminar');
+        return;
+      }
+
+      // Limpiar la configuración
+      await ConfiguracionService.updateByKey('logo_path', '').catch(() => {
+        // Ignorar si no existe
+      });
+
+      ResponseUtil.deleted(res, 'Logo eliminado exitosamente');
+    } catch (error) {
+      console.error('Error en deleteLogo:', error);
       ResponseUtil.internalError(res);
     }
   }

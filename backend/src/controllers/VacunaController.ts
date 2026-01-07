@@ -58,14 +58,9 @@ export class VacunaController {
 
       paginatedResponse(res, {
         data: vacunas,
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total,
-          totalPages: Math.ceil(total / limitNum),
-          hasNext: pageNum * limitNum < total,
-          hasPrev: pageNum > 1
-        },
+        page: pageNum,
+        limit: limitNum,
+        total,
         message: 'Vacunas obtenidas exitosamente'
       });
     } catch (error) {

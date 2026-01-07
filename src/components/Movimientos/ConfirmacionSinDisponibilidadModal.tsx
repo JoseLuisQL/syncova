@@ -1,5 +1,6 @@
 import React from 'react';
-import { X, AlertTriangle, Calendar, Package, CheckCircle } from 'lucide-react';
+import { X, AlertCircle, Calendar, CheckCircle } from 'lucide-react';
+import { COMPONENT_STYLES, COLORS } from './constants';
 
 interface ConfirmacionSinDisponibilidadModalProps {
   isOpen: boolean;
@@ -14,10 +15,6 @@ interface ConfirmacionSinDisponibilidadModalProps {
   tipoEntrega: 'base' | 'adicional';
 }
 
-/**
- * Modal profesional para confirmar el registro de entregas cuando
- * no hay disponibilidad en los próximos meses de la planificación
- */
 const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidadModalProps> = ({
   isOpen,
   onClose,
@@ -33,225 +30,127 @@ const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidad
   if (!isOpen) return null;
 
   const handleConfirm = () => {
-    if (!isProcessing) {
-      onConfirm();
-    }
+    if (!isProcessing) onConfirm();
   };
 
   const handleClose = () => {
-    if (!isProcessing) {
-      onClose();
-    }
+    if (!isProcessing) onClose();
   };
 
   return (
-    <>
-      {/* Overlay con animación */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4 animate-fade-in"
-        onClick={handleClose}
+    <div className={COMPONENT_STYLES.modal.overlay} onClick={handleClose}>
+      <div 
+        className="bg-white rounded-2xl max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-200"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Container con animación de entrada */}
-        <div
-          className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-scale-in"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header Profesional con Gradiente */}
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 p-6 relative">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="bg-white bg-opacity-20 p-3 rounded-xl">
-                  <AlertTriangle className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white">
-                    Sin Disponibilidad Programada
-                  </h2>
-                  <p className="text-orange-100 mt-1">
-                    Confirmación Especial Requerida
-                  </p>
-                </div>
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-gray-100">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2.5 rounded-xl ${COLORS.warning.bg} ${COLORS.warning.border} border`}>
+                <AlertCircle className={`h-5 w-5 ${COLORS.warning.icon}`} />
               </div>
-              {!isProcessing && (
-                <button
-                  onClick={handleClose}
-                  className="text-white hover:text-orange-100 transition-colors p-2 hover:bg-white hover:bg-opacity-10 rounded-lg"
-                  title="Cerrar"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              )}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Sin disponibilidad programada
+                </h3>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  Se registrará en el mes actual
+                </p>
+              </div>
+            </div>
+            {!isProcessing && (
+              <button
+                onClick={handleClose}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="px-6 py-5 space-y-5">
+          {/* Mensaje principal */}
+          <div className={`p-4 rounded-xl ${COLORS.warning.bg} border ${COLORS.warning.border}`}>
+            <p className={`text-sm ${COLORS.warning.text}`}>
+              <span className="font-medium">{establecimientoNombre}</span> no tiene entregas 
+              programadas disponibles para {anio}.
+            </p>
+          </div>
+
+          {/* Detalles */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">Vacuna</span>
+              <span className="font-medium text-gray-900">{vacunaNombre}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">Tipo</span>
+              <span className={`font-medium px-2 py-0.5 rounded-md text-xs ${
+                tipoEntrega === 'base' 
+                  ? 'bg-teal-100 text-teal-700' 
+                  : 'bg-amber-100 text-amber-700'
+              }`}>
+                {tipoEntrega === 'base' ? 'Entrega Base' : 'Adicional'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">Cantidad</span>
+              <span className="font-semibold text-gray-900 text-lg">
+                {cantidad.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">Período</span>
+              <span className="font-medium text-gray-900 flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 text-gray-400" />
+                {mesActual} {anio}
+              </span>
             </div>
           </div>
 
-          {/* Content */}
-          <div className="p-6 space-y-6">
-            {/* Mensaje Principal */}
-            <div className="bg-orange-50 border-l-4 border-orange-500 p-5 rounded-r-lg">
-              <div className="flex items-start space-x-3">
-                <AlertTriangle className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-orange-900 text-lg mb-2">
-                    Ya no hay entregas disponibles para este año
-                  </h3>
-                  <p className="text-orange-800 leading-relaxed">
-                    <strong>{establecimientoNombre}</strong> ya no tiene entregas programadas en los 
-                    próximos meses de <strong>{anio}</strong>. Todas las entregas planificadas ya fueron 
-                    asignadas en su totalidad.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Detalles de la Operación */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 space-y-4">
-              <h4 className="font-semibold text-blue-900 flex items-center space-x-2 mb-3">
-                <Package className="w-5 h-5" />
-                <span>Detalles de la Operación</span>
-              </h4>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-blue-600 font-medium mb-1">Establecimiento</p>
-                  <p className="text-blue-900 font-semibold">{establecimientoNombre}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-blue-600 font-medium mb-1">Vacuna</p>
-                  <p className="text-blue-900 font-semibold">{vacunaNombre}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-blue-600 font-medium mb-1">Cantidad a Registrar</p>
-                  <p className="text-blue-900 font-semibold text-xl">{cantidad.toLocaleString()} unidades</p>
-                </div>
-                <div>
-                  <p className="text-sm text-blue-600 font-medium mb-1">Tipo de Entrega</p>
-                  <p className="text-blue-900 font-semibold">
-                    {tipoEntrega === 'base' ? 'Entrega Base' : 'Entrega Adicional'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Acción que se realizará */}
-            <div className="bg-green-50 border border-green-200 rounded-xl p-5">
-              <h4 className="font-semibold text-green-900 flex items-center space-x-2 mb-3">
-                <CheckCircle className="w-5 h-5" />
-                <span>Si confirma, se realizará lo siguiente:</span>
-              </h4>
-              
-              <div className="space-y-3">
-                <div className="flex items-start space-x-3">
-                  <div className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm font-bold">
-                    1
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-green-900 font-medium">Registro en Mes Actual</p>
-                    <p className="text-green-700 text-sm mt-1">
-                      Se registrarán <strong>{cantidad.toLocaleString()} unidades</strong> en el mes de <strong>{mesActual} {anio}</strong>
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm font-bold">
-                    2
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-green-900 font-medium">Actualización de Planificación</p>
-                    <p className="text-green-700 text-sm mt-1">
-                      La planificación anual se actualizará automáticamente sumando esta cantidad al mes actual
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm font-bold">
-                    3
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-green-900 font-medium">Sincronización Automática</p>
-                    <p className="text-green-700 text-sm mt-1">
-                      Los movimientos de vacuna se sincronizarán automáticamente con la nueva programación
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Nota Importante */}
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-              <p className="text-gray-700 text-sm">
-                <span className="font-semibold">Nota:</span> Esta es una función especial para casos 
-                excepcionales donde ya no hay disponibilidad programada. La cantidad se registrará y 
-                reflejará inmediatamente en el sistema sin necesidad de recargar la página.
+          {/* Qué sucederá */}
+          <div className={`p-4 rounded-xl ${COLORS.success.bg} border ${COLORS.success.border}`}>
+            <div className="flex items-start gap-2.5">
+              <CheckCircle className={`h-4 w-4 ${COLORS.success.icon} flex-shrink-0 mt-0.5`} />
+              <p className={`text-sm ${COLORS.success.text}`}>
+                Se registrará la entrega y se actualizará automáticamente la planificación.
               </p>
             </div>
           </div>
+        </div>
 
-          {/* Footer con Botones */}
-          <div className="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 border-t">
-            <button
-              onClick={handleClose}
-              disabled={isProcessing}
-              className="px-6 py-2.5 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleConfirm}
-              disabled={isProcessing}
-              className="px-8 py-2.5 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-            >
-              {isProcessing ? (
-                <>
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  <span>Procesando...</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="w-5 h-5" />
-                  <span>Confirmar y Registrar</span>
-                </>
-              )}
-            </button>
-          </div>
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50">
+          <button
+            onClick={handleClose}
+            disabled={isProcessing}
+            className={`flex-1 ${COMPONENT_STYLES.button.secondary}`}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={isProcessing}
+            className={`flex-1 ${COMPONENT_STYLES.button.success}`}
+          >
+            {isProcessing ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Procesando...</span>
+              </div>
+            ) : (
+              <>
+                <CheckCircle className="h-4 w-4" />
+                <span>Confirmar</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
-
-      {/* Estilos de Animación */}
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes scaleIn {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
-        .animate-fade-in {
-          animation: fadeIn 0.2s ease-out;
-        }
-
-        .animate-scale-in {
-          animation: scaleIn 0.3s ease-out;
-        }
-      `}</style>
-    </>
+    </div>
   );
 };
 

@@ -128,6 +128,20 @@ router.get('/grupos-entregas-generados', ValeController.getGruposEntregasAdicion
 router.get('/entregas-adicionales-disponibles', ValeController.getEntregasAdicionalesDisponibles);
 
 /**
+ * @route GET /api/vales/calcular-impacto-modificacion
+ * @desc Calcular el impacto de modificar una entrega sobre stocks y vales
+ * @access Public (TODO: Proteger con autenticación)
+ * @query {string} establecimientoId - ID del establecimiento
+ * @query {string} vacunaId - ID de la vacuna
+ * @query {number} mes - Mes (1-12)
+ * @query {number} anio - Año
+ * @query {number} cantidadActual - Cantidad actual de entrega
+ * @query {number} cantidadNueva - Nueva cantidad de entrega
+ * @example GET /api/vales/calcular-impacto-modificacion?establecimientoId=uuid&vacunaId=uuid&mes=8&anio=2025&cantidadActual=2&cantidadNueva=1
+ */
+router.get('/calcular-impacto-modificacion', ValeController.calcularImpactoModificacion);
+
+/**
  * @route GET /api/vales/:id
  * @desc Obtener vale por ID con todos sus detalles
  * @access Public (TODO: Proteger con autenticación)

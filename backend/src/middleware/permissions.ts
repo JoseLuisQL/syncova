@@ -28,9 +28,7 @@ async function getUserPermissions(userId: string): Promise<string[]> {
           include: {
             rolePermissions: {
               include: {
-                permission: {
-                  where: { estado: 'activo' }
-                }
+                permission: true
               }
             }
           }
@@ -42,7 +40,9 @@ async function getUserPermissions(userId: string): Promise<string[]> {
       return [];
     }
 
-    const permissions = user.role.rolePermissions.map(rp => rp.permission.codigo);
+    const permissions = user.role.rolePermissions
+      .filter(rp => rp.permission.estado === 'activo')
+      .map(rp => rp.permission.codigo);
 
     // Actualizar cache
     userPermissionsCache.set(userId, {
@@ -128,7 +128,7 @@ export const validatePermissions = (allowedRoles: string[]) => {
       // Mapear roles del sistema a roles permitidos
       const roleMapping: Record<string, RolUsuario[]> = {
         'admin': ['administrador'],
-        'supervisor': ['administrador', 'coordinador'],
+        'supervisor': ['administrador', 'coordinador', 'responsable_acopio'],
         'operador': ['administrador', 'coordinador', 'responsable_acopio', 'operador'],
         'responsable': ['administrador', 'coordinador', 'responsable_acopio'],
         'coordinador': ['administrador', 'coordinador'],

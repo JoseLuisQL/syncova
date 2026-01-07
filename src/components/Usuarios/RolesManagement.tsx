@@ -8,14 +8,11 @@ import {
   Settings,
   CheckCircle,
   XCircle,
-  Eye,
   Users,
   Key,
   AlertTriangle,
   RefreshCw,
   Loader2,
-  BarChart3,
-  Activity,
   Clock,
   Database
 } from 'lucide-react';
@@ -24,6 +21,7 @@ import { RoleService } from '../../services/roleService';
 import { PermissionService } from '../../services/permissionService';
 import { useToastContext } from '../../contexts/ToastContext';
 import { logger } from '../../utils/debug';
+import { COMPONENT_STYLES } from './constants';
 import RoleModal from './RoleModal';
 import PermissionsModal from './PermissionsModal';
 
@@ -68,7 +66,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     conUsuarios: 0
   });
 
-  const { addToast } = useToastContext();
+  const { toast } = useToastContext();
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -106,7 +104,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al cargar roles';
       setError(errorMessage);
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al cargar roles:', error);
     } finally {
       setLoading(false);
@@ -135,7 +133,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
       setPermissions(result.permissions);
     } catch (error) {
       logger.error('Error al cargar permisos:', error);
-      addToast('error', 'Error', 'Error al cargar permisos disponibles');
+      toast.error('Error al cargar permisos disponibles');
     } finally {
       setLoadingPermissions(false);
     }
@@ -152,7 +150,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
       setSelectedPermissions(result.map(p => p.id));
     } catch (error) {
       logger.error('Error al cargar permisos del rol:', error);
-      addToast('error', 'Error', 'Error al cargar permisos del rol');
+      toast.error('Error al cargar permisos del rol');
     } finally {
       setLoadingPermissions(false);
     }
@@ -166,11 +164,11 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
       if (editingRole) {
         setIsUpdating(true);
         await RoleService.update(editingRole.id, formData as UpdateRoleDto);
-        addToast('success', 'Éxito', 'Rol actualizado correctamente');
+        toast.success('Rol actualizado correctamente');
       } else {
         setIsCreating(true);
         await RoleService.create(formData as CreateRoleDto);
-        addToast('success', 'Éxito', 'Rol creado correctamente');
+        toast.success('Rol creado correctamente');
       }
       
       setShowModal(false);
@@ -179,7 +177,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
       await loadStats();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al guardar rol';
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al guardar rol:', error);
     } finally {
       setIsCreating(false);
@@ -198,12 +196,12 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     try {
       setIsDeleting(true);
       await RoleService.delete(role.id);
-      addToast('success', 'Éxito', 'Rol eliminado correctamente');
+      toast.success('Rol eliminado correctamente');
       await loadRoles();
       await loadStats();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al eliminar rol';
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al eliminar rol:', error);
     } finally {
       setIsDeleting(false);
@@ -217,12 +215,12 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     try {
       const nuevoEstado = role.estado === 'activo' ? 'inactivo' : 'activo';
       await RoleService.changeEstado(role.id, nuevoEstado);
-      addToast('success', 'Éxito', `Rol ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} correctamente`);
+      toast.success(`Rol ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} correctamente`);
       await loadRoles();
       await loadStats();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al cambiar estado';
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al cambiar estado:', error);
     }
   };
@@ -254,12 +252,12 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     try {
       setLoadingPermissions(true);
       await RoleService.assignPermissions(selectedRole.id, selectedPermissions);
-      addToast('success', 'Éxito', 'Permisos asignados correctamente');
+      toast.success('Permisos asignados correctamente');
       setShowPermissionsModal(false);
       setSelectedRole(null);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al asignar permisos';
-      addToast('error', 'Error', errorMessage);
+      toast.error(errorMessage);
       logger.error('Error al asignar permisos:', error);
     } finally {
       setLoadingPermissions(false);
@@ -288,7 +286,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
-          <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+          <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
           <span className="text-gray-600">Cargando roles...</span>
         </div>
       </div>
@@ -318,63 +316,63 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     <div className="space-y-6">
       {/* Header con estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl p-4 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-100 text-sm">Total Roles</p>
+              <p className="text-teal-100 text-sm">Total Roles</p>
               <p className="text-2xl font-bold">{stats.total}</p>
             </div>
-            <Shield className="h-8 w-8 text-purple-200" />
+            <Shield className="h-8 w-8 text-teal-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-4 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm">Activos</p>
+              <p className="text-emerald-100 text-sm">Activos</p>
               <p className="text-2xl font-bold">{stats.activos}</p>
             </div>
-            <CheckCircle className="h-8 w-8 text-green-200" />
+            <CheckCircle className="h-8 w-8 text-emerald-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-rose-500 to-rose-600 rounded-xl p-4 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-red-100 text-sm">Inactivos</p>
+              <p className="text-rose-100 text-sm">Inactivos</p>
               <p className="text-2xl font-bold">{stats.inactivos}</p>
             </div>
-            <XCircle className="h-8 w-8 text-red-200" />
+            <XCircle className="h-8 w-8 text-rose-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-xl p-4 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm">Por Defecto</p>
+              <p className="text-cyan-100 text-sm">Por Defecto</p>
               <p className="text-2xl font-bold">{stats.porDefecto}</p>
             </div>
-            <Database className="h-8 w-8 text-blue-200" />
+            <Database className="h-8 w-8 text-cyan-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl p-4 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-indigo-100 text-sm">Personalizados</p>
+              <p className="text-teal-100 text-sm">Personalizados</p>
               <p className="text-2xl font-bold">{stats.personalizados}</p>
             </div>
-            <Settings className="h-8 w-8 text-indigo-200" />
+            <Settings className="h-8 w-8 text-teal-200" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-4 text-white">
+        <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-4 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-orange-100 text-sm">Con Usuarios</p>
+              <p className="text-amber-100 text-sm">Con Usuarios</p>
               <p className="text-2xl font-bold">{stats.conUsuarios}</p>
             </div>
-            <Users className="h-8 w-8 text-orange-200" />
+            <Users className="h-8 w-8 text-amber-200" />
           </div>
         </div>
       </div>
@@ -391,7 +389,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                 placeholder="Buscar roles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent w-full sm:w-64"
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent w-full sm:w-64"
               />
             </div>
 
@@ -399,7 +397,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
             <select
               value={filterEstado}
               onChange={(e) => setFilterEstado(e.target.value as any)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             >
               <option value="todos">Todos los estados</option>
               <option value="activo">Activos</option>
@@ -412,7 +410,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
             {onNavigateToPermissions && (
               <button
                 onClick={onNavigateToPermissions}
-                className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                className="flex items-center px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
               >
                 <Key className="h-4 w-4 mr-2" />
                 Gestionar Permisos
@@ -422,7 +420,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
             {/* Botón nuevo rol */}
             <button
               onClick={() => setShowModal(true)}
-              className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              className="flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Rol

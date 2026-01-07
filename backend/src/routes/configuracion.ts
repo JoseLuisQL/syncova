@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { ConfiguracionController } from '@/controllers/ConfiguracionController';
 import { authenticate, authorize, checkPermissions } from '@/middleware/auth';
-import { validate, validateUUID, sanitizeInput } from '@/middleware/validation';
-import { ValidationUtil } from '@/utils/validation';
+import { validate, validateParams, validateUUID, sanitizeInput } from '@/middleware/validation';
+import { uploadSingleLogo, handleLogoUploadError } from '@/middleware/uploadLogo';
 import Joi from 'joi';
 
 const router = Router();
@@ -85,6 +85,25 @@ router.get('/categorias',
   ConfiguracionController.getCategories
 );
 
+/**
+ * @route GET /api/configuracion/logo
+ * @desc Obtener información del logo institucional
+ * @access Public
+ */
+router.get('/logo',
+  sanitizeInput,
+  ConfiguracionController.getLogo
+);
+
+/**
+ * @route GET /api/configuracion/logo/file
+ * @desc Obtener archivo de imagen del logo
+ * @access Public
+ */
+router.get('/logo/file',
+  ConfiguracionController.getLogoFile
+);
+
 // =====================================================
 // RUTAS PROTEGIDAS (requieren autenticación)
 // =====================================================
@@ -105,19 +124,6 @@ router.get('/',
 );
 
 /**
- * @route GET /api/configuracion/:clave
- * @desc Obtener configuración por clave
- * @access Private (Administrador, Coordinador)
- */
-router.get('/:clave',
-  authorize(['administrador', 'coordinador']),
-  checkPermissions('read:configuracion'),
-  sanitizeInput,
-  validate(claveParamSchema),
-  ConfiguracionController.getByKey
-);
-
-/**
  * @route GET /api/configuracion/categoria/:categoria
  * @desc Obtener configuraciones por categoría
  * @access Private (Administrador, Coordinador)
@@ -126,8 +132,21 @@ router.get('/categoria/:categoria',
   authorize(['administrador', 'coordinador']),
   checkPermissions('read:configuracion'),
   sanitizeInput,
-  validate(categoriaParamSchema),
+  validateParams(categoriaParamSchema),
   ConfiguracionController.getByCategory
+);
+
+/**
+ * @route GET /api/configuracion/:clave
+ * @desc Obtener configuración por clave
+ * @access Private (Administrador, Coordinador)
+ */
+router.get('/:clave',
+  authorize(['administrador', 'coordinador']),
+  checkPermissions('read:configuracion'),
+  sanitizeInput,
+  validateParams(claveParamSchema),
+  ConfiguracionController.getByKey
 );
 
 /**
@@ -141,6 +160,43 @@ router.post('/',
   sanitizeInput,
   validate(createConfigSchema),
   ConfiguracionController.create
+);
+
+/**
+ * @route POST /api/configuracion/logo
+ * @desc Subir logo institucional
+ * @access Private (Administrador)
+ */
+router.post('/logo',
+  authorize(['administrador']),
+  checkPermissions('write:configuracion'),
+  uploadSingleLogo,
+  handleLogoUploadError,
+  ConfiguracionController.uploadLogo
+);
+
+/**
+ * @route DELETE /api/configuracion/logo
+ * @desc Eliminar logo institucional
+ * @access Private (Administrador)
+ */
+router.delete('/logo',
+  authorize(['administrador']),
+  checkPermissions('delete:configuracion'),
+  ConfiguracionController.deleteLogo
+);
+
+/**
+ * @route PUT /api/configuracion/bulk
+ * @desc Actualizar múltiples configuraciones
+ * @access Private (Administrador)
+ */
+router.put('/bulk',
+  authorize(['administrador']),
+  checkPermissions('write:configuracion'),
+  sanitizeInput,
+  validate(bulkUpdateSchema),
+  ConfiguracionController.bulkUpdate
 );
 
 /**
@@ -166,22 +222,9 @@ router.patch('/:clave/valor',
   authorize(['administrador']),
   checkPermissions('write:configuracion'),
   sanitizeInput,
-  validate(claveParamSchema),
+  validateParams(claveParamSchema),
   validate(updateValueSchema),
   ConfiguracionController.updateByKey
-);
-
-/**
- * @route PUT /api/configuracion/bulk
- * @desc Actualizar múltiples configuraciones
- * @access Private (Administrador)
- */
-router.put('/bulk',
-  authorize(['administrador']),
-  checkPermissions('write:configuracion'),
-  sanitizeInput,
-  validate(bulkUpdateSchema),
-  ConfiguracionController.bulkUpdate
 );
 
 /**

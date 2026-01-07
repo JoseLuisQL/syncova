@@ -983,4 +983,27 @@ export class MovimientosController {
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }
+
+  /**
+   * Obtener años disponibles con movimientos registrados
+   * GET /api/movimientos/anios-disponibles
+   */
+  static async getAniosDisponibles(_req: Request, res: Response): Promise<void> {
+    try {
+      const result = await MovimientosService.getAniosDisponibles();
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al obtener años disponibles', 500);
+        return;
+      }
+
+      ResponseUtil.success(res, {
+        anios: result.data,
+        anioActual: new Date().getFullYear()
+      }, 'Años disponibles obtenidos exitosamente');
+    } catch (error) {
+      console.error('Error en MovimientosController.getAniosDisponibles:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
 }

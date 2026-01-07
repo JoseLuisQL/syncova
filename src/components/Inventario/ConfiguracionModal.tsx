@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Package, Syringe, Building2, AlertCircle, Loader } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { X, Package, Syringe, Building2, Loader, Check } from 'lucide-react';
 import { apiClient } from '../../config/api';
 
 interface Vacuna {
@@ -82,14 +82,8 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Resetear formulario cuando se abre/cierra el modal
   useEffect(() => {
     if (isOpen) {
-      console.log('🔄 Modal abierto, datos recibidos:');
-      console.log('📦 Vacunas en modal:', vacunas.length, vacunas);
-      console.log('💉 Jeringas en modal:', jeringas.length, jeringas);
-      console.log('🏥 Centros en modal:', centrosAcopio.length, centrosAcopio);
-
       if (editingConfig) {
         setFormData({
           centroAcopioId: (editingConfig as ConfiguracionCentro).centroAcopioId || '',
@@ -111,44 +105,33 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
       }
       setErrors({});
     }
-  }, [isOpen, editingConfig, vacunas, jeringas, centrosAcopio]);
+  }, [isOpen, editingConfig]);
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.vacunaId) {
-      newErrors.vacunaId = 'La vacuna es requerida';
+      newErrors.vacunaId = 'Seleccione una vacuna';
     }
-
     if (!formData.jeringaId) {
-      newErrors.jeringaId = 'La jeringa es requerida';
+      newErrors.jeringaId = 'Seleccione una jeringa';
     }
-
     if (tipo === 'centro' && !formData.centroAcopioId) {
-      newErrors.centroAcopioId = 'El centro de acopio es requerido';
+      newErrors.centroAcopioId = 'Seleccione un centro';
     }
-
     if (formData.multiplicador <= 0) {
-      newErrors.multiplicador = 'El multiplicador debe ser mayor a 0';
-    }
-
-    if (formData.prioridad <= 0) {
-      newErrors.prioridad = 'La prioridad debe ser mayor a 0';
+      newErrors.multiplicador = 'Debe ser mayor a 0';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData, tipo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
-
     try {
       const endpoint = editingConfig
         ? `/configuracion-jeringa-vacuna/${tipo}/${editingConfig.id}`
@@ -169,250 +152,243 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
         : await apiClient.post(endpoint, payload);
 
       if (response.data.success) {
-        onNotification('success', `Configuración ${editingConfig ? 'actualizada' : 'creada'} exitosamente`);
+        onNotification('success', `Configuración ${editingConfig ? 'actualizada' : 'creada'}`);
         onSuccess();
       } else {
-        throw new Error(response.data.message || 'Error al guardar configuración');
+        throw new Error(response.data.message || 'Error al guardar');
       }
     } catch (error: any) {
-      console.error('Error al guardar configuración:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Error al guardar configuración';
-      onNotification('error', errorMessage);
+      const msg = error.response?.data?.message || error.message || 'Error al guardar';
+      onNotification('error', msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleChange = useCallback((field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
-  };
+  }, [errors]);
+
+  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  }, [onClose]);
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                {tipo === 'centro' ? (
-                  <Building2 className="h-6 w-6 text-blue-600" />
-                ) : (
-                  <Package className="h-6 w-6 text-blue-600" />
-                )}
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {editingConfig ? 'Editar' : 'Nueva'} Configuración {tipo === 'centro' ? 'por Centro' : 'por Defecto'}
-                </h2>
-                <p className="text-gray-600">
-                  {tipo === 'centro' 
-                    ? 'Configure un multiplicador específico para un centro de acopio.'
-                    : 'Configure el multiplicador por defecto para una combinación vacuna-jeringa.'
-                  }
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100"
-            >
-              <X className="h-6 w-6" />
-            </button>
-          </div>
+  const isEditing = !!editingConfig;
+  const selectedVacuna = vacunas.find(v => v.id === formData.vacunaId);
+  const selectedJeringa = jeringas.find(j => j.id === formData.jeringaId);
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Centro de Acopio (solo para configuraciones por centro) */}
-            {tipo === 'centro' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Building2 className="inline h-4 w-4 mr-1" />
-                  Centro de Acopio *
-                </label>
+  return (
+    <div 
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-white rounded-xl w-full max-w-lg shadow-xl animate-in fade-in zoom-in-95 duration-200">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              {isEditing ? 'Editar' : 'Nueva'} Configuración
+            </h2>
+            <p className="text-sm text-gray-500">
+              {tipo === 'centro' ? 'Configuración por centro' : 'Configuración por defecto'}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {/* Centro de Acopio (solo para tipo centro) */}
+          {tipo === 'centro' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Centro de Acopio
+              </label>
+              <div className="relative">
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <select
                   value={formData.centroAcopioId}
-                  onChange={(e) => handleInputChange('centroAcopioId', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.centroAcopioId ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  disabled={!!editingConfig}
+                  onChange={(e) => handleChange('centroAcopioId', e.target.value)}
+                  disabled={isEditing}
+                  className={`w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm appearance-none bg-white
+                    focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors
+                    ${errors.centroAcopioId ? 'border-rose-300 bg-rose-50' : 'border-gray-200'}
+                    ${isEditing ? 'bg-gray-50 text-gray-500' : ''}`}
                 >
-                  <option value="">Seleccione un centro de acopio</option>
-                  {centrosAcopio.map(centro => (
-                    <option key={centro.id} value={centro.id}>
-                      {centro.nombre} ({centro.codigo})
-                    </option>
+                  <option value="">Seleccionar centro...</option>
+                  {centrosAcopio.map(c => (
+                    <option key={c.id} value={c.id}>{c.nombre}</option>
                   ))}
                 </select>
-                {errors.centroAcopioId && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    {errors.centroAcopioId}
-                  </p>
-                )}
               </div>
-            )}
+              {errors.centroAcopioId && (
+                <p className="mt-1 text-xs text-rose-600">{errors.centroAcopioId}</p>
+              )}
+            </div>
+          )}
 
-            {/* Vacuna */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Package className="inline h-4 w-4 mr-1" />
-                Vacuna * (Disponibles: {vacunas.length})
-              </label>
+          {/* Vacuna */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Vacuna
+            </label>
+            <div className="relative">
+              <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <select
                 value={formData.vacunaId}
-                onChange={(e) => handleInputChange('vacunaId', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.vacunaId ? 'border-red-300' : 'border-gray-300'
-                }`}
-                disabled={!!editingConfig}
+                onChange={(e) => handleChange('vacunaId', e.target.value)}
+                disabled={isEditing}
+                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm appearance-none bg-white
+                  focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors
+                  ${errors.vacunaId ? 'border-rose-300 bg-rose-50' : 'border-gray-200'}
+                  ${isEditing ? 'bg-gray-50 text-gray-500' : ''}`}
               >
-                <option value="">
-                  {vacunas.length === 0 ? 'Cargando vacunas...' : 'Seleccione una vacuna'}
-                </option>
-                {vacunas.map(vacuna => (
-                  <option key={vacuna.id} value={vacuna.id}>
-                    {vacuna.nombre} - {vacuna.tipo} ({vacuna.dosisPorFrasco} dosis/frasco)
-                  </option>
+                <option value="">Seleccionar vacuna...</option>
+                {vacunas.map(v => (
+                  <option key={v.id} value={v.id}>{v.nombre}</option>
                 ))}
               </select>
-              {errors.vacunaId && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errors.vacunaId}
-                </p>
-              )}
             </div>
+            {errors.vacunaId && (
+              <p className="mt-1 text-xs text-rose-600">{errors.vacunaId}</p>
+            )}
+            {selectedVacuna && (
+              <p className="mt-1 text-xs text-gray-500">
+                {selectedVacuna.tipo} · {selectedVacuna.dosisPorFrasco} dosis/frasco
+              </p>
+            )}
+          </div>
 
-            {/* Jeringa */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Syringe className="inline h-4 w-4 mr-1" />
-                Jeringa * (Disponibles: {jeringas.length})
-              </label>
+          {/* Jeringa */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Jeringa
+            </label>
+            <div className="relative">
+              <Syringe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <select
                 value={formData.jeringaId}
-                onChange={(e) => handleInputChange('jeringaId', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.jeringaId ? 'border-red-300' : 'border-gray-300'
-                }`}
-                disabled={!!editingConfig}
+                onChange={(e) => handleChange('jeringaId', e.target.value)}
+                disabled={isEditing}
+                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm appearance-none bg-white
+                  focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors
+                  ${errors.jeringaId ? 'border-rose-300 bg-rose-50' : 'border-gray-200'}
+                  ${isEditing ? 'bg-gray-50 text-gray-500' : ''}`}
               >
-                <option value="">
-                  {jeringas.length === 0 ? 'Cargando jeringas...' : 'Seleccione una jeringa'}
-                </option>
-                {jeringas.map(jeringa => (
-                  <option key={jeringa.id} value={jeringa.id}>
-                    {jeringa.tipo} {jeringa.capacidad} - {jeringa.color}
-                  </option>
+                <option value="">Seleccionar jeringa...</option>
+                {jeringas.map(j => (
+                  <option key={j.id} value={j.id}>{j.tipo} {j.capacidad}</option>
                 ))}
               </select>
-              {errors.jeringaId && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errors.jeringaId}
-                </p>
+            </div>
+            {errors.jeringaId && (
+              <p className="mt-1 text-xs text-rose-600">{errors.jeringaId}</p>
+            )}
+            {selectedJeringa && (
+              <p className="mt-1 text-xs text-gray-500">
+                Color: {selectedJeringa.color}
+              </p>
+            )}
+          </div>
+
+          {/* Multiplicador y Prioridad */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Multiplicador
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                min="0.1"
+                value={formData.multiplicador}
+                onChange={(e) => handleChange('multiplicador', parseFloat(e.target.value) || 0)}
+                className={`w-full px-3 py-2.5 border rounded-lg text-sm
+                  focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors
+                  ${errors.multiplicador ? 'border-rose-300 bg-rose-50' : 'border-gray-200'}`}
+              />
+              {errors.multiplicador ? (
+                <p className="mt-1 text-xs text-rose-600">{errors.multiplicador}</p>
+              ) : (
+                <p className="mt-1 text-xs text-gray-500">Jeringas por dosis</p>
               )}
             </div>
 
-            {/* Multiplicador y Prioridad en la misma fila */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Multiplicador *
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0.1"
-                  value={formData.multiplicador}
-                  onChange={(e) => handleInputChange('multiplicador', parseFloat(e.target.value) || 0)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.multiplicador ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="1.0"
-                />
-                {errors.multiplicador && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    {errors.multiplicador}
-                  </p>
-                )}
-                <p className="mt-1 text-xs text-gray-500">
-                  Cantidad de jeringas por dosis de vacuna
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Prioridad *
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={formData.prioridad}
-                  onChange={(e) => handleInputChange('prioridad', parseInt(e.target.value) || 1)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.prioridad ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="1"
-                />
-                {errors.prioridad && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    {errors.prioridad}
-                  </p>
-                )}
-                <p className="mt-1 text-xs text-gray-500">
-                  Orden de selección (menor número = mayor prioridad)
-                </p>
-              </div>
-            </div>
-
-            {/* Estado */}
             <div>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.activo}
-                  onChange={(e) => handleInputChange('activo', e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <span className="ml-2 text-sm text-gray-700">
-                  Configuración activa
-                </span>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Prioridad
               </label>
-              <p className="mt-1 text-xs text-gray-500">
-                Solo las configuraciones activas se utilizan en los cálculos
+              <input
+                type="number"
+                min="1"
+                value={formData.prioridad}
+                onChange={(e) => handleChange('prioridad', parseInt(e.target.value) || 1)}
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm
+                  focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+              />
+              <p className="mt-1 text-xs text-gray-500">1 = máxima prioridad</p>
+            </div>
+          </div>
+
+          {/* Estado activo */}
+          <div 
+            className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
+              formData.activo 
+                ? 'border-emerald-200 bg-emerald-50' 
+                : 'border-gray-200 bg-gray-50'
+            }`}
+            onClick={() => handleChange('activo', !formData.activo)}
+          >
+            <div>
+              <p className="text-sm font-medium text-gray-900">Estado activo</p>
+              <p className="text-xs text-gray-500">
+                {formData.activo ? 'Se usará en cálculos' : 'No se usará en cálculos'}
               </p>
             </div>
-
-            {/* Botones */}
-            <div className="flex justify-end gap-3 pt-6 border-t">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                disabled={isSubmitting}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {isSubmitting && <Loader className="h-4 w-4 animate-spin" />}
-                {editingConfig ? 'Actualizar' : 'Crear'}
-              </button>
+            <div className={`w-10 h-6 rounded-full p-1 transition-colors ${
+              formData.activo ? 'bg-emerald-500' : 'bg-gray-300'
+            }`}>
+              <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                formData.activo ? 'translate-x-4' : 'translate-x-0'
+              }`} />
             </div>
-          </form>
+          </div>
+        </form>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 rounded-lg transition-all disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <Loader className="h-4 w-4 animate-spin" />
+            ) : (
+              <Check className="h-4 w-4" />
+            )}
+            {isEditing ? 'Guardar Cambios' : 'Crear Configuración'}
+          </button>
         </div>
       </div>
     </div>

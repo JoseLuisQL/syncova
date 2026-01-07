@@ -1,7 +1,10 @@
 import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
+import fs from 'fs';
 import { ValeService } from './ValeService';
 import { ConfiguracionJeringaVacunaService } from './ConfiguracionJeringaVacunaService';
+import { ConfiguracionService } from './ConfiguracionService';
+import { getLogoPath } from '@/middleware/uploadLogo';
 import { ServiceResult } from '@/types';
 
 /**
@@ -45,10 +48,34 @@ export interface ValeExportStats {
 }
 
 /**
+ * Datos dinámicos para el encabezado de exportación
+ */
+interface HeaderData {
+  institucionNombre: string;
+  anioNombre: string;
+  logoPath: string | null;
+}
+
+/**
  * Servicio para exportación de Vales de Entrega
  * Maneja la generación de archivos Excel y PDF con configuraciones personalizadas
  */
 class ValeExportService {
+
+  /**
+   * Obtener datos dinámicos para el encabezado
+   */
+  private static async getHeaderData(): Promise<HeaderData> {
+    const institucionNombre = await ConfiguracionService.getValue('institucion_nombre', 'DISA APURIMAC II');
+    const anioNombre = await ConfiguracionService.getValue('anio_nombre', '');
+    const logoPath = getLogoPath();
+
+    return {
+      institucionNombre: institucionNombre || 'DISA APURIMAC II',
+      anioNombre: anioNombre || '',
+      logoPath
+    };
+  }
 
   /**
    * Exportar vale a Excel
@@ -79,6 +106,9 @@ class ValeExportService {
       // Crear hoja principal
       const worksheet = workbook.addWorksheet('Vale de Entrega');
 
+      // Obtener datos dinámicos del encabezado
+      const headerData = await this.getHeaderData();
+
       // Configurar columnas con anchos optimizados para jeringas
       worksheet.columns = [
         { header: 'Nº', key: 'numero', width: 5 },
@@ -92,7 +122,7 @@ class ValeExportService {
       ];
 
       // Agregar encabezado del vale
-      this.agregarEncabezadoExcel(worksheet, vale, config);
+      await this.agregarEncabezadoExcel(workbook, worksheet, vale, config, headerData);
 
       // Procesar y agregar datos
       const datosParaExportar = await this.procesarDatosParaExportacion(vale, config);
@@ -167,6 +197,9 @@ class ValeExportService {
       // Crear hoja principal
       const worksheet = workbook.addWorksheet('Vales Combinados');
 
+      // Obtener datos dinámicos del encabezado
+      const headerData = await this.getHeaderData();
+
       // Configurar columnas
       worksheet.columns = [
         { header: 'Nº', key: 'numero', width: 5 },
@@ -180,7 +213,7 @@ class ValeExportService {
       ];
 
       // Agregar encabezado del vale combinado
-      this.agregarEncabezadoExcel(worksheet, valeCombinado, config);
+      await this.agregarEncabezadoExcel(workbook, worksheet, valeCombinado, config, headerData);
 
       // Procesar y agregar datos combinados
       const datosParaExportar = await this.procesarDatosParaExportacion(valeCombinado, config);
@@ -235,6 +268,9 @@ class ValeExportService {
 
       const vale = valeResult.data;
 
+      // Obtener datos de cabecera dinámicos
+      const headerData = await this.getHeaderData();
+
       // Crear documento PDF
       const doc = new PDFDocument({ margin: 50 });
       const buffers: Buffer[] = [];
@@ -242,7 +278,7 @@ class ValeExportService {
       doc.on('data', buffers.push.bind(buffers));
 
       // Agregar contenido al PDF
-      this.agregarEncabezadoPDF(doc, vale, config);
+      this.agregarEncabezadoPDF(doc, vale, config, headerData);
 
       // Procesar y agregar datos
       const datosParaExportar = await this.procesarDatosParaExportacion(vale, config);
@@ -890,218 +926,303 @@ class ValeExportService {
       .trim();
   }
 
+  // ============================================================================
+  // PALETA DE COLORES PROFESIONAL - CONSISTENTE CON SIVAC (teal/cyan)
+  // ============================================================================
+  private static readonly COLORS = {
+    // Colores primarios del sistema (teal)
+    primary: 'FF0D9488',      // teal-600
+    primaryDark: 'FF0F766E',  // teal-700
+    primaryLight: 'FFCCFBF1', // teal-100
+    
+    // Colores secundarios (cyan)
+    secondary: 'FF0891B2',    // cyan-600
+    secondaryLight: 'FFCFFAFE', // cyan-100
+    
+    // Colores institucionales
+    institutional: 'FF115E59', // teal-800 para headers institucionales
+    institutionalLight: 'FF14B8A6', // teal-500
+    
+    // Colores de estado
+    success: 'FF059669',      // emerald-600
+    successLight: 'FFECFDF5', // emerald-50
+    
+    // Colores neutros
+    white: 'FFFFFFFF',
+    gray50: 'FFF9FAFB',
+    gray100: 'FFF3F4F6',
+    gray200: 'FFE5E7EB',
+    gray400: 'FF9CA3AF',
+    gray500: 'FF6B7280',
+    gray700: 'FF374151',
+    gray800: 'FF1F2937',
+    gray900: 'FF111827',
+  };
+
   // Métodos auxiliares para Excel y PDF con estructura profesional
-  private static agregarEncabezadoExcel(worksheet: ExcelJS.Worksheet, vale: any, config: ValeExportConfig) {
+  private static async agregarEncabezadoExcel(
+    workbook: ExcelJS.Workbook,
+    worksheet: ExcelJS.Worksheet,
+    vale: any,
+    config: ValeExportConfig,
+    headerData: HeaderData
+  ) {
     // CONFIGURACIÓN PROFESIONAL DE LA HOJA
-    // Eliminar líneas de cuadrícula para diseño moderno
     worksheet.views = [{
       showGridLines: false,
       showRowColHeaders: false,
-      zoomScale: 85
+      zoomScale: 90
     }];
 
-    // Configurar ancho de columnas optimizado para diseño profesional
+    // Configurar ancho de columnas optimizado
     worksheet.columns = [
       { width: 5 },   // A - Nº
-      { width: 22 },  // B - Biológicos
+      { width: 24 },  // B - Biológicos
       { width: 10 },  // C - Cantidad
       { width: 2 },   // D - Separador
-      { width: 38 },  // E - Jeringas (incrementado para nombres completos)
+      { width: 36 },  // E - Jeringas
       { width: 10 },  // F - Cantidad
       { width: 3 },   // G - Separador central
       { width: 5 },   // H - Nº
-      { width: 22 },  // I - Biológicos
+      { width: 24 },  // I - Biológicos
       { width: 10 },  // J - Cantidad
       { width: 2 },   // K - Separador
-      { width: 38 },  // L - Jeringas (incrementado para nombres completos)
+      { width: 36 },  // L - Jeringas
       { width: 10 }   // M - Cantidad
     ];
 
-    // ENCABEZADO INSTITUCIONAL MODERNO
-    // Fondo degradado para toda la sección del encabezado
-    for (let row = 1; row <= 6; row++) {
+    // ENCABEZADO INSTITUCIONAL CON LOGO Y DATOS DINÁMICOS
+    // Configurar alturas de filas del encabezado
+    worksheet.getRow(1).height = 22;
+    worksheet.getRow(2).height = 18;
+    worksheet.getRow(3).height = 16;
+    worksheet.getRow(4).height = 5;  // Espaciador pequeño
+    worksheet.getRow(5).height = 24;
+
+    // Fondo para encabezado (filas 1-3)
+    for (let row = 1; row <= 3; row++) {
       for (let col = 1; col <= 13; col++) {
         const cell = worksheet.getCell(row, col);
         cell.fill = {
           type: 'pattern',
           pattern: 'solid',
-          fgColor: { argb: 'FFF8FAFE' }
+          fgColor: { argb: this.COLORS.primaryLight }
         };
       }
     }
 
-    // Logo y encabezado principal
-    worksheet.mergeCells('A1:M1');
-    const headerCell1 = worksheet.getCell('A1');
-    headerCell1.value = '🏛️ GOBIERNO REGIONAL DE APURÍMAC';
+    // Verificar si existe logo
+    const hasLogo = headerData.logoPath && fs.existsSync(headerData.logoPath);
+
+    if (hasLogo) {
+      try {
+        const logoBuffer = fs.readFileSync(headerData.logoPath!);
+        const logoExtension = headerData.logoPath!.toLowerCase().endsWith('.png') ? 'png' : 'jpeg';
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const imageId = workbook.addImage({
+          buffer: logoBuffer as any,
+          extension: logoExtension,
+        });
+
+        // Logo en columna A, ocupando las 3 primeras filas
+        // Tamaño cuadrado para mantener proporciones (65x65)
+        worksheet.addImage(imageId, {
+          tl: { col: 0.1, row: 0.1 },
+          ext: { width: 65, height: 65 }
+        });
+
+        // Ajustar columna A para el logo
+        worksheet.getColumn('A').width = 10;
+      } catch (error) {
+        console.error('Error al agregar logo al Excel:', error);
+      }
+    }
+
+    // Columnas para texto: si hay logo empiezan en B, sino en A
+    const colInicio = hasLogo ? 'B' : 'A';
+
+    // Nombre de la Institución (dinámico)
+    worksheet.mergeCells(`${colInicio}1:M1`);
+    const headerCell1 = worksheet.getCell(`${colInicio}1`);
+    headerCell1.value = headerData.institucionNombre.toUpperCase();
     headerCell1.font = {
       bold: true,
-      size: 14,
-      color: { argb: 'FF1E3A8A' },
-      name: 'Segoe UI'
+      size: 13,
+      color: { argb: this.COLORS.institutional },
+      name: 'Calibri'
     };
-    headerCell1.alignment = { horizontal: 'center', vertical: 'middle' };
-    headerCell1.fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFDBEAFE' }
-    };
+    headerCell1.alignment = { horizontal: hasLogo ? 'left' : 'center', vertical: 'middle' };
 
-    worksheet.mergeCells('A2:M2');
-    const headerCell2 = worksheet.getCell('A2');
-    headerCell2.value = 'DIRECCIÓN SUB REGIONAL DE SALUD CHANKA ANDAHUAYLAS';
+    // Estrategia Sanitaria (estático)
+    worksheet.mergeCells(`${colInicio}2:M2`);
+    const headerCell2 = worksheet.getCell(`${colInicio}2`);
+    headerCell2.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRIO';
     headerCell2.font = {
       bold: true,
-      size: 11,
-      color: { argb: 'FF1E40AF' },
-      name: 'Segoe UI'
-    };
-    headerCell2.alignment = { horizontal: 'center', vertical: 'middle' };
-
-    worksheet.mergeCells('A3:M3');
-    const headerCell3 = worksheet.getCell('A3');
-    headerCell3.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRÍO';
-    headerCell3.font = {
-      bold: true,
-      size: 10,
-      color: { argb: 'FF2563EB' },
-      name: 'Segoe UI'
-    };
-    headerCell3.alignment = { horizontal: 'center', vertical: 'middle' };
-
-    worksheet.mergeCells('A4:M4');
-    const headerCell4 = worksheet.getCell('A4');
-    headerCell4.value = '"Año de la Universalización de la Salud"';
-    headerCell4.font = {
-      italic: true,
       size: 9,
-      color: { argb: 'FF3B82F6' },
-      name: 'Segoe UI'
+      color: { argb: this.COLORS.primary },
+      name: 'Calibri'
     };
-    headerCell4.alignment = { horizontal: 'center', vertical: 'middle' };
+    headerCell2.alignment = { horizontal: hasLogo ? 'left' : 'center', vertical: 'middle' };
 
-    // Título principal con diseño moderno
-    worksheet.mergeCells('A6:M6');
-    const titleCell = worksheet.getCell('A6');
-    titleCell.value = '📋 VALE DE ENTREGA DE VACUNAS Y JERINGAS';
+    // Nombre del Año (dinámico)
+    worksheet.mergeCells(`${colInicio}3:M3`);
+    const headerCell3 = worksheet.getCell(`${colInicio}3`);
+    if (headerData.anioNombre) {
+      headerCell3.value = `"${headerData.anioNombre}"`;
+      headerCell3.font = {
+        italic: true,
+        size: 8,
+        color: { argb: this.COLORS.gray500 },
+        name: 'Calibri'
+      };
+      headerCell3.alignment = { horizontal: hasLogo ? 'left' : 'center', vertical: 'middle' };
+    }
+
+    // Fila 4 vacía como espaciador
+    worksheet.mergeCells('A4:M4');
+
+    // Título principal profesional
+    worksheet.mergeCells('A5:M5');
+    const titleCell = worksheet.getCell('A5');
+    titleCell.value = 'VALE DE ENTREGA DE VACUNAS Y JERINGAS';
     titleCell.font = {
       bold: true,
-      size: 16,
-      color: { argb: 'FFFFFFFF' },
-      name: 'Segoe UI'
+      size: 14,
+      color: { argb: this.COLORS.white },
+      name: 'Calibri'
     };
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
     titleCell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF1E40AF' }
+      fgColor: { argb: this.COLORS.primary }
     };
 
-    // Información del vale con diseño moderno
-    worksheet.mergeCells('A8:F8');
-    const infoCell1 = worksheet.getCell('A8');
-    infoCell1.value = `🏢 Centro de Acopio: ${vale.centroAcopio.nombre}`;
+    // Información del vale
+    worksheet.mergeCells('A7:F7');
+    const infoCell1 = worksheet.getCell('A7');
+    infoCell1.value = `Centro de Acopio: ${vale.centroAcopio.nombre}`;
     infoCell1.font = {
       bold: true,
-      size: 14,
-      color: { argb: 'FF1F2937' },
-      name: 'Segoe UI'
+      size: 10,
+      color: { argb: this.COLORS.gray800 },
+      name: 'Calibri'
     };
     infoCell1.alignment = { horizontal: 'left', vertical: 'middle' };
     infoCell1.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFF3F4F6' }
+      fgColor: { argb: this.COLORS.gray100 }
     };
 
-    worksheet.mergeCells('H8:M8');
-    const infoCell2 = worksheet.getCell('H8');
-    infoCell2.value = `👤 Responsable: ${config.responsableRecojo}`;
+    worksheet.mergeCells('H7:M7');
+    const infoCell2 = worksheet.getCell('H7');
+    infoCell2.value = `Responsable: ${config.responsableRecojo}`;
     infoCell2.font = {
       bold: true,
-      size: 13,
-      color: { argb: 'FF1F2937' },
-      name: 'Segoe UI'
+      size: 10,
+      color: { argb: this.COLORS.gray800 },
+      name: 'Calibri'
     };
     infoCell2.alignment = { horizontal: 'left', vertical: 'middle' };
     infoCell2.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFF3F4F6' }
+      fgColor: { argb: this.COLORS.gray100 }
     };
 
-    worksheet.mergeCells('A9:F9');
-    const infoCell3 = worksheet.getCell('A9');
-    infoCell3.value = `📅 Fecha: ${new Date().toLocaleDateString('es-PE', {
+    worksheet.mergeCells('A8:F8');
+    const infoCell3 = worksheet.getCell('A8');
+    infoCell3.value = `Fecha: ${new Date().toLocaleDateString('es-PE', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     })}`;
     infoCell3.font = {
-      bold: true,
-      size: 13,
-      color: { argb: 'FF1F2937' },
-      name: 'Segoe UI'
+      bold: false,
+      size: 10,
+      color: { argb: this.COLORS.gray700 },
+      name: 'Calibri'
     };
     infoCell3.alignment = { horizontal: 'left', vertical: 'middle' };
     infoCell3.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFF3F4F6' }
+      fgColor: { argb: this.COLORS.gray100 }
     };
 
-    // Aplicar bordes modernos al encabezado
-    for (let row = 1; row <= 9; row++) {
+    // Número de vale
+    worksheet.mergeCells('H8:M8');
+    const infoCell4 = worksheet.getCell('H8');
+    infoCell4.value = `N° Vale: ${vale.numero || 'S/N'}`;
+    infoCell4.font = {
+      bold: true,
+      size: 10,
+      color: { argb: this.COLORS.primary },
+      name: 'Calibri'
+    };
+    infoCell4.alignment = { horizontal: 'left', vertical: 'middle' };
+    infoCell4.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: this.COLORS.gray100 }
+    };
+
+    // Aplicar bordes sutiles
+    for (let row = 1; row <= 8; row++) {
       for (let col = 1; col <= 13; col++) {
         const cell = worksheet.getCell(row, col);
         cell.border = {
-          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+          top: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+          left: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+          bottom: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+          right: { style: 'thin', color: { argb: this.COLORS.gray200 } }
         };
       }
     }
 
-    // Ajustar altura de filas para mejor presentación
-    worksheet.getRow(1).height = 25;
-    worksheet.getRow(2).height = 20;
-    worksheet.getRow(3).height = 18;
-    worksheet.getRow(4).height = 16;
-    worksheet.getRow(6).height = 30;
-    worksheet.getRow(8).height = 22;
-    worksheet.getRow(9).height = 22;
+    // Ajustar altura de filas
+    if (!hasLogo) {
+      worksheet.getRow(1).height = 24;
+      worksheet.getRow(2).height = 18;
+      worksheet.getRow(3).height = 16;
+    }
+    worksheet.getRow(5).height = 26;
+    worksheet.getRow(7).height = 20;
+    worksheet.getRow(8).height = 20;
   }
 
   private static agregarDatosExcel(worksheet: ExcelJS.Worksheet, datos: any, _config: ValeExportConfig) {
-    let filaActual = 12;
+    let filaActual = 10;
 
-    // SECCIÓN CONSOLIDADO CON DISEÑO MODERNO
+    // SECCIÓN CONSOLIDADO GENERAL - DISEÑO PROFESIONAL
     worksheet.mergeCells(`A${filaActual}:F${filaActual}`);
     const consolidadoHeader = worksheet.getCell(`A${filaActual}`);
-    consolidadoHeader.value = '📊 CONSOLIDADO GENERAL';
+    consolidadoHeader.value = 'CONSOLIDADO GENERAL';
     consolidadoHeader.font = {
       bold: true,
-      size: 14,
-      color: { argb: 'FFFFFFFF' },
-      name: 'Segoe UI'
+      size: 12,
+      color: { argb: this.COLORS.white },
+      name: 'Calibri'
     };
     consolidadoHeader.alignment = { horizontal: 'center', vertical: 'middle' };
     consolidadoHeader.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FF059669' }
+      fgColor: { argb: this.COLORS.primary }
     };
 
-    // Headers del consolidado con diseño profesional
+    // Headers del consolidado
     filaActual++;
     const headerConsolidado = [
-      { col: 'A', text: 'Nº', width: 5 },
-      { col: 'B', text: '💉 Biológicos', width: 22 },
-      { col: 'C', text: 'Cant.', width: 10 },
-      { col: 'E', text: '💊 Jeringas', width: 38 },
-      { col: 'F', text: 'Cant.', width: 10 }
+      { col: 'A', text: 'N°' },
+      { col: 'B', text: 'Biológicos' },
+      { col: 'C', text: 'Cant.' },
+      { col: 'E', text: 'Jeringas' },
+      { col: 'F', text: 'Cant.' }
     ];
 
     headerConsolidado.forEach(header => {
@@ -1109,76 +1230,76 @@ class ValeExportService {
       cell.value = header.text;
       cell.font = {
         bold: true,
-        size: 14,
-        color: { argb: 'FFFFFFFF' },
-        name: 'Segoe UI'
+        size: 10,
+        color: { argb: this.COLORS.white },
+        name: 'Calibri'
       };
       cell.alignment = { horizontal: 'center', vertical: 'middle' };
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FF0D9488' }
+        fgColor: { argb: this.COLORS.primaryDark }
       };
       cell.border = {
-        top: { style: 'medium', color: { argb: 'FF065F46' } },
-        left: { style: 'thin', color: { argb: 'FF065F46' } },
-        bottom: { style: 'medium', color: { argb: 'FF065F46' } },
-        right: { style: 'thin', color: { argb: 'FF065F46' } }
+        top: { style: 'thin', color: { argb: this.COLORS.primary } },
+        left: { style: 'thin', color: { argb: this.COLORS.primary } },
+        bottom: { style: 'thin', color: { argb: this.COLORS.primary } },
+        right: { style: 'thin', color: { argb: this.COLORS.primary } }
       };
     });
 
-    // Ajustar altura de filas del consolidado
-    worksheet.getRow(filaActual - 1).height = 25;
-    worksheet.getRow(filaActual).height = 20;
+    worksheet.getRow(filaActual - 1).height = 22;
+    worksheet.getRow(filaActual).height = 18;
 
-    // Datos del consolidado con diseño moderno
+    // Datos del consolidado - SOLO VACUNAS CON CANTIDAD > 0
     filaActual++;
-    datos.consolidado.forEach((item: any, index: number) => {
+    const consolidadoConDatos = datos.consolidado.filter((item: any) => item.cantidad > 0);
+    
+    consolidadoConDatos.forEach((item: any, index: number) => {
       const isEvenRow = index % 2 === 0;
-      const rowColor = isEvenRow ? 'FFF9FAFB' : 'FFFFFFFF';
+      const rowColor = isEvenRow ? this.COLORS.gray50 : this.COLORS.white;
 
-      // Datos de vacunas
       const cellA = worksheet.getCell(`A${filaActual}`);
-      cellA.value = item.numero;
-      cellA.font = { size: 14, name: 'Segoe UI', color: { argb: 'FF374151' } };
+      cellA.value = index + 1;
+      cellA.font = { size: 9, name: 'Calibri', color: { argb: this.COLORS.gray500 } };
       cellA.alignment = { horizontal: 'center', vertical: 'middle' };
 
       const cellB = worksheet.getCell(`B${filaActual}`);
       cellB.value = item.biologico;
-      cellB.font = { size: 14, name: 'Segoe UI', color: { argb: 'FF374151' } };
+      cellB.font = { size: 9, name: 'Calibri', bold: true, color: { argb: this.COLORS.gray700 } };
       cellB.alignment = { horizontal: 'left', vertical: 'middle' };
 
       const cellC = worksheet.getCell(`C${filaActual}`);
       cellC.value = item.cantidad;
       cellC.font = {
-        size: 14,
-        name: 'Segoe UI',
-        bold: item.cantidad > 0,
-        color: { argb: item.cantidad > 0 ? 'FF059669' : 'FF6B7280' }
+        size: 10,
+        name: 'Calibri',
+        bold: true,
+        color: { argb: this.COLORS.success }
       };
       cellC.alignment = { horizontal: 'center', vertical: 'middle' };
 
-      // Jeringas consolidadas con cantidades reales
+      // Jeringas consolidadas
       if (index < datos.jeringasConsolidado.length) {
         const jeringaData = datos.jeringasConsolidado[index];
 
         const cellE = worksheet.getCell(`E${filaActual}`);
         cellE.value = jeringaData.nombre;
-        cellE.font = { size: 11, name: 'Segoe UI', color: { argb: 'FF374151' } };
+        cellE.font = { size: 9, name: 'Calibri', color: { argb: this.COLORS.gray700 } };
         cellE.alignment = { horizontal: 'left', vertical: 'middle' };
 
         const cellF = worksheet.getCell(`F${filaActual}`);
         cellF.value = jeringaData.cantidad;
         cellF.font = {
-          size: 14,
-          name: 'Segoe UI',
+          size: 10,
+          name: 'Calibri',
           bold: jeringaData.cantidad > 0,
-          color: { argb: jeringaData.cantidad > 0 ? 'FF059669' : 'FF6B7280' }
+          color: { argb: jeringaData.cantidad > 0 ? this.COLORS.success : this.COLORS.gray400 }
         };
         cellF.alignment = { horizontal: 'center', vertical: 'middle' };
       }
 
-      // Aplicar estilos modernos
+      // Aplicar estilos
       ['A', 'B', 'C', 'E', 'F'].forEach(col => {
         const cell = worksheet.getCell(`${col}${filaActual}`);
         cell.fill = {
@@ -1187,35 +1308,24 @@ class ValeExportService {
           fgColor: { argb: rowColor }
         };
         cell.border = {
-          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+          top: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+          left: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+          bottom: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+          right: { style: 'thin', color: { argb: this.COLORS.gray200 } }
         };
       });
 
-      // Destacar filas con cantidades importantes
-      if (item.cantidad > 50) {
-        ['A', 'B', 'C'].forEach(col => {
-          const cell = worksheet.getCell(`${col}${filaActual}`);
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFECFDF5' }
-          };
-        });
-      }
-
-      worksheet.getRow(filaActual).height = 18;
+      worksheet.getRow(filaActual).height = 16;
       filaActual++;
     });
 
     // Observaciones para consolidado
-    worksheet.getCell(`E${filaActual}`).value = 'Observaciones:';
-    worksheet.getCell(`E${filaActual}`).font = { bold: true };
+    filaActual++;
+    worksheet.getCell(`A${filaActual}`).value = 'Observaciones:';
+    worksheet.getCell(`A${filaActual}`).font = { bold: true, size: 9, name: 'Calibri', color: { argb: this.COLORS.gray700 } };
 
     // Agregar establecimientos (2 por fila)
-    filaActual += 3;
+    filaActual += 2;
     const establecimientosPorFila = 2;
     const totalEstablecimientos = datos.establecimientos.length;
 
@@ -1224,158 +1334,145 @@ class ValeExportService {
       // Procesar hasta 2 establecimientos por fila
       for (let j = 0; j < establecimientosPorFila && (i + j) < totalEstablecimientos; j++) {
         const establecimiento = datos.establecimientos[i + j];
-        const colInicio = j === 0 ? 'A' : 'H'; // Primera columna A, segunda H
-        const colFin = j === 0 ? 'F' : 'M';   // Última columna F o M
+        const colInicio = j === 0 ? 'A' : 'H';
+        const colFin = j === 0 ? 'F' : 'M';
 
-        // Header del establecimiento con diseño moderno
+        // Header del establecimiento - PROFESIONAL SIN EMOJIS
         const rangoHeader = `${colInicio}${filaActual}:${colFin}${filaActual}`;
         worksheet.mergeCells(rangoHeader);
         const headerCell = worksheet.getCell(`${colInicio}${filaActual}`);
-        headerCell.value = `🏥 ${establecimiento.nombre}`;
+        headerCell.value = establecimiento.nombre.toUpperCase();
         headerCell.font = {
           bold: true,
-          size: 14,
-          color: { argb: 'FFFFFFFF' },
-          name: 'Segoe UI'
+          size: 10,
+          color: { argb: this.COLORS.white },
+          name: 'Calibri'
         };
         headerCell.alignment = { horizontal: 'center', vertical: 'middle' };
         headerCell.fill = {
           type: 'pattern',
           pattern: 'solid',
-          fgColor: { argb: 'FF2563EB' }
+          fgColor: { argb: this.COLORS.secondary }
         };
         headerCell.border = {
-          top: { style: 'medium', color: { argb: 'FF1D4ED8' } },
-          left: { style: 'medium', color: { argb: 'FF1D4ED8' } },
-          bottom: { style: 'medium', color: { argb: 'FF1D4ED8' } },
-          right: { style: 'medium', color: { argb: 'FF1D4ED8' } }
+          top: { style: 'thin', color: { argb: this.COLORS.primaryDark } },
+          left: { style: 'thin', color: { argb: this.COLORS.primaryDark } },
+          bottom: { style: 'thin', color: { argb: this.COLORS.primaryDark } },
+          right: { style: 'thin', color: { argb: this.COLORS.primaryDark } }
         };
       }
 
       filaActual++;
+      worksheet.getRow(filaActual - 1).height = 20;
 
       // Headers de las columnas para ambos establecimientos
       for (let j = 0; j < establecimientosPorFila && (i + j) < totalEstablecimientos; j++) {
         const cols = ['A', 'B', 'C', 'D', 'E', 'F'];
-        if (j === 1) cols.forEach((_, idx) => cols[idx] = String.fromCharCode(72 + idx)); // H, I, J, K, L, M
+        if (j === 1) cols.forEach((_, idx) => cols[idx] = String.fromCharCode(72 + idx));
 
-        worksheet.getCell((cols[0] || 'A') + filaActual).value = 'Nº';
-        worksheet.getCell((cols[1] || 'B') + filaActual).value = 'Biológicos';
-        worksheet.getCell((cols[2] || 'C') + filaActual).value = 'Cantidad';
-        worksheet.getCell((cols[4] || 'E') + filaActual).value = 'Jeringas';
-        worksheet.getCell((cols[5] || 'F') + filaActual).value = 'Cantidad';
-
-        // Aplicar estilo moderno a headers
-        const headerTexts = ['Nº', '💉 Biológicos', 'Cant', '💊 Jeringas', 'Cant'];
+        const headerTexts = ['N°', 'Biológicos', 'Cant.', '', 'Jeringas', 'Cant.'];
         [cols[0], cols[1], cols[2], cols[4], cols[5]].forEach((col, idx) => {
           const cell = worksheet.getCell((col || 'A') + filaActual);
-          cell.value = headerTexts[idx];
+          cell.value = [headerTexts[0], headerTexts[1], headerTexts[2], headerTexts[4], headerTexts[5]][idx];
           cell.font = {
             bold: true,
-            size: 14,
-            color: { argb: 'FFFFFFFF' },
-            name: 'Segoe UI'
+            size: 9,
+            color: { argb: this.COLORS.white },
+            name: 'Calibri'
           };
           cell.alignment = { horizontal: 'center', vertical: 'middle' };
           cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FF3B82F6' }
+            fgColor: { argb: this.COLORS.primary }
           };
           cell.border = {
-            top: { style: 'thin', color: { argb: 'FF1D4ED8' } },
-            left: { style: 'thin', color: { argb: 'FF1D4ED8' } },
-            bottom: { style: 'thin', color: { argb: 'FF1D4ED8' } },
-            right: { style: 'thin', color: { argb: 'FF1D4ED8' } }
+            top: { style: 'thin', color: { argb: this.COLORS.primaryDark } },
+            left: { style: 'thin', color: { argb: this.COLORS.primaryDark } },
+            bottom: { style: 'thin', color: { argb: this.COLORS.primaryDark } },
+            right: { style: 'thin', color: { argb: this.COLORS.primaryDark } }
           };
         });
       }
 
       filaActual++;
+      worksheet.getRow(filaActual - 1).height = 16;
 
-      // Datos de los establecimientos
-      const maxFilas = 20; // 20 vacunas estándar
-      for (let fila = 0; fila < maxFilas; fila++) {
+      // DATOS DINÁMICOS - Solo filas con datos reales
+      const maxVacunas = Math.max(
+        ...datos.establecimientos.slice(i, i + establecimientosPorFila).map((est: any) => 
+          est.vacunas.filter((v: any) => v.cantidad > 0).length
+        )
+      );
+      const maxJeringas = Math.max(
+        ...datos.establecimientos.slice(i, i + establecimientosPorFila).map((est: any) => 
+          est.jeringas.filter((j: any) => j.cantidad > 0).length
+        )
+      );
+      const filasNecesarias = Math.max(maxVacunas, maxJeringas, 1);
+
+      for (let fila = 0; fila < filasNecesarias; fila++) {
         for (let j = 0; j < establecimientosPorFila && (i + j) < totalEstablecimientos; j++) {
           const establecimiento = datos.establecimientos[i + j];
           const cols = j === 0 ? ['A', 'B', 'C', 'D', 'E', 'F'] : ['H', 'I', 'J', 'K', 'L', 'M'];
 
-          // Definir colores de fila fuera del bloque condicional
           const isEvenRow = fila % 2 === 0;
-          let rowColor = isEvenRow ? 'FFF8FAFC' : 'FFFFFFFF';
+          const rowColor = isEvenRow ? this.COLORS.gray50 : this.COLORS.white;
 
-          if (fila < establecimiento.vacunas.length) {
-            const vacuna = establecimiento.vacunas[fila];
-            const hasQuantity = vacuna.cantidad > 0;
+          // Filtrar vacunas con cantidad > 0
+          const vacunasConDatos = establecimiento.vacunas.filter((v: any) => v.cantidad > 0);
 
-            // Datos de vacunas con diseño moderno
+          if (fila < vacunasConDatos.length) {
+            const vacuna = vacunasConDatos[fila];
+
             const cellNum = worksheet.getCell((cols[0] || 'A') + filaActual);
-            cellNum.value = vacuna.numero;
-            cellNum.font = { size: 14, name: 'Segoe UI', color: { argb: 'FF6B7280' } };
+            cellNum.value = fila + 1;
+            cellNum.font = { size: 8, name: 'Calibri', color: { argb: this.COLORS.gray500 } };
             cellNum.alignment = { horizontal: 'center', vertical: 'middle' };
 
             const cellBio = worksheet.getCell((cols[1] || 'B') + filaActual);
             cellBio.value = vacuna.biologico;
             cellBio.font = {
-              size: 14,
-              name: 'Segoe UI',
-              color: { argb: 'FF374151' },
-              bold: hasQuantity
+              size: 8,
+              name: 'Calibri',
+              color: { argb: this.COLORS.gray700 },
+              bold: true
             };
             cellBio.alignment = { horizontal: 'left', vertical: 'middle' };
 
             const cellCant = worksheet.getCell((cols[2] || 'C') + filaActual);
             cellCant.value = vacuna.cantidad;
             cellCant.font = {
-              size: 14,
-              name: 'Segoe UI',
-              bold: hasQuantity,
-              color: { argb: hasQuantity ? 'FF059669' : 'FF9CA3AF' }
+              size: 9,
+              name: 'Calibri',
+              bold: true,
+              color: { argb: this.COLORS.success }
             };
             cellCant.alignment = { horizontal: 'center', vertical: 'middle' };
-
-            // Jeringas con nombres dinámicos completos
-            if (fila < establecimiento.jeringas.length) {
-              const jeringa = establecimiento.jeringas[fila];
-              const cellJer = worksheet.getCell((cols[4] || 'E') + filaActual);
-              
-              // Usar el nombre real de la jeringa, no el estático
-              cellJer.value = jeringa.nombre || `Jeringa ${fila + 1}`;
-              cellJer.font = { size: 11, name: 'Segoe UI', color: { argb: 'FF374151' } };
-              cellJer.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
-
-              const jeringaCant = jeringa ? jeringa.cantidad : 0;
-              const cellJerCant = worksheet.getCell((cols[5] || 'F') + filaActual);
-              cellJerCant.value = jeringaCant;
-              cellJerCant.font = {
-                size: 14,
-                name: 'Segoe UI',
-                bold: jeringaCant > 0,
-                color: { argb: jeringaCant > 0 ? 'FF059669' : 'FF9CA3AF' }
-              };
-              cellJerCant.alignment = { horizontal: 'center', vertical: 'middle' };
-            }
-
-            // Observaciones en la fila 9 (índice 8) con diseño especial
-            if (fila === 8) {
-              const cellObs = worksheet.getCell((cols[4] || 'E') + filaActual);
-              cellObs.value = '📝 Observaciones:';
-              cellObs.font = {
-                bold: true,
-                size: 9,
-                name: 'Segoe UI',
-                color: { argb: 'FF7C3AED' }
-              };
-              cellObs.alignment = { horizontal: 'left', vertical: 'middle' };
-            }
-
-            // Destacar filas con cantidades importantes
-            if (hasQuantity && vacuna.cantidad > 20) {
-              rowColor = 'FFECFDF5';
-            }
           }
 
-          // Aplicar estilos modernos
+          // Jeringas con cantidad > 0
+          const jeringasConDatos = establecimiento.jeringas.filter((jer: any) => jer.cantidad > 0);
+          if (fila < jeringasConDatos.length) {
+            const jeringa = jeringasConDatos[fila];
+
+            const cellJer = worksheet.getCell((cols[4] || 'E') + filaActual);
+            cellJer.value = jeringa.nombre;
+            cellJer.font = { size: 8, name: 'Calibri', color: { argb: this.COLORS.gray700 } };
+            cellJer.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+
+            const cellJerCant = worksheet.getCell((cols[5] || 'F') + filaActual);
+            cellJerCant.value = jeringa.cantidad;
+            cellJerCant.font = {
+              size: 9,
+              name: 'Calibri',
+              bold: true,
+              color: { argb: this.COLORS.success }
+            };
+            cellJerCant.alignment = { horizontal: 'center', vertical: 'middle' };
+          }
+
+          // Aplicar estilos
           [cols[0], cols[1], cols[2], cols[4], cols[5]].forEach(col => {
             const cell = worksheet.getCell((col || 'A') + filaActual);
             cell.fill = {
@@ -1384,85 +1481,92 @@ class ValeExportService {
               fgColor: { argb: rowColor }
             };
             cell.border = {
-              top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-              left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-              bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-              right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+              top: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+              left: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+              bottom: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+              right: { style: 'thin', color: { argb: this.COLORS.gray200 } }
             };
           });
 
-          // Ajustar altura de fila para acomodar nombres largos de jeringas
-          worksheet.getRow(filaActual).height = 20;
+          worksheet.getRow(filaActual).height = 15;
         }
         filaActual++;
       }
 
-      filaActual += 2; // Espacio entre grupos de establecimientos
+      // Observaciones por establecimiento
+      for (let j = 0; j < establecimientosPorFila && (i + j) < totalEstablecimientos; j++) {
+        const cols = j === 0 ? ['A', 'B', 'C', 'D', 'E', 'F'] : ['H', 'I', 'J', 'K', 'L', 'M'];
+        const cellObs = worksheet.getCell((cols[0] || 'A') + filaActual);
+        cellObs.value = 'Obs:';
+        cellObs.font = { bold: true, size: 8, name: 'Calibri', color: { argb: this.COLORS.gray500 } };
+      }
+      filaActual++;
+
+      filaActual += 1; // Espacio entre grupos
     }
 
-    // SECCIÓN DE FIRMAS CON DISEÑO PROFESIONAL
-    filaActual += 4;
+    // SECCIÓN DE FIRMAS - PROFESIONAL
+    filaActual += 3;
 
-    // Línea separadora elegante
+    // Línea separadora
     worksheet.mergeCells(`A${filaActual}:M${filaActual}`);
     const separatorCell = worksheet.getCell(`A${filaActual}`);
     separatorCell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFE5E7EB' }
+      fgColor: { argb: this.COLORS.gray200 }
     };
-    separatorCell.border = {
-      top: { style: 'medium', color: { argb: 'FF9CA3AF' } }
-    };
-    worksheet.getRow(filaActual).height = 8;
+    worksheet.getRow(filaActual).height = 4;
 
     filaActual += 2;
 
     // Responsable de Entrega
     worksheet.mergeCells(`A${filaActual}:F${filaActual}`);
     const firmaEntrega = worksheet.getCell(`A${filaActual}`);
-    firmaEntrega.value = '✍️ RESPONSABLE DE ENTREGA';
+    firmaEntrega.value = 'RESPONSABLE DE ENTREGA';
     firmaEntrega.font = {
       bold: true,
-      size: 13,
-      color: { argb: 'FF1F2937' },
-      name: 'Segoe UI'
+      size: 11,
+      color: { argb: this.COLORS.gray800 },
+      name: 'Calibri'
     };
     firmaEntrega.alignment = { horizontal: 'center', vertical: 'middle' };
     firmaEntrega.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFF3F4F6' }
+      fgColor: { argb: this.COLORS.gray100 }
     };
     firmaEntrega.border = {
-      top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-      left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-      bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-      right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+      top: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      left: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      bottom: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      right: { style: 'thin', color: { argb: this.COLORS.gray200 } }
     };
 
     // Responsable de Recepción
     worksheet.mergeCells(`H${filaActual}:M${filaActual}`);
     const firmaRecepcion = worksheet.getCell(`H${filaActual}`);
-    firmaRecepcion.value = '📋 RESPONSABLE DE RECEPCIÓN';
+    firmaRecepcion.value = 'RESPONSABLE DE RECEPCIÓN';
     firmaRecepcion.font = {
       bold: true,
-      size: 13,
-      color: { argb: 'FF1F2937' },
-      name: 'Segoe UI'
+      size: 11,
+      color: { argb: this.COLORS.gray800 },
+      name: 'Calibri'
     };
     firmaRecepcion.alignment = { horizontal: 'center', vertical: 'middle' };
     firmaRecepcion.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'FFF3F4F6' }
+      fgColor: { argb: this.COLORS.gray100 }
     };
     firmaRecepcion.border = {
-      top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-      left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-      bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-      right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+      top: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      left: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      bottom: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      right: { style: 'thin', color: { argb: this.COLORS.gray200 } }
     };
+
+    worksheet.getRow(filaActual).height = 22;
 
     // Espacios para firmas
     filaActual += 2;
@@ -1543,360 +1647,381 @@ class ValeExportService {
     }];
   }
 
-  private static agregarEncabezadoPDF(doc: PDFKit.PDFDocument, vale: any, config: ValeExportConfig) {
-    // CONFIGURACIÓN PROFESIONAL DE PÁGINA A4
+  private static agregarEncabezadoPDF(doc: PDFKit.PDFDocument, vale: any, config: ValeExportConfig, headerData: HeaderData) {
     const pageWidth = doc.page.width;
-    const margin = 30;
+    const margin = 40;
     const contentWidth = pageWidth - (margin * 2);
 
-    // Fondo sutil para el encabezado
-    doc.rect(margin - 10, 30, contentWidth + 20, 120)
-       .fillAndStroke('#F8FAFE', '#E5E7EB');
+    // Variables para posicionamiento dinámico según si hay logo
+    const hasLogo = headerData.logoPath && fs.existsSync(headerData.logoPath);
+    const headerHeight = hasLogo ? 85 : 75;
+    const logoWidth = 65;
+    const logoHeight = 65;
+    const logoX = margin + 5;
+    const logoY = 28;
+    const textStartX = hasLogo ? margin + logoWidth + 15 : margin;
+    const textWidth = hasLogo ? contentWidth - logoWidth - 15 : contentWidth;
 
-    // ENCABEZADO INSTITUCIONAL MODERNO (SIN EMOJIS)
-    doc.fontSize(14)
-       .fillColor('#1E3A8A')
-       .font('Helvetica-Bold')
-       .text('GOBIERNO REGIONAL DE APURIMAC', margin, 45, {
-         align: 'center',
-         width: contentWidth
-       });
+    // Fondo sutil para el encabezado - PRIMERO para que no cubra el logo
+    doc.rect(margin - 5, 25, contentWidth + 10, headerHeight)
+       .fillAndStroke('#F0FDFA', '#CCFBF1');
 
-    doc.fontSize(11)
-       .fillColor('#1E40AF')
-       .font('Helvetica-Bold')
-       .text('DIRECCION SUB REGIONAL DE SALUD CHANKA ANDAHUAYLAS', margin, 65, {
-         align: 'center',
-         width: contentWidth
-       });
+    // Agregar logo DESPUÉS del fondo
+    if (hasLogo) {
+      try {
+        doc.image(headerData.logoPath!, logoX, logoY, {
+          width: logoWidth,
+          height: logoHeight,
+          fit: [logoWidth, logoHeight]
+        });
+      } catch (error) {
+        console.error('Error al agregar logo al PDF:', error);
+      }
+    }
 
-    doc.fontSize(10)
-       .fillColor('#2563EB')
+    // ENCABEZADO INSTITUCIONAL - Nombre de institución dinámico
+    doc.fontSize(13)
+       .fillColor('#115E59')
        .font('Helvetica-Bold')
-       .text('ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRIO', margin, 82, {
-         align: 'center',
-         width: contentWidth
+       .text(this.limpiarTexto(headerData.institucionNombre), textStartX, 35, {
+         align: hasLogo ? 'left' : 'center',
+         width: textWidth
        });
 
     doc.fontSize(9)
-       .fillColor('#3B82F6')
-       .font('Helvetica-Oblique')
-       .text('"Ano de la Universalizacion de la Salud"', margin, 98, {
-         align: 'center',
-         width: contentWidth
+       .fillColor('#0D9488')
+       .font('Helvetica-Bold')
+       .text('ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRIO', textStartX, 52, {
+         align: hasLogo ? 'left' : 'center',
+         width: textWidth
        });
 
-    // TÍTULO PRINCIPAL CON DISEÑO MODERNO
-    doc.rect(margin - 5, 125, contentWidth + 10, 25)
-       .fillAndStroke('#1E40AF', '#1D4ED8');
+    // Nombre del año dinámico
+    doc.fontSize(8)
+       .fillColor('#6B7280')
+       .font('Helvetica-Oblique')
+       .text(`"${this.limpiarTexto(headerData.anioNombre)}"`, textStartX, 67, {
+         align: hasLogo ? 'left' : 'center',
+         width: textWidth
+       });
 
-    doc.fontSize(16)
+    // TÍTULO PRINCIPAL - Color teal
+    const titleY = headerHeight + 30;
+    doc.rect(margin - 5, titleY, contentWidth + 10, 22)
+       .fillAndStroke('#0D9488', '#0F766E');
+
+    doc.fontSize(12)
        .fillColor('white')
        .font('Helvetica-Bold')
-       .text('VALE DE ENTREGA DE VACUNAS Y JERINGAS', margin, 135, {
+       .text('VALE DE ENTREGA DE VACUNAS Y JERINGAS', margin, titleY + 6, {
          align: 'center',
          width: contentWidth
        });
 
-    // INFORMACIÓN DEL VALE CON DISEÑO PROFESIONAL
-    const infoY = 170;
+    // INFORMACIÓN DEL VALE
+    const infoY = titleY + 30;
+    doc.rect(margin - 5, infoY, contentWidth + 10, 42)
+       .fillAndStroke('#F9FAFB', '#E5E7EB');
 
-    // Fondo para información
-    doc.rect(margin - 5, infoY - 5, contentWidth + 10, 45)
-       .fillAndStroke('#F3F4F6', '#D1D5DB');
-
-    doc.fontSize(11)
+    doc.fontSize(9)
        .fillColor('#1F2937')
        .font('Helvetica-Bold')
-       .text(`Centro de Acopio: ${this.limpiarTexto(vale.centroAcopio.nombre)}`, margin, infoY);
+       .text(`Centro de Acopio: ${this.limpiarTexto(vale.centroAcopio.nombre)}`, margin, infoY + 6);
 
-    doc.fontSize(11)
-       .text(`Responsable de Recojo: ${this.limpiarTexto(config.responsableRecojo)}`, margin, infoY + 15);
+    doc.font('Helvetica')
+       .text(`Responsable: ${this.limpiarTexto(config.responsableRecojo)}`, margin + contentWidth/2, infoY + 6);
 
-    const fechaCompleta = new Date().toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
+    const fechaCorta = new Date().toLocaleDateString('es-ES', {
+      day: '2-digit',
       month: 'long',
-      day: 'numeric'
+      year: 'numeric'
     });
 
-    doc.fontSize(11)
-       .text(`Fecha: ${this.limpiarTexto(fechaCompleta)}`, margin, infoY + 30);
+    doc.text(`Fecha: ${this.limpiarTexto(fechaCorta)}`, margin, infoY + 20);
+    
+    doc.font('Helvetica-Bold')
+       .fillColor('#0D9488')
+       .text(`N° Vale: ${vale.numero || 'S/N'}`, margin + contentWidth/2, infoY + 20);
 
-    return 230; // Retorna la posición Y donde continuar
+    return infoY + 50; // Retorna posición Y para continuar con los datos
   }
 
   private static agregarDatosPDF(doc: PDFKit.PDFDocument, datos: any, _config: ValeExportConfig) {
-    const margin = 30;
+    const margin = 40;
     const pageWidth = doc.page.width;
     const contentWidth = pageWidth - (margin * 2);
-    let currentY = 240;
+    let currentY = 185;
 
-    // SECCIÓN CONSOLIDADO CON DISEÑO MODERNO
-    // Header del consolidado
-    doc.rect(margin - 5, currentY - 5, contentWidth / 2 + 10, 20)
-       .fillAndStroke('#059669', '#047857');
+    // Filtrar solo datos con cantidad > 0
+    const consolidadoConDatos = datos.consolidado.filter((item: any) => item.cantidad > 0);
+    const jeringasConDatos = datos.jeringasConsolidado?.filter((j: any) => j.cantidad > 0) || [];
 
-    doc.fontSize(14)
+    // SECCIÓN CONSOLIDADO GENERAL
+    doc.rect(margin - 3, currentY - 3, contentWidth + 6, 18)
+       .fillAndStroke('#0D9488', '#0F766E');
+
+    doc.fontSize(11)
        .fillColor('white')
        .font('Helvetica-Bold')
        .text('CONSOLIDADO GENERAL', margin, currentY, {
          align: 'center',
-         width: contentWidth / 2
+         width: contentWidth
        });
 
-    currentY += 30;
+    currentY += 22;
 
-    // Headers del consolidado con diseño profesional
-    doc.rect(margin - 2, currentY - 2, contentWidth / 2 + 4, 15)
-       .fillAndStroke('#0D9488', '#0F766E');
+    // Headers del consolidado - ancho completo
+    const colVacunaWidth = contentWidth * 0.55;
+    const colJeringaWidth = contentWidth * 0.45;
 
-    doc.fontSize(9)
+    doc.rect(margin - 2, currentY - 2, colVacunaWidth, 14)
+       .fillAndStroke('#0F766E', '#115E59');
+    doc.rect(margin + colVacunaWidth + 4, currentY - 2, colJeringaWidth - 4, 14)
+       .fillAndStroke('#0F766E', '#115E59');
+
+    doc.fontSize(8)
        .fillColor('white')
        .font('Helvetica-Bold')
-       .text('No', margin, currentY, { width: 25 })
-       .text('Biologicos', margin + 30, currentY, { width: 120 })
-       .text('Cant', margin + 155, currentY, { width: 35 })
-       .text('Jeringas', margin + 195, currentY, { width: 140 })
-       .text('Cant', margin + 320, currentY, { width: 35 });
+       .text('N°', margin + 2, currentY, { width: 20 })
+       .text('Biologico', margin + 22, currentY, { width: 100 })
+       .text('Cant.', margin + colVacunaWidth - 35, currentY, { width: 30, align: 'right' });
 
-    currentY += 20;
+    doc.text('Jeringa', margin + colVacunaWidth + 8, currentY, { width: 120 })
+       .text('Cant.', margin + contentWidth - 30, currentY, { width: 28, align: 'right' });
 
-    // Datos del consolidado con diseño moderno
-    datos.consolidado.forEach((item: any, index: number) => {
-      const isEvenRow = index % 2 === 0;
-      const hasQuantity = item.cantidad > 0;
+    currentY += 16;
 
-      // Fondo alternado para mejor lectura
-      if (isEvenRow) {
-        doc.rect(margin - 2, currentY - 1, contentWidth / 2 + 4, 12)
-           .fillAndStroke('#F9FAFB', '#F9FAFB');
+    // Datos del consolidado - DINÁMICO
+    const maxFilasConsolidado = Math.max(consolidadoConDatos.length, jeringasConDatos.length);
+    
+    for (let i = 0; i < maxFilasConsolidado; i++) {
+      const isEvenRow = i % 2 === 0;
+      const bgColor = isEvenRow ? '#F0FDFA' : '#FFFFFF';
+
+      // Fondo vacunas
+      if (i < consolidadoConDatos.length) {
+        doc.rect(margin - 2, currentY - 1, colVacunaWidth, 11)
+           .fillAndStroke(bgColor, bgColor);
+      }
+      // Fondo jeringas
+      if (i < jeringasConDatos.length) {
+        doc.rect(margin + colVacunaWidth + 4, currentY - 1, colJeringaWidth - 4, 11)
+           .fillAndStroke(bgColor, bgColor);
       }
 
-      // Destacar filas con cantidades importantes
-      if (hasQuantity && item.cantidad > 50) {
-        doc.rect(margin - 2, currentY - 1, contentWidth / 2 + 4, 12)
-           .fillAndStroke('#ECFDF5', '#D1FAE5');
-      }
-
-      // Datos de vacunas
-      doc.fontSize(8)
-         .fillColor('#374151')
-         .font('Helvetica')
-         .text(item.numero.toString(), margin, currentY, { width: 25 })
-         .text(this.limpiarTexto(item.biologico), margin + 30, currentY, { width: 120 });
-
-      // Cantidad con color según valor
-      doc.fillColor(hasQuantity ? '#059669' : '#6B7280')
-         .font(hasQuantity ? 'Helvetica-Bold' : 'Helvetica')
-         .text(item.cantidad.toString(), margin + 155, currentY, { width: 35 });
-
-      // Jeringas con nombres dinámicos completos
-      if (index < datos.jeringasConsolidado.length) {
-        const jeringaData = datos.jeringasConsolidado[index];
-        doc.fillColor('#374151')
-           .font('Helvetica')
-           .text(this.limpiarTexto(jeringaData.nombre), margin + 195, currentY, { width: 140 })
-           .fillColor(jeringaData.cantidad > 0 ? '#059669' : '#6B7280')
-           .font(jeringaData.cantidad > 0 ? 'Helvetica-Bold' : 'Helvetica')
-           .text(jeringaData.cantidad.toString(), margin + 340, currentY, { width: 35 });
-      }
-
-      currentY += 12;
-
-      // Observaciones en la posición correcta con diseño especial
-      if (index === 8) {
-        doc.fontSize(8)
-           .fillColor('#7C3AED')
-           .font('Helvetica-Bold')
-           .text('Observaciones:', margin + 195, currentY - 12, { width: 120 });
-      }
-    });
-
-    currentY += 30;
-
-    // ESTABLECIMIENTOS CON DISEÑO PROFESIONAL (2 por página)
-    const establecimientosPorPagina = 2;
-    datos.establecimientos.forEach((establecimiento: any, estIndex: number) => {
-      if (estIndex > 0 && estIndex % establecimientosPorPagina === 0) {
-        doc.addPage();
-        currentY = 50;
-      }
-
-      const isSegundaColumna = estIndex % 2 === 1;
-      const offsetX = isSegundaColumna ? contentWidth / 2 + 15 : 0;
-      const colWidth = contentWidth / 2 - 15;
-
-      if (!isSegundaColumna) {
-        currentY += 25;
-      } else {
-        currentY -= (12 * 20 + 50); // Volver a la altura del primer establecimiento
-      }
-
-      // Header del establecimiento con diseño moderno
-      doc.rect(margin + offsetX - 3, currentY - 3, colWidth + 6, 18)
-         .fillAndStroke('#2563EB', '#1D4ED8');
-
-      doc.fontSize(11)
-         .fillColor('white')
-         .font('Helvetica-Bold')
-         .text(`${this.limpiarTexto(establecimiento.nombre)}`, margin + offsetX, currentY, {
-           width: colWidth,
-           align: 'center'
-         });
-
-      currentY += 22;
-
-      // Headers de columnas con diseño profesional
-      doc.rect(margin + offsetX - 2, currentY - 2, colWidth + 4, 12)
-         .fillAndStroke('#3B82F6', '#2563EB');
-
-      doc.fontSize(8)
-         .fillColor('white')
-         .font('Helvetica-Bold')
-         .text('No', margin + offsetX, currentY, { width: 18 })
-         .text('Biologicos', margin + offsetX + 20, currentY, { width: 85 })
-         .text('Cant', margin + offsetX + 108, currentY, { width: 25 })
-         .text('Jeringas', margin + offsetX + 138, currentY, { width: 100 })
-         .text('Cant', margin + offsetX + 228, currentY, { width: 25 });
-
-      currentY += 16;
-
-      // Datos del establecimiento con diseño moderno
-      establecimiento.vacunas.forEach((vacuna: any, vacIndex: number) => {
-        const isEvenRow = vacIndex % 2 === 0;
-        const hasQuantity = vacuna.cantidad > 0;
-
-        // Fondo alternado para mejor lectura
-        if (isEvenRow) {
-          doc.rect(margin + offsetX - 2, currentY - 1, colWidth + 4, 10)
-             .fillAndStroke('#F8FAFC', '#F8FAFC');
-        }
-
-        // Destacar filas con cantidades importantes
-        if (hasQuantity && vacuna.cantidad > 20) {
-          doc.rect(margin + offsetX - 2, currentY - 1, colWidth + 4, 10)
-             .fillAndStroke('#ECFDF5', '#D1FAE5');
-        }
-
-        // Datos de vacunas
+      // Datos vacuna
+      if (i < consolidadoConDatos.length) {
+        const item = consolidadoConDatos[i];
         doc.fontSize(7)
            .fillColor('#6B7280')
            .font('Helvetica')
-           .text(vacuna.numero.toString(), margin + offsetX, currentY, { width: 18 })
-           .fillColor('#374151')
-           .font(hasQuantity ? 'Helvetica-Bold' : 'Helvetica')
-           .text(this.limpiarTexto(vacuna.biologico), margin + offsetX + 20, currentY, { width: 85 });
+           .text((i + 1).toString(), margin + 2, currentY, { width: 18 });
 
-        // Cantidad con color según valor
-        doc.fillColor(hasQuantity ? '#059669' : '#9CA3AF')
-           .font(hasQuantity ? 'Helvetica-Bold' : 'Helvetica')
-           .text(vacuna.cantidad.toString(), margin + offsetX + 108, currentY, { width: 25 });
+        doc.fillColor('#374151')
+           .font('Helvetica-Bold')
+           .text(this.limpiarTexto(item.biologico), margin + 22, currentY, { width: 100 });
 
-        // Jeringas con nombres dinámicos completos
-        if (vacIndex < establecimiento.jeringas.length) {
-          const jeringa = establecimiento.jeringas[vacIndex];
-          const jeringaCant = jeringa ? jeringa.cantidad : 0;
-          const jeringaNombre = jeringa ? jeringa.nombre : `Jeringa ${vacIndex + 1}`;
-
-          doc.fillColor('#374151')
-             .font('Helvetica')
-             .text(this.limpiarTexto(jeringaNombre), margin + offsetX + 138, currentY, { width: 100 })
-             .fillColor(jeringaCant > 0 ? '#059669' : '#9CA3AF')
-             .font(jeringaCant > 0 ? 'Helvetica-Bold' : 'Helvetica')
-             .text(jeringaCant.toString(), margin + offsetX + 243, currentY, { width: 25 });
-        }
-
-        // Observaciones con diseño especial
-        if (vacIndex === 8) {
-          doc.fontSize(7)
-             .fillColor('#7C3AED')
-             .font('Helvetica-Bold')
-             .text('Observaciones:', margin + offsetX + 138, currentY, { width: 85 });
-        }
-
-        currentY += 11;
-      });
-
-      if (isSegundaColumna) {
-        currentY += 20; // Espacio después del segundo establecimiento
+        doc.fillColor('#059669')
+           .text(item.cantidad.toString(), margin + colVacunaWidth - 35, currentY, { width: 30, align: 'right' });
       }
-    });
 
-    // SECCIÓN DE FIRMAS CON DISEÑO PROFESIONAL
-    if (currentY > 650) {
-      doc.addPage();
-      currentY = 50;
-    } else {
-      currentY += 50;
+      // Datos jeringa
+      if (i < jeringasConDatos.length) {
+        const jeringa = jeringasConDatos[i];
+        doc.fontSize(7)
+           .fillColor('#374151')
+           .font('Helvetica')
+           .text(this.limpiarTexto(jeringa.nombre), margin + colVacunaWidth + 8, currentY, { width: 120 });
+
+        doc.fillColor('#059669')
+           .font('Helvetica-Bold')
+           .text(jeringa.cantidad.toString(), margin + contentWidth - 30, currentY, { width: 28, align: 'right' });
+      }
+
+      currentY += 11;
     }
 
-    // Línea separadora elegante
-    doc.moveTo(margin, currentY)
-       .lineTo(margin + contentWidth, currentY)
-       .lineWidth(2)
-       .strokeColor('#9CA3AF')
-       .stroke();
+    // Línea de observaciones
+    currentY += 5;
+    doc.fontSize(7)
+       .fillColor('#6B7280')
+       .font('Helvetica')
+       .text('Observaciones: _______________________________________________', margin, currentY);
 
     currentY += 20;
 
-    // Headers de firmas con diseño moderno
-    const firmaWidth = contentWidth / 2 - 10;
+    // ESTABLECIMIENTOS - Layout vertical (uno debajo del otro)
+    datos.establecimientos.forEach((establecimiento: any, estIndex: number) => {
+      // Filtrar vacunas y jeringas con cantidad > 0
+      const vacunasConDatos = establecimiento.vacunas.filter((v: any) => v.cantidad > 0);
+      const jeringasEstConDatos = establecimiento.jeringas.filter((j: any) => j.cantidad > 0);
+      
+      if (vacunasConDatos.length === 0 && jeringasEstConDatos.length === 0) return;
+
+      const filasNecesarias = Math.max(vacunasConDatos.length, jeringasEstConDatos.length);
+      const alturaEstablecimiento = 20 + 14 + (filasNecesarias * 10) + 15;
+
+      // Nueva página si no hay espacio
+      if (currentY + alturaEstablecimiento > 750) {
+        doc.addPage();
+        currentY = 40;
+      }
+
+      // Header del establecimiento
+      doc.rect(margin - 3, currentY - 2, contentWidth + 6, 16)
+         .fillAndStroke('#0891B2', '#0E7490');
+
+      doc.fontSize(9)
+         .fillColor('white')
+         .font('Helvetica-Bold')
+         .text(this.limpiarTexto(establecimiento.nombre).toUpperCase(), margin, currentY + 1, {
+           width: contentWidth,
+           align: 'center'
+         });
+
+      currentY += 18;
+
+      // Headers de columnas
+      doc.rect(margin - 2, currentY - 1, colVacunaWidth, 12)
+         .fillAndStroke('#0D9488', '#0F766E');
+      doc.rect(margin + colVacunaWidth + 4, currentY - 1, colJeringaWidth - 4, 12)
+         .fillAndStroke('#0D9488', '#0F766E');
+
+      doc.fontSize(7)
+         .fillColor('white')
+         .font('Helvetica-Bold')
+         .text('N°', margin + 2, currentY + 1, { width: 15 })
+         .text('Biologico', margin + 18, currentY + 1, { width: 90 })
+         .text('Cant.', margin + colVacunaWidth - 32, currentY + 1, { width: 28, align: 'right' });
+
+      doc.text('Jeringa', margin + colVacunaWidth + 8, currentY + 1, { width: 110 })
+         .text('Cant.', margin + contentWidth - 28, currentY + 1, { width: 26, align: 'right' });
+
+      currentY += 13;
+
+      // Datos del establecimiento
+      for (let i = 0; i < filasNecesarias; i++) {
+        const isEvenRow = i % 2 === 0;
+        const bgColor = isEvenRow ? '#F0FDFA' : '#FFFFFF';
+
+        doc.rect(margin - 2, currentY - 1, colVacunaWidth, 10)
+           .fillAndStroke(bgColor, bgColor);
+        doc.rect(margin + colVacunaWidth + 4, currentY - 1, colJeringaWidth - 4, 10)
+           .fillAndStroke(bgColor, bgColor);
+
+        // Vacuna
+        if (i < vacunasConDatos.length) {
+          const vacuna = vacunasConDatos[i];
+          doc.fontSize(6)
+             .fillColor('#6B7280')
+             .font('Helvetica')
+             .text((i + 1).toString(), margin + 2, currentY, { width: 14 });
+
+          doc.fillColor('#374151')
+             .font('Helvetica-Bold')
+             .text(this.limpiarTexto(vacuna.biologico), margin + 18, currentY, { width: 90 });
+
+          doc.fillColor('#059669')
+             .text(vacuna.cantidad.toString(), margin + colVacunaWidth - 32, currentY, { width: 28, align: 'right' });
+        }
+
+        // Jeringa
+        if (i < jeringasEstConDatos.length) {
+          const jeringa = jeringasEstConDatos[i];
+          doc.fontSize(6)
+             .fillColor('#374151')
+             .font('Helvetica')
+             .text(this.limpiarTexto(jeringa.nombre), margin + colVacunaWidth + 8, currentY, { width: 110 });
+
+          doc.fillColor('#059669')
+             .font('Helvetica-Bold')
+             .text(jeringa.cantidad.toString(), margin + contentWidth - 28, currentY, { width: 26, align: 'right' });
+        }
+
+        currentY += 10;
+      }
+
+      // Observaciones por establecimiento
+      doc.fontSize(6)
+         .fillColor('#6B7280')
+         .font('Helvetica')
+         .text('Obs: _____________________', margin, currentY + 2);
+
+      currentY += 18;
+    });
+
+    // SECCIÓN DE FIRMAS
+    if (currentY > 680) {
+      doc.addPage();
+      currentY = 40;
+    } else {
+      currentY += 25;
+    }
+
+    // Línea separadora
+    doc.moveTo(margin, currentY)
+       .lineTo(margin + contentWidth, currentY)
+       .lineWidth(1)
+       .strokeColor('#E5E7EB')
+       .stroke();
+
+    currentY += 15;
+
+    const firmaWidth = contentWidth / 2 - 15;
 
     // Responsable de Entrega
-    doc.rect(margin, currentY, firmaWidth, 20)
-       .fillAndStroke('#F3F4F6', '#D1D5DB');
+    doc.rect(margin, currentY, firmaWidth, 18)
+       .fillAndStroke('#F0FDFA', '#CCFBF1');
 
-    doc.fontSize(13)
-       .fillColor('#1F2937')
+    doc.fontSize(9)
+       .fillColor('#115E59')
        .font('Helvetica-Bold')
-       .text('RESPONSABLE DE ENTREGA', margin, currentY + 5, {
+       .text('RESPONSABLE DE ENTREGA', margin, currentY + 4, {
          width: firmaWidth,
          align: 'center'
        });
 
     // Responsable de Recepción
-    doc.rect(margin + contentWidth / 2 + 10, currentY, firmaWidth, 20)
-       .fillAndStroke('#F3F4F6', '#D1D5DB');
+    doc.rect(margin + contentWidth / 2 + 15, currentY, firmaWidth, 18)
+       .fillAndStroke('#F0FDFA', '#CCFBF1');
 
-    doc.fontSize(13)
-       .fillColor('#1F2937')
+    doc.fontSize(9)
+       .fillColor('#115E59')
        .font('Helvetica-Bold')
-       .text('RESPONSABLE DE RECEPCION', margin + contentWidth / 2 + 10, currentY + 5, {
+       .text('RESPONSABLE DE RECEPCION', margin + contentWidth / 2 + 15, currentY + 4, {
          width: firmaWidth,
          align: 'center'
        });
 
-    // Espacios para firmas con bordes elegantes
-    currentY += 30;
+    currentY += 28;
 
-    // Espacio de firma - Entrega
-    doc.rect(margin + 20, currentY, firmaWidth - 40, 50)
-       .fillAndStroke('#FEFEFE', '#E5E7EB');
+    // Espacios para firmas
+    doc.rect(margin + 15, currentY, firmaWidth - 30, 40)
+       .stroke('#E5E7EB');
 
-    // Espacio de firma - Recepción
-    doc.rect(margin + contentWidth / 2 + 30, currentY, firmaWidth - 40, 50)
-       .fillAndStroke('#FEFEFE', '#E5E7EB');
+    doc.rect(margin + contentWidth / 2 + 30, currentY, firmaWidth - 30, 40)
+       .stroke('#E5E7EB');
 
-    // Líneas para firmas más elegantes
-    currentY += 60;
-    doc.lineWidth(1)
-       .strokeColor('#6B7280')
-       .moveTo(margin + 30, currentY)
-       .lineTo(margin + firmaWidth - 10, currentY)
+    currentY += 45;
+
+    // Líneas de firma
+    doc.lineWidth(0.5)
+       .strokeColor('#9CA3AF')
+       .moveTo(margin + 25, currentY)
+       .lineTo(margin + firmaWidth - 5, currentY)
        .stroke();
 
     doc.moveTo(margin + contentWidth / 2 + 40, currentY)
-       .lineTo(margin + contentWidth - 20, currentY)
+       .lineTo(margin + contentWidth - 10, currentY)
        .stroke();
 
-    // Texto de firma
-    currentY += 10;
-    doc.fontSize(8)
+    currentY += 8;
+
+    doc.fontSize(7)
        .fillColor('#6B7280')
        .font('Helvetica')
        .text('Firma y Sello', margin, currentY, { width: firmaWidth, align: 'center' })
-       .text('Firma y Sello', margin + contentWidth / 2 + 10, currentY, { width: firmaWidth, align: 'center' });
+       .text('Firma y Sello', margin + contentWidth / 2 + 15, currentY, { width: firmaWidth, align: 'center' });
   }
 }
 

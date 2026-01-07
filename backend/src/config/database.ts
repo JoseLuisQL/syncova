@@ -7,12 +7,12 @@ const globalForPrisma = globalThis as unknown as {
 
 // Crear instancia de Prisma con configuración optimizada
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  log: process.env['NODE_ENV'] === 'development' ? ['query', 'error', 'warn'] : ['error'],
   errorFormat: 'pretty',
 });
 
 // En desarrollo, reutilizar la conexión para evitar múltiples instancias
-if (process.env.NODE_ENV !== 'production') {
+if (process.env['NODE_ENV'] !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 

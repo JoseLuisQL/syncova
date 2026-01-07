@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Plus, Package, Syringe, FileText, Settings, FolderOpen, Archive } from 'lucide-react';
+import { Package, Plus } from 'lucide-react';
 import NuevoIngreso from './NuevoIngreso';
 import LotesVacunasPage from './LotesVacunasPage';
 import LotesJeringasPage from './LotesJeringasPage';
@@ -9,189 +9,169 @@ import GestionJeringas from './GestionJeringas';
 import ConfiguracionJeringas from './ConfiguracionJeringas';
 import { useVacunas } from '../../hooks/useVacunas';
 import { useJeringas } from '../../hooks/useJeringas';
+import { useLotesVacunas } from '../../hooks/useLotesVacunas';
+import { useLotesJeringas } from '../../hooks/useLotesJeringas';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
-
-// Configuración de secciones organizadas jerárquicamente
-interface SectionConfig {
-  id: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  path: string;
-  category: 'catalogos' | 'lotes' | 'gestion' | 'configuracion';
-  description?: string;
-}
-
-const INVENTORY_SECTIONS: SectionConfig[] = [
-  // Sección Catálogos
-  { 
-    id: 'vacunas', 
-    label: 'Vacunas', 
-    icon: Package, 
-    path: '/inventario/vacunas', 
-    category: 'catalogos'
-  },
-  { 
-    id: 'jeringas', 
-    label: 'Jeringas', 
-    icon: Syringe, 
-    path: '/inventario/jeringas', 
-    category: 'catalogos'
-  },
-  
-  // Sección Lotes
-  { 
-    id: 'lotes-vacunas', 
-    label: 'Vacunas', 
-    icon: Archive, 
-    path: '/inventario/lotes-vacunas', 
-    category: 'lotes'
-  },
-  { 
-    id: 'lotes-jeringas', 
-    label: 'Jeringas', 
-    icon: Archive, 
-    path: '/inventario/lotes-jeringas', 
-    category: 'lotes'
-  },
-  
-  // Sección Gestión
-  { 
-    id: 'recepcion', 
-    label: 'Nuevo Ingreso', 
-    icon: Plus, 
-    path: '/inventario/recepcion', 
-    category: 'gestion'
-  },
-  
-  // Sección Configuración
-  { 
-    id: 'configuracion-jeringas', 
-    label: 'Configuración', 
-    icon: Settings, 
-    path: '/inventario/configuracion-jeringas', 
-    category: 'configuracion'
-  }
-];
-
-const CATEGORY_CONFIG = {
-  catalogos: { label: 'Catálogos', icon: FolderOpen, color: 'blue' },
-  lotes: { label: 'Lotes', icon: Archive, color: 'emerald' },
-  gestion: { label: 'Gestión', icon: FileText, color: 'purple' },
-  configuracion: { label: 'Configuración', icon: Settings, color: 'amber' }
-};
+import { useToastContext } from '../../contexts/ToastContext';
+import { usePermissions } from '../../hooks/usePermissions';
+import { INVENTORY_SECTIONS, COMPONENT_STYLES } from './constants';
+import { CreateLoteVacunaDto, CreateLoteJeringaDto } from '../../types';
 
 const Inventario: React.FC = () => {
   const { navigateToModule } = useAppNavigation();
   const { currentSubModule } = useCurrentRoute();
   const [showNuevoIngreso, setShowNuevoIngreso] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { canAccessSection, hasPermission } = usePermissions();
 
-  // Hooks para cargar datos necesarios para el modal
   const { vacunasActivas, loadVacunasActivas, isLoadingActivas: isLoadingVacunas } = useVacunas();
   const { jeringasActivas, loadJeringasActivas, isLoadingActivas: isLoadingJeringas } = useJeringas();
+  const { createLote: createLoteVacuna } = useLotesVacunas();
+  const { createLote: createLoteJeringa } = useLotesJeringas();
+  const { toast } = useToastContext();
 
-  // Cargar datos cuando se abre el modal de nuevo ingreso
+  // Filtrar secciones según permisos
+  const filteredSections = useMemo(() => {
+    return INVENTORY_SECTIONS.filter(section => canAccessSection('inventario', section.id));
+  }, [canAccessSection]);
+
+  // Verificar si puede registrar ingresos
+  const canRegisterIngreso = hasPermission('inventario:ingreso');
+
   React.useEffect(() => {
     if (showNuevoIngreso) {
-      console.log('🔄 Modal de Nuevo Ingreso abierto, cargando datos...');
       loadVacunasActivas();
       loadJeringasActivas();
     }
-  }, [showNuevoIngreso, loadVacunasActivas, loadJeringasActivas]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showNuevoIngreso]);
 
-  // Agrupar secciones por categoría
-  const sectionsByCategory = INVENTORY_SECTIONS.reduce((acc, section) => {
-    if (!acc[section.category]) {
-      acc[section.category] = [];
+  const handleNuevoIngresoSuccess = useCallback(async (tipo: 'vacuna' | 'jeringa', data: any) => {
+    setIsSubmitting(true);
+    try {
+      if (tipo === 'vacuna') {
+        const loteData: CreateLoteVacunaDto = {
+          numero: data.numero,
+          vacunaId: data.vacunaId,
+          fechaIngreso: data.fechaIngreso instanceof Date ? data.fechaIngreso.toISOString() : data.fechaIngreso,
+          fechaVencimiento: data.fechaVencimiento instanceof Date ? data.fechaVencimiento.toISOString() : data.fechaVencimiento,
+          formaIngreso: data.formaIngreso,
+          comprobanteClase: data.comprobanteClase,
+          numeroComprobante: data.numeroComprobante,
+          cantidadInicial: data.cantidadInicial,
+          cantidadActual: data.cantidadInicial,
+          observaciones: data.observaciones || undefined,
+        };
+        const success = await createLoteVacuna(loteData);
+        if (success) {
+          toast.success('Lote de vacuna registrado exitosamente');
+        } else {
+          toast.error('Error al registrar el lote de vacuna');
+          return;
+        }
+      } else {
+        const loteData: CreateLoteJeringaDto = {
+          numero: data.numero,
+          jeringaId: data.jeringaId,
+          fechaIngreso: data.fechaIngreso instanceof Date ? data.fechaIngreso.toISOString() : data.fechaIngreso,
+          fechaVencimiento: data.fechaVencimiento instanceof Date ? data.fechaVencimiento.toISOString() : (data.fechaVencimiento || undefined),
+          formaIngreso: data.formaIngreso,
+          comprobanteClase: data.comprobanteClase,
+          numeroComprobante: data.numeroComprobante,
+          cantidadInicial: data.cantidadInicial,
+          cantidadActual: data.cantidadInicial,
+          observaciones: data.observaciones || undefined,
+        };
+        const success = await createLoteJeringa(loteData);
+        if (success) {
+          toast.success('Lote de jeringa registrado exitosamente');
+        } else {
+          toast.error('Error al registrar el lote de jeringa');
+          return;
+        }
+      }
+      setShowNuevoIngreso(false);
+    } catch (error) {
+      toast.error('Error al registrar el ingreso');
+    } finally {
+      setIsSubmitting(false);
     }
-    acc[section.category].push(section);
-    return acc;
-  }, {} as Record<string, SectionConfig[]>);
+  }, [createLoteVacuna, createLoteJeringa, toast]);
 
-  // Los handlers ahora son manejados por las páginas individuales
-  const handleNuevoIngresoSuccess = (tipo: 'vacuna' | 'jeringa', data: any) => {
-    console.log('Nuevo ingreso exitoso:', tipo, data);
-  };
+  const handleOpenNuevoIngreso = useCallback(() => {
+    setShowNuevoIngreso(true);
+  }, []);
 
-  // Obtener la sección activa
-  const getActiveSection = () => {
-    return INVENTORY_SECTIONS.find(section => section.id === currentSubModule) || INVENTORY_SECTIONS[0];
-  };
+  const handleCloseNuevoIngreso = useCallback(() => {
+    setShowNuevoIngreso(false);
+  }, []);
+
+  const activeSection = useMemo(() => 
+    currentSubModule || 'vacunas',
+  [currentSubModule]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header Premium */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-full px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
-                <Package className="h-8 w-8 text-white" />
+    <main className={COMPONENT_STYLES.pageBackground}>
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-20">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className={COMPONENT_STYLES.header.iconWrapper}>
+                <Package className="h-7 w-7 text-white" aria-hidden="true" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Inventario</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  Inventario
+                </h1>
+                <p className="text-sm text-gray-600 hidden sm:block">
+                  Gestion de vacunas, jeringas y lotes
+                </p>
               </div>
             </div>
-            <button 
-              onClick={() => setShowNuevoIngreso(true)}
-              className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Nuevo Ingreso
-            </button>
+
+            {canRegisterIngreso && (
+              <button
+                onClick={handleOpenNuevoIngreso}
+                className={COMPONENT_STYLES.button.primary}
+              >
+                <Plus className="h-5 w-5" aria-hidden="true" />
+                <span>Nuevo Ingreso</span>
+              </button>
+            )}
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Navigation Premium */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-full px-6">
-          <div className="grid grid-cols-4 gap-1">
-            {Object.entries(sectionsByCategory).map(([categoryKey, sections]) => {
-              const category = CATEGORY_CONFIG[categoryKey as keyof typeof CATEGORY_CONFIG];
-              const CategoryIcon = category.icon;
-              
+      {/* Navigation Tabs */}
+      <nav className="bg-white border-b border-gray-100 sticky top-[73px] z-10" aria-label="Secciones">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
+            {filteredSections.map((section) => {
+              const Icon = section.icon;
+              const isActive = activeSection === section.id;
+
               return (
-                <div key={categoryKey} className="relative group">
-                  {/* Category Header */}
-                  <div className={`flex items-center justify-center py-4 border-b-4 border-${category.color}-500 bg-${category.color}-50`}>
-                    <CategoryIcon className={`h-5 w-5 text-${category.color}-600 mr-2`} />
-                    <span className={`font-semibold text-${category.color}-800`}>{category.label}</span>
-                  </div>
-                  
-                  {/* Section Buttons */}
-                  <div className="bg-white">
-                    {sections.map((section) => {
-                      const Icon = section.icon;
-                      const isActive = currentSubModule === section.id || (!currentSubModule && section.id === 'vacunas');
-                      
-                      return (
-                        <button
-                          key={section.id}
-                          onClick={() => navigateToModule('inventario', section.id)}
-                          className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                            isActive ? `bg-${category.color}-50 border-l-4 border-l-${category.color}-500` : ''
-                          }`}
-                        >
-                          <Icon className={`h-4 w-4 mr-3 ${isActive ? `text-${category.color}-600` : 'text-gray-500'}`} />
-                          <div className="flex-1">
-                            <div className={`font-medium text-sm ${isActive ? `text-${category.color}-800` : 'text-gray-900'}`}>
-                              {section.label}
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                <button
+                  key={section.id}
+                  onClick={() => navigateToModule('inventario', section.id)}
+                  className={`${COMPONENT_STYLES.nav.tab} ${
+                    isActive ? COMPONENT_STYLES.nav.tabActive : COMPONENT_STYLES.nav.tabInactive
+                  } flex-shrink-0`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  <span className="whitespace-nowrap">{section.label}</span>
+                </button>
               );
             })}
           </div>
         </div>
-      </div>
+      </nav>
 
-      {/* Content Area Premium */}
-      <div className="max-w-full px-6 py-6">
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      {/* Content */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <Routes>
             <Route path="/" element={<Navigate to="vacunas" replace />} />
             <Route path="vacunas" element={<GestionVacunas />} />
@@ -199,7 +179,6 @@ const Inventario: React.FC = () => {
             <Route path="lotes-vacunas" element={<LotesVacunasPage />} />
             <Route path="lotes-jeringas" element={<LotesJeringasPage />} />
             <Route path="configuracion-jeringas" element={<ConfiguracionJeringas />} />
-            <Route path="recepcion" element={<RecepcionTab onNuevoIngreso={() => setShowNuevoIngreso(true)} />} />
           </Routes>
         </div>
       </div>
@@ -207,7 +186,7 @@ const Inventario: React.FC = () => {
       {/* Modal de Nuevo Ingreso */}
       {showNuevoIngreso && (
         <NuevoIngreso
-          onClose={() => setShowNuevoIngreso(false)}
+          onClose={handleCloseNuevoIngreso}
           onSuccess={handleNuevoIngresoSuccess}
           vacunas={vacunasActivas}
           jeringas={jeringasActivas}
@@ -215,36 +194,7 @@ const Inventario: React.FC = () => {
           isLoadingJeringas={isLoadingJeringas}
         />
       )}
-    </div>
-  );
-};
-
-// Recepción Tab Premium
-interface RecepcionTabProps {
-  onNuevoIngreso: () => void;
-}
-
-const RecepcionTab: React.FC<RecepcionTabProps> = ({ onNuevoIngreso }) => {
-  return (
-    <div className="p-8">
-      <div className="max-w-2xl mx-auto text-center">
-        {/* Icono Principal */}
-        <div className="bg-gradient-to-r from-purple-100 to-purple-50 p-6 rounded-2xl inline-block mb-6">
-          <Plus className="h-16 w-16 text-purple-600" />
-        </div>
-        
-        {/* Título y Botón Principal */}
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Nuevo Ingreso</h2>
-        
-        <button 
-          onClick={onNuevoIngreso}
-          className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg font-semibold"
-        >
-          <Plus className="h-5 w-5 mr-3" />
-          Registrar Nuevo Ingreso
-        </button>
-      </div>
-    </div>
+    </main>
   );
 };
 
