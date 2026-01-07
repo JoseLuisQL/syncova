@@ -743,12 +743,19 @@ export class AjusteEntregasService {
             }
           });
 
-          // Sync with planificacion
-          await MovimientosCalculationService.sincronizarConPlanificacion(
-            tx,
-            movimiento,
-            diferencia
-          );
+          // Redistribuir al mes siguiente para mantener coherencia de planificación anual
+          if (diferencia !== 0) {
+            const redistribucionResult = await MovimientosCalculationService.redistribuirEntregasAutomaticamente(
+              tx,
+              movimiento,
+              ajuste.entregaNueva,
+              dto.usuarioId
+            );
+
+            if (!redistribucionResult.success) {
+              throw new Error(redistribucionResult.error || 'Error en redistribución al mes siguiente');
+            }
+          }
 
           movimientosActualizados++;
         }
