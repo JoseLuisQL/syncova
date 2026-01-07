@@ -1003,7 +1003,7 @@ class ValeExportService {
     infoCell1.value = `🏢 Centro de Acopio: ${vale.centroAcopio.nombre}`;
     infoCell1.font = {
       bold: true,
-      size: 11,
+      size: 14,
       color: { argb: 'FF1F2937' },
       name: 'Segoe UI'
     };
@@ -1019,7 +1019,7 @@ class ValeExportService {
     infoCell2.value = `👤 Responsable: ${config.responsableRecojo}`;
     infoCell2.font = {
       bold: true,
-      size: 11,
+      size: 13,
       color: { argb: 'FF1F2937' },
       name: 'Segoe UI'
     };
@@ -1040,7 +1040,7 @@ class ValeExportService {
     })}`;
     infoCell3.font = {
       bold: true,
-      size: 11,
+      size: 13,
       color: { argb: 'FF1F2937' },
       name: 'Segoe UI'
     };
@@ -1099,9 +1099,9 @@ class ValeExportService {
     const headerConsolidado = [
       { col: 'A', text: 'Nº', width: 5 },
       { col: 'B', text: '💉 Biológicos', width: 22 },
-      { col: 'C', text: 'Cantidad', width: 10 },
+      { col: 'C', text: 'Cant.', width: 10 },
       { col: 'E', text: '💊 Jeringas', width: 38 },
-      { col: 'F', text: 'Cantidad', width: 10 }
+      { col: 'F', text: 'Cant.', width: 10 }
     ];
 
     headerConsolidado.forEach(header => {
@@ -1109,7 +1109,7 @@ class ValeExportService {
       cell.value = header.text;
       cell.font = {
         bold: true,
-        size: 11,
+        size: 14,
         color: { argb: 'FFFFFFFF' },
         name: 'Segoe UI'
       };
@@ -1140,18 +1140,18 @@ class ValeExportService {
       // Datos de vacunas
       const cellA = worksheet.getCell(`A${filaActual}`);
       cellA.value = item.numero;
-      cellA.font = { size: 10, name: 'Segoe UI', color: { argb: 'FF374151' } };
+      cellA.font = { size: 14, name: 'Segoe UI', color: { argb: 'FF374151' } };
       cellA.alignment = { horizontal: 'center', vertical: 'middle' };
 
       const cellB = worksheet.getCell(`B${filaActual}`);
       cellB.value = item.biologico;
-      cellB.font = { size: 10, name: 'Segoe UI', color: { argb: 'FF374151' } };
+      cellB.font = { size: 14, name: 'Segoe UI', color: { argb: 'FF374151' } };
       cellB.alignment = { horizontal: 'left', vertical: 'middle' };
 
       const cellC = worksheet.getCell(`C${filaActual}`);
       cellC.value = item.cantidad;
       cellC.font = {
-        size: 11,
+        size: 14,
         name: 'Segoe UI',
         bold: item.cantidad > 0,
         color: { argb: item.cantidad > 0 ? 'FF059669' : 'FF6B7280' }
@@ -1164,13 +1164,13 @@ class ValeExportService {
 
         const cellE = worksheet.getCell(`E${filaActual}`);
         cellE.value = jeringaData.nombre;
-        cellE.font = { size: 10, name: 'Segoe UI', color: { argb: 'FF374151' } };
+        cellE.font = { size: 11, name: 'Segoe UI', color: { argb: 'FF374151' } };
         cellE.alignment = { horizontal: 'left', vertical: 'middle' };
 
         const cellF = worksheet.getCell(`F${filaActual}`);
         cellF.value = jeringaData.cantidad;
         cellF.font = {
-          size: 11,
+          size: 14,
           name: 'Segoe UI',
           bold: jeringaData.cantidad > 0,
           color: { argb: jeringaData.cantidad > 0 ? 'FF059669' : 'FF6B7280' }
@@ -1234,7 +1234,7 @@ class ValeExportService {
         headerCell.value = `🏥 ${establecimiento.nombre}`;
         headerCell.font = {
           bold: true,
-          size: 12,
+          size: 14,
           color: { argb: 'FFFFFFFF' },
           name: 'Segoe UI'
         };
@@ -1272,7 +1272,7 @@ class ValeExportService {
           cell.value = headerTexts[idx];
           cell.font = {
             bold: true,
-            size: 10,
+            size: 14,
             color: { argb: 'FFFFFFFF' },
             name: 'Segoe UI'
           };
@@ -1311,13 +1311,13 @@ class ValeExportService {
             // Datos de vacunas con diseño moderno
             const cellNum = worksheet.getCell((cols[0] || 'A') + filaActual);
             cellNum.value = vacuna.numero;
-            cellNum.font = { size: 9, name: 'Segoe UI', color: { argb: 'FF6B7280' } };
+            cellNum.font = { size: 14, name: 'Segoe UI', color: { argb: 'FF6B7280' } };
             cellNum.alignment = { horizontal: 'center', vertical: 'middle' };
 
             const cellBio = worksheet.getCell((cols[1] || 'B') + filaActual);
             cellBio.value = vacuna.biologico;
             cellBio.font = {
-              size: 9,
+              size: 14,
               name: 'Segoe UI',
               color: { argb: 'FF374151' },
               bold: hasQuantity
@@ -1327,7 +1327,7 @@ class ValeExportService {
             const cellCant = worksheet.getCell((cols[2] || 'C') + filaActual);
             cellCant.value = vacuna.cantidad;
             cellCant.font = {
-              size: 10,
+              size: 14,
               name: 'Segoe UI',
               bold: hasQuantity,
               color: { argb: hasQuantity ? 'FF059669' : 'FF9CA3AF' }
@@ -1341,14 +1341,14 @@ class ValeExportService {
               
               // Usar el nombre real de la jeringa, no el estático
               cellJer.value = jeringa.nombre || `Jeringa ${fila + 1}`;
-              cellJer.font = { size: 9, name: 'Segoe UI', color: { argb: 'FF374151' } };
+              cellJer.font = { size: 11, name: 'Segoe UI', color: { argb: 'FF374151' } };
               cellJer.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
 
               const jeringaCant = jeringa ? jeringa.cantidad : 0;
               const cellJerCant = worksheet.getCell((cols[5] || 'F') + filaActual);
               cellJerCant.value = jeringaCant;
               cellJerCant.font = {
-                size: 10,
+                size: 14,
                 name: 'Segoe UI',
                 bold: jeringaCant > 0,
                 color: { argb: jeringaCant > 0 ? 'FF059669' : 'FF9CA3AF' }
