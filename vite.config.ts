@@ -11,7 +11,16 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['lucide-react'],
+    include: ['lucide-react'],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'lucide': ['lucide-react'],
+        },
+      },
+    },
   },
   server: {
     host: '0.0.0.0', // Permite conexiones desde cualquier IP

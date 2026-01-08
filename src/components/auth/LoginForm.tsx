@@ -340,6 +340,7 @@ const LoginForm: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -377,6 +378,7 @@ const LoginForm: React.FC = () => {
     }
 
     try {
+      setAuthError(null);
       await login(formData);
       toast.success('Inicio de sesión exitoso');
     } catch (error: unknown) {
@@ -384,6 +386,7 @@ const LoginForm: React.FC = () => {
 
       if (!handleRateLimitError(error)) {
         const errorMessage = error instanceof Error ? error.message : 'Error al iniciar sesión';
+        setAuthError(errorMessage);
         toast.error(errorMessage);
       }
     }
@@ -450,6 +453,16 @@ const LoginForm: React.FC = () => {
               onChange={handleInputChange}
               rightElement={passwordToggleButton}
             />
+
+            {/* Auth Error Message */}
+            {authError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl" role="alert">
+                <p className="text-sm text-red-600 flex items-center gap-2">
+                  <ErrorIcon />
+                  {authError}
+                </p>
+              </div>
+            )}
 
             {/* Submit Button */}
             <div className="pt-2">
