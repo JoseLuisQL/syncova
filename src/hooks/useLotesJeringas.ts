@@ -94,19 +94,19 @@ export function useLotesJeringas(initialFilters?: LoteJeringaFilters) {
   /**
    * Crear nuevo lote de jeringa
    */
-  const createLote = useCallback(async (data: CreateLoteJeringaDto): Promise<boolean> => {
+  const createLote = useCallback(async (data: CreateLoteJeringaDto): Promise<{ success: boolean; error?: string }> => {
     logger.debug('Creando nuevo lote de jeringa:', data);
 
-    const result = await crudApi.create.execute(() => LoteJeringaService.create(data));
+    const result = await crudApi.create.executeWithResult(() => LoteJeringaService.create(data));
     
-    if (result) {
+    if (result.success && result.data) {
       // Recargar la lista después de crear
       await loadLotes();
       await loadStats();
-      return true;
+      return { success: true };
     }
     
-    return false;
+    return { success: false, error: result.error || 'Error al crear el lote de jeringa' };
   }, [crudApi.create, loadLotes, loadStats]);
 
   /**

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, memo } from 'react';
-import { X, Package, Syringe, ChevronRight, CheckCircle, AlertCircle, Calendar, FileText, Hash, Truck } from 'lucide-react';
+import { X, Package, Syringe, ChevronRight, CheckCircle, AlertCircle, Calendar, FileText, Hash, Truck, AlertTriangle } from 'lucide-react';
 import { Vacuna, Jeringa } from '../../types';
 import { COMPONENT_STYLES } from './constants';
 
@@ -24,6 +24,7 @@ const NuevoIngreso: React.FC<NuevoIngresoProps> = ({
 }) => {
   const [step, setStep] = useState(tipoFijo ? 2 : 1);
   const [tipo, setTipo] = useState<'vacuna' | 'jeringa' | null>(tipoFijo || null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     numero: '',
@@ -102,6 +103,8 @@ const NuevoIngreso: React.FC<NuevoIngresoProps> = ({
   const handleSubmit = useCallback(async () => {
     if (!validateStep(2)) return;
 
+    setServerError(null);
+
     const baseData = {
       numero: formData.numero,
       fechaIngreso: formData.fechaIngreso,
@@ -131,7 +134,8 @@ const NuevoIngreso: React.FC<NuevoIngresoProps> = ({
       }
       setStep(3);
     } catch (error) {
-      // El error se maneja en el padre con toast
+      const errorMessage = error instanceof Error ? error.message : 'Error al registrar el lote';
+      setServerError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -239,6 +243,30 @@ const NuevoIngreso: React.FC<NuevoIngresoProps> = ({
                 </h3>
                 <p className="text-gray-600">Complete la informacion del nuevo lote</p>
               </div>
+
+              {/* Alerta de error del servidor */}
+              {serverError && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-amber-800">No se pudo registrar el lote</h4>
+                    <p className="text-sm text-amber-700 mt-1">{serverError}</p>
+                    {serverError.toLowerCase().includes('existe') && (
+                      <p className="text-xs text-amber-600 mt-2">
+                        Por favor, verifique el numero de lote e intente con uno diferente.
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setServerError(null)}
+                    className="flex-shrink-0 text-amber-400 hover:text-amber-600 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
 
               <div className="space-y-4">
                 {/* Seleccion de Producto */}

@@ -95,19 +95,19 @@ export function useLotesVacunas(initialFilters?: LoteVacunaFilters) {
   /**
    * Crear nuevo lote de vacuna
    */
-  const createLote = useCallback(async (data: CreateLoteVacunaDto): Promise<boolean> => {
+  const createLote = useCallback(async (data: CreateLoteVacunaDto): Promise<{ success: boolean; error?: string }> => {
     logger.debug('Creando nuevo lote de vacuna:', data);
 
-    const result = await crudApi.create.execute(() => LoteVacunaService.create(data));
+    const result = await crudApi.create.executeWithResult(() => LoteVacunaService.create(data));
     
-    if (result) {
+    if (result.success && result.data) {
       // Recargar la lista después de crear
       await loadLotes();
       await loadStats();
-      return true;
+      return { success: true };
     }
     
-    return false;
+    return { success: false, error: result.error || 'Error al crear el lote de vacuna' };
   }, [crudApi.create, loadLotes, loadStats]);
 
   /**

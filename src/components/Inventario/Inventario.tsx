@@ -62,12 +62,13 @@ const Inventario: React.FC = () => {
           cantidadActual: data.cantidadInicial,
           observaciones: data.observaciones || undefined,
         };
-        const success = await createLoteVacuna(loteData);
-        if (success) {
+        const result = await createLoteVacuna(loteData);
+        if (result.success) {
           toast.success('Lote de vacuna registrado exitosamente');
         } else {
-          toast.error('Error al registrar el lote de vacuna');
-          return;
+          const errorMsg = result.error || 'Error al registrar el lote de vacuna';
+          toast.error(errorMsg);
+          throw new Error(errorMsg);
         }
       } else {
         const loteData: CreateLoteJeringaDto = {
@@ -82,17 +83,16 @@ const Inventario: React.FC = () => {
           cantidadActual: data.cantidadInicial,
           observaciones: data.observaciones || undefined,
         };
-        const success = await createLoteJeringa(loteData);
-        if (success) {
+        const result = await createLoteJeringa(loteData);
+        if (result.success) {
           toast.success('Lote de jeringa registrado exitosamente');
         } else {
-          toast.error('Error al registrar el lote de jeringa');
-          return;
+          const errorMsg = result.error || 'Error al registrar el lote de jeringa';
+          toast.error(errorMsg);
+          throw new Error(errorMsg);
         }
       }
       setShowNuevoIngreso(false);
-    } catch (error) {
-      toast.error('Error al registrar el ingreso');
     } finally {
       setIsSubmitting(false);
     }

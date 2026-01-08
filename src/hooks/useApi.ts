@@ -6,6 +6,15 @@ import { useState, useCallback } from 'react';
 export type ApiState = 'idle' | 'loading' | 'success' | 'error';
 
 /**
+ * Resultado de una operación API
+ */
+export interface ApiResult<T> {
+  data: T | null;
+  error: string | null;
+  success: boolean;
+}
+
+/**
  * Hook genérico para manejar estados de API
  */
 export interface UseApiState<T = any> {
@@ -27,9 +36,9 @@ export function useApi<T = any>() {
   });
 
   /**
-   * Ejecutar una operación API
+   * Ejecutar una operación API y devolver resultado con error
    */
-  const execute = useCallback(async (apiCall: () => Promise<T>): Promise<T | null> => {
+  const executeWithResult = useCallback(async (apiCall: () => Promise<T>): Promise<ApiResult<T>> => {
     setState(prev => ({
       ...prev,
       loading: true,
@@ -45,7 +54,7 @@ export function useApi<T = any>() {
         error: null,
         state: 'success'
       });
-      return result;
+      return { data: result, error: null, success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       setState({
@@ -54,9 +63,17 @@ export function useApi<T = any>() {
         error: errorMessage,
         state: 'error'
       });
-      return null;
+      return { data: null, error: errorMessage, success: false };
     }
   }, []);
+
+  /**
+   * Ejecutar una operación API (compatibilidad con código existente)
+   */
+  const execute = useCallback(async (apiCall: () => Promise<T>): Promise<T | null> => {
+    const result = await executeWithResult(apiCall);
+    return result.data;
+  }, [executeWithResult]);
 
   /**
    * Limpiar el estado
@@ -95,6 +112,7 @@ export function useApi<T = any>() {
   return {
     ...state,
     execute,
+    executeWithResult,
     reset,
     setData,
     setError
