@@ -2656,6 +2656,7 @@ export class ReporteExportService {
 
   /**
    * Configurar columnas para reporte de movimientos por EESS
+   * Incluye columna de Centro de Acopio para agrupacion profesional
    */
   private static configurarColumnasMovimientosPorEESS(
     worksheet: ExcelJS.Worksheet,
@@ -2666,13 +2667,14 @@ export class ReporteExportService {
     const headerRow1 = config.observaciones ? 6 : 5; // Primera fila de encabezados
     const headerRow2 = headerRow1 + 1; // Segunda fila de encabezados
 
-    // Quitar líneas de cuadrícula
+    // Quitar lineas de cuadricula
     worksheet.views = [{ showGridLines: false }];
 
-    // Configurar columnas base (EESS)
-    worksheet.getColumn(1).width = 40; // EESS
+    // Configurar columnas base (Centro de Acopio + EESS)
+    worksheet.getColumn(1).width = 30; // Centro de Acopio
+    worksheet.getColumn(2).width = 40; // EESS
 
-    let currentCol = 2;
+    let currentCol = 3;
 
     // Para cada vacuna, crear 3 columnas (Total Entrega, Total Salidas, Stock)
     vacunasArray.forEach((vacunaId, index) => {
@@ -2680,8 +2682,8 @@ export class ReporteExportService {
       const vacunaNombre = vacunaInfo?.nombre || `Vacuna ${index + 1}`;
 
       // Configurar ancho de las 3 columnas para esta vacuna
-      worksheet.getColumn(currentCol).width = 15;     // Total Entrega
-      worksheet.getColumn(currentCol + 1).width = 15; // Total Salidas
+      worksheet.getColumn(currentCol).width = 14;     // Total Entrega
+      worksheet.getColumn(currentCol + 1).width = 14; // Total Salidas
       worksheet.getColumn(currentCol + 2).width = 12; // Stock
 
       // Primera fila de encabezados: nombre de la vacuna (merge 3 columnas)
@@ -2704,8 +2706,8 @@ export class ReporteExportService {
         fgColor: { argb: 'FF1976D2' }
       };
 
-      // Segunda fila de encabezados: columnas específicas
-      const subHeaders = ['Total Entrega', 'Total Salidas', 'Stock'];
+      // Segunda fila de encabezados: columnas especificas
+      const subHeaders = ['Entrega', 'Salidas', 'Stock'];
       subHeaders.forEach((subHeader, subIndex) => {
         const cell = worksheet.getCell(headerRow2, currentCol + subIndex);
         cell.value = subHeader;
@@ -2726,13 +2728,30 @@ export class ReporteExportService {
       currentCol += 3;
     });
 
-    // Configurar encabezado de EESS
+    // Configurar encabezado de Centro de Acopio
     worksheet.mergeCells(headerRow1, 1, headerRow2, 1);
-    const eessHeaderCell = worksheet.getCell(headerRow1, 1);
-    eessHeaderCell.value = 'EESS';
+    const centroAcopioHeaderCell = worksheet.getCell(headerRow1, 1);
+    centroAcopioHeaderCell.value = 'Centro de Acopio';
+    centroAcopioHeaderCell.font = {
+      bold: true,
+      size: 11,
+      color: { argb: 'FFFFFFFF' },
+      name: 'Segoe UI'
+    };
+    centroAcopioHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    centroAcopioHeaderCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF0D47A1' }
+    };
+
+    // Configurar encabezado de EESS
+    worksheet.mergeCells(headerRow1, 2, headerRow2, 2);
+    const eessHeaderCell = worksheet.getCell(headerRow1, 2);
+    eessHeaderCell.value = 'Establecimiento de Salud';
     eessHeaderCell.font = {
       bold: true,
-      size: 12,
+      size: 11,
       color: { argb: 'FFFFFFFF' },
       name: 'Segoe UI'
     };
@@ -2763,6 +2782,7 @@ export class ReporteExportService {
 
   /**
    * Agregar datos para reporte de movimientos por EESS
+   * Agrupa los establecimientos por centro de acopio con merge vertical
    */
   private static agregarDatosMovimientosPorEESS(
     worksheet: ExcelJS.Worksheet,
@@ -2770,98 +2790,192 @@ export class ReporteExportService {
     vacunasArray: string[],
     config: ReporteExportConfig
   ): void {
-    const startRow = (config.observaciones ? 7 : 6) + 1; // Fila después de los encabezados
+    const startRow = (config.observaciones ? 7 : 6) + 1; // Fila despues de los encabezados
 
-    data.forEach((item, index) => {
-      const row = worksheet.getRow(startRow + index);
-
-      // Primera columna: nombre del establecimiento
-      const eessCell = row.getCell(1);
-      eessCell.value = item.establecimientoNombre;
-      eessCell.font = {
-        size: 10,
-        name: 'Segoe UI',
-        bold: true
-      };
-      eessCell.alignment = { horizontal: 'left', vertical: 'middle' };
-
-      let currentCol = 2;
-
-      // Para cada vacuna, agregar las 3 columnas de datos
-      vacunasArray.forEach(vacunaId => {
-        const vacunaData = item.vacunas[vacunaId];
-
-        if (vacunaData) {
-          // Total Entrega
-          const entregaCell = row.getCell(currentCol);
-          entregaCell.value = vacunaData.totalEntrega;
-          entregaCell.numFmt = '#,##0';
-          entregaCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-          // Total Salidas
-          const salidasCell = row.getCell(currentCol + 1);
-          salidasCell.value = vacunaData.totalSalidas;
-          salidasCell.numFmt = '#,##0';
-          salidasCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-          // Stock
-          const stockCell = row.getCell(currentCol + 2);
-          stockCell.value = vacunaData.stock;
-          stockCell.numFmt = '#,##0';
-          stockCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-          // Colorear stock según nivel
-          if (vacunaData.stock <= 0) {
-            stockCell.font = { color: { argb: 'FFDC2626' }, bold: true };
-          } else if (vacunaData.stock < 50) {
-            stockCell.font = { color: { argb: 'FFF59E0B' }, bold: true };
-          } else {
-            stockCell.font = { color: { argb: 'FF059669' } };
-          }
-        } else {
-          // Si no hay datos para esta vacuna, poner 0
-          for (let i = 0; i < 3; i++) {
-            const cell = row.getCell(currentCol + i);
-            cell.value = 0;
-            cell.numFmt = '#,##0';
-            cell.alignment = { horizontal: 'center', vertical: 'middle' };
-            cell.font = { color: { argb: 'FF9CA3AF' } };
-          }
-        }
-
-        currentCol += 3;
-      });
-
-      // Aplicar estilos a toda la fila
-      for (let col = 1; col < currentCol; col++) {
-        const cell = row.getCell(col);
-        cell.font = {
-          ...cell.font,
-          size: 10,
-          name: 'Segoe UI'
-        };
-        cell.border = {
-          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
-        };
+    // Ordenar datos por centro de acopio y luego por establecimiento
+    const datosOrdenados = [...data].sort((a, b) => {
+      const centroA = a.centroAcopioNombre || 'ZZZ Sin Centro';
+      const centroB = b.centroAcopioNombre || 'ZZZ Sin Centro';
+      if (centroA !== centroB) {
+        return centroA.localeCompare(centroB);
       }
+      return a.establecimientoNombre.localeCompare(b.establecimientoNombre);
+    });
 
-      // Alternar colores de fila para mejor legibilidad
-      if (index % 2 === 1) {
-        for (let col = 1; col < currentCol; col++) {
+    // Agrupar por centro de acopio para hacer merge
+    const gruposPorCentro = new Map<string, { nombre: string; items: MovimientosPorEESSItem[]; startRow: number; endRow: number }>();
+    
+    datosOrdenados.forEach(item => {
+      const centroId = item.centroAcopioId || 'sin-centro';
+      const centroNombre = item.centroAcopioNombre || 'Sin Centro de Acopio';
+      
+      if (!gruposPorCentro.has(centroId)) {
+        gruposPorCentro.set(centroId, {
+          nombre: centroNombre,
+          items: [],
+          startRow: 0,
+          endRow: 0
+        });
+      }
+      gruposPorCentro.get(centroId)!.items.push(item);
+    });
+
+    let currentRow = startRow;
+    const totalCols = 2 + (vacunasArray.length * 3); // Centro + EESS + (vacunas * 3)
+    let centroIndex = 0;
+
+    for (const [centroId, grupo] of gruposPorCentro) {
+      grupo.startRow = currentRow;
+      const centroRowCount = grupo.items.length;
+      grupo.endRow = currentRow + centroRowCount - 1;
+
+      // Definir colores alternos para grupos de centros
+      const isEvenGroup = centroIndex % 2 === 0;
+      const groupBgColor = isEvenGroup ? 'FFFFFFFF' : 'FFF8FAFC';
+
+      grupo.items.forEach((item, itemIndex) => {
+        const row = worksheet.getRow(currentRow);
+
+        // Primera columna: Centro de Acopio (en cada fila, sin merge)
+        const centroCell = row.getCell(1);
+        centroCell.value = grupo.nombre;
+        centroCell.font = {
+          size: 10,
+          name: 'Segoe UI',
+          bold: true,
+          color: { argb: 'FF1E40AF' }
+        };
+        centroCell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+        centroCell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE0E7FF' }
+        };
+
+        // Segunda columna: nombre del establecimiento
+        const eessCell = row.getCell(2);
+        eessCell.value = item.establecimientoNombre;
+        eessCell.font = {
+          size: 10,
+          name: 'Segoe UI',
+          bold: false
+        };
+        eessCell.alignment = { horizontal: 'left', vertical: 'middle' };
+        eessCell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: groupBgColor }
+        };
+
+        let currentCol = 3;
+
+        // Para cada vacuna, agregar las 3 columnas de datos
+        vacunasArray.forEach(vacunaId => {
+          const vacunaData = item.vacunas[vacunaId];
+
+          if (vacunaData) {
+            // Total Entrega
+            const entregaCell = row.getCell(currentCol);
+            entregaCell.value = vacunaData.totalEntrega;
+            entregaCell.numFmt = '#,##0';
+            entregaCell.alignment = { horizontal: 'center', vertical: 'middle' };
+            entregaCell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: groupBgColor }
+            };
+
+            // Total Salidas
+            const salidasCell = row.getCell(currentCol + 1);
+            salidasCell.value = vacunaData.totalSalidas;
+            salidasCell.numFmt = '#,##0';
+            salidasCell.alignment = { horizontal: 'center', vertical: 'middle' };
+            salidasCell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: groupBgColor }
+            };
+
+            // Stock
+            const stockCell = row.getCell(currentCol + 2);
+            stockCell.value = vacunaData.stock;
+            stockCell.numFmt = '#,##0';
+            stockCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+            // Colorear stock segun nivel
+            if (vacunaData.stock <= 0) {
+              stockCell.font = { color: { argb: 'FFDC2626' }, bold: true, size: 10, name: 'Segoe UI' };
+              stockCell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFFEE2E2' }
+              };
+            } else if (vacunaData.stock < 50) {
+              stockCell.font = { color: { argb: 'FFF59E0B' }, bold: true, size: 10, name: 'Segoe UI' };
+              stockCell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFFFFBEB' }
+              };
+            } else {
+              stockCell.font = { color: { argb: 'FF059669' }, size: 10, name: 'Segoe UI' };
+              stockCell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: groupBgColor }
+              };
+            }
+          } else {
+            // Si no hay datos para esta vacuna, poner 0
+            for (let i = 0; i < 3; i++) {
+              const cell = row.getCell(currentCol + i);
+              cell.value = 0;
+              cell.numFmt = '#,##0';
+              cell.alignment = { horizontal: 'center', vertical: 'middle' };
+              cell.font = { color: { argb: 'FF9CA3AF' }, size: 10, name: 'Segoe UI' };
+              cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: groupBgColor }
+              };
+            }
+          }
+
+          currentCol += 3;
+        });
+
+        // Aplicar bordes a toda la fila
+        for (let col = 1; col <= totalCols; col++) {
           const cell = row.getCell(col);
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFF9FAFB' }
+          cell.font = {
+            ...cell.font,
+            size: 10,
+            name: 'Segoe UI'
+          };
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+            left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+            bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+            right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
           };
         }
+
+        row.height = 20;
+        currentRow++;
+      });
+
+      // Aplicar borde mas grueso al final de cada grupo de centro
+      const lastRowOfGroup = worksheet.getRow(grupo.endRow);
+      for (let col = 1; col <= totalCols; col++) {
+        const cell = lastRowOfGroup.getCell(col);
+        cell.border = {
+          ...cell.border,
+          bottom: { style: 'medium', color: { argb: 'FF94A3B8' } }
+        };
       }
 
-      row.height = 20;
-    });
+      centroIndex++;
+    }
   }
 
   /**
@@ -2874,11 +2988,8 @@ export class ReporteExportService {
     // Congelar paneles para mantener encabezados visibles
     worksheet.views = [{
       state: 'frozen',
-      xSplit: 1, // Congelar primera columna (EESS)
+      xSplit: 2, // Congelar primeras dos columnas (Centro de Acopio + EESS)
       ySplit: 2  // Congelar primeras dos filas de encabezados
     }];
-
-    // Los estilos específicos ya se aplican en los métodos anteriores
-    // Este método se mantiene para compatibilidad y futuras mejoras
   }
 }
