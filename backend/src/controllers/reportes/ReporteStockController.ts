@@ -437,4 +437,71 @@ export class ReporteStockController {
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }
+
+  /**
+   * Exportar reporte de stock de vacunas por EESS a Excel
+   * POST /api/reportes/stock-vacunas-eess/exportar
+   */
+  static async exportarStockVacunasEESS(req: Request, res: Response): Promise<void> {
+    try {
+      const { filtros, config } = req.body;
+
+      if (!filtros || !filtros.fechaInicio || !filtros.fechaFin) {
+        ResponseUtil.error(res, 'Fechas de inicio y fin son requeridas', 400);
+        return;
+      }
+
+      if (!filtros.vacunaIds || !Array.isArray(filtros.vacunaIds) || filtros.vacunaIds.length === 0) {
+        ResponseUtil.error(res, 'Debe seleccionar al menos una vacuna', 400);
+        return;
+      }
+
+      if (filtros.centroAcopioId && !validateUUID(filtros.centroAcopioId)) {
+        ResponseUtil.error(res, 'ID de centro de acopio inválido', 400);
+        return;
+      }
+
+      const reporteResult = await ReporteService.generarStockVacunasEESS({
+        fechaInicio: new Date(filtros.fechaInicio),
+        fechaFin: new Date(filtros.fechaFin),
+        centroAcopioId: filtros.centroAcopioId,
+        vacunaIds: filtros.vacunaIds
+      });
+
+      if (!reporteResult.success || !reporteResult.data) {
+        ResponseUtil.error(res, reporteResult.error || 'Error al generar reporte de stock de vacunas por EESS', 400);
+        return;
+      }
+
+      const exportConfig: ReporteExportConfig = {
+        incluirDetalles: config?.incluirDetalles !== false,
+        incluirGraficos: config?.incluirGraficos === true,
+        incluirEstadisticas: config?.incluirEstadisticas !== false,
+        formatoFecha: 'dd/mm/yyyy',
+        responsableReporte: config?.responsableReporte || 'Sistema SIVAC',
+        observaciones: config?.observaciones
+      };
+
+      const exportResult = await ReporteExportService.exportarStockVacunasEESS(
+        reporteResult.data!,
+        exportConfig
+      );
+
+      if (!exportResult.success || !exportResult.data) {
+        ResponseUtil.error(res, exportResult.error || 'Error al exportar reporte de stock de vacunas por EESS', 500);
+        return;
+      }
+
+      const buffer = await exportResult.data!.workbook.xlsx.writeBuffer() as unknown as Uint8Array;
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${exportResult.data!.filename}"`);
+      res.setHeader('Content-Length', buffer.byteLength);
+
+      res.send(buffer);
+    } catch (error) {
+      console.error('Error en ReporteStockController.exportarStockVacunasEESS:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
 }

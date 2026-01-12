@@ -91,6 +91,9 @@ router.post('/lotes-vencidos/export/excel', ReporteController.exportarLotesVenci
 // POST /api/reportes/kardex-detallado/export/excel - Exportar kardex detallado a Excel
 router.post('/kardex-detallado/export/excel', ReporteController.exportarKardexDetalladoExcel);
 
+// POST /api/reportes/stock-vacunas-eess/exportar - Exportar stock de vacunas por EESS a Excel
+router.post('/stock-vacunas-eess/exportar', ReporteController.exportarStockVacunasEESS);
+
 /**
  * Rutas adicionales para futuras funcionalidades
  */

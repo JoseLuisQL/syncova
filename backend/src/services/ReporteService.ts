@@ -70,6 +70,13 @@ export interface MovimientosPorEESSFilters {
   incluirInactivos?: boolean;
 }
 
+export interface StockVacunasEESSFilters {
+  fechaInicio: Date;
+  fechaFin: Date;
+  centroAcopioId?: string;
+  vacunaIds: string[];
+}
+
 /**
  * Interfaces para resultados de reportes
  */
@@ -251,6 +258,20 @@ export interface MovimientosPorEESSItem {
       totalEntrega: number;
       totalSalidas: number;
       stock: number; // Stock del último mes del rango
+    };
+  };
+}
+
+export interface StockVacunasEESSItem {
+  establecimientoId: string;
+  establecimientoNombre: string;
+  centroAcopioId: string;
+  centroAcopioNombre: string;
+  vacunas: {
+    [vacunaId: string]: {
+      vacunaId: string;
+      vacunaNombre: string;
+      stock: number;
     };
   };
 }
@@ -1959,6 +1980,170 @@ export class ReporteService {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Error al generar reporte de movimientos por EESS'
+      };
+    }
+  }
+
+  /**
+   * Generar reporte de stock de vacunas por EESS
+   */
+  static async generarStockVacunasEESS(
+    filters: StockVacunasEESSFilters
+  ): Promise<ServiceResult<StockVacunasEESSItem[]>> {
+    try {
+      console.log('🔄 Generando reporte de stock de vacunas por EESS:', filters);
+
+      // Validar vacunas
+      for (const vacunaId of filters.vacunaIds) {
+        if (!validateUUID(vacunaId)) {
+          return {
+            success: false,
+            error: `ID de vacuna inválido: ${vacunaId}`
+          };
+        }
+      }
+
+      // Obtener establecimientos con sus centros de acopio
+      const whereEstablecimiento: any = {
+        estado: 'activo'
+      };
+
+      if (filters.centroAcopioId && validateUUID(filters.centroAcopioId)) {
+        whereEstablecimiento.centroAcopioId = filters.centroAcopioId;
+      }
+
+      const establecimientos = await prisma.establecimiento.findMany({
+        where: whereEstablecimiento,
+        include: {
+          centroAcopio: true
+        },
+        orderBy: [
+          { centroAcopio: { nombre: 'asc' } },
+          { nombre: 'asc' }
+        ]
+      });
+
+      // Obtener vacunas seleccionadas
+      const vacunas = await prisma.vacuna.findMany({
+        where: {
+          id: { in: filters.vacunaIds },
+          estado: 'activo'
+        },
+        orderBy: { nombre: 'asc' }
+      });
+
+      const vacunaMap = new Map(vacunas.map(v => [v.id, v.nombre]));
+
+      // Calcular el mes y año del rango de fechas (usar el último mes del rango)
+      const fechaFin = new Date(filters.fechaFin);
+      const mesFin = fechaFin.getMonth() + 1;
+      const anioFin = fechaFin.getFullYear();
+
+      // Obtener movimientos del último mes para calcular stock base
+      const movimientos = await prisma.movimientoVacuna.findMany({
+        where: {
+          vacunaId: { in: filters.vacunaIds },
+          mes: mesFin,
+          anio: anioFin,
+          establecimiento: {
+            estado: 'activo',
+            ...(filters.centroAcopioId && { centroAcopioId: filters.centroAcopioId })
+          }
+        },
+        select: {
+          establecimientoId: true,
+          vacunaId: true,
+          saldoAnterior: true,
+          transIngreso: true,
+          salida: true,
+          transSalida: true
+        }
+      });
+
+      // Obtener entregas con vales generados (solo estas cuentan como stock real)
+      const valeDetalles = await prisma.valeDetalle.findMany({
+        where: {
+          vacunaId: { in: filters.vacunaIds },
+          establecimiento: {
+            estado: 'activo',
+            ...(filters.centroAcopioId && { centroAcopioId: filters.centroAcopioId })
+          },
+          valeEntrega: {
+            mes: mesFin,
+            anio: anioFin,
+            estado: { in: ['generado', 'impreso', 'entregado'] }
+          }
+        },
+        select: {
+          establecimientoId: true,
+          vacunaId: true,
+          cantidadProgramada: true,
+          cantidadAdicional: true
+        }
+      });
+
+      // Crear mapa de entregas con vale por establecimiento y vacuna
+      const entregasConValeMap = new Map<string, Map<string, number>>();
+      for (const detalle of valeDetalles) {
+        if (!entregasConValeMap.has(detalle.establecimientoId)) {
+          entregasConValeMap.set(detalle.establecimientoId, new Map());
+        }
+        const cantidad = (detalle.cantidadProgramada || 0) + (detalle.cantidadAdicional || 0);
+        const actual = entregasConValeMap.get(detalle.establecimientoId)!.get(detalle.vacunaId) || 0;
+        entregasConValeMap.get(detalle.establecimientoId)!.set(detalle.vacunaId, actual + cantidad);
+      }
+
+      // Crear mapa de stock por establecimiento y vacuna
+      // Stock = saldoAnterior + transIngreso + (entregas con vale) - salida - transSalida
+      const stockMap = new Map<string, Map<string, number>>();
+      for (const mov of movimientos) {
+        if (!stockMap.has(mov.establecimientoId)) {
+          stockMap.set(mov.establecimientoId, new Map());
+        }
+        // Obtener entregas con vale en lugar de usar mov.entrega directamente
+        const entregaConVale = entregasConValeMap.get(mov.establecimientoId)?.get(mov.vacunaId) || 0;
+        const stock = (mov.saldoAnterior || 0) + (mov.transIngreso || 0) + entregaConVale - (mov.salida || 0) - (mov.transSalida || 0);
+        stockMap.get(mov.establecimientoId)!.set(mov.vacunaId, stock);
+      }
+
+      // Construir resultado
+      const reporteData: StockVacunasEESSItem[] = [];
+
+      for (const establecimiento of establecimientos) {
+        const vacunasData: StockVacunasEESSItem['vacunas'] = {};
+
+        for (const vacunaId of filters.vacunaIds) {
+          const stock = stockMap.get(establecimiento.id)?.get(vacunaId) || 0;
+          const vacunaNombre = vacunaMap.get(vacunaId) || 'Desconocida';
+
+          vacunasData[vacunaId] = {
+            vacunaId,
+            vacunaNombre,
+            stock
+          };
+        }
+
+        reporteData.push({
+          establecimientoId: establecimiento.id,
+          establecimientoNombre: establecimiento.nombre,
+          centroAcopioId: establecimiento.centroAcopioId || '',
+          centroAcopioNombre: establecimiento.centroAcopio?.nombre || 'Sin Centro de Acopio',
+          vacunas: vacunasData
+        });
+      }
+
+      console.log(`✅ Reporte de stock de vacunas por EESS generado: ${reporteData.length} establecimientos`);
+
+      return {
+        success: true,
+        data: reporteData
+      };
+
+    } catch (error) {
+      console.error('❌ Error al generar reporte de stock de vacunas por EESS:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al generar reporte de stock de vacunas por EESS'
       };
     }
   }

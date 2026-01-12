@@ -391,6 +391,15 @@ export const useReportes = (): UseReportesReturn => {
     );
   }, [ejecutarConCarga]);
 
+  const exportarStockVacunasEESS = useCallback(async (
+    filtros: { fechaInicio: string; fechaFin: string; centroAcopioId?: string; vacunaIds: string[] },
+    config: ConfiguracionExportacion
+  ) => {
+    await ejecutarConCarga(
+      () => ReportesService.exportarStockVacunasEESS(filtros, config)
+    );
+  }, [ejecutarConCarga]);
+
   /**
    * Exportar reporte a Excel
    */
@@ -569,6 +578,7 @@ export const useReportes = (): UseReportesReturn => {
     exportarEntregasPorEstablecimiento,
     exportarEficienciaDistribucion,
     exportarMovimientosPorEESS,
+    exportarStockVacunasEESS,
     limpiarReportes,
     actualizarFiltros,
 

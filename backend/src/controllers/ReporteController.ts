@@ -18,6 +18,7 @@ export class ReporteController {
   static exportarStockCriticoExcel = ReporteStockController.exportarStockCriticoExcel;
   static exportarProximosVencimientosExcel = ReporteStockController.exportarProximosVencimientosExcel;
   static exportarLotesVencidosExcel = ReporteStockController.exportarLotesVencidosExcel;
+  static exportarStockVacunasEESS = ReporteStockController.exportarStockVacunasEESS;
 
   // Kardex
   static generarKardexDetallado = ReporteKardexController.generarKardexDetallado;

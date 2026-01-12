@@ -1,5 +1,8 @@
 import ExcelJS from 'exceljs';
+import fs from 'fs';
 import { ServiceResult } from '@/types';
+import { getLogoPath } from '@/middleware/uploadLogo';
+import { ConfiguracionService } from './ConfiguracionService';
 import {
   StockActualItem,
   StockCriticoItem,
@@ -10,7 +13,8 @@ import {
   ConsumoHistoricoItem,
   EntregaPorEstablecimientoItem,
   EficienciaDistribucionItem,
-  MovimientosPorEESSItem
+  MovimientosPorEESSItem,
+  StockVacunasEESSItem
 } from './ReporteService';
 
 /**
@@ -39,6 +43,48 @@ export interface ReporteExcelResult {
  * Implementa diseño profesional siguiendo el patrón de ValeExportService
  */
 export class ReporteExportService {
+  // ============================================================================
+  // PALETA DE COLORES PROFESIONAL - CONSISTENTE CON SIVAC (teal/cyan)
+  // ============================================================================
+  private static readonly COLORS = {
+    // Colores primarios del sistema (teal)
+    primary: 'FF0D9488',      // teal-600
+    primaryDark: 'FF0F766E',  // teal-700
+    primaryLight: 'FFCCFBF1', // teal-100
+    
+    // Colores secundarios (cyan)
+    secondary: 'FF0891B2',    // cyan-600
+    secondaryLight: 'FFCFFAFE', // cyan-100
+    
+    // Colores institucionales
+    institutional: 'FF115E59', // teal-800
+    institutionalLight: 'FF14B8A6', // teal-500
+    
+    // Colores neutros
+    white: 'FFFFFFFF',
+    gray50: 'FFF9FAFB',
+    gray100: 'FFF3F4F6',
+    gray200: 'FFE5E7EB',
+    gray500: 'FF6B7280',
+    gray700: 'FF374151',
+    gray800: 'FF1F2937',
+  };
+
+  /**
+   * Datos dinámicos para el encabezado de exportación
+   */
+  private static async getHeaderData(): Promise<{ institucionNombre: string; anioNombre: string; logoPath: string | null }> {
+    const institucionNombre = await ConfiguracionService.getValue('institucion_nombre', 'DISA APURIMAC II');
+    const anioNombre = await ConfiguracionService.getValue('anio_nombre', '');
+    const logoPath = getLogoPath();
+
+    return {
+      institucionNombre: institucionNombre || 'DISA APURIMAC II',
+      anioNombre: anioNombre || '',
+      logoPath
+    };
+  }
+
   /**
    * Exportar reporte de stock actual a Excel
    */
@@ -3004,6 +3050,486 @@ export class ReporteExportService {
       state: 'frozen',
       xSplit: 2, // Congelar primeras dos columnas (Centro de Acopio + EESS)
       ySplit: headerRow2  // Congelar hasta la fila de encabezados
+    }];
+  }
+
+  /**
+   * Exportar reporte de stock de vacunas por EESS a Excel
+   */
+  static async exportarStockVacunasEESS(
+    data: StockVacunasEESSItem[],
+    config: ReporteExportConfig
+  ): Promise<ServiceResult<ReporteExcelResult>> {
+    try {
+      console.log('🔄 Exportando reporte de stock de vacunas por EESS a Excel');
+
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'SIVAC - Sistema de Vacunación';
+      workbook.created = new Date();
+      workbook.company = 'Gobierno Regional de Apurímac';
+
+      const worksheet = workbook.addWorksheet('Stock por EESS');
+
+      // Obtener datos dinámicos del encabezado
+      const headerData = await this.getHeaderData();
+
+      // Agregar encabezado del reporte con logo
+      await this.agregarEncabezadoStockVacunasEESS(workbook, worksheet, config, headerData);
+
+      // Obtener todas las vacunas únicas para crear las columnas
+      const vacunasUnicas = new Set<string>();
+      const vacunasInfo = new Map<string, { id: string; nombre: string }>();
+
+      data.forEach(item => {
+        Object.values(item.vacunas).forEach(vacuna => {
+          vacunasUnicas.add(vacuna.vacunaId);
+          vacunasInfo.set(vacuna.vacunaId, {
+            id: vacuna.vacunaId,
+            nombre: vacuna.vacunaNombre
+          });
+        });
+      });
+
+      const vacunasArray = Array.from(vacunasUnicas).sort((a, b) => {
+        const nombreA = vacunasInfo.get(a)?.nombre || '';
+        const nombreB = vacunasInfo.get(b)?.nombre || '';
+        return nombreA.localeCompare(nombreB);
+      });
+
+      // Configurar columnas dinámicamente
+      this.configurarColumnasStockVacunasEESS(worksheet, vacunasArray, vacunasInfo, config);
+
+      // Agregar datos
+      this.agregarDatosStockVacunasEESS(worksheet, data, vacunasArray, config);
+
+      // Aplicar estilos profesionales
+      this.aplicarEstilosStockVacunasEESS(worksheet, vacunasArray, config);
+
+      const fecha = new Date().toISOString().split('T')[0];
+      const filename = `Stock_Vacunas_EESS_${fecha}.xlsx`;
+
+      console.log('✅ Reporte de stock de vacunas por EESS exportado exitosamente');
+
+      return {
+        success: true,
+        data: {
+          workbook,
+          filename,
+          size: 0
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de stock de vacunas por EESS:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al exportar reporte de stock de vacunas por EESS'
+      };
+    }
+  }
+
+  /**
+   * Agregar encabezado para reporte de stock de vacunas por EESS
+   * Usa el mismo estilo profesional que ValeExportService
+   */
+  private static async agregarEncabezadoStockVacunasEESS(
+    workbook: ExcelJS.Workbook,
+    worksheet: ExcelJS.Worksheet,
+    config: ReporteExportConfig,
+    headerData: { institucionNombre: string; anioNombre: string; logoPath: string | null }
+  ): Promise<void> {
+    // CONFIGURACIÓN PROFESIONAL DE LA HOJA
+    worksheet.views = [{
+      showGridLines: false,
+      showRowColHeaders: false,
+      zoomScale: 90
+    }];
+
+    // Configurar alturas de filas del encabezado
+    worksheet.getRow(1).height = 22;
+    worksheet.getRow(2).height = 18;
+    worksheet.getRow(3).height = 16;
+    worksheet.getRow(4).height = 5;  // Espaciador pequeño
+    worksheet.getRow(5).height = 24;
+
+    // Fondo para encabezado (filas 1-3)
+    for (let row = 1; row <= 3; row++) {
+      for (let col = 1; col <= 20; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: this.COLORS.primaryLight }
+        };
+      }
+    }
+
+    // Verificar si existe logo
+    const hasLogo = headerData.logoPath && fs.existsSync(headerData.logoPath);
+
+    if (hasLogo) {
+      try {
+        const logoBuffer = fs.readFileSync(headerData.logoPath!);
+        const logoExtension = headerData.logoPath!.toLowerCase().endsWith('.png') ? 'png' : 'jpeg';
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const imageId = workbook.addImage({
+          buffer: logoBuffer as any,
+          extension: logoExtension,
+        });
+
+        // Logo en columna A, ocupando las 3 primeras filas
+        worksheet.addImage(imageId, {
+          tl: { col: 0.99, row: 0.1 },
+          ext: { width: 65, height: 65 }
+        });
+
+        // Ajustar columna A para el logo
+        worksheet.getColumn('A').width = 10;
+      } catch (error) {
+        console.error('Error al agregar logo al Excel:', error);
+      }
+    }
+
+    // Columnas para texto: si hay logo empiezan en B, sino en A
+    const colInicio = hasLogo ? 'B' : 'A';
+
+    // Nombre de la Institución (dinámico)
+    worksheet.mergeCells(`${colInicio}1:T1`);
+    const headerCell1 = worksheet.getCell(`${colInicio}1`);
+    headerCell1.value = headerData.institucionNombre.toUpperCase();
+    headerCell1.font = {
+      bold: true,
+      size: 13,
+      color: { argb: this.COLORS.institutional },
+      name: 'Calibri'
+    };
+    headerCell1.alignment = { horizontal: hasLogo ? 'left' : 'center', vertical: 'middle' };
+
+    // Estrategia Sanitaria (estático)
+    worksheet.mergeCells(`${colInicio}2:T2`);
+    const headerCell2 = worksheet.getCell(`${colInicio}2`);
+    headerCell2.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRIO';
+    headerCell2.font = {
+      bold: true,
+      size: 9,
+      color: { argb: this.COLORS.primary },
+      name: 'Calibri'
+    };
+    headerCell2.alignment = { horizontal: hasLogo ? 'left' : 'center', vertical: 'middle' };
+
+    // Nombre del Año (dinámico)
+    worksheet.mergeCells(`${colInicio}3:T3`);
+    const headerCell3 = worksheet.getCell(`${colInicio}3`);
+    if (headerData.anioNombre) {
+      headerCell3.value = `"${headerData.anioNombre}"`;
+      headerCell3.font = {
+        italic: true,
+        size: 8,
+        color: { argb: this.COLORS.gray500 },
+        name: 'Calibri'
+      };
+      headerCell3.alignment = { horizontal: hasLogo ? 'left' : 'center', vertical: 'middle' };
+    }
+
+    // Fila 4 vacía como espaciador
+    worksheet.mergeCells('A4:T4');
+
+    // Título principal profesional
+    worksheet.mergeCells('A5:T5');
+    const titleCell = worksheet.getCell('A5');
+    titleCell.value = 'REPORTE DE STOCK DE VACUNAS POR EESS';
+    titleCell.font = {
+      bold: true,
+      size: 14,
+      color: { argb: this.COLORS.white },
+      name: 'Calibri'
+    };
+    titleCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    titleCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: this.COLORS.primary }
+    };
+
+    // Información del reporte
+    worksheet.mergeCells('A7:J7');
+    const infoCell1 = worksheet.getCell('A7');
+    infoCell1.value = `Fecha de Generación: ${new Date().toLocaleDateString('es-PE', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })}`;
+    infoCell1.font = {
+      bold: true,
+      size: 10,
+      color: { argb: this.COLORS.gray800 },
+      name: 'Calibri'
+    };
+    infoCell1.alignment = { horizontal: 'left', vertical: 'middle' };
+    infoCell1.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: this.COLORS.gray100 }
+    };
+
+    worksheet.mergeCells('K7:T7');
+    const infoCell2 = worksheet.getCell('K7');
+    infoCell2.value = `Responsable: ${config.responsableReporte}`;
+    infoCell2.font = {
+      bold: true,
+      size: 10,
+      color: { argb: this.COLORS.gray800 },
+      name: 'Calibri'
+    };
+    infoCell2.alignment = { horizontal: 'left', vertical: 'middle' };
+    infoCell2.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: this.COLORS.gray100 }
+    };
+
+    // Observaciones (si existen)
+    if (config.observaciones) {
+      worksheet.mergeCells('A8:T8');
+      const infoCell3 = worksheet.getCell('A8');
+      infoCell3.value = `Observaciones: ${config.observaciones}`;
+      infoCell3.font = {
+        bold: false,
+        size: 10,
+        color: { argb: this.COLORS.gray700 },
+        name: 'Calibri'
+      };
+      infoCell3.alignment = { horizontal: 'left', vertical: 'middle' };
+      infoCell3.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: this.COLORS.gray100 }
+      };
+    }
+
+    // Aplicar bordes sutiles al encabezado
+    const lastRow = config.observaciones ? 8 : 7;
+    for (let row = 1; row <= lastRow; row++) {
+      for (let col = 1; col <= 20; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.border = {
+          top: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+          left: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+          bottom: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+          right: { style: 'thin', color: { argb: this.COLORS.gray200 } }
+        };
+      }
+    }
+
+    // Ajustar altura de filas
+    worksheet.getRow(5).height = 26;
+    worksheet.getRow(7).height = 20;
+    if (config.observaciones) {
+      worksheet.getRow(8).height = 20;
+    }
+  }
+
+  /**
+   * Configurar columnas para reporte de stock de vacunas por EESS
+   */
+  private static configurarColumnasStockVacunasEESS(
+    worksheet: ExcelJS.Worksheet,
+    vacunasArray: string[],
+    vacunasInfo: Map<string, { id: string; nombre: string }>,
+    config: ReporteExportConfig
+  ): void {
+    // El encabezado termina en fila 7 u 8 (si hay observaciones), los datos empiezan despues
+    const headerRow = config.observaciones ? 10 : 9;
+
+    worksheet.getColumn(1).width = 30; // Centro de Acopio
+    worksheet.getColumn(2).width = 40; // EESS
+
+    let currentCol = 3;
+
+    // Para cada vacuna, crear 1 columna (Stock)
+    vacunasArray.forEach((vacunaId) => {
+      const vacunaInfo = vacunasInfo.get(vacunaId);
+      const vacunaNombre = vacunaInfo?.nombre || 'Vacuna';
+
+      worksheet.getColumn(currentCol).width = 15;
+
+      // Encabezado de vacuna con colores teal
+      const vacunaCell = worksheet.getCell(headerRow, currentCol);
+      vacunaCell.value = vacunaNombre;
+      vacunaCell.font = { bold: true, size: 10, color: { argb: this.COLORS.white }, name: 'Calibri' };
+      vacunaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: this.COLORS.primaryDark } };
+      vacunaCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      vacunaCell.border = {
+        top: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+        left: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+        bottom: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+        right: { style: 'thin', color: { argb: this.COLORS.gray200 } }
+      };
+
+      currentCol++;
+    });
+
+    // Encabezados fijos con colores teal
+    const centroAcopioHeader = worksheet.getCell(headerRow, 1);
+    centroAcopioHeader.value = 'Centro de Acopio';
+    centroAcopioHeader.font = { bold: true, size: 11, color: { argb: this.COLORS.white }, name: 'Calibri' };
+    centroAcopioHeader.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: this.COLORS.primary } };
+    centroAcopioHeader.alignment = { horizontal: 'center', vertical: 'middle' };
+    centroAcopioHeader.border = {
+      top: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      left: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      bottom: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      right: { style: 'thin', color: { argb: this.COLORS.gray200 } }
+    };
+
+    const eessHeader = worksheet.getCell(headerRow, 2);
+    eessHeader.value = 'Establecimiento de Salud';
+    eessHeader.font = { bold: true, size: 11, color: { argb: this.COLORS.white }, name: 'Calibri' };
+    eessHeader.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: this.COLORS.primary } };
+    eessHeader.alignment = { horizontal: 'center', vertical: 'middle' };
+    eessHeader.border = {
+      top: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      left: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      bottom: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+      right: { style: 'thin', color: { argb: this.COLORS.gray200 } }
+    };
+
+    worksheet.getRow(headerRow).height = 30;
+  }
+
+  /**
+   * Agregar datos para reporte de stock de vacunas por EESS
+   */
+  private static agregarDatosStockVacunasEESS(
+    worksheet: ExcelJS.Worksheet,
+    data: StockVacunasEESSItem[],
+    vacunasArray: string[],
+    config: ReporteExportConfig
+  ): void {
+    // El encabezado termina en fila 9 o 10 (si hay observaciones)
+    const headerRow = config.observaciones ? 10 : 9;
+    const totalCols = 2 + vacunasArray.length;
+
+    // Agrupar por centro de acopio
+    const gruposCentro = new Map<string, { nombre: string; items: StockVacunasEESSItem[]; startRow: number; endRow: number }>();
+
+    data.forEach(item => {
+      const centroId = item.centroAcopioId || 'SIN_CENTRO';
+      if (!gruposCentro.has(centroId)) {
+        gruposCentro.set(centroId, {
+          nombre: item.centroAcopioNombre,
+          items: [],
+          startRow: 0,
+          endRow: 0
+        });
+      }
+      gruposCentro.get(centroId)!.items.push(item);
+    });
+
+    let currentRow = headerRow + 1;
+    let centroIndex = 0;
+
+    for (const [, grupo] of gruposCentro) {
+      grupo.startRow = currentRow;
+      const centroRowCount = grupo.items.length;
+      grupo.endRow = currentRow + centroRowCount - 1;
+
+      const isEvenGroup = centroIndex % 2 === 0;
+      const groupBgColor = isEvenGroup ? this.COLORS.white : this.COLORS.gray50;
+
+      grupo.items.forEach((item) => {
+        const row = worksheet.getRow(currentRow);
+
+        // Centro de Acopio con colores teal
+        const centroCell = row.getCell(1);
+        centroCell.value = grupo.nombre;
+        centroCell.font = { size: 10, name: 'Calibri', bold: true, color: { argb: this.COLORS.institutional } };
+        centroCell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+        centroCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: this.COLORS.primaryLight } };
+
+        // Establecimiento
+        const eessCell = row.getCell(2);
+        eessCell.value = item.establecimientoNombre;
+        eessCell.font = { size: 10, name: 'Calibri', bold: false };
+        eessCell.alignment = { horizontal: 'left', vertical: 'middle' };
+        eessCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: groupBgColor } };
+
+        let currentCol = 3;
+
+        // Para cada vacuna, agregar stock
+        vacunasArray.forEach(vacunaId => {
+          const vacunaData = item.vacunas[vacunaId];
+          const stockCell = row.getCell(currentCol);
+
+          if (vacunaData) {
+            stockCell.value = vacunaData.stock;
+          } else {
+            stockCell.value = 0;
+          }
+
+          stockCell.numFmt = '#,##0';
+          stockCell.alignment = { horizontal: 'center', vertical: 'middle' };
+          stockCell.font = { size: 10, name: 'Calibri' };
+          stockCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: groupBgColor } };
+
+          currentCol++;
+        });
+
+        // Aplicar bordes
+        for (let col = 1; col <= totalCols; col++) {
+          const cell = row.getCell(col);
+          cell.border = {
+            top: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+            left: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+            bottom: { style: 'thin', color: { argb: this.COLORS.gray200 } },
+            right: { style: 'thin', color: { argb: this.COLORS.gray200 } }
+          };
+        }
+
+        row.height = 20;
+        currentRow++;
+      });
+
+      // Borde grueso al final de cada grupo
+      const lastRowOfGroup = worksheet.getRow(grupo.endRow);
+      for (let col = 1; col <= totalCols; col++) {
+        const cell = lastRowOfGroup.getCell(col);
+        cell.border = {
+          ...cell.border,
+          bottom: { style: 'medium', color: { argb: this.COLORS.primary } }
+        };
+      }
+
+      centroIndex++;
+    }
+  }
+
+  /**
+   * Aplicar estilos profesionales para reporte de stock de vacunas por EESS
+   */
+  private static aplicarEstilosStockVacunasEESS(
+    worksheet: ExcelJS.Worksheet,
+    vacunasArray: string[],
+    config?: ReporteExportConfig
+  ): void {
+    // El encabezado termina en fila 9 o 10 (si hay observaciones)
+    const headerRow = config?.observaciones ? 10 : 9;
+    const totalCols = 2 + vacunasArray.length;
+
+    // Habilitar filtros automaticos
+    worksheet.autoFilter = {
+      from: { row: headerRow, column: 1 },
+      to: { row: headerRow, column: totalCols }
+    };
+
+    // Congelar paneles
+    worksheet.views = [{
+      state: 'frozen',
+      showGridLines: false,
+      xSplit: 2,
+      ySplit: headerRow
     }];
   }
 }

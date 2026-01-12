@@ -86,6 +86,13 @@ export interface MovimientosPorEESSFilters {
   centroAcopioId?: string;
 }
 
+export interface StockVacunasEESSFilters {
+  fechaInicio: string;
+  fechaFin: string;
+  centroAcopioId?: string;
+  vacunaIds: string[];
+}
+
 /**
  * Interfaces para resultados de reportes
  */
@@ -985,6 +992,43 @@ export class ReportesService {
       console.log('✅ Reporte de movimientos por EESS exportado exitosamente');
     } catch (error) {
       console.error('❌ Error al exportar reporte de movimientos por EESS:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
+   * Exportar reporte de stock de vacunas por EESS a Excel
+   */
+  static async exportarStockVacunasEESS(
+    filtros: StockVacunasEESSFilters,
+    config: ReporteExportConfig
+  ): Promise<void> {
+    try {
+      console.log('🔄 Exportando reporte de stock de vacunas por EESS a Excel:', filtros);
+
+      const response = await apiClient.post(
+        `${this.BASE_URL}/stock-vacunas-eess/exportar`,
+        { filtros, config },
+        { responseType: 'blob' }
+      );
+
+      // Crear y descargar archivo
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `stock_vacunas_eess_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ Reporte de stock de vacunas por EESS exportado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al exportar reporte de stock de vacunas por EESS:', error);
       throw this.handleError(error);
     }
   }

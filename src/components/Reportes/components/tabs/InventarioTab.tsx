@@ -20,6 +20,7 @@ import {
 import { COMPONENT_STYLES } from '../../constants';
 import { ReporteCard } from '..';
 import KardexDetalladoModal from '../../modals/KardexDetalladoModal';
+import StockVacunasEESSModal, { StockVacunasEESSFiltros } from '../../modals/StockVacunasEESSModal';
 import VisualizarReporteModal from '../../modals/VisualizarReporteModal';
 
 interface InventarioTabProps {
@@ -43,6 +44,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({
     obtenerEstadisticas,
     exportarExcel,
     exportarKardexDetallado,
+    exportarStockVacunasEESS,
     limpiarError
   } = useReportes();
 
@@ -61,6 +63,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({
   });
 
   const [showKardexModal, setShowKardexModal] = useState(false);
+  const [showStockVacunasEESSModal, setShowStockVacunasEESSModal] = useState(false);
   const [reporteActivo, setReporteActivo] = useState<string | null>(null);
   const [reporteVisualizando, setReporteVisualizando] = useState<string | null>(null);
 
@@ -141,6 +144,28 @@ const InventarioTab: React.FC<InventarioTabProps> = ({
       toast.error('Error de exportacion', errorMessage, { duration: 5000 });
     }
   }, [generarKardexDetallado, exportarKardexDetallado, toast]);
+
+  const handleExportarStockVacunasEESS = useCallback(async (filtros: StockVacunasEESSFiltros) => {
+    try {
+      const config: ConfiguracionExportacion = {
+        incluirDetalles: true,
+        incluirGraficos: false,
+        incluirEstadisticas: true,
+        formatoFecha: 'dd/mm/yyyy',
+        responsableReporte: 'Sistema SIVAC',
+        observaciones: `Stock de Vacunas en EESS`
+      };
+
+      await exportarStockVacunasEESS(filtros, config);
+      setShowStockVacunasEESSModal(false);
+      toast.success('Exportacion exitosa', 'Stock de Vacunas en EESS exportado correctamente', { duration: 3000 });
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } }; message?: string };
+      const errorMessage = err?.response?.data?.error || err?.message || 'Error desconocido';
+      toast.error('Error de exportacion', errorMessage, { duration: 5000 });
+      throw error;
+    }
+  }, [exportarStockVacunasEESS, toast]);
 
   const handleFiltroChange = useCallback((campo: string, valor: string | undefined) => {
     setFiltrosReportes(prev => ({
@@ -318,6 +343,26 @@ const InventarioTab: React.FC<InventarioTabProps> = ({
             <span>Configurar y Exportar</span>
           </button>
         </div>
+
+        {/* Stock de Vacunas en EESS - Card especial */}
+        <div className={COMPONENT_STYLES.reportCard.container}>
+          <div className="flex items-start gap-4 mb-4">
+            <div className={`${COMPONENT_STYLES.reportCard.iconWrapper} bg-cyan-100`}>
+              <Package className="h-5 w-5 text-cyan-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className={COMPONENT_STYLES.reportCard.title}>Stock de Vacunas en EESS</h3>
+              <p className={COMPONENT_STYLES.reportCard.description}>Stock disponible por establecimiento</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowStockVacunasEESSModal(true)}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-700 transition-all duration-200"
+          >
+            <Download className="h-4 w-4" />
+            <span>Configurar y Exportar</span>
+          </button>
+        </div>
       </div>
 
       {/* Modales */}
@@ -325,6 +370,15 @@ const InventarioTab: React.FC<InventarioTabProps> = ({
         <KardexDetalladoModal
           onClose={() => setShowKardexModal(false)}
           onExportar={handleExportarKardex}
+          vacunas={vacunas}
+          centrosAcopio={centrosAcopio}
+        />
+      )}
+
+      {showStockVacunasEESSModal && (
+        <StockVacunasEESSModal
+          onClose={() => setShowStockVacunasEESSModal(false)}
+          onExportar={handleExportarStockVacunasEESS}
           vacunas={vacunas}
           centrosAcopio={centrosAcopio}
         />
