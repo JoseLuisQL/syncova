@@ -244,4 +244,31 @@ export class ProgramacionAnualCenaresService {
       throw handleApiError(error as AxiosError);
     }
   }
+
+  /**
+   * Sincronizar y recalcular saldos anteriores para un año
+   */
+  static async sincronizarSaldos(anio: number): Promise<{
+    saldosCalculados: number;
+    detalles: Array<{ id: string; nombre: string; tipo: string; saldoAnterior: number }>;
+  }> {
+    try {
+      logger.debug('Sincronizando saldos para año:', anio);
+
+      const response = await apiClient.post<ApiResponse<{
+        saldosCalculados: number;
+        detalles: Array<{ id: string; nombre: string; tipo: string; saldoAnterior: number }>;
+      }>>(`${this.BASE_PATH}/sincronizar-saldos`, { anio });
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.error || 'Error al sincronizar saldos');
+      }
+
+      logger.debug('Saldos sincronizados:', response.data.data.saldosCalculados);
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al sincronizar saldos:', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
 }

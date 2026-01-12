@@ -72,6 +72,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({
   const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
   const [isUpdating, setIsUpdating] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const debounceTimeouts = useRef<Record<string, NodeJS.Timeout>>({});
 
   // Cargar datos
@@ -234,6 +235,28 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({
     }
   }, [anio, filteredItems.length]);
 
+  // Sincronizar saldos anteriores
+  const handleSincronizarSaldos = useCallback(async () => {
+    const confirmar = window.confirm(
+      `¿Desea recalcular los saldos del año ${anio - 1} para actualizar el SALDO ${anio - 1}?\n\nEsto recalculará los saldos basándose en los datos del año anterior.`
+    );
+    
+    if (!confirmar) return;
+
+    try {
+      setIsSyncing(true);
+      const resultado = await ProgramacionAnualCenaresService.sincronizarSaldos(anio);
+      toast.success(`Saldos sincronizados: ${resultado.saldosCalculados} items actualizados`);
+      // Recargar datos
+      await loadData();
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al sincronizar saldos';
+      toast.error(errorMessage);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [anio, loadData]);
+
   // Estado de carga
   if (loading) {
     return (
@@ -299,6 +322,21 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({
                 <span className="text-xs font-medium text-emerald-700">Guardado</span>
               </div>
             )}
+
+            {/* Boton sincronizar saldos */}
+            <button
+              onClick={handleSincronizarSaldos}
+              disabled={isSyncing || loading}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title={`Recalcular saldos del año ${anio - 1}`}
+            >
+              {isSyncing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              <span className="hidden sm:inline">Sincronizar Saldos</span>
+            </button>
 
             {/* Boton exportar */}
             <button

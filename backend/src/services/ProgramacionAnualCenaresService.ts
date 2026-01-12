@@ -360,14 +360,10 @@ export class ProgramacionAnualCenaresService {
       });
 
       // Obtener saldo del año anterior (Q4)
+      // La función ya maneja automáticamente:
+      // - 2024: Usa saldos estáticos
+      // - 2025+: Calcula en cascada
       const saldosAnteriores = await this.obtenerSaldosAnoAnterior(anio - 1);
-
-      // AJUSTE ESPECIAL PARA AÑO 2025: Sobrescribir saldos 2024 con valores estáticos
-      // Esto es necesario porque los datos históricos de 2024 no pueden modificarse en la base de datos
-      // y se requieren valores específicos para que los cálculos de 2025 sean correctos
-      if (anio === 2025) {
-        await this.aplicarSaldos2024Estaticos(saldosAnteriores, vacunas, jeringas);
-      }
 
       // Obtener entregas CENARES por trimestre
       const entregasCenares = await this.obtenerEntregasCenaresPorTrimestre(anio);
@@ -466,122 +462,65 @@ export class ProgramacionAnualCenaresService {
 
   /**
    * Obtener saldos del año anterior (Q4)
+   * Calcula el saldo Q4 del año anterior de forma correcta en cascada:
+   * - 2024: Usa saldos estáticos hardcodeados
+   * - 2025+: Calcula basándose en saldo inicial + entregas - consumo
    */
   private static async obtenerSaldosAnoAnterior(anioAnterior: number): Promise<Map<string, number>> {
     const saldosMap = new Map<string, number>();
 
     try {
-      // Obtener todas las programaciones del año anterior
-      const programacionesAnoAnterior = await prisma.programacionAnualCenares.findMany({
-        where: { anio: anioAnterior },
-        include: {
-          vacuna: true,
-          jeringa: true
-        }
-      });
+      console.log(`📊 Calculando saldos Q4 para año ${anioAnterior}...`);
 
-      // Si no hay programaciones del año anterior, retornar mapa vacío
-      if (programacionesAnoAnterior.length === 0) {
-        return saldosMap;
-      }
-
-      // Obtener entregas CENARES del año anterior
-      const entregasAnoAnterior = await this.obtenerEntregasCenaresPorTrimestre(anioAnterior);
-
-      // Obtener consumo de planificación del año anterior
-      const consumoAnoAnterior = await this.obtenerConsumoPlanificacion(anioAnterior);
-
-      // Calcular saldo Q4 para cada ítem del año anterior
-      for (const programacion of programacionesAnoAnterior) {
-        const itemId = programacion.vacunaId || programacion.jeringaId;
-        if (!itemId) continue;
-
-        // Obtener entregas y consumo para este ítem
-        const entregas = entregasAnoAnterior.get(itemId) || { q1: 0, q2: 0, q3: 0, q4: 0 };
-        const consumo = consumoAnoAnterior.get(itemId) || { q1: 0, q2: 0, q3: 0, q4: 0 };
-
-        // Calcular saldo inicial del año anterior (recursivamente)
-        let saldoInicialAnoAnterior = 0;
-        if (anioAnterior > 2020) { // Evitar recursión infinita
-          const saldosAnoAnteriorAnterior = await this.obtenerSaldosAnoAnterior(anioAnterior - 1);
-          saldoInicialAnoAnterior = saldosAnoAnteriorAnterior.get(itemId) || 0;
-        }
-
-        // Calcular saldos secuenciales del año anterior
-        const saldosAnoAnterior = this.calcularSaldosSecuenciales(
-          saldoInicialAnoAnterior,
-          entregas,
-          consumo
-        );
-
-        // El saldo anterior para el año actual es el Q4 del año anterior
-        saldosMap.set(itemId, saldosAnoAnterior.q4);
-      }
-
-      // También necesitamos calcular saldos para ítems que no tenían programación
-      // pero sí tenían entregas o consumo en el año anterior
+      // Obtener todas las vacunas y jeringas activas
       const todasVacunas = await prisma.vacuna.findMany({ where: { estado: 'activo' } });
       const todasJeringas = await prisma.jeringa.findMany({ where: { estado: 'activo' } });
 
-      // Procesar vacunas sin programación
+      // CASO ESPECIAL: Si es 2024, usar saldos estáticos
+      if (anioAnterior === 2024) {
+        await this.aplicarSaldos2024Estaticos(saldosMap, todasVacunas, todasJeringas);
+        console.log(`✅ Saldos 2024 estáticos aplicados: ${saldosMap.size} items`);
+        return saldosMap;
+      }
+
+      // CASO GENERAL: Calcular Q4 del año anterior
+      // Para calcular el Q4, necesitamos:
+      // 1. El saldo inicial del año (Q4 del año anterior al anterior)
+      // 2. Las entregas del año
+      // 3. El consumo del año
+
+      // Obtener saldo inicial (Q4 del año anterior-1)
+      const saldosIniciales = await this.obtenerSaldosAnoAnterior(anioAnterior - 1);
+
+      // Obtener entregas CENARES del año
+      const entregasAnio = await this.obtenerEntregasCenaresPorTrimestre(anioAnterior);
+
+      // Obtener consumo de planificación del año
+      const consumoAnio = await this.obtenerConsumoPlanificacion(anioAnterior);
+
+      // Calcular saldo Q4 para cada vacuna
       for (const vacuna of todasVacunas) {
-        if (!saldosMap.has(vacuna.id)) {
-          const entregas = entregasAnoAnterior.get(vacuna.id) || { q1: 0, q2: 0, q3: 0, q4: 0 };
-          const consumo = consumoAnoAnterior.get(vacuna.id) || { q1: 0, q2: 0, q3: 0, q4: 0 };
+        const saldoInicial = saldosIniciales.get(vacuna.id) || 0;
+        const entregas = entregasAnio.get(vacuna.id) || { q1: 0, q2: 0, q3: 0, q4: 0 };
+        const consumo = consumoAnio.get(vacuna.id) || { q1: 0, q2: 0, q3: 0, q4: 0 };
 
-
-
-          // Si hay entregas o consumo, calcular saldo
-          if (entregas.q1 + entregas.q2 + entregas.q3 + entregas.q4 > 0 ||
-              consumo.q1 + consumo.q2 + consumo.q3 + consumo.q4 > 0) {
-
-
-
-            let saldoInicialAnoAnterior = 0;
-            if (anioAnterior > 2020) {
-              const saldosAnoAnteriorAnterior = await this.obtenerSaldosAnoAnterior(anioAnterior - 1);
-              saldoInicialAnoAnterior = saldosAnoAnteriorAnterior.get(vacuna.id) || 0;
-            }
-
-            const saldosAnoAnterior = this.calcularSaldosSecuenciales(
-              saldoInicialAnoAnterior,
-              entregas,
-              consumo
-            );
-
-
-            saldosMap.set(vacuna.id, saldosAnoAnterior.q4);
-          }
-        }
+        // Calcular saldos secuenciales
+        const saldos = this.calcularSaldosSecuenciales(saldoInicial, entregas, consumo);
+        saldosMap.set(vacuna.id, saldos.q4);
       }
 
-      // Procesar jeringas sin programación
+      // Calcular saldo Q4 para cada jeringa
       for (const jeringa of todasJeringas) {
-        if (!saldosMap.has(jeringa.id)) {
-          const entregas = entregasAnoAnterior.get(jeringa.id) || { q1: 0, q2: 0, q3: 0, q4: 0 };
-          const consumo = consumoAnoAnterior.get(jeringa.id) || { q1: 0, q2: 0, q3: 0, q4: 0 };
+        const saldoInicial = saldosIniciales.get(jeringa.id) || 0;
+        const entregas = entregasAnio.get(jeringa.id) || { q1: 0, q2: 0, q3: 0, q4: 0 };
+        const consumo = consumoAnio.get(jeringa.id) || { q1: 0, q2: 0, q3: 0, q4: 0 };
 
-          // Si hay entregas o consumo, calcular saldo
-          if (entregas.q1 + entregas.q2 + entregas.q3 + entregas.q4 > 0 ||
-              consumo.q1 + consumo.q2 + consumo.q3 + consumo.q4 > 0) {
-
-            let saldoInicialAnoAnterior = 0;
-            if (anioAnterior > 2020) {
-              const saldosAnoAnteriorAnterior = await this.obtenerSaldosAnoAnterior(anioAnterior - 1);
-              saldoInicialAnoAnterior = saldosAnoAnteriorAnterior.get(jeringa.id) || 0;
-            }
-
-            const saldosAnoAnterior = this.calcularSaldosSecuenciales(
-              saldoInicialAnoAnterior,
-              entregas,
-              consumo
-            );
-
-            saldosMap.set(jeringa.id, saldosAnoAnterior.q4);
-          }
-        }
+        // Calcular saldos secuenciales
+        const saldos = this.calcularSaldosSecuenciales(saldoInicial, entregas, consumo);
+        saldosMap.set(jeringa.id, saldos.q4);
       }
 
+      console.log(`✅ Saldos Q4 calculados para año ${anioAnterior}: ${saldosMap.size} items`);
       return saldosMap;
     } catch (error) {
       console.error('Error al obtener saldos año anterior:', error);
@@ -831,5 +770,63 @@ export class ProgramacionAnualCenaresService {
       q3: saldoQ3,
       q4: saldoQ4
     };
+  }
+
+  /**
+   * Sincronizar y recalcular saldos anteriores para un año específico
+   * Útil cuando hay discrepancias en los datos
+   */
+  static async sincronizarSaldosAnteriores(anio: number): Promise<ServiceResult<{
+    saldosCalculados: number;
+    detalles: Array<{ id: string; nombre: string; tipo: string; saldoAnterior: number }>;
+  }>> {
+    try {
+      console.log(`🔄 Sincronizando saldos anteriores para año ${anio}...`);
+
+      // Forzar recálculo de saldos del año anterior
+      const saldosCalculados = await this.obtenerSaldosAnoAnterior(anio - 1);
+
+      // Obtener nombres para el reporte
+      const vacunas = await prisma.vacuna.findMany({ where: { estado: 'activo' } });
+      const jeringas = await prisma.jeringa.findMany({ where: { estado: 'activo' } });
+
+      const detalles: Array<{ id: string; nombre: string; tipo: string; saldoAnterior: number }> = [];
+
+      for (const vacuna of vacunas) {
+        const saldo = saldosCalculados.get(vacuna.id) || 0;
+        detalles.push({
+          id: vacuna.id,
+          nombre: vacuna.nombre,
+          tipo: 'vacuna',
+          saldoAnterior: saldo
+        });
+      }
+
+      for (const jeringa of jeringas) {
+        const saldo = saldosCalculados.get(jeringa.id) || 0;
+        detalles.push({
+          id: jeringa.id,
+          nombre: `${jeringa.tipo} - ${jeringa.capacidad}`,
+          tipo: 'jeringa',
+          saldoAnterior: saldo
+        });
+      }
+
+      console.log(`✅ Sincronización completada: ${detalles.length} items procesados`);
+
+      return {
+        success: true,
+        data: {
+          saldosCalculados: detalles.length,
+          detalles
+        }
+      };
+    } catch (error) {
+      console.error('Error al sincronizar saldos anteriores:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error al sincronizar saldos anteriores'
+      };
+    }
   }
 }

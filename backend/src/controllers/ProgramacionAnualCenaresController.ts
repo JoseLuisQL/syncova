@@ -327,4 +327,33 @@ export class ProgramacionAnualCenaresController {
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }
+
+  /**
+   * Sincronizar y recalcular saldos anteriores para un año
+   * POST /api/programacion-anual-cenares/sincronizar-saldos
+   */
+  static async sincronizarSaldos(req: Request, res: Response): Promise<void> {
+    try {
+      const { anio } = req.body;
+
+      if (!anio || isNaN(parseInt(anio)) || parseInt(anio) < 2020 || parseInt(anio) > 2050) {
+        ResponseUtil.error(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      console.log(`🔄 Iniciando sincronización de saldos para año ${anio}...`);
+
+      const result = await ProgramacionAnualCenaresService.sincronizarSaldosAnteriores(parseInt(anio));
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al sincronizar saldos', 500);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, `Saldos sincronizados exitosamente para año ${anio}`);
+    } catch (error) {
+      console.error('Error en ProgramacionAnualCenaresController.sincronizarSaldos:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
 }

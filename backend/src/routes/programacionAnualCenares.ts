@@ -60,6 +60,14 @@ router.put('/:id', ProgramacionAnualCenaresController.update);
 router.post('/exportar', ProgramacionAnualCenaresController.exportarProgramacionSeguimientoAnual);
 
 /**
+ * @route POST /api/programacion-anual-cenares/sincronizar-saldos
+ * @desc Sincronizar y recalcular saldos anteriores para un año
+ * @access Public (TODO: Proteger con autenticación)
+ * @body {number} anio - Año para sincronizar saldos
+ */
+router.post('/sincronizar-saldos', ProgramacionAnualCenaresController.sincronizarSaldos);
+
+/**
  * @route DELETE /api/programacion-anual-cenares/:id
  * @desc Eliminar programación
  * @access Public (TODO: Proteger con autenticación)
