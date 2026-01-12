@@ -2587,7 +2587,7 @@ export class ReporteExportService {
       this.agregarDatosMovimientosPorEESS(worksheet, data, vacunasArray, config);
 
       // Aplicar estilos profesionales
-      this.aplicarEstilosMovimientosPorEESS(worksheet, vacunasArray);
+      this.aplicarEstilosMovimientosPorEESS(worksheet, vacunasArray, config);
 
       // Generar nombre de archivo
       const fecha = new Date().toISOString().split('T')[0];
@@ -2983,13 +2983,27 @@ export class ReporteExportService {
    */
   private static aplicarEstilosMovimientosPorEESS(
     worksheet: ExcelJS.Worksheet,
-    vacunasArray: string[]
+    vacunasArray: string[],
+    config?: ReporteExportConfig
   ): void {
+    // Calcular filas de encabezado
+    const headerRow1 = config?.observaciones ? 6 : 5;
+    const headerRow2 = headerRow1 + 1;
+    
+    // Calcular total de columnas
+    const totalCols = 2 + (vacunasArray.length * 3);
+
+    // Habilitar filtros automaticos en la fila de encabezados
+    worksheet.autoFilter = {
+      from: { row: headerRow2, column: 1 },
+      to: { row: headerRow2, column: totalCols }
+    };
+
     // Congelar paneles para mantener encabezados visibles
     worksheet.views = [{
       state: 'frozen',
       xSplit: 2, // Congelar primeras dos columnas (Centro de Acopio + EESS)
-      ySplit: 2  // Congelar primeras dos filas de encabezados
+      ySplit: headerRow2  // Congelar hasta la fila de encabezados
     }];
   }
 }
