@@ -1,9 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import {
   TrendingUp,
-  Package,
-  BarChart3,
-  Target,
   Truck,
   Download,
 } from 'lucide-react';
@@ -33,13 +30,7 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
     reportes,
     estado,
     generarMovimientosMensuales,
-    generarConsumoHistorico,
-    generarEntregasPorEstablecimiento,
-    generarEficienciaDistribucion,
     exportarMovimientosMensuales,
-    exportarConsumoHistorico,
-    exportarEntregasPorEstablecimiento,
-    exportarEficienciaDistribucion,
     exportarMovimientosPorEESS,
     limpiarError
   } = useReportes();
@@ -65,15 +56,6 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
         case 'movimientos_mensuales':
           resultado = await generarMovimientosMensuales(filtros);
           break;
-        case 'consumo_historico':
-          resultado = await generarConsumoHistorico({ ...filtros, periodoMeses: 12, incluirProyecciones: true });
-          break;
-        case 'entregas_establecimiento':
-          resultado = await generarEntregasPorEstablecimiento({ ...filtros, incluirDetalleVacunas: true, ordenarPor: 'establecimiento' });
-          break;
-        case 'eficiencia_distribucion':
-          resultado = await generarEficienciaDistribucion({ ...filtros, incluirIndicadores: true, calcularTendencias: true });
-          break;
       }
 
       if (resultado && Array.isArray(resultado) && resultado.length === 0) {
@@ -84,7 +66,7 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
     } finally {
       setReporteActivo(null);
     }
-  }, [buildFiltros, generarMovimientosMensuales, generarConsumoHistorico, generarEntregasPorEstablecimiento, generarEficienciaDistribucion, toast]);
+  }, [buildFiltros, generarMovimientosMensuales, toast]);
 
   const handleExportarReporte = useCallback(async (tipoReporte: string) => {
     try {
@@ -102,20 +84,11 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
         case 'movimientos_mensuales':
           await exportarMovimientosMensuales(filtros, config);
           break;
-        case 'consumo_historico':
-          await exportarConsumoHistorico({ ...filtros, periodoMeses: 12, incluirProyecciones: true }, config);
-          break;
-        case 'entregas_establecimiento':
-          await exportarEntregasPorEstablecimiento({ ...filtros, incluirDetalleVacunas: true, ordenarPor: 'establecimiento' }, config);
-          break;
-        case 'eficiencia_distribucion':
-          await exportarEficienciaDistribucion({ ...filtros, incluirIndicadores: true, calcularTendencias: true }, config);
-          break;
       }
     } catch (error) {
       console.error('Error al exportar reporte:', error);
     }
-  }, [buildFiltros, exportarMovimientosMensuales, exportarConsumoHistorico, exportarEntregasPorEstablecimiento, exportarEficienciaDistribucion]);
+  }, [buildFiltros, exportarMovimientosMensuales]);
 
   const handleExportarMovimientosPorEESS = useCallback(async (filtros: MovimientosPorEESSFiltros) => {
     try {
@@ -139,9 +112,6 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
 
   const reportesMovimientos = [
     { id: 'movimientos_mensuales', nombre: 'Movimientos Mensuales', descripcion: 'Resumen mensual por EESS', icon: TrendingUp, color: 'emerald' as const, datos: reportes.movimientosMensuales },
-    { id: 'entregas_establecimiento', nombre: 'Entregas por EESS', descripcion: 'Detalle de entregas realizadas', icon: Package, color: 'teal' as const, datos: reportes.entregasPorEstablecimiento },
-    { id: 'consumo_historico', nombre: 'Consumo Historico', descripcion: 'Tendencias y proyecciones', icon: BarChart3, color: 'cyan' as const, datos: reportes.consumoHistorico },
-    { id: 'eficiencia_distribucion', nombre: 'Eficiencia', descripcion: 'Metricas e indicadores', icon: Target, color: 'amber' as const, datos: reportes.eficienciaDistribucion },
   ];
 
   return (

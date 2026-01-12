@@ -235,16 +235,10 @@ export const REPORTES_CONFIG = {
   ],
   movimientos: [
     { id: 'movimientos_mensuales', nombre: 'Movimientos Mensuales', descripcion: 'Resumen mensual por EESS', color: 'emerald' },
-    { id: 'entregas_establecimiento', nombre: 'Entregas por EESS', descripcion: 'Detalle de entregas', color: 'teal' },
-    { id: 'consumo_historico', nombre: 'Consumo Historico', descripcion: 'Tendencias y proyecciones', color: 'cyan' },
-    { id: 'eficiencia_distribucion', nombre: 'Eficiencia', descripcion: 'Metricas e indicadores', color: 'amber' },
     { id: 'movimientos_por_eess', nombre: 'Movimientos por EESS', descripcion: 'Agrupado por establecimiento', color: 'teal' },
   ],
   planificacion: [
     { id: 'programacion_anual', nombre: 'Programacion Anual', descripcion: 'Plan anual por vacuna', color: 'teal' },
-    { id: 'cumplimiento_metas', nombre: 'Cumplimiento de Metas', descripcion: 'Avance vs programado', color: 'emerald' },
-    { id: 'proyeccion_demanda', nombre: 'Proyeccion de Demanda', descripcion: 'Estimacion de necesidades', color: 'amber' },
-    { id: 'distribucion_geografica', nombre: 'Distribucion Geografica', descripcion: 'Analisis por zonas', color: 'cyan' },
   ],
   ejecutivo: [
     { id: 'dashboard_ejecutivo', nombre: 'Dashboard Ejecutivo', descripcion: 'Metricas clave consolidadas', color: 'teal' },

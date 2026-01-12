@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Target,
-  CheckCircle,
-  TrendingUp,
-  BarChart3,
 } from 'lucide-react';
 import { Establecimiento, Vacuna } from '../../../../types';
 import { usePlanificacionReportes } from '../../../../hooks/usePlanificacionReportes';
@@ -25,13 +22,7 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
     estado,
     filtros: filtrosPlanificacion,
     generarProgramacionAnual,
-    generarCumplimientoMetas,
-    generarProyeccionDemanda,
-    generarDistribucionGeografica,
     exportarProgramacionAnual,
-    exportarCumplimientoMetas,
-    exportarProyeccionDemanda,
-    exportarDistribucionGeografica,
     actualizarFiltros,
     limpiarError
   } = usePlanificacionReportes();
@@ -68,15 +59,6 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
         case 'programacion_anual':
           resultado = await generarProgramacionAnual(filtros);
           break;
-        case 'cumplimiento_metas':
-          resultado = await generarCumplimientoMetas(filtros);
-          break;
-        case 'proyeccion_demanda':
-          resultado = await generarProyeccionDemanda(filtros);
-          break;
-        case 'distribucion_geografica':
-          resultado = await generarDistribucionGeografica(filtros);
-          break;
       }
 
       if (resultado && Array.isArray(resultado) && resultado.length === 0) {
@@ -90,7 +72,7 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
     } finally {
       setReporteActivo(null);
     }
-  }, [filtrosPlanificacion.anio, filtrosLocales, generarProgramacionAnual, generarCumplimientoMetas, generarProyeccionDemanda, generarDistribucionGeografica, toast]);
+  }, [filtrosPlanificacion.anio, filtrosLocales, generarProgramacionAnual, toast]);
 
   const handleExportarReporte = useCallback(async (tipoReporte: string) => {
     try {
@@ -106,15 +88,6 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
         case 'programacion_anual':
           await exportarProgramacionAnual(config);
           break;
-        case 'cumplimiento_metas':
-          await exportarCumplimientoMetas(config);
-          break;
-        case 'proyeccion_demanda':
-          await exportarProyeccionDemanda(config);
-          break;
-        case 'distribucion_geografica':
-          await exportarDistribucionGeografica(config);
-          break;
       }
 
       toast.success('Exportacion exitosa', 'El archivo Excel se ha descargado', { duration: 3000 });
@@ -122,13 +95,10 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
       console.error('Error al exportar reporte:', error);
       toast.error('Error al exportar', 'Ocurrio un error. Intentalo nuevamente.', { duration: 5000 });
     }
-  }, [filtrosPlanificacion.anio, filtrosLocales, exportarProgramacionAnual, exportarCumplimientoMetas, exportarProyeccionDemanda, exportarDistribucionGeografica, toast]);
+  }, [filtrosPlanificacion.anio, filtrosLocales, exportarProgramacionAnual, toast]);
 
   const reportesPlanificacion = [
     { id: 'programacion_anual', nombre: 'Programacion Anual', descripcion: 'Plan anual por vacuna', icon: Target, color: 'teal' as const, datos: reportes.programacionAnual },
-    { id: 'cumplimiento_metas', nombre: 'Cumplimiento de Metas', descripcion: 'Avance vs programado', icon: CheckCircle, color: 'emerald' as const, datos: reportes.cumplimientoMetas },
-    { id: 'proyeccion_demanda', nombre: 'Proyeccion de Demanda', descripcion: 'Estimacion de necesidades', icon: TrendingUp, color: 'amber' as const, datos: reportes.proyeccionDemanda },
-    { id: 'distribucion_geografica', nombre: 'Distribucion Geografica', descripcion: 'Analisis por zonas', icon: BarChart3, color: 'cyan' as const, datos: reportes.distribucionGeografica },
   ];
 
   return (
