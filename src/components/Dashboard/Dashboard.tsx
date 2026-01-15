@@ -1,19 +1,36 @@
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo, useRef, Suspense, lazy } from 'react';
 import { useDashboard } from '../../hooks/useDashboard';
 import { useToastContext } from '../../contexts/ToastContext';
 
 import DashboardHeader from './DashboardHeader';
 import StatCard from './StatCard';
 import QuickActions from './QuickActions';
-import ChartSection from './ChartSection';
 import CentrosAcopioSection from './CentrosAcopioSection';
 import AlertasSection from './AlertasSection';
 import ActividadSection from './ActividadSection';
 import { LoadingState, ErrorState } from './LoadingStates';
 import { STAT_CARDS_CONFIG } from './constants';
 
+const ChartSection = lazy(() => import('./ChartSection'));
+
+const ChartSkeleton: React.FC = () => (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+      <div className="h-[280px] bg-gray-100 rounded-lg animate-pulse" />
+    </div>
+    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+      <div className="h-[280px] bg-gray-100 rounded-lg animate-pulse" />
+    </div>
+  </div>
+);
+
 const Dashboard: React.FC = () => {
   const { toast } = useToastContext();
+  const toastRef = useRef(toast);
+  
+  useEffect(() => {
+    toastRef.current = toast;
+  });
 
   const {
     estadisticas,
@@ -27,20 +44,25 @@ const Dashboard: React.FC = () => {
     isStale,
   } = useDashboard();
 
+  const prevErrorRef = useRef<string | null>(null);
+  
   useEffect(() => {
-    if (error) {
-      toast.error('Error en Dashboard', error);
+    if (error && error !== prevErrorRef.current) {
+      prevErrorRef.current = error;
+      toastRef.current.error('Error en Dashboard', error);
+    } else if (!error) {
+      prevErrorRef.current = null;
     }
-  }, [error, toast]);
+  }, [error]);
 
   const handleRefresh = useCallback(async () => {
     try {
       await refresh();
-      toast.success('Datos actualizados correctamente');
+      toastRef.current.success('Datos actualizados correctamente');
     } catch {
-      toast.error('No se pudieron actualizar los datos');
+      toastRef.current.error('No se pudieron actualizar los datos');
     }
-  }, [refresh, toast]);
+  }, [refresh]);
 
   const statCards = useMemo(() => {
     if (!estadisticas) return [];
@@ -95,11 +117,13 @@ const Dashboard: React.FC = () => {
 
         <QuickActions />
 
-        <ChartSection
-          movimientosMensuales={movimientosMensuales}
-          stockPorVacuna={stockPorVacuna}
-          isLoading={loading && !hasData}
-        />
+        <Suspense fallback={<ChartSkeleton />}>
+          <ChartSection
+            movimientosMensuales={movimientosMensuales}
+            stockPorVacuna={stockPorVacuna}
+            isLoading={loading && !hasData}
+          />
+        </Suspense>
 
         <section 
           aria-label="Información detallada"

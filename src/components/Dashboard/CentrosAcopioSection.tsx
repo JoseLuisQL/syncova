@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useRef, useEffect } from 'react';
 import { Building, Users, AlertTriangle } from 'lucide-react';
 import { usePaginatedCentrosAcopio } from '../../hooks/usePaginatedDashboard';
 import Pagination from './Pagination';
@@ -53,10 +53,15 @@ CentroAcopioCard.displayName = 'CentroAcopioCard';
 
 const CentrosAcopioSection: React.FC = memo(() => {
   const { data, pagination, loading, error, currentPage, setPage, refresh } = usePaginatedCentrosAcopio(5);
+  
+  const refreshRef = useRef(refresh);
+  useEffect(() => {
+    refreshRef.current = refresh;
+  });
 
-  const handleRefresh = useCallback(() => {
-    refresh();
-  }, [refresh]);
+  const handleRefresh = () => {
+    refreshRef.current();
+  };
 
   return (
     <section 

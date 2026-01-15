@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useMemo, useRef, useEffect } from 'react';
 import { AlertTriangle, AlertCircle, Info, Bell } from 'lucide-react';
 import { usePaginatedAlertas } from '../../hooks/usePaginatedDashboard';
 import Pagination from './Pagination';
@@ -77,9 +77,14 @@ AlertaCard.displayName = 'AlertaCard';
 const AlertasSection: React.FC = memo(() => {
   const { data, pagination, loading, error, currentPage, setPage, refresh } = usePaginatedAlertas(4);
 
-  const handleRefresh = useCallback(() => {
-    refresh();
-  }, [refresh]);
+  const refreshRef = useRef(refresh);
+  useEffect(() => {
+    refreshRef.current = refresh;
+  });
+
+  const handleRefresh = () => {
+    refreshRef.current();
+  };
 
   const alertCount = useMemo(() => pagination.total, [pagination.total]);
 

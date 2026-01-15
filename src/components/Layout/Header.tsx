@@ -1,4 +1,6 @@
 import React, { memo } from 'react';
+import { Menu } from 'lucide-react';
+import { useApp } from '../../contexts/AppContext';
 import UserMenu from '../auth/UserMenu';
 import Breadcrumbs from '../common/Breadcrumbs';
 import NotificationBell from './NotificationBell';
@@ -8,18 +10,31 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = memo(({ title }) => {
+  const { toggleMobileMenu } = useApp();
+
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-gray-100">
       <div className="flex items-center justify-between h-14 px-4 sm:px-6">
-        {/* Left section - Title and Breadcrumbs */}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold text-gray-800 truncate">
-              {title}
-            </h1>
-          </div>
-          <div className="hidden sm:block">
-            <Breadcrumbs />
+        {/* Left section - Menu button (mobile) + Title and Breadcrumbs */}
+        <div className="min-w-0 flex-1 flex items-center gap-3">
+          {/* Mobile menu button */}
+          <button
+            onClick={toggleMobileMenu}
+            className="lg:hidden p-2 -ml-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            aria-label="Abrir menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-lg font-semibold text-gray-800 truncate">
+                {title}
+              </h1>
+            </div>
+            <div className="hidden sm:block">
+              <Breadcrumbs />
+            </div>
           </div>
         </div>
 
