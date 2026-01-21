@@ -56,7 +56,7 @@ const AppContent: React.FC = () => {
         {/* Sidebar */}
         <Sidebar />
         
-        {/* Main content area with dynamic margin */}
+        {/* Main content area with dynamic margin - no margin on mobile */}
         <div 
           className={`
             min-h-screen
@@ -72,14 +72,6 @@ const AppContent: React.FC = () => {
             <AppRoutes />
           </main>
         </div>
-        
-        {/* Mobile overlay when sidebar is open */}
-        {!sidebarCollapsed && (
-          <div 
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
-            onClick={() => {}}
-          />
-        )}
       </div>
     </ProtectedRoute>
   );

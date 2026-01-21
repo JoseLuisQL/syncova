@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useRef, useEffect } from 'react';
 import { FileText, Package, ArrowRight, Clock, User, Building } from 'lucide-react';
 import { usePaginatedActividad } from '../../hooks/usePaginatedDashboard';
 import Pagination from './Pagination';
@@ -94,9 +94,14 @@ ActividadCard.displayName = 'ActividadCard';
 const ActividadSection: React.FC = memo(() => {
   const { data, pagination, loading, error, currentPage, setPage, refresh } = usePaginatedActividad(5);
 
-  const handleRefresh = useCallback(() => {
-    refresh();
-  }, [refresh]);
+  const refreshRef = useRef(refresh);
+  useEffect(() => {
+    refreshRef.current = refresh;
+  });
+
+  const handleRefresh = () => {
+    refreshRef.current();
+  };
 
   return (
     <section 

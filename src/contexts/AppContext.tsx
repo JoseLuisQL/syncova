@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 import { Usuario } from '../types';
 
 interface AppContextType {
@@ -6,6 +6,9 @@ interface AppContextType {
   setCurrentUser: (user: Usuario | null) => void;
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  mobileMenuOpen: boolean;
+  setMobileMenuOpen: (open: boolean) => void;
+  toggleMobileMenu: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -24,6 +27,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
   
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = useCallback(() => {
+    setMobileMenuOpen(prev => !prev);
+  }, []);
 
   return (
     <AppContext.Provider value={{
@@ -31,6 +39,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setCurrentUser,
       sidebarCollapsed,
       setSidebarCollapsed,
+      mobileMenuOpen,
+      setMobileMenuOpen,
+      toggleMobileMenu,
     }}>
       {children}
     </AppContext.Provider>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiClient } from '../config/api';
 import type { CentroAcopioStatus, AlertaReciente, ActividadReciente } from '../services/dashboardService';
 
@@ -24,18 +24,22 @@ interface UsePaginatedSectionResult<T> {
   refresh: () => void;
 }
 
-// Hook para centros de acopio con paginación
+const createInitialPagination = (limit: number): PaginationInfo => ({
+  page: 1,
+  limit,
+  total: 0,
+  totalPages: 0
+});
+
+// Hook para centros de acopio con paginacion
 export const usePaginatedCentrosAcopio = (initialLimit: number = 5): UsePaginatedSectionResult<CentroAcopioStatus> => {
   const [data, setData] = useState<CentroAcopioStatus[]>([]);
-  const [pagination, setPagination] = useState<PaginationInfo>({
-    page: 1,
-    limit: initialLimit,
-    total: 0,
-    totalPages: 0
-  });
+  const [pagination, setPagination] = useState<PaginationInfo>(() => createInitialPagination(initialLimit));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  
+  const mountedRef = useRef(true);
 
   const fetchData = useCallback(async (page: number) => {
     setLoading(true);
@@ -44,6 +48,8 @@ export const usePaginatedCentrosAcopio = (initialLimit: number = 5): UsePaginate
     try {
       const response = await apiClient.get(`/dashboard/centros-acopio?page=${page}&limit=${initialLimit}`);
       
+      if (!mountedRef.current) return;
+      
       if (response.data.success) {
         const paginatedData = response.data.data as PaginatedResponse<CentroAcopioStatus>;
         setData(paginatedData.data);
@@ -51,11 +57,13 @@ export const usePaginatedCentrosAcopio = (initialLimit: number = 5): UsePaginate
       } else {
         setError(response.data.message || 'Error al cargar centros de acopio');
       }
-    } catch (err) {
-      setError('Error de conexión al cargar centros de acopio');
-      console.error('Error fetching centros acopio:', err);
+    } catch {
+      if (!mountedRef.current) return;
+      setError('Error de conexion al cargar centros de acopio');
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   }, [initialLimit]);
 
@@ -69,7 +77,11 @@ export const usePaginatedCentrosAcopio = (initialLimit: number = 5): UsePaginate
   }, [fetchData, currentPage]);
 
   useEffect(() => {
+    mountedRef.current = true;
     fetchData(1);
+    return () => {
+      mountedRef.current = false;
+    };
   }, [fetchData]);
 
   return {
@@ -83,18 +95,15 @@ export const usePaginatedCentrosAcopio = (initialLimit: number = 5): UsePaginate
   };
 };
 
-// Hook para alertas recientes con paginación
+// Hook para alertas recientes con paginacion
 export const usePaginatedAlertas = (initialLimit: number = 3): UsePaginatedSectionResult<AlertaReciente> => {
   const [data, setData] = useState<AlertaReciente[]>([]);
-  const [pagination, setPagination] = useState<PaginationInfo>({
-    page: 1,
-    limit: initialLimit,
-    total: 0,
-    totalPages: 0
-  });
+  const [pagination, setPagination] = useState<PaginationInfo>(() => createInitialPagination(initialLimit));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  
+  const mountedRef = useRef(true);
 
   const fetchData = useCallback(async (page: number) => {
     setLoading(true);
@@ -103,6 +112,8 @@ export const usePaginatedAlertas = (initialLimit: number = 3): UsePaginatedSecti
     try {
       const response = await apiClient.get(`/dashboard/alertas?page=${page}&limit=${initialLimit}`);
       
+      if (!mountedRef.current) return;
+      
       if (response.data.success) {
         const paginatedData = response.data.data as PaginatedResponse<AlertaReciente>;
         setData(paginatedData.data);
@@ -110,11 +121,13 @@ export const usePaginatedAlertas = (initialLimit: number = 3): UsePaginatedSecti
       } else {
         setError(response.data.message || 'Error al cargar alertas');
       }
-    } catch (err) {
-      setError('Error de conexión al cargar alertas');
-      console.error('Error fetching alertas:', err);
+    } catch {
+      if (!mountedRef.current) return;
+      setError('Error de conexion al cargar alertas');
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   }, [initialLimit]);
 
@@ -128,7 +141,11 @@ export const usePaginatedAlertas = (initialLimit: number = 3): UsePaginatedSecti
   }, [fetchData, currentPage]);
 
   useEffect(() => {
+    mountedRef.current = true;
     fetchData(1);
+    return () => {
+      mountedRef.current = false;
+    };
   }, [fetchData]);
 
   return {
@@ -142,18 +159,15 @@ export const usePaginatedAlertas = (initialLimit: number = 3): UsePaginatedSecti
   };
 };
 
-// Hook para actividad reciente con paginación
+// Hook para actividad reciente con paginacion
 export const usePaginatedActividad = (initialLimit: number = 5): UsePaginatedSectionResult<ActividadReciente> => {
   const [data, setData] = useState<ActividadReciente[]>([]);
-  const [pagination, setPagination] = useState<PaginationInfo>({
-    page: 1,
-    limit: initialLimit,
-    total: 0,
-    totalPages: 0
-  });
+  const [pagination, setPagination] = useState<PaginationInfo>(() => createInitialPagination(initialLimit));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  
+  const mountedRef = useRef(true);
 
   const fetchData = useCallback(async (page: number) => {
     setLoading(true);
@@ -162,6 +176,8 @@ export const usePaginatedActividad = (initialLimit: number = 5): UsePaginatedSec
     try {
       const response = await apiClient.get(`/dashboard/actividad?page=${page}&limit=${initialLimit}`);
       
+      if (!mountedRef.current) return;
+      
       if (response.data.success) {
         const paginatedData = response.data.data as PaginatedResponse<ActividadReciente>;
         setData(paginatedData.data);
@@ -169,11 +185,13 @@ export const usePaginatedActividad = (initialLimit: number = 5): UsePaginatedSec
       } else {
         setError(response.data.message || 'Error al cargar actividad');
       }
-    } catch (err) {
-      setError('Error de conexión al cargar actividad');
-      console.error('Error fetching actividad:', err);
+    } catch {
+      if (!mountedRef.current) return;
+      setError('Error de conexion al cargar actividad');
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   }, [initialLimit]);
 
@@ -187,7 +205,11 @@ export const usePaginatedActividad = (initialLimit: number = 5): UsePaginatedSec
   }, [fetchData, currentPage]);
 
   useEffect(() => {
+    mountedRef.current = true;
     fetchData(1);
+    return () => {
+      mountedRef.current = false;
+    };
   }, [fetchData]);
 
   return {
