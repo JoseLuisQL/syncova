@@ -23,6 +23,14 @@ import {
 } from './components';
 import ImportarModal from './ImportarModal';
 
+interface EstablecimientoData {
+  establecimiento: Establecimiento;
+  distribucionMensual: number[];
+  total: number;
+  estado: string;
+  planificacionId?: string;
+}
+
 const Planificacion: React.FC = () => {
   // Estados de filtros
   const [selectedAnio, setSelectedAnio] = useState<number>(new Date().getFullYear());
@@ -143,7 +151,7 @@ const Planificacion: React.FC = () => {
   }, [vacunas, selectedVacuna]);
 
   // Cargar planificaciones por vacuna y año
-  const loadPlanificacionesPorVacuna = async () => {
+  const loadPlanificacionesPorVacuna = async (preserveTempValues: boolean = false) => {
     if (!selectedVacuna || !selectedAnio) return;
 
     try {
@@ -153,8 +161,11 @@ const Planificacion: React.FC = () => {
         selectedCentroAcopio !== 'todos' ? selectedCentroAcopio : undefined
       );
       setPlanificacionesPorVacuna(planificaciones);
-      setTempValues({});
-      setPendingChanges({});
+      // Solo limpiar tempValues si no estamos preservando (ej: cambio de filtros)
+      if (!preserveTempValues) {
+        setTempValues({});
+        setPendingChanges({});
+      }
     } catch (error) {
       console.error('Error al cargar planificaciones:', error);
       toast.error('Error al cargar planificaciones');
@@ -321,14 +332,16 @@ const Planificacion: React.FC = () => {
 
       await createPlanificacion(data);
       toast.success('Planificación creada exitosamente');
-      await loadPlanificacionesPorVacuna();
-    } catch (error: any) {
+      // Para creación, necesitamos recargar para obtener el ID del servidor
+      await loadPlanificacionesPorVacuna(true); // preserveTempValues: true
+    } catch (error: unknown) {
       console.error('Error al crear planificación:', error);
-      toast.error(error?.message || 'Error al crear planificación');
+      const errorMessage = error instanceof Error ? error.message : 'Error al crear planificación';
+      toast.error(errorMessage);
     }
   };
 
-  const handleUpdatePlanificacion = async (id: string, data: UpdatePlanificacionDto) => {
+  const handleUpdatePlanificacion = async (id: string, data: UpdatePlanificacionDto, skipReload: boolean = false) => {
     try {
       if (!id) {
         toast.error('ID de planificación requerido');
@@ -341,11 +354,26 @@ const Planificacion: React.FC = () => {
       }
 
       await updatePlanificacion(id, data);
-      toast.success('Planificación actualizada exitosamente');
-      await loadPlanificacionesPorVacuna();
-    } catch (error: any) {
+      
+      // Actualización optimista del estado local
+      if (data.distribucionMensual && data.metaAnual !== undefined) {
+        setPlanificacionesPorVacuna(prev => 
+          prev.map(p => p.id === id 
+            ? { ...p, distribucionMensual: data.distribucionMensual!, metaAnual: data.metaAnual! }
+            : p
+          )
+        );
+      }
+      
+      if (!skipReload) {
+        toast.success('Planificación actualizada exitosamente');
+      }
+    } catch (error: unknown) {
       console.error('Error al actualizar planificación:', error);
-      toast.error(error?.message || 'Error al actualizar planificación');
+      const errorMessage = error instanceof Error ? error.message : 'Error al actualizar planificación';
+      toast.error(errorMessage);
+      // En caso de error, recargar para sincronizar con el servidor
+      await loadPlanificacionesPorVacuna();
     }
   };
 
@@ -391,7 +419,7 @@ const Planificacion: React.FC = () => {
         await handleUpdatePlanificacion(establecimientoData.planificacionId, {
           distribucionMensual: nuevaDistribucion,
           metaAnual: nuevoTotal
-        });
+        }, true); // skipReload: true - ya actualizamos el estado localmente
       } else {
         if (nuevoTotal > 0) {
           await handleCreatePlanificacion({
@@ -404,9 +432,10 @@ const Planificacion: React.FC = () => {
           });
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al actualizar distribución:', error);
-      toast.error(error?.message || 'Error al actualizar distribución');
+      const errorMessage = error instanceof Error ? error.message : 'Error al actualizar distribución';
+      toast.error(errorMessage);
     }
   };
 
@@ -416,7 +445,7 @@ const Planificacion: React.FC = () => {
       return;
     }
 
-    const establecimientosConDatos = datosVacuna.establecimientos.filter((estData: any) => estData.total > 0);
+    const establecimientosConDatos = datosVacuna.establecimientos.filter((estData: EstablecimientoData) => estData.total > 0);
 
     if (establecimientosConDatos.length === 0) {
       toast.error('No hay establecimientos con programación para guardar');
@@ -427,7 +456,7 @@ const Planificacion: React.FC = () => {
       let exitosos = 0;
       let errores = 0;
 
-      const promesas = datosVacuna.establecimientos.map(async (estData: any) => {
+      const promesas = datosVacuna.establecimientos.map(async (estData: EstablecimientoData) => {
         if (estData.total > 0) {
           try {
             if (estData.planificacionId) {
@@ -463,9 +492,10 @@ const Planificacion: React.FC = () => {
       } else {
         toast.error('Error al guardar la programación');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al guardar programación:', error);
-      toast.error(error?.message || 'Error al guardar programación');
+      const errorMessage = error instanceof Error ? error.message : 'Error al guardar programación';
+      toast.error(errorMessage);
     }
   };
 
@@ -505,9 +535,10 @@ const Planificacion: React.FC = () => {
       }
 
       await loadPlanificacionesPorVacuna();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error en sincronización:', error);
-      toast.error(error?.message || 'Error al sincronizar con movimientos');
+      const errorMessage = error instanceof Error ? error.message : 'Error al sincronizar con movimientos';
+      toast.error(errorMessage);
     }
   };
 
