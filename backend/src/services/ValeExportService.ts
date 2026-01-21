@@ -1048,7 +1048,7 @@ class ValeExportService {
     headerCell1.value = headerData.institucionNombre.toUpperCase();
     headerCell1.font = {
       bold: true,
-      size: 13,
+      size: 14,
       color: { argb: this.COLORS.institutional },
       name: 'Calibri'
     };
@@ -1060,7 +1060,7 @@ class ValeExportService {
     headerCell2.value = 'ESTRATEGIA SANITARIA DE INMUNIZACIONES - CADENA DE FRIO';
     headerCell2.font = {
       bold: true,
-      size: 9,
+      size: 14,
       color: { argb: this.COLORS.primary },
       name: 'Calibri'
     };
@@ -1073,7 +1073,7 @@ class ValeExportService {
       headerCell3.value = `"${headerData.anioNombre}"`;
       headerCell3.font = {
         italic: true,
-        size: 8,
+        size: 12,
         color: { argb: this.COLORS.gray500 },
         name: 'Calibri'
       };
@@ -1106,7 +1106,7 @@ class ValeExportService {
     infoCell1.value = `Centro de Acopio: ${vale.centroAcopio.nombre}`;
     infoCell1.font = {
       bold: true,
-      size: 10,
+      size: 14,
       color: { argb: this.COLORS.gray800 },
       name: 'Calibri'
     };
@@ -1122,7 +1122,7 @@ class ValeExportService {
     infoCell2.value = `Responsable: ${config.responsableRecojo}`;
     infoCell2.font = {
       bold: true,
-      size: 10,
+      size: 14,
       color: { argb: this.COLORS.gray800 },
       name: 'Calibri'
     };
@@ -1143,7 +1143,7 @@ class ValeExportService {
     })}`;
     infoCell3.font = {
       bold: false,
-      size: 10,
+      size: 14,
       color: { argb: this.COLORS.gray700 },
       name: 'Calibri'
     };
@@ -1160,7 +1160,7 @@ class ValeExportService {
     infoCell4.value = `N° Vale: ${vale.numero || 'S/N'}`;
     infoCell4.font = {
       bold: true,
-      size: 10,
+      size: 14,
       color: { argb: this.COLORS.primary },
       name: 'Calibri'
     };
@@ -1204,7 +1204,7 @@ class ValeExportService {
     consolidadoHeader.value = 'CONSOLIDADO GENERAL';
     consolidadoHeader.font = {
       bold: true,
-      size: 12,
+      size: 14,
       color: { argb: this.COLORS.white },
       name: 'Calibri'
     };
@@ -1230,7 +1230,7 @@ class ValeExportService {
       cell.value = header.text;
       cell.font = {
         bold: true,
-        size: 10,
+        size: 14,
         color: { argb: this.COLORS.white },
         name: 'Calibri'
       };
@@ -1261,18 +1261,18 @@ class ValeExportService {
 
       const cellA = worksheet.getCell(`A${filaActual}`);
       cellA.value = index + 1;
-      cellA.font = { size: 9, name: 'Calibri', color: { argb: this.COLORS.gray500 } };
+      cellA.font = { size: 14, name: 'Calibri', color: { argb: this.COLORS.gray500 } };
       cellA.alignment = { horizontal: 'center', vertical: 'middle' };
 
       const cellB = worksheet.getCell(`B${filaActual}`);
       cellB.value = item.biologico;
-      cellB.font = { size: 9, name: 'Calibri', bold: true, color: { argb: this.COLORS.gray700 } };
+      cellB.font = { size: 14, name: 'Calibri', bold: true, color: { argb: this.COLORS.gray700 } };
       cellB.alignment = { horizontal: 'left', vertical: 'middle' };
 
       const cellC = worksheet.getCell(`C${filaActual}`);
       cellC.value = item.cantidad;
       cellC.font = {
-        size: 10,
+        size: 14,
         name: 'Calibri',
         bold: true,
         color: { argb: this.COLORS.success }
@@ -1285,13 +1285,13 @@ class ValeExportService {
 
         const cellE = worksheet.getCell(`E${filaActual}`);
         cellE.value = jeringaData.nombre;
-        cellE.font = { size: 9, name: 'Calibri', color: { argb: this.COLORS.gray700 } };
+        cellE.font = { size: 11, name: 'Calibri', color: { argb: this.COLORS.gray700 } };
         cellE.alignment = { horizontal: 'left', vertical: 'middle' };
 
         const cellF = worksheet.getCell(`F${filaActual}`);
         cellF.value = jeringaData.cantidad;
         cellF.font = {
-          size: 10,
+          size: 14,
           name: 'Calibri',
           bold: jeringaData.cantidad > 0,
           color: { argb: jeringaData.cantidad > 0 ? this.COLORS.success : this.COLORS.gray400 }
@@ -1322,7 +1322,7 @@ class ValeExportService {
     // Observaciones para consolidado
     filaActual++;
     worksheet.getCell(`A${filaActual}`).value = 'Observaciones:';
-    worksheet.getCell(`A${filaActual}`).font = { bold: true, size: 9, name: 'Calibri', color: { argb: this.COLORS.gray700 } };
+    worksheet.getCell(`A${filaActual}`).font = { bold: true, size: 12, name: 'Calibri', color: { argb: this.COLORS.gray700 } };
 
     // Agregar establecimientos (2 por fila)
     filaActual += 2;
@@ -1344,7 +1344,7 @@ class ValeExportService {
         headerCell.value = establecimiento.nombre.toUpperCase();
         headerCell.font = {
           bold: true,
-          size: 10,
+          size: 14,
           color: { argb: this.COLORS.white },
           name: 'Calibri'
         };
@@ -1376,7 +1376,7 @@ class ValeExportService {
           cell.value = [headerTexts[0], headerTexts[1], headerTexts[2], headerTexts[4], headerTexts[5]][idx];
           cell.font = {
             bold: true,
-            size: 9,
+            size: 14,
             color: { argb: this.COLORS.white },
             name: 'Calibri'
           };
@@ -1427,13 +1427,13 @@ class ValeExportService {
 
             const cellNum = worksheet.getCell((cols[0] || 'A') + filaActual);
             cellNum.value = fila + 1;
-            cellNum.font = { size: 8, name: 'Calibri', color: { argb: this.COLORS.gray500 } };
+            cellNum.font = { size: 14, name: 'Calibri', color: { argb: this.COLORS.gray500 } };
             cellNum.alignment = { horizontal: 'center', vertical: 'middle' };
 
             const cellBio = worksheet.getCell((cols[1] || 'B') + filaActual);
             cellBio.value = vacuna.biologico;
             cellBio.font = {
-              size: 8,
+              size: 14,
               name: 'Calibri',
               color: { argb: this.COLORS.gray700 },
               bold: true
@@ -1443,7 +1443,7 @@ class ValeExportService {
             const cellCant = worksheet.getCell((cols[2] || 'C') + filaActual);
             cellCant.value = vacuna.cantidad;
             cellCant.font = {
-              size: 9,
+              size: 14,
               name: 'Calibri',
               bold: true,
               color: { argb: this.COLORS.success }
@@ -1458,13 +1458,13 @@ class ValeExportService {
 
             const cellJer = worksheet.getCell((cols[4] || 'E') + filaActual);
             cellJer.value = jeringa.nombre;
-            cellJer.font = { size: 8, name: 'Calibri', color: { argb: this.COLORS.gray700 } };
+            cellJer.font = { size: 11, name: 'Calibri', color: { argb: this.COLORS.gray700 } };
             cellJer.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
 
             const cellJerCant = worksheet.getCell((cols[5] || 'F') + filaActual);
             cellJerCant.value = jeringa.cantidad;
             cellJerCant.font = {
-              size: 9,
+              size: 14,
               name: 'Calibri',
               bold: true,
               color: { argb: this.COLORS.success }
@@ -1498,7 +1498,7 @@ class ValeExportService {
         const cols = j === 0 ? ['A', 'B', 'C', 'D', 'E', 'F'] : ['H', 'I', 'J', 'K', 'L', 'M'];
         const cellObs = worksheet.getCell((cols[0] || 'A') + filaActual);
         cellObs.value = 'Obs:';
-        cellObs.font = { bold: true, size: 8, name: 'Calibri', color: { argb: this.COLORS.gray500 } };
+        cellObs.font = { bold: true, size: 12, name: 'Calibri', color: { argb: this.COLORS.gray500 } };
       }
       filaActual++;
 
@@ -1526,7 +1526,7 @@ class ValeExportService {
     firmaEntrega.value = 'RESPONSABLE DE ENTREGA';
     firmaEntrega.font = {
       bold: true,
-      size: 11,
+      size: 12,
       color: { argb: this.COLORS.gray800 },
       name: 'Calibri'
     };
@@ -1549,7 +1549,7 @@ class ValeExportService {
     firmaRecepcion.value = 'RESPONSABLE DE RECEPCIÓN';
     firmaRecepcion.font = {
       bold: true,
-      size: 11,
+      size: 12,
       color: { argb: this.COLORS.gray800 },
       name: 'Calibri'
     };
