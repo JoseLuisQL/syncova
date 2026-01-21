@@ -14,12 +14,14 @@ import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useVacunas } from '../../hooks/useVacunas';
 import { useToastContext } from '../../contexts/ToastContext';
 import { PlanificacionService } from '../../services/planificacionService';
-import { COMPONENT_STYLES } from './constants';
+import { ValesService } from '../../services/valesService';
+import { COMPONENT_STYLES, MESES } from './constants';
 import {
   PlanificacionHeader,
   PlanificacionTabla,
   PlanificacionAcciones,
   PlanificacionLeyenda,
+  ConfirmacionValeModal,
 } from './components';
 import ImportarModal from './ImportarModal';
 
@@ -46,6 +48,18 @@ const Planificacion: React.FC = () => {
   const [tempValues, setTempValues] = useState<{[key: string]: number}>({});
   const [pendingChanges, setPendingChanges] = useState<{[key: string]: boolean}>({});
   const debounceTimeouts = useRef<{[key: string]: NodeJS.Timeout}>({});
+
+  // Estados para modal de confirmación de vale
+  const [showConfirmacionValeModal, setShowConfirmacionValeModal] = useState(false);
+  const [isProcessingValeChange, setIsProcessingValeChange] = useState(false);
+  const [pendingValeModification, setPendingValeModification] = useState<{
+    estIndex: number;
+    mesIndex: number;
+    valorNuevo: number;
+    valorOriginal: number;
+    establecimientoNombre: string;
+    establecimientoId: string;
+  } | null>(null);
 
   // Refs para mantener valores actualizados en closures
   const selectedVacunaRef = useRef(selectedVacuna);
@@ -187,9 +201,12 @@ const Planificacion: React.FC = () => {
     return pendingChanges[key] || false;
   }, [getFieldKey, pendingChanges]);
 
-  const handleTempValueChange = useCallback((estIndex: number, mesIndex: number, newValue: number) => {
+  const handleTempValueChange = useCallback(async (estIndex: number, mesIndex: number, newValue: number) => {
     const key = getFieldKey(estIndex, mesIndex);
+    const currentDatosVacuna = datosVacunaRef.current;
+    const currentSelectedVacuna = selectedVacunaRef.current;
 
+    // Actualizar valor temporal inmediatamente para UI responsiva
     setTempValues(prev => ({
       ...prev,
       [key]: newValue
@@ -200,17 +217,80 @@ const Planificacion: React.FC = () => {
       [key]: true
     }));
 
+    // Cancelar timeout anterior si existe
     if (debounceTimeouts.current[key]) {
       clearTimeout(debounceTimeouts.current[key]);
     }
 
-    debounceTimeouts.current[key] = setTimeout(() => {
-      handleSaveFieldValue(estIndex, mesIndex, newValue);
-    }, 2000);
-  }, [getFieldKey]);
+    // Obtener datos del establecimiento
+    const establecimientoData = currentDatosVacuna?.establecimientos[estIndex];
+    if (!establecimientoData || !currentSelectedVacuna) {
+      // Si no hay datos, guardar directamente
+      debounceTimeouts.current[key] = setTimeout(() => {
+        handleSaveFieldValue(estIndex, mesIndex, newValue);
+      }, 2000);
+      return;
+    }
+
+    const valorOriginal = establecimientoData.distribucionMensual[mesIndex] || 0;
+
+    // Si el valor no cambió, no hacer nada
+    if (valorOriginal === newValue) {
+      setTempValues(prev => {
+        const newTemp = { ...prev };
+        delete newTemp[key];
+        return newTemp;
+      });
+      setPendingChanges(prev => {
+        const newPending = { ...prev };
+        delete newPending[key];
+        return newPending;
+      });
+      return;
+    }
+
+    // Verificar si hay vale generado para este establecimiento/vacuna/mes
+    debounceTimeouts.current[key] = setTimeout(async () => {
+      try {
+        const verificacion = await ValesService.verificarValesExistentes(
+          establecimientoData.establecimiento.id,
+          currentSelectedVacuna,
+          mesIndex + 1, // mes es 1-indexed
+          selectedAnio
+        );
+
+        if (verificacion.success && verificacion.data?.existenVales) {
+          // Hay vale generado - mostrar modal de confirmación
+          setPendingValeModification({
+            estIndex,
+            mesIndex,
+            valorNuevo: newValue,
+            valorOriginal,
+            establecimientoNombre: establecimientoData.establecimiento.nombre,
+            establecimientoId: establecimientoData.establecimiento.id
+          });
+          setShowConfirmacionValeModal(true);
+        } else {
+          // No hay vale - guardar directamente
+          handleSaveFieldValue(estIndex, mesIndex, newValue);
+        }
+      } catch (error) {
+        console.error('Error verificando vales:', error);
+        // En caso de error, guardar directamente
+        handleSaveFieldValue(estIndex, mesIndex, newValue);
+      }
+    }, 1500);
+  }, [getFieldKey, selectedAnio]);
 
   const handleSaveFieldValue = async (estIndex: number, mesIndex: number, value: number) => {
     const key = getFieldKey(estIndex, mesIndex);
+
+    // No guardar si hay una modificación pendiente de confirmación de vale para este campo
+    if (pendingValeModification && 
+        pendingValeModification.estIndex === estIndex && 
+        pendingValeModification.mesIndex === mesIndex) {
+      return;
+    }
 
     try {
       if (debounceTimeouts.current[key]) {
@@ -237,13 +317,126 @@ const Planificacion: React.FC = () => {
   };
 
   const handleFieldBlur = useCallback((estIndex: number, mesIndex: number) => {
+    // No procesar blur si hay un modal de confirmación de vale abierto
+    if (showConfirmacionValeModal) return;
+    
     const key = getFieldKey(estIndex, mesIndex);
     const tempValue = tempValues[key];
+
+    // No guardar si hay una modificación pendiente de confirmación para este campo
+    if (pendingValeModification && 
+        pendingValeModification.estIndex === estIndex && 
+        pendingValeModification.mesIndex === mesIndex) {
+      return;
+    }
 
     if (tempValue !== undefined && pendingChanges[key]) {
       handleSaveFieldValue(estIndex, mesIndex, tempValue);
     }
-  }, [getFieldKey, tempValues, pendingChanges]);
+  }, [getFieldKey, tempValues, pendingChanges, showConfirmacionValeModal, pendingValeModification]);
+
+  // Funciones para modal de confirmación de vale
+  const handleConfirmValeModification = async () => {
+    if (!pendingValeModification) return;
+
+    const key = getFieldKey(pendingValeModification.estIndex, pendingValeModification.mesIndex);
+    
+    // Cancelar cualquier timeout pendiente para este campo
+    if (debounceTimeouts.current[key]) {
+      clearTimeout(debounceTimeouts.current[key]);
+      delete debounceTimeouts.current[key];
+    }
+
+    // Guardar los datos antes de limpiar el estado
+    const { estIndex, mesIndex, valorNuevo, establecimientoId } = pendingValeModification;
+
+    setIsProcessingValeChange(true);
+    try {
+      // Llamar directamente a handleActualizarDistribucion (no handleSaveFieldValue que tiene la protección)
+      await handleActualizarDistribucion(estIndex, mesIndex, valorNuevo);
+      
+      // Limpiar tempValues y pendingChanges
+      setTempValues(prev => {
+        const newTemp = { ...prev };
+        delete newTemp[key];
+        return newTemp;
+      });
+      setPendingChanges(prev => {
+        const newPending = { ...prev };
+        delete newPending[key];
+        return newPending;
+      });
+      
+      // Sincronizar los vales del establecimiento para este período
+      // Esperar un momento para asegurar que el backend haya procesado los movimientos
+      try {
+        console.log('🔄 Iniciando sincronización de vales...');
+        
+        // Pequeño delay para asegurar que los movimientos se actualicen
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const verificacion = await ValesService.verificarValesExistentes(
+          establecimientoId,
+          selectedVacunaRef.current,
+          mesIndex + 1,
+          selectedAnio
+        );
+        
+        console.log('📋 Verificación de vales:', verificacion);
+        
+        if (verificacion.success && verificacion.data?.valesEncontrados) {
+          console.log(`📋 Encontrados ${verificacion.data.valesEncontrados.length} vales para sincronizar`);
+          for (const vale of verificacion.data.valesEncontrados) {
+            console.log(`🔄 Sincronizando vale: ${vale.id}`);
+            const syncResult = await ValesService.sincronizarVale(vale.id);
+            console.log(`✅ Resultado sincronización:`, syncResult);
+          }
+        } else {
+          console.log('⚠️ No se encontraron vales para sincronizar');
+        }
+      } catch (syncError) {
+        console.error('Error sincronizando vales:', syncError);
+      }
+      
+      toast.success('Modificación aplicada - Vale y stocks actualizados');
+    } catch (error) {
+      console.error('Error al aplicar modificación con vale:', error);
+      toast.error('Error al aplicar la modificación');
+    } finally {
+      setIsProcessingValeChange(false);
+      setShowConfirmacionValeModal(false);
+      setPendingValeModification(null);
+    }
+  };
+
+  const handleCancelValeModification = () => {
+    if (!pendingValeModification) return;
+
+    const key = getFieldKey(pendingValeModification.estIndex, pendingValeModification.mesIndex);
+
+    // Cancelar cualquier timeout pendiente para este campo
+    if (debounceTimeouts.current[key]) {
+      clearTimeout(debounceTimeouts.current[key]);
+      delete debounceTimeouts.current[key];
+    }
+
+    // Limpiar el valor temporal - esto hará que el input vuelva a mostrar el valor original
+    setTempValues(prev => {
+      const newTemp = { ...prev };
+      delete newTemp[key];
+      return newTemp;
+    });
+
+    setPendingChanges(prev => {
+      const newPending = { ...prev };
+      delete newPending[key];
+      return newPending;
+    });
+
+    setShowConfirmacionValeModal(false);
+    setPendingValeModification(null);
+    toast.info('Modificación cancelada');
+  };
 
   const handleSaveAllPendingChanges = async () => {
     const pendingKeys = Object.keys(pendingChanges).filter(key => pendingChanges[key]);
@@ -771,6 +964,23 @@ const Planificacion: React.FC = () => {
         isDownloadingTemplate={isDownloadingTemplate}
         isImportingExcel={isImportingExcel}
       />
+
+      {/* Modal de Confirmación de Vale */}
+      {showConfirmacionValeModal && pendingValeModification && (
+        <ConfirmacionValeModal
+          isOpen={showConfirmacionValeModal}
+          onClose={() => !isProcessingValeChange && handleCancelValeModification()}
+          onConfirm={handleConfirmValeModification}
+          onCancel={handleCancelValeModification}
+          establecimientoNombre={pendingValeModification.establecimientoNombre}
+          vacunaNombre={vacunaSeleccionada?.nombre || 'Vacuna'}
+          mesNombre={MESES[pendingValeModification.mesIndex]}
+          anio={selectedAnio}
+          valorOriginal={pendingValeModification.valorOriginal}
+          valorNuevo={pendingValeModification.valorNuevo}
+          isProcessing={isProcessingValeChange}
+        />
+      )}
     </main>
   );
 };

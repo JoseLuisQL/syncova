@@ -148,6 +148,24 @@ export class ValeSyncService {
     try {
       console.log(`🔄 [ValeSyncService] Iniciando sincronización de vale: ${valeId}`);
 
+      // Si el usuarioId no es un UUID válido, obtener un usuario del sistema
+      let usuarioIdFinal = usuarioId;
+      if (!usuarioId || usuarioId === 'temp-user-id' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(usuarioId)) {
+        const usuarioSistema = await prisma.usuario.findFirst({
+          where: { estado: 'activo' },
+          select: { id: true }
+        });
+        if (usuarioSistema) {
+          usuarioIdFinal = usuarioSistema.id;
+          console.log(`🔑 [ValeSyncService] Usando usuario del sistema: ${usuarioIdFinal}`);
+        } else {
+          return {
+            success: false,
+            error: 'No se encontró un usuario válido para la sincronización'
+          };
+        }
+      }
+
       const valeExistente = await prisma.valeEntrega.findUnique({
         where: { id: valeId },
         include: {
@@ -338,16 +356,21 @@ export class ValeSyncService {
         });
 
         if (modificaciones.length > 0) {
+          console.log(`📋 [ValeSyncService] ${modificaciones.length} modificaciones detectadas para vale ${valeExistente.numero}`);
           for (const modificacion of modificaciones) {
+            console.log(`   📍 ${modificacion.tipo}: ${modificacion.establecimientoNombre} - ${modificacion.vacunaNombre}`);
+            console.log(`      Cantidad: ${modificacion.cantidadAnterior} → ${modificacion.cantidadNueva} (diferencia: ${modificacion.diferencia})`);
+            
             if (modificacion.diferencia !== 0) {
               try {
                 if (modificacion.diferencia > 0) {
+                  console.log(`   ⬆️ Afectando stock: +${modificacion.diferencia} unidades`);
                   const stockVacunas = await ValeStockService.afectarStockVacunas(
                     tx,
                     modificacion.vacunaId,
                     modificacion.diferencia,
                     valeExistente.numero,
-                    usuarioId,
+                    usuarioIdFinal,
                     modificacion.establecimientoId
                   );
                   stocksAfectadosVacunas.push(...stockVacunas);
@@ -357,18 +380,19 @@ export class ValeSyncService {
                     modificacion.vacunaId,
                     modificacion.diferencia,
                     valeExistente.numero,
-                    usuarioId,
+                    usuarioIdFinal,
                     valeExistente.centroAcopioId,
                     modificacion.establecimientoId
                   );
                   stocksAfectadosJeringas.push(...stockJeringas);
                 } else {
+                  console.log(`   ⬇️ Restaurando stock: ${Math.abs(modificacion.diferencia)} unidades`);
                   await ValeStockService.restaurarStockVacunas(
                     tx,
                     modificacion.vacunaId,
                     Math.abs(modificacion.diferencia),
                     valeExistente.numero,
-                    usuarioId
+                    usuarioIdFinal
                   );
 
                   await ValeStockService.restaurarStockJeringas(
@@ -376,7 +400,7 @@ export class ValeSyncService {
                     modificacion.vacunaId,
                     Math.abs(modificacion.diferencia),
                     valeExistente.numero,
-                    usuarioId,
+                    usuarioIdFinal,
                     valeExistente.centroAcopioId
                   );
                 }
@@ -385,6 +409,8 @@ export class ValeSyncService {
               }
             }
           }
+        } else {
+          console.log(`ℹ️ [ValeSyncService] No se detectaron modificaciones para vale ${valeExistente.numero}`);
         }
 
         const valeActualizado = await tx.valeEntrega.findUnique({
