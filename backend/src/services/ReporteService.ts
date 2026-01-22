@@ -1811,6 +1811,13 @@ export class ReporteService {
         fechaFinObj = new Date(fechaFin + 'T23:59:59.999Z');
       }
 
+      // DESPLAZAMIENTO DE FECHAS: +1 mes para consistencia con módulo de Movimientos
+      // Cuando el usuario selecciona Diciembre 2025, debe buscar datos de Enero 2026
+      console.log(`📅 [Desplazamiento] Usuario seleccionó: ${fechaInicioObj.toISOString()} - ${fechaFinObj.toISOString()}`);
+      fechaInicioObj.setUTCMonth(fechaInicioObj.getUTCMonth() + 1);
+      fechaFinObj.setUTCMonth(fechaFinObj.getUTCMonth() + 1);
+      console.log(`📅 [Desplazamiento] Buscando datos de: ${fechaInicioObj.toISOString()} - ${fechaFinObj.toISOString()}`);
+
       const mesInicio = fechaInicioObj.getUTCMonth() + 1;
       const anioInicio = fechaInicioObj.getUTCFullYear();
       const mesFin = fechaFinObj.getUTCMonth() + 1;
