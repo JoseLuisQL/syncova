@@ -464,7 +464,21 @@ export class MovimientosCalculationService {
     }>;
   }>> {
     try {
-      console.log(`📊 [MovimientosCalculationService] Obteniendo stock disponible para vacuna ${vacunaId}, período ${mes}/${anio}`);
+      // DESPLAZAMIENTO DE FECHAS: Buscar mes+1 para consistencia con MovimientosQueryService.getAll
+      let mesBusqueda = mes;
+      let anioBusqueda = anio;
+
+      if (mes && anio) {
+        mesBusqueda = mes + 1;
+        anioBusqueda = anio;
+        if (mesBusqueda > 12) {
+          mesBusqueda = 1;
+          anioBusqueda = anio + 1;
+        }
+        console.log(`📅 [getStockDisponible] Usuario seleccionó ${mes}/${anio}, buscando datos de ${mesBusqueda}/${anioBusqueda}`);
+      }
+
+      console.log(`📊 [MovimientosCalculationService] Obteniendo stock disponible para vacuna ${vacunaId}, período ${mesBusqueda}/${anioBusqueda}`);
 
       const vacuna = await prisma.vacuna.findUnique({
         where: { id: vacunaId },
@@ -475,7 +489,7 @@ export class MovimientosCalculationService {
         throw new Error('Vacuna no encontrada');
       }
 
-      const stockInicialResult = await StockInicialService.obtenerStockInicial(vacunaId, mes, anio);
+      const stockInicialResult = await StockInicialService.obtenerStockInicial(vacunaId, mesBusqueda, anioBusqueda);
       let stockInicialHistorico: number | null = null;
       let stockInicialOriginal: number | null = null;
       let fechaCapturaStockInicial: Date | null = null;
@@ -492,8 +506,8 @@ export class MovimientosCalculationService {
       let ingresosLotesDelMes = 0;
 
       if (tieneHistorialInicial) {
-        const fechaInicioMes = new Date(anio, mes - 1, 1);
-        const fechaFinMes = new Date(anio, mes, 0);
+        const fechaInicioMes = new Date(anioBusqueda, mesBusqueda - 1, 1);
+        const fechaFinMes = new Date(anioBusqueda, mesBusqueda, 0);
 
         const lotesIngresadosEnMes = await prisma.loteVacuna.aggregate({
           where: {
@@ -533,8 +547,8 @@ export class MovimientosCalculationService {
       const totalEntregas = await prisma.movimientoVacuna.aggregate({
         where: {
           vacunaId,
-          mes,
-          anio
+          mes: mesBusqueda,
+          anio: anioBusqueda
         },
         _sum: {
           entrega: true

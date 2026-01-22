@@ -109,8 +109,16 @@ const Movimientos: React.FC = () => {
   // ============================================================================
   const [selectedCentroAcopio, setSelectedCentroAcopio] = useState<string>('todos');
   const [selectedVacuna, setSelectedVacuna] = useState<string>('');
-  const [selectedMes, setSelectedMes] = useState<number>(new Date().getMonth() + 1);
-  const [selectedAnio, setSelectedAnio] = useState<number>(new Date().getFullYear());
+  // Por defecto cargar el mes anterior al actual
+  const [selectedMes, setSelectedMes] = useState<number>(() => {
+    const mesActual = new Date().getMonth() + 1;
+    return mesActual === 1 ? 12 : mesActual - 1;
+  });
+  const [selectedAnio, setSelectedAnio] = useState<number>(() => {
+    const mesActual = new Date().getMonth() + 1;
+    const anioActual = new Date().getFullYear();
+    return mesActual === 1 ? anioActual - 1 : anioActual;
+  });
   const [aniosDisponibles, setAniosDisponibles] = useState<number[]>([]);
   const [isLoadingAnios, setIsLoadingAnios] = useState(true);
 
@@ -337,11 +345,14 @@ const Movimientos: React.FC = () => {
         setIsLoadingAnios(true);
         const response = await MovimientosService.getAniosDisponibles();
         setAniosDisponibles(response.anios);
-        // Establecer el año actual si está disponible
-        if (response.anios.includes(response.anioActual)) {
-          setSelectedAnio(response.anioActual);
-        } else if (response.anios.length > 0) {
-          setSelectedAnio(response.anios[response.anios.length - 1]);
+        // NO sobrescribir el año inicial - ya se calculó correctamente para el mes anterior
+        // Solo actualizar si el año inicial no está en la lista de años disponibles
+        if (!response.anios.includes(selectedAnio) && response.anios.length > 0) {
+          // Buscar el año más cercano al seleccionado
+          const anioMasCercano = response.anios.reduce((prev, curr) => 
+            Math.abs(curr - selectedAnio) < Math.abs(prev - selectedAnio) ? curr : prev
+          );
+          setSelectedAnio(anioMasCercano);
         }
       } catch (error) {
         console.error('Error al cargar años disponibles:', error);

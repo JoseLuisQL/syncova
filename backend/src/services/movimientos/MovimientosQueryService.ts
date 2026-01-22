@@ -11,6 +11,32 @@ import {
  * Handles all read operations for movimientos
  */
 export class MovimientosQueryService {
+
+  /**
+   * Desplaza mes y año por una cantidad de meses específica
+   * Ejemplo: desplazarMesAnio(2, 2026, 1) => { mes: 3, anio: 2026 } (Feb 2026 -> Mar 2026)
+   * Ejemplo: desplazarMesAnio(12, 2025, 1) => { mes: 1, anio: 2026 } (Dic 2025 -> Ene 2026)
+   */
+  private static desplazarMesAnio(
+    mes: number, 
+    anio: number, 
+    desplazamientoMeses: number = 1
+  ): { mes: number; anio: number } {
+    let nuevoMes = mes + desplazamientoMeses;
+    let nuevoAnio = anio;
+
+    while (nuevoMes > 12) {
+      nuevoMes -= 12;
+      nuevoAnio++;
+    }
+    while (nuevoMes < 1) {
+      nuevoMes += 12;
+      nuevoAnio--;
+    }
+
+    return { mes: nuevoMes, anio: nuevoAnio };
+  }
+
   /**
    * Get all movimientos with optional filters
    */
@@ -41,6 +67,17 @@ export class MovimientosQueryService {
         limit
       });
 
+      // DESPLAZAMIENTO DE FECHAS: Buscar mes+1 para que al seleccionar Enero cargue datos de Febrero
+      let mesBusqueda = mes;
+      let anioBusqueda = anio;
+
+      if (mes && anio) {
+        const fechaAjustada = this.desplazarMesAnio(mes, anio, 1); // Adelantar 1 mes
+        mesBusqueda = fechaAjustada.mes;
+        anioBusqueda = fechaAjustada.anio;
+        console.log(`📅 [Desplazamiento] Usuario seleccionó ${mes}/${anio}, cargando datos de ${mesBusqueda}/${anioBusqueda}`);
+      }
+
       const where: any = {};
 
       if (establecimientoId) {
@@ -51,12 +88,12 @@ export class MovimientosQueryService {
         where.vacunaId = vacunaId;
       }
 
-      if (mes) {
-        where.mes = mes;
+      if (mesBusqueda) {
+        where.mes = mesBusqueda;
       }
 
-      if (anio) {
-        where.anio = anio;
+      if (anioBusqueda) {
+        where.anio = anioBusqueda;
       }
 
       if (centroAcopioId && centroAcopioId !== 'todos') {
@@ -138,8 +175,10 @@ export class MovimientosQueryService {
       const establecimientosUnicos = [...new Set(movimientos.map(m => (m as any).establecimiento?.nombre || 'Sin nombre'))];
       console.log(`🏥 Establecimientos con movimientos: ${establecimientosUnicos.length}`, establecimientosUnicos);
 
-      // Enriquecer movimientos con información de vales generados
-      const movimientosEnriquecidos = await this.enriquecerConInfoVales(movimientos as any[], mes, anio, centroAcopioId);
+      // Enriquecer movimientos con información de vales generados (usar mesBusqueda/anioBusqueda para vales)
+      const movimientosEnriquecidos = await this.enriquecerConInfoVales(movimientos as any[], mesBusqueda, anioBusqueda, centroAcopioId);
+
+      console.log(`📅 [Desplazamiento] Retornando ${movimientosEnriquecidos.length} movimientos de ${mesBusqueda}/${anioBusqueda} (usuario seleccionó ${mes}/${anio})`);
 
       return {
         success: true,
