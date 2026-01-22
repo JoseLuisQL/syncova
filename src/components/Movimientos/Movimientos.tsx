@@ -1610,8 +1610,8 @@ const Movimientos: React.FC = () => {
               <Vales
                 initialCentroAcopioId={selectedCentroAcopio !== 'todos' ? selectedCentroAcopio : undefined}
                 initialVacunaId={selectedVacuna}
-                initialMes={selectedMes}
-                initialAnio={selectedAnio}
+                initialMes={selectedMes === 12 ? 1 : selectedMes + 1}
+                initialAnio={selectedMes === 12 ? selectedAnio + 1 : selectedAnio}
                 onClose={() => setShowValesModal(false)}
               />
             </ValesErrorBoundary>
