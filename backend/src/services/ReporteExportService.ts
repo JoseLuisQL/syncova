@@ -2863,70 +2863,306 @@ export class ReporteExportService {
              nombreUpper.includes('CHANKA');
     };
 
-    // Ordenar datos: RED -> Microred -> Establecimiento (sin los especiales que se generan aparte)
+    // Ordenar datos: Orden FIJO segun estructura organizacional proporcionada
+    // El orden esta definido manualmente para coincidir exactamente con el reporte esperado
+    
+    // Orden fijo de MICROREDES (segun orden proporcionado)
+    const ordenMicroredes: { [key: string]: number } = {
+      // CHICMO / SANTA MARIA DE CHICMO
+      'CHICMO': 1,
+      'MICRORED CHICMO': 1,
+      'SANTA MARIA DE CHICMO': 1,
+      'MICRORED SANTA MARIA DE CHICMO': 1,
+      // HUANCABAMBA
+      'HUANCABAMBA': 2,
+      'MICRORED HUANCABAMBA': 2,
+      // HUANCARAY
+      'HUANCARAY': 3,
+      'MICRORED HUANCARAY': 3,
+      // PAMPACHIRI
+      'PAMPACHIRI': 4,
+      'MICRORED PAMPACHIRI': 4,
+      // TALAVERA
+      'TALAVERA': 5,
+      'MICRORED TALAVERA': 5,
+      // TURPO
+      'TURPO': 6,
+      'MICRORED TURPO': 6,
+      // ANDARAPA
+      'ANDARAPA': 7,
+      'MICRORED ANDARAPA': 7,
+      // KISHUARA
+      'KISHUARA': 8,
+      'MICRORED KISHUARA': 8,
+      // PACUCHA
+      'PACUCHA': 9,
+      'MICRORED PACUCHA': 9,
+      // SAN JERONIMO
+      'SAN JERONIMO': 10,
+      'MICRORED SAN JERONIMO': 10,
+      // Sin microred va intercalado segun corresponda
+      'NO PERTENECE A NINGUNA MICRORED': 999,
+      'SIN MICRORED': 999
+    };
+
+    // Orden fijo de ESTABLECIMIENTOS - ORDEN EXACTO proporcionado
+    // Formato: 'NOMBRE_ESTABLECIMIENTO': posicion_global
+    const ordenEstablecimientos: { [key: string]: number } = {
+      // === MICRORED CHICMO / SANTA MARIA DE CHICMO ===
+      'CASCABAMBA': 1,
+      'CHICMO': 2,
+      'HUANCANE': 3,
+      'LAMAY': 4,
+      'NUEVA ESPERANZA': 5,
+      'PARIABAMBA': 6,
+      'PUESTO DE SALUD CCANTUPATA': 7,
+      'CCANTUPATA': 7,
+      'PUESTO DE SALUD MOYABAMBA BAJA': 8,
+      'MOYABAMBA BAJA': 8,
+      'PUESTO DE SALUD TARAMBA': 9,
+      'TARAMBA': 9,
+      'REBELDE HUAYRANA': 10,
+      
+      // === MICRORED HUANCABAMBA ===
+      'CCEÑUARAN': 11,
+      'CCENUARAN': 11,
+      'HUANCABAMBA': 12,
+      'HUINCHOS': 13,
+      'SACCLAYA': 14,
+      'SAN JUAN DE OCCOLLO': 15,
+      'SOCCÑACANCHA': 16,
+      'SOCCNACANCHA': 16,
+      'SUCARAYLLA': 17,
+      
+      // === MICRORED HUANCARAY ===
+      'CCANCCAYLLO': 18,
+      'CHACCRAMPA': 19,
+      'CHIARA': 20,
+      'CHULLIZANA': 21,
+      'HUANCARAY': 22,
+      'IGLESIA PATA': 23,
+      'MOLLEPATA': 24,
+      'NUEVA HUILLCAYHUA': 25,
+      'OCCOCHO': 26,
+      'SAN ANTONIO DE CACHI': 27,
+      'SAN JUAN DE CULA': 28,
+      'SAN JUAN PAMPA': 29,
+      'SANTIAGO DE YANACULLO': 30,
+      'SANTIAGO DE YAURECC': 31,
+      'TANQUIYAURECC': 32,
+      
+      // === NO PERTENECE A NINGUNA MICRORED (C.S ANDAHUAYLAS) - despues de MICRORED HUANCARAY ===
+      'ANDAHUAYLAS': 33,
+      'C.S ANDAHUAYLAS': 33,
+      'C.S. ANDAHUAYLAS': 33,
+      
+      // === MICRORED PAMPACHIRI ===
+      'CCOCHAPUCRO': 34,
+      'CHECCCHEPAMPA': 35,
+      'CHILLIHUA': 36,
+      'HUAYANA': 37,
+      'LLANCAMA': 38,
+      'PAMPACHIRI': 39,
+      'POMACOCHA': 40,
+      'UMAMARCA': 41,
+      'VILLA SANTA ROSA': 42,
+      
+      // === MICRORED TALAVERA ===
+      'CCACCACHA': 43,
+      'CHOCCEPUQUIO': 44,
+      'LLANTUYHUANCA': 45,
+      'LUIS PATA': 46,
+      'MULACANCHA': 47,
+      'OSCCOLLOPAMPA': 48,
+      'PAMPAMARCA': 49,
+      'SACHAPUNA': 50,
+      'TALAVERA': 51,
+      'UCHUHUANCARAY': 52,
+      
+      // === MICRORED TURPO ===
+      'BELEN DE ANTA': 53,
+      'PALLACCOCHA': 54,
+      'SOCCOSPATA': 55,
+      'TAYPICHA': 56,
+      'TORACCA': 57,
+      'TURPO': 58,
+      'YANACCMA': 59,
+      
+      // === NO PERTENECE A NINGUNA MICRORED (ESSALUD) - despues de MICRORED TURPO ===
+      'HOSP. ESSALUD-ANDAHUAYLAS': 60,
+      'ESSALUD-ANDAHUAYLAS': 60,
+      'ESSALUD ANDAHUAYLAS': 60,
+      
+      // === NO PERTENECE A NINGUNA MICRORED (HOSPITAL ANDAHUAYLAS) - despues de ESSALUD ===
+      'HOSPITAL ANDAHUAYLAS': 61,
+      
+      // === MICRORED ANDARAPA ===
+      'ANDARAPA': 62,
+      'CHANTA UMACA': 63,
+      'HUAMPICA': 64,
+      'HUANCAS': 65,
+      'ILLAHUASI': 66,
+      'PUYHUALLA': 67,
+      'SAN JUAN DE MIRAFLORES': 68,
+      
+      // === MICRORED KISHUARA ===
+      'CAVIRA': 69,
+      'COLPA': 70,
+      'KISHUARA': 71,
+      'MATAPUQUIO': 72,
+      'QUILLABAMBA': 73,
+      'SOTCCOMAYO': 74,
+      'TINTAY': 75,
+      
+      // === MICRORED PACUCHA ===
+      'ARGAMA': 76,
+      'CHURRUBAMBA': 77,
+      'COCAIRO': 78,
+      'COTAHUACHO': 79,
+      'KAQUIABAMBA': 80,
+      'KAKIABAMBA': 80,
+      'LAGUNA': 81,
+      'PACUCHA': 82,
+      'PUCULLOCCOCHA': 83,
+      'PULLURI': 84,
+      
+      // === MICRORED SAN JERONIMO ===
+      'ANCATIRA': 85,
+      'CHAMPACCOCHA': 86,
+      'CHOCCECANCHA': 87,
+      'CHULLCUISA': 88,
+      'CUPISA': 89,
+      'LLIUPAPUQUIO': 90,
+      'OLLABAMBA': 91,
+      'POLTOCCSA': 92,
+      'SAN JERONIMO': 93
+    };
+
+    const getOrdenMicrored = (microredNombre: string | null): number => {
+      if (!microredNombre) return 999;
+      const nombreUpper = microredNombre.toUpperCase().trim();
+      // Buscar coincidencia exacta primero
+      for (const [key, orden] of Object.entries(ordenMicroredes)) {
+        if (nombreUpper === key.toUpperCase()) {
+          return orden;
+        }
+      }
+      // Buscar coincidencia parcial
+      for (const [key, orden] of Object.entries(ordenMicroredes)) {
+        if (nombreUpper.includes(key.toUpperCase()) || key.toUpperCase().includes(nombreUpper)) {
+          return orden;
+        }
+      }
+      return 500; // Microredes no listadas van en el medio
+    };
+
+    const getOrdenEstablecimiento = (establecimientoNombre: string): number => {
+      const nombreUpper = establecimientoNombre.toUpperCase().trim();
+      // Limpiar prefijos comunes para busqueda
+      const nombreLimpio = nombreUpper
+        .replace(/^C\.S\.?\s*/i, '')
+        .replace(/^P\.S\.?\s*/i, '')
+        .replace(/^PUESTO DE SALUD\s*/i, '')
+        .replace(/^CENTRO DE SALUD\s*/i, '')
+        .trim();
+      
+      // Buscar coincidencia exacta primero (con nombre original)
+      for (const [key, orden] of Object.entries(ordenEstablecimientos)) {
+        if (nombreUpper === key.toUpperCase()) {
+          return orden;
+        }
+      }
+      // Buscar coincidencia exacta con nombre limpio
+      for (const [key, orden] of Object.entries(ordenEstablecimientos)) {
+        if (nombreLimpio === key.toUpperCase()) {
+          return orden;
+        }
+      }
+      // Buscar coincidencia parcial
+      for (const [key, orden] of Object.entries(ordenEstablecimientos)) {
+        if (nombreLimpio.includes(key.toUpperCase()) || key.toUpperCase().includes(nombreLimpio)) {
+          return orden;
+        }
+      }
+      return 9999; // Establecimientos no listados van al final
+    };
+
     const datosOrdenados = [...data]
       .filter(item => !esEstablecimientoEspecial(item.establecimientoNombre))
       .sort((a, b) => {
-      // Primero por RED (los sin RED van al final)
-      const redA = a.redNombre || 'ZZZZ SIN RED';
-      const redB = b.redNombre || 'ZZZZ SIN RED';
-      if (redA !== redB) {
-        return redA.localeCompare(redB);
+      // Ordenar por posicion global del establecimiento directamente
+      const ordenEstA = getOrdenEstablecimiento(a.establecimientoNombre);
+      const ordenEstB = getOrdenEstablecimiento(b.establecimientoNombre);
+      if (ordenEstA !== ordenEstB) {
+        return ordenEstA - ordenEstB;
       }
       
-      // Luego por Microred (los sin microred van intercalados segun posicion)
-      const microredA = a.microredNombre || 'ZZZZ NO PERTENECE A NINGUNA MICRORED';
-      const microredB = b.microredNombre || 'ZZZZ NO PERTENECE A NINGUNA MICRORED';
-      if (microredA !== microredB) {
-        return microredA.localeCompare(microredB);
+      // Si no estan en la lista, ordenar por microred y luego alfabeticamente
+      const ordenMicroredA = getOrdenMicrored(a.microredNombre);
+      const ordenMicroredB = getOrdenMicrored(b.microredNombre);
+      if (ordenMicroredA !== ordenMicroredB) {
+        return ordenMicroredA - ordenMicroredB;
       }
       
-      // Finalmente por nombre de establecimiento
+      // Si no estan en la lista, ordenar alfabeticamente
       return a.establecimientoNombre.localeCompare(b.establecimientoNombre);
     });
 
-    // Agrupar por RED y luego por Microred
+    // Agrupar por MICRORED respetando el orden de establecimientos
+    // Cada grupo tiene: microredNombre, items[], ordenMinimo (para ordenar grupos)
     interface GrupoMicrored {
       microredId: string | null;
       microredNombre: string;
       items: MovimientosPorEESSItem[];
+      ordenMinimo: number;
+      esSinMicrored: boolean;
     }
     
-    interface GrupoRed {
-      redId: string | null;
-      redNombre: string;
-      microredes: Map<string, GrupoMicrored>;
-    }
+    const gruposMicrored: GrupoMicrored[] = [];
+    const microredMap = new Map<string, GrupoMicrored>();
     
-    const gruposPorRed = new Map<string, GrupoRed>();
+    // Set para trackear órdenes de establecimientos sin microred ya procesados (evitar duplicados)
+    const ordenesSinMicroredProcesados = new Set<number>();
     
+    // Procesar datos ordenados y agrupar
     datosOrdenados.forEach(item => {
-      const redId = item.redId || 'sin-red';
-      const redNombre = item.redNombre || '';
-      const microredId = item.microredId || 'sin-microred';
-      const microredNombre = item.microredNombre || 'NO PERTENECE A NINGUNA MICRORED';
+      const tieneMicrored = item.microredId && item.microredNombre;
+      const ordenEstab = getOrdenEstablecimiento(item.establecimientoNombre);
       
-      if (!gruposPorRed.has(redId)) {
-        gruposPorRed.set(redId, {
-          redId: item.redId,
-          redNombre: redNombre,
-          microredes: new Map()
-        });
+      // Para establecimientos sin microred, usar el orden como clave para evitar duplicados
+      // Esto agrupa establecimientos con el mismo orden (ej: dos registros de C.S. ANDAHUAYLAS)
+      let microredKey: string;
+      if (tieneMicrored) {
+        microredKey = item.microredId!;
+      } else {
+        // Si ya procesamos un establecimiento sin microred con este orden, saltar
+        if (ordenesSinMicroredProcesados.has(ordenEstab)) {
+          return; // Saltar este item duplicado
+        }
+        ordenesSinMicroredProcesados.add(ordenEstab);
+        microredKey = `sin-microred-orden-${ordenEstab}`;
       }
       
-      const grupoRed = gruposPorRed.get(redId)!;
+      const microredNombre = tieneMicrored ? item.microredNombre! : 'NO PERTENECE A NINGUNA MICRORED';
       
-      if (!grupoRed.microredes.has(microredId)) {
-        grupoRed.microredes.set(microredId, {
+      if (!microredMap.has(microredKey)) {
+        const nuevoGrupo: GrupoMicrored = {
           microredId: item.microredId,
           microredNombre: microredNombre,
-          items: []
-        });
+          items: [],
+          ordenMinimo: ordenEstab,
+          esSinMicrored: !tieneMicrored
+        };
+        microredMap.set(microredKey, nuevoGrupo);
+        gruposMicrored.push(nuevoGrupo);
       }
       
-      grupoRed.microredes.get(microredId)!.items.push(item);
+      microredMap.get(microredKey)!.items.push(item);
     });
-
+    
+    // Ordenar grupos por el orden minimo de sus establecimientos
+    gruposMicrored.sort((a, b) => a.ordenMinimo - b.ordenMinimo);
+    
     let microredIndex = 0;
 
     // Colores para el diseño mejorado
@@ -2935,6 +3171,7 @@ export class ReporteExportService {
     const colorEssalud = 'FF10B981'; // Verde para ESSALUD
     const colorMicroredBg = 'FFDBEAFE'; // Azul muy claro para microred
     const colorAltRow = 'FFF1F5F9'; // Gris muy claro para filas alternas
+    const colorSubtotalBg = 'FFE2E8F0'; // Gris claro para subtotales
 
     // Estructura para trackear filas por RED para las formulas
     interface FilasPorRed {
@@ -2953,229 +3190,318 @@ export class ReporteExportService {
     const filasEspecialesCount = 4;
     let currentRow = startRow + filasEspecialesCount;
 
-    // PRIMERO: Generar los datos de microredes regulares y trackear filas
+    // Funcion auxiliar para agregar fila de subtotal de microred
+    const agregarFilaSubtotalMicrored = (microredNombre: string) => {
+      const subtotalRow = worksheet.getRow(currentRow);
+      
+      // Primera columna: "MICRORED [nombre]"
+      const subtotalCell = subtotalRow.getCell(1);
+      subtotalCell.value = `MICRORED ${microredNombre}`;
+      subtotalCell.font = {
+        size: 9,
+        name: 'Calibri',
+        bold: true,
+        color: { argb: 'FF1E3A8A' }
+      };
+      subtotalCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      subtotalCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: colorSubtotalBg }
+      };
+
+      // Segunda columna: vacio
+      const emptyCell = subtotalRow.getCell(2);
+      emptyCell.value = '';
+      emptyCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: colorSubtotalBg }
+      };
+
+      // Columnas de vacunas: vacias con el mismo estilo
+      for (let col = 3; col <= totalCols; col++) {
+        const cell = subtotalRow.getCell(col);
+        cell.value = '';
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: colorSubtotalBg }
+        };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+          left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+          bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+          right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+        };
+      }
+
+      // Bordes para las primeras 2 columnas
+      subtotalCell.border = {
+        top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+      };
+      emptyCell.border = {
+        top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+      };
+
+      subtotalRow.height = 18;
+      currentRow++;
+    };
+
+    // Funcion auxiliar para agregar fila de establecimiento sin microred
+    const agregarFilaEstablecimientoSinMicrored = (nombreSubtotal: string) => {
+      const subtotalRow = worksheet.getRow(currentRow);
+      
+      // Primera columna: nombre del subtotal tal como viene
+      const subtotalCell = subtotalRow.getCell(1);
+      subtotalCell.value = nombreSubtotal;
+      subtotalCell.font = {
+        size: 9,
+        name: 'Calibri',
+        bold: true,
+        color: { argb: 'FF1E3A8A' }
+      };
+      subtotalCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      subtotalCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: colorSubtotalBg }
+      };
+
+      // Segunda columna: vacio
+      const emptyCell = subtotalRow.getCell(2);
+      emptyCell.value = '';
+      emptyCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: colorSubtotalBg }
+      };
+
+      // Columnas de vacunas: vacias con el mismo estilo
+      for (let col = 3; col <= totalCols; col++) {
+        const cell = subtotalRow.getCell(col);
+        cell.value = '';
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: colorSubtotalBg }
+        };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+          left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+          bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+          right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+        };
+      }
+
+      // Bordes para las primeras 2 columnas
+      subtotalCell.border = {
+        top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+      };
+      emptyCell.border = {
+        top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+      };
+
+      subtotalRow.height = 18;
+      currentRow++;
+    };
+
+    // Procesar cada grupo de microred
     let rowIndex = 0;
-    for (const [, grupoRed] of gruposPorRed) {
-      // Procesar cada microred dentro de esta RED
-      for (const [, grupoMicrored] of grupoRed.microredes) {
-        // Agregar filas de datos de establecimientos
-        grupoMicrored.items.forEach((item) => {
-          const row = worksheet.getRow(currentRow);
-          const isAltRow = rowIndex % 2 === 1;
-          const rowBgColor = isAltRow ? colorAltRow : 'FFFFFFFF';
+    gruposMicrored.forEach((grupo) => {
+      // Procesar cada establecimiento del grupo
+      grupo.items.forEach((item) => {
+        const row = worksheet.getRow(currentRow);
+        const isAltRow = rowIndex % 2 === 1;
+        const rowBgColor = isAltRow ? colorAltRow : 'FFFFFFFF';
 
-          // Trackear fila segun la RED
-          const redNombreUpper = (item.redNombre || '').toUpperCase().trim();
-          const nombreUpper = item.establecimientoNombre.toUpperCase().trim();
+        // Trackear fila segun la RED
+        const redNombreUpper = (item.redNombre || '').toUpperCase().trim();
+        const nombreUpper = item.establecimientoNombre.toUpperCase().trim();
+        
+        if (nombreUpper.includes('ESSALUD') && nombreUpper.includes('ANDAHUAYLAS')) {
+          filasPorRed.essalud.push(currentRow);
+        } else if (redNombreUpper.includes('JOSE MARIA ARGUEDAS')) {
+          filasPorRed.redJoseMariaArguedas.push(currentRow);
+        } else if (redNombreUpper.includes('SONDOR')) {
+          filasPorRed.redSondor.push(currentRow);
+        }
+
+        // Primera columna: Nombre de la Microred
+        const microredCell = row.getCell(1);
+        microredCell.value = grupo.esSinMicrored ? 'NO PERTENECE A NINGUNA MICRORED' : grupo.microredNombre;
+        microredCell.font = {
+          size: 9,
+          name: 'Calibri',
+          bold: true,
+          color: { argb: 'FF1E40AF' }
+        };
+        microredCell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+        microredCell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: colorMicroredBg }
+        };
+
+        // Segunda columna: nombre del establecimiento
+        const eessCell = row.getCell(2);
+        // Para establecimientos sin microred, mostrar el nombre especial
+        let nombreEstablecimiento = limpiarNombreEstablecimiento(item.establecimientoNombre);
+        if (grupo.esSinMicrored) {
+          const ordenEstab = getOrdenEstablecimiento(item.establecimientoNombre);
           
-          if (nombreUpper.includes('ESSALUD') && nombreUpper.includes('ANDAHUAYLAS')) {
-            filasPorRed.essalud.push(currentRow);
-          } else if (redNombreUpper.includes('JOSE MARIA ARGUEDAS')) {
-            filasPorRed.redJoseMariaArguedas.push(currentRow);
-          } else if (redNombreUpper.includes('SONDOR')) {
-            filasPorRed.redSondor.push(currentRow);
+          // Usar el orden para determinar qué nombre mostrar
+          if (ordenEstab === 33) {
+            // C.S. ANDAHUAYLAS (orden 33) -> mostrar "ANDAHUAYLAS"
+            nombreEstablecimiento = 'ANDAHUAYLAS';
+          } else if (ordenEstab === 60) {
+            // HOSP. ESSALUD-ANDAHUAYLAS (orden 60) -> mostrar "ESSALUD-ANDAHUAYLAS"
+            nombreEstablecimiento = 'ESSALUD-ANDAHUAYLAS';
+          } else if (ordenEstab === 61) {
+            // HOSPITAL ANDAHUAYLAS (orden 61) -> mostrar "HOSPITAL ANDAHUAYLAS"
+            nombreEstablecimiento = 'HOSPITAL ANDAHUAYLAS';
+          } else {
+            // Otros -> mantener nombre limpio
+            nombreEstablecimiento = limpiarNombreEstablecimiento(item.establecimientoNombre);
           }
+        }
+        eessCell.value = nombreEstablecimiento;
+        eessCell.font = {
+          size: 9,
+          name: 'Calibri',
+          bold: false,
+          color: { argb: 'FF374151' }
+        };
+        eessCell.alignment = { horizontal: 'left', vertical: 'middle' };
+        eessCell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: rowBgColor }
+        };
 
-          // Primera columna: Nombre de la Microred
-          const microredCell = row.getCell(1);
-          microredCell.value = grupoMicrored.microredNombre === 'NO PERTENECE A NINGUNA MICRORED' 
-            ? 'SIN MICRORED' 
-            : grupoMicrored.microredNombre;
-          microredCell.font = {
-            size: 9,
-            name: 'Calibri',
-            bold: true,
-            color: { argb: 'FF1E40AF' }
-          };
-          microredCell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
-          microredCell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: colorMicroredBg }
-          };
+        let currentCol = 3;
 
-          // Segunda columna: nombre del establecimiento
-          // Si es SIN MICRORED, mostrar nombre completo; si no, limpiar prefijos
-          const eessCell = row.getCell(2);
-          const esSinMicrored = grupoMicrored.microredNombre === 'NO PERTENECE A NINGUNA MICRORED';
-          eessCell.value = esSinMicrored 
-            ? item.establecimientoNombre 
-            : limpiarNombreEstablecimiento(item.establecimientoNombre);
-          eessCell.font = {
-            size: 9,
-            name: 'Calibri',
-            bold: false,
-            color: { argb: 'FF374151' }
-          };
-          eessCell.alignment = { horizontal: 'left', vertical: 'middle' };
-          eessCell.fill = {
+      // Para cada vacuna, agregar las 3 columnas de datos
+      vacunasArray.forEach(vacunaId => {
+        const vacunaData = item.vacunas[vacunaId];
+
+        if (vacunaData) {
+          // Total Entrega
+          const entregaCell = row.getCell(currentCol);
+          entregaCell.value = vacunaData.totalEntrega;
+          entregaCell.numFmt = '#,##0';
+          entregaCell.alignment = { horizontal: 'center', vertical: 'middle' };
+          entregaCell.font = { size: 9, name: 'Calibri', color: { argb: 'FF374151' } };
+          entregaCell.fill = {
             type: 'pattern',
             pattern: 'solid',
             fgColor: { argb: rowBgColor }
           };
 
-          let currentCol = 3;
+          // Total Salidas
+          const salidasCell = row.getCell(currentCol + 1);
+          salidasCell.value = vacunaData.totalSalidas;
+          salidasCell.numFmt = '#,##0';
+          salidasCell.alignment = { horizontal: 'center', vertical: 'middle' };
+          salidasCell.font = { size: 9, name: 'Calibri', color: { argb: 'FF374151' } };
+          salidasCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: rowBgColor }
+          };
 
-          // Para cada vacuna, agregar las 3 columnas de datos
-          vacunasArray.forEach(vacunaId => {
-            const vacunaData = item.vacunas[vacunaId];
+          // Stock
+          const stockCell = row.getCell(currentCol + 2);
+          stockCell.value = vacunaData.stock;
+          stockCell.numFmt = '#,##0';
+          stockCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-            if (vacunaData) {
-              // Total Entrega
-              const entregaCell = row.getCell(currentCol);
-              entregaCell.value = vacunaData.totalEntrega;
-              entregaCell.numFmt = '#,##0';
-              entregaCell.alignment = { horizontal: 'center', vertical: 'middle' };
-              entregaCell.font = { size: 9, name: 'Calibri', color: { argb: 'FF374151' } };
-              entregaCell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: rowBgColor }
-              };
-
-              // Total Salidas
-              const salidasCell = row.getCell(currentCol + 1);
-              salidasCell.value = vacunaData.totalSalidas;
-              salidasCell.numFmt = '#,##0';
-              salidasCell.alignment = { horizontal: 'center', vertical: 'middle' };
-              salidasCell.font = { size: 9, name: 'Calibri', color: { argb: 'FF374151' } };
-              salidasCell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: rowBgColor }
-              };
-
-              // Stock
-              const stockCell = row.getCell(currentCol + 2);
-              stockCell.value = vacunaData.stock;
-              stockCell.numFmt = '#,##0';
-              stockCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-              // Colorear stock segun nivel
-              if (vacunaData.stock <= 0) {
-                stockCell.font = { color: { argb: 'FFDC2626' }, bold: true, size: 9, name: 'Calibri' };
-                stockCell.fill = {
-                  type: 'pattern',
-                  pattern: 'solid',
-                  fgColor: { argb: 'FFFEE2E2' }
-                };
-              } else if (vacunaData.stock < 50) {
-                stockCell.font = { color: { argb: 'FFF59E0B' }, bold: true, size: 9, name: 'Calibri' };
-                stockCell.fill = {
-                  type: 'pattern',
-                  pattern: 'solid',
-                  fgColor: { argb: 'FFFFFBEB' }
-                };
-              } else {
-                stockCell.font = { color: { argb: 'FF059669' }, size: 9, name: 'Calibri' };
-                stockCell.fill = {
-                  type: 'pattern',
-                  pattern: 'solid',
-                  fgColor: { argb: rowBgColor }
-                };
-              }
-            } else {
-              // Si no hay datos para esta vacuna, poner 0
-              for (let i = 0; i < 3; i++) {
-                const cell = row.getCell(currentCol + i);
-                cell.value = 0;
-                cell.numFmt = '#,##0';
-                cell.alignment = { horizontal: 'center', vertical: 'middle' };
-                cell.font = { color: { argb: 'FFD1D5DB' }, size: 9, name: 'Calibri' };
-                cell.fill = {
-                  type: 'pattern',
-                  pattern: 'solid',
-                  fgColor: { argb: rowBgColor }
-                };
-              }
-            }
-
-            currentCol += 3;
-          });
-
-          // Aplicar bordes a toda la fila
-          for (let col = 1; col <= totalCols; col++) {
-            const cell = row.getCell(col);
-            cell.border = {
-              top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-              left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-              bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-              right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+          // Colorear stock segun nivel
+          if (vacunaData.stock <= 0) {
+            stockCell.font = { color: { argb: 'FFDC2626' }, bold: true, size: 9, name: 'Calibri' };
+            stockCell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFFEE2E2' }
+            };
+          } else if (vacunaData.stock < 50) {
+            stockCell.font = { color: { argb: 'FFF59E0B' }, bold: true, size: 9, name: 'Calibri' };
+            stockCell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFFFFBEB' }
+            };
+          } else {
+            stockCell.font = { color: { argb: 'FF059669' }, size: 9, name: 'Calibri' };
+            stockCell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: rowBgColor }
             };
           }
-
-          row.height = 18;
-          rowIndex++;
-          currentRow++;
-        });
-
-        // Agregar fila de subtotal "MICRORED [nombre]" al final de cada grupo
-        if (grupoMicrored.microredId && grupoMicrored.microredNombre !== 'NO PERTENECE A NINGUNA MICRORED') {
-          const subtotalRow = worksheet.getRow(currentRow);
-          
-          // Primera columna: "MICRORED [nombre]"
-          const subtotalCell = subtotalRow.getCell(1);
-          subtotalCell.value = `MICRORED ${grupoMicrored.microredNombre}`;
-          subtotalCell.font = {
-            size: 9,
-            name: 'Calibri',
-            bold: true,
-            color: { argb: 'FF1E3A8A' }
-          };
-          subtotalCell.alignment = { horizontal: 'left', vertical: 'middle' };
-          subtotalCell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFE2E8F0' }
-          };
-
-          // Segunda columna: vacio
-          const emptyCell = subtotalRow.getCell(2);
-          emptyCell.value = '';
-          emptyCell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFE2E8F0' }
-          };
-
-          // Columnas de vacunas: vacias con el mismo estilo
-          for (let col = 3; col <= totalCols; col++) {
-            const cell = subtotalRow.getCell(col);
-            cell.value = '';
+        } else {
+          // Si no hay datos para esta vacuna, poner 0
+          for (let i = 0; i < 3; i++) {
+            const cell = row.getCell(currentCol + i);
+            cell.value = 0;
+            cell.numFmt = '#,##0';
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            cell.font = { size: 9, name: 'Calibri', color: { argb: 'FF9CA3AF' } };
             cell.fill = {
               type: 'pattern',
               pattern: 'solid',
-              fgColor: { argb: 'FFE2E8F0' }
-            };
-            cell.border = {
-              top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-              left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-              bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-              right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+              fgColor: { argb: rowBgColor }
             };
           }
-
-          // Bordes para las primeras 2 columnas
-          subtotalCell.border = {
-            top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-            left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-            bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-            right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
-          };
-          emptyCell.border = {
-            top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-            left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-            bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-            right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
-          };
-
-          subtotalRow.height = 18;
-          currentRow++;
         }
 
-        microredIndex++;
+        currentCol += 3;
+      });
+
+      // Aplicar bordes a todas las celdas de la fila
+      for (let col = 1; col < currentCol; col++) {
+        const cell = row.getCell(col);
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+          right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+        };
       }
-    }
+
+      row.height = 18;
+      currentRow++;
+      rowIndex++;
+      });  // Cierre del forEach de items
+      
+      // Despues de procesar todos los establecimientos del grupo, agregar fila de subtotal
+      if (!grupo.esSinMicrored) {
+        // Para grupos con microred, agregar fila "MICRORED [nombre]"
+        agregarFilaSubtotalMicrored(grupo.microredNombre);
+      } else {
+        // Para establecimientos sin microred, solo C.S. ANDAHUAYLAS (orden 33) tiene fila de subtotal
+        if (grupo.items.length > 0) {
+          const ordenEstab = getOrdenEstablecimiento(grupo.items[0].establecimientoNombre);
+          if (ordenEstab === 33) {
+            agregarFilaEstablecimientoSinMicrored('C.S ANDAHUAYLAS');
+          }
+        }
+      }
+      
+      microredIndex++;
+    });  // Cierre del forEach de grupos
 
     // SEGUNDO: Generar las filas especiales con formulas (TOTAL DISA, RED JOSE MARIA, RED SONDOR, ESSALUD)
     // Funcion auxiliar para crear formula de suma de filas especificas
