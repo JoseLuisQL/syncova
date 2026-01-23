@@ -2702,7 +2702,7 @@ export class ReporteExportService {
 
   /**
    * Configurar columnas para reporte de movimientos por EESS
-   * Incluye columna de Centro de Acopio para agrupacion profesional
+   * Incluye columna de MICRORED para agrupacion profesional
    */
   private static configurarColumnasMovimientosPorEESS(
     worksheet: ExcelJS.Worksheet,
@@ -2716,9 +2716,9 @@ export class ReporteExportService {
     // Quitar lineas de cuadricula
     worksheet.views = [{ showGridLines: false }];
 
-    // Configurar columnas base (Centro de Acopio + EESS)
-    worksheet.getColumn(1).width = 30; // Centro de Acopio
-    worksheet.getColumn(2).width = 40; // EESS
+    // Configurar columnas base (MICRORED + DISTRITOS)
+    worksheet.getColumn(1).width = 30; // MICRORED
+    worksheet.getColumn(2).width = 40; // DISTRITOS
 
     let currentCol = 3;
 
@@ -2774,35 +2774,35 @@ export class ReporteExportService {
       currentCol += 3;
     });
 
-    // Configurar encabezado de Centro de Acopio
+    // Configurar encabezado de MICRORED
     worksheet.mergeCells(headerRow1, 1, headerRow2, 1);
-    const centroAcopioHeaderCell = worksheet.getCell(headerRow1, 1);
-    centroAcopioHeaderCell.value = 'Centro de Acopio';
-    centroAcopioHeaderCell.font = {
+    const microredHeaderCell = worksheet.getCell(headerRow1, 1);
+    microredHeaderCell.value = 'MICRORED';
+    microredHeaderCell.font = {
       bold: true,
       size: 11,
       color: { argb: 'FFFFFFFF' },
       name: 'Segoe UI'
     };
-    centroAcopioHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    centroAcopioHeaderCell.fill = {
+    microredHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    microredHeaderCell.fill = {
       type: 'pattern',
       pattern: 'solid',
       fgColor: { argb: 'FF0D47A1' }
     };
 
-    // Configurar encabezado de EESS
+    // Configurar encabezado de DISTRITOS
     worksheet.mergeCells(headerRow1, 2, headerRow2, 2);
-    const eessHeaderCell = worksheet.getCell(headerRow1, 2);
-    eessHeaderCell.value = 'Establecimiento de Salud';
-    eessHeaderCell.font = {
+    const distritosHeaderCell = worksheet.getCell(headerRow1, 2);
+    distritosHeaderCell.value = 'DISTRITOS';
+    distritosHeaderCell.font = {
       bold: true,
       size: 11,
       color: { argb: 'FFFFFFFF' },
       name: 'Segoe UI'
     };
-    eessHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    eessHeaderCell.fill = {
+    distritosHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    distritosHeaderCell.fill = {
       type: 'pattern',
       pattern: 'solid',
       fgColor: { argb: 'FF0D47A1' }
@@ -2828,7 +2828,7 @@ export class ReporteExportService {
 
   /**
    * Agregar datos para reporte de movimientos por EESS
-   * Agrupa los establecimientos por centro de acopio con merge vertical
+   * Agrupa los establecimientos por RED -> MICRORED con filas de cabecera y subtotal
    */
   private static agregarDatosMovimientosPorEESS(
     worksheet: ExcelJS.Worksheet,
@@ -2837,191 +2837,491 @@ export class ReporteExportService {
     config: ReporteExportConfig
   ): void {
     const startRow = (config.observaciones ? 7 : 6) + 1; // Fila despues de los encabezados
+    const totalCols = 2 + (vacunasArray.length * 3); // Microred + EESS + (vacunas * 3)
 
-    // Ordenar datos por centro de acopio y luego por establecimiento
-    const datosOrdenados = [...data].sort((a, b) => {
-      const centroA = a.centroAcopioNombre || 'ZZZ Sin Centro';
-      const centroB = b.centroAcopioNombre || 'ZZZ Sin Centro';
-      if (centroA !== centroB) {
-        return centroA.localeCompare(centroB);
+    // Funcion para limpiar nombres de establecimientos (quitar prefijos C.S., P.S., HOSP., etc.)
+    const limpiarNombreEstablecimiento = (nombre: string): string => {
+      return nombre
+        .replace(/^C\.S\.\s*/i, '')
+        .replace(/^P\.S\.\s*/i, '')
+        .replace(/^HOSP\.\s*/i, '')
+        .replace(/^HOSPITAL\s*/i, '')
+        .replace(/^CENTRO DE SALUD\s*/i, '')
+        .replace(/^PUESTO DE SALUD\s*/i, '')
+        .trim();
+    };
+
+    // Funcion para verificar si un establecimiento es especial (cabecera) o debe ser excluido
+    const esEstablecimientoEspecial = (nombre: string): boolean => {
+      const nombreUpper = nombre.toUpperCase().trim();
+      return nombreUpper.includes('TOTAL DISA') || 
+             nombreUpper.includes('RED JOSE MARIA ARGUEDAS') || 
+             nombreUpper.includes('RED SONDOR') || 
+             (nombreUpper.includes('ESSALUD') && !nombreUpper.includes('ANDAHUAYLAS')) ||
+             nombreUpper.includes('ALMACEN') || 
+             nombreUpper.includes('ALMACÉN') ||
+             nombreUpper.includes('CHANKA');
+    };
+
+    // Ordenar datos: RED -> Microred -> Establecimiento (sin los especiales que se generan aparte)
+    const datosOrdenados = [...data]
+      .filter(item => !esEstablecimientoEspecial(item.establecimientoNombre))
+      .sort((a, b) => {
+      // Primero por RED (los sin RED van al final)
+      const redA = a.redNombre || 'ZZZZ SIN RED';
+      const redB = b.redNombre || 'ZZZZ SIN RED';
+      if (redA !== redB) {
+        return redA.localeCompare(redB);
       }
+      
+      // Luego por Microred (los sin microred van intercalados segun posicion)
+      const microredA = a.microredNombre || 'ZZZZ NO PERTENECE A NINGUNA MICRORED';
+      const microredB = b.microredNombre || 'ZZZZ NO PERTENECE A NINGUNA MICRORED';
+      if (microredA !== microredB) {
+        return microredA.localeCompare(microredB);
+      }
+      
+      // Finalmente por nombre de establecimiento
       return a.establecimientoNombre.localeCompare(b.establecimientoNombre);
     });
 
-    // Agrupar por centro de acopio para hacer merge
-    const gruposPorCentro = new Map<string, { nombre: string; items: MovimientosPorEESSItem[]; startRow: number; endRow: number }>();
+    // Agrupar por RED y luego por Microred
+    interface GrupoMicrored {
+      microredId: string | null;
+      microredNombre: string;
+      items: MovimientosPorEESSItem[];
+    }
+    
+    interface GrupoRed {
+      redId: string | null;
+      redNombre: string;
+      microredes: Map<string, GrupoMicrored>;
+    }
+    
+    const gruposPorRed = new Map<string, GrupoRed>();
     
     datosOrdenados.forEach(item => {
-      const centroId = item.centroAcopioId || 'sin-centro';
-      const centroNombre = item.centroAcopioNombre || 'Sin Centro de Acopio';
+      const redId = item.redId || 'sin-red';
+      const redNombre = item.redNombre || '';
+      const microredId = item.microredId || 'sin-microred';
+      const microredNombre = item.microredNombre || 'NO PERTENECE A NINGUNA MICRORED';
       
-      if (!gruposPorCentro.has(centroId)) {
-        gruposPorCentro.set(centroId, {
-          nombre: centroNombre,
-          items: [],
-          startRow: 0,
-          endRow: 0
+      if (!gruposPorRed.has(redId)) {
+        gruposPorRed.set(redId, {
+          redId: item.redId,
+          redNombre: redNombre,
+          microredes: new Map()
         });
       }
-      gruposPorCentro.get(centroId)!.items.push(item);
+      
+      const grupoRed = gruposPorRed.get(redId)!;
+      
+      if (!grupoRed.microredes.has(microredId)) {
+        grupoRed.microredes.set(microredId, {
+          microredId: item.microredId,
+          microredNombre: microredNombre,
+          items: []
+        });
+      }
+      
+      grupoRed.microredes.get(microredId)!.items.push(item);
     });
 
-    let currentRow = startRow;
-    const totalCols = 2 + (vacunasArray.length * 3); // Centro + EESS + (vacunas * 3)
-    let centroIndex = 0;
+    let microredIndex = 0;
 
-    for (const [centroId, grupo] of gruposPorCentro) {
-      grupo.startRow = currentRow;
-      const centroRowCount = grupo.items.length;
-      grupo.endRow = currentRow + centroRowCount - 1;
+    // Colores para el diseño mejorado
+    const colorTotalDisa = 'FF1E3A8A'; // Azul oscuro para TOTAL DISA
+    const colorRedHeader = 'FF3B82F6'; // Azul medio para RED headers
+    const colorEssalud = 'FF10B981'; // Verde para ESSALUD
+    const colorMicroredBg = 'FFDBEAFE'; // Azul muy claro para microred
+    const colorAltRow = 'FFF1F5F9'; // Gris muy claro para filas alternas
 
-      // Definir colores alternos para grupos de centros
-      const isEvenGroup = centroIndex % 2 === 0;
-      const groupBgColor = isEvenGroup ? 'FFFFFFFF' : 'FFF8FAFC';
+    // Estructura para trackear filas por RED para las formulas
+    interface FilasPorRed {
+      redJoseMariaArguedas: number[];
+      redSondor: number[];
+      essalud: number[];
+    }
+    const filasPorRed: FilasPorRed = {
+      redJoseMariaArguedas: [],
+      redSondor: [],
+      essalud: []
+    };
 
-      grupo.items.forEach((item, itemIndex) => {
-        const row = worksheet.getRow(currentRow);
+    // Reservar 4 filas para las filas especiales (TOTAL DISA, RED JOSE MARIA, RED SONDOR, ESSALUD)
+    const filasEspecialesStartRow = startRow;
+    const filasEspecialesCount = 4;
+    let currentRow = startRow + filasEspecialesCount;
 
-        // Primera columna: Centro de Acopio (en cada fila, sin merge)
-        const centroCell = row.getCell(1);
-        centroCell.value = grupo.nombre;
-        centroCell.font = {
-          size: 10,
-          name: 'Segoe UI',
-          bold: true,
-          color: { argb: 'FF1E40AF' }
-        };
-        centroCell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
-        centroCell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFE0E7FF' }
-        };
+    // PRIMERO: Generar los datos de microredes regulares y trackear filas
+    let rowIndex = 0;
+    for (const [, grupoRed] of gruposPorRed) {
+      // Procesar cada microred dentro de esta RED
+      for (const [, grupoMicrored] of grupoRed.microredes) {
+        // Agregar filas de datos de establecimientos
+        grupoMicrored.items.forEach((item) => {
+          const row = worksheet.getRow(currentRow);
+          const isAltRow = rowIndex % 2 === 1;
+          const rowBgColor = isAltRow ? colorAltRow : 'FFFFFFFF';
 
-        // Segunda columna: nombre del establecimiento
-        const eessCell = row.getCell(2);
-        eessCell.value = item.establecimientoNombre;
-        eessCell.font = {
-          size: 10,
-          name: 'Segoe UI',
-          bold: false
-        };
-        eessCell.alignment = { horizontal: 'left', vertical: 'middle' };
-        eessCell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: groupBgColor }
-        };
-
-        let currentCol = 3;
-
-        // Para cada vacuna, agregar las 3 columnas de datos
-        vacunasArray.forEach(vacunaId => {
-          const vacunaData = item.vacunas[vacunaId];
-
-          if (vacunaData) {
-            // Total Entrega
-            const entregaCell = row.getCell(currentCol);
-            entregaCell.value = vacunaData.totalEntrega;
-            entregaCell.numFmt = '#,##0';
-            entregaCell.alignment = { horizontal: 'center', vertical: 'middle' };
-            entregaCell.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: groupBgColor }
-            };
-
-            // Total Salidas
-            const salidasCell = row.getCell(currentCol + 1);
-            salidasCell.value = vacunaData.totalSalidas;
-            salidasCell.numFmt = '#,##0';
-            salidasCell.alignment = { horizontal: 'center', vertical: 'middle' };
-            salidasCell.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: groupBgColor }
-            };
-
-            // Stock
-            const stockCell = row.getCell(currentCol + 2);
-            stockCell.value = vacunaData.stock;
-            stockCell.numFmt = '#,##0';
-            stockCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-            // Colorear stock segun nivel
-            if (vacunaData.stock <= 0) {
-              stockCell.font = { color: { argb: 'FFDC2626' }, bold: true, size: 10, name: 'Segoe UI' };
-              stockCell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'FFFEE2E2' }
-              };
-            } else if (vacunaData.stock < 50) {
-              stockCell.font = { color: { argb: 'FFF59E0B' }, bold: true, size: 10, name: 'Segoe UI' };
-              stockCell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'FFFFFBEB' }
-              };
-            } else {
-              stockCell.font = { color: { argb: 'FF059669' }, size: 10, name: 'Segoe UI' };
-              stockCell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: groupBgColor }
-              };
-            }
-          } else {
-            // Si no hay datos para esta vacuna, poner 0
-            for (let i = 0; i < 3; i++) {
-              const cell = row.getCell(currentCol + i);
-              cell.value = 0;
-              cell.numFmt = '#,##0';
-              cell.alignment = { horizontal: 'center', vertical: 'middle' };
-              cell.font = { color: { argb: 'FF9CA3AF' }, size: 10, name: 'Segoe UI' };
-              cell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: groupBgColor }
-              };
-            }
+          // Trackear fila segun la RED
+          const redNombreUpper = (item.redNombre || '').toUpperCase().trim();
+          const nombreUpper = item.establecimientoNombre.toUpperCase().trim();
+          
+          if (nombreUpper.includes('ESSALUD') && nombreUpper.includes('ANDAHUAYLAS')) {
+            filasPorRed.essalud.push(currentRow);
+          } else if (redNombreUpper.includes('JOSE MARIA ARGUEDAS')) {
+            filasPorRed.redJoseMariaArguedas.push(currentRow);
+          } else if (redNombreUpper.includes('SONDOR')) {
+            filasPorRed.redSondor.push(currentRow);
           }
 
-          currentCol += 3;
+          // Primera columna: Nombre de la Microred
+          const microredCell = row.getCell(1);
+          microredCell.value = grupoMicrored.microredNombre === 'NO PERTENECE A NINGUNA MICRORED' 
+            ? 'SIN MICRORED' 
+            : grupoMicrored.microredNombre;
+          microredCell.font = {
+            size: 9,
+            name: 'Calibri',
+            bold: true,
+            color: { argb: 'FF1E40AF' }
+          };
+          microredCell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+          microredCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: colorMicroredBg }
+          };
+
+          // Segunda columna: nombre del establecimiento
+          // Si es SIN MICRORED, mostrar nombre completo; si no, limpiar prefijos
+          const eessCell = row.getCell(2);
+          const esSinMicrored = grupoMicrored.microredNombre === 'NO PERTENECE A NINGUNA MICRORED';
+          eessCell.value = esSinMicrored 
+            ? item.establecimientoNombre 
+            : limpiarNombreEstablecimiento(item.establecimientoNombre);
+          eessCell.font = {
+            size: 9,
+            name: 'Calibri',
+            bold: false,
+            color: { argb: 'FF374151' }
+          };
+          eessCell.alignment = { horizontal: 'left', vertical: 'middle' };
+          eessCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: rowBgColor }
+          };
+
+          let currentCol = 3;
+
+          // Para cada vacuna, agregar las 3 columnas de datos
+          vacunasArray.forEach(vacunaId => {
+            const vacunaData = item.vacunas[vacunaId];
+
+            if (vacunaData) {
+              // Total Entrega
+              const entregaCell = row.getCell(currentCol);
+              entregaCell.value = vacunaData.totalEntrega;
+              entregaCell.numFmt = '#,##0';
+              entregaCell.alignment = { horizontal: 'center', vertical: 'middle' };
+              entregaCell.font = { size: 9, name: 'Calibri', color: { argb: 'FF374151' } };
+              entregaCell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: rowBgColor }
+              };
+
+              // Total Salidas
+              const salidasCell = row.getCell(currentCol + 1);
+              salidasCell.value = vacunaData.totalSalidas;
+              salidasCell.numFmt = '#,##0';
+              salidasCell.alignment = { horizontal: 'center', vertical: 'middle' };
+              salidasCell.font = { size: 9, name: 'Calibri', color: { argb: 'FF374151' } };
+              salidasCell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: rowBgColor }
+              };
+
+              // Stock
+              const stockCell = row.getCell(currentCol + 2);
+              stockCell.value = vacunaData.stock;
+              stockCell.numFmt = '#,##0';
+              stockCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+              // Colorear stock segun nivel
+              if (vacunaData.stock <= 0) {
+                stockCell.font = { color: { argb: 'FFDC2626' }, bold: true, size: 9, name: 'Calibri' };
+                stockCell.fill = {
+                  type: 'pattern',
+                  pattern: 'solid',
+                  fgColor: { argb: 'FFFEE2E2' }
+                };
+              } else if (vacunaData.stock < 50) {
+                stockCell.font = { color: { argb: 'FFF59E0B' }, bold: true, size: 9, name: 'Calibri' };
+                stockCell.fill = {
+                  type: 'pattern',
+                  pattern: 'solid',
+                  fgColor: { argb: 'FFFFFBEB' }
+                };
+              } else {
+                stockCell.font = { color: { argb: 'FF059669' }, size: 9, name: 'Calibri' };
+                stockCell.fill = {
+                  type: 'pattern',
+                  pattern: 'solid',
+                  fgColor: { argb: rowBgColor }
+                };
+              }
+            } else {
+              // Si no hay datos para esta vacuna, poner 0
+              for (let i = 0; i < 3; i++) {
+                const cell = row.getCell(currentCol + i);
+                cell.value = 0;
+                cell.numFmt = '#,##0';
+                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                cell.font = { color: { argb: 'FFD1D5DB' }, size: 9, name: 'Calibri' };
+                cell.fill = {
+                  type: 'pattern',
+                  pattern: 'solid',
+                  fgColor: { argb: rowBgColor }
+                };
+              }
+            }
+
+            currentCol += 3;
+          });
+
+          // Aplicar bordes a toda la fila
+          for (let col = 1; col <= totalCols; col++) {
+            const cell = row.getCell(col);
+            cell.border = {
+              top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+              left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+              bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+              right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+            };
+          }
+
+          row.height = 18;
+          rowIndex++;
+          currentRow++;
         });
 
-        // Aplicar bordes a toda la fila
-        for (let col = 1; col <= totalCols; col++) {
-          const cell = row.getCell(col);
-          cell.font = {
-            ...cell.font,
-            size: 10,
-            name: 'Segoe UI'
+        // Agregar fila de subtotal "MICRORED [nombre]" al final de cada grupo
+        if (grupoMicrored.microredId && grupoMicrored.microredNombre !== 'NO PERTENECE A NINGUNA MICRORED') {
+          const subtotalRow = worksheet.getRow(currentRow);
+          
+          // Primera columna: "MICRORED [nombre]"
+          const subtotalCell = subtotalRow.getCell(1);
+          subtotalCell.value = `MICRORED ${grupoMicrored.microredNombre}`;
+          subtotalCell.font = {
+            size: 9,
+            name: 'Calibri',
+            bold: true,
+            color: { argb: 'FF1E3A8A' }
           };
-          cell.border = {
-            top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-            left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-            bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-            right: { style: 'thin', color: { argb: 'FFE5E7EB' } }
+          subtotalCell.alignment = { horizontal: 'left', vertical: 'middle' };
+          subtotalCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFE2E8F0' }
           };
+
+          // Segunda columna: vacio
+          const emptyCell = subtotalRow.getCell(2);
+          emptyCell.value = '';
+          emptyCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFE2E8F0' }
+          };
+
+          // Columnas de vacunas: vacias con el mismo estilo
+          for (let col = 3; col <= totalCols; col++) {
+            const cell = subtotalRow.getCell(col);
+            cell.value = '';
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFE2E8F0' }
+            };
+            cell.border = {
+              top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+              left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+              bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+              right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+            };
+          }
+
+          // Bordes para las primeras 2 columnas
+          subtotalCell.border = {
+            top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+          };
+          emptyCell.border = {
+            top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+          };
+
+          subtotalRow.height = 18;
+          currentRow++;
         }
 
-        row.height = 20;
-        currentRow++;
-      });
-
-      // Aplicar borde mas grueso al final de cada grupo de centro
-      const lastRowOfGroup = worksheet.getRow(grupo.endRow);
-      for (let col = 1; col <= totalCols; col++) {
-        const cell = lastRowOfGroup.getCell(col);
-        cell.border = {
-          ...cell.border,
-          bottom: { style: 'medium', color: { argb: 'FF94A3B8' } }
-        };
+        microredIndex++;
       }
-
-      centroIndex++;
     }
+
+    // SEGUNDO: Generar las filas especiales con formulas (TOTAL DISA, RED JOSE MARIA, RED SONDOR, ESSALUD)
+    // Funcion auxiliar para crear formula de suma de filas especificas
+    const crearFormulaSuma = (filas: number[], columna: number): string => {
+      if (filas.length === 0) return '0';
+      const colLetter = this.getColumnLetter(columna);
+      // Crear formula con referencias individuales: =C12+C15+C18...
+      return filas.map(fila => `${colLetter}${fila}`).join('+');
+    };
+
+    // Definir las filas especiales
+    const filasEspecialesDefinicion = [
+      { 
+        nombre: 'TOTAL DISA', 
+        bgColor: 'FFE0E7FF', 
+        fontColor: colorTotalDisa, 
+        fontSize: 11,
+        // TOTAL DISA = suma de las otras 3 filas especiales (RED JOSE MARIA + RED SONDOR + ESSALUD)
+        esTotal: true
+      },
+      { 
+        nombre: 'RED JOSE MARIA ARGUEDAS', 
+        bgColor: 'FFDBEAFE', 
+        fontColor: colorRedHeader, 
+        fontSize: 10,
+        filas: filasPorRed.redJoseMariaArguedas
+      },
+      { 
+        nombre: 'RED SONDOR', 
+        bgColor: 'FFDBEAFE', 
+        fontColor: colorRedHeader, 
+        fontSize: 10,
+        filas: filasPorRed.redSondor
+      },
+      { 
+        nombre: 'ESSALUD', 
+        bgColor: 'FFD1FAE5', 
+        fontColor: colorEssalud, 
+        fontSize: 10,
+        filas: filasPorRed.essalud
+      }
+    ];
+
+    // Filas especiales empiezan en filasEspecialesStartRow
+    const rowTotalDisa = filasEspecialesStartRow;
+    const rowRedJoseMaria = filasEspecialesStartRow + 1;
+    const rowRedSondor = filasEspecialesStartRow + 2;
+    const rowEssalud = filasEspecialesStartRow + 3;
+
+    filasEspecialesDefinicion.forEach((filaEspecial, index) => {
+      const filaNum = filasEspecialesStartRow + index;
+      const row = worksheet.getRow(filaNum);
+      
+      // Primera columna: vacia
+      const microredCell = row.getCell(1);
+      microredCell.value = '';
+      microredCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: filaEspecial.bgColor }
+      };
+      
+      // Segunda columna: nombre de la fila especial
+      const nombreCell = row.getCell(2);
+      nombreCell.value = filaEspecial.nombre;
+      nombreCell.font = {
+        size: filaEspecial.fontSize,
+        name: 'Calibri',
+        bold: true,
+        color: { argb: filaEspecial.fontColor }
+      };
+      nombreCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      nombreCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: filaEspecial.bgColor }
+      };
+      
+      // Columnas de vacunas con formulas
+      let currentCol = 3;
+      vacunasArray.forEach(() => {
+        // Para cada columna (Entrega, Salidas, Stock) de cada vacuna
+        for (let i = 0; i < 3; i++) {
+          const cell = row.getCell(currentCol + i);
+          
+          if (filaEspecial.esTotal) {
+            // TOTAL DISA = suma de las otras 3 filas especiales
+            const colLetter = this.getColumnLetter(currentCol + i);
+            cell.value = { formula: `${colLetter}${rowRedJoseMaria}+${colLetter}${rowRedSondor}+${colLetter}${rowEssalud}` };
+          } else if (filaEspecial.filas && filaEspecial.filas.length > 0) {
+            // Suma de las filas correspondientes a esta RED
+            const formula = crearFormulaSuma(filaEspecial.filas, currentCol + i);
+            cell.value = { formula: formula };
+          } else {
+            cell.value = 0;
+          }
+          
+          cell.numFmt = '#,##0';
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          cell.font = { size: 10, name: 'Calibri', bold: true, color: { argb: filaEspecial.fontColor } };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: filaEspecial.bgColor }
+          };
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+          };
+        }
+        
+        currentCol += 3;
+      });
+      
+      // Bordes para las primeras 2 columnas
+      microredCell.border = {
+        top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+      };
+      nombreCell.border = {
+        top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+        right: { style: 'thin', color: { argb: 'FFD1D5DB' } }
+      };
+      
+      row.height = 20;
+    });
+  }
+
+  /**
+   * Obtener letra de columna para formulas de Excel
+   */
+  private static getColumnLetter(columnNumber: number): string {
+    let letter = '';
+    let num = columnNumber;
+    while (num > 0) {
+      const remainder = (num - 1) % 26;
+      letter = String.fromCharCode(65 + remainder) + letter;
+      num = Math.floor((num - 1) / 26);
+    }
+    return letter;
   }
 
   /**

@@ -251,6 +251,10 @@ export interface MovimientosPorEESSItem {
   establecimientoNombre: string;
   centroAcopioId: string;
   centroAcopioNombre: string;
+  microredId: string | null;
+  microredNombre: string | null;
+  redId: string | null;
+  redNombre: string | null;
   vacunas: {
     [vacunaId: string]: {
       vacunaId: string;
@@ -1873,7 +1877,15 @@ export class ReporteService {
         include: {
           establecimiento: {
             include: {
-              centroAcopio: true
+              centroAcopio: {
+                include: {
+                  microred: {
+                    include: {
+                      red: true
+                    }
+                  }
+                }
+              }
             }
           },
           vacuna: true
@@ -1895,11 +1907,19 @@ export class ReporteService {
         const establecimientoId = mov.establecimientoId;
 
         if (!establecimientosMap.has(establecimientoId)) {
+          const centroAcopio = mov.establecimiento.centroAcopio;
+          const microred = centroAcopio?.microred;
+          const red = microred?.red;
+          
           establecimientosMap.set(establecimientoId, {
             establecimientoId: mov.establecimientoId,
             establecimientoNombre: mov.establecimiento.nombre,
-            centroAcopioId: mov.establecimiento.centroAcopio?.id || '',
-            centroAcopioNombre: mov.establecimiento.centroAcopio?.nombre || 'Sin Centro',
+            centroAcopioId: centroAcopio?.id || '',
+            centroAcopioNombre: centroAcopio?.nombre || 'Sin Centro',
+            microredId: microred?.id || null,
+            microredNombre: microred?.nombre || null,
+            redId: red?.id || null,
+            redNombre: red?.nombre || null,
             vacunas: new Map<string, any>()
           });
         }
@@ -1971,6 +1991,10 @@ export class ReporteService {
           establecimientoNombre: establecimiento.establecimientoNombre,
           centroAcopioId: establecimiento.centroAcopioId,
           centroAcopioNombre: establecimiento.centroAcopioNombre,
+          microredId: establecimiento.microredId,
+          microredNombre: establecimiento.microredNombre,
+          redId: establecimiento.redId,
+          redNombre: establecimiento.redNombre,
           vacunas: vacunasProcessed
         });
       }
