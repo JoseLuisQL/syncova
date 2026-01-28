@@ -686,6 +686,11 @@ export class MovimientosCalculationService {
 
   /**
    * Update initial stock for next month automatically
+   * IMPORTANTE: Esta función considera el desplazamiento de +1 mes que ya se aplica en getStockDisponible
+   * - El frontend envía el mes del FILTRO (ej: Noviembre = 11)
+   * - getStockDisponible ya aplica +1 mes internamente (busca datos de Diciembre = 12)
+   * - Por lo tanto, el mes REAL que se está visualizando es mes+1
+   * - El "siguiente mes" para actualizar stock inicial es mes+2 desde el filtro original
    */
   static async actualizarStockInicialSiguienteMes(
     vacunaId: string,
@@ -697,7 +702,17 @@ export class MovimientosCalculationService {
     mensaje: string;
   }>> {
     try {
-      console.log(`🔄 [MovimientosCalculationService] Actualizando stock inicial siguiente mes para vacuna ${vacunaId}, período ${mes}/${anio}`);
+      // Calcular el mes REAL que se está visualizando (con desplazamiento +1)
+      let mesRealVisualizado = mes + 1;
+      let anioRealVisualizado = anio;
+      if (mesRealVisualizado > 12) {
+        mesRealVisualizado = 1;
+        anioRealVisualizado++;
+      }
+
+      console.log(`🔄 [MovimientosCalculationService] Actualizando stock inicial siguiente mes`);
+      console.log(`   📅 Filtro seleccionado: ${mes}/${anio}`);
+      console.log(`   📅 Mes REAL visualizado (con desplazamiento): ${mesRealVisualizado}/${anioRealVisualizado}`);
 
       if (!vacunaId) {
         return { success: false, error: 'ID de vacuna requerido' };
@@ -720,6 +735,7 @@ export class MovimientosCalculationService {
         return { success: false, error: 'Vacuna no encontrada' };
       }
 
+      // getStockDisponible YA aplica el desplazamiento internamente
       const stockDisponibleResult = await this.getStockDisponible(vacunaId, mes, anio);
 
       if (!stockDisponibleResult.success || !stockDisponibleResult.data) {
@@ -733,19 +749,27 @@ export class MovimientosCalculationService {
       } = stockDisponibleResult.data;
 
       if (stockInicialHistorico === null) {
+        const mesesNombres = [
+          'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+          'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
         return {
           success: false,
-          error: `No existe stock inicial histórico registrado para ${vacuna.nombre} en ${mes}/${anio}. Debe capturar el stock inicial primero.`
+          error: `No existe stock inicial histórico registrado para ${vacuna.nombre} en ${mesesNombres[mesRealVisualizado - 1]} ${anioRealVisualizado}. Debe capturar el stock inicial primero.`
         };
       }
 
-      let mesSiguiente = mes + 1;
-      let anioSiguiente = anio;
+      // El siguiente mes es +1 desde el mes REAL visualizado (que ya tiene +1 del desplazamiento)
+      // Es decir, es +2 desde el mes del filtro original
+      let mesSiguiente = mesRealVisualizado + 1;
+      let anioSiguiente = anioRealVisualizado;
 
       if (mesSiguiente > 12) {
         mesSiguiente = 1;
         anioSiguiente++;
       }
+
+      console.log(`   📅 Mes SIGUIENTE a registrar: ${mesSiguiente}/${anioSiguiente}`);
 
       if (anioSiguiente > 2050) {
         return { success: false, error: `No se puede registrar stock inicial para el año ${anioSiguiente}. Límite máximo: 2050` };
@@ -768,7 +792,7 @@ export class MovimientosCalculationService {
           where: { id: registroExistente.id },
           data: {
             stockInicial: stockDisponible,
-            observaciones: `Stock inicial actualizado automáticamente desde disponible de ${mes}/${anio}`,
+            observaciones: `Stock inicial actualizado automáticamente desde disponible de ${mesRealVisualizado}/${anioRealVisualizado}`,
             fechaCaptura: new Date()
           }
         });
@@ -780,7 +804,7 @@ export class MovimientosCalculationService {
             mes: mesSiguiente,
             anio: anioSiguiente,
             stockInicial: stockDisponible,
-            observaciones: `Stock inicial capturado automáticamente desde disponible de ${mes}/${anio}`
+            observaciones: `Stock inicial capturado automáticamente desde disponible de ${mesRealVisualizado}/${anioRealVisualizado}`
           }
         });
         operacion = 'creado';
@@ -791,17 +815,19 @@ export class MovimientosCalculationService {
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
       ];
 
-      const mesActualNombre = mesesNombres[mes - 1];
+      const mesRealNombre = mesesNombres[mesRealVisualizado - 1];
       const mesSiguienteNombre = mesesNombres[mesSiguiente - 1];
 
-      const mensaje = `Stock inicial del mes ${mesSiguienteNombre} ${anioSiguiente} ${operacion} exitosamente con ${stockDisponible.toLocaleString()} unidades (disponible de ${mesActualNombre} ${anio})`;
+      const mensaje = `Stock inicial del mes ${mesSiguienteNombre} ${anioSiguiente} ${operacion} exitosamente con ${stockDisponible.toLocaleString()} unidades (disponible de ${mesRealNombre} ${anioRealVisualizado})`;
+
+      console.log(`   ✅ ${mensaje}`);
 
       return {
         success: true,
         data: {
           mesActual: {
-            mes,
-            anio,
+            mes: mesRealVisualizado,
+            anio: anioRealVisualizado,
             stockInicial: stockInicialHistorico,
             entregas: totalEntregas,
             disponible: stockDisponible

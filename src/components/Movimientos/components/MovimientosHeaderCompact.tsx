@@ -577,7 +577,24 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                     </div>
 
                     {/* Botón Actualizar Siguiente Mes */}
-                    {stockInfo.tieneHistorialInicial && (
+                    {/* NOTA: Debido al desplazamiento de +1 mes en el filtro, el mes REAL visualizado es selectedMes+1 */}
+                    {/* Por lo tanto, el "siguiente mes" para actualizar es selectedMes+2 desde el filtro original */}
+                    {stockInfo.tieneHistorialInicial && (() => {
+                      // Calcular el mes REAL visualizado (filtro + 1 por desplazamiento)
+                      let mesRealVisualizado = selectedMes + 1;
+                      let anioRealVisualizado = selectedAnio;
+                      if (mesRealVisualizado > 12) {
+                        mesRealVisualizado = 1;
+                        anioRealVisualizado++;
+                      }
+                      // Calcular el mes SIGUIENTE al real visualizado
+                      let mesSiguiente = mesRealVisualizado + 1;
+                      let anioSiguiente = anioRealVisualizado;
+                      if (mesSiguiente > 12) {
+                        mesSiguiente = 1;
+                        anioSiguiente++;
+                      }
+                      return (
                       <>
                         <div className="w-px h-8 bg-white/30 mx-1"></div>
                         <button
@@ -586,7 +603,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/20 
                                      hover:bg-white/30 border border-white/30 
                                      text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-                          title={`Actualizar stock inicial de ${MESES[selectedMes === 12 ? 0 : selectedMes]} ${selectedMes === 12 ? selectedAnio + 1 : selectedAnio}`}
+                          title={`Actualizar stock inicial de ${MESES[mesSiguiente - 1]} ${anioSiguiente}`}
                         >
                           {isUpdatingStockSiguienteMes ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -596,7 +613,8 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                           <span className="text-sm font-medium">Sig. Mes</span>
                         </button>
                       </>
-                    )}
+                    );
+                    })()}
                   </div>
                 ) : null}
               </div>

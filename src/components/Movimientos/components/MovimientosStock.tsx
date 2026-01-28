@@ -213,7 +213,24 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
             </div>
 
             {/* Botón Actualizar Stock Siguiente Mes */}
-            {stockInfo.tieneHistorialInicial && (
+            {/* NOTA: Debido al desplazamiento de +1 mes en el filtro, el mes REAL visualizado es selectedMes+1 */}
+            {/* Por lo tanto, el "siguiente mes" para actualizar es selectedMes+2 desde el filtro original */}
+            {stockInfo.tieneHistorialInicial && (() => {
+              // Calcular el mes REAL visualizado (filtro + 1 por desplazamiento)
+              let mesRealVisualizado = selectedMes + 1;
+              let anioRealVisualizado = selectedAnio;
+              if (mesRealVisualizado > 12) {
+                mesRealVisualizado = 1;
+                anioRealVisualizado++;
+              }
+              // Calcular el mes SIGUIENTE al real visualizado
+              let mesSiguiente = mesRealVisualizado + 1;
+              let anioSiguiente = anioRealVisualizado;
+              if (mesSiguiente > 12) {
+                mesSiguiente = 1;
+                anioSiguiente++;
+              }
+              return (
               <div className="col-span-full mt-4 pt-4 border-t border-gray-200">
                 <button
                   onClick={onActualizarStockSiguienteMes}
@@ -234,10 +251,11 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
                 </button>
                 <p className="mt-2 text-center text-xs text-gray-600">
                   Registra el disponible actual ({stockInfo.stockDisponible.toLocaleString()} unidades) 
-                  como stock inicial del mes {MESES[selectedMes === 12 ? 0 : selectedMes]} {selectedMes === 12 ? selectedAnio + 1 : selectedAnio}
+                  como stock inicial del mes {MESES[mesSiguiente - 1]} {anioSiguiente}
                 </p>
               </div>
-            )}
+            );
+            })()}
           </div>
         ) : stockError ? (
           <div className="text-center py-8">
