@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { LoteVacunaService } from '@/services/LoteVacunaService';
-import { CreateLoteVacunaDto, UpdateLoteVacunaDto, EstadoLote, FormaIngreso, ComprobanteClase } from '@/types';
+import { CreateLoteVacunaDto, UpdateLoteVacunaDto, EstadoLote, FormaIngreso, ComprobanteClase, AuthenticatedRequest } from '@/types';
 import { successResponse, errorResponse, paginatedResponse } from '@/utils/response';
 import { validateRequired, validateEnum, validateUUID, validateDate, validateNumber, isRequired, isValidEnum } from '@/utils/validation';
 
@@ -255,7 +255,7 @@ export class LoteVacunaController {
    * Actualizar lote de vacuna
    * PUT /api/lotes-vacunas/:id
    */
-  static async update(req: Request, res: Response): Promise<void> {
+  static async update(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       console.log('📝 Datos recibidos para actualizar lote de vacuna:', JSON.stringify(req.body, null, 2));
 
@@ -280,6 +280,11 @@ export class LoteVacunaController {
 
       // Construir objeto de actualización solo con campos proporcionados
       const updateData: UpdateLoteVacunaDto = {};
+
+      // Incluir el ID del usuario autenticado para registro en Kardex
+      if (req.user?.id) {
+        updateData.usuarioId = req.user.id;
+      }
 
       if (numero !== undefined) {
         if (!isRequired(numero)) {

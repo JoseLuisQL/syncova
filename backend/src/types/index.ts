@@ -376,6 +376,7 @@ export interface UpdateLoteVacunaDto {
   cantidadActual?: number;
   estado?: EstadoLote;
   observaciones?: string;
+  usuarioId?: string; // ID del usuario que realiza la modificación (para registro en Kardex)
 }
 
 export interface CreateLoteJeringaDto {

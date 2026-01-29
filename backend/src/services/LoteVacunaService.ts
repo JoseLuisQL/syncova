@@ -360,6 +360,9 @@ export class LoteVacunaService {
         throw new HttpError('Lote de vacuna no encontrado', 404);
       }
 
+      // Guardar cantidad anterior para detectar cambios
+      const cantidadAnterior = existingLote.cantidadActual;
+
       // Validaciones de negocio
       await this.validateUpdateData(data, existingLote);
 
@@ -382,10 +385,13 @@ export class LoteVacunaService {
         estado = this.determinarEstado(fechaVencimiento, cantidadActual);
       }
 
+      // Extraer usuarioId antes de actualizar (no es un campo del modelo)
+      const { usuarioId, ...updateDataForPrisma } = data;
+
       const lote = await prisma.loteVacuna.update({
         where: { id },
         data: {
-          ...data,
+          ...updateDataForPrisma,
           estado
         },
         include: {
@@ -399,6 +405,57 @@ export class LoteVacunaService {
           }
         }
       });
+
+      // Registrar ajuste en Kardex si cambió la cantidad actual
+      if (data.cantidadActual !== undefined && data.cantidadActual !== cantidadAnterior) {
+        const diferencia = data.cantidadActual - cantidadAnterior;
+        
+        console.log(`📊 [LoteVacunaService] Detectado cambio de cantidad: ${cantidadAnterior} -> ${data.cantidadActual} (diferencia: ${diferencia})`);
+        
+        // Obtener el almacén central para el registro
+        const almacenCentralResult = await AlmacenCentralService.obtenerIdAlmacenCentral();
+        
+        if (almacenCentralResult.success && usuarioId) {
+          try {
+            const observacionAjuste = diferencia > 0 
+              ? `Ajuste manual: Incremento de ${cantidadAnterior} a ${data.cantidadActual} (+${diferencia})`
+              : `Ajuste manual: Decremento de ${cantidadAnterior} a ${data.cantidadActual} (${diferencia})`;
+
+            const kardexData = {
+              tipo: 'vacuna' as const,
+              itemId: existingLote.vacunaId,
+              loteId: id,
+              tipoMovimiento: TipoMovimientoKardex.ajuste,
+              cantidad: Math.abs(diferencia),
+              establecimientoDestinoId: almacenCentralResult.data,
+              documento: 'CORRECCION_STOCK',
+              numeroDocumento: existingLote.numero,
+              observaciones: observacionAjuste,
+              usuarioId: usuarioId,
+              fechaMovimiento: new Date()
+            };
+
+            console.log(`📝 [LoteVacunaService] Registrando ajuste en Kardex:`, JSON.stringify(kardexData, null, 2));
+
+            const kardexResult = await KardexService.generarMovimientoAutomatico(kardexData);
+
+            if (!kardexResult.success) {
+              console.warn(`⚠️ [LoteVacunaService] No se pudo registrar ajuste en Kardex: ${kardexResult.error}`);
+            } else {
+              console.log(`✅ [LoteVacunaService] Ajuste registrado en Kardex exitosamente`);
+            }
+          } catch (kardexError) {
+            console.error(`❌ [LoteVacunaService] Error al registrar ajuste en Kardex:`, kardexError);
+          }
+        } else {
+          if (!almacenCentralResult.success) {
+            console.warn(`⚠️ [LoteVacunaService] No se pudo obtener almacén central para registro en Kardex`);
+          }
+          if (!usuarioId) {
+            console.warn(`⚠️ [LoteVacunaService] No se proporcionó usuarioId para registro en Kardex`);
+          }
+        }
+      }
 
       return {
         success: true,

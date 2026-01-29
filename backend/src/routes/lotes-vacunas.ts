@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { LoteVacunaController } from '@/controllers/LoteVacunaController';
+import { authenticate } from '@/middleware/auth';
 
 /**
  * Rutas para gestión de lotes de vacunas
@@ -61,11 +62,11 @@ router.post('/', LoteVacunaController.create);
 /**
  * @route PUT /api/lotes-vacunas/:id
  * @desc Actualizar lote de vacuna
- * @access Public (TODO: Proteger con autenticación y permisos)
+ * @access Private - Requiere autenticación para registro en Kardex
  * @param {string} id - ID del lote de vacuna
  * @body {UpdateLoteVacunaDto} data - Datos a actualizar
  */
-router.put('/:id', LoteVacunaController.update);
+router.put('/:id', authenticate, LoteVacunaController.update);
 
 /**
  * @route DELETE /api/lotes-vacunas/:id
