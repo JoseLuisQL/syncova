@@ -15,6 +15,17 @@ const router = Router();
  */
 router.get('/anios-disponibles', MovimientosController.getAniosDisponibles);
 
+/**
+ * @route GET /api/movimientos/progreso-vales
+ * @desc Obtener progreso de generación de vales para una vacuna/periodo
+ * @access Public (TODO: Proteger con autenticación)
+ * @query {string} vacunaId - ID de la vacuna (requerido)
+ * @query {number} mes - Mes (1-12) (requerido)
+ * @query {number} anio - Año (requerido)
+ * @query {string} [centroAcopioId] - ID del centro de acopio (opcional)
+ */
+router.get('/progreso-vales', MovimientosController.getProgresoVales);
+
 // =====================================================
 // RUTAS DE AJUSTE AUTOMÁTICO DE ENTREGAS
 // =====================================================

@@ -15,3 +15,4 @@ export * from './MovimientosQueryService';
 export * from './MovimientosWriteService';
 export * from './MovimientosCalculationService';
 export * from './MovimientosExcelService';
+export * from './MovimientosProgresoService';

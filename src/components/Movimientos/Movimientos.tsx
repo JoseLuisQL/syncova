@@ -12,7 +12,7 @@ import { useToastContext } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAutoSync } from '../../hooks/useAutoSync';
 import { PlanificacionService } from '../../services/planificacionService';
-import { MovimientosService } from '../../services/movimientosService';
+import { MovimientosService, ProgresoValesResponse } from '../../services/movimientosService';
 import { MovimientosExportService, MovimientosExportConfig } from '../../services/movimientosExportService';
 import { ValesService, ImpactoModificacion } from '../../services/valesService';
 import { ordenarEstablecimientos, COLORES_CENTROS_ACOPIO } from '../../utils/centroAcopioUtils';
@@ -170,6 +170,12 @@ const Movimientos: React.FC = () => {
   const [stockError, setStockError] = useState<string | null>(null);
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
   const [isUpdatingStockSiguienteMes, setIsUpdatingStockSiguienteMes] = useState(false);
+
+  // ============================================================================
+  // ESTADOS DE PROGRESO DE VALES
+  // ============================================================================
+  const [progresoVales, setProgresoVales] = useState<ProgresoValesResponse | null>(null);
+  const [isLoadingProgresoVales, setIsLoadingProgresoVales] = useState(false);
 
   // ============================================================================
   // ESTADOS DE EDICIÓN
@@ -452,6 +458,32 @@ const Movimientos: React.FC = () => {
     verificarAjusteDeficit();
   }, [selectedVacuna, selectedMes, selectedAnio, stockInfo]);
 
+  // Cargar progreso de vales
+  useEffect(() => {
+    const loadProgresoVales = async () => {
+      if (selectedVacuna) {
+        setIsLoadingProgresoVales(true);
+        try {
+          const progreso = await MovimientosService.getProgresoVales(
+            selectedVacuna,
+            selectedMes,
+            selectedAnio,
+            selectedCentroAcopio !== 'todos' ? selectedCentroAcopio : undefined
+          );
+          setProgresoVales(progreso);
+        } catch (err) {
+          console.error('Error al cargar progreso de vales:', err);
+          setProgresoVales(null);
+        } finally {
+          setIsLoadingProgresoVales(false);
+        }
+      } else {
+        setProgresoVales(null);
+      }
+    };
+    loadProgresoVales();
+  }, [selectedVacuna, selectedMes, selectedAnio, selectedCentroAcopio]);
+
   useEffect(() => {
     const unsubscribe = onValeGenerated(async (event) => {
       if (event.mes === selectedMes && event.anio === selectedAnio) {
@@ -478,6 +510,21 @@ const Movimientos: React.FC = () => {
           centroAcopioId: selectedCentroAcopio !== 'todos' ? selectedCentroAcopio : undefined
         };
         await loadMovimientos(filters);
+
+        // Actualizar progreso de vales
+        if (selectedVacuna) {
+          try {
+            const progreso = await MovimientosService.getProgresoVales(
+              selectedVacuna,
+              selectedMes,
+              selectedAnio,
+              selectedCentroAcopio !== 'todos' ? selectedCentroAcopio : undefined
+            );
+            setProgresoVales(progreso);
+          } catch (err) {
+            console.error('Error al actualizar progreso de vales:', err);
+          }
+        }
       }
     });
     return unsubscribe;
@@ -560,6 +607,28 @@ const Movimientos: React.FC = () => {
         .finally(() => setIsLoadingStock(false));
     }
   };
+
+  // ============================================================================
+  // FUNCIONES DE PROGRESO DE VALES
+  // ============================================================================
+  const handleRefreshProgresoVales = useCallback(async () => {
+    if (!selectedVacuna) return;
+    
+    setIsLoadingProgresoVales(true);
+    try {
+      const progreso = await MovimientosService.getProgresoVales(
+        selectedVacuna,
+        selectedMes,
+        selectedAnio,
+        selectedCentroAcopio !== 'todos' ? selectedCentroAcopio : undefined
+      );
+      setProgresoVales(progreso);
+    } catch (err) {
+      console.error('Error al refrescar progreso de vales:', err);
+    } finally {
+      setIsLoadingProgresoVales(false);
+    }
+  }, [selectedVacuna, selectedMes, selectedAnio, selectedCentroAcopio]);
 
   // ============================================================================
   // FUNCIONES DE VALIDACIÓN (MANTENIDAS DEL ORIGINAL)
@@ -1529,6 +1598,10 @@ const Movimientos: React.FC = () => {
         // Ajuste de Deficit
         onOpenAjusteDeficit={() => setShowAjusteDeficitModal(true)}
         ajusteDeficitDisponible={ajusteDeficitDisponible}
+        // Progreso de Vales
+        progresoVales={progresoVales}
+        isLoadingProgresoVales={isLoadingProgresoVales}
+        onRefreshProgresoVales={handleRefreshProgresoVales}
       />
 
       {/* Content */}

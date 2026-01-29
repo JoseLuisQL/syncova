@@ -649,4 +649,82 @@ export class MovimientosService {
       };
     }
   }
+
+  /**
+   * Obtener progreso de generación de vales
+   */
+  static async getProgresoVales(
+    vacunaId: string,
+    mes: number,
+    anio: number,
+    centroAcopioId?: string
+  ): Promise<ProgresoValesResponse> {
+    try {
+      logger.debug('Obteniendo progreso de vales:', { vacunaId, mes, anio, centroAcopioId });
+
+      const params = new URLSearchParams({
+        vacunaId,
+        mes: mes.toString(),
+        anio: anio.toString()
+      });
+
+      if (centroAcopioId && centroAcopioId !== 'todos') {
+        params.append('centroAcopioId', centroAcopioId);
+      }
+
+      const response = await apiClient.get<ApiResponse<ProgresoValesResponse>>(
+        `${this.BASE_PATH}/progreso-vales?${params.toString()}`
+      );
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Error al obtener progreso de vales');
+      }
+
+      logger.debug('Progreso de vales obtenido:', response.data.data);
+      return response.data.data;
+    } catch (error) {
+      logger.error('Error al obtener progreso de vales:', error);
+      // Retornar estado por defecto en caso de error
+      return {
+        totalEstablecimientosConEntregas: 0,
+        establecimientosConValeCompleto: 0,
+        porcentajeProgreso: 0,
+        estado: 'sin_vales',
+        totalEntregas: 0,
+        establecimientosPendientes: []
+      };
+    }
+  }
+}
+
+/**
+ * Interfaces for voucher progress
+ */
+export interface EstablecimientoPendiente {
+  id: string;
+  nombre: string;
+  codigo: string;
+  tipoEntregaPendiente: 'base' | 'adicional' | 'ambos';
+  cantidadEntregaBase: number;
+  entregasAdicionalesPendientes: number;
+  totalCantidadPendiente: number;
+}
+
+export interface CentroAcopioConPendientes {
+  centroAcopio: {
+    id: string;
+    nombre: string;
+    codigo: string;
+  };
+  establecimientos: EstablecimientoPendiente[];
+  totalPendientes: number;
+}
+
+export interface ProgresoValesResponse {
+  totalEstablecimientosConEntregas: number;
+  establecimientosConValeCompleto: number;
+  porcentajeProgreso: number;
+  estado: 'sin_vales' | 'en_progreso' | 'completo';
+  totalEntregas: number;
+  establecimientosPendientes: CentroAcopioConPendientes[];
 }

@@ -1006,4 +1006,57 @@ export class MovimientosController {
       ResponseUtil.error(res, 'Error interno del servidor', 500);
     }
   }
+
+  /**
+   * Obtener progreso de generación de vales
+   * GET /api/movimientos/progreso-vales
+   */
+  static async getProgresoVales(req: Request, res: Response): Promise<void> {
+    try {
+      const { vacunaId, mes, anio, centroAcopioId } = req.query;
+
+      // Validations
+      if (!vacunaId || !validateUUID(vacunaId as string)) {
+        ResponseUtil.error(res, 'ID de vacuna inválido o no proporcionado', 400);
+        return;
+      }
+
+      const mesNum = parseInt(mes as string, 10);
+      if (isNaN(mesNum) || mesNum < 1 || mesNum > 12) {
+        ResponseUtil.error(res, 'El mes debe estar entre 1 y 12', 400);
+        return;
+      }
+
+      const anioNum = parseInt(anio as string, 10);
+      if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
+        ResponseUtil.error(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      if (centroAcopioId && centroAcopioId !== 'todos' && !validateUUID(centroAcopioId as string)) {
+        ResponseUtil.error(res, 'ID de centro de acopio inválido', 400);
+        return;
+      }
+
+      // Import the service dynamically to avoid circular dependencies
+      const { MovimientosProgresoService } = await import('@/services/movimientos/MovimientosProgresoService');
+      
+      const result = await MovimientosProgresoService.getProgresoVales(
+        vacunaId as string,
+        mesNum,
+        anioNum,
+        centroAcopioId as string | undefined
+      );
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error al obtener progreso de vales', 500);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, 'Progreso de vales obtenido exitosamente');
+    } catch (error) {
+      console.error('Error en MovimientosController.getProgresoVales:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
 }

@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { MESES } from '../constants';
 import { Vacuna, CentroAcopio } from '../../../types';
+import { EntregasProgressBadge } from './EntregasProgressBadge';
+import { ProgresoValesResponse } from '../../../services/movimientosService';
 
 interface StockInfo {
   stockInicialHistorico: number | null;
@@ -79,6 +81,10 @@ interface MovimientosHeaderCompactProps {
   // Ajuste de Deficit
   onOpenAjusteDeficit?: () => void;
   ajusteDeficitDisponible?: boolean;
+  // Progreso de Vales
+  progresoVales?: ProgresoValesResponse | null;
+  isLoadingProgresoVales?: boolean;
+  onRefreshProgresoVales?: () => void;
 }
 
 export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> = memo(({
@@ -119,6 +125,10 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   // Ajuste de Deficit
   onOpenAjusteDeficit,
   ajusteDeficitDisponible = false,
+  // Progreso de Vales
+  progresoVales,
+  isLoadingProgresoVales = false,
+  onRefreshProgresoVales,
 }) => {
   const [showStockInicialDropdown, setShowStockInicialDropdown] = useState(false);
   const [showStockActualDropdown, setShowStockActualDropdown] = useState(false);
@@ -469,16 +479,13 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
 
                     <ArrowRight className="h-4 w-4 text-white/50" />
 
-                    {/* Total Entregas */}
-                    <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20 border border-white/20">
-                      <div className="p-1.5 bg-white/30 rounded-lg">
-                        <Truck className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="text-left">
-                        <div className="text-[10px] text-white/80 font-medium uppercase tracking-wide">Entregas</div>
-                        <div className="text-lg font-bold text-white leading-none">{stockInfo.totalEntregas.toLocaleString()}</div>
-                      </div>
-                    </div>
+                    {/* Total Entregas con Progreso de Vales */}
+                    <EntregasProgressBadge
+                      totalEntregas={stockInfo.totalEntregas}
+                      progresoVales={progresoVales ?? null}
+                      isLoading={isLoadingProgresoVales}
+                      onRefresh={onRefreshProgresoVales}
+                    />
 
                     <ArrowRight className="h-4 w-4 text-white/50" />
 
@@ -674,9 +681,15 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 <Package className="h-3.5 w-3.5" />
                 Inicial: <span className="font-bold">{stockInfo.stockInicialHistorico?.toLocaleString() || 'N/A'}</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 rounded-lg text-xs font-medium text-white whitespace-nowrap">
+              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white whitespace-nowrap ${
+                progresoVales?.estado === 'completo' ? 'bg-emerald-500/50' :
+                progresoVales?.estado === 'en_progreso' ? 'bg-amber-500/50' : 'bg-white/20'
+              }`}>
                 <Truck className="h-3.5 w-3.5" />
                 Entregas: <span className="font-bold">{stockInfo.totalEntregas.toLocaleString()}</span>
+                {progresoVales && progresoVales.totalEstablecimientosConEntregas > 0 && (
+                  <span className="text-white/80">({progresoVales.porcentajeProgreso}%)</span>
+                )}
               </div>
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${
                 stockInfo.stockDisponible < 0 ? 'bg-rose-500/50 text-white' : 'bg-emerald-500/50 text-white'
