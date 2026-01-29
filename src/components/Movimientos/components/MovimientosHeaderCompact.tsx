@@ -385,9 +385,35 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                     <span className="text-sm text-white">Error - Reintentar</span>
                   </button>
                 ) : stockInfo ? (
-                  <div className="flex items-center gap-1 p-1 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
-                    {/* Stock Inicial */}
-                    <div className="relative" ref={stockInicialRef}>
+                  <>
+                    {/* Badge del Período - Separado */}
+                    {(() => {
+                      let mesRealVisualizado = selectedMes + 1;
+                      let anioRealVisualizado = selectedAnio;
+                      if (mesRealVisualizado > 12) {
+                        mesRealVisualizado = 1;
+                        anioRealVisualizado++;
+                      }
+                      return (
+                        <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20 border border-white/20">
+                          <div className="p-1.5 bg-white/30 rounded-lg">
+                            <Calendar className="h-4 w-4 text-white" />
+                          </div>
+                          <div className="text-left">
+                            <div className="text-[10px] text-white/80 font-medium uppercase tracking-wide">Período</div>
+                            <div className="text-lg font-bold text-white leading-none">
+                              {MESES[mesRealVisualizado - 1]?.slice(0, 3).toUpperCase()} {anioRealVisualizado}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    <ArrowRight className="h-4 w-4 text-white/50" />
+
+                    <div className="flex items-center gap-1 p-1 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+                      {/* Stock Inicial */}
+                      <div className="relative" ref={stockInicialRef}>
                       <button
                         onClick={() => setShowStockInicialDropdown(!showStockInicialDropdown)}
                         className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20 
@@ -615,7 +641,8 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                       </>
                     );
                     })()}
-                  </div>
+                    </div>
+                  </>
                 ) : null}
               </div>
             )}
@@ -628,6 +655,21 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
         <div className="lg:hidden" style={{ backgroundColor: '#0e8a7d' }}>
           <div className="w-full px-4 py-2 overflow-x-auto">
             <div className="flex items-center gap-2">
+              {/* Badge del Período - Mobile */}
+              {(() => {
+                let mesRealVisualizadoMobile = selectedMes + 1;
+                let anioRealVisualizadoMobile = selectedAnio;
+                if (mesRealVisualizadoMobile > 12) {
+                  mesRealVisualizadoMobile = 1;
+                  anioRealVisualizadoMobile++;
+                }
+                return (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 rounded-lg text-xs font-medium text-white whitespace-nowrap">
+                    <Calendar className="h-3.5 w-3.5" />
+                    <span className="font-bold">{MESES[mesRealVisualizadoMobile - 1]?.slice(0, 3).toUpperCase()} {anioRealVisualizadoMobile}</span>
+                  </div>
+                );
+              })()}
               <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 rounded-lg text-xs font-medium text-white whitespace-nowrap">
                 <Package className="h-3.5 w-3.5" />
                 Inicial: <span className="font-bold">{stockInfo.stockInicialHistorico?.toLocaleString() || 'N/A'}</span>

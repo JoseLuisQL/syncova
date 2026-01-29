@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Package, Plus, X, Eye, Zap, Loader2 } from 'lucide-react';
-import { COMPONENT_STYLES, INPUT_FIELD_STYLES } from '../constants';
+import { COMPONENT_STYLES, INPUT_FIELD_STYLES, MESES } from '../constants';
 import { MovimientoCalculado } from '../../../types';
 import { getEstiloEstablecimiento } from '../../../utils/centroAcopioUtils';
 
@@ -272,7 +272,20 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 Saldo
               </th>
               <th className="px-3 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider border-b border-gray-200 min-w-[180px]">
-                Entrega
+                <div className="flex flex-col items-center">
+                  <span>Entrega</span>
+                  <span className="text-[10px] font-semibold text-teal-600 normal-case">
+                    {(() => {
+                      let mesReal = selectedMes + 1;
+                      let anioReal = selectedAnio;
+                      if (mesReal > 12) {
+                        mesReal = 1;
+                        anioReal++;
+                      }
+                      return `${MESES[mesReal - 1]?.slice(0, 3)} ${anioReal}`;
+                    })()}
+                  </span>
+                </div>
               </th>
               <th className="px-3 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider border-b border-gray-200 w-24 bg-cyan-50/50">
                 Stock
