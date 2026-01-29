@@ -440,8 +440,7 @@ const LoteModal: React.FC<LoteModalProps> = ({ lote, tipo, onClose, onSubmit }) 
     observaciones: lote.observaciones || '',
   });
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(() => {
     const updatedData: Partial<Lote | LoteJeringa> = {
       ...formData,
       fechaIngreso: new Date(formData.fechaIngreso),
@@ -467,10 +466,12 @@ const LoteModal: React.FC<LoteModalProps> = ({ lote, tipo, onClose, onSubmit }) 
         <ModalFooter
           onCancel={onClose}
           submitLabel="Actualizar Lote"
+          submitType="button"
+          onSubmit={handleSubmit}
         />
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <TextInput
             id="numero"
@@ -557,9 +558,7 @@ const LoteModal: React.FC<LoteModalProps> = ({ lote, tipo, onClose, onSubmit }) 
           onChange={(v) => handleFieldChange('observaciones', v)}
           placeholder="Observaciones adicionales (opcional)"
         />
-
-        <button type="submit" className="hidden" />
-      </form>
+      </div>
     </Modal>
   );
 };
