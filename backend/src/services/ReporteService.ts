@@ -1820,7 +1820,7 @@ export class ReporteService {
       console.log(`📅 [Desplazamiento] Usuario seleccionó: ${fechaInicioObj.toISOString()} - ${fechaFinObj.toISOString()}`);
       fechaInicioObj.setUTCMonth(fechaInicioObj.getUTCMonth() + 1);
       fechaFinObj.setUTCMonth(fechaFinObj.getUTCMonth() + 1);
-      console.log(`📅 [Desplazamiento] Buscando datos de: ${fechaInicioObj.toISOString()} - ${fechaFinObj.toISOString()}`);
+      console.log(`📅 [Desplazamiento] Buscando movimientos de: ${fechaInicioObj.toISOString()} - ${fechaFinObj.toISOString()}`);
 
       const mesInicio = fechaInicioObj.getUTCMonth() + 1;
       const anioInicio = fechaInicioObj.getUTCFullYear();
@@ -1870,54 +1870,6 @@ export class ReporteService {
       }
 
       console.log('📋 Condiciones de consulta:', JSON.stringify(whereConditions, null, 2));
-
-      // Obtener entregas con vales generados para el rango de fechas
-      // Solo las entregas base y adicionales que tienen vale generado cuentan para el stock
-      const valeDetallesConditions: any[] = [];
-      for (let anio = anioInicio; anio <= anioFin; anio++) {
-        const mesInicioAnio = anio === anioInicio ? mesInicio : 1;
-        const mesFinAnio = anio === anioFin ? mesFin : 12;
-
-        for (let mes = mesInicioAnio; mes <= mesFinAnio; mes++) {
-          valeDetallesConditions.push({
-            valeEntrega: {
-              mes: mes,
-              anio: anio,
-              estado: { in: ['generado', 'impreso', 'entregado'] }
-            }
-          });
-        }
-      }
-
-      const valeDetalles = await prisma.valeDetalle.findMany({
-        where: {
-          OR: valeDetallesConditions,
-          establecimiento: {
-            estado: 'activo',
-            ...(centroAcopioId && centroAcopioId !== 'todos' ? { centroAcopioId } : {})
-          }
-        },
-        include: {
-          valeEntrega: {
-            select: {
-              mes: true,
-              anio: true
-            }
-          }
-        }
-      });
-
-      // Crear mapa de entregas con vale por establecimiento/vacuna/mes/anio
-      // Key: `${establecimientoId}-${vacunaId}-${mes}-${anio}`
-      const entregasConValeMap = new Map<string, number>();
-      for (const detalle of valeDetalles) {
-        const key = `${detalle.establecimientoId}-${detalle.vacunaId}-${detalle.valeEntrega.mes}-${detalle.valeEntrega.anio}`;
-        const cantidad = (detalle.cantidadProgramada || 0) + (detalle.cantidadAdicional || 0);
-        const actual = entregasConValeMap.get(key) || 0;
-        entregasConValeMap.set(key, actual + cantidad);
-      }
-
-      console.log(`📋 Se encontraron ${valeDetalles.length} detalles de vale con entregas confirmadas`);
 
       // Obtener todos los movimientos en el rango de fechas
       const movimientos = await prisma.movimientoVacuna.findMany({
@@ -2026,18 +1978,17 @@ export class ReporteService {
             return b.mes - a.mes;
           });
 
-          // Calcular stock usando SOLO entregas con vale generado
-          // Stock = SALDO_ANTERIOR + TRANS_INGRESO - SALIDA - TRANS_SALIDA + ENTREGA_CON_VALE
+          // Calcular stock del mes seleccionado
+          // IMPORTANTE: La entrega que aparece en el movimiento es para el MES SIGUIENTE
+          // Por lo tanto, el stock del mes actual = SALDO_ANTERIOR + TRANS_INGRESO - SALIDA - TRANS_SALIDA
+          // NO se suma la entrega porque esa entrega es para el siguiente mes
           let stockUltimoMes = 0;
           const movParaStock = movimientoMesSeleccionado || movimientosOrdenados[0];
           
           if (movParaStock) {
-            // Obtener entrega con vale para este establecimiento/vacuna/mes/anio
-            const keyVale = `${movParaStock.establecimientoId}-${movParaStock.vacunaId}-${movParaStock.mes}-${movParaStock.anio}`;
-            const entregaConVale = entregasConValeMap.get(keyVale) || 0;
-            
+            // Stock = Saldo antes de la entrega (la entrega es para el mes siguiente)
             stockUltimoMes = movParaStock.saldoAnterior + movParaStock.transIngreso -
-                           movParaStock.salida - movParaStock.transSalida + entregaConVale;
+                           movParaStock.salida - movParaStock.transSalida;
           }
 
           vacunasProcessed[vacunaId] = {
