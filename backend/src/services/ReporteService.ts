@@ -271,6 +271,10 @@ export interface StockVacunasEESSItem {
   establecimientoNombre: string;
   centroAcopioId: string;
   centroAcopioNombre: string;
+  microredId: string | null;
+  microredNombre: string | null;
+  redId: string | null;
+  redNombre: string | null;
   vacunas: {
     [vacunaId: string]: {
       vacunaId: string;
@@ -2048,7 +2052,7 @@ export class ReporteService {
         }
       }
 
-      // Obtener establecimientos con sus centros de acopio
+      // Obtener establecimientos con sus centros de acopio y microred
       const whereEstablecimiento: any = {
         estado: 'activo'
       };
@@ -2060,7 +2064,15 @@ export class ReporteService {
       const establecimientos = await prisma.establecimiento.findMany({
         where: whereEstablecimiento,
         include: {
-          centroAcopio: true
+          centroAcopio: {
+            include: {
+              microred: {
+                include: {
+                  red: true
+                }
+              }
+            }
+          }
         },
         orderBy: [
           { centroAcopio: { nombre: 'asc' } },
@@ -2151,19 +2163,19 @@ export class ReporteService {
         stockMap.get(mov.establecimientoId)!.set(mov.vacunaId, stock);
       }
 
-      // Construir resultado
+      // Construir resultado - usar solo vacunas activas encontradas en BD
       const reporteData: StockVacunasEESSItem[] = [];
 
       for (const establecimiento of establecimientos) {
         const vacunasData: StockVacunasEESSItem['vacunas'] = {};
 
-        for (const vacunaId of filters.vacunaIds) {
-          const stock = stockMap.get(establecimiento.id)?.get(vacunaId) || 0;
-          const vacunaNombre = vacunaMap.get(vacunaId) || 'Desconocida';
+        // Iterar solo sobre las vacunas activas encontradas, no sobre filters.vacunaIds
+        for (const vacuna of vacunas) {
+          const stock = stockMap.get(establecimiento.id)?.get(vacuna.id) || 0;
 
-          vacunasData[vacunaId] = {
-            vacunaId,
-            vacunaNombre,
+          vacunasData[vacuna.id] = {
+            vacunaId: vacuna.id,
+            vacunaNombre: vacuna.nombre,
             stock
           };
         }
@@ -2173,6 +2185,10 @@ export class ReporteService {
           establecimientoNombre: establecimiento.nombre,
           centroAcopioId: establecimiento.centroAcopioId || '',
           centroAcopioNombre: establecimiento.centroAcopio?.nombre || 'Sin Centro de Acopio',
+          microredId: establecimiento.centroAcopio?.microredId || null,
+          microredNombre: establecimiento.centroAcopio?.microred?.nombre || null,
+          redId: establecimiento.centroAcopio?.microred?.redId || null,
+          redNombre: establecimiento.centroAcopio?.microred?.red?.nombre || null,
           vacunas: vacunasData
         });
       }
