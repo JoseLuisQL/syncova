@@ -178,10 +178,10 @@ const InventarioTab: React.FC<InventarioTabProps> = ({
   }, []);
 
   const reportesInventario = [
-    { id: 'stock_actual', nombre: 'Stock Actual', descripcion: 'Estado actual del inventario', icon: Package, color: 'teal' as const, datos: reportes.stockActual },
-    { id: 'stock_critico', nombre: 'Stock Critico', descripcion: 'Vacunas con stock bajo o agotado', icon: Activity, color: 'rose' as const, datos: reportes.stockCritico },
-    { id: 'vencimientos', nombre: 'Proximos Vencimientos', descripcion: 'Lotes por vencer en 30 dias', icon: Calendar, color: 'amber' as const, datos: reportes.vencimientos },
-    { id: 'lotes_vencidos', nombre: 'Lotes Vencidos', descripcion: 'Lotes que ya han vencido', icon: AlertTriangle, color: 'rose' as const, datos: reportes.lotesVencidos },
+    { id: 'stock_actual', nombre: 'Stock Actual Almacen DISA', descripcion: 'Estado actual del inventario', icon: Package, color: 'teal' as const, datos: reportes.stockActual },
+    { id: 'stock_critico', nombre: 'Stock Critico Almacen DISA', descripcion: 'Vacunas con stock bajo o agotado', icon: Activity, color: 'rose' as const, datos: reportes.stockCritico },
+    { id: 'vencimientos', nombre: 'Proximos Vencimientos Almacen DISA', descripcion: 'Lotes por vencer en 30 dias', icon: Calendar, color: 'amber' as const, datos: reportes.vencimientos },
+    { id: 'lotes_vencidos', nombre: 'Lotes Vencidos Almacen DISA', descripcion: 'Lotes que ya han vencido', icon: AlertTriangle, color: 'rose' as const, datos: reportes.lotesVencidos },
   ];
 
   return (

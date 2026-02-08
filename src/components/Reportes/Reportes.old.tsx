@@ -65,41 +65,41 @@ const REPORTS_SECTIONS: SectionConfig[] = [
     category: 'generacion',
     description: 'Reportes de inventario y stock'
   },
-  { 
-    id: 'movimientos', 
-    label: 'Movimientos', 
-    icon: TrendingUp, 
-    path: '/reportes/movimientos', 
+  {
+    id: 'movimientos',
+    label: 'Movimientos',
+    icon: TrendingUp,
+    path: '/reportes/movimientos',
     category: 'generacion',
     description: 'Análisis de distribución'
   },
-  { 
-    id: 'planificacion', 
-    label: 'Planificación', 
-    icon: Target, 
-    path: '/reportes/planificacion', 
+  {
+    id: 'planificacion',
+    label: 'Planificación',
+    icon: Target,
+    path: '/reportes/planificacion',
     category: 'generacion',
     description: 'Programación y metas'
   },
-  { 
-    id: 'ejecutivo', 
-    label: 'Ejecutivo', 
-    icon: Star, 
-    path: '/reportes/ejecutivo', 
+  {
+    id: 'ejecutivo',
+    label: 'Ejecutivo',
+    icon: Star,
+    path: '/reportes/ejecutivo',
     category: 'generacion',
     description: 'Reportes estratégicos'
   },
-  
+
   // Sección Automatización
-  { 
-    id: 'programados', 
-    label: 'Reportes Programados', 
-    icon: Clock, 
-    path: '/reportes/programados', 
+  {
+    id: 'programados',
+    label: 'Reportes Programados',
+    icon: Clock,
+    path: '/reportes/programados',
     category: 'automatizacion',
     description: 'Automatización y programación'
   },
-  
+
   // Sección Configuración
   {
     id: 'configuracion',
@@ -255,7 +255,7 @@ const Reportes: React.FC = () => {
 
               const category = CATEGORY_CONFIG[categoryKey as keyof typeof CATEGORY_CONFIG];
               const CategoryIcon = category.icon;
-              
+
               return (
                 <div key={categoryKey} className="relative group">
                   {/* Category Header */}
@@ -263,7 +263,7 @@ const Reportes: React.FC = () => {
                     <CategoryIcon className={`h-5 w-5 text-${category.color}-600 mr-2`} />
                     <span className={`font-semibold text-${category.color}-800`}>{category.label}</span>
                   </div>
-                  
+
                   {/* Section Buttons */}
                   <div className="bg-white">
                     {sections.map((section) => {
@@ -273,9 +273,8 @@ const Reportes: React.FC = () => {
                         <button
                           key={section.id}
                           onClick={() => navigateToModule('reportes', section.id)}
-                          className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                            isActive ? `bg-${category.color}-50 border-l-4 border-l-${category.color}-500` : ''
-                          }`}
+                          className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${isActive ? `bg-${category.color}-50 border-l-4 border-l-${category.color}-500` : ''
+                            }`}
                         >
                           <div className="flex items-center">
                             <SectionIcon className={`h-4 w-4 mr-3 ${isActive ? `text-${category.color}-600` : 'text-gray-500'}`} />
@@ -740,11 +739,10 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
                 <button
                   onClick={reporte.generar}
                   disabled={isLoading}
-                  className={`flex-1 py-2 px-4 rounded-lg transition-colors text-sm font-medium ${
-                    isLoading
+                  className={`flex-1 py-2 px-4 rounded-lg transition-colors text-sm font-medium ${isLoading
                       ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       : `bg-${reporte.color}-600 text-white hover:bg-${reporte.color}-700`
-                  }`}
+                    }`}
                 >
                   {isLoading ? (
                     <>
@@ -1383,7 +1381,7 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
             <input
               type="date"
               value={filtros.fechaInicio}
-              onChange={(e) => setFiltros({...filtros, fechaInicio: e.target.value})}
+              onChange={(e) => setFiltros({ ...filtros, fechaInicio: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -1392,7 +1390,7 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
             <input
               type="date"
               value={filtros.fechaFin}
-              onChange={(e) => setFiltros({...filtros, fechaFin: e.target.value})}
+              onChange={(e) => setFiltros({ ...filtros, fechaFin: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
@@ -1400,7 +1398,7 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">Centro</label>
             <select
               value={filtros.centroAcopio}
-              onChange={(e) => setFiltros({...filtros, centroAcopio: e.target.value})}
+              onChange={(e) => setFiltros({ ...filtros, centroAcopio: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="todos">Todos</option>
@@ -1413,7 +1411,7 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">Formato</label>
             <select
               value={filtros.formato}
-              onChange={(e) => setFiltros({...filtros, formato: e.target.value})}
+              onChange={(e) => setFiltros({ ...filtros, formato: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               <option value="pdf">PDF</option>
@@ -1469,11 +1467,10 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
                 <button
                   onClick={reporte.generar}
                   disabled={reporteActivo === reporte.id}
-                  className={`flex-1 py-2 px-4 rounded-lg transition-colors text-sm font-medium ${
-                    reporteActivo === reporte.id
+                  className={`flex-1 py-2 px-4 rounded-lg transition-colors text-sm font-medium ${reporteActivo === reporte.id
                       ? 'bg-gray-400 text-white cursor-not-allowed'
                       : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                  }`}
+                    }`}
                 >
                   {reporteActivo === reporte.id ? (
                     <div className="flex items-center justify-center">
@@ -1721,7 +1718,7 @@ const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">Vacuna</label>
             <select
               value={filtros.vacuna}
-              onChange={(e) => setFiltros({...filtros, vacuna: e.target.value})}
+              onChange={(e) => setFiltros({ ...filtros, vacuna: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="todas">Todas</option>
@@ -1734,7 +1731,7 @@ const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">Centro</label>
             <select
               value={filtros.centroAcopio}
-              onChange={(e) => setFiltros({...filtros, centroAcopio: e.target.value})}
+              onChange={(e) => setFiltros({ ...filtros, centroAcopio: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="todos">Todos</option>
@@ -1747,7 +1744,7 @@ const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">Formato</label>
             <select
               value={filtros.formato}
-              onChange={(e) => setFiltros({...filtros, formato: e.target.value})}
+              onChange={(e) => setFiltros({ ...filtros, formato: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="pdf">PDF</option>
@@ -1816,11 +1813,10 @@ const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
                 <button
                   onClick={reporte.generar}
                   disabled={reporteActivo === reporte.id}
-                  className={`flex-1 py-2 px-4 rounded-lg transition-colors text-sm font-medium ${
-                    reporteActivo === reporte.id
+                  className={`flex-1 py-2 px-4 rounded-lg transition-colors text-sm font-medium ${reporteActivo === reporte.id
                       ? 'bg-gray-400 text-white cursor-not-allowed'
                       : `${colors.button} text-white`
-                  }`}
+                    }`}
                 >
                   {reporteActivo === reporte.id ? (
                     <div className="flex items-center justify-center">
@@ -1891,7 +1887,7 @@ const EjecutivoReportesTab: React.FC<EjecutivoReportesTabProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">Formato</label>
             <select
               value={filtros.formato}
-              onChange={(e) => setFiltros({...filtros, formato: e.target.value})}
+              onChange={(e) => setFiltros({ ...filtros, formato: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
               <option value="pdf">PDF</option>
@@ -1959,7 +1955,7 @@ const ReportesProgramadosTab: React.FC<ReportesProgramadosTabProps> = ({
   };
 
   const handleToggleEstado = (id: string) => {
-    setReportesProgramados(reportesProgramados.map(r => 
+    setReportesProgramados(reportesProgramados.map(r =>
       r.id === id ? { ...r, estado: r.estado === 'activo' ? 'inactivo' : 'activo' } : r
     ));
   };
@@ -1979,7 +1975,7 @@ const ReportesProgramadosTab: React.FC<ReportesProgramadosTabProps> = ({
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
@@ -1993,7 +1989,7 @@ const ReportesProgramadosTab: React.FC<ReportesProgramadosTabProps> = ({
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-orange-100 rounded-lg">
@@ -2005,7 +2001,7 @@ const ReportesProgramadosTab: React.FC<ReportesProgramadosTabProps> = ({
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-purple-100 rounded-lg">
@@ -2074,11 +2070,10 @@ const ReportesProgramadosTab: React.FC<ReportesProgramadosTabProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
                       onClick={() => handleToggleEstado(reporte.id)}
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        reporte.estado === 'activo'
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${reporte.estado === 'activo'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
-                      }`}
+                        }`}
                     >
                       {reporte.estado}
                     </button>
@@ -2088,7 +2083,7 @@ const ReportesProgramadosTab: React.FC<ReportesProgramadosTabProps> = ({
                       <button className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded">
                         <Edit className="h-4 w-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleEliminarReporte(reporte.id)}
                         className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
                       >
@@ -2133,7 +2128,7 @@ const ConfiguracionReportesTab: React.FC = () => {
             </label>
             <select
               value={configuracion.formatoFechaDefault}
-              onChange={(e) => setConfiguracion({...configuracion, formatoFechaDefault: e.target.value})}
+              onChange={(e) => setConfiguracion({ ...configuracion, formatoFechaDefault: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="dd/mm/yyyy">DD/MM/YYYY</option>
@@ -2141,14 +2136,14 @@ const ConfiguracionReportesTab: React.FC = () => {
               <option value="yyyy-mm-dd">YYYY-MM-DD</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Idioma por Defecto
             </label>
             <select
               value={configuracion.idiomaDefault}
-              onChange={(e) => setConfiguracion({...configuracion, idiomaDefault: e.target.value})}
+              onChange={(e) => setConfiguracion({ ...configuracion, idiomaDefault: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="es">Español</option>
@@ -2156,14 +2151,14 @@ const ConfiguracionReportesTab: React.FC = () => {
               <option value="qu">Quechua</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Tiempo de Retención (meses)
             </label>
             <select
               value={configuracion.tiempoRetencion}
-              onChange={(e) => setConfiguracion({...configuracion, tiempoRetencion: e.target.value})}
+              onChange={(e) => setConfiguracion({ ...configuracion, tiempoRetencion: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="6">6 meses</option>
@@ -2172,14 +2167,14 @@ const ConfiguracionReportesTab: React.FC = () => {
               <option value="36">36 meses</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Compresión PDF
             </label>
             <select
               value={configuracion.compressionPDF}
-              onChange={(e) => setConfiguracion({...configuracion, compressionPDF: e.target.value})}
+              onChange={(e) => setConfiguracion({ ...configuracion, compressionPDF: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="baja">Baja (mejor calidad)</option>
@@ -2200,53 +2195,47 @@ const ConfiguracionReportesTab: React.FC = () => {
               <p className="text-sm text-gray-500">Incluir firma digital en los reportes PDF</p>
             </div>
             <button
-              onClick={() => setConfiguracion({...configuracion, incluirFirmaDigital: !configuracion.incluirFirmaDigital})}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                configuracion.incluirFirmaDigital ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
+              onClick={() => setConfiguracion({ ...configuracion, incluirFirmaDigital: !configuracion.incluirFirmaDigital })}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${configuracion.incluirFirmaDigital ? 'bg-blue-600' : 'bg-gray-200'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  configuracion.incluirFirmaDigital ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.incluirFirmaDigital ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-sm font-medium text-gray-900">Marca de Agua</h4>
               <p className="text-sm text-gray-500">Agregar marca de agua institucional</p>
             </div>
             <button
-              onClick={() => setConfiguracion({...configuracion, marcaAgua: !configuracion.marcaAgua})}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                configuracion.marcaAgua ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
+              onClick={() => setConfiguracion({ ...configuracion, marcaAgua: !configuracion.marcaAgua })}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${configuracion.marcaAgua ? 'bg-blue-600' : 'bg-gray-200'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  configuracion.marcaAgua ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.marcaAgua ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-sm font-medium text-gray-900">Encriptación de Reportes</h4>
               <p className="text-sm text-gray-500">Encriptar reportes sensibles automáticamente</p>
             </div>
             <button
-              onClick={() => setConfiguracion({...configuracion, encriptacionReportes: !configuracion.encriptacionReportes})}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                configuracion.encriptacionReportes ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
+              onClick={() => setConfiguracion({ ...configuracion, encriptacionReportes: !configuracion.encriptacionReportes })}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${configuracion.encriptacionReportes ? 'bg-blue-600' : 'bg-gray-200'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  configuracion.encriptacionReportes ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.encriptacionReportes ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
           </div>
@@ -2263,34 +2252,30 @@ const ConfiguracionReportesTab: React.FC = () => {
               <p className="text-sm text-gray-500">Enviar notificaciones cuando se generen reportes</p>
             </div>
             <button
-              onClick={() => setConfiguracion({...configuracion, notificacionesEmail: !configuracion.notificacionesEmail})}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                configuracion.notificacionesEmail ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
+              onClick={() => setConfiguracion({ ...configuracion, notificacionesEmail: !configuracion.notificacionesEmail })}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${configuracion.notificacionesEmail ? 'bg-blue-600' : 'bg-gray-200'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  configuracion.notificacionesEmail ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.notificacionesEmail ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-sm font-medium text-gray-900">Backup Automático</h4>
               <p className="text-sm text-gray-500">Crear copias de seguridad automáticas de reportes</p>
             </div>
             <button
-              onClick={() => setConfiguracion({...configuracion, backupAutomatico: !configuracion.backupAutomatico})}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                configuracion.backupAutomatico ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
+              onClick={() => setConfiguracion({ ...configuracion, backupAutomatico: !configuracion.backupAutomatico })}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${configuracion.backupAutomatico ? 'bg-blue-600' : 'bg-gray-200'
+                }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  configuracion.backupAutomatico ? 'translate-x-6' : 'translate-x-1'
-                }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.backupAutomatico ? 'translate-x-6' : 'translate-x-1'
+                  }`}
               />
             </button>
           </div>
@@ -2334,7 +2319,7 @@ const GeneradorReporteModal: React.FC<GeneradorReporteModalProps> = ({
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Configurar y Generar Reporte
           </h2>
-          
+
           <div className="space-y-6">
             {/* Información del Reporte */}
             <div className="bg-blue-50 rounded-lg p-4">
@@ -2351,11 +2336,11 @@ const GeneradorReporteModal: React.FC<GeneradorReporteModalProps> = ({
                 <input
                   type="date"
                   value={filtros.fechaInicio}
-                  onChange={(e) => setFiltros({...filtros, fechaInicio: e.target.value})}
+                  onChange={(e) => setFiltros({ ...filtros, fechaInicio: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Fecha de Fin
@@ -2363,18 +2348,18 @@ const GeneradorReporteModal: React.FC<GeneradorReporteModalProps> = ({
                 <input
                   type="date"
                   value={filtros.fechaFin}
-                  onChange={(e) => setFiltros({...filtros, fechaFin: e.target.value})}
+                  onChange={(e) => setFiltros({ ...filtros, fechaFin: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Centro de Acopio
                 </label>
                 <select
                   value={filtros.centroAcopio}
-                  onChange={(e) => setFiltros({...filtros, centroAcopio: e.target.value})}
+                  onChange={(e) => setFiltros({ ...filtros, centroAcopio: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="todos">Todos los centros</option>
@@ -2385,14 +2370,14 @@ const GeneradorReporteModal: React.FC<GeneradorReporteModalProps> = ({
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Vacuna
                 </label>
                 <select
                   value={filtros.vacuna}
-                  onChange={(e) => setFiltros({...filtros, vacuna: e.target.value})}
+                  onChange={(e) => setFiltros({ ...filtros, vacuna: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="todas">Todas las vacunas</option>
@@ -2403,14 +2388,14 @@ const GeneradorReporteModal: React.FC<GeneradorReporteModalProps> = ({
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Tipo de Reporte
                 </label>
                 <select
                   value={filtros.tipoReporte}
-                  onChange={(e) => setFiltros({...filtros, tipoReporte: e.target.value})}
+                  onChange={(e) => setFiltros({ ...filtros, tipoReporte: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="detallado">Detallado</option>
@@ -2418,14 +2403,14 @@ const GeneradorReporteModal: React.FC<GeneradorReporteModalProps> = ({
                   <option value="ejecutivo">Ejecutivo</option>
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Formato de Salida
                 </label>
                 <select
                   value={filtros.formato}
-                  onChange={(e) => setFiltros({...filtros, formato: e.target.value})}
+                  onChange={(e) => setFiltros({ ...filtros, formato: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="pdf">PDF</option>
@@ -2467,7 +2452,7 @@ const GeneradorReporteModal: React.FC<GeneradorReporteModalProps> = ({
               </div>
             </div>
           </div>
-          
+
           <div className="flex justify-end space-x-3 pt-6 border-t mt-6">
             <button
               onClick={onClose}
@@ -2542,7 +2527,7 @@ const ProgramarReporteModal: React.FC<ProgramarReporteModalProps> = ({
           <h2 className="text-xl font-semibold text-gray-900 mb-6">
             Programar Reporte Automático
           </h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -2552,7 +2537,7 @@ const ProgramarReporteModal: React.FC<ProgramarReporteModalProps> = ({
                 type="text"
                 required
                 value={formData.nombre}
-                onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="Ej: Reporte Mensual de Stock"
               />
@@ -2565,7 +2550,7 @@ const ProgramarReporteModal: React.FC<ProgramarReporteModalProps> = ({
                 </label>
                 <select
                   value={formData.tipo}
-                  onChange={(e) => setFormData({...formData, tipo: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   {tiposReporte.map((tipo) => (
@@ -2582,7 +2567,7 @@ const ProgramarReporteModal: React.FC<ProgramarReporteModalProps> = ({
                 </label>
                 <select
                   value={formData.frecuencia}
-                  onChange={(e) => setFormData({...formData, frecuencia: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, frecuencia: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="semanal">Semanal</option>
@@ -2599,7 +2584,7 @@ const ProgramarReporteModal: React.FC<ProgramarReporteModalProps> = ({
               <textarea
                 required
                 value={formData.destinatarios}
-                onChange={(e) => setFormData({...formData, destinatarios: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, destinatarios: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 rows={2}
                 placeholder="coordinadora@saludapurimac.gob.pe"
@@ -2612,14 +2597,14 @@ const ProgramarReporteModal: React.FC<ProgramarReporteModalProps> = ({
               </label>
               <select
                 value={formData.formato}
-                onChange={(e) => setFormData({...formData, formato: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, formato: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="pdf">PDF</option>
                 <option value="excel">Excel</option>
               </select>
             </div>
-            
+
             <div className="flex justify-end space-x-3 pt-6">
               <button
                 type="button"
@@ -2706,13 +2691,12 @@ const VisualizarReporteModal: React.FC<VisualizarReporteModalProps> = ({
                   <div className="text-sm font-medium text-gray-900">{item.porcentajeCritico}%</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    item.nivelCriticidad === 'agotado'
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${item.nivelCriticidad === 'agotado'
                       ? 'bg-red-100 text-red-800'
                       : item.nivelCriticidad === 'critico'
-                      ? 'bg-orange-100 text-orange-800'
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
+                        ? 'bg-orange-100 text-orange-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
                     {item.nivelCriticidad.toUpperCase()}
                   </span>
                 </td>
@@ -2845,15 +2829,14 @@ const VisualizarReporteModal: React.FC<VisualizarReporteModalProps> = ({
                   <div className="text-sm font-medium text-gray-900">{item.diasParaVencer} días</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    item.nivelUrgencia === 'inmediato'
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${item.nivelUrgencia === 'inmediato'
                       ? 'bg-red-100 text-red-800'
                       : item.nivelUrgencia === 'urgente'
-                      ? 'bg-orange-100 text-orange-800'
-                      : item.nivelUrgencia === 'atencion'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}>
+                        ? 'bg-orange-100 text-orange-800'
+                        : item.nivelUrgencia === 'atencion'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-green-100 text-green-800'
+                    }`}>
                     {item.nivelUrgencia.toUpperCase()}
                   </span>
                 </td>
@@ -2927,13 +2910,12 @@ const VisualizarReporteModal: React.FC<VisualizarReporteModalProps> = ({
                   <div className="text-sm font-medium text-red-600">{item.diasVencido} días</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    item.nivelCriticidad === 'extremo'
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${item.nivelCriticidad === 'extremo'
                       ? 'bg-red-100 text-red-800'
                       : item.nivelCriticidad === 'muy_critico'
-                      ? 'bg-orange-100 text-orange-800'
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
+                        ? 'bg-orange-100 text-orange-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
                     {item.nivelCriticidad.toUpperCase().replace('_', ' ')}
                   </span>
                 </td>
