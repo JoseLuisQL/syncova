@@ -119,8 +119,8 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
     if (tipo === 'centro' && !formData.centroAcopioId) {
       newErrors.centroAcopioId = 'Seleccione un centro';
     }
-    if (formData.multiplicador <= 0) {
-      newErrors.multiplicador = 'Debe ser mayor a 0';
+    if (formData.multiplicador < 0) {
+      newErrors.multiplicador = 'Debe ser mayor o igual a 0';
     }
 
     setErrors(newErrors);
@@ -312,7 +312,7 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
               <input
                 type="number"
                 step="0.1"
-                min="0.1"
+                min="0"
                 value={formData.multiplicador}
                 onChange={(e) => handleChange('multiplicador', parseFloat(e.target.value) || 0)}
                 className={`w-full px-3 py-2.5 border rounded-lg text-sm

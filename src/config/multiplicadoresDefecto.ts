@@ -332,8 +332,8 @@ export const validarConfiguracion = (config: ConfiguracionMultiplicadorDefecto):
       errores.push(`Jeringa ${index + 1}: La capacidad es requerida`);
     }
 
-    if (jeringa.multiplicador <= 0) {
-      errores.push(`Jeringa ${index + 1}: El multiplicador debe ser mayor a 0`);
+    if (jeringa.multiplicador < 0) {
+      errores.push(`Jeringa ${index + 1}: El multiplicador debe ser mayor o igual a 0`);
     }
 
     if (jeringa.prioridad <= 0) {

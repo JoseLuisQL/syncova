@@ -182,8 +182,8 @@ export class ConfiguracionJeringaVacunaService {
       }
 
       // Validar datos de actualización
-      if (data.multiplicador !== undefined && data.multiplicador <= 0) {
-        throw createError('El multiplicador debe ser mayor a 0', 400);
+      if (data.multiplicador !== undefined && data.multiplicador < 0) {
+        throw createError('El multiplicador debe ser mayor o igual a 0', 400);
       }
 
       if (data.prioridad !== undefined && data.prioridad <= 0) {
@@ -459,8 +459,8 @@ export class ConfiguracionJeringaVacunaService {
     }
 
     // Validar multiplicador
-    if (data.multiplicador <= 0) {
-      throw createError('El multiplicador debe ser mayor a 0', 400);
+    if (data.multiplicador < 0) {
+      throw createError('El multiplicador debe ser mayor o igual a 0', 400);
     }
 
     // Validar prioridad si se proporciona
@@ -632,26 +632,26 @@ export class ConfiguracionJeringaVacunaService {
       // Calcular jeringas necesarias según configuración con información completa
       // CORRECCIÓN: El multiplicador debe aplicarse a la cantidad de vacunas, no a las dosis totales
       // Esto evita el bug donde se deducían 10x más jeringas de las necesarias
-      const jeringasCalculadas: JeringasCalculadas[] = configResult.data.map(config => {
-        const jeringaInfo = jeringasMap.get(config.jeringaId);
-        // Cálculo correcto: cantidadVacunas * multiplicador
-        // El multiplicador representa "jeringas por unidad de vacuna", no "jeringas por dosis"
-        const cantidadJeringas = Math.ceil(cantidadVacunas * config.multiplicador);
+      const jeringasCalculadas: JeringasCalculadas[] = configResult.data
+        .filter(config => config.multiplicador > 0)
+        .map(config => {
+          const jeringaInfo = jeringasMap.get(config.jeringaId);
+          const cantidadJeringas = Math.ceil(cantidadVacunas * config.multiplicador);
 
-        return {
-          jeringaId: config.jeringaId,
-          jeringa: jeringaInfo ? {
-            id: jeringaInfo.id,
-            tipo: jeringaInfo.tipo,
-            capacidad: jeringaInfo.capacidad,
-            color: jeringaInfo.color
-          } : undefined,
-          cantidad: cantidadJeringas,
-          multiplicador: config.multiplicador,
-          prioridad: config.prioridad,
-          origen: config.origen
-        };
-      });
+          return {
+            jeringaId: config.jeringaId,
+            jeringa: jeringaInfo ? {
+              id: jeringaInfo.id,
+              tipo: jeringaInfo.tipo,
+              capacidad: jeringaInfo.capacidad,
+              color: jeringaInfo.color
+            } : undefined,
+            cantidad: cantidadJeringas,
+            multiplicador: config.multiplicador,
+            prioridad: config.prioridad,
+            origen: config.origen
+          };
+        });
 
       return {
         success: true,
@@ -680,8 +680,8 @@ export class ConfiguracionJeringaVacunaService {
       }
 
       // Validar datos de actualización
-      if (data.multiplicador !== undefined && data.multiplicador <= 0) {
-        throw createError('El multiplicador debe ser mayor a 0', 400);
+      if (data.multiplicador !== undefined && data.multiplicador < 0) {
+        throw createError('El multiplicador debe ser mayor o igual a 0', 400);
       }
 
       if (data.prioridad !== undefined && data.prioridad <= 0) {

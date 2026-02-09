@@ -314,6 +314,11 @@ export class ValeStockService {
     const stocksAfectados: StockAfectacion[] = [];
 
     for (const jeringaConfig of configResult.data) {
+      if (jeringaConfig.multiplicador === 0) {
+        console.log(`⏭️ [ValeStockService] Omitiendo jeringa ${jeringaConfig.jeringaId} (multiplicador=0)`);
+        continue;
+      }
+
       console.log(`🔄 [ValeStockService] Procesando jeringa consolidada: ${jeringaConfig.jeringaId}, multiplicador: ${jeringaConfig.multiplicador || 1}`);
 
       try {
@@ -505,6 +510,11 @@ export class ValeStockService {
     const stocksAfectados: StockAfectacion[] = [];
 
     for (const jeringaConfig of configResult.data) {
+      if (jeringaConfig.cantidad === 0) {
+        console.log(`⏭️ [ValeStockService] Omitiendo jeringa ${jeringaConfig.jeringaId} (cantidad=0, multiplicador=0)`);
+        continue;
+      }
+
       console.log(`🔄 [ValeStockService] Procesando jeringa: ${jeringaConfig.jeringaId}, cantidad: ${jeringaConfig.cantidad}, multiplicador: ${jeringaConfig.multiplicador || 1}`);
 
       try {

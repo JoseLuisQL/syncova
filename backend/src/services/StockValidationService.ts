@@ -287,21 +287,16 @@ export class StockValidationService {
         requirement.vaccineId,
         requirement.quantity,
         centroAcopioId,
-        true // Use fallback to ensure we always get some configuration
+        false // Don't use fallback - if no config or all multiplicador=0, skip syringe validation
       );
 
       if (!configResult.success || !configResult.data || configResult.data.length === 0) {
-        warnings.push(
-          `No se encontró configuración de jeringas para ${vaccine.nombre}. ` +
-          `Se usará configuración por defecto.`
-        );
-
-        // Use default fallback: 1:1 ratio with available syringes
-        const defaultSyringes = await this.getDefaultSyringeConfiguration(totalDoses);
-        details.push(...defaultSyringes);
+        // No syringe configuration or all have multiplicador=0 - skip validation
       } else {
-        // Validate each configured syringe
+        // Validate each configured syringe (skip those with quantity 0, i.e. multiplicador=0)
         for (const syringeConfig of configResult.data) {
+          if (syringeConfig.cantidad === 0) continue;
+
           const syringeDetail = await this.validateSpecificSyringeStock(
             syringeConfig.jeringaId,
             syringeConfig.cantidad

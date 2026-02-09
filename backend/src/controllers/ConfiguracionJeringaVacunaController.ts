@@ -127,8 +127,8 @@ export class ConfiguracionJeringaVacunaController {
 
       // Validar multiplicador
       const multiplicadorNum = parseFloat(multiplicador);
-      if (isNaN(multiplicadorNum) || multiplicadorNum <= 0) {
-        errorResponse(res, 'El multiplicador debe ser un número mayor a 0', 400);
+      if (isNaN(multiplicadorNum) || multiplicadorNum < 0) {
+        errorResponse(res, 'El multiplicador debe ser un número mayor o igual a 0', 400);
         return;
       }
 
@@ -183,8 +183,8 @@ export class ConfiguracionJeringaVacunaController {
       // Validar multiplicador si se proporciona
       if (multiplicador !== undefined) {
         const multiplicadorNum = parseFloat(multiplicador);
-        if (isNaN(multiplicadorNum) || multiplicadorNum <= 0) {
-          errorResponse(res, 'El multiplicador debe ser un número mayor a 0', 400);
+        if (isNaN(multiplicadorNum) || multiplicadorNum < 0) {
+          errorResponse(res, 'El multiplicador debe ser un número mayor o igual a 0', 400);
           return;
         }
         data.multiplicador = multiplicadorNum;
@@ -375,8 +375,8 @@ export class ConfiguracionJeringaVacunaController {
 
       // Validar multiplicador
       const multiplicadorNum = parseFloat(multiplicador);
-      if (isNaN(multiplicadorNum) || multiplicadorNum <= 0) {
-        errorResponse(res, 'El multiplicador debe ser un número mayor a 0', 400);
+      if (isNaN(multiplicadorNum) || multiplicadorNum < 0) {
+        errorResponse(res, 'El multiplicador debe ser un número mayor o igual a 0', 400);
         return;
       }
 
@@ -432,8 +432,8 @@ export class ConfiguracionJeringaVacunaController {
       // Validar multiplicador si se proporciona
       if (multiplicador !== undefined) {
         const multiplicadorNum = parseFloat(multiplicador);
-        if (isNaN(multiplicadorNum) || multiplicadorNum <= 0) {
-          errorResponse(res, 'El multiplicador debe ser un número mayor a 0', 400);
+        if (isNaN(multiplicadorNum) || multiplicadorNum < 0) {
+          errorResponse(res, 'El multiplicador debe ser un número mayor o igual a 0', 400);
           return;
         }
         data.multiplicador = multiplicadorNum;
