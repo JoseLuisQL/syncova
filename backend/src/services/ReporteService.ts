@@ -1819,29 +1819,45 @@ export class ReporteService {
         fechaFinObj = new Date(fechaFin + 'T23:59:59.999Z');
       }
 
+      // Extraer mes y año ANTES del desplazamiento (para evitar problemas con días que no existen en el mes destino)
+      // Por ejemplo: 2026-01-31 + 1 mes con setUTCMonth() = 2026-03-03 (febrero no tiene 31 días)
+      const mesInicioUsuario = fechaInicioObj.getUTCMonth() + 1; // 1-12
+      const anioInicioUsuario = fechaInicioObj.getUTCFullYear();
+      const mesFinUsuario = fechaFinObj.getUTCMonth() + 1; // 1-12
+      const anioFinUsuario = fechaFinObj.getUTCFullYear();
+
+      console.log(`📅 [Usuario seleccionó] Rango: ${mesInicioUsuario}/${anioInicioUsuario} - ${mesFinUsuario}/${anioFinUsuario}`);
+
       // DESPLAZAMIENTO DE FECHAS: +1 mes para consistencia con módulo de Movimientos
       // Cuando el usuario selecciona Diciembre 2025, debe buscar datos de Enero 2026
-      console.log(`📅 [Desplazamiento] Usuario seleccionó: ${fechaInicioObj.toISOString()} - ${fechaFinObj.toISOString()}`);
-      fechaInicioObj.setUTCMonth(fechaInicioObj.getUTCMonth() + 1);
-      fechaFinObj.setUTCMonth(fechaFinObj.getUTCMonth() + 1);
-      console.log(`📅 [Desplazamiento] Buscando movimientos de: ${fechaInicioObj.toISOString()} - ${fechaFinObj.toISOString()}`);
+      // Usamos aritmética de meses directa para evitar problemas con días inválidos
+      const desplazarMes = (mes: number, anio: number): { mes: number; anio: number } => {
+        let nuevoMes = mes + 1;
+        let nuevoAnio = anio;
+        if (nuevoMes > 12) {
+          nuevoMes = 1;
+          nuevoAnio++;
+        }
+        return { mes: nuevoMes, anio: nuevoAnio };
+      };
 
-      const mesInicio = fechaInicioObj.getUTCMonth() + 1;
-      const anioInicio = fechaInicioObj.getUTCFullYear();
-      const mesFin = fechaFinObj.getUTCMonth() + 1;
-      const anioFin = fechaFinObj.getUTCFullYear();
+      const inicioDesplazado = desplazarMes(mesInicioUsuario, anioInicioUsuario);
+      const finDesplazado = desplazarMes(mesFinUsuario, anioFinUsuario);
 
-      console.log('📅 Procesamiento de fechas:');
-      console.log(`  - Fecha inicio: ${fechaInicio instanceof Date ? fechaInicio.toISOString() : fechaInicio} -> ${fechaInicioObj.toISOString()} -> Mes: ${mesInicio}, Año: ${anioInicio}`);
-      console.log(`  - Fecha fin: ${fechaFin instanceof Date ? fechaFin.toISOString() : fechaFin} -> ${fechaFinObj.toISOString()} -> Mes: ${mesFin}, Año: ${anioFin}`);
+      const mesInicio = inicioDesplazado.mes;
+      const anioInicio = inicioDesplazado.anio;
+      const mesFin = finDesplazado.mes;
+      const anioFin = finDesplazado.anio;
 
-      // Construir condiciones WHERE
+      console.log(`📅 [Desplazamiento] Buscando movimientos de: ${mesInicio}/${anioInicio} - ${mesFin}/${anioFin}`);
+
+      // Construir condiciones WHERE para movimientos (con desplazamiento - para Salidas y Stock)
       const whereConditions: any = {
         OR: []
       };
 
-      // Agregar condiciones para cada mes en el rango
-      console.log('🔍 Construyendo condiciones de consulta por mes:');
+      // Agregar condiciones para cada mes en el rango DESPLAZADO (para Salidas y Stock)
+      console.log('🔍 Construyendo condiciones de consulta por mes (desplazado):');
       for (let anio = anioInicio; anio <= anioFin; anio++) {
         const mesInicioAnio = anio === anioInicio ? mesInicio : 1;
         const mesFinAnio = anio === anioFin ? mesFin : 12;
@@ -1855,9 +1871,31 @@ export class ReporteService {
         }
       }
 
+      // Construir condiciones WHERE para ENTREGAS (SIN desplazamiento - mes original del usuario)
+      const whereConditionsEntregas: any = {
+        OR: []
+      };
+
+      console.log('🔍 Construyendo condiciones para ENTREGAS (mes original del usuario):');
+      for (let anio = anioInicioUsuario; anio <= anioFinUsuario; anio++) {
+        const mesInicioAnio = anio === anioInicioUsuario ? mesInicioUsuario : 1;
+        const mesFinAnio = anio === anioFinUsuario ? mesFinUsuario : 12;
+
+        for (let mes = mesInicioAnio; mes <= mesFinAnio; mes++) {
+          console.log(`  - Incluyendo ENTREGA: Año ${anio}, Mes ${mes}`);
+          whereConditionsEntregas.OR.push({
+            mes: mes,
+            anio: anio
+          });
+        }
+      }
+
       // Filtro por centro de acopio si se especifica
       if (centroAcopioId && centroAcopioId !== 'todos') {
         whereConditions.establecimiento = {
+          centroAcopioId
+        };
+        whereConditionsEntregas.establecimiento = {
           centroAcopioId
         };
       }
@@ -1871,11 +1909,19 @@ export class ReporteService {
           ...whereConditions.establecimiento,
           estado: 'activo'
         };
+        whereConditionsEntregas.vacuna = {
+          estado: 'activo'
+        };
+        whereConditionsEntregas.establecimiento = {
+          ...whereConditionsEntregas.establecimiento,
+          estado: 'activo'
+        };
       }
 
-      console.log('📋 Condiciones de consulta:', JSON.stringify(whereConditions, null, 2));
+      console.log('📋 Condiciones de consulta (desplazado):', JSON.stringify(whereConditions, null, 2));
+      console.log('📋 Condiciones de consulta ENTREGAS (original):', JSON.stringify(whereConditionsEntregas, null, 2));
 
-      // Obtener todos los movimientos en el rango de fechas
+      // Obtener movimientos del mes DESPLAZADO (para Salidas y Stock)
       const movimientos = await prisma.movimientoVacuna.findMany({
         where: whereConditions,
         include: {
@@ -1902,7 +1948,29 @@ export class ReporteService {
         ]
       });
 
-      console.log(`📊 Se encontraron ${movimientos.length} movimientos`);
+      console.log(`📊 Se encontraron ${movimientos.length} movimientos (para Salidas/Stock)`);
+
+      // Obtener movimientos del mes ORIGINAL (para Entregas - SIN desplazamiento)
+      const movimientosEntregas = await prisma.movimientoVacuna.findMany({
+        where: whereConditionsEntregas,
+        select: {
+          establecimientoId: true,
+          vacunaId: true,
+          entrega: true,
+          mes: true,
+          anio: true
+        }
+      });
+
+      console.log(`📊 Se encontraron ${movimientosEntregas.length} movimientos para ENTREGAS (mes original)`);
+
+      // Crear mapa de entregas por establecimiento y vacuna (del mes ORIGINAL)
+      const entregasMap = new Map<string, number>();
+      for (const mov of movimientosEntregas) {
+        const key = `${mov.establecimientoId}-${mov.vacunaId}`;
+        const entregaActual = entregasMap.get(key) || 0;
+        entregasMap.set(key, entregaActual + mov.entrega);
+      }
 
       // Agrupar por establecimiento
       const establecimientosMap = new Map<string, any>();
@@ -1932,10 +2000,14 @@ export class ReporteService {
         const vacunaId = mov.vacunaId;
 
         if (!establecimiento.vacunas.has(vacunaId)) {
+          // Obtener entrega del mes ORIGINAL (sin desplazamiento) desde el mapa
+          const keyEntrega = `${establecimientoId}-${vacunaId}`;
+          const entregaDelMesOriginal = entregasMap.get(keyEntrega) || 0;
+
           establecimiento.vacunas.set(vacunaId, {
             vacunaId: mov.vacunaId,
             vacunaNombre: mov.vacuna.nombre,
-            totalEntrega: 0,
+            totalEntrega: entregaDelMesOriginal, // Entrega del mes ORIGINAL (sin desplazar)
             totalSalidas: 0,
             stock: 0,
             movimientosPorMes: []
@@ -1944,8 +2016,8 @@ export class ReporteService {
 
         const vacunaData = establecimiento.vacunas.get(vacunaId)!;
 
-        // Acumular entregas y salidas
-        vacunaData.totalEntrega += mov.entrega;
+        // Acumular SOLO salidas de los movimientos del mes desplazado
+        // La entrega ya se asignó del mes original (sin desplazamiento)
         vacunaData.totalSalidas += (mov.salida + mov.transSalida);
 
         // Guardar movimiento para calcular stock del último mes
