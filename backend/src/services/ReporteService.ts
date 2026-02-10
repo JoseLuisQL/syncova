@@ -1920,19 +1920,78 @@ export class ReporteService {
         }
       });
 
-      // Mapa de entregas acumuladas y stock del ultimo mes (meses originales)
+      // Mapa de entregas acumuladas (meses originales)
       const entregasMap = new Map<string, number>();
-      const stockMap = new Map<string, { mes: number; anio: number; stock: number }>();
+      // Mapa de datos base del ultimo mes por establecimiento/vacuna (para stock)
+      const baseStockMap = new Map<string, { mes: number; anio: number; saldoAnterior: number; transIngreso: number; salida: number; transSalida: number }>();
+
       for (const mov of movimientosOriginales) {
         const key = `${mov.establecimientoId}-${mov.vacunaId}`;
-        // Acumular entregas
         entregasMap.set(key, (entregasMap.get(key) || 0) + mov.entrega);
-        // Stock del ultimo mes: formula identica al modulo de Movimientos
-        const stock = mov.saldoAnterior + mov.transIngreso - mov.salida - mov.transSalida + mov.entrega;
-        const prev = stockMap.get(key);
+        // Guardar datos base del ultimo mes para calcular stock despues
+        const prev = baseStockMap.get(key);
         if (!prev || mov.anio > prev.anio || (mov.anio === prev.anio && mov.mes >= prev.mes)) {
-          stockMap.set(key, { mes: mov.mes, anio: mov.anio, stock });
+          baseStockMap.set(key, {
+            mes: mov.mes, anio: mov.anio,
+            saldoAnterior: mov.saldoAnterior, transIngreso: mov.transIngreso,
+            salida: mov.salida, transSalida: mov.transSalida
+          });
         }
+      }
+
+      // 3) Consulta de entregas con vale generado para el ultimo mes de cada establecimiento/vacuna
+      // Recopilar todos los meses unicos que necesitamos consultar
+      const mesesParaVales = new Map<string, { mes: number; anio: number }>();
+      for (const [key, base] of baseStockMap) {
+        const mesAnioKey = `${base.mes}-${base.anio}`;
+        if (!mesesParaVales.has(mesAnioKey)) {
+          mesesParaVales.set(mesAnioKey, { mes: base.mes, anio: base.anio });
+        }
+      }
+
+      // Consultar vales generados para todos los meses relevantes
+      const valeConditions: any[] = [];
+      for (const { mes, anio } of mesesParaVales.values()) {
+        valeConditions.push({ mes, anio });
+      }
+
+      const valeDetalles = valeConditions.length > 0 ? await prisma.valeDetalle.findMany({
+        where: {
+          valeEntrega: {
+            OR: valeConditions,
+            estado: { in: ['generado', 'impreso', 'entregado'] }
+          },
+          ...(centroAcopioId && centroAcopioId !== 'todos' ? {
+            establecimiento: { centroAcopioId }
+          } : {})
+        },
+        select: {
+          establecimientoId: true,
+          vacunaId: true,
+          cantidadProgramada: true,
+          cantidadAdicional: true,
+          valeEntrega: {
+            select: { mes: true, anio: true }
+          }
+        }
+      }) : [];
+
+      // Mapa de entregas con vale: key = estId-vacId-mes-anio
+      const entregasConValeMap = new Map<string, number>();
+      for (const detalle of valeDetalles) {
+        const key = `${detalle.establecimientoId}-${detalle.vacunaId}-${detalle.valeEntrega.mes}-${detalle.valeEntrega.anio}`;
+        const cantidad = (detalle.cantidadProgramada || 0) + (detalle.cantidadAdicional || 0);
+        entregasConValeMap.set(key, (entregasConValeMap.get(key) || 0) + cantidad);
+      }
+
+      // Calcular stock final por establecimiento/vacuna
+      // Stock = saldoAnterior + transIngreso + (entregas con vale generado) - salida - transSalida
+      const stockMap = new Map<string, number>();
+      for (const [key, base] of baseStockMap) {
+        const valeKey = `${key}-${base.mes}-${base.anio}`;
+        const entregaConVale = entregasConValeMap.get(valeKey) || 0;
+        const stock = base.saldoAnterior + base.transIngreso + entregaConVale - base.salida - base.transSalida;
+        stockMap.set(key, stock);
       }
 
       // Agrupar datos desplazados por establecimiento/vacuna
@@ -1988,7 +2047,7 @@ export class ReporteService {
             vacunaNombre: vd.vacunaNombre,
             totalEntrega: entregasMap.get(key) || 0,
             totalSalidas: vd.totalSalidas,
-            stock: stockMap.get(key)?.stock || 0
+            stock: stockMap.get(key) || 0
           };
         }
 
