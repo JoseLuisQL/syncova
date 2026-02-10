@@ -1778,12 +1778,25 @@ export class ReporteService {
 
   /**
    * Generar reporte de movimientos por EESS
+   *
+   * Modelo de datos de MovimientoVacuna:
+   * - El campo `salida` en mes=N registra el consumo real del mes N-1
+   *   (en febrero se registran las salidas de enero)
+   * - El campo `entrega` en mes=N corresponde a la entrega del propio mes N
+   * - El stock en el modulo principal se calcula como:
+   *   stock = saldoAnterior + transIngreso - salida - transSalida + entrega
+   *
+   * Por lo tanto, para un rango de fechas del usuario (ej: Ene-Feb 2026):
+   * - Salidas: se consultan los meses desplazados +1 (Feb-Mar) para obtener
+   *   las salidas reales de Ene-Feb
+   * - Entregas: se consultan los meses originales (Ene-Feb)
+   * - Stock: se usa el ultimo mes desplazado, con la misma formula del modulo principal
    */
   static async generarMovimientosPorEESS(
     filters: MovimientosPorEESSFilters
   ): Promise<ServiceResult<MovimientosPorEESSItem[]>> {
     try {
-      console.log('🔄 Generando reporte de movimientos por EESS:', filters);
+      console.log('Generando reporte de movimientos por EESS:', filters);
 
       const {
         fechaInicio,
@@ -1792,7 +1805,6 @@ export class ReporteService {
         incluirInactivos = false
       } = filters;
 
-      // Validar fechas
       if (!fechaInicio || !fechaFin) {
         return {
           success: false,
@@ -1800,8 +1812,7 @@ export class ReporteService {
         };
       }
 
-      // Calcular rango de meses basado en las fechas
-      // Manejar tanto strings como Date objects
+      // Parsear fechas
       let fechaInicioObj: Date;
       let fechaFinObj: Date;
 
@@ -1819,121 +1830,63 @@ export class ReporteService {
         fechaFinObj = new Date(fechaFin + 'T23:59:59.999Z');
       }
 
-      // Extraer mes y año ANTES del desplazamiento (para evitar problemas con días que no existen en el mes destino)
-      // Por ejemplo: 2026-01-31 + 1 mes con setUTCMonth() = 2026-03-03 (febrero no tiene 31 días)
-      const mesInicioUsuario = fechaInicioObj.getUTCMonth() + 1; // 1-12
+      // Meses originales del usuario
+      const mesInicioUsuario = fechaInicioObj.getUTCMonth() + 1;
       const anioInicioUsuario = fechaInicioObj.getUTCFullYear();
-      const mesFinUsuario = fechaFinObj.getUTCMonth() + 1; // 1-12
+      const mesFinUsuario = fechaFinObj.getUTCMonth() + 1;
       const anioFinUsuario = fechaFinObj.getUTCFullYear();
 
-      console.log(`📅 [Usuario seleccionó] Rango: ${mesInicioUsuario}/${anioInicioUsuario} - ${mesFinUsuario}/${anioFinUsuario}`);
-
-      // DESPLAZAMIENTO DE FECHAS: +1 mes para consistencia con módulo de Movimientos
-      // Cuando el usuario selecciona Diciembre 2025, debe buscar datos de Enero 2026
-      // Usamos aritmética de meses directa para evitar problemas con días inválidos
-      const desplazarMes = (mes: number, anio: number): { mes: number; anio: number } => {
-        let nuevoMes = mes + 1;
-        let nuevoAnio = anio;
-        if (nuevoMes > 12) {
-          nuevoMes = 1;
-          nuevoAnio++;
-        }
-        return { mes: nuevoMes, anio: nuevoAnio };
+      // Desplazar +1 mes para salidas y stock
+      const desplazarMes = (mes: number, anio: number) => {
+        let m = mes + 1, a = anio;
+        if (m > 12) { m = 1; a++; }
+        return { mes: m, anio: a };
       };
 
-      const inicioDesplazado = desplazarMes(mesInicioUsuario, anioInicioUsuario);
-      const finDesplazado = desplazarMes(mesFinUsuario, anioFinUsuario);
+      const inicioDesp = desplazarMes(mesInicioUsuario, anioInicioUsuario);
+      const finDesp = desplazarMes(mesFinUsuario, anioFinUsuario);
 
-      const mesInicio = inicioDesplazado.mes;
-      const anioInicio = inicioDesplazado.anio;
-      const mesFin = finDesplazado.mes;
-      const anioFin = finDesplazado.anio;
+      console.log(`Usuario: ${mesInicioUsuario}/${anioInicioUsuario} - ${mesFinUsuario}/${anioFinUsuario}`);
+      console.log(`Desplazado (salidas/stock): ${inicioDesp.mes}/${inicioDesp.anio} - ${finDesp.mes}/${finDesp.anio}`);
 
-      console.log(`📅 [Desplazamiento] Buscando movimientos de: ${mesInicio}/${anioInicio} - ${mesFin}/${anioFin}`);
-
-      // Construir condiciones WHERE para movimientos (con desplazamiento - para Salidas y Stock)
-      const whereConditions: any = {
-        OR: []
-      };
-
-      // Agregar condiciones para cada mes en el rango DESPLAZADO (para Salidas y Stock)
-      console.log('🔍 Construyendo condiciones de consulta por mes (desplazado):');
-      for (let anio = anioInicio; anio <= anioFin; anio++) {
-        const mesInicioAnio = anio === anioInicio ? mesInicio : 1;
-        const mesFinAnio = anio === anioFin ? mesFin : 12;
-
-        for (let mes = mesInicioAnio; mes <= mesFinAnio; mes++) {
-          console.log(`  - Incluyendo: Año ${anio}, Mes ${mes}`);
-          whereConditions.OR.push({
-            mes: mes,
-            anio: anio
-          });
-        }
-      }
-
-      // Construir condiciones WHERE para ENTREGAS (SIN desplazamiento - mes original del usuario)
-      const whereConditionsEntregas: any = {
-        OR: []
-      };
-
-      console.log('🔍 Construyendo condiciones para ENTREGAS (mes original del usuario):');
-      for (let anio = anioInicioUsuario; anio <= anioFinUsuario; anio++) {
-        const mesInicioAnio = anio === anioInicioUsuario ? mesInicioUsuario : 1;
-        const mesFinAnio = anio === anioFinUsuario ? mesFinUsuario : 12;
-
-        for (let mes = mesInicioAnio; mes <= mesFinAnio; mes++) {
-          console.log(`  - Incluyendo ENTREGA: Año ${anio}, Mes ${mes}`);
-          whereConditionsEntregas.OR.push({
-            mes: mes,
-            anio: anio
-          });
-        }
-      }
-
-      // Filtro por centro de acopio si se especifica
+      // Filtros comunes de establecimiento/vacuna
+      const filtrosRelacion: any = {};
       if (centroAcopioId && centroAcopioId !== 'todos') {
-        whereConditions.establecimiento = {
-          centroAcopioId
-        };
-        whereConditionsEntregas.establecimiento = {
-          centroAcopioId
-        };
+        filtrosRelacion.establecimiento = { centroAcopioId };
       }
-
-      // Filtro por estado si no incluir inactivos
       if (!incluirInactivos) {
-        whereConditions.vacuna = {
-          estado: 'activo'
-        };
-        whereConditions.establecimiento = {
-          ...whereConditions.establecimiento,
-          estado: 'activo'
-        };
-        whereConditionsEntregas.vacuna = {
-          estado: 'activo'
-        };
-        whereConditionsEntregas.establecimiento = {
-          ...whereConditionsEntregas.establecimiento,
+        filtrosRelacion.vacuna = { estado: 'activo' };
+        filtrosRelacion.establecimiento = {
+          ...filtrosRelacion.establecimiento,
           estado: 'activo'
         };
       }
 
-      console.log('📋 Condiciones de consulta (desplazado):', JSON.stringify(whereConditions, null, 2));
-      console.log('📋 Condiciones de consulta ENTREGAS (original):', JSON.stringify(whereConditionsEntregas, null, 2));
+      // --- Helper para construir OR de meses ---
+      const buildMesesOR = (mI: number, aI: number, mF: number, aF: number) => {
+        const or: any[] = [];
+        for (let a = aI; a <= aF; a++) {
+          const desde = a === aI ? mI : 1;
+          const hasta = a === aF ? mF : 12;
+          for (let m = desde; m <= hasta; m++) {
+            or.push({ mes: m, anio: a });
+          }
+        }
+        return or;
+      };
 
-      // Obtener movimientos del mes DESPLAZADO (para Salidas y Stock)
-      const movimientos = await prisma.movimientoVacuna.findMany({
-        where: whereConditions,
+      // 1) Consulta DESPLAZADA (+1 mes): para obtener las salidas reales
+      const movimientosDesplazados = await prisma.movimientoVacuna.findMany({
+        where: {
+          OR: buildMesesOR(inicioDesp.mes, inicioDesp.anio, finDesp.mes, finDesp.anio),
+          ...filtrosRelacion
+        },
         include: {
           establecimiento: {
             include: {
               centroAcopio: {
                 include: {
-                  microred: {
-                    include: {
-                      red: true
-                    }
-                  }
+                  microred: { include: { red: true } }
                 }
               }
             }
@@ -1948,143 +1901,106 @@ export class ReporteService {
         ]
       });
 
-      console.log(`📊 Se encontraron ${movimientos.length} movimientos (para Salidas/Stock)`);
-
-      // Obtener movimientos del mes ORIGINAL (para Entregas - SIN desplazamiento)
-      const movimientosEntregas = await prisma.movimientoVacuna.findMany({
-        where: whereConditionsEntregas,
+      // 2) Consulta ORIGINAL (sin desplazar): para entregas y stock
+      const movimientosOriginales = await prisma.movimientoVacuna.findMany({
+        where: {
+          OR: buildMesesOR(mesInicioUsuario, anioInicioUsuario, mesFinUsuario, anioFinUsuario),
+          ...filtrosRelacion
+        },
         select: {
           establecimientoId: true,
           vacunaId: true,
-          entrega: true,
           mes: true,
-          anio: true
+          anio: true,
+          entrega: true,
+          saldoAnterior: true,
+          transIngreso: true,
+          salida: true,
+          transSalida: true
         }
       });
 
-      console.log(`📊 Se encontraron ${movimientosEntregas.length} movimientos para ENTREGAS (mes original)`);
-
-      // Crear mapa de entregas por establecimiento y vacuna (del mes ORIGINAL)
+      // Mapa de entregas acumuladas y stock del ultimo mes (meses originales)
       const entregasMap = new Map<string, number>();
-      for (const mov of movimientosEntregas) {
+      const stockMap = new Map<string, { mes: number; anio: number; stock: number }>();
+      for (const mov of movimientosOriginales) {
         const key = `${mov.establecimientoId}-${mov.vacunaId}`;
-        const entregaActual = entregasMap.get(key) || 0;
-        entregasMap.set(key, entregaActual + mov.entrega);
+        // Acumular entregas
+        entregasMap.set(key, (entregasMap.get(key) || 0) + mov.entrega);
+        // Stock del ultimo mes: formula identica al modulo de Movimientos
+        const stock = mov.saldoAnterior + mov.transIngreso - mov.salida - mov.transSalida + mov.entrega;
+        const prev = stockMap.get(key);
+        if (!prev || mov.anio > prev.anio || (mov.anio === prev.anio && mov.mes >= prev.mes)) {
+          stockMap.set(key, { mes: mov.mes, anio: mov.anio, stock });
+        }
       }
 
-      // Agrupar por establecimiento
+      // Agrupar datos desplazados por establecimiento/vacuna
       const establecimientosMap = new Map<string, any>();
 
-      for (const mov of movimientos) {
-        const establecimientoId = mov.establecimientoId;
+      for (const mov of movimientosDesplazados) {
+        const estId = mov.establecimientoId;
 
-        if (!establecimientosMap.has(establecimientoId)) {
-          const centroAcopio = mov.establecimiento.centroAcopio;
-          const microred = centroAcopio?.microred;
-          const red = microred?.red;
-          
-          establecimientosMap.set(establecimientoId, {
-            establecimientoId: mov.establecimientoId,
+        if (!establecimientosMap.has(estId)) {
+          const ca = mov.establecimiento.centroAcopio;
+          const mr = ca?.microred;
+          const red = mr?.red;
+          establecimientosMap.set(estId, {
+            establecimientoId: estId,
             establecimientoNombre: mov.establecimiento.nombre,
-            centroAcopioId: centroAcopio?.id || '',
-            centroAcopioNombre: centroAcopio?.nombre || 'Sin Centro',
-            microredId: microred?.id || null,
-            microredNombre: microred?.nombre || null,
+            centroAcopioId: ca?.id || '',
+            centroAcopioNombre: ca?.nombre || 'Sin Centro',
+            microredId: mr?.id || null,
+            microredNombre: mr?.nombre || null,
             redId: red?.id || null,
             redNombre: red?.nombre || null,
             vacunas: new Map<string, any>()
           });
         }
 
-        const establecimiento = establecimientosMap.get(establecimientoId)!;
-        const vacunaId = mov.vacunaId;
+        const est = establecimientosMap.get(estId)!;
+        const vacId = mov.vacunaId;
 
-        if (!establecimiento.vacunas.has(vacunaId)) {
-          // Obtener entrega del mes ORIGINAL (sin desplazamiento) desde el mapa
-          const keyEntrega = `${establecimientoId}-${vacunaId}`;
-          const entregaDelMesOriginal = entregasMap.get(keyEntrega) || 0;
-
-          establecimiento.vacunas.set(vacunaId, {
+        if (!est.vacunas.has(vacId)) {
+          est.vacunas.set(vacId, {
             vacunaId: mov.vacunaId,
             vacunaNombre: mov.vacuna.nombre,
-            totalEntrega: entregaDelMesOriginal, // Entrega del mes ORIGINAL (sin desplazar)
-            totalSalidas: 0,
-            stock: 0,
-            movimientosPorMes: []
+            totalSalidas: 0
           });
         }
 
-        const vacunaData = establecimiento.vacunas.get(vacunaId)!;
+        const vd = est.vacunas.get(vacId)!;
 
-        // Acumular SOLO salidas de los movimientos del mes desplazado
-        // La entrega ya se asignó del mes original (sin desplazamiento)
-        vacunaData.totalSalidas += (mov.salida + mov.transSalida);
-
-        // Guardar movimiento para calcular stock del último mes
-        vacunaData.movimientosPorMes.push({
-          establecimientoId: mov.establecimientoId,
-          vacunaId: mov.vacunaId,
-          mes: mov.mes,
-          anio: mov.anio,
-          saldoAnterior: mov.saldoAnterior,
-          transIngreso: mov.transIngreso,
-          salida: mov.salida,
-          transSalida: mov.transSalida,
-          entrega: mov.entrega
-        });
+        // Acumular salidas de los meses desplazados
+        vd.totalSalidas += (mov.salida + mov.transSalida);
       }
 
-      // Procesar datos finales y calcular stock del mes seleccionado por el usuario
-      // IMPORTANTE: Usar mesInicio (primer mes del rango) porque corresponde al mes que el usuario selecciono
+      // Construir resultado final
       const reporteData: MovimientosPorEESSItem[] = [];
 
-      for (const [establecimientoId, establecimiento] of establecimientosMap) {
+      for (const [estId, est] of establecimientosMap) {
         const vacunasProcessed: { [vacunaId: string]: any } = {};
 
-        for (const [vacunaId, vacunaData] of establecimiento.vacunas) {
-          // Buscar el movimiento del mes seleccionado (mesInicio corresponde al mes del usuario)
-          // Si no existe, buscar el ultimo mes disponible en el rango
-          const movimientoMesSeleccionado = vacunaData.movimientosPorMes.find(
-            (m: any) => m.mes === mesInicio && m.anio === anioInicio
-          );
-          
-          // Si no hay movimiento para el mes seleccionado, ordenar y tomar el ultimo del rango
-          const movimientosOrdenados = vacunaData.movimientosPorMes.sort((a: any, b: any) => {
-            if (a.anio !== b.anio) return b.anio - a.anio;
-            return b.mes - a.mes;
-          });
-
-          // Calcular stock del mes seleccionado
-          // IMPORTANTE: La entrega que aparece en el movimiento es para el MES SIGUIENTE
-          // Por lo tanto, el stock del mes actual = SALDO_ANTERIOR + TRANS_INGRESO - SALIDA - TRANS_SALIDA
-          // NO se suma la entrega porque esa entrega es para el siguiente mes
-          let stockUltimoMes = 0;
-          const movParaStock = movimientoMesSeleccionado || movimientosOrdenados[0];
-          
-          if (movParaStock) {
-            // Stock = Saldo antes de la entrega (la entrega es para el mes siguiente)
-            stockUltimoMes = movParaStock.saldoAnterior + movParaStock.transIngreso -
-                           movParaStock.salida - movParaStock.transSalida;
-          }
-
-          vacunasProcessed[vacunaId] = {
-            vacunaId: vacunaData.vacunaId,
-            vacunaNombre: vacunaData.vacunaNombre,
-            totalEntrega: vacunaData.totalEntrega,
-            totalSalidas: vacunaData.totalSalidas,
-            stock: stockUltimoMes
+        for (const [vacId, vd] of est.vacunas) {
+          const key = `${estId}-${vacId}`;
+          vacunasProcessed[vacId] = {
+            vacunaId: vd.vacunaId,
+            vacunaNombre: vd.vacunaNombre,
+            totalEntrega: entregasMap.get(key) || 0,
+            totalSalidas: vd.totalSalidas,
+            stock: stockMap.get(key)?.stock || 0
           };
         }
 
         reporteData.push({
-          establecimientoId: establecimiento.establecimientoId,
-          establecimientoNombre: establecimiento.establecimientoNombre,
-          centroAcopioId: establecimiento.centroAcopioId,
-          centroAcopioNombre: establecimiento.centroAcopioNombre,
-          microredId: establecimiento.microredId,
-          microredNombre: establecimiento.microredNombre,
-          redId: establecimiento.redId,
-          redNombre: establecimiento.redNombre,
+          establecimientoId: est.establecimientoId,
+          establecimientoNombre: est.establecimientoNombre,
+          centroAcopioId: est.centroAcopioId,
+          centroAcopioNombre: est.centroAcopioNombre,
+          microredId: est.microredId,
+          microredNombre: est.microredNombre,
+          redId: est.redId,
+          redNombre: est.redNombre,
           vacunas: vacunasProcessed
         });
       }
