@@ -2030,8 +2030,8 @@ export class ReporteService {
 
         const vd = est.vacunas.get(vacId)!;
 
-        // Acumular salidas de los meses desplazados
-        vd.totalSalidas += (mov.salida + mov.transSalida);
+        // Acumular salidas de los meses desplazados (sin transferencias de salida)
+        vd.totalSalidas += mov.salida;
       }
 
       // Construir resultado final
