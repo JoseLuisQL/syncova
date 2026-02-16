@@ -483,7 +483,11 @@ export class ReporteMovimientosController {
         return;
       }
 
-      const reporteResult = await ReporteService.generarMovimientosPorEESS(filtros);
+      const reporteResult = await ReporteService.generarMovimientosPorEESS({
+        ...filtros,
+        usarSaldoSinEntregaParaStock: true,
+        usarTotalUltimoMesParaEntrega: true
+      });
       if (!reporteResult.success) {
         ResponseUtil.error(res, reporteResult.error || 'Error al generar datos del reporte', 500);
         return;

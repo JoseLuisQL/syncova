@@ -68,6 +68,8 @@ export interface MovimientosPorEESSFilters {
   fechaFin: Date;
   centroAcopioId?: string;
   incluirInactivos?: boolean;
+  usarSaldoSinEntregaParaStock?: boolean;
+  usarTotalUltimoMesParaEntrega?: boolean;
 }
 
 export interface StockVacunasEESSFilters {
@@ -1802,7 +1804,9 @@ export class ReporteService {
         fechaInicio,
         fechaFin,
         centroAcopioId,
-        incluirInactivos = false
+        incluirInactivos = false,
+        usarSaldoSinEntregaParaStock = false,
+        usarTotalUltimoMesParaEntrega = false
       } = filters;
 
       if (!fechaInicio || !fechaFin) {
@@ -1922,7 +1926,7 @@ export class ReporteService {
 
       // Mapa de entregas acumuladas (meses originales)
       const entregasMap = new Map<string, number>();
-      // Mapa de datos base del ultimo mes por establecimiento/vacuna (para stock)
+      // Mapa de datos base del ultimo mes por establecimiento/vacuna (para stock/total)
       const baseStockMap = new Map<string, { mes: number; anio: number; saldoAnterior: number; transIngreso: number; salida: number; transSalida: number }>();
 
       for (const mov of movimientosOriginales) {
@@ -1985,13 +1989,21 @@ export class ReporteService {
       }
 
       // Calcular stock final por establecimiento/vacuna
-      // Stock = saldoAnterior + transIngreso + (entregas con vale generado) - salida - transSalida
+      // - Modo estándar: saldoAnterior + transIngreso + entregaConVale - salida - transSalida
+      // - Modo saldo (sin entrega): saldoAnterior + transIngreso - salida - transSalida
       const stockMap = new Map<string, number>();
+      // Calcular TOTAL del último mes por establecimiento/vacuna
+      // TOTAL = saldoAnterior + transIngreso
+      const totalUltimoMesMap = new Map<string, number>();
+
       for (const [key, base] of baseStockMap) {
         const valeKey = `${key}-${base.mes}-${base.anio}`;
         const entregaConVale = entregasConValeMap.get(valeKey) || 0;
-        const stock = base.saldoAnterior + base.transIngreso + entregaConVale - base.salida - base.transSalida;
+        const stock = usarSaldoSinEntregaParaStock
+          ? base.saldoAnterior + base.transIngreso - base.salida - base.transSalida
+          : base.saldoAnterior + base.transIngreso + entregaConVale - base.salida - base.transSalida;
         stockMap.set(key, stock);
+        totalUltimoMesMap.set(key, base.saldoAnterior + base.transIngreso);
       }
 
       // Agrupar datos desplazados por establecimiento/vacuna
@@ -2045,7 +2057,9 @@ export class ReporteService {
           vacunasProcessed[vacId] = {
             vacunaId: vd.vacunaId,
             vacunaNombre: vd.vacunaNombre,
-            totalEntrega: entregasMap.get(key) || 0,
+            totalEntrega: usarTotalUltimoMesParaEntrega
+              ? (totalUltimoMesMap.get(key) || 0)
+              : (entregasMap.get(key) || 0),
             totalSalidas: vd.totalSalidas,
             stock: stockMap.get(key) || 0
           };
