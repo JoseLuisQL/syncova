@@ -2,7 +2,6 @@ import React, { useEffect, useCallback, useRef, Suspense, lazy } from 'react';
 import { useDashboard } from '../../hooks/useDashboard';
 import { useToastContext } from '../../contexts/ToastContext';
 
-import DashboardHeader from './DashboardHeader';
 import CentrosAcopioSection from './CentrosAcopioSection';
 import AlertasSection from './AlertasSection';
 import ActividadSection from './ActividadSection';
@@ -32,12 +31,10 @@ const Dashboard: React.FC = () => {
   const {
     loading,
     error,
-    lastUpdated,
     refresh,
     movimientosMensuales,
     stockPorVacuna,
     hasData,
-    isStale,
   } = useDashboard();
 
   const prevErrorRef = useRef<string | null>(null);
@@ -79,13 +76,6 @@ const Dashboard: React.FC = () => {
   return (
     <main className="min-h-screen bg-gray-50/60">
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <DashboardHeader
-          lastUpdated={lastUpdated}
-          isStale={isStale}
-          isLoading={loading}
-          onRefresh={handleRefresh}
-        />
-
         <Suspense fallback={<ChartSkeleton />}>
           <ChartSection
             movimientosMensuales={movimientosMensuales}
