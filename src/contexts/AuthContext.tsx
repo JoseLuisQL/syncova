@@ -162,6 +162,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkExistingAuth();
   }, []);
 
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      dispatch({ type: 'AUTH_LOGOUT' });
+    };
+
+    window.addEventListener('auth:logout', handleAuthLogout);
+
+    return () => {
+      window.removeEventListener('auth:logout', handleAuthLogout);
+    };
+  }, []);
+
   /**
    * Función de login
    */
