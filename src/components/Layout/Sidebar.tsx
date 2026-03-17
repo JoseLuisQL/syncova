@@ -2,7 +2,8 @@ import React, { memo, useMemo } from 'react';
 import { useApp } from '../../contexts/AppContext';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 import { usePermissions } from '../../hooks/usePermissions';
-import { Activity, ChevronLeft, ChevronRight, Building, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Building, X } from 'lucide-react';
+import { SivacLogo } from '../common/SivacLogo';
 import { MENU_SECTIONS } from './constants';
 
 const Sidebar: React.FC = memo(() => {
@@ -53,8 +54,8 @@ const Sidebar: React.FC = memo(() => {
         {/* Header con Logo */}
         <div className="h-16 flex items-center px-4 border-b border-gray-100">
           <div className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${sidebarCollapsed && !mobileMenuOpen ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'}`}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-md shadow-teal-500/20 flex-shrink-0">
-              <Activity className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 flex items-center justify-center flex-shrink-0 transition-transform hover:scale-105 duration-300">
+              <SivacLogo size={36} />
             </div>
             <div className="min-w-0">
               <h1 className="text-lg font-bold text-gray-800 tracking-tight">SIVAC</h1>
@@ -63,8 +64,8 @@ const Sidebar: React.FC = memo(() => {
           </div>
           
           {sidebarCollapsed && !mobileMenuOpen && (
-            <div className="hidden lg:flex w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 items-center justify-center shadow-md shadow-teal-500/20 mx-auto">
-              <Activity className="w-5 h-5 text-white" />
+            <div className="hidden lg:flex w-10 h-10 flex-shrink-0 items-center justify-center mx-auto transition-transform hover:scale-105 duration-300">
+              <SivacLogo size={36} />
             </div>
           )}
 
