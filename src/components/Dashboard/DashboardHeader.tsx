@@ -22,33 +22,42 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
     });
   }, [lastUpdated]);
 
+  const today = useMemo(() => {
+    return new Date().toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }, []);
+
   return (
-    <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-          Dashboard
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+          Panel de Control
         </h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Sistema Integral de Gestión de Vacunas
+        <p className="text-sm text-gray-500 mt-1 capitalize">
+          {today}
         </p>
       </div>
 
       <div className="flex items-center gap-3">
         {formattedTime && (
-          <div className="flex items-center gap-1.5 text-sm text-gray-500">
-            <Clock className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Actualizado:</span>
+          <div className="flex items-center gap-1.5 text-sm text-gray-400">
+            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="hidden sm:inline">Última actualización</span>
             <span>{formattedTime}</span>
           </div>
         )}
 
         {isStale && (
           <div 
-            className="flex items-center gap-1.5 text-sm text-amber-600 bg-amber-50 px-2 py-1 rounded-lg"
+            className="flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full"
             role="status"
             aria-live="polite"
           >
-            <AlertCircle className="h-4 w-4" aria-hidden="true" />
+            <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
             <span className="hidden sm:inline">Desactualizado</span>
           </div>
         )}
@@ -56,11 +65,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
         <button
           onClick={onRefresh}
           disabled={isLoading}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium 
-            transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium 
+            transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:ring-offset-1
             ${isLoading 
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-              : 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 shadow-md hover:shadow-lg'
+              : 'bg-white text-gray-700 border border-gray-200 hover:border-teal-300 hover:text-teal-700 hover:shadow-sm'
             }`}
           aria-label={isLoading ? 'Actualizando datos' : 'Actualizar datos del dashboard'}
           aria-busy={isLoading}

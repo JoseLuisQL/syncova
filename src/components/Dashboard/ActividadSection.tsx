@@ -7,7 +7,7 @@ import { ACTIVITY_TYPE_CONFIG } from './constants';
 import type { ActividadReciente } from '../../services/dashboardService';
 
 const getActivityIcon = (tipo: ActividadReciente['tipo']) => {
-  const iconClass = "h-5 w-5";
+  const iconClass = "h-4 w-4";
   
   switch (tipo) {
     case 'vale_generado':
@@ -17,7 +17,7 @@ const getActivityIcon = (tipo: ActividadReciente['tipo']) => {
     case 'movimiento_registrado':
       return <ArrowRight className={`${iconClass} text-cyan-600`} />;
     default:
-      return <Clock className={`${iconClass} text-gray-500`} />;
+      return <Clock className={`${iconClass} text-gray-400`} />;
   }
 };
 
@@ -46,20 +46,19 @@ const ActividadCard: React.FC<{ actividad: ActividadReciente }> = memo(({ activi
 
   return (
     <div
-      className={`flex items-start gap-3 p-3 ${config.bg} rounded-xl border ${config.border}
-        hover:shadow-sm transition-all duration-200`}
+      className="flex items-start gap-3 p-3.5 rounded-xl hover:bg-gray-50 transition-colors duration-200"
       role="listitem"
     >
-      <div className="flex-shrink-0 mt-0.5">
+      <div className={`flex-shrink-0 mt-0.5 p-1.5 rounded-lg ${config.bg}`}>
         {getActivityIcon(actividad.tipo)}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
-          <span className="text-xs font-medium text-gray-600 bg-white px-2 py-0.5 rounded-full shadow-sm">
+          <span className="text-xs font-medium text-gray-500">
             {config.label}
           </span>
           <time 
-            className="text-xs text-gray-500"
+            className="text-xs text-gray-400"
             dateTime={new Date(actividad.fecha).toISOString()}
           >
             {formatRelativeTime(actividad.fecha)}
@@ -69,7 +68,7 @@ const ActividadCard: React.FC<{ actividad: ActividadReciente }> = memo(({ activi
           {actividad.descripcion}
         </p>
         {(actividad.usuario || actividad.establecimiento) && (
-          <div className="mt-1.5 flex items-center gap-3 text-xs text-gray-500">
+          <div className="mt-1.5 flex items-center gap-3 text-xs text-gray-400">
             {actividad.usuario && (
               <span className="flex items-center gap-1">
                 <User className="h-3 w-3" aria-hidden="true" />
@@ -105,18 +104,20 @@ const ActividadSection: React.FC = memo(() => {
 
   return (
     <section 
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+      className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300"
       aria-label="Actividad reciente"
     >
-      <header className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white">
-        <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-          <Clock className="h-5 w-5 text-cyan-600" aria-hidden="true" />
+      <header className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2.5">
+          <div className="p-1.5 rounded-lg bg-cyan-50">
+            <Clock className="h-4 w-4 text-cyan-600" aria-hidden="true" />
+          </div>
           Actividad Reciente
         </h3>
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="text-xs font-medium text-teal-600 hover:text-teal-700 disabled:opacity-50 
+          className="text-xs font-medium text-gray-400 hover:text-teal-600 disabled:opacity-50 
             disabled:cursor-not-allowed transition-colors"
           aria-label={loading ? 'Actualizando actividad' : 'Actualizar actividad'}
         >
@@ -128,10 +129,10 @@ const ActividadSection: React.FC = memo(() => {
         {loading && data.length === 0 ? (
           <SectionSkeleton rows={5} />
         ) : error ? (
-          <div className="text-center py-6">
-            <Clock className="mx-auto h-10 w-10 text-rose-400 mb-2" aria-hidden="true" />
-            <p className="text-sm font-medium text-gray-900 mb-1">Error al cargar</p>
-            <p className="text-xs text-gray-500 mb-4">{error}</p>
+          <div className="text-center py-8">
+            <Clock className="mx-auto h-8 w-8 text-gray-300 mb-2" aria-hidden="true" />
+            <p className="text-sm font-medium text-gray-700 mb-1">Error al cargar</p>
+            <p className="text-xs text-gray-400 mb-4">{error}</p>
             <button
               onClick={handleRefresh}
               className="text-xs font-medium text-teal-600 hover:text-teal-700"
@@ -146,7 +147,7 @@ const ActividadSection: React.FC = memo(() => {
             description="No hay actividad en las últimas 24 horas"
           />
         ) : (
-          <div className="space-y-2" role="list" aria-label="Lista de actividades">
+          <div className="space-y-1" role="list" aria-label="Lista de actividades">
             {data.map((actividad) => (
               <ActividadCard key={actividad.id} actividad={actividad} />
             ))}

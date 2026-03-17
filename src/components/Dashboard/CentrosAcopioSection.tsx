@@ -11,23 +11,22 @@ const CentroAcopioCard: React.FC<{ centro: CentroAcopioStatus }> = memo(({ centr
 
   return (
     <div
-      className={`flex items-center justify-between p-3.5 ${config.bg} rounded-xl 
-        hover:shadow-sm transition-all duration-200 border border-transparent hover:border-gray-200`}
+      className="flex items-center justify-between p-3.5 rounded-xl hover:bg-gray-50 transition-colors duration-200"
     >
       <div className="flex items-center gap-3 min-w-0">
-        <div className={`p-2 rounded-lg bg-white shadow-sm`}>
-          <Building className={`h-5 w-5 ${config.icon}`} aria-hidden="true" />
+        <div className={`p-2 rounded-lg ${config.bg}`}>
+          <Building className={`h-4 w-4 ${config.icon}`} aria-hidden="true" />
         </div>
         <div className="min-w-0">
           <h4 className="text-sm font-medium text-gray-900 truncate">
             {centro.nombre}
           </h4>
           <div className="flex items-center gap-3 mt-0.5">
-            <span className="flex items-center gap-1 text-xs text-gray-500">
+            <span className="flex items-center gap-1 text-xs text-gray-400">
               <Users className="h-3.5 w-3.5" aria-hidden="true" />
               {centro.establecimientos}
             </span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-400">
               {centro.stockTotal.toLocaleString()} uds
             </span>
           </div>
@@ -39,7 +38,7 @@ const CentroAcopioCard: React.FC<{ centro: CentroAcopioStatus }> = memo(({ centr
           {centro.estado}
         </span>
         {centro.alertas > 0 && (
-          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700">
             <AlertTriangle className="h-3 w-3" aria-hidden="true" />
             {centro.alertas}
           </span>
@@ -65,18 +64,20 @@ const CentrosAcopioSection: React.FC = memo(() => {
 
   return (
     <section 
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+      className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300"
       aria-label="Centros de Acopio"
     >
-      <header className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white">
-        <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-          <Building className="h-5 w-5 text-teal-600" aria-hidden="true" />
+      <header className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2.5">
+          <div className="p-1.5 rounded-lg bg-teal-50">
+            <Building className="h-4 w-4 text-teal-600" aria-hidden="true" />
+          </div>
           Centros de Acopio
         </h3>
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="text-xs font-medium text-teal-600 hover:text-teal-700 disabled:opacity-50 
+          className="text-xs font-medium text-gray-400 hover:text-teal-600 disabled:opacity-50 
             disabled:cursor-not-allowed transition-colors"
           aria-label={loading ? 'Actualizando centros' : 'Actualizar centros de acopio'}
         >
@@ -88,10 +89,10 @@ const CentrosAcopioSection: React.FC = memo(() => {
         {loading && data.length === 0 ? (
           <SectionSkeleton rows={5} />
         ) : error ? (
-          <div className="text-center py-6">
-            <AlertTriangle className="mx-auto h-10 w-10 text-rose-400 mb-2" aria-hidden="true" />
-            <p className="text-sm font-medium text-gray-900 mb-1">Error al cargar</p>
-            <p className="text-xs text-gray-500 mb-4">{error}</p>
+          <div className="text-center py-8">
+            <AlertTriangle className="mx-auto h-8 w-8 text-gray-300 mb-2" aria-hidden="true" />
+            <p className="text-sm font-medium text-gray-700 mb-1">Error al cargar</p>
+            <p className="text-xs text-gray-400 mb-4">{error}</p>
             <button
               onClick={handleRefresh}
               className="text-xs font-medium text-teal-600 hover:text-teal-700"
@@ -106,7 +107,7 @@ const CentrosAcopioSection: React.FC = memo(() => {
             description="No hay centros registrados"
           />
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1">
             {data.map((centro) => (
               <CentroAcopioCard key={centro.id} centro={centro} />
             ))}
