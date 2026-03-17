@@ -12,11 +12,11 @@ const ChartSection = lazy(() => import('./ChartSection'));
 
 const ChartSkeleton: React.FC = () => (
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div className="bg-white rounded-2xl p-6 shadow-sm">
-      <div className="h-[300px] bg-gray-50 rounded-xl animate-pulse" />
+    <div className="bg-white rounded-2xl border border-gray-100/80 p-6">
+      <div className="h-[340px] bg-gray-50 rounded-xl animate-pulse" />
     </div>
-    <div className="bg-white rounded-2xl p-6 shadow-sm">
-      <div className="h-[300px] bg-gray-50 rounded-xl animate-pulse" />
+    <div className="bg-white rounded-2xl border border-gray-100/80 p-6">
+      <div className="h-[340px] bg-gray-50 rounded-xl animate-pulse" />
     </div>
   </div>
 );

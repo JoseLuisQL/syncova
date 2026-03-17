@@ -47,15 +47,31 @@ export const DASHBOARD_COLORS = {
 } as const;
 
 export const CHART_COLORS = {
-  primary: '#0d9488',
-  secondary: '#0891b2',
-  tertiary: '#0284c7',
-  quaternary: '#7c3aed',
-  success: '#10b981',
-  warning: '#f59e0b',
-  danger: '#ef4444',
-  muted: '#94a3b8',
+  primary: '#0D9488',     // teal-600
+  secondary: '#0891B2',   // cyan-600
+  tertiary: '#0E7490',    // cyan-700
+  quaternary: '#0F766E',  // teal-700
+  success: '#10B981',     // emerald-500
+  info: '#06B6D4',        // cyan-500
+  warning: '#F59E0B',     // amber-500
+  danger: '#EF4444',      // red-500
+  muted: '#94A3B8',       // slate-400
 } as const;
+
+export const CHART_GRADIENT_COLORS = [
+  { main: '#0D9488', light: 'rgba(13, 148, 136, 0.15)' },   // teal-600
+  { main: '#0891B2', light: 'rgba(8, 145, 178, 0.15)' },    // cyan-600
+  { main: '#10B981', light: 'rgba(16, 185, 129, 0.15)' },   // emerald-500
+  { main: '#0EA5E9', light: 'rgba(14, 165, 233, 0.15)' },   // sky-500
+  { main: '#14B8A6', light: 'rgba(20, 184, 166, 0.15)' },   // teal-500
+  { main: '#06B6D4', light: 'rgba(6, 182, 212, 0.15)' },    // cyan-500
+  { main: '#059669', light: 'rgba(5, 150, 105, 0.15)' },    // emerald-600
+  { main: '#0284C7', light: 'rgba(2, 132, 199, 0.15)' },    // sky-600
+  { main: '#0F766E', light: 'rgba(15, 118, 110, 0.15)' },   // teal-700
+  { main: '#0E7490', light: 'rgba(14, 116, 144, 0.15)' },   // cyan-700
+  { main: '#047857', light: 'rgba(4, 120, 87, 0.15)' },     // emerald-700
+  { main: '#0369A1', light: 'rgba(3, 105, 161, 0.15)' },    // sky-700
+] as const;
 
 export const STAT_CARDS_CONFIG = [
   {

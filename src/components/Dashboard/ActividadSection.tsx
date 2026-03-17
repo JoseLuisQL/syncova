@@ -104,7 +104,7 @@ const ActividadSection: React.FC = memo(() => {
 
   return (
     <section 
-      className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300"
+      className="bg-white rounded-2xl border border-gray-100/80 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300"
       aria-label="Actividad reciente"
     >
       <header className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
