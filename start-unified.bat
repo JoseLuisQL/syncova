@@ -6,7 +6,7 @@ color 0F
 echo.
 echo =======================================================
 echo   SIVAC - Sistema de Vacunas Apurimac
-echo   Iniciando Sistema Unificado (Backend y Frontend)
+echo   Iniciando Sistema (Backend y Frontend)
 echo =======================================================
 echo.
 
@@ -63,7 +63,7 @@ if defined ip (
 )
 echo.
 echo =======================================================
-echo [SISTEMA] Iniciando servidores sin ventanas extra...
+echo [SISTEMA] Iniciando servidores...
 echo [SISTEMA] Pulse Ctrl+C para detener ambos servicios.
 echo =======================================================
 echo.
