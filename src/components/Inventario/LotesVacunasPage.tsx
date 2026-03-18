@@ -1,12 +1,12 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Plus, Package } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Plus, RefreshCw } from 'lucide-react';
 import GestionLotes from './GestionLotes';
-import NuevoIngreso from './NuevoIngreso';
+import NuevoIngreso, { NuevoIngresoPayload, NuevoIngresoSubmitResult } from './NuevoIngreso';
 import { useLotesVacunas } from '../../hooks/useLotesVacunas';
 import { useVacunas } from '../../hooks/useVacunas';
 import { CreateLoteVacunaDto, Lote } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
-import { PageHeader, ErrorAlert, LoadingSpinner } from './components/SharedComponents';
+import { ErrorAlert, LoadingSpinner } from './components/SharedComponents';
 import { COMPONENT_STYLES } from './constants';
 
 const LotesVacunasPage: React.FC = () => {
@@ -29,10 +29,9 @@ const LotesVacunasPage: React.FC = () => {
     updateError,
     deleteError,
     refresh,
-    applyFilters,
   } = useLotesVacunas();
 
-  const { vacunasActivas, loadVacunasActivas, isLoadingActivas: isLoadingVacunas } = useVacunas();
+  const { vacunasActivas, loadVacunasActivas, isLoadingActivas: isLoadingVacunas } = useVacunas(undefined, { autoLoad: false });
 
   useEffect(() => {
     loadVacunasActivas();
@@ -46,18 +45,23 @@ const LotesVacunasPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showNuevoIngreso]);
 
-  const handleNuevoLote = useCallback(async (tipo: 'vacuna' | 'jeringa', data: Lote) => {
-    if (tipo !== 'vacuna') {
-      toast.error('Error: Tipo de lote incorrecto');
-      return;
+  const handleNuevoLote = useCallback(async (
+    tipo: 'vacuna' | 'jeringa',
+    data: NuevoIngresoPayload
+  ): Promise<NuevoIngresoSubmitResult> => {
+    if (tipo !== 'vacuna' || !('vacunaId' in data)) {
+      return {
+        success: false,
+        error: 'Error: Tipo de lote incorrecto'
+      };
     }
 
     try {
       const loteData: CreateLoteVacunaDto = {
         numero: data.numero,
         vacunaId: data.vacunaId,
-        fechaIngreso: data.fechaIngreso.toISOString(),
-        fechaVencimiento: data.fechaVencimiento.toISOString(),
+        fechaIngreso: data.fechaIngreso,
+        fechaVencimiento: data.fechaVencimiento,
         formaIngreso: data.formaIngreso,
         comprobanteClase: data.comprobanteClase,
         numeroComprobante: data.numeroComprobante,
@@ -66,16 +70,22 @@ const LotesVacunasPage: React.FC = () => {
         observaciones: data.observaciones || undefined
       };
 
-      const success = await createLote(loteData);
+      const result = await createLote(loteData);
 
-      if (success) {
+      if (result.success) {
         toast.success('Lote creado', 'El lote de vacuna se creo exitosamente');
-        setShowNuevoIngreso(false);
-      } else {
-        toast.error('Error al crear', createError || 'Error al crear el lote de vacuna');
+        return { success: true };
       }
-    } catch {
-      toast.error('Error inesperado', 'Error inesperado al crear el lote');
+
+      return {
+        success: false,
+        error: result.error || createError || 'Error al crear el lote de vacuna'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error inesperado al crear el lote'
+      };
     }
   }, [createLote, createError, toast]);
 
@@ -118,12 +128,6 @@ const LotesVacunasPage: React.FC = () => {
     }
   }, [deleteLote, deleteError, toast]);
 
-  const handleApplyFilters = useCallback(async (filters: Record<string, string>) => {
-    if (applyFilters) {
-      await applyFilters(filters);
-    }
-  }, [applyFilters]);
-
   const handleOpenNuevoIngreso = useCallback(() => {
     setShowNuevoIngreso(true);
   }, []);
@@ -149,35 +153,34 @@ const LotesVacunasPage: React.FC = () => {
   }
 
   return (
-    <div className="p-5 sm:p-6">
-      <PageHeader
-        title="Lotes de Vacunas"
-        subtitle="Gestion de lotes de vacunas del inventario"
-        icon={Package}
-        action={{
-          label: 'Nuevo Lote',
-          onClick: handleOpenNuevoIngreso,
-          icon: Plus,
-          isLoading: isCreating,
-        }}
-      />
-
-      <GestionLotes
-        lotes={lotes}
-        onUpdate={handleUpdateLote}
-        onDelete={handleDeleteLote}
-        tipo="vacuna"
-        isLoading={isLoading}
-        isUpdating={isUpdating}
-        isDeleting={isDeleting}
-        stats={stats}
-        isLoadingStats={isLoadingStats}
-        vacunas={vacunasActivas}
-        jeringas={[]}
-        onApplyFilters={handleApplyFilters}
-        isLoadingVacunas={isLoadingVacunas}
-        isLoadingJeringas={false}
-      />
+    <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+      <div className="space-y-4">
+        <GestionLotes
+          lotes={lotes}
+          onUpdate={handleUpdateLote}
+          onDelete={handleDeleteLote}
+          tipo="vacuna"
+          toolbarActions={
+            <>
+              <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={refresh} disabled={isLoading}>
+                <RefreshCw className="h-4 w-4" />
+                <span>Actualizar</span>
+              </button>
+              <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleOpenNuevoIngreso} disabled={isCreating}>
+                <Plus className="h-4 w-4" />
+                <span>Nuevo lote</span>
+              </button>
+            </>
+          }
+          isLoading={isLoading}
+          isUpdating={isUpdating}
+          isDeleting={isDeleting}
+          stats={stats}
+          isLoadingStats={isLoadingStats}
+          vacunas={vacunasActivas}
+          jeringas={[]}
+        />
+      </div>
 
       {showNuevoIngreso && (
         <NuevoIngreso
@@ -190,7 +193,7 @@ const LotesVacunasPage: React.FC = () => {
           isLoadingJeringas={false}
         />
       )}
-    </div>
+    </section>
   );
 };
 

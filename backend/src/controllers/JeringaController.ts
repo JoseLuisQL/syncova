@@ -54,7 +54,7 @@ export class JeringaController {
       });
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al obtener jeringas', 500);
+        errorResponse(res, result.error || 'Error al obtener jeringas', result.statusCode || 500);
         return;
       }
 
@@ -67,9 +67,9 @@ export class JeringaController {
         total,
         message: 'Jeringas obtenidas exitosamente'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en JeringaController.getAll:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -89,7 +89,7 @@ export class JeringaController {
       const result = await JeringaService.getById(id);
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al obtener jeringa', 500);
+        errorResponse(res, result.error || 'Error al obtener jeringa', result.statusCode || 500);
         return;
       }
 
@@ -99,9 +99,9 @@ export class JeringaController {
       }
 
       successResponse(res, result.data, 'Jeringa obtenida exitosamente');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en JeringaController.getById:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -130,15 +130,15 @@ export class JeringaController {
       const result = await JeringaService.create(data);
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al crear jeringa', 400);
+        errorResponse(res, result.error || 'Error al crear jeringa', result.statusCode || 400);
         return;
       }
 
       console.log('✅ Jeringa creada exitosamente:', result.data?.id);
       successResponse(res, result.data, 'Jeringa creada exitosamente', 201);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en JeringaController.create:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -176,15 +176,15 @@ export class JeringaController {
       const result = await JeringaService.update(id, data);
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al actualizar jeringa', 400);
+        errorResponse(res, result.error || 'Error al actualizar jeringa', result.statusCode || 400);
         return;
       }
 
       console.log('✅ Jeringa actualizada exitosamente:', id);
       successResponse(res, result.data, 'Jeringa actualizada exitosamente');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en JeringaController.update:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -204,15 +204,15 @@ export class JeringaController {
       const result = await JeringaService.delete(id);
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al eliminar jeringa', 400);
+        errorResponse(res, result.error || 'Error al eliminar jeringa', result.statusCode || 400);
         return;
       }
 
       console.log('✅ Jeringa eliminada exitosamente:', id);
       successResponse(res, null, 'Jeringa eliminada exitosamente');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en JeringaController.delete:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -225,14 +225,14 @@ export class JeringaController {
       const result = await JeringaService.getActivas();
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al obtener jeringas activas', 500);
+        errorResponse(res, result.error || 'Error al obtener jeringas activas', result.statusCode || 500);
         return;
       }
 
       successResponse(res, result.data, 'Jeringas activas obtenidas exitosamente');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en JeringaController.getActivas:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -252,14 +252,14 @@ export class JeringaController {
       const result = await JeringaService.getStockStats(jeringaId as string);
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al obtener estadísticas de stock', 500);
+        errorResponse(res, result.error || 'Error al obtener estadísticas de stock', result.statusCode || 500);
         return;
       }
 
       successResponse(res, result.data, 'Estadísticas de stock obtenidas exitosamente');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en JeringaController.getStockStats:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 }

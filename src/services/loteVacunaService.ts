@@ -39,7 +39,7 @@ export class LoteVacunaService {
       logger.debug('Obteniendo lotes de vacunas con filtros:', filters);
 
       const queryParams = filters ? buildQueryParams(filters) : '';
-      const url = queryParams ? `${this.BASE_PATH}?${queryParams}` : this.BASE_PATH;
+      const url = `${this.BASE_PATH}${queryParams}`;
 
       const response = await apiClient.get<PaginatedResponse<Lote>>(url);
 

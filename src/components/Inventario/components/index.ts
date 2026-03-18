@@ -11,6 +11,7 @@ export {
   ActionButtons,
   StockProgress,
   ExpiryBadge,
+  KeyValueGrid,
 } from './SharedComponents';
 
 // Filter and Table Components
@@ -28,9 +29,13 @@ export {
   Modal,
   ModalFooter,
   FormField,
+  FormSection,
   TextInput,
   TextArea,
   SelectInput,
   DateInput,
   DeleteConfirmModal,
+  SideSheet,
 } from './ModalComponents';
+
+export { default as InventoryShell } from './InventoryShell';

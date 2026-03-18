@@ -172,7 +172,6 @@ export class ConfiguracionJeringaVacunaService {
    */
   static async updateDefecto(id: string, data: UpdateConfiguracionDefectoDto): Promise<ServiceResult<IConfiguracionJeringaVacunaDefecto>> {
     try {
-      // Verificar que la configuración existe
       const existingConfig = await prisma.configuracionJeringaVacunaDefecto.findUnique({
         where: { id }
       });
@@ -181,18 +180,37 @@ export class ConfiguracionJeringaVacunaService {
         throw createError('Configuración no encontrada', 404);
       }
 
-      // Validar datos de actualización
-      if (data.multiplicador !== undefined && data.multiplicador < 0) {
-        throw createError('El multiplicador debe ser mayor o igual a 0', 400);
-      }
+      const mergedData: CreateConfiguracionDefectoDto = {
+        vacunaId: data.vacunaId || existingConfig.vacunaId,
+        jeringaId: data.jeringaId || existingConfig.jeringaId,
+        multiplicador: data.multiplicador ?? Number(existingConfig.multiplicador),
+        prioridad: data.prioridad ?? existingConfig.prioridad,
+        activo: data.activo ?? existingConfig.activo
+      };
 
-      if (data.prioridad !== undefined && data.prioridad <= 0) {
-        throw createError('La prioridad debe ser mayor a 0', 400);
+      await this.validateConfiguracionDefectoData(mergedData);
+
+      const duplicateConfig = await prisma.configuracionJeringaVacunaDefecto.findFirst({
+        where: {
+          vacunaId: mergedData.vacunaId,
+          jeringaId: mergedData.jeringaId,
+          NOT: { id }
+        }
+      });
+
+      if (duplicateConfig) {
+        throw createError('Ya existe una configuración para esta combinación de vacuna y jeringa', 400);
       }
 
       const configuracion = await prisma.configuracionJeringaVacunaDefecto.update({
         where: { id },
-        data,
+        data: {
+          vacunaId: mergedData.vacunaId,
+          jeringaId: mergedData.jeringaId,
+          multiplicador: mergedData.multiplicador,
+          prioridad: mergedData.prioridad,
+          activo: mergedData.activo
+        },
         include: {
           vacuna: {
             select: {
@@ -670,7 +688,6 @@ export class ConfiguracionJeringaVacunaService {
    */
   static async updateCentro(id: string, data: UpdateConfiguracionCentroDto): Promise<ServiceResult<IConfiguracionJeringaVacunaCentro>> {
     try {
-      // Verificar que la configuración existe
       const existingConfig = await prisma.configuracionJeringaVacunaCentro.findUnique({
         where: { id }
       });
@@ -679,18 +696,40 @@ export class ConfiguracionJeringaVacunaService {
         throw createError('Configuración no encontrada', 404);
       }
 
-      // Validar datos de actualización
-      if (data.multiplicador !== undefined && data.multiplicador < 0) {
-        throw createError('El multiplicador debe ser mayor o igual a 0', 400);
-      }
+      const mergedData: CreateConfiguracionCentroDto = {
+        centroAcopioId: data.centroAcopioId || existingConfig.centroAcopioId,
+        vacunaId: data.vacunaId || existingConfig.vacunaId,
+        jeringaId: data.jeringaId || existingConfig.jeringaId,
+        multiplicador: data.multiplicador ?? Number(existingConfig.multiplicador),
+        prioridad: data.prioridad ?? existingConfig.prioridad,
+        activo: data.activo ?? existingConfig.activo
+      };
 
-      if (data.prioridad !== undefined && data.prioridad <= 0) {
-        throw createError('La prioridad debe ser mayor a 0', 400);
+      await this.validateConfiguracionCentroData(mergedData);
+
+      const duplicateConfig = await prisma.configuracionJeringaVacunaCentro.findFirst({
+        where: {
+          centroAcopioId: mergedData.centroAcopioId,
+          vacunaId: mergedData.vacunaId,
+          jeringaId: mergedData.jeringaId,
+          NOT: { id }
+        }
+      });
+
+      if (duplicateConfig) {
+        throw createError('Ya existe una configuración para esta combinación de centro, vacuna y jeringa', 400);
       }
 
       const configuracion = await prisma.configuracionJeringaVacunaCentro.update({
         where: { id },
-        data,
+        data: {
+          centroAcopioId: mergedData.centroAcopioId,
+          vacunaId: mergedData.vacunaId,
+          jeringaId: mergedData.jeringaId,
+          multiplicador: mergedData.multiplicador,
+          prioridad: mergedData.prioridad,
+          activo: mergedData.activo
+        },
         include: {
           centroAcopio: {
             select: {

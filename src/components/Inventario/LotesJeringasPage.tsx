@@ -1,12 +1,13 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Plus, Syringe } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Plus, RefreshCw } from 'lucide-react';
 import GestionLotes from './GestionLotes';
-import NuevoIngreso from './NuevoIngreso';
+import NuevoIngreso, { NuevoIngresoPayload, NuevoIngresoSubmitResult } from './NuevoIngreso';
 import { useLotesJeringas } from '../../hooks/useLotesJeringas';
 import { useJeringas } from '../../hooks/useJeringas';
 import { CreateLoteJeringaDto, LoteJeringa } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
-import { PageHeader, ErrorAlert, LoadingSpinner } from './components/SharedComponents';
+import { ErrorAlert, LoadingSpinner } from './components/SharedComponents';
+import { COMPONENT_STYLES } from './constants';
 
 const LotesJeringasPage: React.FC = () => {
   const [showNuevoIngreso, setShowNuevoIngreso] = useState(false);
@@ -28,10 +29,9 @@ const LotesJeringasPage: React.FC = () => {
     updateError,
     deleteError,
     refresh,
-    applyFilters,
   } = useLotesJeringas();
 
-  const { jeringasActivas, loadJeringasActivas, isLoadingActivas: isLoadingJeringas } = useJeringas();
+  const { jeringasActivas, loadJeringasActivas, isLoadingActivas: isLoadingJeringas } = useJeringas(undefined, { autoLoad: false });
 
   useEffect(() => {
     loadJeringasActivas();
@@ -45,17 +45,23 @@ const LotesJeringasPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showNuevoIngreso]);
 
-  const handleNuevoLote = useCallback(async (tipo: 'vacuna' | 'jeringa', data: LoteJeringa) => {
-    if (tipo !== 'jeringa') {
-      toast.error('Error: Tipo de lote incorrecto');
-      return;
+  const handleNuevoLote = useCallback(async (
+    tipo: 'vacuna' | 'jeringa',
+    data: NuevoIngresoPayload
+  ): Promise<NuevoIngresoSubmitResult> => {
+    if (tipo !== 'jeringa' || !('jeringaId' in data)) {
+      return {
+        success: false,
+        error: 'Error: Tipo de lote incorrecto'
+      };
     }
 
     try {
       const loteData: CreateLoteJeringaDto = {
         numero: data.numero,
         jeringaId: data.jeringaId,
-        fechaIngreso: data.fechaIngreso.toISOString(),
+        fechaIngreso: data.fechaIngreso,
+        fechaVencimiento: data.fechaVencimiento,
         formaIngreso: data.formaIngreso,
         comprobanteClase: data.comprobanteClase,
         numeroComprobante: data.numeroComprobante,
@@ -64,16 +70,22 @@ const LotesJeringasPage: React.FC = () => {
         observaciones: data.observaciones || undefined
       };
 
-      const success = await createLote(loteData);
+      const result = await createLote(loteData);
 
-      if (success) {
+      if (result.success) {
         toast.success('Lote creado', 'El lote de jeringa se creo exitosamente');
-        setShowNuevoIngreso(false);
-      } else {
-        toast.error('Error al crear', createError || 'Error al crear el lote de jeringa');
+        return { success: true };
       }
-    } catch {
-      toast.error('Error inesperado', 'Error inesperado al crear el lote');
+
+      return {
+        success: false,
+        error: result.error || createError || 'Error al crear el lote de jeringa'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error inesperado al crear el lote'
+      };
     }
   }, [createLote, createError, toast]);
 
@@ -115,12 +127,6 @@ const LotesJeringasPage: React.FC = () => {
     }
   }, [deleteLote, deleteError, toast]);
 
-  const handleApplyFilters = useCallback(async (filters: Record<string, string>) => {
-    if (applyFilters) {
-      await applyFilters(filters);
-    }
-  }, [applyFilters]);
-
   const handleOpenNuevoIngreso = useCallback(() => {
     setShowNuevoIngreso(true);
   }, []);
@@ -146,35 +152,34 @@ const LotesJeringasPage: React.FC = () => {
   }
 
   return (
-    <div className="p-5 sm:p-6">
-      <PageHeader
-        title="Lotes de Jeringas"
-        subtitle="Gestion de lotes de jeringas del inventario"
-        icon={Syringe}
-        action={{
-          label: 'Nuevo Lote',
-          onClick: handleOpenNuevoIngreso,
-          icon: Plus,
-          isLoading: isCreating,
-        }}
-      />
-
-      <GestionLotes
-        lotes={lotes}
-        onUpdate={handleUpdateLote}
-        onDelete={handleDeleteLote}
-        tipo="jeringa"
-        isLoading={isLoading}
-        isUpdating={isUpdating}
-        isDeleting={isDeleting}
-        stats={stats}
-        isLoadingStats={isLoadingStats}
-        vacunas={[]}
-        jeringas={jeringasActivas}
-        onApplyFilters={handleApplyFilters}
-        isLoadingVacunas={false}
-        isLoadingJeringas={isLoadingJeringas}
-      />
+    <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+      <div className="space-y-4">
+        <GestionLotes
+          lotes={lotes}
+          onUpdate={handleUpdateLote}
+          onDelete={handleDeleteLote}
+          tipo="jeringa"
+          toolbarActions={
+            <>
+              <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={refresh} disabled={isLoading}>
+                <RefreshCw className="h-4 w-4" />
+                <span>Actualizar</span>
+              </button>
+              <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleOpenNuevoIngreso} disabled={isCreating}>
+                <Plus className="h-4 w-4" />
+                <span>Nuevo lote</span>
+              </button>
+            </>
+          }
+          isLoading={isLoading}
+          isUpdating={isUpdating}
+          isDeleting={isDeleting}
+          stats={stats}
+          isLoadingStats={isLoadingStats}
+          vacunas={[]}
+          jeringas={jeringasActivas}
+        />
+      </div>
 
       {showNuevoIngreso && (
         <NuevoIngreso
@@ -187,7 +192,7 @@ const LotesJeringasPage: React.FC = () => {
           isLoadingJeringas={isLoadingJeringas}
         />
       )}
-    </div>
+    </section>
   );
 };
 

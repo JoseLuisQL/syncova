@@ -55,7 +55,7 @@ const mockJeringas: Jeringa[] = [
 
 const mockProps = {
   onClose: jest.fn(),
-  onSuccess: jest.fn(),
+  onSuccess: jest.fn().mockResolvedValue({ success: true }),
   vacunas: mockVacunas,
   jeringas: mockJeringas,
 };
@@ -200,5 +200,43 @@ describe('NuevoIngreso Component', () => {
         numeroComprobante: 'P-001-2024'
       }));
     });
+  });
+
+  test('keeps modal open and shows server error when creation fails', async () => {
+    mockProps.onSuccess.mockResolvedValueOnce({
+      success: false,
+      error: 'Ya existe un lote con este número',
+    });
+
+    render(<NuevoIngreso {...mockProps} tipoFijo="vacuna" />);
+
+    const select = screen.getByRole('combobox');
+    fireEvent.change(select, { target: { value: '1' } });
+
+    fireEvent.change(screen.getByPlaceholderText('Ej: BCG-2024-001'), {
+      target: { value: 'TEST-001' },
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('0'), {
+      target: { value: '100' },
+    });
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    fireEvent.change(screen.getByLabelText('Fecha de Vencimiento'), {
+      target: { value: tomorrow.toISOString().split('T')[0] },
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('Ej: P-001-2024'), {
+      target: { value: 'P-001-2024' },
+    });
+
+    fireEvent.click(screen.getByText('Registrar Ingreso'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Ya existe un lote con este número')).toBeInTheDocument();
+    });
+
+    expect(mockProps.onClose).not.toHaveBeenCalled();
   });
 });

@@ -35,7 +35,7 @@ class JeringaService {
   }> {
     try {
       const queryString = filters ? buildQueryParams(filters) : '';
-      const url = `${this.BASE_PATH}${queryString ? `?${queryString}` : ''}`;
+      const url = `${this.BASE_PATH}${queryString}`;
 
       logger.debug('Obteniendo jeringas', { url, filters });
 

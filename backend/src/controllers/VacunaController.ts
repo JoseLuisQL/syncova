@@ -50,7 +50,7 @@ export class VacunaController {
       });
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al obtener vacunas', 500);
+        errorResponse(res, result.error || 'Error al obtener vacunas', result.statusCode || 500);
         return;
       }
 
@@ -63,9 +63,9 @@ export class VacunaController {
         total,
         message: 'Vacunas obtenidas exitosamente'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en VacunaController.getAll:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -85,7 +85,7 @@ export class VacunaController {
       const result = await VacunaService.getById(id);
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al obtener vacuna', 500);
+        errorResponse(res, result.error || 'Error al obtener vacuna', result.statusCode || 500);
         return;
       }
 
@@ -95,9 +95,9 @@ export class VacunaController {
       }
 
       successResponse(res, result.data, 'Vacuna obtenida exitosamente');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en VacunaController.getById:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -140,15 +140,15 @@ export class VacunaController {
       const result = await VacunaService.create(data);
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al crear vacuna', 400);
+        errorResponse(res, result.error || 'Error al crear vacuna', result.statusCode || 400);
         return;
       }
 
       console.log('✅ Vacuna creada exitosamente:', result.data?.id);
       successResponse(res, result.data, 'Vacuna creada exitosamente', 201);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en VacunaController.create:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -196,15 +196,15 @@ export class VacunaController {
       const result = await VacunaService.update(id, data);
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al actualizar vacuna', 400);
+        errorResponse(res, result.error || 'Error al actualizar vacuna', result.statusCode || 400);
         return;
       }
 
       console.log('✅ Vacuna actualizada exitosamente:', id);
       successResponse(res, result.data, 'Vacuna actualizada exitosamente');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en VacunaController.update:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -224,15 +224,15 @@ export class VacunaController {
       const result = await VacunaService.delete(id);
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al eliminar vacuna', 400);
+        errorResponse(res, result.error || 'Error al eliminar vacuna', result.statusCode || 400);
         return;
       }
 
       console.log('✅ Vacuna eliminada exitosamente:', id);
       successResponse(res, null, 'Vacuna eliminada exitosamente');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en VacunaController.delete:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -252,14 +252,14 @@ export class VacunaController {
       const result = await VacunaService.getStockStats(vacunaId as string);
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al obtener estadísticas', 500);
+        errorResponse(res, result.error || 'Error al obtener estadísticas', result.statusCode || 500);
         return;
       }
 
       successResponse(res, result.data, 'Estadísticas obtenidas exitosamente');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en VacunaController.getStockStats:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -276,7 +276,7 @@ export class VacunaController {
       });
 
       if (!result.success) {
-        errorResponse(res, result.error || 'Error al obtener vacunas activas', 500);
+        errorResponse(res, result.error || 'Error al obtener vacunas activas', result.statusCode || 500);
         return;
       }
 
@@ -289,9 +289,9 @@ export class VacunaController {
       }));
 
       successResponse(res, vacunasSimples, 'Vacunas activas obtenidas exitosamente');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en VacunaController.getActivas:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 }

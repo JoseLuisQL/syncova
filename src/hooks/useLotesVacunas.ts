@@ -64,7 +64,7 @@ export function useLotesVacunas(initialFilters?: LoteVacunaFilters) {
       setPagination(result.pagination);
       setFilters(filtersToUse);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [filters, listApi]);
 
   /**
    * Cargar estadísticas
@@ -172,9 +172,10 @@ export function useLotesVacunas(initialFilters?: LoteVacunaFilters) {
    * Buscar lotes
    */
   const search = useCallback(async (searchTerm: string) => {
+    const normalizedSearch = searchTerm.trim();
     const newFilters = {
       ...filters,
-      search: searchTerm,
+      search: normalizedSearch || undefined,
       page: 1 // Resetear a la primera página cuando se busca
     };
     
@@ -188,6 +189,7 @@ export function useLotesVacunas(initialFilters?: LoteVacunaFilters) {
     const updatedFilters = {
       ...filters,
       ...newFilters,
+      search: typeof newFilters.search === 'string' ? newFilters.search.trim() || undefined : filters.search,
       page: 1 // Resetear a la primera página cuando se cambian filtros
     };
     

@@ -1,36 +1,64 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { Plus, Package, RefreshCw } from 'lucide-react';
-import { Vacuna, CreateVacunaDto, UpdateVacunaDto } from '../../types';
-import { useVacunas } from '../../hooks/useVacunas';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Package2, Plus, RefreshCw, ShieldAlert, TestTube2, ThermometerSnowflake } from 'lucide-react';
+import { CreateVacunaDto, UpdateVacunaDto, Vacuna } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
+import { useVacunas } from '../../hooks/useVacunas';
+import { useInventorySearch } from '../../hooks/useInventorySearch';
 import {
-  PageHeader,
-  StatsGrid,
-  StatusBadge,
+  ActionButtons,
   EmptyState,
   ErrorAlert,
-  ActionButtons,
+  KeyValueGrid,
+  StatsGrid,
+  StatusBadge,
 } from './components/SharedComponents';
-import { FilterBar, Pagination, DataTable, TableHeader } from './components/FilterAndTable';
-import { Modal, ModalFooter, TextInput, SelectInput, DeleteConfirmModal } from './components/ModalComponents';
+import { DataTable, FilterBar, Pagination, TableHeader } from './components/FilterAndTable';
+import {
+  DeleteConfirmModal,
+  FormSection,
+  Modal,
+  ModalFooter,
+  SelectInput,
+  SideSheet,
+  TextInput,
+} from './components/ModalComponents';
 import { COMPONENT_STYLES, FILTER_OPTIONS } from './constants';
 
 const TABLE_COLUMNS = [
   { key: 'vacuna', label: 'Vacuna' },
-  { key: 'tipo', label: 'Tipo y Presentacion' },
-  { key: 'stock', label: 'Stock Total', align: 'center' as const },
+  { key: 'detalle', label: 'Detalle' },
+  { key: 'stock', label: 'Stock', align: 'center' as const },
   { key: 'lotes', label: 'Lotes', align: 'center' as const },
   { key: 'estado', label: 'Estado', align: 'center' as const },
   { key: 'acciones', label: 'Acciones', align: 'right' as const },
 ];
 
+const PRESENTACION_OPTIONS = [
+  { value: 'Frasco multidosis', label: 'Frasco multidosis' },
+  { value: 'Frasco unidosis', label: 'Frasco unidosis' },
+  { value: 'Ampolla', label: 'Ampolla' },
+  { value: 'Jeringa prellenada', label: 'Jeringa prellenada' },
+];
+
+const VIDA_UTIL_OPTIONS = [
+  { value: '365', label: '1 año' },
+  { value: '730', label: '2 años' },
+  { value: '1095', label: '3 años' },
+  { value: '1460', label: '4 años' },
+  { value: '1825', label: '5 años' },
+];
+
+const TEMPERATURA_OPTIONS = [
+  { value: '2°C a 8°C', label: '2°C a 8°C (Refrigeración)' },
+  { value: '-15°C a -25°C', label: '-15°C a -25°C (Congelación)' },
+  { value: '15°C a 25°C', label: '15°C a 25°C (Ambiente)' },
+];
+
 const GestionVacunas: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState('todos');
-  const [filterTipo, setFilterTipo] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingVacuna, setEditingVacuna] = useState<Vacuna | null>(null);
-  const [showDetails, setShowDetails] = useState<string | null>(null);
+  const [selectedVacuna, setSelectedVacuna] = useState<Vacuna | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Vacuna | null>(null);
 
   const {
@@ -50,70 +78,64 @@ const GestionVacunas: React.FC = () => {
     isDeleting,
     createError,
     updateError,
-    deleteError
+    deleteError,
   } = useVacunas();
 
   const { toast } = useToastContext();
+  const filterInitRef = useRef(true);
+  const applyFiltersRef = useRef(applyFilters);
 
-  // Cargar datos iniciales
-  const hasLoadedRef = React.useRef(false);
-  React.useEffect(() => {
-    if (!hasLoadedRef.current) {
-      hasLoadedRef.current = true;
-      refresh();
-    }
-  }, [refresh]);
+  const { searchValue, setSearchValue, clearSearch } = useInventorySearch({
+    onSearch: search,
+    onReset: () => search(''),
+  });
 
-  // Efecto para búsqueda con debounce
   useEffect(() => {
-    if (!searchTerm) return;
-    const timeoutId = setTimeout(() => {
-      search(searchTerm);
-    }, 500);
-    return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm]);
+    applyFiltersRef.current = applyFilters;
+  }, [applyFilters]);
 
-  // Efecto para filtros (solo cuando cambian, no en el primer render)
-  const isFirstFilterRender = React.useRef(true);
   useEffect(() => {
-    if (isFirstFilterRender.current) {
-      isFirstFilterRender.current = false;
+    if (!error) return;
+    toast.error('Error al cargar vacunas', error);
+  }, [error, toast]);
+
+  useEffect(() => {
+    if (filterInitRef.current) {
+      filterInitRef.current = false;
       return;
     }
-    applyFilters({
-      estado: filterEstado === 'todos' ? undefined : filterEstado as 'activo' | 'inactivo',
-      tipo: filterTipo || undefined
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterEstado, filterTipo]);
 
-  useEffect(() => {
-    if (error) {
-      toast.error('Error al cargar vacunas', error);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+    void applyFiltersRef.current({
+      estado: filterEstado === 'todos' ? undefined : (filterEstado as 'activo' | 'inactivo'),
+    });
+  }, [filterEstado]);
 
   const stats = useMemo(() => {
     const total = vacunas.length;
-    const activas = vacunas.filter(v => v.estado === 'activo').length;
-    const conStock = vacunas.filter(v => {
-      const stock = v.lotes?.reduce((t, l) => t + l.cantidadActual, 0) || 0;
-      return stock > 0;
-    }).length;
-    const sinStock = vacunas.filter(v => {
-      const stock = v.lotes?.reduce((t, l) => t + l.cantidadActual, 0) || 0;
-      return stock === 0;
-    }).length;
+    const activas = vacunas.filter((vacuna) => vacuna.estado === 'activo').length;
+    const conStock = vacunas.filter((vacuna) => getStockInfo(vacuna).stockTotal > 0).length;
+    const sinStock = total - conStock;
 
     return [
-      { key: 'total', label: 'Total Vacunas', value: total, icon: Package, color: 'primary' as const },
-      { key: 'activas', label: 'Activas', value: activas, icon: Package, color: 'success' as const },
-      { key: 'conStock', label: 'Con Stock', value: conStock, icon: Package, color: 'secondary' as const },
-      { key: 'sinStock', label: 'Sin Stock', value: sinStock, icon: Package, color: 'warning' as const },
+      { key: 'total', label: 'Total vacunas', value: total, icon: Package2, color: 'primary' as const },
+      { key: 'activas', label: 'Activas', value: activas, icon: Package2, color: 'success' as const },
+      { key: 'conStock', label: 'Con stock', value: conStock, icon: TestTube2, color: 'secondary' as const },
+      { key: 'sinStock', label: 'Sin stock', value: sinStock, icon: ShieldAlert, color: 'warning' as const },
     ];
   }, [vacunas]);
+
+  const filters = useMemo(
+    () => [
+      {
+        id: 'estado-vacuna',
+        label: 'Estado',
+        value: filterEstado,
+        options: FILTER_OPTIONS.estado,
+        onChange: setFilterEstado,
+      },
+    ],
+    [filterEstado],
+  );
 
   const handleCreate = useCallback(() => {
     setEditingVacuna(null);
@@ -125,294 +147,325 @@ const GestionVacunas: React.FC = () => {
     setShowModal(true);
   }, []);
 
-  const handleCloseModal = useCallback(() => {
-    setShowModal(false);
-    setEditingVacuna(null);
-  }, []);
+  const handleSubmit = useCallback(
+    async (payload: CreateVacunaDto | UpdateVacunaDto) => {
+      if (editingVacuna) {
+        const success = await updateVacuna(editingVacuna.id, payload as UpdateVacunaDto);
+        if (!success) {
+          toast.error('No se pudo actualizar la vacuna', updateError || 'Revise los datos e intente nuevamente.');
+          return;
+        }
 
-  const handleDelete = useCallback((id: string) => {
-    const vacuna = vacunas.find(v => v.id === id);
-    if (vacuna) {
-      setDeleteTarget(vacuna);
-    }
-  }, [vacunas]);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deleteTarget) return;
-
-    const success = await deleteVacuna(deleteTarget.id);
-    if (success) {
-      toast.success('Vacuna eliminada', `"${deleteTarget.nombre}" fue eliminada exitosamente.`);
-      setDeleteTarget(null);
-    } else if (deleteError) {
-      toast.error('Error al eliminar', deleteError);
-    }
-  }, [deleteTarget, deleteVacuna, deleteError, toast]);
-
-  const handleCancelDelete = useCallback(() => {
-    setDeleteTarget(null);
-  }, []);
-
-  const handleSubmit = useCallback(async (formData: CreateVacunaDto | UpdateVacunaDto) => {
-    if (editingVacuna) {
-      const success = await updateVacuna(editingVacuna.id, formData as UpdateVacunaDto);
-      if (success) {
         toast.success('Vacuna actualizada', 'Los cambios se guardaron correctamente.');
-        handleCloseModal();
-      } else if (updateError) {
-        toast.error('Error al actualizar', updateError);
+      } else {
+        const success = await createVacuna(payload as CreateVacunaDto);
+        if (!success) {
+          toast.error('No se pudo crear la vacuna', createError || 'Revise los datos e intente nuevamente.');
+          return;
+        }
+
+        toast.success('Vacuna creada', 'La vacuna fue registrada correctamente.');
       }
-    } else {
-      const success = await createVacuna(formData as CreateVacunaDto);
-      if (success) {
-        toast.success('Vacuna creada', 'La vacuna se registro correctamente.');
-        handleCloseModal();
-      } else if (createError) {
-        toast.error('Error al crear', createError);
+
+      setShowModal(false);
+      setEditingVacuna(null);
+    },
+    [createError, createVacuna, editingVacuna, toast, updateError, updateVacuna],
+  );
+
+  const handleDelete = useCallback(
+    async () => {
+      if (!deleteTarget) return;
+
+      const success = await deleteVacuna(deleteTarget.id);
+      if (!success) {
+        toast.error('No se pudo eliminar la vacuna', deleteError || 'Intente nuevamente.');
+        return;
       }
-    }
-  }, [editingVacuna, updateVacuna, createVacuna, updateError, createError, toast, handleCloseModal]);
 
-  const handleRefresh = useCallback(async () => {
-    await refresh();
-    if (!error) {
-      toast.info('Datos actualizados', 'La lista de vacunas fue actualizada.');
-    }
-  }, [refresh, error, toast]);
+      toast.success('Vacuna eliminada', `"${deleteTarget.nombre}" fue eliminada.`);
+      setDeleteTarget(null);
+      if (selectedVacuna?.id === deleteTarget.id) {
+        setSelectedVacuna(null);
+      }
+    },
+    [deleteError, deleteTarget, deleteVacuna, selectedVacuna?.id, toast],
+  );
 
-  const getStockInfo = useCallback((vacuna: Vacuna) => {
-    const lotes = vacuna.lotes || [];
-    const stockTotal = lotes.reduce((t, l) => t + l.cantidadActual, 0);
-    const lotesActivos = lotes.filter(l => l.estado === 'disponible').length;
-    const lotesVencidos = lotes.filter(l => l.estado === 'vencido').length;
-    const lotesPorVencer = lotes.filter(l => {
-      const days = Math.ceil((l.fechaVencimiento.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-      return days <= 30 && days > 0;
-    }).length;
-    return { stockTotal, lotesActivos, lotesVencidos, lotesPorVencer };
-  }, []);
+  const handleClearFilters = useCallback(() => {
+    clearSearch();
+    setFilterEstado('todos');
+  }, [clearSearch]);
 
-  const filterConfigs = useMemo(() => [
-    { id: 'estado', label: 'Estado', value: filterEstado, options: FILTER_OPTIONS.estado, onChange: setFilterEstado },
-  ], [filterEstado]);
-
-  return (
-    <div className="p-5 sm:p-6">
-      {error && <ErrorAlert message={error} onRetry={refresh} />}
-
-      <PageHeader
-        title="Catalogo de Vacunas"
-        subtitle="Gestion del catalogo de vacunas del sistema"
-        icon={Package}
-        count={pagination.total}
-        action={{
-          label: 'Nueva Vacuna',
-          onClick: handleCreate,
-          icon: Plus,
-          isLoading: isCreating,
-        }}
-        secondaryAction={{
-          label: 'Actualizar',
-          onClick: handleRefresh,
-          icon: RefreshCw,
-          isLoading: isLoading,
-        }}
-      />
-
-      <StatsGrid stats={stats} isLoading={isLoading} />
-
-      <div className="space-y-5">
-        <FilterBar
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Buscar por nombre, tipo..."
-          filters={filterConfigs}
-        />
-
-        <DataTable isLoading={isLoading} loadingMessage="Cargando vacunas...">
-          <table className="min-w-full divide-y divide-gray-200">
-            <TableHeader columns={TABLE_COLUMNS} />
-            <tbody className="divide-y divide-gray-100">
-              {vacunas.length === 0 && !isLoading ? (
-                <tr>
-                  <td colSpan={6}>
-                    <EmptyState
-                      icon={Package}
-                      title="No se encontraron vacunas"
-                      description="Intente ajustar los filtros o cree una nueva"
-                      action={{
-                        label: 'Nueva Vacuna',
-                        onClick: handleCreate,
-                      }}
+  const desktopTable = (
+    <DataTable
+      isLoading={isLoading}
+      loadingMessage="Cargando vacunas..."
+      skeletonRows={5}
+      skeletonColumns={TABLE_COLUMNS.length}
+      loadingVariant="table"
+    >
+      <table className="min-w-full divide-y divide-slate-200">
+        <TableHeader columns={TABLE_COLUMNS} />
+        <tbody className="divide-y divide-slate-100">
+          {vacunas.length === 0 ? (
+            <tr>
+              <td colSpan={6}>
+                <EmptyState
+                  icon={Package2}
+                  title="No se encontraron vacunas"
+                  description="Ajuste los filtros o registre una nueva vacuna."
+                  action={{ label: 'Nueva vacuna', onClick: handleCreate }}
+                />
+              </td>
+            </tr>
+          ) : (
+            vacunas.map((vacuna) => {
+              const stockInfo = getStockInfo(vacuna);
+              return (
+                <tr key={vacuna.id} className={COMPONENT_STYLES.table.row}>
+                  <td className={COMPONENT_STYLES.table.cell}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVacuna(vacuna)}
+                      className="flex items-center gap-3 text-left"
+                    >
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+                        <Package2 className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-900">{vacuna.nombre}</p>
+                        <p className="text-xs text-slate-500">{vacuna.dosisPorFrasco} dosis por frasco</p>
+                      </div>
+                    </button>
+                  </td>
+                  <td className={COMPONENT_STYLES.table.cell}>
+                    <p className="text-sm font-medium text-slate-900">{vacuna.tipo}</p>
+                    <p className="text-xs text-slate-500">{vacuna.presentacion}</p>
+                  </td>
+                  <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                    <span className={`text-lg font-semibold ${stockInfo.stockTotal > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                      {stockInfo.stockTotal.toLocaleString()}
+                    </span>
+                  </td>
+                  <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                    <div className="flex flex-wrap items-center justify-center gap-1.5 text-[0.78rem]">
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">
+                        {stockInfo.lotesActivos} act.
+                      </span>
+                      <span className="rounded-full bg-amber-50 px-2 py-0.5 text-amber-700">
+                        {stockInfo.lotesPorVencer} pv
+                      </span>
+                      <span className="rounded-full bg-rose-50 px-2 py-0.5 text-rose-700">
+                        {stockInfo.lotesVencidos} venc.
+                      </span>
+                    </div>
+                  </td>
+                  <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                    <StatusBadge status={vacuna.estado} />
+                  </td>
+                  <td className={COMPONENT_STYLES.table.cell}>
+                    <ActionButtons
+                      onView={() => setSelectedVacuna(vacuna)}
+                      onEdit={() => handleEdit(vacuna)}
+                      onDelete={() => setDeleteTarget(vacuna)}
+                      isLoading={isUpdating || isDeleting}
                     />
                   </td>
                 </tr>
-              ) : (
-                vacunas.map((vacuna) => (
-                  <VacunaRow
-                    key={vacuna.id}
-                    vacuna={vacuna}
-                    stockInfo={getStockInfo(vacuna)}
-                    isExpanded={showDetails === vacuna.id}
-                    onToggleDetails={() => setShowDetails(showDetails === vacuna.id ? null : vacuna.id)}
-                    onEdit={() => handleEdit(vacuna)}
-                    onDelete={() => handleDelete(vacuna.id)}
-                    isLoading={isUpdating || isDeleting}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+      <Pagination
+        currentPage={pagination.page}
+        totalPages={pagination.totalPages}
+        total={pagination.total}
+        limit={pagination.limit}
+        onPageChange={changePage}
+      />
+    </DataTable>
+  );
 
-          <Pagination
-            currentPage={pagination.page}
-            totalPages={pagination.totalPages}
-            total={pagination.total}
-            limit={pagination.limit}
-            onPageChange={changePage}
+  return (
+    <div className="space-y-4">
+      {error ? <ErrorAlert message={error} onRetry={refresh} /> : null}
+
+      <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+        <div className="space-y-4">
+          <StatsGrid stats={stats} isLoading={isLoading} />
+
+          <FilterBar
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            searchPlaceholder="Buscar por nombre, tipo o presentación"
+            filters={filters}
+            onClear={handleClearFilters}
+            actions={
+              <>
+                <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={refresh} disabled={isLoading}>
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Actualizar</span>
+                </button>
+                <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleCreate} disabled={isCreating}>
+                  <Plus className="h-4 w-4" />
+                  <span>Nueva vacuna</span>
+                </button>
+              </>
+            }
           />
-        </DataTable>
-      </div>
 
-      {showModal && (
+          <div className="hidden lg:block">{desktopTable}</div>
+
+          <div className="space-y-3 lg:hidden">
+            {isLoading ? (
+              <DataTable isLoading={isLoading} loadingMessage="Cargando vacunas..." skeletonRows={4} loadingVariant="cards" />
+            ) : vacunas.length === 0 ? (
+              <div className={COMPONENT_STYLES.panel}>
+                <EmptyState
+                  icon={Package2}
+                  title="No se encontraron vacunas"
+                  description="Ajuste los filtros o registre una nueva vacuna."
+                  action={{ label: 'Nueva vacuna', onClick: handleCreate }}
+                />
+              </div>
+            ) : (
+              vacunas.map((vacuna) => {
+                const stockInfo = getStockInfo(vacuna);
+                return (
+                  <article key={vacuna.id} className={`${COMPONENT_STYLES.panel} p-4`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <button type="button" onClick={() => setSelectedVacuna(vacuna)} className="min-w-0 text-left">
+                        <p className="truncate text-base font-semibold text-slate-950">{vacuna.nombre}</p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          {vacuna.tipo} · {vacuna.presentacion}
+                        </p>
+                      </button>
+                      <StatusBadge status={vacuna.estado} />
+                    </div>
+                <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+                        <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Stock</p>
+                        <p className={`mt-2 text-lg font-semibold ${stockInfo.stockTotal > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                          {stockInfo.stockTotal.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+                        <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Lotes activos</p>
+                        <p className="mt-2 text-lg font-semibold text-slate-900">{stockInfo.lotesActivos}</p>
+                      </div>
+                    </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="text-xs text-slate-500">
+                    <p>{stockInfo.lotesPorVencer} por vencer</p>
+                    <p>{stockInfo.lotesVencidos} vencidos</p>
+                  </div>
+                      <ActionButtons
+                        onView={() => setSelectedVacuna(vacuna)}
+                        onEdit={() => handleEdit(vacuna)}
+                        onDelete={() => setDeleteTarget(vacuna)}
+                        isLoading={isUpdating || isDeleting}
+                      />
+                    </div>
+                  </article>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </section>
+
+      <SideSheet
+        isOpen={Boolean(selectedVacuna)}
+        onClose={() => setSelectedVacuna(null)}
+        title={selectedVacuna?.nombre || 'Detalle de vacuna'}
+        subtitle={selectedVacuna ? `${selectedVacuna.tipo} · ${selectedVacuna.presentacion}` : undefined}
+        icon={Package2}
+      >
+        {selectedVacuna ? (
+          <div className="space-y-5">
+            <KeyValueGrid
+              columns={2}
+              items={[
+                { label: 'Dosis por frasco', value: <span className="font-medium">{selectedVacuna.dosisPorFrasco}</span> },
+                { label: 'Temperatura', value: <span className="font-medium">{selectedVacuna.temperaturaAlmacenamiento}</span> },
+                { label: 'Vida útil', value: <span className="font-medium">{Math.round(selectedVacuna.tiempoVidaUtil / 365)} años</span> },
+                { label: 'Estado', value: <StatusBadge status={selectedVacuna.estado} /> },
+              ]}
+            />
+
+            <KeyValueGrid
+              columns={1}
+              items={[
+                {
+                  label: 'Inventario asociado',
+                  value: (
+                    <div className="space-y-2 text-sm">
+                      <p>
+                        <span className="font-semibold text-slate-900">{getStockInfo(selectedVacuna).stockTotal.toLocaleString()}</span>{' '}
+                        dosis en stock total
+                      </p>
+                      <p>{getStockInfo(selectedVacuna).lotesActivos} lotes disponibles</p>
+                      <p>{getStockInfo(selectedVacuna).lotesPorVencer} lotes por vencer</p>
+                      <p>{getStockInfo(selectedVacuna).lotesVencidos} lotes vencidos</p>
+                    </div>
+                  ),
+                },
+              ]}
+            />
+
+            {selectedVacuna._count ? (
+              <KeyValueGrid
+                columns={3}
+                items={[
+                  { label: 'Lotes', value: <span className="font-medium">{selectedVacuna._count.lotes}</span> },
+                  { label: 'Planificaciones', value: <span className="font-medium">{selectedVacuna._count.planificaciones}</span> },
+                  { label: 'Movimientos', value: <span className="font-medium">{selectedVacuna._count.movimientos}</span> },
+                ]}
+              />
+            ) : null}
+
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={() => handleEdit(selectedVacuna)}>
+                Editar vacuna
+              </button>
+              <button type="button" className={COMPONENT_STYLES.button.ghost} onClick={() => setSelectedVacuna(null)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </SideSheet>
+
+      {showModal ? (
         <VacunaModal
           vacuna={editingVacuna}
-          onClose={handleCloseModal}
+          onClose={() => {
+            setShowModal(false);
+            setEditingVacuna(null);
+          }}
           onSubmit={handleSubmit}
           isLoading={isCreating || isUpdating}
         />
-      )}
+      ) : null}
 
       <DeleteConfirmModal
-        isOpen={!!deleteTarget}
-        onClose={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
         itemName={deleteTarget?.nombre || ''}
-        itemType="Vacuna"
+        itemType="vacuna"
         isLoading={isDeleting}
       />
     </div>
   );
 };
 
-// ============================================================================
-// VACUNA ROW COMPONENT
-// ============================================================================
-
-interface VacunaRowProps {
-  vacuna: Vacuna;
-  stockInfo: { stockTotal: number; lotesActivos: number; lotesVencidos: number; lotesPorVencer: number };
-  isExpanded: boolean;
-  onToggleDetails: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  isLoading?: boolean;
-}
-
-const VacunaRow: React.FC<VacunaRowProps> = memo(({
-  vacuna,
-  stockInfo,
-  isExpanded,
-  onToggleDetails,
-  onEdit,
-  onDelete,
-  isLoading = false,
-}) => (
-  <>
-    <tr className={COMPONENT_STYLES.table.row}>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-            <Package className="h-5 w-5 text-white" aria-hidden="true" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{vacuna.nombre}</p>
-            <p className="text-xs text-gray-500">{vacuna.dosisPorFrasco} dosis/frasco</p>
-          </div>
-        </div>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <p className="text-sm font-medium text-gray-900">{vacuna.tipo}</p>
-        <p className="text-xs text-gray-500">{vacuna.presentacion}</p>
-      </td>
-      <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-        <span className={`text-lg font-bold ${stockInfo.stockTotal > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-          {stockInfo.stockTotal.toLocaleString()}
-        </span>
-      </td>
-      <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-        <div className="grid grid-cols-3 gap-2 text-xs">
-          <div className="text-center">
-            <div className="text-emerald-600 font-semibold">{stockInfo.lotesActivos}</div>
-            <div className="text-gray-500">Activos</div>
-          </div>
-          <div className="text-center">
-            <div className="text-amber-600 font-semibold">{stockInfo.lotesPorVencer}</div>
-            <div className="text-gray-500">Por vencer</div>
-          </div>
-          <div className="text-center">
-            <div className="text-rose-600 font-semibold">{stockInfo.lotesVencidos}</div>
-            <div className="text-gray-500">Vencidos</div>
-          </div>
-        </div>
-      </td>
-      <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-        <StatusBadge status={vacuna.estado as 'activo' | 'inactivo'} />
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <ActionButtons
-          onView={onToggleDetails}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          isLoading={isLoading}
-        />
-      </td>
-    </tr>
-    {isExpanded && (
-      <tr>
-        <td colSpan={6} className="px-5 py-4 bg-teal-50/50 border-l-4 border-teal-500">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Informacion Tecnica</h4>
-              <div className="space-y-2 text-sm">
-                <div><span className="text-gray-600">Temperatura:</span> <span className="ml-2 text-gray-900 font-medium">{vacuna.temperaturaAlmacenamiento}</span></div>
-                <div><span className="text-gray-600">Vida util:</span> <span className="ml-2 text-gray-900 font-medium">{Math.round(vacuna.tiempoVidaUtil / 365)} años</span></div>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-2">Datos del Sistema</h4>
-              <div className="space-y-2 text-sm">
-                <div><span className="text-gray-600">Creado:</span> <span className="ml-2 text-gray-900 font-medium">{vacuna.createdAt.toLocaleDateString()}</span></div>
-                <div><span className="text-gray-600">ID:</span> <span className="ml-2 text-gray-500 font-mono text-xs">{vacuna.id}</span></div>
-              </div>
-            </div>
-            {vacuna._count && (
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-2">Estadisticas</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-600">Lotes:</span> <span className="text-gray-900 font-medium">{vacuna._count.lotes}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-600">Planificaciones:</span> <span className="text-gray-900 font-medium">{vacuna._count.planificaciones}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-600">Movimientos:</span> <span className="text-gray-900 font-medium">{vacuna._count.movimientos}</span></div>
-                </div>
-              </div>
-            )}
-          </div>
-        </td>
-      </tr>
-    )}
-  </>
-));
-
-VacunaRow.displayName = 'VacunaRow';
-
-// ============================================================================
-// VACUNA MODAL COMPONENT
-// ============================================================================
-
 interface VacunaModalProps {
   vacuna: Vacuna | null;
   onClose: () => void;
-  onSubmit: (data: CreateVacunaDto | UpdateVacunaDto) => Promise<void>;
+  onSubmit: (payload: CreateVacunaDto | UpdateVacunaDto) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -421,140 +474,163 @@ const VacunaModal: React.FC<VacunaModalProps> = ({ vacuna, onClose, onSubmit, is
     nombre: vacuna?.nombre || '',
     tipo: vacuna?.tipo || '',
     presentacion: vacuna?.presentacion || 'Frasco multidosis',
-    dosisPorFrasco: vacuna?.dosisPorFrasco || 1,
-    tiempoVidaUtil: vacuna?.tiempoVidaUtil || 1095,
+    dosisPorFrasco: String(vacuna?.dosisPorFrasco || 1),
+    tiempoVidaUtil: String(vacuna?.tiempoVidaUtil || 1095),
     temperaturaAlmacenamiento: vacuna?.temperaturaAlmacenamiento || '2°C a 8°C',
-    ...(vacuna && { estado: vacuna.estado }),
+    estado: vacuna?.estado || 'activo',
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateForm = useCallback((): boolean => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es requerido';
-    if (!formData.tipo.trim()) newErrors.tipo = 'El tipo es requerido';
-    if (!formData.presentacion.trim()) newErrors.presentacion = 'La presentacion es requerida';
-    if (!formData.dosisPorFrasco || formData.dosisPorFrasco < 1) newErrors.dosisPorFrasco = 'Las dosis deben ser mayor a 0';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData]);
+  const handleFieldChange = useCallback((field: string, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: '' }));
+  }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    const submitData = { ...formData };
-    if (!vacuna) delete (submitData as any).estado;
-    await onSubmit(submitData);
-  }, [formData, vacuna, validateForm, onSubmit]);
+  const handleSubmit = useCallback(async () => {
+    const nextErrors: Record<string, string> = {};
 
-  const handleFieldChange = useCallback((field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
-  }, [errors]);
+    if (!formData.nombre.trim()) nextErrors.nombre = 'Ingrese un nombre breve para reconocer la vacuna.';
+    if (!formData.tipo.trim()) nextErrors.tipo = 'Ingrese el tipo o denominación técnica.';
+
+    const dosis = Number(formData.dosisPorFrasco);
+    if (!Number.isFinite(dosis) || dosis <= 0) nextErrors.dosisPorFrasco = 'Las dosis por frasco deben ser mayores a 0.';
+
+    const vidaUtil = Number(formData.tiempoVidaUtil);
+    if (!Number.isFinite(vidaUtil) || vidaUtil <= 0) nextErrors.tiempoVidaUtil = 'Seleccione un tiempo de vida útil válido.';
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+
+    const payload: CreateVacunaDto | UpdateVacunaDto = {
+      nombre: formData.nombre.trim(),
+      tipo: formData.tipo.trim(),
+      presentacion: formData.presentacion,
+      dosisPorFrasco: dosis,
+      tiempoVidaUtil: vidaUtil,
+      temperaturaAlmacenamiento: formData.temperaturaAlmacenamiento,
+      ...(vacuna ? { estado: formData.estado as 'activo' | 'inactivo' } : {}),
+    };
+
+    await onSubmit(payload);
+  }, [formData, onSubmit, vacuna]);
 
   return (
     <Modal
-      isOpen={true}
+      isOpen
       onClose={onClose}
-      title={vacuna ? 'Editar Vacuna' : 'Nueva Vacuna'}
-      subtitle={vacuna ? 'Actualizar informacion' : 'Registrar nueva vacuna'}
-      icon={Package}
+      title={vacuna ? 'Editar vacuna' : 'Nueva vacuna'}
+      subtitle={vacuna ? 'Corrige datos sin perder el contexto del inventario.' : 'Registra una nueva vacuna en el catálogo.'}
+      icon={Package2}
       footer={
         <ModalFooter
           onCancel={onClose}
-          submitLabel={vacuna ? 'Actualizar' : 'Crear'}
+          onSubmit={handleSubmit}
+          submitType="button"
+          submitLabel={vacuna ? 'Guardar cambios' : 'Crear vacuna'}
           isLoading={isLoading}
         />
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <TextInput
-            id="nombre"
-            label="Nombre"
-            value={formData.nombre}
-            onChange={(v) => handleFieldChange('nombre', v)}
-            placeholder="Ej: BCG, Pentavalente"
-            required
-            error={errors.nombre}
-          />
-          <TextInput
-            id="tipo"
-            label="Tipo de Vacuna"
-            value={formData.tipo}
-            onChange={(v) => handleFieldChange('tipo', v)}
-            placeholder="Ej: Antituberculosa"
-            required
-            error={errors.tipo}
-          />
-          <SelectInput
-            id="presentacion"
-            label="Presentacion"
-            value={formData.presentacion}
-            onChange={(v) => handleFieldChange('presentacion', v)}
-            options={[
-              { value: 'Frasco multidosis', label: 'Frasco multidosis' },
-              { value: 'Frasco unidosis', label: 'Frasco unidosis' },
-              { value: 'Ampolla', label: 'Ampolla' },
-              { value: 'Jeringa prellenada', label: 'Jeringa prellenada' },
-            ]}
-            required
-          />
-          <TextInput
-            id="dosisPorFrasco"
-            label="Dosis por Frasco"
-            type="number"
-            value={String(formData.dosisPorFrasco)}
-            onChange={(v) => handleFieldChange('dosisPorFrasco', parseInt(v) || 1)}
-            required
-            error={errors.dosisPorFrasco}
-            min={1}
-          />
-          <SelectInput
-            id="tiempoVidaUtil"
-            label="Tiempo de Vida Util"
-            value={String(formData.tiempoVidaUtil)}
-            onChange={(v) => handleFieldChange('tiempoVidaUtil', parseInt(v))}
-            options={[
-              { value: '365', label: '1 año' },
-              { value: '730', label: '2 años' },
-              { value: '1095', label: '3 años' },
-              { value: '1460', label: '4 años' },
-              { value: '1825', label: '5 años' },
-            ]}
-            required
-          />
-          <SelectInput
-            id="temperaturaAlmacenamiento"
-            label="Temperatura"
-            value={formData.temperaturaAlmacenamiento}
-            onChange={(v) => handleFieldChange('temperaturaAlmacenamiento', v)}
-            options={[
-              { value: '2°C a 8°C', label: '2°C a 8°C (Refrigeracion)' },
-              { value: '-15°C a -25°C', label: '-15°C a -25°C (Congelacion)' },
-              { value: '15°C a 25°C', label: '15°C a 25°C (Ambiente)' },
-            ]}
-            required
-          />
-        </div>
+      <div className="space-y-4">
+        <FormSection title="Identificación" description="Datos que el usuario usa para reconocer rápidamente la vacuna.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextInput
+              id="vacuna-nombre"
+              label="Nombre"
+              value={formData.nombre}
+              onChange={(value) => handleFieldChange('nombre', value)}
+              placeholder="Ej: BCG"
+              required
+              error={errors.nombre}
+            />
+            <TextInput
+              id="vacuna-tipo"
+              label="Tipo"
+              value={formData.tipo}
+              onChange={(value) => handleFieldChange('tipo', value)}
+              placeholder="Ej: Antituberculosa"
+              required
+              error={errors.tipo}
+            />
+            <SelectInput
+              id="vacuna-presentacion"
+              label="Presentación"
+              value={formData.presentacion}
+              onChange={(value) => handleFieldChange('presentacion', value)}
+              options={PRESENTACION_OPTIONS}
+              required
+            />
+            <TextInput
+              id="vacuna-dosis"
+              label="Dosis por frasco"
+              type="number"
+              value={formData.dosisPorFrasco}
+              onChange={(value) => handleFieldChange('dosisPorFrasco', value)}
+              required
+              error={errors.dosisPorFrasco}
+              min={1}
+            />
+          </div>
+        </FormSection>
 
-        {vacuna && (
-          <SelectInput
-            id="estado"
-            label="Estado"
-            value={(formData as any).estado || 'activo'}
-            onChange={(v) => handleFieldChange('estado', v)}
-            options={[
-              { value: 'activo', label: 'Activo' },
-              { value: 'inactivo', label: 'Inactivo' },
-            ]}
-          />
-        )}
-
-        <button type="submit" className="hidden" />
-      </form>
+        <FormSection title="Conservación" description="Parámetros operativos usados al almacenar y distribuir la vacuna.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <SelectInput
+              id="vacuna-vida-util"
+              label="Tiempo de vida útil"
+              value={formData.tiempoVidaUtil}
+              onChange={(value) => handleFieldChange('tiempoVidaUtil', value)}
+              options={VIDA_UTIL_OPTIONS}
+              required
+              error={errors.tiempoVidaUtil}
+            />
+            <SelectInput
+              id="vacuna-temperatura"
+              label="Temperatura"
+              value={formData.temperaturaAlmacenamiento}
+              onChange={(value) => handleFieldChange('temperaturaAlmacenamiento', value)}
+              options={TEMPERATURA_OPTIONS}
+              required
+            />
+            {vacuna ? (
+              <SelectInput
+                id="vacuna-estado"
+                label="Estado"
+                value={formData.estado}
+                onChange={(value) => handleFieldChange('estado', value)}
+                options={[
+                  { value: 'activo', label: 'Activo' },
+                  { value: 'inactivo', label: 'Inactivo' },
+                ]}
+              />
+            ) : null}
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+            <div className="flex items-center gap-2 text-slate-900">
+              <ThermometerSnowflake className="h-4 w-4 text-teal-600" />
+              <span className="font-medium">{formData.temperaturaAlmacenamiento}</span>
+            </div>
+            <p className="mt-2">Vida útil configurada: {Math.round(Number(formData.tiempoVidaUtil) / 365)} años.</p>
+          </div>
+        </FormSection>
+      </div>
     </Modal>
   );
 };
 
-export default GestionVacunas;
+const getStockInfo = (vacuna: Vacuna) => {
+  const lotes = vacuna.lotes || [];
+  const stockTotal = lotes.reduce((total, lote) => total + lote.cantidadActual, 0);
+  const lotesActivos = lotes.filter((lote) => lote.estado === 'disponible').length;
+  const lotesVencidos = lotes.filter((lote) => lote.estado === 'vencido').length;
+  const lotesPorVencer = lotes.filter((lote) => {
+    const days = Math.ceil((lote.fechaVencimiento.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    return days > 0 && days <= 30;
+  }).length;
+
+  return { stockTotal, lotesActivos, lotesVencidos, lotesPorVencer };
+};
+
+export default memo(GestionVacunas);

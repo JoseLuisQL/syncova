@@ -602,6 +602,7 @@ export interface ServiceResult<T = any> {
   error?: string;
   message?: string;
   errors?: ValidationError[];
+  statusCode?: number;
 }
 
 // =====================================================
@@ -770,6 +771,8 @@ export interface CreateConfiguracionDefectoDto {
 }
 
 export interface UpdateConfiguracionDefectoDto {
+  vacunaId?: string;
+  jeringaId?: string;
   multiplicador?: number;
   prioridad?: number;
   activo?: boolean;
@@ -785,6 +788,9 @@ export interface CreateConfiguracionCentroDto {
 }
 
 export interface UpdateConfiguracionCentroDto {
+  centroAcopioId?: string;
+  vacunaId?: string;
+  jeringaId?: string;
   multiplicador?: number;
   prioridad?: number;
   activo?: boolean;

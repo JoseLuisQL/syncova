@@ -81,9 +81,9 @@ export class ConfiguracionJeringaVacunaController {
       } else {
         errorResponse(res, result.message || 'Error al obtener configuraciones', 500);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en getAllDefecto:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -157,9 +157,9 @@ export class ConfiguracionJeringaVacunaController {
       } else {
         errorResponse(res, result.message || 'Error al crear configuración', 400);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en createDefecto:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -170,7 +170,7 @@ export class ConfiguracionJeringaVacunaController {
   static async updateDefecto(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { multiplicador, prioridad, activo } = req.body;
+      const { vacunaId, jeringaId, multiplicador, prioridad, activo } = req.body;
 
       // Validar UUID
       if (!validateUUID(id)) {
@@ -179,6 +179,22 @@ export class ConfiguracionJeringaVacunaController {
       }
 
       const data: UpdateConfiguracionDefectoDto = {};
+
+      if (vacunaId !== undefined) {
+        if (!validateUUID(vacunaId)) {
+          errorResponse(res, 'ID de vacuna inválido', 400);
+          return;
+        }
+        data.vacunaId = vacunaId;
+      }
+
+      if (jeringaId !== undefined) {
+        if (!validateUUID(jeringaId)) {
+          errorResponse(res, 'ID de jeringa inválido', 400);
+          return;
+        }
+        data.jeringaId = jeringaId;
+      }
 
       // Validar multiplicador si se proporciona
       if (multiplicador !== undefined) {
@@ -212,9 +228,9 @@ export class ConfiguracionJeringaVacunaController {
       } else {
         errorResponse(res, result.message || 'Error al actualizar configuración', 400);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en updateDefecto:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -239,9 +255,9 @@ export class ConfiguracionJeringaVacunaController {
       } else {
         errorResponse(res, result.message || 'Error al eliminar configuración', 400);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en deleteDefecto:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -318,9 +334,9 @@ export class ConfiguracionJeringaVacunaController {
       } else {
         errorResponse(res, result.message || 'Error al obtener configuraciones', 500);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en getAllCentro:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -406,9 +422,9 @@ export class ConfiguracionJeringaVacunaController {
       } else {
         errorResponse(res, result.message || 'Error al crear configuración', 400);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en createCentro:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -419,7 +435,7 @@ export class ConfiguracionJeringaVacunaController {
   static async updateCentro(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { multiplicador, prioridad, activo } = req.body;
+      const { centroAcopioId, vacunaId, jeringaId, multiplicador, prioridad, activo } = req.body;
 
       // Validar UUID
       if (!validateUUID(id)) {
@@ -428,6 +444,30 @@ export class ConfiguracionJeringaVacunaController {
       }
 
       const data: UpdateConfiguracionCentroDto = {};
+
+      if (centroAcopioId !== undefined) {
+        if (!validateUUID(centroAcopioId)) {
+          errorResponse(res, 'ID de centro de acopio inválido', 400);
+          return;
+        }
+        data.centroAcopioId = centroAcopioId;
+      }
+
+      if (vacunaId !== undefined) {
+        if (!validateUUID(vacunaId)) {
+          errorResponse(res, 'ID de vacuna inválido', 400);
+          return;
+        }
+        data.vacunaId = vacunaId;
+      }
+
+      if (jeringaId !== undefined) {
+        if (!validateUUID(jeringaId)) {
+          errorResponse(res, 'ID de jeringa inválido', 400);
+          return;
+        }
+        data.jeringaId = jeringaId;
+      }
 
       // Validar multiplicador si se proporciona
       if (multiplicador !== undefined) {
@@ -461,9 +501,9 @@ export class ConfiguracionJeringaVacunaController {
       } else {
         errorResponse(res, result.message || 'Error al actualizar configuración', 400);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en updateCentro:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -488,9 +528,9 @@ export class ConfiguracionJeringaVacunaController {
       } else {
         errorResponse(res, result.message || 'Error al eliminar configuración', 400);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en deleteCentro:', error);
-      errorResponse(res, 'Error interno del servidor', 500);
+      errorResponse(res, error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 

@@ -1,10 +1,10 @@
 import React, { memo } from 'react';
-import { LucideIcon, Loader2 } from 'lucide-react';
-import { COLORS, COMPONENT_STYLES, ColorScheme } from '../constants';
+import { Loader2, LucideIcon, Pencil, Eye, Trash2 } from 'lucide-react';
+import { ColorScheme, COMPONENT_STYLES } from '../constants';
 
-// ============================================================================
-// PAGE HEADER COMPONENT
-// ============================================================================
+const SkeletonBlock: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <div className={`inventory-skeleton ${className}`} aria-hidden="true" />
+);
 
 interface PageHeaderProps {
   title: string;
@@ -37,29 +37,26 @@ export const PageHeader: React.FC<PageHeaderProps> = memo(({
   const SecondaryIcon = secondaryAction?.icon;
 
   return (
-    <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-      <div className="flex items-center gap-4">
+    <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div className="flex min-w-0 items-start gap-3">
         <div className={COMPONENT_STYLES.header.iconWrapper}>
-          <Icon className="h-6 w-6 text-white" aria-hidden="true" />
+          <Icon className="h-5 w-5" aria-hidden="true" />
         </div>
-        <div>
-          <h1 className={COMPONENT_STYLES.header.title}>
-            {title}
-            {count !== undefined && count > 0 && (
-              <span className="ml-2 text-base font-medium text-teal-600">
-                ({count})
-              </span>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className={COMPONENT_STYLES.header.title}>{title}</h1>
+            {typeof count === 'number' && (
+              <span className={`${COMPONENT_STYLES.badge.count} px-2 py-0.5 text-[0.76rem]`}>{count.toLocaleString()}</span>
             )}
-          </h1>
-          {subtitle && (
-            <p className={COMPONENT_STYLES.header.subtitle}>{subtitle}</p>
-          )}
+          </div>
+          {subtitle ? <p className={`${COMPONENT_STYLES.header.subtitle} mt-1`}>{subtitle}</p> : null}
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        {secondaryAction && (
+      <div className="flex flex-wrap items-center gap-2 md:justify-end">
+        {secondaryAction ? (
           <button
+            type="button"
             onClick={secondaryAction.onClick}
             disabled={secondaryAction.isLoading}
             className={COMPONENT_STYLES.button.secondary}
@@ -72,9 +69,10 @@ export const PageHeader: React.FC<PageHeaderProps> = memo(({
             ) : null}
             <span>{secondaryAction.label}</span>
           </button>
-        )}
-        {action && (
+        ) : null}
+        {action ? (
           <button
+            type="button"
             onClick={action.onClick}
             disabled={action.isLoading}
             className={COMPONENT_STYLES.button.primary}
@@ -87,17 +85,13 @@ export const PageHeader: React.FC<PageHeaderProps> = memo(({
             ) : null}
             <span>{action.label}</span>
           </button>
-        )}
+        ) : null}
       </div>
     </header>
   );
 });
 
 PageHeader.displayName = 'PageHeader';
-
-// ============================================================================
-// STATS CARD COMPONENT
-// ============================================================================
 
 interface StatsCardProps {
   label: string;
@@ -107,48 +101,63 @@ interface StatsCardProps {
   isLoading?: boolean;
 }
 
-const colorClasses: Record<ColorScheme, { bg: string; border: string; text: string; textDark: string; iconBg: string }> = {
+const colorClasses: Record<
+  ColorScheme,
+  { surface: string; border: string; text: string; textStrong: string; iconBg: string; iconText: string; iconBorder: string }
+> = {
   primary: {
-    bg: 'bg-gradient-to-br from-teal-50 to-teal-100',
-    border: 'border-teal-200',
-    text: 'text-teal-600',
-    textDark: 'text-teal-800',
-    iconBg: 'bg-teal-500',
+    surface: 'bg-white',
+    border: 'border-slate-200',
+    text: 'text-slate-600',
+    textStrong: 'text-teal-900',
+    iconBg: 'bg-teal-100',
+    iconText: 'text-teal-800',
+    iconBorder: 'border-teal-200',
   },
   secondary: {
-    bg: 'bg-gradient-to-br from-cyan-50 to-cyan-100',
-    border: 'border-cyan-200',
-    text: 'text-cyan-600',
-    textDark: 'text-cyan-800',
-    iconBg: 'bg-cyan-500',
+    surface: 'bg-white',
+    border: 'border-slate-200',
+    text: 'text-slate-600',
+    textStrong: 'text-cyan-900',
+    iconBg: 'bg-cyan-100',
+    iconText: 'text-cyan-800',
+    iconBorder: 'border-cyan-200',
   },
   success: {
-    bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
-    border: 'border-emerald-200',
-    text: 'text-emerald-600',
-    textDark: 'text-emerald-800',
-    iconBg: 'bg-emerald-500',
+    surface: 'bg-white',
+    border: 'border-slate-200',
+    text: 'text-slate-600',
+    textStrong: 'text-emerald-900',
+    iconBg: 'bg-emerald-100',
+    iconText: 'text-emerald-800',
+    iconBorder: 'border-emerald-200',
   },
   warning: {
-    bg: 'bg-gradient-to-br from-amber-50 to-amber-100',
-    border: 'border-amber-200',
-    text: 'text-amber-600',
-    textDark: 'text-amber-800',
-    iconBg: 'bg-amber-500',
+    surface: 'bg-white',
+    border: 'border-slate-200',
+    text: 'text-slate-600',
+    textStrong: 'text-amber-900',
+    iconBg: 'bg-amber-100',
+    iconText: 'text-amber-800',
+    iconBorder: 'border-amber-200',
   },
   danger: {
-    bg: 'bg-gradient-to-br from-rose-50 to-rose-100',
-    border: 'border-rose-200',
-    text: 'text-rose-600',
-    textDark: 'text-rose-800',
-    iconBg: 'bg-rose-500',
+    surface: 'bg-white',
+    border: 'border-slate-200',
+    text: 'text-slate-600',
+    textStrong: 'text-rose-900',
+    iconBg: 'bg-rose-100',
+    iconText: 'text-rose-800',
+    iconBorder: 'border-rose-200',
   },
   neutral: {
-    bg: 'bg-gradient-to-br from-gray-50 to-gray-100',
-    border: 'border-gray-200',
-    text: 'text-gray-600',
-    textDark: 'text-gray-800',
-    iconBg: 'bg-gray-500',
+    surface: 'bg-white',
+    border: 'border-slate-200',
+    text: 'text-slate-600',
+    textStrong: 'text-slate-900',
+    iconBg: 'bg-slate-200',
+    iconText: 'text-slate-700',
+    iconBorder: 'border-slate-200',
   },
 };
 
@@ -162,26 +171,23 @@ export const StatsCard: React.FC<StatsCardProps> = memo(({
   const colors = colorClasses[colorScheme];
 
   return (
-    <div
-      className={`${COMPONENT_STYLES.stats.card} ${colors.bg} ${colors.border}`}
-      role="region"
-      aria-label={`${label}: ${value}`}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className={`${COMPONENT_STYLES.stats.label} ${colors.text}`}>
-            {label}
-          </p>
+    <div className={`${COMPONENT_STYLES.stats.card} ${colors.surface} ${colors.border} inventory-reveal`}>
+      <div className="flex h-full items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className={`${COMPONENT_STYLES.stats.label} ${colors.text}`}>{label}</p>
           {isLoading ? (
-            <Loader2 className={`h-6 w-6 ${colors.text} animate-spin mt-1`} />
+            <div className="mt-3 space-y-2.5">
+              <SkeletonBlock className="h-8 w-20 rounded-2xl" />
+              <SkeletonBlock className="h-3 w-24 rounded-full opacity-80" />
+            </div>
           ) : (
-            <p className={`${COMPONENT_STYLES.stats.value} ${colors.textDark}`}>
+            <p className={`${COMPONENT_STYLES.stats.value} ${colors.textStrong}`}>
               {(value ?? 0).toLocaleString()}
             </p>
           )}
         </div>
-        <div className={`${COMPONENT_STYLES.stats.iconWrapper} ${colors.iconBg}`}>
-          <Icon className="h-5 w-5 text-white" aria-hidden="true" />
+        <div className={`${COMPONENT_STYLES.stats.iconWrapper} ${colors.iconBg} ${colors.iconText} ${colors.iconBorder} transition-transform duration-300 ${isLoading ? 'inventory-breathe' : ''}`}>
+          {isLoading ? <SkeletonBlock className="h-4 w-4 rounded-full" /> : <Icon className="h-4 w-4" aria-hidden="true" />}
         </div>
       </div>
     </div>
@@ -189,10 +195,6 @@ export const StatsCard: React.FC<StatsCardProps> = memo(({
 });
 
 StatsCard.displayName = 'StatsCard';
-
-// ============================================================================
-// STATS GRID COMPONENT
-// ============================================================================
 
 interface StatsGridProps {
   stats: Array<{
@@ -206,7 +208,7 @@ interface StatsGridProps {
 }
 
 export const StatsGrid: React.FC<StatsGridProps> = memo(({ stats, isLoading = false }) => (
-  <section aria-label="Estadisticas" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <section aria-label="Estadisticas" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
     {stats.map((stat) => (
       <StatsCard
         key={stat.key}
@@ -222,10 +224,6 @@ export const StatsGrid: React.FC<StatsGridProps> = memo(({ stats, isLoading = fa
 
 StatsGrid.displayName = 'StatsGrid';
 
-// ============================================================================
-// STATUS BADGE COMPONENT
-// ============================================================================
-
 interface StatusBadgeProps {
   status: 'activo' | 'inactivo' | 'disponible' | 'agotado' | 'vencido';
 }
@@ -240,18 +238,10 @@ const statusConfig = {
 
 export const StatusBadge: React.FC<StatusBadgeProps> = memo(({ status }) => {
   const config = statusConfig[status] || statusConfig.inactivo;
-  return (
-    <span className={config.className}>
-      {config.label}
-    </span>
-  );
+  return <span className={config.className}>{config.label}</span>;
 });
 
 StatusBadge.displayName = 'StatusBadge';
-
-// ============================================================================
-// COUNT BADGE COMPONENT
-// ============================================================================
 
 interface CountBadgeProps {
   count: number;
@@ -260,15 +250,16 @@ interface CountBadgeProps {
 }
 
 export const CountBadge: React.FC<CountBadgeProps> = memo(({ count, icon: Icon, variant = 'default' }) => {
-  const className = variant === 'warning' 
-    ? COMPONENT_STYLES.badge.warning 
-    : variant === 'danger' 
-    ? COMPONENT_STYLES.badge.danger 
-    : COMPONENT_STYLES.badge.count;
-  
+  const className =
+    variant === 'warning'
+      ? COMPONENT_STYLES.badge.warning
+      : variant === 'danger'
+      ? COMPONENT_STYLES.badge.danger
+      : COMPONENT_STYLES.badge.count;
+
   return (
     <span className={className}>
-      {Icon && <Icon className="h-3 w-3 mr-1" aria-hidden="true" />}
+      {Icon ? <Icon className="mr-1 h-3 w-3" aria-hidden="true" /> : null}
       {count}
     </span>
   );
@@ -276,26 +267,45 @@ export const CountBadge: React.FC<CountBadgeProps> = memo(({ count, icon: Icon, 
 
 CountBadge.displayName = 'CountBadge';
 
-// ============================================================================
-// LOADING SPINNER COMPONENT
-// ============================================================================
-
 interface LoadingSpinnerProps {
   message?: string;
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = memo(({ message = 'Cargando...' }) => (
-  <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
-    <Loader2 className="h-8 w-8 animate-spin text-teal-600" aria-hidden="true" />
-    <span className="ml-3 text-gray-600">{message}</span>
+  <div
+    className="inventory-loading-shell rounded-[24px] border border-slate-200/90 bg-white p-5 shadow-[0_10px_26px_-22px_rgba(15,23,42,0.22)]"
+    role="status"
+    aria-live="polite"
+  >
+    <div className="flex items-center gap-3 text-slate-700">
+      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 text-teal-700 inventory-breathe">
+        <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-slate-900">{message}</p>
+        <p className="text-xs text-slate-500">Preparando la información para mostrarla de forma segura.</p>
+      </div>
+    </div>
+
+    <div className="mt-5 grid gap-3 sm:grid-cols-3">
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+        <SkeletonBlock className="h-3 w-20 rounded-full" />
+        <SkeletonBlock className="mt-3 h-7 w-14 rounded-2xl" />
+      </div>
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+        <SkeletonBlock className="h-3 w-24 rounded-full" />
+        <SkeletonBlock className="mt-3 h-4 w-full rounded-full" />
+        <SkeletonBlock className="mt-2 h-4 w-3/4 rounded-full" />
+      </div>
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+        <SkeletonBlock className="h-3 w-16 rounded-full" />
+        <SkeletonBlock className="mt-3 h-10 w-full rounded-2xl" />
+      </div>
+    </div>
   </div>
 ));
 
 LoadingSpinner.displayName = 'LoadingSpinner';
-
-// ============================================================================
-// EMPTY STATE COMPONENT
-// ============================================================================
 
 interface EmptyStateProps {
   icon: LucideIcon;
@@ -313,28 +323,21 @@ export const EmptyState: React.FC<EmptyStateProps> = memo(({
   description,
   action,
 }) => (
-  <div className="text-center py-12 px-4">
-    <Icon className={COMPONENT_STYLES.table.emptyIcon} aria-hidden="true" />
-    <p className="text-lg font-medium text-gray-900 mb-1">{title}</p>
-    {description && (
-      <p className="text-sm text-gray-500 mb-4">{description}</p>
-    )}
-    {action && (
-      <button
-        onClick={action.onClick}
-        className={COMPONENT_STYLES.button.primary}
-      >
+  <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+      <Icon className="h-8 w-8 text-slate-400" aria-hidden="true" />
+    </div>
+    <p className="text-lg font-medium text-slate-900">{title}</p>
+    {description ? <p className="mt-1 max-w-md text-sm text-slate-500">{description}</p> : null}
+    {action ? (
+      <button type="button" onClick={action.onClick} className={`${COMPONENT_STYLES.button.primary} mt-5`}>
         {action.label}
       </button>
-    )}
+    ) : null}
   </div>
 ));
 
 EmptyState.displayName = 'EmptyState';
-
-// ============================================================================
-// ERROR ALERT COMPONENT
-// ============================================================================
 
 interface ErrorAlertProps {
   message: string;
@@ -342,36 +345,24 @@ interface ErrorAlertProps {
 }
 
 export const ErrorAlert: React.FC<ErrorAlertProps> = memo(({ message, onRetry }) => (
-  <div
-    className="bg-rose-50 border border-rose-200 rounded-xl p-4 mb-6"
-    role="alert"
-  >
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-rose-100">
-          <svg className="h-5 w-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <span className="text-rose-800 text-sm font-medium">{message}</span>
+  <div className="flex flex-col gap-3 rounded-[22px] border border-rose-200 bg-rose-50/80 p-4 text-sm text-rose-800 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex items-center gap-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-100">
+        <svg className="h-5 w-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-7 4h14a2 2 0 001.73-3L13.73 4a2 2 0 00-3.46 0L3.27 18A2 2 0 005 21z" />
+        </svg>
       </div>
-      {onRetry && (
-        <button
-          onClick={onRetry}
-          className="text-sm font-medium text-rose-700 hover:text-rose-800"
-        >
-          Reintentar
-        </button>
-      )}
+      <span>{message}</span>
     </div>
+    {onRetry ? (
+      <button type="button" onClick={onRetry} className={COMPONENT_STYLES.button.secondary}>
+        Reintentar
+      </button>
+    ) : null}
   </div>
 ));
 
 ErrorAlert.displayName = 'ErrorAlert';
-
-// ============================================================================
-// ACTION BUTTONS COMPONENT
-// ============================================================================
 
 interface ActionButtonsProps {
   onEdit?: () => void;
@@ -390,61 +381,45 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   canDelete = true,
   deleteTooltip,
 }) => (
-  <div className="flex items-center justify-end gap-1">
-    {onView && (
+  <div className="flex items-center justify-end gap-2">
+    {onView ? (
       <button
+        type="button"
         onClick={onView}
         disabled={isLoading}
         className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconView}`}
         aria-label="Ver detalles"
       >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
+        <Eye className="h-4 w-4" aria-hidden="true" />
       </button>
-    )}
-    {onEdit && (
+    ) : null}
+    {onEdit ? (
       <button
+        type="button"
         onClick={onEdit}
         disabled={isLoading}
         className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconEdit}`}
         aria-label="Editar"
       >
-        {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-        )}
+        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Pencil className="h-4 w-4" aria-hidden="true" />}
       </button>
-    )}
-    {onDelete && (
+    ) : null}
+    {onDelete ? (
       <button
+        type="button"
         onClick={onDelete}
         disabled={isLoading || !canDelete}
         className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconDelete}`}
         aria-label="Eliminar"
         title={!canDelete ? deleteTooltip : 'Eliminar'}
       >
-        {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        )}
+        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" aria-hidden="true" />}
       </button>
-    )}
+    ) : null}
   </div>
 ));
 
 ActionButtons.displayName = 'ActionButtons';
-
-// ============================================================================
-// STOCK PROGRESS BAR COMPONENT
-// ============================================================================
 
 interface StockProgressProps {
   current: number;
@@ -452,42 +427,30 @@ interface StockProgressProps {
   showPercentage?: boolean;
 }
 
-export const StockProgress: React.FC<StockProgressProps> = memo(({ 
-  current, 
-  initial, 
-  showPercentage = true 
+export const StockProgress: React.FC<StockProgressProps> = memo(({
+  current,
+  initial,
+  showPercentage = true,
 }) => {
   const percentage = initial > 0 ? Math.round((current / initial) * 100) : 0;
-  const colorClass = current === 0 
-    ? 'bg-rose-500' 
-    : percentage < 20 
-    ? 'bg-amber-500' 
-    : 'bg-emerald-500';
-  
+  const tone = current === 0 ? 'bg-rose-500' : percentage < 20 ? 'bg-amber-500' : 'bg-emerald-500';
+  const width = `${Math.max(Math.min(percentage, 100), current > 0 ? 4 : 0)}%`;
+
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-sm">
-        <span className="font-bold text-gray-900">{current.toLocaleString()}</span>
-        <span className="text-gray-500">de {initial.toLocaleString()}</span>
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between gap-3 text-sm">
+        <span className="font-semibold text-slate-900">{current.toLocaleString()}</span>
+        <span className="text-slate-500">de {initial.toLocaleString()}</span>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div
-          className={`h-2 rounded-full transition-all duration-300 ${colorClass}`}
-          style={{ width: `${Math.max(percentage, 2)}%` }}
-        />
+      <div className="h-2 rounded-full bg-slate-200">
+        <div className={`h-2 rounded-full transition-all ${tone}`} style={{ width }} />
       </div>
-      {showPercentage && (
-        <p className="text-xs text-gray-500 text-center">{percentage}%</p>
-      )}
+      {showPercentage ? <p className="text-xs text-slate-500">{percentage}% disponible</p> : null}
     </div>
   );
 });
 
 StockProgress.displayName = 'StockProgress';
-
-// ============================================================================
-// EXPIRY BADGE COMPONENT
-// ============================================================================
 
 interface ExpiryBadgeProps {
   daysToExpire: number | null;
@@ -496,17 +459,32 @@ interface ExpiryBadgeProps {
 export const ExpiryBadge: React.FC<ExpiryBadgeProps> = memo(({ daysToExpire }) => {
   if (daysToExpire === null) return null;
 
-  const config = daysToExpire <= 0
-    ? { label: 'Vencido', className: 'bg-rose-100 text-rose-800' }
-    : daysToExpire <= 30
-    ? { label: `${daysToExpire} dias`, className: 'bg-amber-100 text-amber-800' }
-    : { label: `${daysToExpire} dias`, className: 'bg-emerald-100 text-emerald-800' };
+  const config =
+    daysToExpire <= 0
+      ? { label: 'Vencido', className: COMPONENT_STYLES.badge.danger }
+      : daysToExpire <= 30
+      ? { label: `${daysToExpire} dias`, className: COMPONENT_STYLES.badge.warning }
+      : { label: `${daysToExpire} dias`, className: COMPONENT_STYLES.badge.active };
 
-  return (
-    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${config.className}`}>
-      {config.label}
-    </span>
-  );
+  return <span className={config.className}>{config.label}</span>;
 });
 
 ExpiryBadge.displayName = 'ExpiryBadge';
+
+interface KeyValueGridProps {
+  items: Array<{ label: string; value: React.ReactNode }>;
+  columns?: 1 | 2 | 3;
+}
+
+export const KeyValueGrid: React.FC<KeyValueGridProps> = memo(({ items, columns = 2 }) => (
+  <div className={`grid gap-4 ${columns === 1 ? 'grid-cols-1' : columns === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
+    {items.map((item) => (
+      <div key={item.label} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+        <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-500">{item.label}</p>
+        <div className="mt-2 text-sm text-slate-900">{item.value}</div>
+      </div>
+    ))}
+  </div>
+));
+
+KeyValueGrid.displayName = 'KeyValueGrid';

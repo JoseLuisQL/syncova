@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Vacuna,
   CreateVacunaDto,
@@ -12,7 +12,8 @@ import { logger } from '../utils/debug';
 /**
  * Hook personalizado para gestión de vacunas
  */
-export function useVacunas(initialFilters?: VacunaFilters) {
+export function useVacunas(initialFilters?: VacunaFilters, options?: { autoLoad?: boolean }) {
+  const { autoLoad = true } = options || {};
   // Estados principales
   const [vacunas, setVacunas] = useState<Vacuna[]>([]);
   const [vacunasActivas, setVacunasActivas] = useState<Vacuna[]>([]);
@@ -33,6 +34,10 @@ export function useVacunas(initialFilters?: VacunaFilters) {
   const crudApi = useCrudApi<Vacuna>();
   const activasApi = useApi<Vacuna[]>();
   const stockStatsApi = useApi<any>();
+  const pendingListKeyRef = useRef<string | null>(null);
+  const pendingActivasRef = useRef(false);
+  const loadedListKeyRef = useRef<string | null>(null);
+  const hasLoadedActivasRef = useRef(false);
 
   // Estados derivados
   const isLoading = listApi.loading;
@@ -49,19 +54,37 @@ export function useVacunas(initialFilters?: VacunaFilters) {
   /**
    * Cargar vacunas con filtros
    */
-  const loadVacunas = useCallback(async (newFilters?: VacunaFilters) => {
+  const loadVacunas = useCallback(async (newFilters?: VacunaFilters, options?: { force?: boolean }) => {
     const filtersToUse = newFilters || filters;
+    const requestKey = JSON.stringify(filtersToUse || {});
+    const force = options?.force === true;
+
+    if (pendingListKeyRef.current === requestKey) {
+      return;
+    }
+
+    if (!force && loadedListKeyRef.current === requestKey) {
+      return;
+    }
     
     logger.debug('Cargando vacunas con filtros:', filtersToUse);
+    pendingListKeyRef.current = requestKey;
 
-    const result = await listApi.execute(() => VacunaService.getAll(filtersToUse));
-    
-    if (result) {
-      setVacunas(result.vacunas);
-      setPagination(result.pagination);
+    try {
+      const result = await listApi.execute(() => VacunaService.getAll(filtersToUse));
       
-      if (newFilters) {
-        setFilters(newFilters);
+      if (result) {
+        setVacunas(result.vacunas);
+        setPagination(result.pagination);
+        loadedListKeyRef.current = requestKey;
+        
+        if (newFilters) {
+          setFilters(newFilters);
+        }
+      }
+    } finally {
+      if (pendingListKeyRef.current === requestKey) {
+        pendingListKeyRef.current = null;
       }
     }
   }, [filters, listApi]);
@@ -69,21 +92,37 @@ export function useVacunas(initialFilters?: VacunaFilters) {
   /**
    * Cargar vacunas activas
    */
-  const loadVacunasActivas = useCallback(async () => {
+  const loadVacunasActivas = useCallback(async (options?: { force?: boolean }) => {
+    const force = options?.force === true;
+
+    if (pendingActivasRef.current) {
+      return;
+    }
+
+    if (!force && hasLoadedActivasRef.current) {
+      return;
+    }
+
     logger.debug('Cargando vacunas activas');
     console.log('🔄 Iniciando carga de vacunas activas...');
+    pendingActivasRef.current = true;
 
-    const result = await activasApi.execute(() => VacunaService.getActivas());
+    try {
+      const result = await activasApi.execute(() => VacunaService.getActivas());
 
-    console.log('📊 Resultado de vacunas activas:', result);
-    console.log('⚠️ Error en activasApi:', activasApi.error);
-    console.log('🔄 Loading state:', activasApi.loading);
+      console.log('📊 Resultado de vacunas activas:', result);
+      console.log('⚠️ Error en activasApi:', activasApi.error);
+      console.log('🔄 Loading state:', activasApi.loading);
 
-    if (result) {
-      console.log('✅ Vacunas activas cargadas:', result.length, 'vacunas');
-      setVacunasActivas(result);
-    } else {
-      console.log('❌ No se pudieron cargar las vacunas activas');
+      if (result) {
+        console.log('✅ Vacunas activas cargadas:', result.length, 'vacunas');
+        setVacunasActivas(result);
+        hasLoadedActivasRef.current = true;
+      } else {
+        console.log('❌ No se pudieron cargar las vacunas activas');
+      }
+    } finally {
+      pendingActivasRef.current = false;
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -97,8 +136,8 @@ export function useVacunas(initialFilters?: VacunaFilters) {
     
     if (result) {
       // Recargar la lista después de crear
-      await loadVacunas();
-      await loadVacunasActivas(); // Actualizar también las activas
+      await loadVacunas(undefined, { force: true });
+      await loadVacunasActivas({ force: true }); // Actualizar también las activas
       return true;
     }
     
@@ -115,8 +154,8 @@ export function useVacunas(initialFilters?: VacunaFilters) {
     
     if (result) {
       // Recargar la lista después de actualizar
-      await loadVacunas();
-      await loadVacunasActivas(); // Actualizar también las activas
+      await loadVacunas(undefined, { force: true });
+      await loadVacunasActivas({ force: true }); // Actualizar también las activas
       return true;
     }
     
@@ -133,8 +172,8 @@ export function useVacunas(initialFilters?: VacunaFilters) {
     
     if (result !== null) { // delete devuelve void, así que verificamos que no sea null (error)
       // Recargar la lista después de eliminar
-      await loadVacunas();
-      await loadVacunasActivas(); // Actualizar también las activas
+      await loadVacunas(undefined, { force: true });
+      await loadVacunasActivas({ force: true }); // Actualizar también las activas
       return true;
     }
     
@@ -145,9 +184,10 @@ export function useVacunas(initialFilters?: VacunaFilters) {
    * Buscar vacunas
    */
   const search = useCallback(async (searchTerm: string) => {
+    const normalizedSearch = searchTerm.trim();
     const newFilters = {
       ...filters,
-      search: searchTerm,
+      search: normalizedSearch || undefined,
       page: 1 // Resetear a la primera página
     };
     
@@ -161,6 +201,7 @@ export function useVacunas(initialFilters?: VacunaFilters) {
     const updatedFilters = {
       ...filters,
       ...newFilters,
+      search: typeof newFilters.search === 'string' ? newFilters.search.trim() || undefined : filters.search,
       page: 1 // Resetear a la primera página cuando se cambian filtros
     };
     
@@ -188,8 +229,8 @@ export function useVacunas(initialFilters?: VacunaFilters) {
    */
   const refresh = useCallback(async () => {
     await Promise.all([
-      loadVacunas(),
-      loadVacunasActivas()
+      loadVacunas(undefined, { force: true }),
+      loadVacunasActivas({ force: true })
     ]);
   }, [loadVacunas, loadVacunasActivas]);
 
@@ -215,9 +256,13 @@ export function useVacunas(initialFilters?: VacunaFilters) {
 
   // Cargar datos iniciales
   useEffect(() => {
+    if (!autoLoad) {
+      return;
+    }
+
     loadVacunas();
     loadVacunasActivas();
-  }, []); // Solo al montar el componente
+  }, [autoLoad]); // Solo al montar el componente
 
   return {
     // Datos

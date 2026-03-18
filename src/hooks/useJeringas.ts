@@ -12,11 +12,8 @@ import { logger } from '../utils/debug';
 /**
  * Hook personalizado para gestión de jeringas
  */
-export function useJeringas(initialFilters?: JeringaFilters) {
-  // Referencias para throttling
-  const lastCallTime = useRef<number>(0);
-  const throttleDelay = 1000; // 1 segundo entre llamadas
-
+export function useJeringas(initialFilters?: JeringaFilters, options?: { autoLoad?: boolean }) {
+  const { autoLoad = true } = options || {};
   // Estados principales
   const [jeringas, setJeringas] = useState<Jeringa[]>([]);
   const [jeringasActivas, setJeringasActivas] = useState<Jeringa[]>([]);
@@ -37,6 +34,10 @@ export function useJeringas(initialFilters?: JeringaFilters) {
   const crudApi = useCrudApi<Jeringa>();
   const activasApi = useApi<Jeringa[]>();
   const stockStatsApi = useApi<any>();
+  const pendingListKeyRef = useRef<string | null>(null);
+  const pendingActivasRef = useRef(false);
+  const loadedListKeyRef = useRef<string | null>(null);
+  const hasLoadedActivasRef = useRef(false);
 
   // Estados derivados
   const isLoading = listApi.loading;
@@ -51,52 +52,69 @@ export function useJeringas(initialFilters?: JeringaFilters) {
   const deleteError = crudApi.delete.error;
 
   /**
-   * Función para throttling de llamadas API
-   */
-  const shouldThrottle = useCallback(() => {
-    const now = Date.now();
-    if (now - lastCallTime.current < throttleDelay) {
-      logger.debug('Llamada throttled, muy pronto desde la última');
-      return true;
-    }
-    lastCallTime.current = now;
-    return false;
-  }, [throttleDelay]);
-
-  /**
    * Cargar jeringas con filtros
    */
-  const loadJeringas = useCallback(async (newFilters?: JeringaFilters) => {
-    if (shouldThrottle()) {
+  const loadJeringas = useCallback(async (newFilters?: JeringaFilters, options?: { force?: boolean }) => {
+    const filtersToUse = newFilters || filters;
+    const requestKey = JSON.stringify(filtersToUse || {});
+    const force = options?.force === true;
+
+    if (pendingListKeyRef.current === requestKey) {
       return;
     }
 
-    const filtersToUse = newFilters || filters;
+    if (!force && loadedListKeyRef.current === requestKey) {
+      return;
+    }
 
     logger.debug('Cargando jeringas con filtros:', filtersToUse);
+    pendingListKeyRef.current = requestKey;
 
-    const result = await listApi.execute(() => JeringaService.getAll(filtersToUse));
+    try {
+      const result = await listApi.execute(() => JeringaService.getAll(filtersToUse));
 
-    if (result) {
-      setJeringas(result.jeringas);
-      setPagination(result.pagination);
+      if (result) {
+        setJeringas(result.jeringas);
+        setPagination(result.pagination);
+        loadedListKeyRef.current = requestKey;
 
-      if (newFilters) {
-        setFilters(newFilters);
+        if (newFilters) {
+          setFilters(newFilters);
+        }
+      }
+    } finally {
+      if (pendingListKeyRef.current === requestKey) {
+        pendingListKeyRef.current = null;
       }
     }
-  }, [filters, listApi, shouldThrottle]);
+  }, [filters, listApi]);
 
   /**
    * Cargar jeringas activas
    */
-  const loadJeringasActivas = useCallback(async () => {
+  const loadJeringasActivas = useCallback(async (options?: { force?: boolean }) => {
+    const force = options?.force === true;
+
+    if (pendingActivasRef.current) {
+      return;
+    }
+
+    if (!force && hasLoadedActivasRef.current) {
+      return;
+    }
+
     logger.debug('Cargando jeringas activas');
+    pendingActivasRef.current = true;
 
-    const result = await activasApi.execute(() => JeringaService.getActivas());
+    try {
+      const result = await activasApi.execute(() => JeringaService.getActivas());
 
-    if (result) {
-      setJeringasActivas(result);
+      if (result) {
+        setJeringasActivas(result);
+        hasLoadedActivasRef.current = true;
+      }
+    } finally {
+      pendingActivasRef.current = false;
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -110,8 +128,8 @@ export function useJeringas(initialFilters?: JeringaFilters) {
     
     if (result) {
       // Recargar la lista después de crear
-      await loadJeringas();
-      await loadJeringasActivas();
+      await loadJeringas(undefined, { force: true });
+      await loadJeringasActivas({ force: true });
       return true;
     }
     
@@ -128,8 +146,8 @@ export function useJeringas(initialFilters?: JeringaFilters) {
     
     if (result) {
       // Recargar la lista después de actualizar
-      await loadJeringas();
-      await loadJeringasActivas();
+      await loadJeringas(undefined, { force: true });
+      await loadJeringasActivas({ force: true });
       return true;
     }
     
@@ -146,8 +164,8 @@ export function useJeringas(initialFilters?: JeringaFilters) {
     
     if (result !== null) { // null indica error, undefined indica éxito para delete
       // Recargar la lista después de eliminar
-      await loadJeringas();
-      await loadJeringasActivas();
+      await loadJeringas(undefined, { force: true });
+      await loadJeringasActivas({ force: true });
       return true;
     }
     
@@ -158,9 +176,10 @@ export function useJeringas(initialFilters?: JeringaFilters) {
    * Buscar jeringas
    */
   const search = useCallback(async (searchTerm: string) => {
+    const normalizedSearch = searchTerm.trim();
     const newFilters = {
       ...filters,
-      search: searchTerm,
+      search: normalizedSearch || undefined,
       page: 1 // Resetear a la primera página cuando se busca
     };
     
@@ -174,6 +193,7 @@ export function useJeringas(initialFilters?: JeringaFilters) {
     const updatedFilters = {
       ...filters,
       ...newFilters,
+      search: typeof newFilters.search === 'string' ? newFilters.search.trim() || undefined : filters.search,
       page: 1 // Resetear a la primera página cuando se cambian filtros
     };
     
@@ -201,8 +221,8 @@ export function useJeringas(initialFilters?: JeringaFilters) {
    */
   const refresh = useCallback(async () => {
     await Promise.all([
-      loadJeringas(),
-      loadJeringasActivas()
+      loadJeringas(undefined, { force: true }),
+      loadJeringasActivas({ force: true })
     ]);
   }, [loadJeringas, loadJeringasActivas]);
 
@@ -228,27 +248,13 @@ export function useJeringas(initialFilters?: JeringaFilters) {
 
   // Cargar datos iniciales
   useEffect(() => {
+    if (!autoLoad) {
+      return;
+    }
+
     loadJeringas();
     loadJeringasActivas();
-  }, []); // Solo al montar el componente
-
-  // Evitar dependencias circulares en loadJeringas
-  const loadJeringasStable = useCallback(async (newFilters?: JeringaFilters) => {
-    const filtersToUse = newFilters || filters;
-
-    logger.debug('Cargando jeringas con filtros:', filtersToUse);
-
-    const result = await listApi.execute(() => JeringaService.getAll(filtersToUse));
-
-    if (result) {
-      setJeringas(result.jeringas);
-      setPagination(result.pagination);
-
-      if (newFilters) {
-        setFilters(newFilters);
-      }
-    }
-  }, [listApi]); // Solo depende de listApi
+  }, [autoLoad]); // Solo al montar el componente
 
   return {
     // Datos

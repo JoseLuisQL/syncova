@@ -222,6 +222,7 @@ const getSegmentLabel = (segment: string, _index: number): string => {
     'jeringas': 'Jeringas',
     'lotes-vacunas': 'Lotes de Vacunas',
     'lotes-jeringas': 'Lotes de Jeringas',
+    'configuracion-jeringas': 'Asignación de Jeringas',
     'recepcion': 'Nuevo Ingreso',
     
     // Sub-módulos de Planificación

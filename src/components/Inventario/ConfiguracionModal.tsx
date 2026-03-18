@@ -1,6 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { X, Package, Syringe, Building2, Loader, Check } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Package2, Settings2, Syringe, Warehouse } from 'lucide-react';
 import { apiClient } from '../../config/api';
+import {
+  FormSection,
+  Modal,
+  ModalFooter,
+  SelectInput,
+  TextInput,
+} from './components/ModalComponents';
 
 interface Vacuna {
   id: string;
@@ -68,68 +75,81 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
   vacunas,
   jeringas,
   centrosAcopio,
-  onNotification
+  onNotification,
 }) => {
   const [formData, setFormData] = useState({
     centroAcopioId: '',
     vacunaId: '',
     jeringaId: '',
-    multiplicador: 1.0,
-    prioridad: 1,
-    activo: true
+    multiplicador: '1',
+    prioridad: '1',
+    activo: 'true',
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      if (editingConfig) {
-        setFormData({
-          centroAcopioId: (editingConfig as ConfiguracionCentro).centroAcopioId || '',
-          vacunaId: editingConfig.vacunaId,
-          jeringaId: editingConfig.jeringaId,
-          multiplicador: editingConfig.multiplicador,
-          prioridad: editingConfig.prioridad,
-          activo: editingConfig.activo
-        });
-      } else {
-        setFormData({
-          centroAcopioId: '',
-          vacunaId: '',
-          jeringaId: '',
-          multiplicador: 1.0,
-          prioridad: 1,
-          activo: true
-        });
-      }
-      setErrors({});
-    }
-  }, [isOpen, editingConfig]);
+    if (!isOpen) return;
 
-  const validateForm = useCallback(() => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.vacunaId) {
-      newErrors.vacunaId = 'Seleccione una vacuna';
-    }
-    if (!formData.jeringaId) {
-      newErrors.jeringaId = 'Seleccione una jeringa';
-    }
-    if (tipo === 'centro' && !formData.centroAcopioId) {
-      newErrors.centroAcopioId = 'Seleccione un centro';
-    }
-    if (formData.multiplicador < 0) {
-      newErrors.multiplicador = 'Debe ser mayor o igual a 0';
+    if (editingConfig) {
+      setFormData({
+        centroAcopioId: 'centroAcopioId' in editingConfig ? editingConfig.centroAcopioId : '',
+        vacunaId: editingConfig.vacunaId,
+        jeringaId: editingConfig.jeringaId,
+        multiplicador: String(editingConfig.multiplicador),
+        prioridad: String(editingConfig.prioridad),
+        activo: String(editingConfig.activo),
+      });
+    } else {
+      setFormData({
+        centroAcopioId: '',
+        vacunaId: '',
+        jeringaId: '',
+        multiplicador: '1',
+        prioridad: '1',
+        activo: 'true',
+      });
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors({});
+  }, [editingConfig, isOpen]);
+
+  const vacunaOptions = useMemo(() => vacunas.map((vacuna) => ({ value: vacuna.id, label: vacuna.nombre })), [vacunas]);
+  const jeringaOptions = useMemo(
+    () => jeringas.map((jeringa) => ({ value: jeringa.id, label: `${jeringa.tipo} ${jeringa.capacidad} · ${jeringa.color}` })),
+    [jeringas],
+  );
+  const centroOptions = useMemo(
+    () => centrosAcopio.map((centro) => ({ value: centro.id, label: centro.codigo ? `${centro.nombre} (${centro.codigo})` : centro.nombre })),
+    [centrosAcopio],
+  );
+
+  const selectedVacuna = vacunas.find((vacuna) => vacuna.id === formData.vacunaId);
+  const selectedJeringa = jeringas.find((jeringa) => jeringa.id === formData.jeringaId);
+  const selectedCentro = centrosAcopio.find((centro) => centro.id === formData.centroAcopioId);
+
+  const handleChange = useCallback((field: string, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: '' }));
+  }, []);
+
+  const validate = useCallback(() => {
+    const nextErrors: Record<string, string> = {};
+    const multiplicador = Number(formData.multiplicador);
+    const prioridad = Number(formData.prioridad);
+
+    if (tipo === 'centro' && !formData.centroAcopioId) nextErrors.centroAcopioId = 'Seleccione un centro.';
+    if (!formData.vacunaId) nextErrors.vacunaId = 'Seleccione una vacuna.';
+    if (!formData.jeringaId) nextErrors.jeringaId = 'Seleccione una jeringa.';
+    if (!Number.isFinite(multiplicador) || multiplicador < 0) nextErrors.multiplicador = 'Debe ser un número mayor o igual a 0.';
+    if (!Number.isFinite(prioridad) || prioridad <= 0) nextErrors.prioridad = 'La prioridad debe ser mayor a 0.';
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   }, [formData, tipo]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  const handleSubmit = useCallback(async () => {
+    if (!validate()) return;
 
     setIsSubmitting(true);
     try {
@@ -137,262 +157,187 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
         ? `/configuracion-jeringa-vacuna/${tipo}/${editingConfig.id}`
         : `/configuracion-jeringa-vacuna/${tipo}`;
 
-      const payload = tipo === 'centro'
-        ? formData
-        : {
-            vacunaId: formData.vacunaId,
-            jeringaId: formData.jeringaId,
-            multiplicador: formData.multiplicador,
-            prioridad: formData.prioridad,
-            activo: formData.activo
-          };
+      const payload =
+        tipo === 'centro'
+          ? {
+              centroAcopioId: formData.centroAcopioId,
+              vacunaId: formData.vacunaId,
+              jeringaId: formData.jeringaId,
+              multiplicador: Number(formData.multiplicador),
+              prioridad: Number(formData.prioridad),
+              activo: formData.activo === 'true',
+            }
+          : {
+              vacunaId: formData.vacunaId,
+              jeringaId: formData.jeringaId,
+              multiplicador: Number(formData.multiplicador),
+              prioridad: Number(formData.prioridad),
+              activo: formData.activo === 'true',
+            };
 
-      const response = editingConfig
-        ? await apiClient.put(endpoint, payload)
-        : await apiClient.post(endpoint, payload);
+      const response = editingConfig ? await apiClient.put(endpoint, payload) : await apiClient.post(endpoint, payload);
 
-      if (response.data.success) {
-        onNotification('success', `Configuración ${editingConfig ? 'actualizada' : 'creada'}`);
-        onSuccess();
-      } else {
-        throw new Error(response.data.message || 'Error al guardar');
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'No se pudo guardar la configuración');
       }
+
+      onNotification('success', `Configuración ${editingConfig ? 'actualizada' : 'creada'} correctamente`);
+      onSuccess();
     } catch (error: any) {
-      const msg = error.response?.data?.message || error.message || 'Error al guardar';
-      onNotification('error', msg);
+      const message = error.response?.data?.message || error.response?.data?.error || error.message || 'No se pudo guardar la configuración';
+      onNotification('error', message);
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleChange = useCallback((field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  }, [errors]);
-
-  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  }, [onClose]);
-
-  if (!isOpen) return null;
-
-  const isEditing = !!editingConfig;
-  const selectedVacuna = vacunas.find(v => v.id === formData.vacunaId);
-  const selectedJeringa = jeringas.find(j => j.id === formData.jeringaId);
+  }, [editingConfig, formData, onNotification, onSuccess, tipo, validate]);
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={handleBackdropClick}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={editingConfig ? 'Editar configuración' : 'Nueva configuración'}
+      subtitle={tipo === 'centro' ? 'Relación específica para un centro de acopio.' : 'Relación por defecto entre vacuna y jeringa.'}
+      icon={Settings2}
+      footer={
+        <ModalFooter
+          onCancel={onClose}
+          onSubmit={handleSubmit}
+          submitType="button"
+          submitLabel={editingConfig ? 'Guardar cambios' : 'Crear configuración'}
+          isLoading={isSubmitting}
+        />
+      }
     >
-      <div className="bg-white rounded-xl w-full max-w-lg shadow-xl animate-in fade-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">
-              {isEditing ? 'Editar' : 'Nueva'} Configuración
-            </h2>
-            <p className="text-sm text-gray-500">
-              {tipo === 'centro' ? 'Configuración por centro' : 'Configuración por defecto'}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Centro de Acopio (solo para tipo centro) */}
-          {tipo === 'centro' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Centro de Acopio
-              </label>
-              <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <select
-                  value={formData.centroAcopioId}
-                  onChange={(e) => handleChange('centroAcopioId', e.target.value)}
-                  disabled={isEditing}
-                  className={`w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm appearance-none bg-white
-                    focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors
-                    ${errors.centroAcopioId ? 'border-rose-300 bg-rose-50' : 'border-gray-200'}
-                    ${isEditing ? 'bg-gray-50 text-gray-500' : ''}`}
-                >
-                  <option value="">Seleccionar centro...</option>
-                  {centrosAcopio.map(c => (
-                    <option key={c.id} value={c.id}>{c.nombre}</option>
-                  ))}
-                </select>
-              </div>
-              {errors.centroAcopioId && (
-                <p className="mt-1 text-xs text-rose-600">{errors.centroAcopioId}</p>
-              )}
-            </div>
-          )}
-
-          {/* Vacuna */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Vacuna
-            </label>
-            <div className="relative">
-              <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <select
-                value={formData.vacunaId}
-                onChange={(e) => handleChange('vacunaId', e.target.value)}
-                disabled={isEditing}
-                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm appearance-none bg-white
-                  focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors
-                  ${errors.vacunaId ? 'border-rose-300 bg-rose-50' : 'border-gray-200'}
-                  ${isEditing ? 'bg-gray-50 text-gray-500' : ''}`}
-              >
-                <option value="">Seleccionar vacuna...</option>
-                {vacunas.map(v => (
-                  <option key={v.id} value={v.id}>{v.nombre}</option>
-                ))}
-              </select>
-            </div>
-            {errors.vacunaId && (
-              <p className="mt-1 text-xs text-rose-600">{errors.vacunaId}</p>
-            )}
-            {selectedVacuna && (
-              <p className="mt-1 text-xs text-gray-500">
-                {selectedVacuna.tipo} · {selectedVacuna.dosisPorFrasco} dosis/frasco
-              </p>
-            )}
-          </div>
-
-          {/* Jeringa */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Jeringa
-            </label>
-            <div className="relative">
-              <Syringe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <select
-                value={formData.jeringaId}
-                onChange={(e) => handleChange('jeringaId', e.target.value)}
-                disabled={isEditing}
-                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm appearance-none bg-white
-                  focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors
-                  ${errors.jeringaId ? 'border-rose-300 bg-rose-50' : 'border-gray-200'}
-                  ${isEditing ? 'bg-gray-50 text-gray-500' : ''}`}
-              >
-                <option value="">Seleccionar jeringa...</option>
-                {jeringas.map(j => (
-                  <option key={j.id} value={j.id}>{j.tipo} {j.capacidad}</option>
-                ))}
-              </select>
-            </div>
-            {errors.jeringaId && (
-              <p className="mt-1 text-xs text-rose-600">{errors.jeringaId}</p>
-            )}
-            {selectedJeringa && (
-              <p className="mt-1 text-xs text-gray-500">
-                Color: {selectedJeringa.color}
-              </p>
-            )}
-          </div>
-
-          {/* Multiplicador y Prioridad */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Multiplicador
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                value={formData.multiplicador}
-                onChange={(e) => handleChange('multiplicador', parseFloat(e.target.value) || 0)}
-                className={`w-full px-3 py-2.5 border rounded-lg text-sm
-                  focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors
-                  ${errors.multiplicador ? 'border-rose-300 bg-rose-50' : 'border-gray-200'}`}
-              />
-              {errors.multiplicador ? (
-                <p className="mt-1 text-xs text-rose-600">{errors.multiplicador}</p>
-              ) : (
-                <p className="mt-1 text-xs text-gray-500">Jeringas por dosis</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Prioridad
-              </label>
-              <input
-                type="number"
-                min="1"
-                value={formData.prioridad}
-                onChange={(e) => handleChange('prioridad', parseInt(e.target.value) || 1)}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm
-                  focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-              />
-              <p className="mt-1 text-xs text-gray-500">1 = máxima prioridad</p>
-            </div>
-          </div>
-
-          {/* Estado activo */}
-          <div 
-            className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-              formData.activo 
-                ? 'border-emerald-200 bg-emerald-50' 
-                : 'border-gray-200 bg-gray-50'
-            }`}
-            onClick={() => handleChange('activo', !formData.activo)}
-          >
-            <div>
-              <p className="text-sm font-medium text-gray-900">Estado activo</p>
-              <p className="text-xs text-gray-500">
-                {formData.activo ? 'Se usará en cálculos' : 'No se usará en cálculos'}
-              </p>
-            </div>
-            <div className={`w-10 h-6 rounded-full p-1 transition-colors ${
-              formData.activo ? 'bg-emerald-500' : 'bg-gray-300'
-            }`}>
-              <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                formData.activo ? 'translate-x-4' : 'translate-x-0'
-              }`} />
-            </div>
-          </div>
-        </form>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 rounded-lg transition-all disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <Loader className="h-4 w-4 animate-spin" />
+      <div className="space-y-4">
+        <div className="rounded-[18px] border border-teal-100 bg-teal-50/60 p-4">
+          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-teal-700">Vista previa</p>
+          <p className="mt-2 text-sm leading-6 text-slate-800">
+            {selectedVacuna ? (
+              <>
+                Para <span className="font-semibold text-slate-950">{selectedVacuna.nombre}</span>{' '}
+                {selectedJeringa ? (
+                  <>
+                    se usará <span className="font-semibold text-slate-950">{selectedJeringa.tipo} {selectedJeringa.capacidad}</span>.
+                  </>
+                ) : (
+                  <>debe elegir una jeringa.</>
+                )}
+              </>
             ) : (
-              <Check className="h-4 w-4" />
+              <>Seleccione una vacuna y una jeringa para construir la regla.</>
             )}
-            {isEditing ? 'Guardar Cambios' : 'Crear Configuración'}
-          </button>
+          </p>
+          <p className="mt-1 text-xs text-slate-600">
+            {tipo === 'centro'
+              ? selectedCentro
+                ? `Aplicará solo en ${selectedCentro.nombre}.`
+                : 'Aplicará solo al centro seleccionado.'
+              : 'Aplicará como regla general cuando no exista una regla específica por centro.'}
+          </p>
         </div>
+
+        <FormSection title="Relación" description="Defina de forma directa qué jeringa corresponde a la vacuna.">
+          <div className="grid gap-4 md:grid-cols-2">
+            {tipo === 'centro' ? (
+              <SelectInput
+                id="config-centro"
+                label="Centro de acopio"
+                value={formData.centroAcopioId}
+                onChange={(value) => handleChange('centroAcopioId', value)}
+                options={centroOptions}
+                placeholder="Seleccionar centro..."
+                required
+                error={errors.centroAcopioId}
+              />
+            ) : null}
+
+            <SelectInput
+              id="config-vacuna"
+              label="Vacuna"
+              value={formData.vacunaId}
+              onChange={(value) => handleChange('vacunaId', value)}
+              options={vacunaOptions}
+              placeholder="Seleccionar vacuna..."
+              required
+              error={errors.vacunaId}
+            />
+
+            <SelectInput
+              id="config-jeringa"
+              label="Jeringa"
+              value={formData.jeringaId}
+              onChange={(value) => handleChange('jeringaId', value)}
+              options={jeringaOptions}
+              placeholder="Seleccionar jeringa..."
+              required
+              error={errors.jeringaId}
+            />
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            {tipo === 'centro' ? (
+              <ResumeCard icon={Warehouse} label="Centro" value={selectedCentro?.nombre || 'Pendiente'} />
+            ) : null}
+            <ResumeCard icon={Package2} label="Vacuna" value={selectedVacuna?.nombre || 'Pendiente'} />
+            <ResumeCard icon={Syringe} label="Jeringa" value={selectedJeringa ? `${selectedJeringa.tipo} ${selectedJeringa.capacidad}` : 'Pendiente'} />
+          </div>
+        </FormSection>
+
+        <FormSection title="Regla de uso" description="Solo configure multiplicador, prioridad y estado.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextInput
+              id="config-multiplicador"
+              label="Multiplicador"
+              type="number"
+              value={formData.multiplicador}
+              onChange={(value) => handleChange('multiplicador', value)}
+              error={errors.multiplicador}
+              placeholder="1"
+              min={0}
+              required
+            />
+            <TextInput
+              id="config-prioridad"
+              label="Prioridad"
+              type="number"
+              value={formData.prioridad}
+              onChange={(value) => handleChange('prioridad', value)}
+              error={errors.prioridad}
+              placeholder="1"
+              min={1}
+              required
+            />
+            <SelectInput
+              id="config-activo"
+              label="Estado"
+              value={formData.activo}
+              onChange={(value) => handleChange('activo', value)}
+              options={[
+                { value: 'true', label: 'Activa' },
+                { value: 'false', label: 'Inactiva' },
+              ]}
+            />
+          </div>
+        </FormSection>
       </div>
-    </div>
+    </Modal>
   );
 };
+
+interface ResumeCardProps {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}
+
+const ResumeCard: React.FC<ResumeCardProps> = ({ icon: Icon, label, value }) => (
+  <div className="rounded-2xl border border-slate-200 bg-white p-4">
+    <div className="flex items-center gap-2 text-slate-500">
+      <Icon className="h-4 w-4" />
+      <span className="text-xs font-medium uppercase tracking-[0.08em]">{label}</span>
+    </div>
+    <p className="mt-2 text-sm font-medium text-slate-900">{value}</p>
+  </div>
+);
 
 export default ConfiguracionModal;

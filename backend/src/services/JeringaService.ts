@@ -100,7 +100,8 @@ export class JeringaService {
       console.error('Error al obtener jeringas:', error);
       return {
         success: false,
-        error: 'Error al obtener jeringas'
+        error: 'Error al obtener jeringas',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }
@@ -143,7 +144,8 @@ export class JeringaService {
       console.error(`Error al obtener jeringa ${id}:`, error);
       return {
         success: false,
-        error: 'Error al obtener jeringa'
+        error: 'Error al obtener jeringa',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }
@@ -172,7 +174,8 @@ export class JeringaService {
       console.error('Error al crear jeringa:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Error al crear jeringa'
+        error: error instanceof Error ? error.message : 'Error al crear jeringa',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }
@@ -212,7 +215,8 @@ export class JeringaService {
       console.error(`Error al actualizar jeringa ${id}:`, error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Error al actualizar jeringa'
+        error: error instanceof Error ? error.message : 'Error al actualizar jeringa',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }
@@ -252,7 +256,8 @@ export class JeringaService {
       console.error(`Error al eliminar jeringa ${id}:`, error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Error al eliminar jeringa'
+        error: error instanceof Error ? error.message : 'Error al eliminar jeringa',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }
@@ -280,7 +285,8 @@ export class JeringaService {
       console.error('Error al obtener jeringas activas:', error);
       return {
         success: false,
-        error: 'Error al obtener jeringas activas'
+        error: 'Error al obtener jeringas activas',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }
@@ -332,7 +338,8 @@ export class JeringaService {
       console.error('Error al obtener estadísticas de stock:', error);
       return {
         success: false,
-        error: 'Error al obtener estadísticas de stock'
+        error: 'Error al obtener estadísticas de stock',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }

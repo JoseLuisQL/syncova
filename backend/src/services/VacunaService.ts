@@ -89,7 +89,8 @@ export class VacunaService {
       console.error('Error al obtener vacunas:', error);
       return {
         success: false,
-        error: 'Error al obtener vacunas'
+        error: 'Error al obtener vacunas',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }
@@ -134,7 +135,8 @@ export class VacunaService {
       console.error(`Error al obtener vacuna ${id}:`, error);
       return {
         success: false,
-        error: 'Error al obtener vacuna'
+        error: 'Error al obtener vacuna',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }
@@ -166,7 +168,8 @@ export class VacunaService {
       console.error('Error al crear vacuna:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Error al crear vacuna'
+        error: error instanceof Error ? error.message : 'Error al crear vacuna',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }
@@ -209,7 +212,8 @@ export class VacunaService {
       console.error('Error al actualizar vacuna:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Error al actualizar vacuna'
+        error: error instanceof Error ? error.message : 'Error al actualizar vacuna',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }
@@ -264,7 +268,8 @@ export class VacunaService {
       console.error('Error al eliminar vacuna:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Error al eliminar vacuna'
+        error: error instanceof Error ? error.message : 'Error al eliminar vacuna',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }
@@ -295,7 +300,8 @@ export class VacunaService {
       console.error('Error al obtener estadísticas de stock:', error);
       return {
         success: false,
-        error: 'Error al obtener estadísticas de stock'
+        error: 'Error al obtener estadísticas de stock',
+        statusCode: (error as any)?.statusCode || 500
       };
     }
   }

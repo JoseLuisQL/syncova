@@ -39,7 +39,7 @@ export class LoteJeringaService {
       logger.debug('Obteniendo lotes de jeringas con filtros:', filters);
 
       const queryParams = filters ? buildQueryParams(filters) : '';
-      const url = queryParams ? `${this.BASE_PATH}?${queryParams}` : this.BASE_PATH;
+      const url = `${this.BASE_PATH}${queryParams}`;
 
       const response = await apiClient.get<PaginatedResponse<LoteJeringa>>(url);
 
