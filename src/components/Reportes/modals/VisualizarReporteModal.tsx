@@ -1,323 +1,101 @@
 import React from 'react';
-import {
-  X,
-  Package,
-  Activity,
-  Calendar,
-  AlertTriangle,
-} from 'lucide-react';
+import { AlertCircle, BarChart3 } from 'lucide-react';
+import { Modal } from '../../Inventario/components/ModalComponents';
+import { DataTable, TableCell, TableHeader, TableRow } from '../../Inventario/components/FilterAndTable';
 import { COMPONENT_STYLES } from '../constants';
+import { ReportTableColumn } from '../components/ReportPrimitives';
 
-interface VisualizarReporteModalProps {
-  tipoReporte: string;
-  datos: {
-    stockActual: unknown[];
-    stockCritico: unknown[];
-    vencimientos: unknown[];
-    lotesVencidos: unknown[];
-  };
+interface VisualizarReporteModalProps<T> {
+  isOpen: boolean;
+  title: string;
+  subtitle: string;
+  rows: T[];
+  columns: ReportTableColumn<T>[];
   onClose: () => void;
+  isLoading?: boolean;
+  loadingMessage?: string;
+  emptyTitle: string;
+  emptyDescription: string;
 }
 
-interface StockActualItem {
-  vacunaNombre: string;
-  vacunaTipo: string;
-  stockTotal: number;
-  totalLotes: number;
-  lotesPorVencer: number;
-  ultimaActualizacion: string;
-}
-
-interface StockCriticoItem {
-  vacunaNombre: string;
-  vacunaTipo: string;
-  stockTotal: number;
-  stockMinimo: number;
-  porcentajeCritico: number;
-  nivelCriticidad: string;
-  recomendacionAccion: string;
-}
-
-interface VencimientoItem {
-  numeroLote: string;
-  vacunaNombre: string;
-  vacunaTipo: string;
-  cantidadActual: number;
-  fechaVencimiento: string;
-  diasParaVencer: number;
-  nivelUrgencia: string;
-}
-
-interface LoteVencidoItem {
-  numeroLote: string;
-  vacunaNombre: string;
-  vacunaTipo: string;
-  cantidadActual: number;
-  fechaVencimiento: string;
-  diasVencido: number;
-  nivelCriticidad: string;
-}
-
-const VisualizarReporteModal: React.FC<VisualizarReporteModalProps> = ({
-  tipoReporte,
-  datos,
-  onClose
-}) => {
-  const getTitulo = () => {
-    const titulos: Record<string, string> = {
-      'stock_actual': 'Stock Actual',
-      'stock_critico': 'Stock Critico',
-      'vencimientos': 'Proximos Vencimientos',
-      'lotes_vencidos': 'Lotes Vencidos',
-    };
-    return titulos[tipoReporte] || 'Datos del Reporte';
-  };
-
-  const getDatos = () => {
-    const mapping: Record<string, unknown[]> = {
-      'stock_actual': datos.stockActual,
-      'stock_critico': datos.stockCritico,
-      'vencimientos': datos.vencimientos,
-      'lotes_vencidos': datos.lotesVencidos,
-    };
-    return mapping[tipoReporte] || [];
-  };
-
-  const renderEmptyState = (icon: React.ReactNode, mensaje: string) => (
-    <div className="text-center py-12">
-      <div className="text-gray-300 mb-4">{icon}</div>
-      <p className="text-gray-500">{mensaje}</p>
-    </div>
-  );
-
-  const renderStockActual = () => {
-    const items = getDatos() as StockActualItem[];
-    if (items.length === 0) return renderEmptyState(<Package className="h-12 w-12 mx-auto" />, 'No hay datos de stock actual');
-
-    return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className={COMPONENT_STYLES.table.header}>
-            <tr>
-              <th className={COMPONENT_STYLES.table.headerCell}>Vacuna</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Stock Total</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Total Lotes</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Por Vencer</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Ultima Actualizacion</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {items.map((item, index) => (
-              <tr key={index} className={COMPONENT_STYLES.table.row}>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <div className="text-sm font-medium text-gray-900">{item.vacunaNombre}</div>
-                  <div className="text-xs text-gray-500">{item.vacunaTipo}</div>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm font-bold text-gray-900">{item.stockTotal.toLocaleString()}</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm text-gray-900">{item.totalLotes}</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm text-gray-900">{item.lotesPorVencer}</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm text-gray-900">{new Date(item.ultimaActualizacion).toLocaleDateString('es-PE')}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
-
-  const renderStockCritico = () => {
-    const items = getDatos() as StockCriticoItem[];
-    if (items.length === 0) return renderEmptyState(<Activity className="h-12 w-12 mx-auto" />, 'No hay vacunas con stock critico');
-
-    return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className={COMPONENT_STYLES.table.header}>
-            <tr>
-              <th className={COMPONENT_STYLES.table.headerCell}>Vacuna</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Stock Actual</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Stock Minimo</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>% Critico</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Nivel</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Accion</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {items.map((item, index) => (
-              <tr key={index} className={COMPONENT_STYLES.table.row}>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <div className="text-sm font-medium text-gray-900">{item.vacunaNombre}</div>
-                  <div className="text-xs text-gray-500">{item.vacunaTipo}</div>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm font-bold text-gray-900">{item.stockTotal.toLocaleString()}</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm text-gray-900">{item.stockMinimo.toLocaleString()}</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm font-medium text-gray-900">{item.porcentajeCritico}%</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className={`${COMPONENT_STYLES.badge[item.nivelCriticidad === 'agotado' || item.nivelCriticidad === 'critico' ? 'danger' : 'warning']}`}>
-                    {item.nivelCriticidad.toUpperCase()}
-                  </span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm text-gray-900">{item.recomendacionAccion}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
-
-  const renderVencimientos = () => {
-    const items = getDatos() as VencimientoItem[];
-    if (items.length === 0) return renderEmptyState(<Calendar className="h-12 w-12 mx-auto" />, 'No hay lotes proximos a vencer');
-
-    return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className={COMPONENT_STYLES.table.header}>
-            <tr>
-              <th className={COMPONENT_STYLES.table.headerCell}>Lote</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Vacuna</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Cantidad</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Vencimiento</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Dias</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Urgencia</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {items.map((item, index) => (
-              <tr key={index} className={COMPONENT_STYLES.table.row}>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm font-medium text-gray-900">{item.numeroLote}</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <div className="text-sm font-medium text-gray-900">{item.vacunaNombre}</div>
-                  <div className="text-xs text-gray-500">{item.vacunaTipo}</div>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm font-bold text-gray-900">{item.cantidadActual.toLocaleString()}</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm text-gray-900">{new Date(item.fechaVencimiento).toLocaleDateString('es-PE')}</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm font-medium text-gray-900">{item.diasParaVencer} dias</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className={`${COMPONENT_STYLES.badge[item.nivelUrgencia === 'inmediato' || item.nivelUrgencia === 'urgente' ? 'danger' : item.nivelUrgencia === 'atencion' ? 'warning' : 'active']}`}>
-                    {item.nivelUrgencia.toUpperCase()}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
-
-  const renderLotesVencidos = () => {
-    const items = getDatos() as LoteVencidoItem[];
-    if (items.length === 0) return renderEmptyState(<AlertTriangle className="h-12 w-12 mx-auto" />, 'No hay lotes vencidos');
-
-    return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className={COMPONENT_STYLES.table.header}>
-            <tr>
-              <th className={COMPONENT_STYLES.table.headerCell}>Lote</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Vacuna</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Cantidad</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Vencimiento</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Dias Vencido</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Criticidad</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {items.map((item, index) => (
-              <tr key={index} className={COMPONENT_STYLES.table.row}>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm font-medium text-gray-900">{item.numeroLote}</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <div className="text-sm font-medium text-gray-900">{item.vacunaNombre}</div>
-                  <div className="text-xs text-gray-500">{item.vacunaTipo}</div>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm font-bold text-gray-900">{item.cantidadActual.toLocaleString()}</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm text-gray-900">{new Date(item.fechaVencimiento).toLocaleDateString('es-PE')}</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className="text-sm font-medium text-rose-600">{item.diasVencido} dias</span>
-                </td>
-                <td className={COMPONENT_STYLES.table.cell}>
-                  <span className={COMPONENT_STYLES.badge.danger}>
-                    {item.nivelCriticidad.toUpperCase()}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
-
-  const renderContenido = () => {
-    switch (tipoReporte) {
-      case 'stock_actual':
-        return renderStockActual();
-      case 'stock_critico':
-        return renderStockCritico();
-      case 'vencimientos':
-        return renderVencimientos();
-      case 'lotes_vencidos':
-        return renderLotesVencidos();
-      default:
-        return <p className="text-gray-500 text-center py-8">Tipo de reporte no soportado</p>;
-    }
-  };
-
+function VisualizarReporteModal<T>({
+  isOpen,
+  title,
+  subtitle,
+  rows,
+  columns,
+  onClose,
+  isLoading = false,
+  loadingMessage = 'Generando vista previa...',
+  emptyTitle,
+  emptyDescription,
+}: VisualizarReporteModalProps<T>) {
   return (
-    <div className={COMPONENT_STYLES.modal.overlay}>
-      <div className={COMPONENT_STYLES.modal.containerLarge}>
-        <div className={COMPONENT_STYLES.modal.header}>
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">{getTitulo()}</h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <p className="text-sm text-gray-500 mt-1">{getDatos().length} registros encontrados</p>
-        </div>
-        <div className={COMPONENT_STYLES.modal.body}>
-          {renderContenido()}
-        </div>
-        <div className={COMPONENT_STYLES.modal.footer}>
-          <button onClick={onClose} className={COMPONENT_STYLES.button.secondary}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      subtitle={subtitle}
+      icon={BarChart3}
+      size="xl"
+      footer={(
+        <div className="flex justify-end">
+          <button type="button" onClick={onClose} className={COMPONENT_STYLES.button.secondary}>
             Cerrar
           </button>
         </div>
-      </div>
-    </div>
-  );
-};
+      )}
+    >
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <span className={rows.length > 0 ? COMPONENT_STYLES.badge.count : COMPONENT_STYLES.badge.neutral}>
+            {rows.length} registro{rows.length === 1 ? '' : 's'}
+          </span>
+        </div>
 
-export default React.memo(VisualizarReporteModal);
+        <DataTable
+          isLoading={isLoading}
+          loadingMessage={loadingMessage}
+          skeletonRows={5}
+          skeletonColumns={columns.length}
+        >
+          {rows.length > 0 ? (
+            <table className="min-w-full table-auto">
+              <TableHeader columns={columns.map((column) => ({
+                key: column.key,
+                label: column.label,
+                align: column.align,
+                className: column.className,
+              }))} />
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {rows.map((row, index) => (
+                  <TableRow key={`${title}-${index + 1}`}>
+                    {columns.map((column) => (
+                      <TableCell
+                        key={`${column.key}-${index + 1}`}
+                        align={column.align}
+                        className={column.className}
+                      >
+                        {column.render(row)}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-[22px] border border-dashed border-slate-200 bg-slate-50/70 px-6 py-14 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <h4 className="mt-4 text-sm font-semibold text-slate-900">{emptyTitle}</h4>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">{emptyDescription}</p>
+            </div>
+          )}
+        </DataTable>
+      </div>
+    </Modal>
+  );
+}
+
+export default React.memo(VisualizarReporteModal) as typeof VisualizarReporteModal;

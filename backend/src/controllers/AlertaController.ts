@@ -4,11 +4,38 @@ import { AlertaAutomaticaService } from '@/services/AlertaAutomaticaService';
 import { ResponseUtil } from '@/utils/response';
 import { validateUUID } from '@/utils/validation';
 import { AuthenticatedRequest } from '@/types';
+import { resolveAuthenticatedUserFromToken } from '@/middleware/auth';
+import { AlertaRealtimeService } from '@/services/AlertaRealtimeService';
 
 /**
  * Controlador para gestión de alertas del sistema
  */
 export class AlertaController {
+  static async stream(req: Request, res: Response): Promise<void> {
+    try {
+      const token = typeof req.query.token === 'string' ? req.query.token : '';
+
+      if (!token) {
+        ResponseUtil.unauthorized(res, 'Token de acceso requerido');
+        return;
+      }
+
+      const user = await resolveAuthenticatedUserFromToken(token);
+
+      if (!user) {
+        ResponseUtil.unauthorized(res, 'Token inválido');
+        return;
+      }
+
+      AlertaRealtimeService.addClient(user.id, res);
+    } catch (error) {
+      console.error('Error en AlertaController.stream:', error);
+      if (!res.headersSent) {
+        ResponseUtil.error(res, 'No se pudo abrir el canal en tiempo real', 500);
+      }
+    }
+  }
+
   /**
    * Obtener todas las alertas con filtros opcionales
    * GET /api/alertas
@@ -28,8 +55,8 @@ export class AlertaController {
       } = req.query;
 
       const filters: AlertaFilters = {
-        tipo: tipo as any,
-        nivel: nivel as any,
+        tipo: tipo as AlertaFilters['tipo'],
+        nivel: nivel as AlertaFilters['nivel'],
         leida: leida === 'true' ? true : leida === 'false' ? false : undefined,
         usuarioId: usuarioId as string,
         fechaDesde: fechaDesde ? new Date(fechaDesde as string) : undefined,
@@ -327,11 +354,12 @@ export class AlertaController {
    */
   static async generateAutomatic(req: Request, res: Response): Promise<void> {
     try {
-      const { diasAnticipacion = 30, porcentajeMinimo = 20 } = req.body;
+      const { diasAnticipacion = 30, porcentajeMinimo, stockMinimo } = req.body;
+      const threshold = Number(stockMinimo ?? porcentajeMinimo ?? 100);
 
       const result = await AlertaAutomaticaService.generarAlertas(
         Number(diasAnticipacion),
-        Number(porcentajeMinimo)
+        threshold
       );
 
       if (!result.success) {

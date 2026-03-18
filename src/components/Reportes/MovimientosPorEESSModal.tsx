@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import {
-  X,
-  Calendar,
-  Building2,
-  Download,
-  Loader2,
-  FileSpreadsheet,
-  AlertCircle
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { FileSpreadsheet } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
+import {
+  DateInput,
+  FormSection,
+  Modal,
+  ModalFooter,
+  SelectInput,
+} from '../Inventario/components/ModalComponents';
+import { getFechaPeruActual, getFechaPeruMesAnterior } from './utils';
 
 interface Establecimiento {
   id: string;
@@ -17,7 +17,7 @@ interface Establecimiento {
 
 interface MovimientosPorEESSModalProps {
   onClose: () => void;
-  onExportar: (filtros: MovimientosPorEESSFiltros) => void;
+  onExportar: (filtros: MovimientosPorEESSFiltros) => Promise<void>;
   centrosAcopio: Establecimiento[];
 }
 
@@ -30,60 +30,31 @@ interface MovimientosPorEESSFiltros {
 const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
   onClose,
   onExportar,
-  centrosAcopio
+  centrosAcopio,
 }) => {
   const { toast } = useToastContext();
-
-  // Función para obtener fecha actual en zona horaria de Perú
-  const getFechaPeruActual = () => {
-    const ahora = new Date();
-    // Perú está en UTC-5 (sin horario de verano)
-    const fechaPeru = new Date(ahora.getTime() - (5 * 60 * 60 * 1000));
-    return fechaPeru.toISOString().split('T')[0];
-  };
-
-  const getFechaPeruMesAnterior = () => {
-    const ahora = new Date();
-    // Perú está en UTC-5 (sin horario de verano)
-    const fechaPeru = new Date(ahora.getTime() - (5 * 60 * 60 * 1000));
-    fechaPeru.setMonth(fechaPeru.getMonth() - 1);
-    return fechaPeru.toISOString().split('T')[0];
-  };
-
   const [filtros, setFiltros] = useState<MovimientosPorEESSFiltros>({
     fechaInicio: getFechaPeruMesAnterior(),
-    fechaFin: getFechaPeruActual()
+    fechaFin: getFechaPeruActual(),
   });
-
   const [exportando, setExportando] = useState(false);
-  const [errores, setErrores] = useState<{ [key: string]: string }>({});
+  const [errores, setErrores] = useState<Record<string, string>>({});
 
-  // Validar formulario
-  const validarFormulario = (): boolean => {
-    const nuevosErrores: { [key: string]: string } = {};
+  const validarFormulario = () => {
+    const nuevosErrores: Record<string, string> = {};
 
-    if (!filtros.fechaInicio) {
-      nuevosErrores.fechaInicio = 'La fecha de inicio es requerida';
-    }
-
-    if (!filtros.fechaFin) {
-      nuevosErrores.fechaFin = 'La fecha de fin es requerida';
-    }
+    if (!filtros.fechaInicio) nuevosErrores.fechaInicio = 'La fecha de inicio es requerida.';
+    if (!filtros.fechaFin) nuevosErrores.fechaFin = 'La fecha de fin es requerida.';
 
     if (filtros.fechaInicio && filtros.fechaFin) {
-      const fechaInicio = new Date(filtros.fechaInicio);
-      const fechaFin = new Date(filtros.fechaFin);
+      const inicio = new Date(filtros.fechaInicio);
+      const fin = new Date(filtros.fechaFin);
+      const diffDays = Math.ceil(Math.abs(fin.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24));
 
-      if (fechaInicio > fechaFin) {
-        nuevosErrores.fechaFin = 'La fecha de fin debe ser posterior a la fecha de inicio';
-      }
-
-      // Validar que no sea un rango muy amplio (más de 2 años)
-      const diffTime = Math.abs(fechaFin.getTime() - fechaInicio.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays > 730) {
-        nuevosErrores.fechaFin = 'El rango de fechas no puede ser mayor a 2 años';
+      if (inicio > fin) {
+        nuevosErrores.fechaFin = 'La fecha final debe ser posterior a la inicial.';
+      } else if (diffDays > 730) {
+        nuevosErrores.fechaFin = 'El rango no puede superar 2 años.';
       }
     }
 
@@ -93,171 +64,89 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
 
   const handleExportar = async () => {
     if (!validarFormulario()) {
-      toast.error('Por favor, corrija los errores en el formulario');
+      toast.error('Corrige los campos requeridos', 'Verifica el rango de fechas antes de exportar.', { duration: 3500 });
       return;
     }
 
     setExportando(true);
     try {
       await onExportar(filtros);
-      toast.success('Reporte de Movimientos por EESS exportado exitosamente');
       onClose();
     } catch (error) {
       console.error('Error al exportar reporte:', error);
-      toast.error('Error al exportar el reporte. Por favor, inténtelo nuevamente.');
+      toast.error('No se pudo exportar el reporte', 'Inténtalo nuevamente con otro rango o centro.', { duration: 4000 });
     } finally {
       setExportando(false);
     }
   };
 
-  const handleCentroAcopioChange = (value: string) => {
-    setFiltros(prev => ({
-      ...prev,
-      centroAcopioId: value === '' ? undefined : value
-    }));
-  };
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <FileSpreadsheet className="h-6 w-6 text-blue-600" />
-            <h3 className="text-xl font-semibold text-gray-900">
-              Generar Reporte de Movimientos por EESS
-            </h3>
+    <Modal
+      isOpen
+      onClose={onClose}
+      title="Movimientos por EESS"
+      subtitle="Configura el periodo y el centro de acopio antes de generar el archivo Excel."
+      icon={FileSpreadsheet}
+      size="lg"
+      footer={(
+        <ModalFooter
+          onCancel={onClose}
+          onSubmit={handleExportar}
+          submitType="button"
+          submitLabel={exportando ? 'Generando Excel...' : 'Generar Excel'}
+          isLoading={exportando}
+        />
+      )}
+    >
+      <div className="space-y-4">
+        <FormSection
+          title="Resumen del reporte"
+          description="El archivo agrupa movimientos por establecimiento de salud y vacuna dentro del periodo seleccionado."
+        >
+          <div className="rounded-[18px] border border-sky-200 bg-sky-50/80 p-4 text-sm leading-6 text-sky-900">
+            Úsalo cuando necesites revisar distribución, entregas y saldos por EESS en una sola exportación.
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
+        </FormSection>
 
-        <div className="space-y-6">
-          {/* Información del reporte */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start space-x-3">
-              <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-              <div>
-                <h4 className="text-sm font-semibold text-blue-900 mb-1">
-                  Acerca de este reporte
-                </h4>
-                <p className="text-sm text-blue-800">
-                  Este reporte genera un archivo Excel con los movimientos de vacunas agrupados por 
-                  Establecimientos de Salud (EESS), mostrando las entregas, salidas y stock actual 
-                  para cada vacuna en el período seleccionado.
-                </p>
-              </div>
-            </div>
+        <FormSection
+          title="Periodo"
+          description="El rango debe ser consistente con la revisión mensual o el corte operativo."
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <DateInput
+              id="movimientos-eess-start"
+              label="Fecha inicio"
+              value={filtros.fechaInicio}
+              onChange={(value) => setFiltros((prev) => ({ ...prev, fechaInicio: value }))}
+              error={errores.fechaInicio}
+            />
+            <DateInput
+              id="movimientos-eess-end"
+              label="Fecha fin"
+              value={filtros.fechaFin}
+              onChange={(value) => setFiltros((prev) => ({ ...prev, fechaFin: value }))}
+              error={errores.fechaFin}
+            />
           </div>
+        </FormSection>
 
-          {/* Rango de Fechas */}
-          <div className="bg-gray-50 rounded-xl p-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-              <Calendar className="h-4 w-4 mr-2" />
-              Rango de Fechas *
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fecha Inicio
-                </label>
-                <input
-                  type="date"
-                  value={filtros.fechaInicio}
-                  onChange={(e) => setFiltros(prev => ({ ...prev, fechaInicio: e.target.value }))}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errores.fechaInicio ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
-                  required
-                />
-                {errores.fechaInicio && (
-                  <p className="text-red-600 text-xs mt-1">{errores.fechaInicio}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fecha Fin
-                </label>
-                <input
-                  type="date"
-                  value={filtros.fechaFin}
-                  onChange={(e) => setFiltros(prev => ({ ...prev, fechaFin: e.target.value }))}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errores.fechaFin ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
-                  required
-                />
-                {errores.fechaFin && (
-                  <p className="text-red-600 text-xs mt-1">{errores.fechaFin}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Centro de Acopio */}
-          <div className="bg-gray-50 rounded-xl p-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-              <Building2 className="h-4 w-4 mr-2" />
-              Centro de Acopio (Opcional)
-            </h4>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Seleccionar Centro de Acopio
-              </label>
-              <select
-                value={filtros.centroAcopioId || ''}
-                onChange={(e) => handleCentroAcopioChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Todos los Centros de Acopio</option>
-                {centrosAcopio.map((centro) => (
-                  <option key={centro.id} value={centro.id}>
-                    {centro.nombre}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">
-                Si no selecciona un centro específico, se incluirán todos los establecimientos
-              </p>
-            </div>
-          </div>
-
-          {/* Botones de Acción */}
-          <div className="flex justify-between items-center pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-              disabled={exportando}
-            >
-              Cancelar
-            </button>
-
-            <button
-              type="button"
-              onClick={handleExportar}
-              disabled={exportando}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-            >
-              {exportando ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generando Excel...
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-2" />
-                  Generar Excel
-                </>
-              )}
-            </button>
-          </div>
-        </div>
+        <FormSection
+          title="Cobertura"
+          description="Si no seleccionas un centro, el reporte incluirá todos los establecimientos disponibles."
+        >
+          <SelectInput
+            id="movimientos-eess-centro"
+            label="Centro de acopio"
+            value={filtros.centroAcopioId || ''}
+            onChange={(value) => setFiltros((prev) => ({ ...prev, centroAcopioId: value || undefined }))}
+            options={[
+              { value: '', label: 'Todos los centros de acopio' },
+              ...centrosAcopio.map((centro) => ({ value: centro.id, label: centro.nombre })),
+            ]}
+          />
+        </FormSection>
       </div>
-    </div>
+    </Modal>
   );
 };
 

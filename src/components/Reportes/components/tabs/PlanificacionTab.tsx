@@ -1,22 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Target,
-} from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Download, Eye, Target } from 'lucide-react';
 import { Establecimiento, Vacuna } from '../../../../types';
 import { usePlanificacionReportes } from '../../../../hooks/usePlanificacionReportes';
 import { useToastContext } from '../../../../contexts/ToastContext';
+import { ProgramacionAnualData } from '../../../../services/planificacionReportesService';
 import { COMPONENT_STYLES } from '../../constants';
-import { ReporteCard } from '..';
+import { ReporteCard, ReportInlineStatus, ReportSectionCard, ReportTableColumn } from '..';
+import VisualizarReporteModal from '../../modals/VisualizarReporteModal';
+import { formatCompactDate } from '../../utils';
 
 interface PlanificacionTabProps {
   centrosAcopio: Establecimiento[];
   vacunas: Vacuna[];
 }
 
-const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
-  centrosAcopio,
-  vacunas,
-}) => {
+const PlanificacionTab: React.FC<PlanificacionTabProps> = ({ centrosAcopio, vacunas }) => {
   const {
     reportes,
     estado,
@@ -24,160 +22,224 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
     generarProgramacionAnual,
     exportarProgramacionAnual,
     actualizarFiltros,
-    limpiarError
   } = usePlanificacionReportes();
-
   const { toast } = useToastContext();
+
   const [reporteActivo, setReporteActivo] = useState<string | null>(null);
+  const [showResultados, setShowResultados] = useState(false);
   const [filtrosLocales, setFiltrosLocales] = useState({
     vacuna: 'todas',
-    centroAcopio: 'todos'
+    centroAcopio: 'todos',
   });
 
   useEffect(() => {
     actualizarFiltros({
-      anio: new Date().getFullYear(),
+      anio: filtrosPlanificacion.anio || new Date().getFullYear(),
       vacunaId: filtrosLocales.vacuna !== 'todas' ? filtrosLocales.vacuna : undefined,
-      centroAcopioId: filtrosLocales.centroAcopio !== 'todos' ? filtrosLocales.centroAcopio : undefined
+      centroAcopioId: filtrosLocales.centroAcopio !== 'todos' ? filtrosLocales.centroAcopio : undefined,
     });
-  }, [filtrosLocales.vacuna, filtrosLocales.centroAcopio, actualizarFiltros]);
+  }, [actualizarFiltros, filtrosLocales.centroAcopio, filtrosLocales.vacuna, filtrosPlanificacion.anio]);
 
-  const handleGenerarReporte = useCallback(async (tipoReporte: string) => {
+  const handleGenerarReporte = useCallback(async () => {
     try {
-      setReporteActivo(tipoReporte);
-
+      setReporteActivo('programacion_anual');
       const filtros = {
         anio: filtrosPlanificacion.anio || new Date().getFullYear(),
         vacunaId: filtrosLocales.vacuna !== 'todas' ? filtrosLocales.vacuna : undefined,
         centroAcopioId: filtrosLocales.centroAcopio !== 'todos' ? filtrosLocales.centroAcopio : undefined,
-        incluirInactivos: false
+        incluirInactivos: false,
       };
 
-      let resultado: unknown[] | null = null;
+      const resultado = await generarProgramacionAnual(filtros);
 
-      switch (tipoReporte) {
-        case 'programacion_anual':
-          resultado = await generarProgramacionAnual(filtros);
-          break;
-      }
-
-      if (resultado && Array.isArray(resultado) && resultado.length === 0) {
-        toast.warning('Sin datos disponibles', 'No hay datos para los filtros seleccionados', { duration: 4000 });
-      } else if (resultado && resultado.length > 0) {
-        toast.success('Reporte generado', `Se generaron ${resultado.length} registros`, { duration: 3000 });
+      if (resultado && resultado.length > 0) {
+        setShowResultados(true);
+        toast.success('Reporte generado', `Se prepararon ${resultado.length} registros.`, { duration: 3000 });
+      } else {
+        setShowResultados(false);
+        toast.warning('Sin datos disponibles', 'No hay datos para los filtros seleccionados.', { duration: 3500 });
       }
     } catch (error) {
       console.error('Error al generar reporte:', error);
-      toast.error('Error al generar reporte', 'Ocurrio un error. Intentalo nuevamente.', { duration: 5000 });
+      toast.error('Error al generar reporte', 'Ocurrió un error. Inténtalo nuevamente.', { duration: 5000 });
     } finally {
       setReporteActivo(null);
     }
-  }, [filtrosPlanificacion.anio, filtrosLocales, generarProgramacionAnual, toast]);
+  }, [filtrosLocales.centroAcopio, filtrosLocales.vacuna, filtrosPlanificacion.anio, generarProgramacionAnual, toast]);
 
-  const handleExportarReporte = useCallback(async (tipoReporte: string) => {
+  const handleExportarReporte = useCallback(async () => {
     try {
-      const config = {
+      await exportarProgramacionAnual({
         anio: filtrosPlanificacion.anio || new Date().getFullYear(),
         vacunaId: filtrosLocales.vacuna !== 'todas' ? filtrosLocales.vacuna : undefined,
         centroAcopioId: filtrosLocales.centroAcopio !== 'todos' ? filtrosLocales.centroAcopio : undefined,
         responsableReporte: 'Usuario del Sistema',
-        observaciones: `Reporte generado - Año ${filtrosPlanificacion.anio || new Date().getFullYear()}`
-      };
+        observaciones: `Reporte generado para el año ${filtrosPlanificacion.anio || new Date().getFullYear()}`,
+      });
 
-      switch (tipoReporte) {
-        case 'programacion_anual':
-          await exportarProgramacionAnual(config);
-          break;
-      }
-
-      toast.success('Exportacion exitosa', 'El archivo Excel se ha descargado', { duration: 3000 });
+      toast.success('Exportación lista', 'El archivo Excel se descargó correctamente.', { duration: 3000 });
     } catch (error) {
       console.error('Error al exportar reporte:', error);
-      toast.error('Error al exportar', 'Ocurrio un error. Intentalo nuevamente.', { duration: 5000 });
+      toast.error('Error al exportar', 'Ocurrió un error al preparar el archivo.', { duration: 5000 });
     }
-  }, [filtrosPlanificacion.anio, filtrosLocales, exportarProgramacionAnual, toast]);
+  }, [exportarProgramacionAnual, filtrosLocales.centroAcopio, filtrosLocales.vacuna, filtrosPlanificacion.anio, toast]);
 
-  const reportesPlanificacion = [
-    { id: 'programacion_anual', nombre: 'Programacion Anual', descripcion: 'Plan anual por vacuna', icon: Target, color: 'teal' as const, datos: reportes.programacionAnual },
+  const columns: ReportTableColumn<ProgramacionAnualData>[] = [
+    {
+      key: 'establecimiento',
+      label: 'Establecimiento',
+      render: (row) => (
+        <div>
+          <p className="font-medium text-slate-900">{row.establecimiento.nombre}</p>
+          <p className="text-xs text-slate-500">{row.establecimiento.codigo} · {row.establecimiento.tipo}</p>
+        </div>
+      ),
+    },
+    {
+      key: 'vacuna',
+      label: 'Vacuna',
+      render: (row) => (
+        <div>
+          <p className="font-medium text-slate-900">{row.vacuna.nombre}</p>
+          <p className="text-xs text-slate-500">{row.vacuna.presentacion}</p>
+        </div>
+      ),
+    },
+    {
+      key: 'meta',
+      label: 'Meta anual',
+      align: 'right',
+      render: (row) => <span className="font-semibold text-slate-900">{row.metaAnual.toLocaleString()}</span>,
+    },
+    {
+      key: 'estado',
+      label: 'Estado',
+      align: 'center',
+      render: (row) => <span className={row.estado === 'activo' ? COMPONENT_STYLES.badge.active : COMPONENT_STYLES.badge.warning}>{row.estado}</span>,
+    },
+    {
+      key: 'actualizacion',
+      label: 'Actualización',
+      render: (row) => <span className="text-sm text-slate-600">{formatCompactDate(row.fechaActualizacion)}</span>,
+    },
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      <h2 className="text-lg font-semibold text-gray-900">Reportes de Planificacion</h2>
+    <ReportSectionCard
+      title="Planificación"
+      subtitle="Programación anual con filtros, vista previa y Excel."
+      aside={<span className={COMPONENT_STYLES.badge.info}>Año {filtrosPlanificacion.anio || new Date().getFullYear()}</span>}
+      showHeader={false}
+    >
+      <div className="space-y-6">
+        <section className={COMPONENT_STYLES.filter.container}>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-700">Contexto de planificación</h3>
+            </div>
+            <span className={COMPONENT_STYLES.badge.neutral}>Filtro operativo</span>
+          </div>
 
-      {/* Filtros */}
-      <div className={COMPONENT_STYLES.filter.container}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className={COMPONENT_STYLES.input.label}>Año</label>
-            <select
-              value={filtrosPlanificacion.anio || new Date().getFullYear()}
-              onChange={(e) => actualizarFiltros({ anio: parseInt(e.target.value) })}
-              className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-            >
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-            </select>
+          <div className="mt-4 grid gap-4 lg:grid-cols-3">
+            <div>
+              <label className={COMPONENT_STYLES.input.label}>Año</label>
+              <select
+                value={filtrosPlanificacion.anio || new Date().getFullYear()}
+                onChange={(event) => actualizarFiltros({ anio: parseInt(event.target.value, 10) })}
+                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+              >
+                {[2024, 2025, 2026, 2027].map((anio) => (
+                  <option key={anio} value={anio}>{anio}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={COMPONENT_STYLES.input.label}>Vacuna</label>
+              <select
+                value={filtrosLocales.vacuna}
+                onChange={(event) => setFiltrosLocales((prev) => ({ ...prev, vacuna: event.target.value }))}
+                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+              >
+                <option value="todas">Todas</option>
+                {vacunas.map((vacuna) => (
+                  <option key={vacuna.id} value={vacuna.id}>{vacuna.nombre}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={COMPONENT_STYLES.input.label}>Centro de acopio</label>
+              <select
+                value={filtrosLocales.centroAcopio}
+                onChange={(event) => setFiltrosLocales((prev) => ({ ...prev, centroAcopio: event.target.value }))}
+                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+              >
+                <option value="todos">Todos</option>
+                {centrosAcopio.map((centro) => (
+                  <option key={centro.id} value={centro.id}>{centro.nombre}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div>
-            <label className={COMPONENT_STYLES.input.label}>Vacuna</label>
-            <select
-              value={filtrosLocales.vacuna}
-              onChange={(e) => setFiltrosLocales(prev => ({ ...prev, vacuna: e.target.value }))}
-              className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-            >
-              <option value="todas">Todas</option>
-              {vacunas.map((vacuna) => (
-                <option key={vacuna.id} value={vacuna.id}>{vacuna.nombre}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={COMPONENT_STYLES.input.label}>Centro de Acopio</label>
-            <select
-              value={filtrosLocales.centroAcopio}
-              onChange={(e) => setFiltrosLocales(prev => ({ ...prev, centroAcopio: e.target.value }))}
-              className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-            >
-              <option value="todos">Todos</option>
-              {centrosAcopio.map((centro) => (
-                <option key={centro.id} value={centro.id}>{centro.nombre}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Error */}
-      {estado.error && (
-        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-rose-800">{estado.error}</p>
-            <button onClick={limpiarError} className="text-rose-600 hover:text-rose-800">&times;</button>
-          </div>
-        </div>
-      )}
-
-      {/* Reportes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {reportesPlanificacion.map((reporte) => (
-          <ReporteCard
-            key={reporte.id}
-            id={reporte.id}
-            nombre={reporte.nombre}
-            descripcion={reporte.descripcion}
-            icon={reporte.icon}
-            color={reporte.color}
-            registros={reporte.datos?.length || 0}
-            isLoading={estado.cargando && reporteActivo === reporte.id}
-            hasData={(reporte.datos?.length || 0) > 0}
-            onGenerar={() => handleGenerarReporte(reporte.id)}
-            onExportar={() => handleExportarReporte(reporte.id)}
+        {estado.error ? (
+          <ReportInlineStatus
+            tone="danger"
+            title="No se pudo generar la programación"
+            description={estado.error}
           />
-        ))}
+        ) : null}
+
+        <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+          <ReporteCard
+            title="Programación anual"
+            description="Metas por establecimiento y vacuna con vista previa y Excel."
+            icon={Target}
+            tone="primary"
+            statusLabel={reportes.programacionAnual.length > 0 ? `${reportes.programacionAnual.length} filas` : 'Pendiente'}
+            facts={['Mismo contexto', 'Vista inline']}
+            actions={[
+              {
+                label: reporteActivo === 'programacion_anual' ? 'Consultando' : 'Ver reporte',
+                icon: Eye,
+                onClick: handleGenerarReporte,
+                variant: 'primary',
+                isLoading: estado.cargando && reporteActivo === 'programacion_anual',
+              },
+              {
+                label: 'Excel',
+                icon: Download,
+                onClick: handleExportarReporte,
+                disabled: reportes.programacionAnual.length === 0,
+              },
+            ]}
+          />
+
+          <div className="rounded-[22px] border border-teal-200 bg-teal-50/70 p-5">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-teal-800">Flujo</h3>
+            <div className="mt-3 space-y-2 text-sm leading-6 text-teal-900">
+              <p>1. Ajusta filtros.</p>
+              <p>2. Genera.</p>
+              <p>3. Revisa y exporta.</p>
+            </div>
+          </div>
+        </div>
+
       </div>
-    </div>
+
+      <VisualizarReporteModal
+        isOpen={showResultados}
+        title="Vista previa: programación anual"
+        subtitle="Listado generado con el contexto de planificación actual."
+        rows={reportes.programacionAnual}
+        columns={columns}
+        isLoading={estado.cargando && Boolean(reporteActivo)}
+        loadingMessage="Generando programación anual..."
+        emptyTitle="Genera la programación anual para revisar resultados"
+        emptyDescription="La vista previa mostrará establecimiento, vacuna, meta anual y fecha de actualización."
+        onClose={() => setShowResultados(false)}
+      />
+    </ReportSectionCard>
   );
 };
 

@@ -2,6 +2,8 @@ import React, { createContext, useContext, useReducer, useEffect, useCallback, u
 import { Alerta } from '../types';
 import { AlertasService } from '../services/alertasService';
 import { useAuth } from './AuthContext';
+import AuthService from '../services/authService';
+import { getApiBaseUrl } from '../config/api';
 
 interface AlertasState {
   alertasNoLeidas: Alerta[];
@@ -68,12 +70,19 @@ interface AlertasProviderProps {
 
 export const AlertasProvider: React.FC<AlertasProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(alertasReducer, initialState);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token } = useAuth();
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
   const isRefreshingRef = useRef(false);
 
+  const emitAlertasUpdated = useCallback((reason: string) => {
+    window.dispatchEvent(new CustomEvent('alertas:updated', {
+      detail: { reason, timestamp: new Date().toISOString() }
+    }));
+  }, []);
+
   // Obtener alertas no leídas
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (reason: string = 'manual') => {
     if (!isAuthenticated) return;
     
     // Evitar llamadas duplicadas simultáneas
@@ -83,13 +92,14 @@ export const AlertasProvider: React.FC<AlertasProviderProps> = ({ children }) =>
     try {
       const alertas = await AlertasService.getUnreadForUser();
       dispatch({ type: 'SET_ALERTAS', payload: alertas });
+      emitAlertasUpdated(reason);
     } catch (error) {
       console.error('Error al refrescar alertas:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Error al cargar alertas' });
     } finally {
       isRefreshingRef.current = false;
     }
-  }, [isAuthenticated]);
+  }, [emitAlertasUpdated, isAuthenticated]);
 
   const markAsRead = useCallback(async (id: string): Promise<boolean> => {
     // Actualización optimista - remover inmediatamente de la UI
@@ -97,6 +107,7 @@ export const AlertasProvider: React.FC<AlertasProviderProps> = ({ children }) =>
 
     try {
       await AlertasService.markAsRead(id);
+      emitAlertasUpdated('mark-read');
       return true;
     } catch (error) {
       console.error('Error al marcar como leída:', error);
@@ -104,7 +115,7 @@ export const AlertasProvider: React.FC<AlertasProviderProps> = ({ children }) =>
       refresh();
       return false;
     }
-  }, [refresh]);
+  }, [emitAlertasUpdated, refresh]);
 
   const markAllAsRead = useCallback(async (): Promise<boolean> => {
     if (state.alertasNoLeidas.length === 0) return true;
@@ -116,38 +127,57 @@ export const AlertasProvider: React.FC<AlertasProviderProps> = ({ children }) =>
 
     try {
       await AlertasService.markMultipleAsRead(ids);
+      emitAlertasUpdated('mark-all-read');
       return true;
     } catch (error) {
       console.error('Error al marcar todas como leídas:', error);
       refresh();
       return false;
     }
-  }, [state.alertasNoLeidas, refresh]);
+  }, [emitAlertasUpdated, refresh, state.alertasNoLeidas]);
 
-  // Polling para obtener alertas - cada 2 minutos (no genera, solo consulta)
   useEffect(() => {
-    if (isAuthenticated) {
-      // Cargar alertas inmediatamente
-      refresh();
+    if (!isAuthenticated || !token) {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      return;
+    }
 
-      // Polling cada 2 minutos (solo consulta, no genera)
-      pollingRef.current = setInterval(() => {
-        refresh();
-      }, 120000); // 2 minutos
+    refresh('bootstrap');
 
-      return () => {
-        if (pollingRef.current) {
-          clearInterval(pollingRef.current);
-          pollingRef.current = null;
-        }
+    const streamToken = token || AuthService.getToken();
+    if (streamToken && typeof EventSource !== 'undefined') {
+      const eventSource = new EventSource(`${getApiBaseUrl()}/alertas/stream?token=${encodeURIComponent(streamToken)}`);
+      eventSourceRef.current = eventSource;
+
+      eventSource.addEventListener('alertas:update', () => {
+        void refresh('realtime');
+      });
+
+      eventSource.onerror = () => {
+        eventSource.close();
+        eventSourceRef.current = null;
       };
-    } else {
+    }
+
+    pollingRef.current = setInterval(() => {
+      void refresh('poll');
+    }, 180000);
+
+    return () => {
       if (pollingRef.current) {
         clearInterval(pollingRef.current);
         pollingRef.current = null;
       }
-    }
-  }, [isAuthenticated, refresh]);
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+    };
+  }, [isAuthenticated, refresh, token]);
 
   const value: AlertasContextType = {
     alertasNoLeidas: state.alertasNoLeidas,

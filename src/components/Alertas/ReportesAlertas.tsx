@@ -1,8 +1,10 @@
-import React, { memo, useMemo, useState, useCallback } from 'react';
-import { Download, Loader2, BarChart3, TrendingUp, Target, FileSpreadsheet } from 'lucide-react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { FileSpreadsheet, Loader2 } from 'lucide-react';
 import ExcelJS from 'exceljs';
 import { Alerta } from '../../types';
-import { COMPONENT_STYLES, TIPOS_ALERTA, NIVELES_ALERTA } from './constants';
+import { useToastContext } from '../../contexts/ToastContext';
+import { AlertSectionCard } from './components';
+import { COMPONENT_STYLES, TIPOS_ALERTA } from './constants';
 
 interface ReportesAlertasProps {
   alertas: Alerta[];
@@ -13,16 +15,17 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
   alertas,
   isLoading = false,
 }) => {
+  const { toast } = useToastContext();
   const [filtroFecha, setFiltroFecha] = useState('7');
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [isExporting, setIsExporting] = useState(false);
 
   const alertasFiltradas = useMemo(() => {
-    const diasAtras = parseInt(filtroFecha);
+    const diasAtras = parseInt(filtroFecha, 10);
     const fechaLimite = new Date();
     fechaLimite.setDate(fechaLimite.getDate() - diasAtras);
 
-    return alertas.filter(alerta => {
+    return alertas.filter((alerta) => {
       const fechaAlerta = new Date(alerta.fechaCreacion);
       const cumpleFecha = fechaAlerta >= fechaLimite;
       const cumpleTipo = filtroTipo === 'todos' || alerta.tipo === filtroTipo;
@@ -30,29 +33,30 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
     });
   }, [alertas, filtroFecha, filtroTipo]);
 
-  const estadisticasHistorial = useMemo(() => {
+  const estadisticas = useMemo(() => {
     const totalPeriodo = alertasFiltradas.length;
-    const promedioDiario = Math.round(totalPeriodo / parseInt(filtroFecha)) || 0;
+    const promedioDiario = Math.round(totalPeriodo / parseInt(filtroFecha, 10)) || 0;
 
     const tipoMasFrecuente = TIPOS_ALERTA.reduce((max, tipo) => {
-      const cantidad = alertasFiltradas.filter(a => a.tipo === tipo.id).length;
+      const cantidad = alertasFiltradas.filter((alerta) => alerta.tipo === tipo.id).length;
       return cantidad > max.cantidad ? { tipo: tipo.label, cantidad } : max;
     }, { tipo: 'N/A', cantidad: 0 });
 
     return { totalPeriodo, promedioDiario, tipoMasFrecuente };
   }, [alertasFiltradas, filtroFecha]);
 
-  const distribucionTipo = useMemo(() => {
-    return TIPOS_ALERTA.map(tipo => {
-      const cantidad = alertasFiltradas.filter(a => a.tipo === tipo.id).length;
-      const porcentaje = alertasFiltradas.length > 0 ? (cantidad / alertasFiltradas.length * 100) : 0;
+  const distribucionTipo = useMemo(
+    () => TIPOS_ALERTA.map((tipo) => {
+      const cantidad = alertasFiltradas.filter((alerta) => alerta.tipo === tipo.id).length;
+      const porcentaje = alertasFiltradas.length > 0 ? (cantidad / alertasFiltradas.length) * 100 : 0;
       return { ...tipo, cantidad, porcentaje };
-    });
-  }, [alertasFiltradas]);
+    }),
+    [alertasFiltradas],
+  );
 
   const handleExportExcel = useCallback(async () => {
     if (alertasFiltradas.length === 0) {
-      alert('No hay alertas para exportar');
+      toast.warning('Sin datos para exportar', 'No hay alertas en el período seleccionado.', { duration: 2500 });
       return;
     }
 
@@ -62,113 +66,45 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
       workbook.creator = 'SIVAC';
       workbook.created = new Date();
 
-      // Hoja de Alertas
       const wsAlertas = workbook.addWorksheet('Alertas', {
-        properties: { tabColor: { argb: '0D9488' } }
+        properties: { tabColor: { argb: '0D9488' } },
       });
 
-      // Configurar columnas
       wsAlertas.columns = [
         { header: 'Fecha', key: 'fecha', width: 18 },
-        { header: 'Tipo', key: 'tipo', width: 15 },
-        { header: 'Nivel', key: 'nivel', width: 12 },
-        { header: 'Titulo', key: 'titulo', width: 40 },
-        { header: 'Descripcion', key: 'descripcion', width: 60 },
+        { header: 'Tipo', key: 'tipo', width: 18 },
+        { header: 'Nivel', key: 'nivel', width: 14 },
+        { header: 'Título', key: 'titulo', width: 40 },
+        { header: 'Descripción', key: 'descripcion', width: 60 },
         { header: 'Estado', key: 'estado', width: 12 },
       ];
 
-      // Estilo del encabezado
-      wsAlertas.getRow(1).eachCell(cell => {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: '0D9488' }
-        };
+      wsAlertas.getRow(1).eachCell((cell) => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '0D9488' } };
         cell.font = { bold: true, color: { argb: 'FFFFFF' } };
         cell.alignment = { horizontal: 'center', vertical: 'middle' };
-        cell.border = {
-          bottom: { style: 'thin', color: { argb: '000000' } }
-        };
       });
-      wsAlertas.getRow(1).height = 24;
 
-      // Agregar datos
       alertasFiltradas.forEach((alerta, index) => {
-        const tipoLabel = TIPOS_ALERTA.find(t => t.id === alerta.tipo)?.label || alerta.tipo;
-        const nivelLabel = NIVELES_ALERTA.find(n => n.id === alerta.nivel)?.label || alerta.nivel;
-
+        const tipoLabel = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo)?.label || alerta.tipo;
         const row = wsAlertas.addRow({
           fecha: new Date(alerta.fechaCreacion).toLocaleString('es-PE'),
           tipo: tipoLabel,
-          nivel: nivelLabel,
+          nivel: alerta.nivel,
           titulo: alerta.titulo,
           descripcion: alerta.descripcion,
-          estado: alerta.leida ? 'Leida' : 'No leida'
+          estado: alerta.leida ? 'Leída' : 'Pendiente',
         });
 
-        // Alternar colores de fila
         if (index % 2 === 0) {
-          row.eachCell(cell => {
-            cell.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'F0FDFA' }
-            };
+          row.eachCell((cell) => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F0FDFA' } };
           });
         }
-
-        // Color por nivel
-        const nivelCell = row.getCell('nivel');
-        switch (alerta.nivel) {
-          case 'error':
-            nivelCell.font = { color: { argb: 'DC2626' }, bold: true };
-            break;
-          case 'warning':
-            nivelCell.font = { color: { argb: 'D97706' }, bold: true };
-            break;
-          case 'success':
-            nivelCell.font = { color: { argb: '059669' }, bold: true };
-            break;
-          default:
-            nivelCell.font = { color: { argb: '0891B2' } };
-        }
       });
 
-      // Hoja de Resumen
-      const wsResumen = workbook.addWorksheet('Resumen', {
-        properties: { tabColor: { argb: '14B8A6' } }
-      });
-
-      wsResumen.columns = [
-        { header: 'Metrica', key: 'metrica', width: 30 },
-        { header: 'Valor', key: 'valor', width: 20 },
-      ];
-
-      wsResumen.getRow(1).eachCell(cell => {
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: '14B8A6' }
-        };
-        cell.font = { bold: true, color: { argb: 'FFFFFF' } };
-      });
-
-      wsResumen.addRow({ metrica: 'Periodo analizado', valor: `Ultimos ${filtroFecha} dias` });
-      wsResumen.addRow({ metrica: 'Total alertas', valor: estadisticasHistorial.totalPeriodo });
-      wsResumen.addRow({ metrica: 'Promedio diario', valor: estadisticasHistorial.promedioDiario });
-      wsResumen.addRow({ metrica: 'Tipo mas frecuente', valor: estadisticasHistorial.tipoMasFrecuente.tipo });
-      wsResumen.addRow({ metrica: '', valor: '' });
-      wsResumen.addRow({ metrica: 'DISTRIBUCION POR TIPO', valor: '' });
-
-      distribucionTipo.forEach(tipo => {
-        wsResumen.addRow({ metrica: tipo.label, valor: `${tipo.cantidad} (${tipo.porcentaje.toFixed(1)}%)` });
-      });
-
-      // Generar y descargar
       const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-      });
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -177,150 +113,121 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      toast.success('Reporte exportado', 'El archivo Excel se descargó correctamente.', { duration: 2500 });
     } catch (error) {
       console.error('Error al exportar:', error);
-      alert('Error al generar el archivo Excel');
+      toast.error('No se pudo exportar', 'Hubo un problema al generar el archivo Excel.', { duration: 3500 });
     } finally {
       setIsExporting(false);
     }
-  }, [alertasFiltradas, filtroFecha, estadisticasHistorial, distribucionTipo]);
+  }, [alertasFiltradas, toast]);
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Reportes y Analisis</h2>
-          <p className="text-sm text-gray-600">Estadisticas y tendencias de alertas</p>
-        </div>
-      </div>
-
-      <div className="bg-gray-50/80 rounded-xl p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <AlertSectionCard>
+      <div className="space-y-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <label className={COMPONENT_STYLES.input.label}>Periodo</label>
-            <select
-              value={filtroFecha}
-              onChange={(e) => setFiltroFecha(e.target.value)}
-              className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
-            >
-              <option value="1">Ultimo dia</option>
-              <option value="7">Ultimos 7 dias</option>
-              <option value="30">Ultimos 30 dias</option>
-              <option value="90">Ultimos 3 meses</option>
-              <option value="365">Ultimo ano</option>
-            </select>
+            <h2 className="text-lg font-semibold text-slate-950">Reportes y análisis</h2>
+            <p className="mt-1 text-sm text-slate-500">Filtra el período y exporta sin salir del módulo.</p>
           </div>
-          <div>
-            <label className={COMPONENT_STYLES.input.label}>Tipo de Alerta</label>
-            <select
-              value={filtroTipo}
-              onChange={(e) => setFiltroTipo(e.target.value)}
-              className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
-            >
-              <option value="todos">Todos los tipos</option>
-              {TIPOS_ALERTA.map((tipo) => (
-                <option key={tipo.id} value={tipo.id}>{tipo.label}</option>
-              ))}
-            </select>
-          </div>
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            disabled={isExporting}
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-emerald-700 hover:to-teal-700 disabled:opacity-60"
+          >
+            {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
+            Exportar Excel
+          </button>
         </div>
-      </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-5 border border-teal-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-teal-700">Total en Periodo</p>
-                  <p className="text-2xl font-bold text-teal-900">{estadisticasHistorial.totalPeriodo}</p>
-                </div>
-                <div className="p-2.5 bg-teal-600 rounded-xl">
-                  <BarChart3 className="h-5 w-5 text-white" />
-                </div>
-              </div>
+        <section className={COMPONENT_STYLES.filter.container}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className={COMPONENT_STYLES.input.label}>Período</label>
+              <select
+                value={filtroFecha}
+                onChange={(event) => setFiltroFecha(event.target.value)}
+                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
+              >
+                <option value="1">Último día</option>
+                <option value="7">Últimos 7 días</option>
+                <option value="30">Últimos 30 días</option>
+                <option value="90">Últimos 3 meses</option>
+                <option value="365">Último año</option>
+              </select>
             </div>
-
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-5 border border-emerald-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-emerald-700">Promedio Diario</p>
-                  <p className="text-2xl font-bold text-emerald-900">{estadisticasHistorial.promedioDiario}</p>
-                </div>
-                <div className="p-2.5 bg-emerald-600 rounded-xl">
-                  <TrendingUp className="h-5 w-5 text-white" />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-5 border border-cyan-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-cyan-700">Tipo Mas Frecuente</p>
-                  <p className="text-lg font-bold text-cyan-900">{estadisticasHistorial.tipoMasFrecuente.tipo}</p>
-                  <p className="text-xs text-cyan-600">{estadisticasHistorial.tipoMasFrecuente.cantidad} alertas</p>
-                </div>
-                <div className="p-2.5 bg-cyan-600 rounded-xl">
-                  <Target className="h-5 w-5 text-white" />
-                </div>
-              </div>
+            <div>
+              <label className={COMPONENT_STYLES.input.label}>Tipo de alerta</label>
+              <select
+                value={filtroTipo}
+                onChange={(event) => setFiltroTipo(event.target.value)}
+                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
+              >
+                <option value="todos">Todos los tipos</option>
+                {TIPOS_ALERTA.map((tipo) => (
+                  <option key={tipo.id} value={tipo.id}>{tipo.label}</option>
+                ))}
+              </select>
             </div>
           </div>
+        </section>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">Distribucion por Tipo</h3>
-            <div className="space-y-3">
-              {distribucionTipo.map((tipo) => {
-                const Icon = tipo.icon;
-                return (
-                  <div key={tipo.id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Icon className={`h-4 w-4 ${tipo.color}`} />
-                      <span className="text-sm font-medium text-gray-900">{tipo.label}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-gray-600">{tipo.cantidad}</span>
-                      <div className="w-20 bg-gray-200 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${tipo.bgColor.replace('-100', '-500')}`}
-                          style={{ width: `${Math.max(tipo.porcentaje, 2)}%` }}
-                        />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+              <section className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
+                <h3 className="text-base font-semibold text-slate-950">Distribución por tipo</h3>
+                <div className="mt-4 space-y-3">
+                  {distribucionTipo.map((tipo) => {
+                    const Icon = tipo.icon;
+                    return (
+                      <div key={tipo.id} className="rounded-[16px] border border-slate-200 bg-slate-50/70 p-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            <div className={`rounded-lg p-2 ${tipo.bgColor}`}>
+                              <Icon className={`h-4 w-4 ${tipo.color}`} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-slate-900">{tipo.label}</p>
+                              <p className="text-xs text-slate-500">{tipo.cantidad} alerta(s)</p>
+                            </div>
+                          </div>
+                          <p className="text-sm font-semibold text-slate-900">{tipo.porcentaje.toFixed(0)}%</p>
+                        </div>
                       </div>
-                      <span className="text-sm text-gray-500 w-12 text-right">
-                        {tipo.porcentaje.toFixed(0)}%
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+                    );
+                  })}
+                </div>
+              </section>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">Exportar Reporte</h3>
-            <button
-              onClick={handleExportExcel}
-              disabled={isExporting || alertasFiltradas.length === 0}
-              className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isExporting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <FileSpreadsheet className="h-4 w-4" />
-              )}
-              <span>Exportar a Excel</span>
-            </button>
-            {alertasFiltradas.length === 0 && (
-              <p className="mt-2 text-sm text-gray-500">No hay alertas en el periodo seleccionado</p>
-            )}
-          </div>
-        </>
-      )}
-    </div>
+              <section className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
+                <h3 className="text-base font-semibold text-slate-950">Resumen del período</h3>
+                <div className="mt-4 space-y-3">
+                  <div className="rounded-[16px] border border-slate-200 bg-slate-50/70 p-4">
+                    <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-500">Total del período</p>
+                    <p className="mt-2 text-2xl font-semibold text-slate-950">{estadisticas.totalPeriodo}</p>
+                  </div>
+                  <div className="rounded-[16px] border border-slate-200 bg-slate-50/70 p-4">
+                    <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-500">Promedio diario</p>
+                    <p className="mt-2 text-2xl font-semibold text-slate-950">{estadisticas.promedioDiario}</p>
+                  </div>
+                  <div className="rounded-[16px] border border-slate-200 bg-slate-50/70 p-4">
+                    <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-500">Tipo dominante</p>
+                    <p className="mt-2 text-lg font-semibold text-slate-950">{estadisticas.tipoMasFrecuente.tipo}</p>
+                    <p className="mt-1 text-sm text-slate-500">{estadisticas.tipoMasFrecuente.cantidad} alerta(s)</p>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </>
+        )}
+      </div>
+    </AlertSectionCard>
   );
 });
 

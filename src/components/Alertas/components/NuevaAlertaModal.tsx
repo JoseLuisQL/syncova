@@ -1,6 +1,13 @@
-import React, { memo, useState, useCallback } from 'react';
-import { X, Bell, Loader2 } from 'lucide-react';
-import { COMPONENT_STYLES, TIPOS_ALERTA, NIVELES_ALERTA } from '../constants';
+import React, { memo, useCallback, useState } from 'react';
+import { Bell } from 'lucide-react';
+import {
+  Modal,
+  ModalFooter,
+  SelectInput,
+  TextArea,
+  TextInput,
+} from '../../Inventario/components/ModalComponents';
+import { NIVELES_ALERTA, TIPOS_ALERTA } from '../constants';
 
 interface NuevaAlertaModalProps {
   isOpen: boolean;
@@ -26,29 +33,22 @@ export const NuevaAlertaModal: React.FC<NuevaAlertaModalProps> = memo(({
     titulo: '',
     descripcion: '',
   });
-
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = useCallback(() => {
-    const newErrors: { [key: string]: string } = {};
-    if (!formData.titulo.trim()) {
-      newErrors.titulo = 'El titulo es requerido';
-    }
-    if (!formData.descripcion.trim()) {
-      newErrors.descripcion = 'La descripcion es requerida';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData]);
+    const nextErrors: Record<string, string> = {};
+    if (!formData.titulo.trim()) nextErrors.titulo = 'El título es requerido.';
+    if (!formData.descripcion.trim()) nextErrors.descripcion = 'La descripción es requerida.';
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }, [formData.descripcion, formData.titulo]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(async () => {
     if (!validate()) return;
-
     await onCrear(formData);
     setFormData({ tipo: 'sistema', nivel: 'info', titulo: '', descripcion: '' });
     setErrors({});
-  }, [formData, validate, onCrear]);
+  }, [formData, onCrear, validate]);
 
   const handleClose = useCallback(() => {
     setFormData({ tipo: 'sistema', nivel: 'info', titulo: '', descripcion: '' });
@@ -56,142 +56,63 @@ export const NuevaAlertaModal: React.FC<NuevaAlertaModalProps> = memo(({
     onClose();
   }, [onClose]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      handleClose();
-    }
-  }, [handleClose]);
-
-  if (!isOpen) return null;
-
   return (
-    <div
-      className={COMPONENT_STYLES.modal.overlay}
-      onClick={(e) => e.target === e.currentTarget && handleClose()}
-      onKeyDown={handleKeyDown}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Nueva alerta"
+      subtitle="Registra una alerta manual cuando el equipo necesite seguimiento inmediato."
+      icon={Bell}
+      size="lg"
+      footer={(
+        <ModalFooter
+          onCancel={handleClose}
+          onSubmit={handleSubmit}
+          submitType="button"
+          submitLabel="Crear alerta"
+          isLoading={isCreating}
+          isSubmitDisabled={!formData.titulo.trim() || !formData.descripcion.trim()}
+        />
+      )}
     >
-      <div className={`${COMPONENT_STYLES.modal.container} max-w-lg`}>
-        <div className={COMPONENT_STYLES.modal.header}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-teal-600 to-cyan-600 shadow-lg">
-                <Bell className="h-5 w-5 text-white" />
-              </div>
-              <h2 id="modal-title" className="text-lg font-semibold text-gray-900">
-                Nueva Alerta
-              </h2>
-            </div>
-            <button
-              onClick={handleClose}
-              className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-              aria-label="Cerrar"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+      <div className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <SelectInput
+            id="alerta-tipo"
+            label="Tipo"
+            value={formData.tipo}
+            onChange={(value) => setFormData((prev) => ({ ...prev, tipo: value }))}
+            options={TIPOS_ALERTA.map((tipo) => ({ value: tipo.id, label: tipo.label }))}
+          />
+          <SelectInput
+            id="alerta-nivel"
+            label="Nivel"
+            value={formData.nivel}
+            onChange={(value) => setFormData((prev) => ({ ...prev, nivel: value }))}
+            options={NIVELES_ALERTA.map((nivel) => ({ value: nivel.id, label: nivel.label }))}
+          />
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className={COMPONENT_STYLES.modal.body}>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="tipo" className={COMPONENT_STYLES.input.label}>
-                    Tipo <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    id="tipo"
-                    value={formData.tipo}
-                    onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-                    className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
-                  >
-                    {TIPOS_ALERTA.map((tipo) => (
-                      <option key={tipo.id} value={tipo.id}>{tipo.label}</option>
-                    ))}
-                  </select>
-                </div>
+        <TextInput
+          id="alerta-titulo"
+          label="Título"
+          value={formData.titulo}
+          onChange={(value) => setFormData((prev) => ({ ...prev, titulo: value }))}
+          placeholder="Ej: Temperatura fuera de rango"
+          error={errors.titulo}
+        />
 
-                <div>
-                  <label htmlFor="nivel" className={COMPONENT_STYLES.input.label}>
-                    Nivel <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    id="nivel"
-                    value={formData.nivel}
-                    onChange={(e) => setFormData({ ...formData, nivel: e.target.value })}
-                    className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
-                  >
-                    {NIVELES_ALERTA.map((nivel) => (
-                      <option key={nivel.id} value={nivel.id}>{nivel.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="titulo" className={COMPONENT_STYLES.input.label}>
-                  Titulo <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  id="titulo"
-                  type="text"
-                  value={formData.titulo}
-                  onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                  placeholder="Titulo de la alerta"
-                  className={`${COMPONENT_STYLES.input.base} ${
-                    errors.titulo ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal
-                  }`}
-                />
-                {errors.titulo && (
-                  <p className={COMPONENT_STYLES.input.errorText}>{errors.titulo}</p>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="descripcion" className={COMPONENT_STYLES.input.label}>
-                  Descripcion <span className="text-rose-500">*</span>
-                </label>
-                <textarea
-                  id="descripcion"
-                  rows={3}
-                  value={formData.descripcion}
-                  onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                  placeholder="Descripcion detallada de la alerta"
-                  className={`${COMPONENT_STYLES.input.base} ${
-                    errors.descripcion ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal
-                  } resize-none`}
-                />
-                {errors.descripcion && (
-                  <p className={COMPONENT_STYLES.input.errorText}>{errors.descripcion}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className={COMPONENT_STYLES.modal.footer}>
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={isCreating}
-              className={COMPONENT_STYLES.button.secondary}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isCreating}
-              className={COMPONENT_STYLES.button.primary}
-            >
-              {isCreating && <Loader2 className="h-4 w-4 animate-spin" />}
-              <span>Crear Alerta</span>
-            </button>
-          </div>
-        </form>
+        <TextArea
+          id="alerta-descripcion"
+          label="Descripción"
+          value={formData.descripcion}
+          onChange={(value) => setFormData((prev) => ({ ...prev, descripcion: value }))}
+          placeholder="Describe el evento para que el equipo actúe sin ambigüedad"
+          rows={4}
+          error={errors.descripcion}
+        />
       </div>
-    </div>
+    </Modal>
   );
 });
 

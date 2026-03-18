@@ -1,15 +1,14 @@
-import React, { useState, useCallback } from 'react';
-import {
-  TrendingUp,
-  Truck,
-  Download,
-} from 'lucide-react';
+import React, { useCallback, useState } from 'react';
+import { ArrowRightLeft, Download, Eye, FileSpreadsheet } from 'lucide-react';
 import { Establecimiento } from '../../../../types';
 import { useReportes } from '../../../../hooks/useReportes';
 import { useToastContext } from '../../../../contexts/ToastContext';
+import { ItemMovimientoMensual } from '../../../../types/reportes';
 import { COMPONENT_STYLES } from '../../constants';
-import { ReporteCard } from '..';
+import { ReporteCard, ReportInlineStatus, ReportSectionCard, ReportTableColumn } from '..';
 import MovimientosPorEESSModal, { MovimientosPorEESSFiltros } from '../../MovimientosPorEESSModal';
+import VisualizarReporteModal from '../../modals/VisualizarReporteModal';
+import { formatCompactDate } from '../../utils';
 
 interface MovimientosTabProps {
   centrosAcopio: Establecimiento[];
@@ -32,34 +31,30 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
     generarMovimientosMensuales,
     exportarMovimientosMensuales,
     exportarMovimientosPorEESS,
-    limpiarError
   } = useReportes();
-
   const { toast } = useToastContext();
+
   const [reporteActivo, setReporteActivo] = useState<string | null>(null);
   const [showMovimientosPorEESSModal, setShowMovimientosPorEESSModal] = useState(false);
+  const [showResultados, setShowResultados] = useState(false);
 
   const buildFiltros = useCallback(() => ({
     centroAcopioId: filtrosFechas.centroAcopio !== 'todos' ? filtrosFechas.centroAcopio : undefined,
     fechaInicio: filtrosFechas.fechaInicio,
     fechaFin: filtrosFechas.fechaFin,
-    incluirInactivos: false
+    incluirInactivos: false,
   }), [filtrosFechas]);
 
-  const handleGenerarReporte = useCallback(async (tipoReporte: string) => {
+  const handleGenerarReporte = useCallback(async () => {
     try {
-      setReporteActivo(tipoReporte);
-      const filtros = buildFiltros();
-      let resultado: unknown[] | null = null;
+      setReporteActivo('movimientos_mensuales');
+      const resultado = await generarMovimientosMensuales(buildFiltros());
 
-      switch (tipoReporte) {
-        case 'movimientos_mensuales':
-          resultado = await generarMovimientosMensuales(filtros);
-          break;
-      }
-
-      if (resultado && Array.isArray(resultado) && resultado.length === 0) {
-        toast.warning('Sin datos disponibles', 'No hay datos en el rango seleccionado', { duration: 4000 });
+      if (resultado && Array.isArray(resultado) && resultado.length > 0) {
+        setShowResultados(true);
+      } else {
+        setShowResultados(false);
+        toast.warning('Sin datos disponibles', 'No hay movimientos para el rango seleccionado.', { duration: 3500 });
       }
     } catch (error) {
       console.error('Error al generar reporte:', error);
@@ -68,23 +63,18 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
     }
   }, [buildFiltros, generarMovimientosMensuales, toast]);
 
-  const handleExportarReporte = useCallback(async (tipoReporte: string) => {
+  const handleExportarReporte = useCallback(async () => {
     try {
-      const filtros = buildFiltros();
       const config = {
         incluirDetalles: true,
         incluirGraficos: false,
         incluirEstadisticas: true,
         formatoFecha: 'dd/mm/yyyy' as const,
         responsableReporte: 'Sistema SIVAC',
-        observaciones: 'Reporte generado automaticamente'
+        observaciones: 'Reporte de movimientos generado desde el módulo de reportes',
       };
 
-      switch (tipoReporte) {
-        case 'movimientos_mensuales':
-          await exportarMovimientosMensuales(filtros, config);
-          break;
-      }
+      await exportarMovimientosMensuales(buildFiltros(), config);
     } catch (error) {
       console.error('Error al exportar reporte:', error);
     }
@@ -98,121 +88,186 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
         incluirEstadisticas: true,
         formatoFecha: 'dd/mm/yyyy' as const,
         responsableReporte: 'Sistema SIVAC',
-        observaciones: `Reporte generado para el periodo del ${filtros.fechaInicio} al ${filtros.fechaFin}`
+        observaciones: `Periodo del ${filtros.fechaInicio} al ${filtros.fechaFin}`,
       };
 
       await exportarMovimientosPorEESS(filtros, config);
-      toast.success('Reporte de Movimientos por EESS exportado exitosamente');
+      toast.success('Exportación lista', 'El reporte por EESS se descargó correctamente.', { duration: 3000 });
     } catch (error) {
       console.error('Error al exportar Movimientos por EESS:', error);
-      toast.error('Error al exportar el reporte. Por favor, intentelo nuevamente.');
+      toast.error('Error al exportar', 'No se pudo generar el archivo solicitado.', { duration: 4000 });
       throw error;
     }
   }, [exportarMovimientosPorEESS, toast]);
 
-  const reportesMovimientos = [
-    { id: 'movimientos_mensuales', nombre: 'Movimientos Mensuales', descripcion: 'Resumen mensual por EESS', icon: TrendingUp, color: 'emerald' as const, datos: reportes.movimientosMensuales },
+  const columns: ReportTableColumn<ItemMovimientoMensual>[] = [
+    {
+      key: 'establecimiento',
+      label: 'Establecimiento',
+      render: (row) => (
+        <div>
+          <p className="font-medium text-slate-900">{row.establecimientoNombre}</p>
+          <p className="text-xs text-slate-500">{row.vacunaNombre}</p>
+        </div>
+      ),
+    },
+    {
+      key: 'periodo',
+      label: 'Periodo',
+      render: (row) => <span className="text-sm text-slate-600">{`${row.mes}/${row.anio}`}</span>,
+      align: 'center',
+    },
+    {
+      key: 'ingresos',
+      label: 'Ingresos',
+      render: (row) => <span className="text-sm text-slate-700">{(row.transIngreso || 0).toLocaleString()}</span>,
+      align: 'right',
+    },
+    {
+      key: 'entregas',
+      label: 'Entregas',
+      render: (row) => <span className="text-sm text-slate-700">{(row.entrega || 0).toLocaleString()}</span>,
+      align: 'right',
+    },
+    {
+      key: 'salidas',
+      label: 'Salidas',
+      render: (row) => <span className="text-sm text-slate-700">{(row.salida || 0).toLocaleString()}</span>,
+      align: 'right',
+    },
+    {
+      key: 'saldoFinal',
+      label: 'Saldo final',
+      render: (row) => <span className="font-semibold text-slate-900">{row.saldoFinal.toLocaleString()}</span>,
+      align: 'right',
+    },
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      <h2 className="text-lg font-semibold text-gray-900">Reportes de Movimientos</h2>
+    <ReportSectionCard
+      title="Movimientos y distribución"
+      subtitle="Resumen mensual y exportación por EESS en un flujo directo."
+      aside={<span className={COMPONENT_STYLES.badge.info}>{`${formatCompactDate(filtrosFechas.fechaInicio)} a ${formatCompactDate(filtrosFechas.fechaFin)}`}</span>}
+      showHeader={false}
+    >
+      <div className="space-y-6">
+        <section className={COMPONENT_STYLES.filter.container}>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-700">Rango operativo</h3>
+            </div>
+            <span className={COMPONENT_STYLES.badge.neutral}>Filtros sincronizados</span>
+          </div>
 
-      {/* Filtros */}
-      <div className={COMPONENT_STYLES.filter.container}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className={COMPONENT_STYLES.input.label}>Fecha Inicio</label>
-            <input
-              type="date"
-              value={filtrosFechas.fechaInicio}
-              onChange={(e) => onFiltrosChange({ ...filtrosFechas, fechaInicio: e.target.value })}
-              className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
-            />
+          <div className="mt-4 grid gap-4 lg:grid-cols-3">
+            <div>
+              <label className={COMPONENT_STYLES.input.label}>Fecha inicio</label>
+              <input
+                type="date"
+                value={filtrosFechas.fechaInicio}
+                onChange={(event) => onFiltrosChange({ ...filtrosFechas, fechaInicio: event.target.value })}
+                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
+              />
+            </div>
+            <div>
+              <label className={COMPONENT_STYLES.input.label}>Fecha fin</label>
+              <input
+                type="date"
+                value={filtrosFechas.fechaFin}
+                onChange={(event) => onFiltrosChange({ ...filtrosFechas, fechaFin: event.target.value })}
+                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
+              />
+            </div>
+            <div>
+              <label className={COMPONENT_STYLES.input.label}>Centro de acopio</label>
+              <select
+                value={filtrosFechas.centroAcopio}
+                onChange={(event) => onFiltrosChange({ ...filtrosFechas, centroAcopio: event.target.value })}
+                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+              >
+                <option value="todos">Todos</option>
+                {centrosAcopio.map((centro) => (
+                  <option key={centro.id} value={centro.id}>{centro.nombre}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div>
-            <label className={COMPONENT_STYLES.input.label}>Fecha Fin</label>
-            <input
-              type="date"
-              value={filtrosFechas.fechaFin}
-              onChange={(e) => onFiltrosChange({ ...filtrosFechas, fechaFin: e.target.value })}
-              className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
-            />
-          </div>
-          <div>
-            <label className={COMPONENT_STYLES.input.label}>Centro de Acopio</label>
-            <select
-              value={filtrosFechas.centroAcopio}
-              onChange={(e) => onFiltrosChange({ ...filtrosFechas, centroAcopio: e.target.value })}
-              className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-            >
-              <option value="todos">Todos</option>
-              {centrosAcopio.map((centro) => (
-                <option key={centro.id} value={centro.id}>{centro.nombre}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Error */}
-      {estado.error && (
-        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-rose-800">{estado.error}</p>
-            <button onClick={limpiarError} className="text-rose-600 hover:text-rose-800">&times;</button>
-          </div>
-        </div>
-      )}
-
-      {/* Reportes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {reportesMovimientos.map((reporte) => (
-          <ReporteCard
-            key={reporte.id}
-            id={reporte.id}
-            nombre={reporte.nombre}
-            descripcion={reporte.descripcion}
-            icon={reporte.icon}
-            color={reporte.color}
-            registros={reporte.datos?.length || 0}
-            isLoading={estado.cargando && reporteActivo === reporte.id}
-            hasData={(reporte.datos?.length || 0) > 0}
-            onGenerar={() => handleGenerarReporte(reporte.id)}
-            onExportar={() => handleExportarReporte(reporte.id)}
+        {estado.error ? (
+          <ReportInlineStatus
+            tone="danger"
+            title="No se pudo procesar el reporte de movimientos"
+            description={estado.error}
           />
-        ))}
+        ) : null}
 
-        {/* Movimientos por EESS - Card especial */}
-        <div className={COMPONENT_STYLES.reportCard.container}>
-          <div className="flex items-start gap-4 mb-4">
-            <div className={`${COMPONENT_STYLES.reportCard.iconWrapper} bg-teal-100`}>
-              <Truck className="h-5 w-5 text-teal-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className={COMPONENT_STYLES.reportCard.title}>Movimientos por EESS</h3>
-              <p className={COMPONENT_STYLES.reportCard.description}>Agrupado por establecimiento</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowMovimientosPorEESSModal(true)}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 transition-all duration-200"
-          >
-            <Download className="h-4 w-4" />
-            <span>Configurar y Exportar</span>
-          </button>
+        <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+          <ReporteCard
+            title="Movimientos mensuales"
+            description="Ingresos, entregas, salidas y saldo final por EESS."
+            icon={ArrowRightLeft}
+            tone="success"
+            statusLabel={reportes.movimientosMensuales.length > 0 ? `${reportes.movimientosMensuales.length} filas` : 'Pendiente'}
+            facts={['Rango superior', 'Vista inline']}
+            actions={[
+              {
+                label: reporteActivo === 'movimientos_mensuales' ? 'Consultando' : 'Ver reporte',
+                icon: Eye,
+                onClick: handleGenerarReporte,
+                variant: 'primary',
+                isLoading: estado.cargando && reporteActivo === 'movimientos_mensuales',
+              },
+              {
+                label: 'Excel',
+                icon: Download,
+                  onClick: handleExportarReporte,
+                  disabled: reportes.movimientosMensuales.length === 0,
+              },
+            ]}
+          />
+
+            <ReporteCard
+              title="Movimientos por EESS"
+            description="Excel por establecimientos con filtros de rango y centro."
+            icon={FileSpreadsheet}
+            tone="secondary"
+            statusLabel="Especializado"
+            facts={['Exportación avanzada', 'Salida Excel']}
+            actions={[
+                {
+                label: 'Configurar',
+                  icon: FileSpreadsheet,
+                  onClick: () => setShowMovimientosPorEESSModal(true),
+                  variant: 'primary',
+              },
+            ]}
+          />
         </div>
+
       </div>
 
-      {/* Modal */}
-      {showMovimientosPorEESSModal && (
+      {showMovimientosPorEESSModal ? (
         <MovimientosPorEESSModal
           onClose={() => setShowMovimientosPorEESSModal(false)}
           onExportar={handleExportarMovimientosPorEESS}
           centrosAcopio={centrosAcopio}
         />
-      )}
-    </div>
+      ) : null}
+
+      <VisualizarReporteModal
+        isOpen={showResultados}
+        title="Vista previa: movimientos mensuales"
+        subtitle="Resumen generado con el rango y centro seleccionados."
+        rows={reportes.movimientosMensuales}
+        columns={columns}
+        isLoading={estado.cargando && Boolean(reporteActivo)}
+        loadingMessage="Generando resumen de movimientos..."
+        emptyTitle="Genera el reporte mensual para revisar resultados"
+        emptyDescription="Cuando ejecutes el análisis, aquí verás ingresos, entregas, salidas y saldos finales."
+        onClose={() => setShowResultados(false)}
+      />
+    </ReportSectionCard>
   );
 };
 

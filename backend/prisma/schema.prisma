@@ -473,6 +473,10 @@ model Alerta {
   // Relaciones
   usuario           Usuario?    @relation(fields: [usuarioId], references: [id])
 
+  @@index([leida, usuarioId, fechaCreacion], name: "idx_alertas_leida_usuario_fecha")
+  @@index([tipo, fechaCreacion], name: "idx_alertas_tipo_fecha")
+  @@index([nivel, fechaCreacion], name: "idx_alertas_nivel_fecha")
+  @@index([fechaVencimiento], name: "idx_alertas_fecha_vencimiento")
   @@map("alertas")
 }
 

@@ -1,6 +1,7 @@
 import { prisma } from '@/config/database';
 import { ServiceResult } from '@/types';
-import { NivelAlerta } from '@prisma/client';
+import { NivelAlerta, Prisma } from '@prisma/client';
+import { AlertaRealtimeService } from '@/services/AlertaRealtimeService';
 
 interface GeneracionResult {
   alertasGeneradas: number;
@@ -49,10 +50,16 @@ export class AlertaAutomaticaService {
         detalles.push(...resultStock.data.detalles);
       }
 
+      const totalGeneradas = alertasVencimiento + alertasStockBajo;
+
+      if (totalGeneradas > 0) {
+        AlertaRealtimeService.notifyAlertasChanged('automatic-generated', { count: totalGeneradas });
+      }
+
       return {
         success: true,
         data: {
-          alertasGeneradas: alertasVencimiento + alertasStockBajo,
+          alertasGeneradas: totalGeneradas,
           alertasVencimiento,
           alertasStockBajo,
           detalles
@@ -297,9 +304,11 @@ export class AlertaAutomaticaService {
           descripcion,
           nivel,
           usuarioId,
-          parametros: parametros as any
+          parametros: parametros as Prisma.InputJsonValue
         }
       });
+
+      AlertaRealtimeService.notifyAlertasChanged('system-created', { id: alerta.id, nivel: alerta.nivel });
 
       return {
         success: true,
@@ -330,6 +339,10 @@ export class AlertaAutomaticaService {
           }
         }
       });
+
+      if (result.count > 0) {
+        AlertaRealtimeService.notifyAlertasChanged('cleanup-resolved', { count: result.count });
+      }
 
       return {
         success: true,

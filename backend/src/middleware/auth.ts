@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '@/config/env';
 import { ResponseUtil } from '@/utils/response';
@@ -16,6 +16,43 @@ interface JwtPayload {
   iat: number;
   exp: number;
 }
+
+export interface ResolvedAuthUser {
+  id: string;
+  usuario: string;
+  rol: RolUsuario;
+  establecimientoId?: string;
+}
+
+export const resolveAuthenticatedUserFromToken = async (token: string): Promise<ResolvedAuthUser | null> => {
+  try {
+    const decoded = jwt.verify(token, config.jwt.secret) as JwtPayload;
+
+    const user = await prisma.usuario.findUnique({
+      where: { id: decoded.id },
+      select: {
+        id: true,
+        usuario: true,
+        rol: true,
+        establecimientoId: true,
+        estado: true,
+      },
+    });
+
+    if (!user || user.estado !== 'activo') {
+      return null;
+    }
+
+    return {
+      id: user.id,
+      usuario: user.usuario,
+      rol: user.rol as RolUsuario,
+      establecimientoId: user.establecimientoId || undefined,
+    };
+  } catch {
+    return null;
+  }
+};
 
 /**
  * Middleware de autenticación
@@ -189,7 +226,7 @@ export const optionalAuth = async (
           establecimientoId: user.establecimientoId || undefined,
         };
       }
-    } catch (error) {
+    } catch {
       // Ignorar errores de token en autenticación opcional
     }
 

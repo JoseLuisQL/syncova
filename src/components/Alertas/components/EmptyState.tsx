@@ -13,21 +13,20 @@ interface EmptyStateProps {
 
 export const EmptyState: React.FC<EmptyStateProps> = memo(({
   title = 'No se encontraron alertas',
-  description = 'Intenta ajustar los filtros de busqueda',
+  description = 'Ajusta filtros o genera nuevas alertas para volver a poblar la vista.',
   action,
 }) => (
-  <div className="text-center py-12 px-4">
-    <Bell className="h-12 w-12 mx-auto text-gray-300 mb-4" aria-hidden="true" />
-    <p className="text-lg font-medium text-gray-900 mb-1">{title}</p>
-    <p className="text-sm text-gray-500 mb-4">{description}</p>
-    {action && (
-      <button
-        onClick={action.onClick}
-        className={COMPONENT_STYLES.button.primary}
-      >
+  <div className="flex flex-col items-center justify-center rounded-[22px] border border-dashed border-slate-200 bg-slate-50/70 px-6 py-14 text-center">
+    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+      <Bell className="h-5 w-5" aria-hidden="true" />
+    </div>
+    <p className="mt-4 text-sm font-semibold text-slate-900">{title}</p>
+    <p className="mt-2 max-w-lg text-sm leading-6 text-slate-500">{description}</p>
+    {action ? (
+      <button type="button" onClick={action.onClick} className={`${COMPONENT_STYLES.button.primary} mt-5`}>
         {action.label}
       </button>
-    )}
+    ) : null}
   </div>
 ));
 

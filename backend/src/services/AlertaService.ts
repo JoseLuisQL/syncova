@@ -1,7 +1,8 @@
 import { prisma } from '@/config/database';
 import { ServiceResult, IAlerta } from '@/types';
-import { TipoAlerta, NivelAlerta, EstadoGeneral } from '@prisma/client';
+import { Prisma, TipoAlerta, NivelAlerta } from '@prisma/client';
 import { createError } from '@/middleware/errorHandler';
+import { AlertaRealtimeService } from '@/services/AlertaRealtimeService';
 
 export interface CreateAlertaDto {
   tipo: TipoAlerta;
@@ -10,7 +11,7 @@ export interface CreateAlertaDto {
   nivel: NivelAlerta;
   fechaVencimiento?: Date;
   usuarioId?: string;
-  parametros?: any;
+  parametros?: Record<string, unknown>;
 }
 
 export interface UpdateAlertaDto {
@@ -21,7 +22,7 @@ export interface UpdateAlertaDto {
   fechaVencimiento?: Date;
   leida?: boolean;
   usuarioId?: string;
-  parametros?: any;
+  parametros?: Record<string, unknown>;
 }
 
 export interface AlertaFilters {
@@ -67,7 +68,7 @@ export class AlertaService {
       } = filters || {};
 
       // Construir condiciones de filtro
-      const where: any = {};
+      const where: Prisma.AlertaWhereInput = {};
 
       if (tipo && tipo !== 'todos') {
         where.tipo = tipo;
@@ -193,7 +194,7 @@ export class AlertaService {
           nivel: data.nivel,
           fechaVencimiento: data.fechaVencimiento,
           usuarioId: data.usuarioId,
-          parametros: data.parametros
+          parametros: data.parametros as Prisma.InputJsonValue | undefined
         },
         include: {
           usuario: {
@@ -207,10 +208,18 @@ export class AlertaService {
         }
       });
 
+      AlertaRealtimeService.notifyAlertasChanged('created', {
+        id: alerta.id,
+        tipo: alerta.tipo,
+        nivel: alerta.nivel,
+      });
+
       return {
         success: true,
         data: alerta
       };
+
+      
     } catch (error) {
       console.error('Error al crear alerta:', error);
       return {
@@ -235,7 +244,8 @@ export class AlertaService {
       }
 
       // Validaciones de negocio para la actualización
-      await this.validateAlertaData(data, id);
+      await this.validateAlertaData(data);
+      
 
       const alerta = await prisma.alerta.update({
         where: { id },
@@ -247,7 +257,7 @@ export class AlertaService {
           fechaVencimiento: data.fechaVencimiento,
           leida: data.leida,
           usuarioId: data.usuarioId,
-          parametros: data.parametros
+          parametros: data.parametros as Prisma.InputJsonValue | undefined
         },
         include: {
           usuario: {
@@ -259,6 +269,13 @@ export class AlertaService {
             }
           }
         }
+      });
+
+      AlertaRealtimeService.notifyAlertasChanged('updated', {
+        id: alerta.id,
+        tipo: alerta.tipo,
+        nivel: alerta.nivel,
+        leida: alerta.leida,
       });
 
       return {
@@ -291,6 +308,8 @@ export class AlertaService {
       await prisma.alerta.delete({
         where: { id }
       });
+
+      AlertaRealtimeService.notifyAlertasChanged('deleted', { id });
 
       return {
         success: true,
@@ -325,6 +344,8 @@ export class AlertaService {
         }
       });
 
+      AlertaRealtimeService.notifyAlertasChanged('read-single', { id: alerta.id });
+
       return {
         success: true,
         data: alerta
@@ -349,6 +370,10 @@ export class AlertaService {
         },
         data: { leida: true }
       });
+
+      if (result.count > 0) {
+        AlertaRealtimeService.notifyAlertasChanged('read-multiple', { ids, count: result.count });
+      }
 
       return {
         success: true,
@@ -525,6 +550,10 @@ export class AlertaService {
         }
       });
 
+      if (result.count > 0) {
+        AlertaRealtimeService.notifyAlertasChanged('cleanup-old', { count: result.count });
+      }
+
       return {
         success: true,
         data: { count: result.count }
@@ -541,7 +570,7 @@ export class AlertaService {
   /**
    * Validaciones de negocio para alertas
    */
-  private static async validateAlertaData(data: CreateAlertaDto | UpdateAlertaDto, excludeId?: string): Promise<void> {
+  private static async validateAlertaData(data: CreateAlertaDto | UpdateAlertaDto): Promise<void> {
     // Validar título requerido
     if (data.titulo && data.titulo.trim().length === 0) {
       throw createError.badRequest('El título es requerido');

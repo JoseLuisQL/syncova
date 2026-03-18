@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { AlertaController } from '@/controllers/AlertaController';
-import { authenticate, optionalAuth } from '@/middleware/auth';
+import { authenticate } from '@/middleware/auth';
 import { validatePermissions } from '@/middleware/permissions';
 
 const router = Router();
+
+router.get('/stream', AlertaController.stream);
 
 /**
  * @route GET /api/alertas/stats
@@ -43,7 +45,7 @@ router.delete('/limpiar-antiguas', authenticate, validatePermissions(['admin']),
  * @body {number} [diasAnticipacion=30] - Días de anticipación para alertas de vencimiento
  * @body {number} [porcentajeMinimo=20] - Porcentaje mínimo de stock para alertas
  */
-router.post('/generar-automaticas', authenticate, validatePermissions(['admin', 'supervisor']), AlertaController.generateAutomatic);
+router.post('/generar-automaticas', authenticate, validatePermissions(['admin', 'coordinador']), AlertaController.generateAutomatic);
 
 /**
  * @route DELETE /api/alertas/limpiar-resueltas
@@ -120,7 +122,7 @@ router.put('/:id', authenticate, AlertaController.update);
  * @access Private (Solo Administradores y Coordinadores)
  * @param {string} id - ID de la alerta
  */
-router.delete('/:id', authenticate, validatePermissions(['admin', 'supervisor']), AlertaController.delete);
+router.delete('/:id', authenticate, validatePermissions(['admin', 'coordinador']), AlertaController.delete);
 
 /**
  * @route PUT /api/alertas/:id/leer

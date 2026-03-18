@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Alerta, CreateAlertaDto, UpdateAlertaDto, AlertaFilters, AlertaStats } from '../types';
 import { AlertasService } from '../services/alertasService';
 import { useApi, useCrudApi } from './useApi';
@@ -54,6 +54,7 @@ interface UseAlertasResult {
  * Proporciona funcionalidades CRUD y operaciones especiales para alertas
  */
 export const useAlertas = (): UseAlertasResult => {
+  const initialLoadRef = useRef(false);
   // Estados locales
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [alertaActual, setAlertaActual] = useState<Alerta | null>(null);
@@ -67,7 +68,12 @@ export const useAlertas = (): UseAlertasResult => {
   const listApi = useApi<{
     alertas: Alerta[];
     total: number;
-    pagination: any;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
   }>();
   const crudApi = useCrudApi<Alerta>();
   const statsApi = useApi<AlertaStats>();
@@ -368,10 +374,24 @@ export const useAlertas = (): UseAlertasResult => {
 
   // Cargar datos iniciales
   useEffect(() => {
-    loadAlertas();
-    loadStats();
-    loadUnreadAlertas();
-  }, []);
+    if (initialLoadRef.current) return;
+    initialLoadRef.current = true;
+
+    void loadAlertas();
+    void loadStats();
+    void loadUnreadAlertas();
+  }, [loadAlertas, loadStats, loadUnreadAlertas]);
+
+  useEffect(() => {
+    const handleAlertasUpdated = () => {
+      void refreshData();
+    };
+
+    window.addEventListener('alertas:updated', handleAlertasUpdated);
+    return () => {
+      window.removeEventListener('alertas:updated', handleAlertasUpdated);
+    };
+  }, [refreshData]);
 
   return {
     // Datos

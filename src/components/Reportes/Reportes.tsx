@@ -1,103 +1,118 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { Clock, Loader2 } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { useKardexFiltros } from '../../hooks/useKardexData';
-import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
+import { useCurrentRoute } from '../../hooks/useRouting';
 import { usePermissions } from '../../hooks/usePermissions';
-import { COMPONENT_STYLES, REPORTS_SECTIONS } from './constants';
-import { ReportesHeader, ReportesNav } from './components';
-import { InventarioTab, MovimientosTab, PlanificacionTab, ConfiguracionTab, CenaresTab } from './components/tabs';
+import { ReportScheduleModal, ReportsShell } from './components';
+import { COMPONENT_STYLES, REPORTS_SECTIONS, ReporteProgramado, SectionId } from './constants';
+import { ConfiguracionTab, InventarioTab, MovimientosTab, PlanificacionTab, CenaresTab } from './components/tabs';
 
-interface ReporteProgramado {
-  id: string;
-  nombre: string;
-  tipo: string;
-  frecuencia: string;
-  proximaEjecucion: Date;
-  estado: string;
-  destinatarios: string[];
-  formato: string;
-}
+const INITIAL_PROGRAMADOS: ReporteProgramado[] = [
+  {
+    id: '1',
+    nombre: 'Reporte Mensual de Stock',
+    tipo: 'inventario',
+    frecuencia: 'mensual',
+    proximaEjecucion: new Date('2026-04-15T18:00:00'),
+    estado: 'activo',
+    destinatarios: ['coordinadora@saludapurimac.gob.pe'],
+    formato: 'pdf',
+  },
+  {
+    id: '2',
+    nombre: 'Análisis de Consumo Trimestral',
+    tipo: 'planificacion',
+    frecuencia: 'trimestral',
+    proximaEjecucion: new Date('2026-06-01T08:30:00'),
+    estado: 'activo',
+    destinatarios: ['admin@saludapurimac.gob.pe'],
+    formato: 'excel',
+  },
+];
 
 const Reportes: React.FC = () => {
-  const { navigateToModule } = useAppNavigation();
   const { currentSubModule } = useCurrentRoute();
   const { canAccessSection } = usePermissions();
-
-  const {
-    vacunas: vacunasReales,
-    centrosAcopio: centrosAcopioReales,
-    loading: loadingFiltros
-  } = useKardexFiltros();
+  const { vacunas: vacunasReales, centrosAcopio: centrosAcopioReales, loading } = useKardexFiltros();
 
   const [filtrosFechas, setFiltrosFechas] = useState({
     fechaInicio: new Date().toISOString().split('T')[0],
     fechaFin: new Date().toISOString().split('T')[0],
     centroAcopio: 'todos',
   });
+  const [reportesProgramados, setReportesProgramados] = useState<ReporteProgramado[]>(INITIAL_PROGRAMADOS);
+  const [scheduleModalReporte, setScheduleModalReporte] = useState<ReporteProgramado | null>(null);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
-  const [showModalProgramar, setShowModalProgramar] = useState(false);
+  const accessibleSections = useMemo(
+    () => REPORTS_SECTIONS.filter((section) => canAccessSection('reportes', section.id)),
+    [canAccessSection],
+  );
+  const visibleSections = useMemo(
+    () => accessibleSections.filter((section) => section.id !== 'configuracion'),
+    [accessibleSections],
+  );
 
-  const [reportesProgramados, setReportesProgramados] = useState<ReporteProgramado[]>([
-    {
-      id: '1',
-      nombre: 'Reporte Mensual de Stock',
-      tipo: 'stock_mensual',
-      frecuencia: 'mensual',
-      proximaEjecucion: new Date('2024-12-31'),
-      estado: 'activo',
-      destinatarios: ['coordinadora@saludapurimac.gob.pe'],
-      formato: 'pdf'
-    },
-    {
-      id: '2',
-      nombre: 'Analisis de Consumo Trimestral',
-      tipo: 'consumo_trimestral',
-      frecuencia: 'trimestral',
-      proximaEjecucion: new Date('2025-01-15'),
-      estado: 'activo',
-      destinatarios: ['admin@saludapurimac.gob.pe'],
-      formato: 'excel'
-    }
-  ]);
-
-  const centrosAcopio = useMemo(() => centrosAcopioReales, [centrosAcopioReales]);
-  const vacunas = useMemo(() => vacunasReales, [vacunasReales]);
-
-  // Filtrar secciones según permisos
-  const filteredSections = useMemo(() => {
-    return REPORTS_SECTIONS.filter(section => canAccessSection('reportes', section.id));
-  }, [canAccessSection]);
-
-  const activeSection = useMemo(() => {
+  const activeSection = useMemo<SectionId>(() => {
     if (currentSubModule === 'programacion-seguimiento-anual') return 'cenares';
-    return currentSubModule || 'inventario';
-  }, [currentSubModule]);
+    const current = accessibleSections.find((section) => section.routeSegment === currentSubModule || section.id === currentSubModule);
+    return current?.id || 'inventario';
+  }, [accessibleSections, currentSubModule]);
 
-  const handleSectionChange = useCallback((sectionId: string) => {
-    const section = REPORTS_SECTIONS.find(s => s.id === sectionId);
-    if (section) {
-      const path = section.path.split('/').pop() || sectionId;
-      navigateToModule('reportes', path);
-    }
-  }, [navigateToModule]);
-
-  const handleFiltrosChange = useCallback((newFiltros: typeof filtrosFechas) => {
-    setFiltrosFechas(newFiltros);
+  const openCreateScheduleModal = useCallback(() => {
+    setScheduleModalReporte(null);
+    setIsScheduleModalOpen(true);
   }, []);
 
-  const handleProgramarReporte = useCallback((reporte: Omit<ReporteProgramado, 'id'>) => {
-    setReportesProgramados(prev => [...prev, { ...reporte, id: Date.now().toString() }]);
-    setShowModalProgramar(false);
+  const openEditScheduleModal = useCallback((reporte: ReporteProgramado) => {
+    setScheduleModalReporte(reporte);
+    setIsScheduleModalOpen(true);
   }, []);
 
-  if (loadingFiltros) {
+  const closeScheduleModal = useCallback(() => {
+    setIsScheduleModalOpen(false);
+    setScheduleModalReporte(null);
+  }, []);
+
+  const handleSaveScheduledReport = useCallback((reporte: Omit<ReporteProgramado, 'id'>, existingId?: string) => {
+    setReportesProgramados((prev) => {
+      if (existingId) {
+        return prev.map((item) => (item.id === existingId ? { ...item, ...reporte } : item));
+      }
+
+      return [...prev, { ...reporte, id: Date.now().toString() }];
+    });
+
+    closeScheduleModal();
+  }, [closeScheduleModal]);
+
+  const handleDeleteScheduledReport = useCallback((id: string) => {
+    setReportesProgramados((prev) => prev.filter((item) => item.id !== id));
+  }, []);
+
+  const handleToggleScheduledReport = useCallback((id: string) => {
+    setReportesProgramados((prev) =>
+      prev.map((item) => (
+        item.id === id
+          ? { ...item, estado: item.estado === 'activo' ? 'inactivo' : 'activo' }
+          : item
+      )),
+    );
+  }, []);
+
+  if (loading) {
     return (
       <main className={COMPONENT_STYLES.pageBackground}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 text-teal-600 animate-spin" />
-            <p className="text-gray-600">Cargando datos...</p>
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="flex flex-col items-center gap-4 rounded-[24px] border border-slate-200 bg-white px-8 py-10 shadow-sm">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-600">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-slate-900">Cargando entorno de reportes</p>
+              <p className="mt-1 text-sm text-slate-500">Preparando filtros y catálogos operativos.</p>
+            </div>
           </div>
         </div>
       </main>
@@ -105,223 +120,73 @@ const Reportes: React.FC = () => {
   }
 
   return (
-    <main className={COMPONENT_STYLES.pageBackground}>
-      {/* Header */}
-      <ReportesHeader>
-        <button
-          onClick={() => setShowModalProgramar(true)}
-          className={COMPONENT_STYLES.button.secondary}
-        >
-          <Clock className="h-4 w-4" />
-          <span className="hidden sm:inline">Programar</span>
-        </button>
-      </ReportesHeader>
-
-      {/* Navigation Tabs */}
-      <ReportesNav
+    <>
+      <ReportsShell
         activeSection={activeSection}
-        onSectionChange={handleSectionChange}
-        sections={filteredSections}
+        sections={visibleSections}
+      >
+        <Routes>
+          <Route path="/" element={<Navigate to="inventario" replace />} />
+          <Route
+            path="inventario"
+            element={(
+              <InventarioTab
+                centrosAcopio={centrosAcopioReales}
+                vacunas={vacunasReales}
+              />
+            )}
+          />
+          <Route
+            path="movimientos"
+            element={(
+              <MovimientosTab
+                centrosAcopio={centrosAcopioReales}
+                filtrosFechas={filtrosFechas}
+                onFiltrosChange={setFiltrosFechas}
+              />
+            )}
+          />
+          <Route
+            path="planificacion"
+            element={(
+              <PlanificacionTab
+                centrosAcopio={centrosAcopioReales}
+                vacunas={vacunasReales}
+              />
+            )}
+          />
+          <Route
+            path="programacion-seguimiento-anual"
+            element={(
+              <CenaresTab
+                centrosAcopio={centrosAcopioReales}
+                vacunas={vacunasReales}
+              />
+            )}
+          />
+          <Route
+            path="configuracion"
+            element={(
+              <ConfiguracionTab
+                reportesProgramados={reportesProgramados}
+                onOpenCreate={openCreateScheduleModal}
+                onOpenEdit={openEditScheduleModal}
+                onDelete={handleDeleteScheduledReport}
+                onToggleEstado={handleToggleScheduledReport}
+              />
+            )}
+          />
+          <Route path="*" element={<Navigate to={visibleSections[0]?.routeSegment || 'inventario'} replace />} />
+        </Routes>
+      </ReportsShell>
+
+      <ReportScheduleModal
+        isOpen={isScheduleModalOpen}
+        onClose={closeScheduleModal}
+        onSubmit={handleSaveScheduledReport}
+        reporte={scheduleModalReporte}
       />
-
-      {/* Content */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <Routes>
-            <Route path="/" element={<Navigate to="inventario" replace />} />
-            <Route
-              path="inventario"
-              element={
-                <InventarioTab
-                  centrosAcopio={centrosAcopio}
-                  vacunas={vacunas}
-                />
-              }
-            />
-            <Route
-              path="movimientos"
-              element={
-                <MovimientosTab
-                  centrosAcopio={centrosAcopio}
-                  filtrosFechas={filtrosFechas}
-                  onFiltrosChange={handleFiltrosChange}
-                />
-              }
-            />
-            <Route
-              path="planificacion"
-              element={
-                <PlanificacionTab
-                  centrosAcopio={centrosAcopio}
-                  vacunas={vacunas}
-                />
-              }
-            />
-            <Route
-              path="programacion-seguimiento-anual"
-              element={
-                <CenaresTab
-                  centrosAcopio={centrosAcopio}
-                  vacunas={vacunas}
-                />
-              }
-            />
-            <Route
-              path="configuracion"
-              element={
-                <ConfiguracionTab
-                  reportesProgramados={reportesProgramados}
-                  onReportesProgramadosChange={setReportesProgramados}
-                />
-              }
-            />
-          </Routes>
-        </div>
-      </div>
-
-      {/* Modal Programar Reporte */}
-      {showModalProgramar && (
-        <ProgramarReporteModal
-          onClose={() => setShowModalProgramar(false)}
-          onProgramar={handleProgramarReporte}
-        />
-      )}
-    </main>
-  );
-};
-
-// Modal Programar Reporte (inline simplificado)
-interface ProgramarReporteModalProps {
-  onClose: () => void;
-  onProgramar: (reporte: Omit<ReporteProgramado, 'id'>) => void;
-}
-
-const ProgramarReporteModal: React.FC<ProgramarReporteModalProps> = ({
-  onClose,
-  onProgramar,
-}) => {
-  const [formData, setFormData] = useState({
-    nombre: '',
-    tipo: 'inventario',
-    frecuencia: 'mensual',
-    destinatarios: '',
-    formato: 'pdf',
-    estado: 'activo'
-  });
-
-  const tiposReporte = [
-    { id: 'inventario', nombre: 'Inventario' },
-    { id: 'movimientos', nombre: 'Movimientos' },
-    { id: 'planificacion', nombre: 'Planificacion' },
-  ];
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const proximaEjecucion = new Date();
-    proximaEjecucion.setDate(proximaEjecucion.getDate() + 30);
-
-    onProgramar({
-      ...formData,
-      proximaEjecucion,
-      destinatarios: formData.destinatarios.split(',').map(email => email.trim())
-    });
-  };
-
-  return (
-    <div className={COMPONENT_STYLES.modal.overlay}>
-      <div className={COMPONENT_STYLES.modal.container}>
-        <div className={COMPONENT_STYLES.modal.header}>
-          <h2 className="text-lg font-semibold text-gray-900">
-            Programar Reporte Automatico
-          </h2>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className={COMPONENT_STYLES.modal.body}>
-            <div className="space-y-4">
-              <div>
-                <label className={COMPONENT_STYLES.input.label}>Nombre del Reporte</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.nombre}
-                  onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                  className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
-                  placeholder="Ej: Reporte Mensual de Stock"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={COMPONENT_STYLES.input.label}>Tipo de Reporte</label>
-                  <select
-                    value={formData.tipo}
-                    onChange={(e) => setFormData({...formData, tipo: e.target.value})}
-                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-                  >
-                    {tiposReporte.map((tipo) => (
-                      <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className={COMPONENT_STYLES.input.label}>Frecuencia</label>
-                  <select
-                    value={formData.frecuencia}
-                    onChange={(e) => setFormData({...formData, frecuencia: e.target.value})}
-                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-                  >
-                    <option value="semanal">Semanal</option>
-                    <option value="mensual">Mensual</option>
-                    <option value="trimestral">Trimestral</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className={COMPONENT_STYLES.input.label}>Destinatarios (separados por comas)</label>
-                <textarea
-                  required
-                  value={formData.destinatarios}
-                  onChange={(e) => setFormData({...formData, destinatarios: e.target.value})}
-                  className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
-                  rows={2}
-                  placeholder="coordinadora@saludapurimac.gob.pe"
-                />
-              </div>
-
-              <div>
-                <label className={COMPONENT_STYLES.input.label}>Formato</label>
-                <select
-                  value={formData.formato}
-                  onChange={(e) => setFormData({...formData, formato: e.target.value})}
-                  className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-                >
-                  <option value="pdf">PDF</option>
-                  <option value="excel">Excel</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className={COMPONENT_STYLES.modal.footer}>
-            <button
-              type="button"
-              onClick={onClose}
-              className={COMPONENT_STYLES.button.secondary}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className={COMPONENT_STYLES.button.primary}
-            >
-              Programar
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    </>
   );
 };
 

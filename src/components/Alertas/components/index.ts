@@ -6,3 +6,6 @@ export { AlertasList } from './AlertasList';
 export { NuevaAlertaModal } from './NuevaAlertaModal';
 export { EmptyState } from './EmptyState';
 export { LoadingSpinner } from './LoadingSpinner';
+export { default as AlertsShell } from './AlertsShell';
+export { default as AlertActionDialog } from './AlertActionDialog';
+export * from './AlertPrimitives';

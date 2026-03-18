@@ -1,7 +1,7 @@
 import React, { memo, useCallback } from 'react';
 import { Eye, EyeOff, Trash2 } from 'lucide-react';
 import { Alerta } from '../../../types';
-import { TIPOS_ALERTA, NIVELES_ALERTA } from '../constants';
+import { NIVELES_ALERTA, TIPOS_ALERTA } from '../constants';
 
 interface AlertaCardProps {
   alerta: Alerta;
@@ -12,12 +12,8 @@ interface AlertaCardProps {
   onEliminar: (id: string) => void;
 }
 
-const formatearFecha = (fecha: Date | string): string => {
-  if (!fecha) return 'Fecha no disponible';
-
+const formatearFecha = (fecha: Date | string) => {
   const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
-  if (isNaN(fechaObj.getTime())) return 'Fecha invalida';
-
   const ahora = new Date();
   const diferencia = ahora.getTime() - fechaObj.getTime();
   const minutos = Math.floor(diferencia / (1000 * 60));
@@ -28,8 +24,7 @@ const formatearFecha = (fecha: Date | string): string => {
   if (minutos < 60) return `Hace ${minutos} min`;
   if (horas < 24) return `Hace ${horas}h`;
   if (dias < 7) return `Hace ${dias}d`;
-
-  return fechaObj.toLocaleDateString();
+  return fechaObj.toLocaleDateString('es-PE');
 };
 
 export const AlertaCard: React.FC<AlertaCardProps> = memo(({
@@ -40,10 +35,8 @@ export const AlertaCard: React.FC<AlertaCardProps> = memo(({
   onMarcarNoLeida,
   onEliminar,
 }) => {
-  const tipoInfo = TIPOS_ALERTA.find(t => t.id === alerta.tipo);
-  const nivelInfo = NIVELES_ALERTA.find(n => n.id === alerta.nivel);
-
-  const IconoTipo = tipoInfo?.icon || TIPOS_ALERTA[3].icon;
+  const tipoInfo = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo);
+  const nivelInfo = NIVELES_ALERTA.find((nivel) => nivel.id === alerta.nivel);
   const IconoNivel = nivelInfo?.icon || NIVELES_ALERTA[2].icon;
 
   const handleToggle = useCallback(() => onToggleSelect(alerta.id), [alerta.id, onToggleSelect]);
@@ -52,84 +45,59 @@ export const AlertaCard: React.FC<AlertaCardProps> = memo(({
   const handleEliminar = useCallback(() => onEliminar(alerta.id), [alerta.id, onEliminar]);
 
   return (
-    <div
-      className={`p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-        !alerta.leida ? 'bg-teal-50/50' : ''
-      } ${isSelected ? 'bg-teal-100/50' : ''}`}
-    >
+    <article className={`rounded-[20px] border p-4 ${isSelected ? 'border-teal-300 bg-teal-50/70' : !alerta.leida ? 'border-teal-200 bg-white' : 'border-slate-200 bg-white'}`}>
       <div className="flex items-start gap-3">
         <input
           type="checkbox"
           checked={isSelected}
           onChange={handleToggle}
-          className="mt-1 h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+          className="mt-1 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
           aria-label={`Seleccionar alerta: ${alerta.titulo}`}
         />
 
-        <div className={`p-2 ${nivelInfo?.bgColor || 'bg-gray-100'} rounded-lg flex-shrink-0`}>
-          <IconoNivel className={`h-4 w-4 ${nivelInfo?.color || 'text-gray-600'}`} />
+        <div className={`mt-0.5 rounded-xl p-2 ${nivelInfo?.bgColor || 'bg-slate-100'}`}>
+          <IconoNivel className={`h-4 w-4 ${nivelInfo?.color || 'text-slate-500'}`} />
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h4 className={`text-sm font-medium truncate ${!alerta.leida ? 'text-gray-900' : 'text-gray-700'}`}>
-                  {alerta.titulo}
-                </h4>
-                {!alerta.leida && (
-                  <span className="w-2 h-2 bg-teal-500 rounded-full flex-shrink-0" />
-                )}
-              </div>
-              <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">
-                {alerta.descripcion}
-              </p>
-              <div className="flex items-center gap-3 mt-2">
-                <div className="flex items-center gap-1">
-                  <IconoTipo className={`h-3 w-3 ${tipoInfo?.color || 'text-gray-500'}`} />
-                  <span className="text-xs text-gray-500 capitalize">
-                    {alerta.tipo.replace('_', ' ')}
-                  </span>
-                </div>
-                <span className="text-xs text-gray-400">
-                  {formatearFecha(alerta.fechaCreacion)}
-                </span>
-              </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-slate-950">{alerta.titulo}</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">{alerta.descripcion}</p>
             </div>
+            <span className="text-xs font-medium text-slate-500">{formatearFecha(alerta.fechaCreacion)}</span>
+          </div>
 
-            <div className="flex items-center gap-1 flex-shrink-0">
-              {alerta.leida ? (
-                <button
-                  onClick={handleMarcarNoLeida}
-                  className="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
-                  title="Marcar como no leida"
-                  aria-label="Marcar como no leida"
-                >
-                  <EyeOff className="h-4 w-4" />
-                </button>
-              ) : (
-                <button
-                  onClick={handleMarcarLeida}
-                  className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                  title="Marcar como leida"
-                  aria-label="Marcar como leida"
-                >
-                  <Eye className="h-4 w-4" />
-                </button>
-              )}
-              <button
-                onClick={handleEliminar}
-                className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                title="Eliminar alerta"
-                aria-label="Eliminar alerta"
-              >
-                <Trash2 className="h-4 w-4" />
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${tipoInfo?.bgColor || 'bg-slate-100'} ${tipoInfo?.color || 'text-slate-700'}`}>
+              {tipoInfo?.label || alerta.tipo}
+            </span>
+            <span className={alerta.leida ? 'inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700' : 'inline-flex items-center rounded-full bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-700'}>
+              {alerta.leida ? 'Leída' : 'Pendiente'}
+            </span>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {alerta.leida ? (
+              <button type="button" onClick={handleMarcarNoLeida} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                <EyeOff className="h-4 w-4" />
+                Marcar no leída
               </button>
-            </div>
+            ) : (
+              <button type="button" onClick={handleMarcarLeida} className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100">
+                <Eye className="h-4 w-4" />
+                Marcar leída
+              </button>
+            )}
+
+            <button type="button" onClick={handleEliminar} className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">
+              <Trash2 className="h-4 w-4" />
+              Eliminar
+            </button>
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 });
 
