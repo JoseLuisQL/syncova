@@ -1,21 +1,35 @@
-import React, { useState, useCallback, useMemo, memo } from 'react';
-import { Network, GitBranch, Plus } from 'lucide-react';
-import { Red, CreateRedDto, UpdateRedDto } from '../../types';
-import { useRedes } from '../../hooks/useRedes';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GitBranch, Network, Plus, RefreshCw } from 'lucide-react';
+import { CreateRedDto, Red, UpdateRedDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
-import { validateRed, sanitizeInput } from '../../utils/validation';
+import { useRedes } from '../../hooks/useRedes';
+import { sanitizeInput, validateRed } from '../../utils/validation';
+import { ColorScheme, COMPONENT_STYLES, STATS_CONFIG } from '../Establecimientos/constants';
 import {
-  PageHeader,
-  StatsGrid,
-  StatusBadge,
+  ActionButtons,
   CountBadge,
   EmptyState,
   ErrorAlert,
-  ActionButtons,
-} from '../Establecimientos/components/SharedComponents';
-import { FilterBar, Pagination, DataTable, TableHeader } from '../Establecimientos/components/FilterAndTable';
-import { Modal, ModalFooter, TextInput, TextArea, SelectInput, DeleteConfirmModal } from '../Establecimientos/components/ModalComponents';
-import { COMPONENT_STYLES, ColorScheme } from '../Establecimientos/constants';
+  StatsGrid,
+  StatusBadge,
+} from '../Establecimientos/components';
+import {
+  DataTable,
+  FilterBar,
+  Pagination,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from '../Establecimientos/components';
+import {
+  DeleteConfirmModal,
+  FormSection,
+  Modal,
+  ModalFooter,
+  SelectInput,
+  TextArea,
+  TextInput,
+} from '../Establecimientos/components';
 
 interface RedesProps {
   onNavigateToMicroredes?: (redId: string, redNombre: string) => void;
@@ -23,17 +37,17 @@ interface RedesProps {
 
 const TABLE_COLUMNS = [
   { key: 'red', label: 'Red' },
-  { key: 'codigo', label: 'Codigo' },
-  { key: 'descripcion', label: 'Descripcion' },
-  { key: 'microredes', label: 'Microredes' },
-  { key: 'estado', label: 'Estado' },
+  { key: 'codigo', label: 'Código' },
+  { key: 'descripcion', label: 'Descripción' },
+  { key: 'microredes', label: 'Microredes', align: 'center' as const },
+  { key: 'estado', label: 'Estado', align: 'center' as const },
   { key: 'acciones', label: 'Acciones', align: 'right' as const },
 ];
 
 const ESTADO_OPTIONS = [
-  { value: 'todos', label: 'Todos' },
-  { value: 'activo', label: 'Activos' },
-  { value: 'inactivo', label: 'Inactivos' },
+  { value: 'todos', label: 'Todos los estados' },
+  { value: 'activo', label: 'Activo' },
+  { value: 'inactivo', label: 'Inactivo' },
 ];
 
 const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
@@ -46,6 +60,7 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
     redId: string;
     redNombre: string;
   }>({ isOpen: false, redId: '', redNombre: '' });
+  const filterInitRef = useRef(false);
 
   const {
     redes,
@@ -56,6 +71,7 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
     totalPages,
     filters,
     setFilters,
+    fetchRedes,
     createRed,
     updateRed,
     deleteRed,
@@ -63,26 +79,56 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
 
   const { toast } = useToastContext();
 
-  // Debounced filter application
-  React.useEffect(() => {
-    if (!redes.length && !searchTerm && filterEstado === 'todos') return;
+  useEffect(() => {
+    if (!filterInitRef.current) {
+      filterInitRef.current = true;
+      return;
+    }
 
-    const timeoutId = setTimeout(() => {
-      const newFilters: Record<string, string> = {};
-      if (filterEstado !== 'todos') newFilters.estado = filterEstado;
-      if (searchTerm.trim()) newFilters.search = searchTerm.trim();
-      setFilters(newFilters);
-    }, 500);
+    const timeoutId = window.setTimeout(() => {
+      const nextFilters: Record<string, string> = {};
+      if (filterEstado !== 'todos') nextFilters.estado = filterEstado;
+      if (searchTerm.trim()) nextFilters.search = searchTerm.trim();
+      setFilters(nextFilters);
+    }, 320);
 
-    return () => clearTimeout(timeoutId);
-  }, [filterEstado, searchTerm]);
+    return () => window.clearTimeout(timeoutId);
+  }, [filterEstado, searchTerm, setFilters]);
 
-  const stats = useMemo(() => [
-    { key: 'total', label: 'Total Redes', value: total, icon: Network, color: 'primary' as ColorScheme },
-    { key: 'activas', label: 'Activas', value: redes.filter(r => r.estado === 'activo').length, icon: Network, color: 'success' as ColorScheme },
-    { key: 'conMicroredes', label: 'Con Microredes', value: redes.filter(r => (r._count?.microredes || 0) > 0).length, icon: GitBranch, color: 'warning' as ColorScheme },
-    { key: 'inactivas', label: 'Inactivas', value: redes.filter(r => r.estado === 'inactivo').length, icon: Network, color: 'danger' as ColorScheme },
-  ], [redes, total]);
+  const stats = useMemo(
+    () => [
+      { ...STATS_CONFIG.redes[0], value: total, color: STATS_CONFIG.redes[0].color as ColorScheme },
+      {
+        ...STATS_CONFIG.redes[1],
+        value: redes.filter((red) => red.estado === 'activo').length,
+        color: STATS_CONFIG.redes[1].color as ColorScheme,
+      },
+      {
+        ...STATS_CONFIG.redes[2],
+        value: redes.filter((red) => (red._count?.microredes || 0) > 0).length,
+        color: STATS_CONFIG.redes[2].color as ColorScheme,
+      },
+      {
+        ...STATS_CONFIG.redes[3],
+        value: redes.filter((red) => red.estado === 'inactivo').length,
+        color: STATS_CONFIG.redes[3].color as ColorScheme,
+      },
+    ],
+    [redes, total],
+  );
+
+  const filtersConfig = useMemo(
+    () => [
+      {
+        id: 'estado-red',
+        label: 'Estado',
+        value: filterEstado,
+        options: ESTADO_OPTIONS,
+        onChange: setFilterEstado,
+      },
+    ],
+    [filterEstado],
+  );
 
   const handleOpenModal = useCallback((red?: Red) => {
     setEditingRed(red || null);
@@ -94,122 +140,170 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
     setEditingRed(null);
   }, []);
 
-  const handleDelete = useCallback((id: string, nombre: string) => {
-    setDeleteConfirmation({ isOpen: true, redId: id, redNombre: nombre });
+  const handleSubmit = useCallback(
+    async (formData: CreateRedDto | UpdateRedDto) => {
+      if (editingRed) {
+        const result = await updateRed(editingRed.id, formData as UpdateRedDto);
+        if (!result) {
+          toast.error('No se pudo actualizar la red', 'Revise los datos e intente nuevamente.');
+          return;
+        }
+
+        toast.success('Red actualizada', 'Los cambios se guardaron correctamente.');
+      } else {
+        const result = await createRed(formData as CreateRedDto);
+        if (!result) {
+          toast.error('No se pudo crear la red', 'Revise los datos e intente nuevamente.');
+          return;
+        }
+
+        toast.success('Red creada', 'La red se registró correctamente.');
+      }
+
+      handleCloseModal();
+    },
+    [createRed, editingRed, handleCloseModal, toast, updateRed],
+  );
+
+  const handleDelete = useCallback((red: Red) => {
+    setDeleteConfirmation({ isOpen: true, redId: red.id, redNombre: red.nombre });
   }, []);
 
   const confirmDelete = useCallback(async () => {
     const success = await deleteRed(deleteConfirmation.redId);
-    if (success) {
-      toast.success('Red eliminada', `"${deleteConfirmation.redNombre}" ha sido eliminada.`);
-    } else {
-      toast.error('Error al eliminar', 'Verifique que no tenga microredes asociadas.');
+
+    if (!success) {
+      toast.error('No se pudo eliminar la red', 'Verifique que no tenga microredes asociadas.');
+      return;
     }
+
+    toast.success('Red eliminada', `"${deleteConfirmation.redNombre}" fue eliminada.`);
     setDeleteConfirmation({ isOpen: false, redId: '', redNombre: '' });
-  }, [deleteConfirmation, deleteRed, toast]);
+  }, [deleteConfirmation.redId, deleteConfirmation.redNombre, deleteRed, toast]);
 
-  const handleSubmit = useCallback(async (formData: CreateRedDto | UpdateRedDto) => {
-    if (editingRed) {
-      const success = await updateRed(editingRed.id, formData as UpdateRedDto);
-      if (success) {
-        toast.success('Red actualizada', 'Los cambios se guardaron correctamente.');
-        handleCloseModal();
-      } else {
-        toast.error('Error al actualizar', 'No se pudieron guardar los cambios.');
-      }
-    } else {
-      const success = await createRed(formData as CreateRedDto);
-      if (success) {
-        toast.success('Red creada', 'La nueva red se registro correctamente.');
-        handleCloseModal();
-      } else {
-        toast.error('Error al crear', 'No se pudo crear la red.');
-      }
-    }
-  }, [editingRed, updateRed, createRed, toast, handleCloseModal]);
+  const handleClearFilters = useCallback(() => {
+    setSearchTerm('');
+    setFilterEstado('todos');
+    setFilters({});
+  }, [setFilters]);
 
-  const changePage = useCallback((page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     setFilters({ ...filters, page });
   }, [filters, setFilters]);
 
-  const filterConfigs = useMemo(() => [
-    { id: 'estado', label: 'Estado', value: filterEstado, options: ESTADO_OPTIONS, onChange: setFilterEstado },
-  ], [filterEstado]);
+  const desktopTable = (
+    <DataTable
+      isLoading={loading}
+      loadingMessage="Cargando redes..."
+      skeletonRows={5}
+      skeletonColumns={TABLE_COLUMNS.length}
+      loadingVariant="table"
+    >
+      <table className="min-w-full divide-y divide-slate-200">
+        <TableHeader columns={TABLE_COLUMNS} />
+        <tbody className="divide-y divide-slate-100">
+          {redes.length === 0 ? (
+            <tr>
+              <td colSpan={TABLE_COLUMNS.length}>
+                <EmptyState
+                  icon={Network}
+                  title="No se encontraron redes"
+                  description="Ajuste los filtros o registre una nueva red."
+                  action={{ label: 'Nueva red', onClick: () => handleOpenModal() }}
+                />
+              </td>
+            </tr>
+          ) : (
+            redes.map((red) => (
+              <RedDesktopRow
+                key={red.id}
+                red={red}
+                onEdit={() => handleOpenModal(red)}
+                onDelete={() => handleDelete(red)}
+                onNavigate={onNavigateToMicroredes}
+                isLoading={loading}
+              />
+            ))
+          )}
+        </tbody>
+      </table>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        total={total}
+        limit={filters.limit || 10}
+        onPageChange={handlePageChange}
+      />
+    </DataTable>
+  );
 
   return (
-    <div className="p-5 sm:p-6">
-      {error && <ErrorAlert message={error} />}
+    <div className="space-y-4">
+      {error ? <ErrorAlert message={error} onRetry={() => void fetchRedes()} /> : null}
 
-      <PageHeader
-        title="Redes de Salud"
-        subtitle="Gestion de redes organizacionales"
-        icon={Network}
-        count={total}
-        action={{
-          label: 'Nueva Red',
-          onClick: () => handleOpenModal(),
-          icon: Plus,
-          isLoading: loading,
-        }}
-      />
+      <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+        <div className="space-y-4">
+          <StatsGrid stats={stats} isLoading={loading} />
 
-      <StatsGrid stats={stats} />
-
-      <div className="space-y-5">
-        <FilterBar
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Buscar por nombre, codigo o descripcion..."
-          filters={filterConfigs}
-        />
-
-        <DataTable isLoading={loading} loadingMessage="Cargando redes...">
-          <table className="min-w-full divide-y divide-gray-200">
-            <TableHeader columns={TABLE_COLUMNS} />
-            <tbody className="divide-y divide-gray-100">
-              {redes.length === 0 && !loading ? (
-                <tr>
-                  <td colSpan={6}>
-                    <EmptyState
-                      icon={Network}
-                      title="No se encontraron redes"
-                      description="Intente ajustar los filtros o cree una nueva"
-                    />
-                  </td>
-                </tr>
-              ) : (
-                redes.map((red) => (
-                  <RedRow
-                    key={red.id}
-                    red={red}
-                    onEdit={() => handleOpenModal(red)}
-                    onDelete={() => handleDelete(red.id, red.nombre)}
-                    onNavigate={onNavigateToMicroredes}
-                    isLoading={loading}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
-
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            total={total}
-            limit={filters.limit || 10}
-            onPageChange={changePage}
+          <FilterBar
+            searchValue={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchPlaceholder="Buscar por nombre, código o descripción"
+            filters={filtersConfig}
+            onClear={handleClearFilters}
+            actions={
+              <>
+                <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={() => void fetchRedes()} disabled={loading}>
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Actualizar</span>
+                </button>
+                <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={loading}>
+                  <Plus className="h-4 w-4" />
+                  <span>Nueva red</span>
+                </button>
+              </>
+            }
           />
-        </DataTable>
-      </div>
 
-      {showModal && (
+          <div className="hidden lg:block">{desktopTable}</div>
+
+          <div className="space-y-3 lg:hidden">
+            {loading ? (
+              <DataTable isLoading loadingMessage="Cargando redes..." skeletonRows={4} loadingVariant="cards" />
+            ) : redes.length === 0 ? (
+              <div className={COMPONENT_STYLES.panel}>
+                <EmptyState
+                  icon={Network}
+                  title="No se encontraron redes"
+                  description="Ajuste los filtros o registre una nueva red."
+                  action={{ label: 'Nueva red', onClick: () => handleOpenModal() }}
+                />
+              </div>
+            ) : (
+              redes.map((red) => (
+                <RedMobileCard
+                  key={red.id}
+                  red={red}
+                  onEdit={() => handleOpenModal(red)}
+                  onDelete={() => handleDelete(red)}
+                  onNavigate={onNavigateToMicroredes}
+                  isLoading={loading}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {showModal ? (
         <RedModal
           red={editingRed}
           onClose={handleCloseModal}
           onSubmit={handleSubmit}
           isLoading={loading}
         />
-      )}
+      ) : null}
 
       <DeleteConfirmModal
         isOpen={deleteConfirmation.isOpen}
@@ -224,10 +318,6 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
   );
 };
 
-// ============================================================================
-// TABLE ROW COMPONENT
-// ============================================================================
-
 interface RedRowProps {
   red: Red;
   onEdit: () => void;
@@ -236,7 +326,7 @@ interface RedRowProps {
   isLoading?: boolean;
 }
 
-const RedRow: React.FC<RedRowProps> = memo(({
+const RedDesktopRow: React.FC<RedRowProps> = memo(({
   red,
   onEdit,
   onDelete,
@@ -244,64 +334,118 @@ const RedRow: React.FC<RedRowProps> = memo(({
   isLoading = false,
 }) => {
   const microredesCount = red._count?.microredes || 0;
-  const canDelete = microredesCount === 0;
 
   return (
-    <tr className={COMPONENT_STYLES.table.row}>
-      <td className={COMPONENT_STYLES.table.cell}>
+    <TableRow>
+      <TableCell>
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 border border-teal-200 flex items-center justify-center flex-shrink-0">
-            <Network className="h-5 w-5 text-teal-600" aria-hidden="true" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+            <Network className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{red.nombre}</p>
-            <p className="text-xs text-gray-500 font-medium">{red.codigo || 'Sin codigo'}</p>
+            <p className="truncate text-sm font-semibold text-slate-900">{red.nombre}</p>
+            <p className="text-xs text-slate-500">{red.codigo || 'Sin código registrado'}</p>
           </div>
         </div>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <span className="text-sm text-gray-900">{red.codigo || '-'}</span>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <p className="text-sm text-gray-600 max-w-xs truncate">
-          {red.descripcion || 'Sin descripcion'}
-        </p>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
+      </TableCell>
+      <TableCell>
+        <span className="text-sm font-medium text-slate-900">{red.codigo || '-'}</span>
+      </TableCell>
+      <TableCell>
+        <p className="max-w-sm text-sm text-slate-600">{red.descripcion || 'Sin descripción registrada.'}</p>
+      </TableCell>
+      <TableCell align="center">
         <CountBadge count={microredesCount} icon={GitBranch} />
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <StatusBadge status={red.estado as 'activo' | 'inactivo'} />
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <div className="flex items-center justify-end gap-1">
-          {onNavigate && microredesCount > 0 && (
+      </TableCell>
+      <TableCell align="center">
+        <StatusBadge status={red.estado} />
+      </TableCell>
+      <TableCell align="right">
+        <div className="flex items-center justify-end gap-2">
+          {onNavigate && microredesCount > 0 ? (
             <button
+              type="button"
               onClick={() => onNavigate(red.id, red.nombre)}
-              className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconView}`}
+              className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconNavigate}`}
               title="Ver microredes"
+              aria-label={`Ver microredes de ${red.nombre}`}
             >
-              <GitBranch className="h-4 w-4" />
+              <GitBranch className="h-4 w-4" aria-hidden="true" />
             </button>
-          )}
+          ) : null}
           <ActionButtons
             onEdit={onEdit}
             onDelete={onDelete}
             isLoading={isLoading}
-            canDelete={canDelete}
-            deleteTooltip="No se puede eliminar: tiene microredes asociadas"
+            canDelete={microredesCount === 0}
+            deleteTooltip="No se puede eliminar: tiene microredes asociadas."
           />
         </div>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 });
 
-RedRow.displayName = 'RedRow';
+RedDesktopRow.displayName = 'RedDesktopRow';
 
-// ============================================================================
-// MODAL COMPONENT
-// ============================================================================
+const RedMobileCard: React.FC<RedRowProps> = memo(({
+  red,
+  onEdit,
+  onDelete,
+  onNavigate,
+  isLoading = false,
+}) => {
+  const microredesCount = red._count?.microredes || 0;
+
+  return (
+    <article className={`${COMPONENT_STYLES.panel} p-4`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-base font-semibold text-slate-950">{red.nombre}</p>
+          <p className="mt-1 text-sm text-slate-500">{red.codigo || 'Sin código'}</p>
+        </div>
+        <StatusBadge status={red.estado} />
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Microredes</p>
+          <p className="mt-2 text-lg font-semibold text-slate-900">{microredesCount}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Código</p>
+          <p className="mt-2 text-sm font-medium text-slate-900">{red.codigo || '-'}</p>
+        </div>
+      </div>
+
+      <p className="mt-3 text-sm text-slate-600">{red.descripcion || 'Sin descripción registrada.'}</p>
+
+      <div className="mt-4 flex items-center justify-between gap-3">
+        {onNavigate && microredesCount > 0 ? (
+          <button
+            type="button"
+            className={COMPONENT_STYLES.button.secondary}
+            onClick={() => onNavigate(red.id, red.nombre)}
+          >
+            <GitBranch className="h-4 w-4" />
+            <span>Ver microredes</span>
+          </button>
+        ) : (
+          <div />
+        )}
+        <ActionButtons
+          onEdit={onEdit}
+          onDelete={onDelete}
+          isLoading={isLoading}
+          canDelete={microredesCount === 0}
+          deleteTooltip="No se puede eliminar: tiene microredes asociadas."
+        />
+      </div>
+    </article>
+  );
+});
+
+RedMobileCard.displayName = 'RedMobileCard';
 
 interface RedModalProps {
   red: Red | null;
@@ -310,118 +454,102 @@ interface RedModalProps {
   isLoading?: boolean;
 }
 
-const RedModal: React.FC<RedModalProps> = ({
-  red,
-  onClose,
-  onSubmit,
-  isLoading = false,
-}) => {
+const RedModal: React.FC<RedModalProps> = ({ red, onClose, onSubmit, isLoading = false }) => {
   const [formData, setFormData] = useState({
     nombre: red?.nombre || '',
     codigo: red?.codigo || '',
     descripcion: red?.descripcion || '',
-    ...(red && { estado: red.estado }),
+    estado: red?.estado || 'activo',
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateForm = useCallback(() => {
+  const handleFieldChange = useCallback((field: keyof typeof formData, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: '' }));
+  }, []);
+
+  const handleSubmit = useCallback(async () => {
     const sanitizedData = {
       nombre: sanitizeInput(formData.nombre),
       codigo: formData.codigo ? sanitizeInput(formData.codigo) : '',
       descripcion: formData.descripcion ? sanitizeInput(formData.descripcion) : '',
-      ...(red && { estado: formData.estado }),
+      ...(red ? { estado: formData.estado as 'activo' | 'inactivo' } : {}),
     };
 
     const validation = validateRed(sanitizedData);
-    setErrors(validation.errors);
-
-    if (validation.isValid) {
-      setFormData(prev => ({
-        ...prev,
-        nombre: sanitizedData.nombre,
-        codigo: sanitizedData.codigo,
-        descripcion: sanitizedData.descripcion,
-      }));
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      return;
     }
 
-    return validation.isValid;
-  }, [formData, red]);
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    const submitData = { ...formData };
-    if (!red) delete (submitData as any).estado;
-    await onSubmit(submitData);
-  }, [formData, red, validateForm, onSubmit]);
-
-  const handleFieldChange = useCallback((field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
-  }, [errors]);
+    await onSubmit(sanitizedData);
+  }, [formData, onSubmit, red]);
 
   return (
     <Modal
-      isOpen={true}
+      isOpen
       onClose={onClose}
-      title={red ? 'Editar Red' : 'Nueva Red'}
-      subtitle={red ? 'Actualizar informacion' : 'Registrar nueva red de salud'}
+      title={red ? 'Editar red' : 'Nueva red'}
+      subtitle={red ? 'Ajusta la información base de la red sin perder contexto.' : 'Registra una nueva red dentro de la estructura territorial.'}
       icon={Network}
       footer={
         <ModalFooter
           onCancel={onClose}
-          submitLabel={red ? 'Actualizar' : 'Crear'}
+          onSubmit={handleSubmit}
+          submitType="button"
+          submitLabel={red ? 'Guardar cambios' : 'Crear red'}
           isLoading={isLoading}
         />
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <TextInput
-            id="nombre"
-            label="Nombre"
-            value={formData.nombre}
-            onChange={(v) => handleFieldChange('nombre', v)}
-            required
-            error={errors.nombre}
-          />
-          <TextInput
-            id="codigo"
-            label="Codigo"
-            value={formData.codigo}
-            onChange={(v) => handleFieldChange('codigo', v)}
-            placeholder="Opcional"
-            error={errors.codigo}
-          />
-          {red && (
-            <SelectInput
-              id="estado"
-              label="Estado"
-              value={formData.estado || 'activo'}
-              onChange={(v) => handleFieldChange('estado', v)}
-              options={[
-                { value: 'activo', label: 'Activo' },
-                { value: 'inactivo', label: 'Inactivo' },
-              ]}
+      <div className="space-y-4">
+        <FormSection title="Identificación" description="Datos visibles para reconocer rápidamente la red en listados y filtros.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextInput
+              id="red-nombre"
+              label="Nombre"
+              value={formData.nombre}
+              onChange={(value) => handleFieldChange('nombre', value)}
+              placeholder="Ej: José María Arguedas"
+              required
+              error={errors.nombre}
             />
-          )}
-        </div>
+            <TextInput
+              id="red-codigo"
+              label="Código"
+              value={formData.codigo}
+              onChange={(value) => handleFieldChange('codigo', value)}
+              placeholder="Opcional"
+              error={errors.codigo}
+              helpText="Se usa para referencias breves dentro del sistema."
+            />
+            {red ? (
+              <SelectInput
+                id="red-estado"
+                label="Estado"
+                value={formData.estado}
+                onChange={(value) => handleFieldChange('estado', value)}
+                options={[
+                  { value: 'activo', label: 'Activo' },
+                  { value: 'inactivo', label: 'Inactivo' },
+                ]}
+              />
+            ) : null}
+          </div>
 
-        <TextArea
-          id="descripcion"
-          label="Descripcion"
-          value={formData.descripcion}
-          onChange={(v) => handleFieldChange('descripcion', v)}
-          placeholder="Descripcion opcional de la red"
-          error={errors.descripcion}
-        />
-
-        <button type="submit" className="hidden" />
-      </form>
+          <TextArea
+            id="red-descripcion"
+            label="Descripción"
+            value={formData.descripcion}
+            onChange={(value) => handleFieldChange('descripcion', value)}
+            placeholder="Describe el ámbito o la finalidad de la red."
+            error={errors.descripcion}
+            rows={4}
+          />
+        </FormSection>
+      </div>
     </Modal>
   );
 };
 
-export default Redes;
+export default memo(Redes);

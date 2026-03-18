@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Loader2 } from 'lucide-react';
-import { Red, Microred, CentroAcopio } from '../../types';
-import { useRedes } from '../../hooks/useRedes';
-import { useMicroredes } from '../../hooks/useMicroredes';
+import React, { useEffect, useMemo, useState } from 'react';
+import { GitBranch, Loader2, LucideIcon, MapPin, Network, Warehouse } from 'lucide-react';
 import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
+import { useMicroredes } from '../../hooks/useMicroredes';
+import { useRedes } from '../../hooks/useRedes';
+import { CentroAcopio, Microred } from '../../types';
+import { COMPONENT_STYLES } from '../Establecimientos/constants';
 import { logger } from '../../utils/debug';
 
 interface CascadingSelectorProps {
@@ -33,6 +34,8 @@ interface CascadingSelectorProps {
   };
 }
 
+const selectorCardBase = 'rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm transition';
+
 const CascadingSelector: React.FC<CascadingSelectorProps> = ({
   selectedRedId = '',
   selectedMicroredId = '',
@@ -45,77 +48,58 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
   showCentroAcopio = true,
   required = {},
   disabled = {},
-  errors = {}
+  errors = {},
 }) => {
   const [localRedId, setLocalRedId] = useState(selectedRedId);
   const [localMicroredId, setLocalMicroredId] = useState(selectedMicroredId);
   const [localCentroAcopioId, setLocalCentroAcopioId] = useState(selectedCentroAcopioId);
-
-  // Hooks para obtener datos reales de la API
-  const { redes, loading: redesLoading } = useRedes();
-
-  const {
-    microredes,
-    loading: microredesLoading,
-    getMicroredesByRed
-  } = useMicroredes();
-
-  const {
-    centrosAcopio,
-    loading: centrosLoading,
-    getCentrosAcopioByMicrored
-  } = useCentrosAcopio();
-
-  // Estados para datos filtrados
   const [filteredMicroredes, setFilteredMicroredes] = useState<Microred[]>([]);
   const [filteredCentrosAcopio, setFilteredCentrosAcopio] = useState<CentroAcopio[]>([]);
 
-  // Loading general
+  const { redes, loading: redesLoading } = useRedes();
+  const { loading: microredesLoading, getMicroredesByRed } = useMicroredes();
+  const { loading: centrosLoading, getCentrosAcopioByMicrored } = useCentrosAcopio();
+
   const loading = redesLoading || microredesLoading || centrosLoading;
 
-  // Cargar microredes cuando cambie la red seleccionada
   useEffect(() => {
     const loadMicroredes = async () => {
-      if (localRedId) {
-        try {
-          logger.debug('Cargando microredes para red:', localRedId);
-          const microredesData = await getMicroredesByRed(localRedId);
-          setFilteredMicroredes(microredesData);
-          logger.info(`Microredes cargadas: ${microredesData.length}`);
-        } catch (error) {
-          logger.error('Error al cargar microredes:', error);
-          setFilteredMicroredes([]);
-        }
-      } else {
+      if (!localRedId) {
+        setFilteredMicroredes([]);
+        return;
+      }
+
+      try {
+        const data = await getMicroredesByRed(localRedId);
+        setFilteredMicroredes(data);
+      } catch (error) {
+        logger.error('Error al cargar microredes en el selector jerárquico:', error);
         setFilteredMicroredes([]);
       }
     };
 
-    loadMicroredes();
-  }, [localRedId, getMicroredesByRed]);
+    void loadMicroredes();
+  }, [getMicroredesByRed, localRedId]);
 
-  // Cargar centros de acopio cuando cambie la microred seleccionada
   useEffect(() => {
     const loadCentrosAcopio = async () => {
-      if (localMicroredId) {
-        try {
-          logger.debug('Cargando centros de acopio para microred:', localMicroredId);
-          const centrosData = await getCentrosAcopioByMicrored(localMicroredId);
-          setFilteredCentrosAcopio(centrosData);
-          logger.info(`Centros de acopio cargados: ${centrosData.length}`);
-        } catch (error) {
-          logger.error('Error al cargar centros de acopio:', error);
-          setFilteredCentrosAcopio([]);
-        }
-      } else {
+      if (!localMicroredId) {
+        setFilteredCentrosAcopio([]);
+        return;
+      }
+
+      try {
+        const data = await getCentrosAcopioByMicrored(localMicroredId);
+        setFilteredCentrosAcopio(data);
+      } catch (error) {
+        logger.error('Error al cargar centros de acopio en el selector jerárquico:', error);
         setFilteredCentrosAcopio([]);
       }
     };
 
-    loadCentrosAcopio();
-  }, [localMicroredId, getCentrosAcopioByMicrored]);
+    void loadCentrosAcopio();
+  }, [getCentrosAcopioByMicrored, localMicroredId]);
 
-  // Sync with props
   useEffect(() => {
     setLocalRedId(selectedRedId);
   }, [selectedRedId]);
@@ -128,7 +112,23 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
     setLocalCentroAcopioId(selectedCentroAcopioId);
   }, [selectedCentroAcopioId]);
 
-  // Handle changes
+  const selectedRedLabel = useMemo(
+    () => redes.find((red) => red.id === localRedId)?.nombre || 'Sin red seleccionada',
+    [localRedId, redes],
+  );
+
+  const selectedMicroredLabel = useMemo(
+    () => filteredMicroredes.find((microred) => microred.id === localMicroredId)?.nombre || 'Sin microred seleccionada',
+    [filteredMicroredes, localMicroredId],
+  );
+
+  const selectedCentroLabel = useMemo(
+    () =>
+      filteredCentrosAcopio.find((centroAcopio) => centroAcopio.id === localCentroAcopioId)?.nombre ||
+      'Sin centro de acopio seleccionado',
+    [filteredCentrosAcopio, localCentroAcopioId],
+  );
+
   const handleRedChange = (redId: string) => {
     setLocalRedId(redId);
     setLocalMicroredId('');
@@ -150,120 +150,176 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
     onCentroAcopioChange?.(centroAcopioId);
   };
 
+  const getSelectClassName = (hasError?: string, isDisabled?: boolean) =>
+    `${COMPONENT_STYLES.input.base} ${hasError ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal} ${
+      isDisabled ? 'cursor-not-allowed bg-slate-100 text-slate-500' : ''
+    }`;
+
+  const summaryItems = [
+    showRed ? { key: 'red', label: 'Red', value: selectedRedLabel, icon: Network } : null,
+    showMicrored ? { key: 'microred', label: 'Microred', value: selectedMicroredLabel, icon: GitBranch } : null,
+    showCentroAcopio ? { key: 'centro', label: 'Centro de acopio', value: selectedCentroLabel, icon: Warehouse } : null,
+  ].filter(Boolean) as Array<{ key: string; label: string; value: string; icon: LucideIcon }>;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {/* Selector de Red */}
-      {showRed && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Red de Salud {required.red && <span className="text-red-500">*</span>}
-          </label>
-          <select
-            value={localRedId}
-            onChange={(e) => handleRedChange(e.target.value)}
-            disabled={loading || disabled.red}
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-              errors.red
-                ? 'border-red-300 focus:ring-red-500'
-                : 'border-gray-300 focus:ring-blue-500'
-            } ${disabled.red ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-          >
-            <option value="">
-              {loading ? 'Cargando...' : 'Seleccionar red...'}
-            </option>
-            {redes.map((red) => (
-              <option key={red.id} value={red.id}>
-                {red.nombre} {red.codigo && `(${red.codigo})`}
-              </option>
-            ))}
-          </select>
-          {errors.red && (
-            <p className="mt-1 text-sm text-red-600">{errors.red}</p>
-          )}
-        </div>
-      )}
+    <div className="space-y-4">
+      <div className="grid gap-4 xl:grid-cols-3">
+        {showRed ? (
+          <section className={selectorCardBase}>
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-teal-200 bg-teal-50 text-teal-700">
+                <Network className="h-4 w-4" aria-hidden="true" />
+              </div>
+              <div>
+                <label htmlFor="cascading-red" className={COMPONENT_STYLES.input.label}>
+                  Red de Salud
+                  {required.red ? <span className="ml-0.5 text-rose-500">*</span> : null}
+                </label>
+                <p className="text-xs text-slate-500">Primer nivel de la estructura territorial.</p>
+              </div>
+            </div>
 
-      {/* Selector de Microred */}
-      {showMicrored && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Microred {required.microred && <span className="text-red-500">*</span>}
-          </label>
-          <select
-            value={localMicroredId}
-            onChange={(e) => handleMicroredChange(e.target.value)}
-            disabled={loading || disabled.microred || !localRedId}
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-              errors.microred
-                ? 'border-red-300 focus:ring-red-500'
-                : 'border-gray-300 focus:ring-blue-500'
-            } ${disabled.microred || !localRedId ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-          >
-            <option value="">
-              {!localRedId
-                ? 'Seleccione una red primero...'
-                : loading
-                  ? 'Cargando...'
-                  : 'Seleccionar microred...'
-              }
-            </option>
-            {filteredMicroredes.map((microred) => (
-              <option key={microred.id} value={microred.id}>
-                {microred.nombre}
-              </option>
-            ))}
-          </select>
-          {errors.microred && (
-            <p className="mt-1 text-sm text-red-600">{errors.microred}</p>
-          )}
-        </div>
-      )}
+            <select
+              id="cascading-red"
+              value={localRedId}
+              onChange={(event) => handleRedChange(event.target.value)}
+              disabled={loading || disabled.red}
+              className={getSelectClassName(errors.red, loading || disabled.red)}
+            >
+              <option value="">{loading ? 'Cargando redes...' : 'Seleccionar red...'}</option>
+              {redes.map((red) => (
+                <option key={red.id} value={red.id}>
+                  {red.nombre} {red.codigo ? `(${red.codigo})` : ''}
+                </option>
+              ))}
+            </select>
 
-      {/* Selector de Centro de Acopio */}
-      {showCentroAcopio && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Centro de Acopio {required.centroAcopio && <span className="text-red-500">*</span>}
-          </label>
-          <select
-            value={localCentroAcopioId}
-            onChange={(e) => handleCentroAcopioChange(e.target.value)}
-            disabled={loading || disabled.centroAcopio || !localMicroredId}
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-              errors.centroAcopio
-                ? 'border-red-300 focus:ring-red-500'
-                : 'border-gray-300 focus:ring-blue-500'
-            } ${disabled.centroAcopio || !localMicroredId ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-          >
-            <option value="">
-              {!localMicroredId
-                ? 'Seleccione una microred primero...'
-                : loading
-                  ? 'Cargando...'
-                  : 'Seleccionar centro de acopio...'
-              }
-            </option>
-            {filteredCentrosAcopio.map((centro) => (
-              <option key={centro.id} value={centro.id}>
-                {centro.nombre}
-              </option>
-            ))}
-          </select>
-          {errors.centroAcopio && (
-            <p className="mt-1 text-sm text-red-600">{errors.centroAcopio}</p>
-          )}
-        </div>
-      )}
+            {errors.red ? <p className={COMPONENT_STYLES.input.errorText}>{errors.red}</p> : null}
+          </section>
+        ) : null}
 
-      {/* Loading indicator */}
-      {loading && (
-        <div className="col-span-full">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Cargando opciones...
+        {showMicrored ? (
+          <section className={selectorCardBase}>
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-200 bg-cyan-50 text-cyan-700">
+                <GitBranch className="h-4 w-4" aria-hidden="true" />
+              </div>
+              <div>
+                <label htmlFor="cascading-microred" className={COMPONENT_STYLES.input.label}>
+                  Microred
+                  {required.microred ? <span className="ml-0.5 text-rose-500">*</span> : null}
+                </label>
+                <p className="text-xs text-slate-500">Se habilita después de escoger la red.</p>
+              </div>
+            </div>
+
+            <select
+              id="cascading-microred"
+              value={localMicroredId}
+              onChange={(event) => handleMicroredChange(event.target.value)}
+              disabled={loading || disabled.microred || !localRedId}
+              className={getSelectClassName(errors.microred, loading || disabled.microred || !localRedId)}
+            >
+              <option value="">
+                {!localRedId
+                  ? 'Seleccione una red primero...'
+                  : loading
+                  ? 'Cargando microredes...'
+                  : 'Seleccionar microred...'}
+              </option>
+              {filteredMicroredes.map((microred) => (
+                <option key={microred.id} value={microred.id}>
+                  {microred.nombre}
+                </option>
+              ))}
+            </select>
+
+            {errors.microred ? <p className={COMPONENT_STYLES.input.errorText}>{errors.microred}</p> : null}
+          </section>
+        ) : null}
+
+        {showCentroAcopio ? (
+          <section className={selectorCardBase}>
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 text-amber-700">
+                <Warehouse className="h-4 w-4" aria-hidden="true" />
+              </div>
+              <div>
+                <label htmlFor="cascading-centro" className={COMPONENT_STYLES.input.label}>
+                  Centro de Acopio
+                  {required.centroAcopio ? <span className="ml-0.5 text-rose-500">*</span> : null}
+                </label>
+                <p className="text-xs text-slate-500">Último nivel antes del establecimiento de salud.</p>
+              </div>
+            </div>
+
+            <select
+              id="cascading-centro"
+              value={localCentroAcopioId}
+              onChange={(event) => handleCentroAcopioChange(event.target.value)}
+              disabled={loading || disabled.centroAcopio || !localMicroredId}
+              className={getSelectClassName(errors.centroAcopio, loading || disabled.centroAcopio || !localMicroredId)}
+            >
+              <option value="">
+                {!localMicroredId
+                  ? 'Seleccione una microred primero...'
+                  : loading
+                  ? 'Cargando centros de acopio...'
+                  : 'Seleccionar centro de acopio...'}
+              </option>
+              {filteredCentrosAcopio.map((centroAcopio) => (
+                <option key={centroAcopio.id} value={centroAcopio.id}>
+                  {centroAcopio.nombre}
+                </option>
+              ))}
+            </select>
+
+            {errors.centroAcopio ? <p className={COMPONENT_STYLES.input.errorText}>{errors.centroAcopio}</p> : null}
+          </section>
+        ) : null}
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-3">
+        {summaryItems.map((item) => {
+          const Icon = item.icon;
+
+          return (
+            <div key={item.key} className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3">
+              <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-500">{item.label}</p>
+              <div className="mt-2 flex items-center gap-2 text-sm text-slate-900">
+                <Icon className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                <span className="truncate">{item.value}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {loading ? (
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-teal-200 bg-teal-50 text-teal-700">
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="font-medium text-slate-900">Actualizando opciones jerárquicas</p>
+            <p className="text-xs text-slate-500">Cargando las dependencias de la estructura territorial.</p>
           </div>
         </div>
-      )}
+      ) : null}
+
+      {showCentroAcopio ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600">
+            <MapPin className="h-4 w-4" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="font-medium text-slate-900">La ubicación determina el centro logístico del establecimiento</p>
+            <p className="text-xs text-slate-500">
+              Si cambia la red o la microred, se limpiarán automáticamente las selecciones dependientes para evitar inconsistencias.
+            </p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

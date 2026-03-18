@@ -1,10 +1,15 @@
 import React, { memo } from 'react';
-import { LucideIcon, Loader2, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { AlertTriangle, Loader2, LucideIcon, X } from 'lucide-react';
 import { COMPONENT_STYLES } from '../constants';
 
-// ============================================================================
-// MODAL COMPONENT
-// ============================================================================
+const renderOverlay = (node: React.ReactElement) => {
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(node, document.body);
+};
 
 interface ModalProps {
   isOpen: boolean;
@@ -18,10 +23,10 @@ interface ModalProps {
 }
 
 const sizeClasses = {
-  sm: 'max-w-md',
-  md: 'max-w-lg',
-  lg: 'max-w-2xl',
-  xl: 'max-w-4xl',
+  sm: 'sm:max-w-md',
+  md: 'sm:max-w-lg',
+  lg: 'sm:max-w-2xl',
+  xl: 'sm:max-w-4xl',
 };
 
 export const Modal: React.FC<ModalProps> = memo(({
@@ -36,67 +41,42 @@ export const Modal: React.FC<ModalProps> = memo(({
 }) => {
   if (!isOpen) return null;
 
-  return (
-    <div 
-      className={COMPONENT_STYLES.modal.overlay}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      <div 
-        className={`${COMPONENT_STYLES.modal.container} ${sizeClasses[size]}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className={COMPONENT_STYLES.modal.header}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-teal-600 to-cyan-600 shadow-lg">
-                <Icon className="h-5 w-5 text-white" aria-hidden="true" />
+  return renderOverlay(
+    <div className={COMPONENT_STYLES.modal.overlay} onClick={(event) => event.target === event.currentTarget && onClose()}>
+      <div className={COMPONENT_STYLES.modal.container}>
+        <div className={`${COMPONENT_STYLES.modal.panel} ${sizeClasses[size]}`}>
+          <div className={COMPONENT_STYLES.modal.header}>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex min-w-0 items-start gap-4">
+                <div className={COMPONENT_STYLES.header.iconWrapper}>
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
+                  {subtitle ? <p className="mt-1 text-sm text-slate-500">{subtitle}</p> : null}
+                </div>
               </div>
-              <div>
-                <h2 id="modal-title" className="text-lg font-semibold text-gray-900">
-                  {title}
-                </h2>
-                {subtitle && (
-                  <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
-                )}
-              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className={COMPONENT_STYLES.button.ghost}
+                aria-label="Cerrar modal"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-              aria-label="Cerrar modal"
-            >
-              <X className="h-5 w-5" />
-            </button>
           </div>
-        </div>
 
-        {/* Body */}
-        <div className={COMPONENT_STYLES.modal.body}>
-          {children}
-        </div>
+          <div className={COMPONENT_STYLES.modal.body}>{children}</div>
 
-        {/* Footer */}
-        {footer && (
-          <div className={COMPONENT_STYLES.modal.footer}>
-            {footer}
-          </div>
-        )}
+          {footer ? <div className={COMPONENT_STYLES.modal.footer}>{footer}</div> : null}
+        </div>
       </div>
-    </div>
+    </div>,
   );
 });
 
 Modal.displayName = 'Modal';
-
-// ============================================================================
-// MODAL FOOTER COMPONENT
-// ============================================================================
 
 interface ModalFooterProps {
   onCancel: () => void;
@@ -117,33 +97,24 @@ export const ModalFooter: React.FC<ModalFooterProps> = memo(({
   isSubmitDisabled = false,
   submitType = 'submit',
 }) => (
-  <>
-    <button
-      type="button"
-      onClick={onCancel}
-      className={COMPONENT_STYLES.button.secondary}
-      disabled={isLoading}
-    >
+  <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+    <button type="button" onClick={onCancel} className={COMPONENT_STYLES.button.secondary} disabled={isLoading}>
       {cancelLabel}
     </button>
     <button
       type={submitType}
       onClick={submitType === 'button' ? onSubmit : undefined}
-      disabled={isLoading || isSubmitDisabled}
       className={COMPONENT_STYLES.button.primary}
+      disabled={isLoading || isSubmitDisabled}
       aria-busy={isLoading}
     >
-      {isLoading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
       <span>{submitLabel}</span>
     </button>
-  </>
+  </div>
 ));
 
 ModalFooter.displayName = 'ModalFooter';
-
-// ============================================================================
-// FORM FIELD COMPONENT
-// ============================================================================
 
 interface FormFieldProps {
   id: string;
@@ -165,25 +136,33 @@ export const FormField: React.FC<FormFieldProps> = memo(({
   <div>
     <label htmlFor={id} className={COMPONENT_STYLES.input.label}>
       {label}
-      {required && <span className="text-rose-500 ml-0.5">*</span>}
+      {required ? <span className="ml-0.5 text-rose-500">*</span> : null}
     </label>
     {children}
-    {helpText && !error && (
-      <p className="mt-1 text-xs text-gray-500">{helpText}</p>
-    )}
-    {error && (
-      <p className={COMPONENT_STYLES.input.errorText} role="alert">
-        {error}
-      </p>
-    )}
+    {helpText && !error ? <p className={COMPONENT_STYLES.input.helpText}>{helpText}</p> : null}
+    {error ? <p className={COMPONENT_STYLES.input.errorText}>{error}</p> : null}
   </div>
 ));
 
 FormField.displayName = 'FormField';
 
-// ============================================================================
-// TEXT INPUT COMPONENT
-// ============================================================================
+interface FormSectionProps {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}
+
+export const FormSection: React.FC<FormSectionProps> = memo(({ title, description, children }) => (
+  <section className="space-y-4 rounded-[22px] border border-slate-200 bg-slate-50/60 p-4 sm:p-5">
+    <header>
+      <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-700">{title}</h3>
+      {description ? <p className="mt-1 text-sm text-slate-500">{description}</p> : null}
+    </header>
+    {children}
+  </section>
+));
+
+FormSection.displayName = 'FormSection';
 
 interface TextInputProps {
   id: string;
@@ -193,8 +172,11 @@ interface TextInputProps {
   placeholder?: string;
   required?: boolean;
   error?: string;
-  type?: 'text' | 'email' | 'tel' | 'url';
+  type?: 'text' | 'email' | 'tel' | 'url' | 'number';
   disabled?: boolean;
+  min?: number;
+  max?: number;
+  helpText?: string;
 }
 
 export const TextInput: React.FC<TextInputProps> = memo(({
@@ -207,30 +189,28 @@ export const TextInput: React.FC<TextInputProps> = memo(({
   error,
   type = 'text',
   disabled = false,
+  min,
+  max,
+  helpText,
 }) => (
-  <FormField id={id} label={label} required={required} error={error}>
+  <FormField id={id} label={label} required={required} error={error} helpText={helpText}>
     <input
       id={id}
       type={type}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
       required={required}
       disabled={disabled}
-      className={`${COMPONENT_STYLES.input.base} ${
-        error ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal
-      }`}
-      aria-invalid={!!error}
-      aria-describedby={error ? `${id}-error` : undefined}
+      min={min}
+      max={max}
+      className={`${COMPONENT_STYLES.input.base} ${error ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal}`}
+      aria-invalid={Boolean(error)}
     />
   </FormField>
 ));
 
 TextInput.displayName = 'TextInput';
-
-// ============================================================================
-// TEXTAREA COMPONENT
-// ============================================================================
 
 interface TextAreaProps {
   id: string;
@@ -242,6 +222,7 @@ interface TextAreaProps {
   error?: string;
   rows?: number;
   disabled?: boolean;
+  helpText?: string;
 }
 
 export const TextArea: React.FC<TextAreaProps> = memo(({
@@ -254,30 +235,24 @@ export const TextArea: React.FC<TextAreaProps> = memo(({
   error,
   rows = 3,
   disabled = false,
+  helpText,
 }) => (
-  <FormField id={id} label={label} required={required} error={error}>
+  <FormField id={id} label={label} required={required} error={error} helpText={helpText}>
     <textarea
       id={id}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
       required={required}
       disabled={disabled}
       rows={rows}
-      className={`${COMPONENT_STYLES.input.base} ${
-        error ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal
-      } resize-none`}
-      aria-invalid={!!error}
-      aria-describedby={error ? `${id}-error` : undefined}
+      className={`${COMPONENT_STYLES.input.base} ${error ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal} resize-none`}
+      aria-invalid={Boolean(error)}
     />
   </FormField>
 ));
 
 TextArea.displayName = 'TextArea';
-
-// ============================================================================
-// SELECT INPUT COMPONENT
-// ============================================================================
 
 interface SelectOption {
   value: string;
@@ -294,6 +269,7 @@ interface SelectInputProps {
   required?: boolean;
   error?: string;
   disabled?: boolean;
+  helpText?: string;
 }
 
 export const SelectInput: React.FC<SelectInputProps> = memo(({
@@ -306,19 +282,17 @@ export const SelectInput: React.FC<SelectInputProps> = memo(({
   required = false,
   error,
   disabled = false,
+  helpText,
 }) => (
-  <FormField id={id} label={label} required={required} error={error}>
+  <FormField id={id} label={label} required={required} error={error} helpText={helpText}>
     <select
       id={id}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(event) => onChange(event.target.value)}
       required={required}
       disabled={disabled}
-      className={`${COMPONENT_STYLES.input.base} ${
-        error ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal
-      }`}
-      aria-invalid={!!error}
-      aria-describedby={error ? `${id}-error` : undefined}
+      className={`${COMPONENT_STYLES.input.base} ${error ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal}`}
+      aria-invalid={Boolean(error)}
     >
       <option value="">{placeholder}</option>
       {options.map((option) => (
@@ -331,10 +305,6 @@ export const SelectInput: React.FC<SelectInputProps> = memo(({
 ));
 
 SelectInput.displayName = 'SelectInput';
-
-// ============================================================================
-// DELETE CONFIRMATION MODAL COMPONENT
-// ============================================================================
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
@@ -357,64 +327,52 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = memo(({
 }) => {
   if (!isOpen) return null;
 
-  return (
-    <div 
-      className={COMPONENT_STYLES.modal.overlay}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      role="alertdialog"
-      aria-modal="true"
-      aria-labelledby="delete-modal-title"
-      aria-describedby="delete-modal-description"
-    >
-      <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
-        <div className="p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 rounded-full bg-rose-100">
-              <svg className="h-6 w-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+  return renderOverlay(
+    <div className={COMPONENT_STYLES.modal.overlay} onClick={(event) => event.target === event.currentTarget && onClose()}>
+      <div className={COMPONENT_STYLES.modal.container}>
+        <div className="w-full sm:max-w-md">
+          <div className={`${COMPONENT_STYLES.modal.panel} sm:rounded-[28px]`}>
+            <div className={COMPONENT_STYLES.modal.header}>
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-600">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-950">Eliminar {itemType}</h3>
+                  <p className="mt-1 text-sm text-slate-500">Esta acción no se puede deshacer.</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 id="delete-modal-title" className="text-lg font-semibold text-gray-900">
-                Eliminar {itemType}
-              </h3>
-              <p id="delete-modal-description" className="text-sm text-gray-500 mt-1">
-                Esta accion no se puede deshacer
-              </p>
+
+            <div className={COMPONENT_STYLES.modal.body}>
+              <div className="rounded-[22px] border border-slate-200 bg-slate-50/70 p-4">
+                <p className="text-sm text-slate-700">
+                  Se eliminará <span className="font-semibold text-slate-950">"{itemName}"</span>.
+                </p>
+                {warningMessage ? <p className="mt-2 text-xs text-amber-700">{warningMessage}</p> : null}
+              </div>
             </div>
-          </div>
 
-          <div className="bg-gray-50 rounded-xl p-4 mb-4">
-            <p className="text-sm text-gray-700">
-              ¿Esta seguro de eliminar <span className="font-semibold">"{itemName}"</span>?
-            </p>
-            {warningMessage && (
-              <p className="text-xs text-amber-600 mt-2">{warningMessage}</p>
-            )}
-          </div>
-
-          <div className="flex justify-end gap-3">
-            <button
-              onClick={onClose}
-              disabled={isLoading}
-              className={COMPONENT_STYLES.button.secondary}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={onConfirm}
-              disabled={isLoading}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 shadow-md transition-all duration-200 disabled:opacity-50"
-            >
-              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              <span>Eliminar</span>
-            </button>
+            <div className={COMPONENT_STYLES.modal.footer}>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button type="button" onClick={onClose} className={COMPONENT_STYLES.button.secondary} disabled={isLoading}>
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={onConfirm}
+                  disabled={isLoading}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:from-rose-700 hover:to-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+                  <span>Eliminar</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
   );
 });
 

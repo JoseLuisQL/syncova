@@ -1,22 +1,36 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { GitBranch, Network, Building, Plus } from 'lucide-react';
-import { Microred, CreateMicroredDto, UpdateMicroredDto } from '../../types';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Building2, GitBranch, Network, Plus, RefreshCw } from 'lucide-react';
+import { CreateMicroredDto, Microred, Red, UpdateMicroredDto } from '../../types';
+import { useToastContext } from '../../contexts/ToastContext';
 import { useMicroredes } from '../../hooks/useMicroredes';
 import { useRedes } from '../../hooks/useRedes';
-import { useToastContext } from '../../contexts/ToastContext';
-import { validateMicrored, sanitizeInput } from '../../utils/validation';
+import { sanitizeInput, validateMicrored } from '../../utils/validation';
+import { ColorScheme, COMPONENT_STYLES, STATS_CONFIG } from '../Establecimientos/constants';
 import {
-  PageHeader,
-  StatsGrid,
-  StatusBadge,
+  ActionButtons,
   CountBadge,
   EmptyState,
   ErrorAlert,
-  ActionButtons,
-} from '../Establecimientos/components/SharedComponents';
-import { FilterBar, Pagination, DataTable, TableHeader } from '../Establecimientos/components/FilterAndTable';
-import { Modal, ModalFooter, TextInput, TextArea, SelectInput, DeleteConfirmModal } from '../Establecimientos/components/ModalComponents';
-import { COMPONENT_STYLES, ColorScheme } from '../Establecimientos/constants';
+  StatsGrid,
+  StatusBadge,
+} from '../Establecimientos/components';
+import {
+  DataTable,
+  FilterBar,
+  Pagination,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from '../Establecimientos/components';
+import {
+  DeleteConfirmModal,
+  FormSection,
+  Modal,
+  ModalFooter,
+  SelectInput,
+  TextArea,
+  TextInput,
+} from '../Establecimientos/components';
 
 interface MicroredesProps {
   selectedRedId?: string;
@@ -26,28 +40,27 @@ interface MicroredesProps {
 
 const TABLE_COLUMNS = [
   { key: 'microred', label: 'Microred' },
-  { key: 'codigo', label: 'Codigo' },
+  { key: 'codigo', label: 'Código' },
   { key: 'red', label: 'Red' },
-  { key: 'descripcion', label: 'Descripcion' },
-  { key: 'centros', label: 'Centros de Acopio' },
-  { key: 'estado', label: 'Estado' },
+  { key: 'descripcion', label: 'Descripción' },
+  { key: 'centros', label: 'Centros de Acopio', align: 'center' as const },
+  { key: 'estado', label: 'Estado', align: 'center' as const },
   { key: 'acciones', label: 'Acciones', align: 'right' as const },
 ];
 
 const ESTADO_OPTIONS = [
-  { value: 'todos', label: 'Todos' },
-  { value: 'activo', label: 'Activos' },
-  { value: 'inactivo', label: 'Inactivos' },
+  { value: 'todos', label: 'Todos los estados' },
+  { value: 'activo', label: 'Activo' },
+  { value: 'inactivo', label: 'Inactivo' },
 ];
 
 const Microredes: React.FC<MicroredesProps> = ({
-  selectedRedId,
-  selectedRedNombre,
+  selectedRedId = '',
   onNavigateToCentrosAcopio,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState('todos');
-  const [filterRedId, setFilterRedId] = useState(selectedRedId || '');
+  const [filterRedId, setFilterRedId] = useState(selectedRedId);
   const [showModal, setShowModal] = useState(false);
   const [editingMicrored, setEditingMicrored] = useState<Microred | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
@@ -55,6 +68,7 @@ const Microredes: React.FC<MicroredesProps> = ({
     id: string;
     nombre: string;
   }>({ isOpen: false, id: '', nombre: '' });
+  const filterInitRef = useRef(false);
 
   const {
     microredes,
@@ -65,6 +79,7 @@ const Microredes: React.FC<MicroredesProps> = ({
     totalPages,
     filters,
     setFilters,
+    fetchMicroredes,
     createMicrored,
     updateMicrored,
     deleteMicrored,
@@ -74,32 +89,74 @@ const Microredes: React.FC<MicroredesProps> = ({
   const { toast } = useToastContext();
 
   useEffect(() => {
-    if (selectedRedId && selectedRedId !== filterRedId) {
-      setFilterRedId(selectedRedId);
-    }
+    setFilterRedId(selectedRedId || '');
   }, [selectedRedId]);
 
-  // Debounced filter application
-  React.useEffect(() => {
-    if (!microredes.length && !searchTerm && filterEstado === 'todos' && !filterRedId) return;
+  useEffect(() => {
+    const isFirstRun = !filterInitRef.current;
+    filterInitRef.current = true;
 
-    const timeoutId = setTimeout(() => {
-      const newFilters: Record<string, string> = {};
-      if (filterEstado !== 'todos') newFilters.estado = filterEstado;
-      if (filterRedId) newFilters.redId = filterRedId;
-      if (searchTerm.trim()) newFilters.search = searchTerm.trim();
-      setFilters(newFilters);
-    }, 500);
+    if (isFirstRun && !searchTerm && filterEstado === 'todos' && !filterRedId) {
+      return;
+    }
 
-    return () => clearTimeout(timeoutId);
-  }, [filterEstado, filterRedId, searchTerm]);
+    const timeoutId = window.setTimeout(() => {
+      const nextFilters: Record<string, string> = {};
+      if (filterRedId) nextFilters.redId = filterRedId;
+      if (filterEstado !== 'todos') nextFilters.estado = filterEstado;
+      if (searchTerm.trim()) nextFilters.search = searchTerm.trim();
+      setFilters(nextFilters);
+    }, 320);
 
-  const stats = useMemo(() => [
-    { key: 'total', label: 'Total Microredes', value: total, icon: GitBranch, color: 'primary' as ColorScheme },
-    { key: 'activas', label: 'Activas', value: microredes.filter(m => m.estado === 'activo').length, icon: GitBranch, color: 'success' as ColorScheme },
-    { key: 'conCentros', label: 'Con Centros', value: microredes.filter(m => (m._count?.centrosAcopio || 0) > 0).length, icon: Building, color: 'warning' as ColorScheme },
-    { key: 'inactivas', label: 'Inactivas', value: microredes.filter(m => m.estado === 'inactivo').length, icon: GitBranch, color: 'danger' as ColorScheme },
-  ], [microredes, total]);
+    return () => window.clearTimeout(timeoutId);
+  }, [filterEstado, filterRedId, searchTerm, setFilters]);
+
+  const stats = useMemo(
+    () => [
+      { ...STATS_CONFIG.microredes[0], value: total, color: STATS_CONFIG.microredes[0].color as ColorScheme },
+      {
+        ...STATS_CONFIG.microredes[1],
+        value: microredes.filter((microred) => microred.estado === 'activo').length,
+        color: STATS_CONFIG.microredes[1].color as ColorScheme,
+      },
+      {
+        ...STATS_CONFIG.microredes[2],
+        value: microredes.filter((microred) => (microred._count?.centrosAcopio || 0) > 0).length,
+        color: STATS_CONFIG.microredes[2].color as ColorScheme,
+      },
+      {
+        ...STATS_CONFIG.microredes[3],
+        value: microredes.filter((microred) => microred.estado === 'inactivo').length,
+        color: STATS_CONFIG.microredes[3].color as ColorScheme,
+      },
+    ],
+    [microredes, total],
+  );
+
+  const redesOptions = useMemo(
+    () => [{ value: '', label: 'Todas las redes' }, ...redes.map((red) => ({ value: red.id, label: red.nombre }))],
+    [redes],
+  );
+
+  const filtersConfig = useMemo(
+    () => [
+      {
+        id: 'microred-red',
+        label: 'Red',
+        value: filterRedId,
+        options: redesOptions,
+        onChange: setFilterRedId,
+      },
+      {
+        id: 'microred-estado',
+        label: 'Estado',
+        value: filterEstado,
+        options: ESTADO_OPTIONS,
+        onChange: setFilterEstado,
+      },
+    ],
+    [filterEstado, filterRedId, redesOptions],
+  );
 
   const handleOpenModal = useCallback((microred?: Microred) => {
     setEditingMicrored(microred || null);
@@ -111,121 +168,165 @@ const Microredes: React.FC<MicroredesProps> = ({
     setEditingMicrored(null);
   }, []);
 
-  const handleDelete = useCallback((id: string, nombre: string) => {
-    setDeleteConfirmation({ isOpen: true, id, nombre });
+  const handleSubmit = useCallback(
+    async (formData: CreateMicroredDto | UpdateMicroredDto) => {
+      if (editingMicrored) {
+        const success = await updateMicrored(editingMicrored.id, formData as UpdateMicroredDto);
+        if (!success) {
+          toast.error('No se pudo actualizar la microred', 'Revise los datos e intente nuevamente.');
+          return;
+        }
+
+        toast.success('Microred actualizada', 'Los cambios se guardaron correctamente.');
+      } else {
+        const success = await createMicrored(formData as CreateMicroredDto);
+        if (!success) {
+          toast.error('No se pudo crear la microred', 'Revise los datos e intente nuevamente.');
+          return;
+        }
+
+        toast.success('Microred creada', 'La microred se registró correctamente.');
+      }
+
+      handleCloseModal();
+    },
+    [createMicrored, editingMicrored, handleCloseModal, toast, updateMicrored],
+  );
+
+  const handleDelete = useCallback((microred: Microred) => {
+    setDeleteConfirmation({ isOpen: true, id: microred.id, nombre: microred.nombre });
   }, []);
 
   const confirmDelete = useCallback(async () => {
     const success = await deleteMicrored(deleteConfirmation.id);
-    if (success) {
-      toast.success('Microred eliminada', `"${deleteConfirmation.nombre}" ha sido eliminada.`);
-    } else {
-      toast.error('Error al eliminar', 'Verifique que no tenga centros de acopio asociados.');
+
+    if (!success) {
+      toast.error('No se pudo eliminar la microred', 'Verifique que no tenga centros de acopio asociados.');
+      return;
     }
+
+    toast.success('Microred eliminada', `"${deleteConfirmation.nombre}" fue eliminada.`);
     setDeleteConfirmation({ isOpen: false, id: '', nombre: '' });
-  }, [deleteConfirmation, deleteMicrored, toast]);
+  }, [deleteConfirmation.id, deleteConfirmation.nombre, deleteMicrored, toast]);
 
-  const handleSubmit = useCallback(async (formData: CreateMicroredDto | UpdateMicroredDto) => {
-    if (editingMicrored) {
-      const success = await updateMicrored(editingMicrored.id, formData as UpdateMicroredDto);
-      if (success) {
-        toast.success('Microred actualizada', 'Los cambios se guardaron correctamente.');
-        handleCloseModal();
-      } else {
-        toast.error('Error al actualizar', 'No se pudieron guardar los cambios.');
-      }
-    } else {
-      const success = await createMicrored(formData as CreateMicroredDto);
-      if (success) {
-        toast.success('Microred creada', 'La nueva microred se registro correctamente.');
-        handleCloseModal();
-      } else {
-        toast.error('Error al crear', 'No se pudo crear la microred.');
-      }
-    }
-  }, [editingMicrored, updateMicrored, createMicrored, toast, handleCloseModal]);
+  const handleClearFilters = useCallback(() => {
+    const baseFilters = selectedRedId ? { redId: selectedRedId } : {};
+    setSearchTerm('');
+    setFilterEstado('todos');
+    setFilterRedId(selectedRedId || '');
+    setFilters(baseFilters);
+  }, [selectedRedId, setFilters]);
 
-  const changePage = useCallback((page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     setFilters({ ...filters, page });
   }, [filters, setFilters]);
 
-  const redesOptions = useMemo(() => [
-    { value: '', label: 'Todas' },
-    ...redes.map(r => ({ value: r.id, label: r.nombre })),
-  ], [redes]);
+  const desktopTable = (
+    <DataTable
+      isLoading={loading}
+      loadingMessage="Cargando microredes..."
+      skeletonRows={5}
+      skeletonColumns={TABLE_COLUMNS.length}
+      loadingVariant="table"
+    >
+      <table className="min-w-full divide-y divide-slate-200">
+        <TableHeader columns={TABLE_COLUMNS} />
+        <tbody className="divide-y divide-slate-100">
+          {microredes.length === 0 ? (
+            <tr>
+              <td colSpan={TABLE_COLUMNS.length}>
+                <EmptyState
+                  icon={GitBranch}
+                  title="No se encontraron microredes"
+                  description="Ajuste los filtros o registre una nueva microred."
+                  action={{ label: 'Nueva microred', onClick: () => handleOpenModal() }}
+                />
+              </td>
+            </tr>
+          ) : (
+            microredes.map((microred) => (
+              <MicroredDesktopRow
+                key={microred.id}
+                microred={microred}
+                onEdit={() => handleOpenModal(microred)}
+                onDelete={() => handleDelete(microred)}
+                onNavigate={onNavigateToCentrosAcopio}
+                isLoading={loading}
+              />
+            ))
+          )}
+        </tbody>
+      </table>
 
-  const filterConfigs = useMemo(() => [
-    { id: 'red', label: 'Red', value: filterRedId, options: redesOptions, onChange: setFilterRedId },
-    { id: 'estado', label: 'Estado', value: filterEstado, options: ESTADO_OPTIONS, onChange: setFilterEstado },
-  ], [filterRedId, filterEstado, redesOptions]);
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        total={total}
+        limit={filters.limit || 10}
+        onPageChange={handlePageChange}
+      />
+    </DataTable>
+  );
 
   return (
-    <div className="p-5 sm:p-6">
-      {error && <ErrorAlert message={error} />}
+    <div className="space-y-4">
+      {error ? <ErrorAlert message={error} onRetry={() => void fetchMicroredes()} /> : null}
 
-      <PageHeader
-        title={selectedRedNombre ? `Microredes - Red: ${selectedRedNombre}` : 'Microredes'}
-        subtitle="Gestion de agrupaciones territoriales"
-        icon={GitBranch}
-        count={total}
-        action={{
-          label: 'Nueva Microred',
-          onClick: () => handleOpenModal(),
-          icon: Plus,
-          isLoading: loading,
-        }}
-      />
+      <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+        <div className="space-y-4">
+          <StatsGrid stats={stats} isLoading={loading} />
 
-      <StatsGrid stats={stats} />
-
-      <div className="space-y-5">
-        <FilterBar
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Buscar por nombre, codigo o descripcion..."
-          filters={filterConfigs}
-        />
-
-        <DataTable isLoading={loading} loadingMessage="Cargando microredes...">
-          <table className="min-w-full divide-y divide-gray-200">
-            <TableHeader columns={TABLE_COLUMNS} />
-            <tbody className="divide-y divide-gray-100">
-              {microredes.length === 0 && !loading ? (
-                <tr>
-                  <td colSpan={7}>
-                    <EmptyState
-                      icon={GitBranch}
-                      title="No se encontraron microredes"
-                      description="Intente ajustar los filtros o cree una nueva"
-                    />
-                  </td>
-                </tr>
-              ) : (
-                microredes.map((microred) => (
-                  <MicroredRow
-                    key={microred.id}
-                    microred={microred}
-                    onEdit={() => handleOpenModal(microred)}
-                    onDelete={() => handleDelete(microred.id, microred.nombre)}
-                    onNavigate={onNavigateToCentrosAcopio}
-                    isLoading={loading}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
-
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            total={total}
-            limit={filters.limit || 10}
-            onPageChange={changePage}
+          <FilterBar
+            searchValue={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchPlaceholder="Buscar por nombre, código o descripción"
+            filters={filtersConfig}
+            onClear={handleClearFilters}
+            actions={
+              <>
+                <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={() => void fetchMicroredes()} disabled={loading}>
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Actualizar</span>
+                </button>
+                <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={loading}>
+                  <Plus className="h-4 w-4" />
+                  <span>Nueva microred</span>
+                </button>
+              </>
+            }
           />
-        </DataTable>
-      </div>
 
-      {showModal && (
+          <div className="hidden lg:block">{desktopTable}</div>
+
+          <div className="space-y-3 lg:hidden">
+            {loading ? (
+              <DataTable isLoading loadingMessage="Cargando microredes..." skeletonRows={4} loadingVariant="cards" />
+            ) : microredes.length === 0 ? (
+              <div className={COMPONENT_STYLES.panel}>
+                <EmptyState
+                  icon={GitBranch}
+                  title="No se encontraron microredes"
+                  description="Ajuste los filtros o registre una nueva microred."
+                  action={{ label: 'Nueva microred', onClick: () => handleOpenModal() }}
+                />
+              </div>
+            ) : (
+              microredes.map((microred) => (
+                <MicroredMobileCard
+                  key={microred.id}
+                  microred={microred}
+                  onEdit={() => handleOpenModal(microred)}
+                  onDelete={() => handleDelete(microred)}
+                  onNavigate={onNavigateToCentrosAcopio}
+                  isLoading={loading}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {showModal ? (
         <MicroredModal
           microred={editingMicrored}
           redes={redes}
@@ -233,7 +334,7 @@ const Microredes: React.FC<MicroredesProps> = ({
           onSubmit={handleSubmit}
           isLoading={loading}
         />
-      )}
+      ) : null}
 
       <DeleteConfirmModal
         isOpen={deleteConfirmation.isOpen}
@@ -248,10 +349,6 @@ const Microredes: React.FC<MicroredesProps> = ({
   );
 };
 
-// ============================================================================
-// TABLE ROW COMPONENT
-// ============================================================================
-
 interface MicroredRowProps {
   microred: Microred;
   onEdit: () => void;
@@ -260,7 +357,7 @@ interface MicroredRowProps {
   isLoading?: boolean;
 }
 
-const MicroredRow: React.FC<MicroredRowProps> = memo(({
+const MicroredDesktopRow: React.FC<MicroredRowProps> = memo(({
   microred,
   onEdit,
   onDelete,
@@ -268,73 +365,128 @@ const MicroredRow: React.FC<MicroredRowProps> = memo(({
   isLoading = false,
 }) => {
   const centrosCount = microred._count?.centrosAcopio || 0;
-  const canDelete = centrosCount === 0;
 
   return (
-    <tr className={COMPONENT_STYLES.table.row}>
-      <td className={COMPONENT_STYLES.table.cell}>
+    <TableRow>
+      <TableCell>
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-cyan-50 to-cyan-100 border border-cyan-200 flex items-center justify-center flex-shrink-0">
-            <GitBranch className="h-5 w-5 text-cyan-600" aria-hidden="true" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-700">
+            <GitBranch className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{microred.nombre}</p>
+            <p className="truncate text-sm font-semibold text-slate-900">{microred.nombre}</p>
+            <p className="text-xs text-slate-500">{microred.codigo || 'Sin código registrado'}</p>
           </div>
         </div>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <span className="text-sm text-gray-900">{microred.codigo || '-'}</span>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <div className="flex items-center gap-2">
-          <Network className="h-4 w-4 text-gray-400 flex-shrink-0" />
-          <span className="text-sm text-gray-900">{microred.red?.nombre || 'Sin red'}</span>
+      </TableCell>
+      <TableCell>
+        <span className="text-sm font-medium text-slate-900">{microred.codigo || '-'}</span>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2 text-sm text-slate-700">
+          <Network className="h-4 w-4 text-slate-400" aria-hidden="true" />
+          <span>{microred.red?.nombre || 'Sin red asociada'}</span>
         </div>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <p className="text-sm text-gray-600 max-w-xs truncate">
-          {microred.descripcion || '-'}
-        </p>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <CountBadge count={centrosCount} icon={Building} />
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <StatusBadge status={microred.estado as 'activo' | 'inactivo'} />
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <div className="flex items-center justify-end gap-1">
-          {onNavigate && centrosCount > 0 && (
+      </TableCell>
+      <TableCell>
+        <p className="max-w-sm text-sm text-slate-600">{microred.descripcion || 'Sin descripción registrada.'}</p>
+      </TableCell>
+      <TableCell align="center">
+        <CountBadge count={centrosCount} icon={Building2} />
+      </TableCell>
+      <TableCell align="center">
+        <StatusBadge status={microred.estado} />
+      </TableCell>
+      <TableCell align="right">
+        <div className="flex items-center justify-end gap-2">
+          {onNavigate && centrosCount > 0 ? (
             <button
+              type="button"
               onClick={() => onNavigate(microred.id, microred.nombre)}
-              className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconView}`}
+              className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconNavigate}`}
               title="Ver centros de acopio"
+              aria-label={`Ver centros de acopio de ${microred.nombre}`}
             >
-              <Building className="h-4 w-4" />
+              <Building2 className="h-4 w-4" aria-hidden="true" />
             </button>
-          )}
+          ) : null}
           <ActionButtons
             onEdit={onEdit}
             onDelete={onDelete}
             isLoading={isLoading}
-            canDelete={canDelete}
-            deleteTooltip="No se puede eliminar: tiene centros de acopio asociados"
+            canDelete={centrosCount === 0}
+            deleteTooltip="No se puede eliminar: tiene centros de acopio asociados."
           />
         </div>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 });
 
-MicroredRow.displayName = 'MicroredRow';
+MicroredDesktopRow.displayName = 'MicroredDesktopRow';
 
-// ============================================================================
-// MODAL COMPONENT
-// ============================================================================
+const MicroredMobileCard: React.FC<MicroredRowProps> = memo(({
+  microred,
+  onEdit,
+  onDelete,
+  onNavigate,
+  isLoading = false,
+}) => {
+  const centrosCount = microred._count?.centrosAcopio || 0;
+
+  return (
+    <article className={`${COMPONENT_STYLES.panel} p-4`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-base font-semibold text-slate-950">{microred.nombre}</p>
+          <p className="mt-1 text-sm text-slate-500">{microred.red?.nombre || 'Sin red asociada'}</p>
+        </div>
+        <StatusBadge status={microred.estado} />
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Centros</p>
+          <p className="mt-2 text-lg font-semibold text-slate-900">{centrosCount}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Código</p>
+          <p className="mt-2 text-sm font-medium text-slate-900">{microred.codigo || '-'}</p>
+        </div>
+      </div>
+
+      <p className="mt-3 text-sm text-slate-600">{microred.descripcion || 'Sin descripción registrada.'}</p>
+
+      <div className="mt-4 flex items-center justify-between gap-3">
+        {onNavigate && centrosCount > 0 ? (
+          <button
+            type="button"
+            className={COMPONENT_STYLES.button.secondary}
+            onClick={() => onNavigate(microred.id, microred.nombre)}
+          >
+            <Building2 className="h-4 w-4" />
+            <span>Ver centros</span>
+          </button>
+        ) : (
+          <div />
+        )}
+        <ActionButtons
+          onEdit={onEdit}
+          onDelete={onDelete}
+          isLoading={isLoading}
+          canDelete={centrosCount === 0}
+          deleteTooltip="No se puede eliminar: tiene centros de acopio asociados."
+        />
+      </div>
+    </article>
+  );
+});
+
+MicroredMobileCard.displayName = 'MicroredMobileCard';
 
 interface MicroredModalProps {
   microred: Microred | null;
-  redes: any[];
+  redes: Red[];
   onClose: () => void;
   onSubmit: (data: CreateMicroredDto | UpdateMicroredDto) => Promise<void>;
   isLoading?: boolean;
@@ -352,121 +504,121 @@ const MicroredModal: React.FC<MicroredModalProps> = ({
     codigo: microred?.codigo || '',
     descripcion: microred?.descripcion || '',
     redId: microred?.redId || '',
-    ...(microred && { estado: microred.estado }),
+    estado: microred?.estado || 'activo',
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateForm = useCallback(() => {
+  const redesOptions = useMemo(
+    () => redes.map((red) => ({ value: red.id, label: red.nombre })),
+    [redes],
+  );
+
+  const handleFieldChange = useCallback((field: keyof typeof formData, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: '' }));
+  }, []);
+
+  const handleSubmit = useCallback(async () => {
     const sanitizedData = {
       nombre: sanitizeInput(formData.nombre),
       codigo: formData.codigo ? sanitizeInput(formData.codigo) : '',
       descripcion: formData.descripcion ? sanitizeInput(formData.descripcion) : '',
       redId: formData.redId,
-      ...(microred && { estado: formData.estado }),
+      ...(microred ? { estado: formData.estado as 'activo' | 'inactivo' } : {}),
     };
 
     const validation = validateMicrored(sanitizedData);
-    setErrors(validation.errors);
-
-    if (validation.isValid) {
-      setFormData(prev => ({
-        ...prev,
-        nombre: sanitizedData.nombre,
-        codigo: sanitizedData.codigo,
-        descripcion: sanitizedData.descripcion,
-      }));
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      return;
     }
 
-    return validation.isValid;
-  }, [formData, microred]);
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    const submitData = { ...formData };
-    if (!microred) delete (submitData as any).estado;
-    await onSubmit(submitData);
-  }, [formData, microred, validateForm, onSubmit]);
-
-  const handleFieldChange = useCallback((field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
-  }, [errors]);
-
-  const redesOptions = useMemo(() => redes.map(r => ({ value: r.id, label: r.nombre })), [redes]);
+    await onSubmit(sanitizedData);
+  }, [formData, microred, onSubmit]);
 
   return (
     <Modal
-      isOpen={true}
+      isOpen
       onClose={onClose}
-      title={microred ? 'Editar Microred' : 'Nueva Microred'}
-      subtitle={microred ? 'Actualizar informacion' : 'Registrar nueva microred'}
+      title={microred ? 'Editar microred' : 'Nueva microred'}
+      subtitle={
+        microred
+          ? 'Ajusta la dependencia territorial sin perder la relación con la red.'
+          : 'Registra una microred y define la red a la que pertenece.'
+      }
       icon={GitBranch}
       footer={
         <ModalFooter
           onCancel={onClose}
-          submitLabel={microred ? 'Actualizar' : 'Crear'}
+          onSubmit={handleSubmit}
+          submitType="button"
+          submitLabel={microred ? 'Guardar cambios' : 'Crear microred'}
           isLoading={isLoading}
         />
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <TextInput
-            id="nombre"
-            label="Nombre"
-            value={formData.nombre}
-            onChange={(v) => handleFieldChange('nombre', v)}
-            required
-            error={errors.nombre}
-          />
-          <TextInput
-            id="codigo"
-            label="Codigo"
-            value={formData.codigo}
-            onChange={(v) => handleFieldChange('codigo', v)}
-            placeholder="Opcional"
-            error={errors.codigo}
-          />
-          <SelectInput
-            id="redId"
-            label="Red"
-            value={formData.redId}
-            onChange={(v) => handleFieldChange('redId', v)}
-            options={redesOptions}
-            placeholder="Seleccionar red..."
-            required
-            error={errors.redId}
-          />
-          {microred && (
-            <SelectInput
-              id="estado"
-              label="Estado"
-              value={formData.estado || 'activo'}
-              onChange={(v) => handleFieldChange('estado', v)}
-              options={[
-                { value: 'activo', label: 'Activo' },
-                { value: 'inactivo', label: 'Inactivo' },
-              ]}
+      <div className="space-y-4">
+        <FormSection title="Identificación" description="Datos visibles para búsqueda rápida y referencia operativa.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextInput
+              id="microred-nombre"
+              label="Nombre"
+              value={formData.nombre}
+              onChange={(value) => handleFieldChange('nombre', value)}
+              placeholder="Ej: Chicmo"
+              required
+              error={errors.nombre}
             />
-          )}
-        </div>
+            <TextInput
+              id="microred-codigo"
+              label="Código"
+              value={formData.codigo}
+              onChange={(value) => handleFieldChange('codigo', value)}
+              placeholder="Opcional"
+              error={errors.codigo}
+            />
+          </div>
 
-        <TextArea
-          id="descripcion"
-          label="Descripcion"
-          value={formData.descripcion}
-          onChange={(v) => handleFieldChange('descripcion', v)}
-          placeholder="Descripcion opcional de la microred"
-          error={errors.descripcion}
-        />
+          <TextArea
+            id="microred-descripcion"
+            label="Descripción"
+            value={formData.descripcion}
+            onChange={(value) => handleFieldChange('descripcion', value)}
+            placeholder="Describe el ámbito territorial de la microred."
+            error={errors.descripcion}
+            rows={4}
+          />
+        </FormSection>
 
-        <button type="submit" className="hidden" />
-      </form>
+        <FormSection title="Dependencia territorial" description="Relaciona la microred con su red de salud principal.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <SelectInput
+              id="microred-red"
+              label="Red"
+              value={formData.redId}
+              onChange={(value) => handleFieldChange('redId', value)}
+              options={redesOptions}
+              placeholder="Seleccionar red..."
+              required
+              error={errors.redId}
+            />
+            {microred ? (
+              <SelectInput
+                id="microred-estado"
+                label="Estado"
+                value={formData.estado}
+                onChange={(value) => handleFieldChange('estado', value)}
+                options={[
+                  { value: 'activo', label: 'Activo' },
+                  { value: 'inactivo', label: 'Inactivo' },
+                ]}
+              />
+            ) : null}
+          </div>
+        </FormSection>
+      </div>
     </Modal>
   );
 };
 
-export default Microredes;
+export default memo(Microredes);

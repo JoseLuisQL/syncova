@@ -1,0 +1,750 @@
+- generic [ref=e3]:
+  - navigation "Menu principal" [ref=e4]:
+    - generic [ref=e6]:
+      - img "SIVAC Logo" [ref=e8]
+      - generic [ref=e14]:
+        - heading "SIVAC" [level=1] [ref=e15]
+        - paragraph [ref=e16]: Sistema de Vacunas
+    - button "Colapsar menu" [expanded] [ref=e17] [cursor=pointer]:
+      - img [ref=e18]
+    - navigation [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]: Principal
+        - button "Dashboard" [ref=e24] [cursor=pointer]:
+          - img [ref=e26]
+          - generic [ref=e31]: Dashboard
+      - generic [ref=e32]:
+        - generic [ref=e33]: Gestión
+        - generic [ref=e34]:
+          - button "Establecimientos" [ref=e35] [cursor=pointer]:
+            - img [ref=e37]
+            - generic [ref=e41]: Establecimientos
+          - button "Inventario" [ref=e42] [cursor=pointer]:
+            - img [ref=e44]
+            - generic [ref=e48]: Inventario
+          - button "Movimientos" [ref=e49] [cursor=pointer]:
+            - img [ref=e51]
+            - generic [ref=e54]: Movimientos
+          - button "Planificación" [ref=e55] [cursor=pointer]:
+            - img [ref=e57]
+            - generic [ref=e59]: Planificación
+          - button "Kardex" [ref=e60] [cursor=pointer]:
+            - img [ref=e62]
+            - generic [ref=e65]: Kardex
+      - generic [ref=e66]:
+        - generic [ref=e67]: Reportes
+        - generic [ref=e68]:
+          - button "Reportes" [ref=e69] [cursor=pointer]:
+            - img [ref=e71]
+            - generic [ref=e74]: Reportes
+          - button "Alertas" [ref=e75] [cursor=pointer]:
+            - img [ref=e77]
+            - generic [ref=e80]: Alertas
+      - generic [ref=e81]:
+        - generic [ref=e82]: Sistema
+        - generic [ref=e83]:
+          - button "Usuarios" [ref=e84] [cursor=pointer]:
+            - img [ref=e86]
+            - generic [ref=e91]: Usuarios
+          - button "Configuración" [ref=e92] [cursor=pointer]:
+            - img [ref=e94]
+            - generic [ref=e97]: Configuración
+    - generic [ref=e99]:
+      - img [ref=e101]
+      - generic [ref=e104]:
+        - paragraph [ref=e105]: DISA Apurimac II
+        - paragraph [ref=e106]: Estrategia Sanitaria
+  - generic [ref=e107]:
+    - banner [ref=e108]:
+      - generic [ref=e109]:
+        - navigation "Breadcrumb" [ref=e112]:
+          - button "Ir al Dashboard" [ref=e113] [cursor=pointer]:
+            - img [ref=e114]
+          - img [ref=e117]
+          - generic [ref=e119] [cursor=pointer]: Inventario
+          - img [ref=e120]
+          - generic [ref=e122]: Vacunas
+        - generic [ref=e123]:
+          - button "Ver notificaciones" [ref=e125] [cursor=pointer]:
+            - img [ref=e126]
+          - button "JQ José Luis Quispe León Administrador" [ref=e131] [cursor=pointer]:
+            - generic [ref=e133]: JQ
+            - generic [ref=e134]:
+              - paragraph [ref=e135]: José Luis Quispe León
+              - paragraph [ref=e136]: Administrador
+            - img [ref=e137]
+    - main [ref=e139]:
+      - main [ref=e140]:
+        - generic [ref=e141]:
+          - generic [ref=e142]:
+            - generic [ref=e145]:
+              - img [ref=e147]
+              - generic [ref=e150]:
+                - heading "Inventario" [level=1] [ref=e151]
+                - paragraph [ref=e152]: Catálogos, lotes y asignaciones organizados por tipo de trabajo.
+            - navigation "Secciones de inventario" [ref=e153]:
+              - generic [ref=e154]:
+                - generic [ref=e155]:
+                  - generic [ref=e156]:
+                    - img [ref=e157]
+                    - paragraph [ref=e159]: Catálogos
+                  - generic [ref=e160]:
+                    - button "Vacunas Maestro de vacunas" [ref=e161] [cursor=pointer]:
+                      - img [ref=e162]
+                      - generic [ref=e165]:
+                        - generic [ref=e166]: Vacunas
+                        - generic [ref=e167]: Maestro de vacunas
+                    - button "Jeringas Maestro de jeringas" [ref=e168] [cursor=pointer]:
+                      - img [ref=e169]
+                      - generic [ref=e176]:
+                        - generic [ref=e177]: Jeringas
+                        - generic [ref=e178]: Maestro de jeringas
+                - generic [ref=e179]:
+                  - generic [ref=e180]:
+                    - img [ref=e181]
+                    - paragraph [ref=e184]: Lotes
+                  - generic [ref=e185]:
+                    - button "Vacunas Stock y vencimientos por lote" [ref=e186] [cursor=pointer]:
+                      - img [ref=e187]
+                      - generic [ref=e190]:
+                        - generic [ref=e191]: Vacunas
+                        - generic [ref=e192]: Stock y vencimientos por lote
+                    - button "Jeringas Stock y trazabilidad por lote" [ref=e193] [cursor=pointer]:
+                      - img [ref=e194]
+                      - generic [ref=e197]:
+                        - generic [ref=e198]: Jeringas
+                        - generic [ref=e199]: Stock y trazabilidad por lote
+                - generic [ref=e200]:
+                  - generic [ref=e201]:
+                    - img [ref=e202]
+                    - paragraph [ref=e205]: Configuración
+                  - button "Asignación Relación vacuna y jeringa" [ref=e207] [cursor=pointer]:
+                    - img [ref=e208]
+                    - generic [ref=e211]:
+                      - generic [ref=e212]: Asignación
+                      - generic [ref=e213]: Relación vacuna y jeringa
+          - generic [ref=e216]:
+            - region "Estadisticas" [ref=e217]:
+              - generic [ref=e219]:
+                - generic [ref=e220]:
+                  - paragraph [ref=e221]: Total vacunas
+                  - paragraph [ref=e222]: "22"
+                - img [ref=e224]
+              - generic [ref=e228]:
+                - generic [ref=e229]:
+                  - paragraph [ref=e230]: Activas
+                  - paragraph [ref=e231]: "20"
+                - img [ref=e233]
+              - generic [ref=e237]:
+                - generic [ref=e238]:
+                  - paragraph [ref=e239]: Con stock
+                  - paragraph [ref=e240]: "17"
+                - img [ref=e242]
+              - generic [ref=e246]:
+                - generic [ref=e247]:
+                  - paragraph [ref=e248]: Sin stock
+                  - paragraph [ref=e249]: "5"
+                - img [ref=e251]
+            - region "Filtros" [ref=e253]:
+              - generic [ref=e254]:
+                - generic [ref=e255]:
+                  - generic [ref=e256]: Buscar
+                  - generic [ref=e257]:
+                    - img
+                    - textbox "Buscar" [ref=e258]:
+                      - /placeholder: Buscar por nombre, tipo o presentación
+                - generic [ref=e259]:
+                  - generic [ref=e260]: Estado
+                  - combobox "Estado" [ref=e261]:
+                    - option "Todos los estados" [selected]
+                    - option "Activo"
+                    - option "Inactivo"
+                - generic [ref=e262]:
+                  - button "Actualizar" [ref=e263] [cursor=pointer]:
+                    - img [ref=e264]
+                    - generic [ref=e269]: Actualizar
+                  - button "Nueva vacuna" [ref=e270] [cursor=pointer]:
+                    - img [ref=e271]
+                    - generic [ref=e272]: Nueva vacuna
+            - table [ref=e276]:
+              - rowgroup [ref=e277]:
+                - row "Vacuna Detalle Stock Lotes Estado Acciones" [ref=e278]:
+                  - columnheader "Vacuna" [ref=e279]
+                  - columnheader "Detalle" [ref=e280]
+                  - columnheader "Stock" [ref=e281]
+                  - columnheader "Lotes" [ref=e282]
+                  - columnheader "Estado" [ref=e283]
+                  - columnheader "Acciones" [ref=e284]
+              - rowgroup [ref=e285]:
+                - row "AMA 10 dosis por frasco VACUNA ANTIAMARILICA 1000 DL/0.5 ML INY 10 DOSIS Frasco 10 dosis 338 2 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e286]:
+                  - cell "AMA 10 dosis por frasco" [ref=e287]:
+                    - button "AMA 10 dosis por frasco" [ref=e288] [cursor=pointer]:
+                      - img [ref=e290]
+                      - generic [ref=e293]:
+                        - paragraph [ref=e294]: AMA
+                        - paragraph [ref=e295]: 10 dosis por frasco
+                  - cell "VACUNA ANTIAMARILICA 1000 DL/0.5 ML INY 10 DOSIS Frasco 10 dosis" [ref=e296]:
+                    - paragraph [ref=e297]: VACUNA ANTIAMARILICA 1000 DL/0.5 ML INY 10 DOSIS
+                    - paragraph [ref=e298]: Frasco 10 dosis
+                  - cell "338" [ref=e299]
+                  - cell "2 act. 0 pv 0 venc." [ref=e300]:
+                    - generic [ref=e301]:
+                      - generic [ref=e302]: 2 act.
+                      - generic [ref=e303]: 0 pv
+                      - generic [ref=e304]: 0 venc.
+                  - cell "Activo" [ref=e305]:
+                    - generic [ref=e306]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e307]:
+                    - generic [ref=e308]:
+                      - button "Ver detalles" [ref=e309] [cursor=pointer]:
+                        - img [ref=e310]
+                      - button "Editar" [ref=e313] [cursor=pointer]:
+                        - img [ref=e314]
+                      - button "Eliminar" [ref=e317] [cursor=pointer]:
+                        - img [ref=e318]
+                - row "APO 20 dosis por frasco VACUNA ANTIPOLIOMIELITICA BIVALENTE TIPO 1 Y 3 SUSPENSION ORAL 20 DOSIS Frasco 20 dosis 113 1 act. 1 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e321]:
+                  - cell "APO 20 dosis por frasco" [ref=e322]:
+                    - button "APO 20 dosis por frasco" [ref=e323] [cursor=pointer]:
+                      - img [ref=e325]
+                      - generic [ref=e328]:
+                        - paragraph [ref=e329]: APO
+                        - paragraph [ref=e330]: 20 dosis por frasco
+                  - cell "VACUNA ANTIPOLIOMIELITICA BIVALENTE TIPO 1 Y 3 SUSPENSION ORAL 20 DOSIS Frasco 20 dosis" [ref=e331]:
+                    - paragraph [ref=e332]: VACUNA ANTIPOLIOMIELITICA BIVALENTE TIPO 1 Y 3 SUSPENSION ORAL 20 DOSIS
+                    - paragraph [ref=e333]: Frasco 20 dosis
+                  - cell "113" [ref=e334]
+                  - cell "1 act. 1 pv 0 venc." [ref=e335]:
+                    - generic [ref=e336]:
+                      - generic [ref=e337]: 1 act.
+                      - generic [ref=e338]: 1 pv
+                      - generic [ref=e339]: 0 venc.
+                  - cell "Activo" [ref=e340]:
+                    - generic [ref=e341]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e342]:
+                    - generic [ref=e343]:
+                      - button "Ver detalles" [ref=e344] [cursor=pointer]:
+                        - img [ref=e345]
+                      - button "Editar" [ref=e348] [cursor=pointer]:
+                        - img [ref=e349]
+                      - button "Eliminar" [ref=e352] [cursor=pointer]:
+                        - img [ref=e353]
+                - row "BCG 10 dosis por frasco VACUNA ANTITUBERCULOSA (BCG) 3200000 U/0.1 ML INY 10 DOSIS Frasco 10 dosis 326 1 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e356]:
+                  - cell "BCG 10 dosis por frasco" [ref=e357]:
+                    - button "BCG 10 dosis por frasco" [ref=e358] [cursor=pointer]:
+                      - img [ref=e360]
+                      - generic [ref=e363]:
+                        - paragraph [ref=e364]: BCG
+                        - paragraph [ref=e365]: 10 dosis por frasco
+                  - cell "VACUNA ANTITUBERCULOSA (BCG) 3200000 U/0.1 ML INY 10 DOSIS Frasco 10 dosis" [ref=e366]:
+                    - paragraph [ref=e367]: VACUNA ANTITUBERCULOSA (BCG) 3200000 U/0.1 ML INY 10 DOSIS
+                    - paragraph [ref=e368]: Frasco 10 dosis
+                  - cell "326" [ref=e369]
+                  - cell "1 act. 0 pv 0 venc." [ref=e370]:
+                    - generic [ref=e371]:
+                      - generic [ref=e372]: 1 act.
+                      - generic [ref=e373]: 0 pv
+                      - generic [ref=e374]: 0 venc.
+                  - cell "Activo" [ref=e375]:
+                    - generic [ref=e376]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e377]:
+                    - generic [ref=e378]:
+                      - button "Ver detalles" [ref=e379] [cursor=pointer]:
+                        - img [ref=e380]
+                      - button "Editar" [ref=e383] [cursor=pointer]:
+                        - img [ref=e384]
+                      - button "Eliminar" [ref=e387] [cursor=pointer]:
+                        - img [ref=e388]
+                - row "DPT 10 dosis por frasco VACUNA CONTRA DIFTERIA TETANOS Y TOS FERINA (DPT TRIPLE) INY 10 DOSIS Frasco 10 dosis 208 1 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e391]:
+                  - cell "DPT 10 dosis por frasco" [ref=e392]:
+                    - button "DPT 10 dosis por frasco" [ref=e393] [cursor=pointer]:
+                      - img [ref=e395]
+                      - generic [ref=e398]:
+                        - paragraph [ref=e399]: DPT
+                        - paragraph [ref=e400]: 10 dosis por frasco
+                  - cell "VACUNA CONTRA DIFTERIA TETANOS Y TOS FERINA (DPT TRIPLE) INY 10 DOSIS Frasco 10 dosis" [ref=e401]:
+                    - paragraph [ref=e402]: VACUNA CONTRA DIFTERIA TETANOS Y TOS FERINA (DPT TRIPLE) INY 10 DOSIS
+                    - paragraph [ref=e403]: Frasco 10 dosis
+                  - cell "208" [ref=e404]
+                  - cell "1 act. 0 pv 0 venc." [ref=e405]:
+                    - generic [ref=e406]:
+                      - generic [ref=e407]: 1 act.
+                      - generic [ref=e408]: 0 pv
+                      - generic [ref=e409]: 0 venc.
+                  - cell "Activo" [ref=e410]:
+                    - generic [ref=e411]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e412]:
+                    - generic [ref=e413]:
+                      - button "Ver detalles" [ref=e414] [cursor=pointer]:
+                        - img [ref=e415]
+                      - button "Editar" [ref=e418] [cursor=pointer]:
+                        - img [ref=e419]
+                      - button "Eliminar" [ref=e422] [cursor=pointer]:
+                        - img [ref=e423]
+                - row "DPTA 1 dosis por frasco VACUNA DPTA ACELULAR Frasco 160 1 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e426]:
+                  - cell "DPTA 1 dosis por frasco" [ref=e427]:
+                    - button "DPTA 1 dosis por frasco" [ref=e428] [cursor=pointer]:
+                      - img [ref=e430]
+                      - generic [ref=e433]:
+                        - paragraph [ref=e434]: DPTA
+                        - paragraph [ref=e435]: 1 dosis por frasco
+                  - cell "VACUNA DPTA ACELULAR Frasco" [ref=e436]:
+                    - paragraph [ref=e437]: VACUNA DPTA ACELULAR
+                    - paragraph [ref=e438]: Frasco
+                  - cell "160" [ref=e439]
+                  - cell "1 act. 0 pv 0 venc." [ref=e440]:
+                    - generic [ref=e441]:
+                      - generic [ref=e442]: 1 act.
+                      - generic [ref=e443]: 0 pv
+                      - generic [ref=e444]: 0 venc.
+                  - cell "Activo" [ref=e445]:
+                    - generic [ref=e446]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e447]:
+                    - generic [ref=e448]:
+                      - button "Ver detalles" [ref=e449] [cursor=pointer]:
+                        - img [ref=e450]
+                      - button "Editar" [ref=e453] [cursor=pointer]:
+                        - img [ref=e454]
+                      - button "Eliminar" [ref=e457] [cursor=pointer]:
+                        - img [ref=e458]
+                - row "Dt Adulto 10 dosis por frasco VACUNA CONTRA LA DIFTERIA Y TETANOS (DT ADULTO) INY 10 DOSIS Frasco 10 dosis 328 1 act. 0 pv 1 venc. Activo Ver detalles Editar Eliminar" [ref=e461]:
+                  - cell "Dt Adulto 10 dosis por frasco" [ref=e462]:
+                    - button "Dt Adulto 10 dosis por frasco" [ref=e463] [cursor=pointer]:
+                      - img [ref=e465]
+                      - generic [ref=e468]:
+                        - paragraph [ref=e469]: Dt Adulto
+                        - paragraph [ref=e470]: 10 dosis por frasco
+                  - cell "VACUNA CONTRA LA DIFTERIA Y TETANOS (DT ADULTO) INY 10 DOSIS Frasco 10 dosis" [ref=e471]:
+                    - paragraph [ref=e472]: VACUNA CONTRA LA DIFTERIA Y TETANOS (DT ADULTO) INY 10 DOSIS
+                    - paragraph [ref=e473]: Frasco 10 dosis
+                  - cell "328" [ref=e474]
+                  - cell "1 act. 0 pv 1 venc." [ref=e475]:
+                    - generic [ref=e476]:
+                      - generic [ref=e477]: 1 act.
+                      - generic [ref=e478]: 0 pv
+                      - generic [ref=e479]: 1 venc.
+                  - cell "Activo" [ref=e480]:
+                    - generic [ref=e481]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e482]:
+                    - generic [ref=e483]:
+                      - button "Ver detalles" [ref=e484] [cursor=pointer]:
+                        - img [ref=e485]
+                      - button "Editar" [ref=e488] [cursor=pointer]:
+                        - img [ref=e489]
+                      - button "Eliminar" [ref=e492] [cursor=pointer]:
+                        - img [ref=e493]
+                - row "Dt Pediatrico 10 dosis por frasco VACUNA CONTRA LA DIFTERIA Y TETANOS (DT PEDIATRICO) INY 10 DOSIS Frasco 10 dosis 0 0 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e496]:
+                  - cell "Dt Pediatrico 10 dosis por frasco" [ref=e497]:
+                    - button "Dt Pediatrico 10 dosis por frasco" [ref=e498] [cursor=pointer]:
+                      - img [ref=e500]
+                      - generic [ref=e503]:
+                        - paragraph [ref=e504]: Dt Pediatrico
+                        - paragraph [ref=e505]: 10 dosis por frasco
+                  - cell "VACUNA CONTRA LA DIFTERIA Y TETANOS (DT PEDIATRICO) INY 10 DOSIS Frasco 10 dosis" [ref=e506]:
+                    - paragraph [ref=e507]: VACUNA CONTRA LA DIFTERIA Y TETANOS (DT PEDIATRICO) INY 10 DOSIS
+                    - paragraph [ref=e508]: Frasco 10 dosis
+                  - cell "0" [ref=e509]
+                  - cell "0 act. 0 pv 0 venc." [ref=e510]:
+                    - generic [ref=e511]:
+                      - generic [ref=e512]: 0 act.
+                      - generic [ref=e513]: 0 pv
+                      - generic [ref=e514]: 0 venc.
+                  - cell "Activo" [ref=e515]:
+                    - generic [ref=e516]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e517]:
+                    - generic [ref=e518]:
+                      - button "Ver detalles" [ref=e519] [cursor=pointer]:
+                        - img [ref=e520]
+                      - button "Editar" [ref=e523] [cursor=pointer]:
+                        - img [ref=e524]
+                      - button "Eliminar" [ref=e527] [cursor=pointer]:
+                        - img [ref=e528]
+                - row "HEPATITIS A 1 dosis por frasco VACUNA CONTRA LA HEPATITIS A 720 UI/0.5 ML INY 1 DOSIS Frasco unidosis 214 1 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e531]:
+                  - cell "HEPATITIS A 1 dosis por frasco" [ref=e532]:
+                    - button "HEPATITIS A 1 dosis por frasco" [ref=e533] [cursor=pointer]:
+                      - img [ref=e535]
+                      - generic [ref=e538]:
+                        - paragraph [ref=e539]: HEPATITIS A
+                        - paragraph [ref=e540]: 1 dosis por frasco
+                  - cell "VACUNA CONTRA LA HEPATITIS A 720 UI/0.5 ML INY 1 DOSIS Frasco unidosis" [ref=e541]:
+                    - paragraph [ref=e542]: VACUNA CONTRA LA HEPATITIS A 720 UI/0.5 ML INY 1 DOSIS
+                    - paragraph [ref=e543]: Frasco unidosis
+                  - cell "214" [ref=e544]
+                  - cell "1 act. 0 pv 0 venc." [ref=e545]:
+                    - generic [ref=e546]:
+                      - generic [ref=e547]: 1 act.
+                      - generic [ref=e548]: 0 pv
+                      - generic [ref=e549]: 0 venc.
+                  - cell "Activo" [ref=e550]:
+                    - generic [ref=e551]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e552]:
+                    - generic [ref=e553]:
+                      - button "Ver detalles" [ref=e554] [cursor=pointer]:
+                        - img [ref=e555]
+                      - button "Editar" [ref=e558] [cursor=pointer]:
+                        - img [ref=e559]
+                      - button "Eliminar" [ref=e562] [cursor=pointer]:
+                        - img [ref=e563]
+                - row "HIB 1 dosis por frasco Vacuna Frasco 0 0 act. 0 pv 0 venc. Inactivo Ver detalles Editar Eliminar" [ref=e566]:
+                  - cell "HIB 1 dosis por frasco" [ref=e567]:
+                    - button "HIB 1 dosis por frasco" [ref=e568] [cursor=pointer]:
+                      - img [ref=e570]
+                      - generic [ref=e573]:
+                        - paragraph [ref=e574]: HIB
+                        - paragraph [ref=e575]: 1 dosis por frasco
+                  - cell "Vacuna Frasco" [ref=e576]:
+                    - paragraph [ref=e577]: Vacuna
+                    - paragraph [ref=e578]: Frasco
+                  - cell "0" [ref=e579]
+                  - cell "0 act. 0 pv 0 venc." [ref=e580]:
+                    - generic [ref=e581]:
+                      - generic [ref=e582]: 0 act.
+                      - generic [ref=e583]: 0 pv
+                      - generic [ref=e584]: 0 venc.
+                  - cell "Inactivo" [ref=e585]:
+                    - generic [ref=e586]: Inactivo
+                  - cell "Ver detalles Editar Eliminar" [ref=e587]:
+                    - generic [ref=e588]:
+                      - button "Ver detalles" [ref=e589] [cursor=pointer]:
+                        - img [ref=e590]
+                      - button "Editar" [ref=e593] [cursor=pointer]:
+                        - img [ref=e594]
+                      - button "Eliminar" [ref=e597] [cursor=pointer]:
+                        - img [ref=e598]
+                - row "HVB Adulto 1 dosis por frasco VACUNA CONTRA LA HEPATITIS B ADULTO 20 UG/ML INY 1 DOSIS Frasco unidosis 307 1 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e601]:
+                  - cell "HVB Adulto 1 dosis por frasco" [ref=e602]:
+                    - button "HVB Adulto 1 dosis por frasco" [ref=e603] [cursor=pointer]:
+                      - img [ref=e605]
+                      - generic [ref=e608]:
+                        - paragraph [ref=e609]: HVB Adulto
+                        - paragraph [ref=e610]: 1 dosis por frasco
+                  - cell "VACUNA CONTRA LA HEPATITIS B ADULTO 20 UG/ML INY 1 DOSIS Frasco unidosis" [ref=e611]:
+                    - paragraph [ref=e612]: VACUNA CONTRA LA HEPATITIS B ADULTO 20 UG/ML INY 1 DOSIS
+                    - paragraph [ref=e613]: Frasco unidosis
+                  - cell "307" [ref=e614]
+                  - cell "1 act. 0 pv 0 venc." [ref=e615]:
+                    - generic [ref=e616]:
+                      - generic [ref=e617]: 1 act.
+                      - generic [ref=e618]: 0 pv
+                      - generic [ref=e619]: 0 venc.
+                  - cell "Activo" [ref=e620]:
+                    - generic [ref=e621]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e622]:
+                    - generic [ref=e623]:
+                      - button "Ver detalles" [ref=e624] [cursor=pointer]:
+                        - img [ref=e625]
+                      - button "Editar" [ref=e628] [cursor=pointer]:
+                        - img [ref=e629]
+                      - button "Eliminar" [ref=e632] [cursor=pointer]:
+                        - img [ref=e633]
+                - row "HVB Pediatrico 1 dosis por frasco VACUNA CONTRA LA HEPATITIS B 10 UG/0.5 ML INY 1 DOSIS Frasco unidosis 321 1 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e636]:
+                  - cell "HVB Pediatrico 1 dosis por frasco" [ref=e637]:
+                    - button "HVB Pediatrico 1 dosis por frasco" [ref=e638] [cursor=pointer]:
+                      - img [ref=e640]
+                      - generic [ref=e643]:
+                        - paragraph [ref=e644]: HVB Pediatrico
+                        - paragraph [ref=e645]: 1 dosis por frasco
+                  - cell "VACUNA CONTRA LA HEPATITIS B 10 UG/0.5 ML INY 1 DOSIS Frasco unidosis" [ref=e646]:
+                    - paragraph [ref=e647]: VACUNA CONTRA LA HEPATITIS B 10 UG/0.5 ML INY 1 DOSIS
+                    - paragraph [ref=e648]: Frasco unidosis
+                  - cell "321" [ref=e649]
+                  - cell "1 act. 0 pv 0 venc." [ref=e650]:
+                    - generic [ref=e651]:
+                      - generic [ref=e652]: 1 act.
+                      - generic [ref=e653]: 0 pv
+                      - generic [ref=e654]: 0 venc.
+                  - cell "Activo" [ref=e655]:
+                    - generic [ref=e656]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e657]:
+                    - generic [ref=e658]:
+                      - button "Ver detalles" [ref=e659] [cursor=pointer]:
+                        - img [ref=e660]
+                      - button "Editar" [ref=e663] [cursor=pointer]:
+                        - img [ref=e664]
+                      - button "Eliminar" [ref=e667] [cursor=pointer]:
+                        - img [ref=e668]
+                - row "Influenza Adulto 1 dosis por frasco VACUNA CONTRA LA INFLUENZA ESTACIONARIA - ADULTO 1 DOSIS (0.5 ML) Frasco unidosis 0 0 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e671]:
+                  - cell "Influenza Adulto 1 dosis por frasco" [ref=e672]:
+                    - button "Influenza Adulto 1 dosis por frasco" [ref=e673] [cursor=pointer]:
+                      - img [ref=e675]
+                      - generic [ref=e678]:
+                        - paragraph [ref=e679]: Influenza Adulto
+                        - paragraph [ref=e680]: 1 dosis por frasco
+                  - cell "VACUNA CONTRA LA INFLUENZA ESTACIONARIA - ADULTO 1 DOSIS (0.5 ML) Frasco unidosis" [ref=e681]:
+                    - paragraph [ref=e682]: VACUNA CONTRA LA INFLUENZA ESTACIONARIA - ADULTO 1 DOSIS (0.5 ML)
+                    - paragraph [ref=e683]: Frasco unidosis
+                  - cell "0" [ref=e684]
+                  - cell "0 act. 0 pv 0 venc." [ref=e685]:
+                    - generic [ref=e686]:
+                      - generic [ref=e687]: 0 act.
+                      - generic [ref=e688]: 0 pv
+                      - generic [ref=e689]: 0 venc.
+                  - cell "Activo" [ref=e690]:
+                    - generic [ref=e691]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e692]:
+                    - generic [ref=e693]:
+                      - button "Ver detalles" [ref=e694] [cursor=pointer]:
+                        - img [ref=e695]
+                      - button "Editar" [ref=e698] [cursor=pointer]:
+                        - img [ref=e699]
+                      - button "Eliminar" [ref=e702] [cursor=pointer]:
+                        - img [ref=e703]
+                - row "Influenza Pediatrica 20 dosis por frasco VACUNA CONTRA LA INFLUENZA (ANTIGENO TIPO A (H1N1 + H3N2) + ANTIGENO TIPO B) INY 20 DOSIS PEDIÁTRICO Frasco 20 dosis 0 0 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e706]:
+                  - cell "Influenza Pediatrica 20 dosis por frasco" [ref=e707]:
+                    - button "Influenza Pediatrica 20 dosis por frasco" [ref=e708] [cursor=pointer]:
+                      - img [ref=e710]
+                      - generic [ref=e713]:
+                        - paragraph [ref=e714]: Influenza Pediatrica
+                        - paragraph [ref=e715]: 20 dosis por frasco
+                  - cell "VACUNA CONTRA LA INFLUENZA (ANTIGENO TIPO A (H1N1 + H3N2) + ANTIGENO TIPO B) INY 20 DOSIS PEDIÁTRICO Frasco 20 dosis" [ref=e716]:
+                    - paragraph [ref=e717]: VACUNA CONTRA LA INFLUENZA (ANTIGENO TIPO A (H1N1 + H3N2) + ANTIGENO TIPO B) INY 20 DOSIS PEDIÁTRICO
+                    - paragraph [ref=e718]: Frasco 20 dosis
+                  - cell "0" [ref=e719]
+                  - cell "0 act. 0 pv 0 venc." [ref=e720]:
+                    - generic [ref=e721]:
+                      - generic [ref=e722]: 0 act.
+                      - generic [ref=e723]: 0 pv
+                      - generic [ref=e724]: 0 venc.
+                  - cell "Activo" [ref=e725]:
+                    - generic [ref=e726]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e727]:
+                    - generic [ref=e728]:
+                      - button "Ver detalles" [ref=e729] [cursor=pointer]:
+                        - img [ref=e730]
+                      - button "Editar" [ref=e733] [cursor=pointer]:
+                        - img [ref=e734]
+                      - button "Eliminar" [ref=e737] [cursor=pointer]:
+                        - img [ref=e738]
+                - row "IPV 1 dosis por frasco VACUNA ANTIPOLIOMIELITICA 80 LF/0.5 ML INY 1 DOSIS Frasco unidosis 4,451 4 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e741]:
+                  - cell "IPV 1 dosis por frasco" [ref=e742]:
+                    - button "IPV 1 dosis por frasco" [ref=e743] [cursor=pointer]:
+                      - img [ref=e745]
+                      - generic [ref=e748]:
+                        - paragraph [ref=e749]: IPV
+                        - paragraph [ref=e750]: 1 dosis por frasco
+                  - cell "VACUNA ANTIPOLIOMIELITICA 80 LF/0.5 ML INY 1 DOSIS Frasco unidosis" [ref=e751]:
+                    - paragraph [ref=e752]: VACUNA ANTIPOLIOMIELITICA 80 LF/0.5 ML INY 1 DOSIS
+                    - paragraph [ref=e753]: Frasco unidosis
+                  - cell "4,451" [ref=e754]
+                  - cell "4 act. 0 pv 0 venc." [ref=e755]:
+                    - generic [ref=e756]:
+                      - generic [ref=e757]: 4 act.
+                      - generic [ref=e758]: 0 pv
+                      - generic [ref=e759]: 0 venc.
+                  - cell "Activo" [ref=e760]:
+                    - generic [ref=e761]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e762]:
+                    - generic [ref=e763]:
+                      - button "Ver detalles" [ref=e764] [cursor=pointer]:
+                        - img [ref=e765]
+                      - button "Editar" [ref=e768] [cursor=pointer]:
+                        - img [ref=e769]
+                      - button "Eliminar" [ref=e772] [cursor=pointer]:
+                        - img [ref=e773]
+                - row "Neumococo 1 dosis por frasco VACUNA ANTINEUMOCOCICA CONJUGADA 13-VALENTE INY 1 DOSIS Frasco unidosis 6,232 3 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e776]:
+                  - cell "Neumococo 1 dosis por frasco" [ref=e777]:
+                    - button "Neumococo 1 dosis por frasco" [ref=e778] [cursor=pointer]:
+                      - img [ref=e780]
+                      - generic [ref=e783]:
+                        - paragraph [ref=e784]: Neumococo
+                        - paragraph [ref=e785]: 1 dosis por frasco
+                  - cell "VACUNA ANTINEUMOCOCICA CONJUGADA 13-VALENTE INY 1 DOSIS Frasco unidosis" [ref=e786]:
+                    - paragraph [ref=e787]: VACUNA ANTINEUMOCOCICA CONJUGADA 13-VALENTE INY 1 DOSIS
+                    - paragraph [ref=e788]: Frasco unidosis
+                  - cell "6,232" [ref=e789]
+                  - cell "3 act. 0 pv 0 venc." [ref=e790]:
+                    - generic [ref=e791]:
+                      - generic [ref=e792]: 3 act.
+                      - generic [ref=e793]: 0 pv
+                      - generic [ref=e794]: 0 venc.
+                  - cell "Activo" [ref=e795]:
+                    - generic [ref=e796]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e797]:
+                    - generic [ref=e798]:
+                      - button "Ver detalles" [ref=e799] [cursor=pointer]:
+                        - img [ref=e800]
+                      - button "Editar" [ref=e803] [cursor=pointer]:
+                        - img [ref=e804]
+                      - button "Eliminar" [ref=e807] [cursor=pointer]:
+                        - img [ref=e808]
+                - row "Pentavalente 1 dosis por frasco VACUNA DPT HIB Y VHB (PENTAVALENTE) INY 1 DOSIS Frasco unidosis 1,568 2 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e811]:
+                  - cell "Pentavalente 1 dosis por frasco" [ref=e812]:
+                    - button "Pentavalente 1 dosis por frasco" [ref=e813] [cursor=pointer]:
+                      - img [ref=e815]
+                      - generic [ref=e818]:
+                        - paragraph [ref=e819]: Pentavalente
+                        - paragraph [ref=e820]: 1 dosis por frasco
+                  - cell "VACUNA DPT HIB Y VHB (PENTAVALENTE) INY 1 DOSIS Frasco unidosis" [ref=e821]:
+                    - paragraph [ref=e822]: VACUNA DPT HIB Y VHB (PENTAVALENTE) INY 1 DOSIS
+                    - paragraph [ref=e823]: Frasco unidosis
+                  - cell "1,568" [ref=e824]
+                  - cell "2 act. 0 pv 0 venc." [ref=e825]:
+                    - generic [ref=e826]:
+                      - generic [ref=e827]: 2 act.
+                      - generic [ref=e828]: 0 pv
+                      - generic [ref=e829]: 0 venc.
+                  - cell "Activo" [ref=e830]:
+                    - generic [ref=e831]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e832]:
+                    - generic [ref=e833]:
+                      - button "Ver detalles" [ref=e834] [cursor=pointer]:
+                        - img [ref=e835]
+                      - button "Editar" [ref=e838] [cursor=pointer]:
+                        - img [ref=e839]
+                      - button "Eliminar" [ref=e842] [cursor=pointer]:
+                        - img [ref=e843]
+                - row "Rotavirus 1 dosis por frasco VACUNA CONTRA EL ROTAVIRUS PLV 1 DOSIS Frasco unidosis 1,404 2 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e846]:
+                  - cell "Rotavirus 1 dosis por frasco" [ref=e847]:
+                    - button "Rotavirus 1 dosis por frasco" [ref=e848] [cursor=pointer]:
+                      - img [ref=e850]
+                      - generic [ref=e853]:
+                        - paragraph [ref=e854]: Rotavirus
+                        - paragraph [ref=e855]: 1 dosis por frasco
+                  - cell "VACUNA CONTRA EL ROTAVIRUS PLV 1 DOSIS Frasco unidosis" [ref=e856]:
+                    - paragraph [ref=e857]: VACUNA CONTRA EL ROTAVIRUS PLV 1 DOSIS
+                    - paragraph [ref=e858]: Frasco unidosis
+                  - cell "1,404" [ref=e859]
+                  - cell "2 act. 0 pv 0 venc." [ref=e860]:
+                    - generic [ref=e861]:
+                      - generic [ref=e862]: 2 act.
+                      - generic [ref=e863]: 0 pv
+                      - generic [ref=e864]: 0 venc.
+                  - cell "Activo" [ref=e865]:
+                    - generic [ref=e866]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e867]:
+                    - generic [ref=e868]:
+                      - button "Ver detalles" [ref=e869] [cursor=pointer]:
+                        - img [ref=e870]
+                      - button "Editar" [ref=e873] [cursor=pointer]:
+                        - img [ref=e874]
+                      - button "Eliminar" [ref=e877] [cursor=pointer]:
+                        - img [ref=e878]
+                - row "SPR X 1 DOSIS 1 dosis por frasco VACUNA ANTIPAROTIDITIS RUBEOLA Y SARAMPION 700 DCI/0.5 ML INY 1 DOSIS Frasco unidosis 828 1 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e881]:
+                  - cell "SPR X 1 DOSIS 1 dosis por frasco" [ref=e882]:
+                    - button "SPR X 1 DOSIS 1 dosis por frasco" [ref=e883] [cursor=pointer]:
+                      - img [ref=e885]
+                      - generic [ref=e888]:
+                        - paragraph [ref=e889]: SPR X 1 DOSIS
+                        - paragraph [ref=e890]: 1 dosis por frasco
+                  - cell "VACUNA ANTIPAROTIDITIS RUBEOLA Y SARAMPION 700 DCI/0.5 ML INY 1 DOSIS Frasco unidosis" [ref=e891]:
+                    - paragraph [ref=e892]: VACUNA ANTIPAROTIDITIS RUBEOLA Y SARAMPION 700 DCI/0.5 ML INY 1 DOSIS
+                    - paragraph [ref=e893]: Frasco unidosis
+                  - cell "828" [ref=e894]
+                  - cell "1 act. 0 pv 0 venc." [ref=e895]:
+                    - generic [ref=e896]:
+                      - generic [ref=e897]: 1 act.
+                      - generic [ref=e898]: 0 pv
+                      - generic [ref=e899]: 0 venc.
+                  - cell "Activo" [ref=e900]:
+                    - generic [ref=e901]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e902]:
+                    - generic [ref=e903]:
+                      - button "Ver detalles" [ref=e904] [cursor=pointer]:
+                        - img [ref=e905]
+                      - button "Editar" [ref=e908] [cursor=pointer]:
+                        - img [ref=e909]
+                      - button "Eliminar" [ref=e912] [cursor=pointer]:
+                        - img [ref=e913]
+                - row "SPR X 5 DOSIS 5 dosis por frasco VACUNA ANTIPAROTIDITIS RUBEOLA Y SARAMPION 5 DOSIS Frasco 5 dosis 283 1 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e916]:
+                  - cell "SPR X 5 DOSIS 5 dosis por frasco" [ref=e917]:
+                    - button "SPR X 5 DOSIS 5 dosis por frasco" [ref=e918] [cursor=pointer]:
+                      - img [ref=e920]
+                      - generic [ref=e923]:
+                        - paragraph [ref=e924]: SPR X 5 DOSIS
+                        - paragraph [ref=e925]: 5 dosis por frasco
+                  - cell "VACUNA ANTIPAROTIDITIS RUBEOLA Y SARAMPION 5 DOSIS Frasco 5 dosis" [ref=e926]:
+                    - paragraph [ref=e927]: VACUNA ANTIPAROTIDITIS RUBEOLA Y SARAMPION 5 DOSIS
+                    - paragraph [ref=e928]: Frasco 5 dosis
+                  - cell "283" [ref=e929]
+                  - cell "1 act. 0 pv 0 venc." [ref=e930]:
+                    - generic [ref=e931]:
+                      - generic [ref=e932]: 1 act.
+                      - generic [ref=e933]: 0 pv
+                      - generic [ref=e934]: 0 venc.
+                  - cell "Activo" [ref=e935]:
+                    - generic [ref=e936]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e937]:
+                    - generic [ref=e938]:
+                      - button "Ver detalles" [ref=e939] [cursor=pointer]:
+                        - img [ref=e940]
+                      - button "Editar" [ref=e943] [cursor=pointer]:
+                        - img [ref=e944]
+                      - button "Eliminar" [ref=e947] [cursor=pointer]:
+                        - img [ref=e948]
+                - row "Varicela 1 dosis por frasco VACUNA ANTIVARICELA 1350 UFP/0.5 ML INY 0.7 ML Frasco 23 1 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e951]:
+                  - cell "Varicela 1 dosis por frasco" [ref=e952]:
+                    - button "Varicela 1 dosis por frasco" [ref=e953] [cursor=pointer]:
+                      - img [ref=e955]
+                      - generic [ref=e958]:
+                        - paragraph [ref=e959]: Varicela
+                        - paragraph [ref=e960]: 1 dosis por frasco
+                  - cell "VACUNA ANTIVARICELA 1350 UFP/0.5 ML INY 0.7 ML Frasco" [ref=e961]:
+                    - paragraph [ref=e962]: VACUNA ANTIVARICELA 1350 UFP/0.5 ML INY 0.7 ML
+                    - paragraph [ref=e963]: Frasco
+                  - cell "23" [ref=e964]
+                  - cell "1 act. 0 pv 0 venc." [ref=e965]:
+                    - generic [ref=e966]:
+                      - generic [ref=e967]: 1 act.
+                      - generic [ref=e968]: 0 pv
+                      - generic [ref=e969]: 0 venc.
+                  - cell "Activo" [ref=e970]:
+                    - generic [ref=e971]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e972]:
+                    - generic [ref=e973]:
+                      - button "Ver detalles" [ref=e974] [cursor=pointer]:
+                        - img [ref=e975]
+                      - button "Editar" [ref=e978] [cursor=pointer]:
+                        - img [ref=e979]
+                      - button "Eliminar" [ref=e982] [cursor=pointer]:
+                        - img [ref=e983]
+                - row "VIRUELA 1 dosis por frasco VIRUELA SIMICA Frasco 0 0 act. 0 pv 0 venc. Inactivo Ver detalles Editar Eliminar" [ref=e986]:
+                  - cell "VIRUELA 1 dosis por frasco" [ref=e987]:
+                    - button "VIRUELA 1 dosis por frasco" [ref=e988] [cursor=pointer]:
+                      - img [ref=e990]
+                      - generic [ref=e993]:
+                        - paragraph [ref=e994]: VIRUELA
+                        - paragraph [ref=e995]: 1 dosis por frasco
+                  - cell "VIRUELA SIMICA Frasco" [ref=e996]:
+                    - paragraph [ref=e997]: VIRUELA SIMICA
+                    - paragraph [ref=e998]: Frasco
+                  - cell "0" [ref=e999]
+                  - cell "0 act. 0 pv 0 venc." [ref=e1000]:
+                    - generic [ref=e1001]:
+                      - generic [ref=e1002]: 0 act.
+                      - generic [ref=e1003]: 0 pv
+                      - generic [ref=e1004]: 0 venc.
+                  - cell "Inactivo" [ref=e1005]:
+                    - generic [ref=e1006]: Inactivo
+                  - cell "Ver detalles Editar Eliminar" [ref=e1007]:
+                    - generic [ref=e1008]:
+                      - button "Ver detalles" [ref=e1009] [cursor=pointer]:
+                        - img [ref=e1010]
+                      - button "Editar" [ref=e1013] [cursor=pointer]:
+                        - img [ref=e1014]
+                      - button "Eliminar" [ref=e1017] [cursor=pointer]:
+                        - img [ref=e1018]
+                - row "VPH 1 dosis por frasco VACUNA DEL VIRUS DEL PAPILOMA HUMANO Frasco 5,513 2 act. 0 pv 0 venc. Activo Ver detalles Editar Eliminar" [ref=e1021]:
+                  - cell "VPH 1 dosis por frasco" [ref=e1022]:
+                    - button "VPH 1 dosis por frasco" [ref=e1023] [cursor=pointer]:
+                      - img [ref=e1025]
+                      - generic [ref=e1028]:
+                        - paragraph [ref=e1029]: VPH
+                        - paragraph [ref=e1030]: 1 dosis por frasco
+                  - cell "VACUNA DEL VIRUS DEL PAPILOMA HUMANO Frasco" [ref=e1031]:
+                    - paragraph [ref=e1032]: VACUNA DEL VIRUS DEL PAPILOMA HUMANO
+                    - paragraph [ref=e1033]: Frasco
+                  - cell "5,513" [ref=e1034]
+                  - cell "2 act. 0 pv 0 venc." [ref=e1035]:
+                    - generic [ref=e1036]:
+                      - generic [ref=e1037]: 2 act.
+                      - generic [ref=e1038]: 0 pv
+                      - generic [ref=e1039]: 0 venc.
+                  - cell "Activo" [ref=e1040]:
+                    - generic [ref=e1041]: Activo
+                  - cell "Ver detalles Editar Eliminar" [ref=e1042]:
+                    - generic [ref=e1043]:
+                      - button "Ver detalles" [ref=e1044] [cursor=pointer]:
+                        - img [ref=e1045]
+                      - button "Editar" [ref=e1048] [cursor=pointer]:
+                        - img [ref=e1049]
+                      - button "Eliminar" [ref=e1052] [cursor=pointer]:
+                        - img [ref=e1053]

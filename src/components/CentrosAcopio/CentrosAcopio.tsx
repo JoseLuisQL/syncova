@@ -1,25 +1,41 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { Building, Building2, GitBranch, Network, MapPin, Phone, User, Plus } from 'lucide-react';
-import { CentroAcopio, CreateCentroAcopioDto, UpdateCentroAcopioDto } from '../../types';
-import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
-import { useRedes } from '../../hooks/useRedes';
-import { useMicroredes } from '../../hooks/useMicroredes';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Building, Building2, GitBranch, MapPin, Network, Plus, RefreshCw, User } from 'lucide-react';
+import { CentroAcopio, CreateCentroAcopioDto, Microred, UpdateCentroAcopioDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
-import { validateCentroAcopio, sanitizeInput } from '../../utils/validation';
+import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
+import { useMicroredes } from '../../hooks/useMicroredes';
+import { useRedes } from '../../hooks/useRedes';
+import { sanitizeInput, validateCentroAcopio } from '../../utils/validation';
+import { ColorScheme, COMPONENT_STYLES, STATS_CONFIG } from '../Establecimientos/constants';
 import {
-  PageHeader,
-  StatsGrid,
-  StatusBadge,
+  ActionButtons,
   CountBadge,
   EmptyState,
   ErrorAlert,
-  ActionButtons,
-} from '../Establecimientos/components/SharedComponents';
-import { FilterBar, Pagination, DataTable, TableHeader } from '../Establecimientos/components/FilterAndTable';
-import { Modal, ModalFooter, TextInput, TextArea, SelectInput, DeleteConfirmModal } from '../Establecimientos/components/ModalComponents';
-import { COMPONENT_STYLES, ColorScheme } from '../Establecimientos/constants';
+  StatsGrid,
+  StatusBadge,
+} from '../Establecimientos/components';
+import {
+  DataTable,
+  FilterBar,
+  Pagination,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from '../Establecimientos/components';
+import {
+  DeleteConfirmModal,
+  FormSection,
+  Modal,
+  ModalFooter,
+  SelectInput,
+  TextArea,
+  TextInput,
+} from '../Establecimientos/components';
 
 interface CentrosAcopioProps {
+  selectedRedId?: string;
+  selectedRedNombre?: string;
   selectedMicroredId?: string;
   selectedMicroredNombre?: string;
   onNavigateToEstablecimientos?: (centroAcopioId: string, centroAcopioNombre: string) => void;
@@ -27,30 +43,30 @@ interface CentrosAcopioProps {
 
 const TABLE_COLUMNS = [
   { key: 'centro', label: 'Centro de Acopio' },
-  { key: 'codigo', label: 'Codigo' },
-  { key: 'microred', label: 'Microred' },
+  { key: 'codigo', label: 'Código' },
+  { key: 'microred', label: 'Cobertura territorial' },
   { key: 'responsable', label: 'Responsable' },
-  { key: 'direccion', label: 'Direccion' },
-  { key: 'establecimientos', label: 'Establec.' },
-  { key: 'estado', label: 'Estado' },
+  { key: 'direccion', label: 'Dirección' },
+  { key: 'establecimientos', label: 'Establecimientos', align: 'center' as const },
+  { key: 'estado', label: 'Estado', align: 'center' as const },
   { key: 'acciones', label: 'Acciones', align: 'right' as const },
 ];
 
 const ESTADO_OPTIONS = [
-  { value: 'todos', label: 'Todos' },
-  { value: 'activo', label: 'Activos' },
-  { value: 'inactivo', label: 'Inactivos' },
+  { value: 'todos', label: 'Todos los estados' },
+  { value: 'activo', label: 'Activo' },
+  { value: 'inactivo', label: 'Inactivo' },
 ];
 
 const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
-  selectedMicroredId,
-  selectedMicroredNombre,
+  selectedRedId = '',
+  selectedMicroredId = '',
   onNavigateToEstablecimientos,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState('todos');
-  const [filterRedId, setFilterRedId] = useState('');
-  const [filterMicroredId, setFilterMicroredId] = useState(selectedMicroredId || '');
+  const [filterRedId, setFilterRedId] = useState(selectedRedId);
+  const [filterMicroredId, setFilterMicroredId] = useState(selectedMicroredId);
   const [showModal, setShowModal] = useState(false);
   const [editingCentro, setEditingCentro] = useState<CentroAcopio | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
@@ -58,6 +74,7 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
     id: string;
     nombre: string;
   }>({ isOpen: false, id: '', nombre: '' });
+  const filterInitRef = useRef(false);
 
   const {
     centrosAcopio,
@@ -68,6 +85,7 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
     totalPages,
     filters,
     setFilters,
+    fetchCentrosAcopio,
     createCentroAcopio,
     updateCentroAcopio,
     deleteCentroAcopio,
@@ -78,45 +96,120 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
   const { toast } = useToastContext();
 
   useEffect(() => {
-    if (selectedMicroredId && selectedMicroredId !== filterMicroredId) {
-      setFilterMicroredId(selectedMicroredId);
-    }
-  }, [selectedMicroredId]);
+    setFilterRedId(selectedRedId || '');
+  }, [selectedRedId]);
 
-  // Clear microred filter when red changes
   useEffect(() => {
-    if (filterRedId !== filters.redId) {
-      setFilterMicroredId('');
-    }
-  }, [filterRedId]);
-
-  // Debounced filter application
-  React.useEffect(() => {
-    if (!centrosAcopio.length && !searchTerm && filterEstado === 'todos' && !filterRedId && !filterMicroredId) return;
-
-    const timeoutId = setTimeout(() => {
-      const newFilters: Record<string, string> = {};
-      if (filterEstado !== 'todos') newFilters.estado = filterEstado;
-      if (filterRedId) newFilters.redId = filterRedId;
-      if (filterMicroredId) newFilters.microredId = filterMicroredId;
-      if (searchTerm.trim()) newFilters.search = searchTerm.trim();
-      setFilters(newFilters);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [filterEstado, filterRedId, filterMicroredId, searchTerm]);
+    setFilterMicroredId(selectedMicroredId || '');
+  }, [selectedMicroredId]);
 
   const microredesFiltradas = useMemo(() => {
     if (!filterRedId) return microredes;
-    return microredes.filter(m => m.redId === filterRedId);
-  }, [microredes, filterRedId]);
+    return microredes.filter((microred) => microred.redId === filterRedId);
+  }, [filterRedId, microredes]);
 
-  const stats = useMemo(() => [
-    { key: 'total', label: 'Total Centros', value: total, icon: Building, color: 'primary' as ColorScheme },
-    { key: 'activos', label: 'Activos', value: centrosAcopio.filter(c => c.estado === 'activo').length, icon: Building, color: 'success' as ColorScheme },
-    { key: 'conEstablecimientos', label: 'Con Establec.', value: centrosAcopio.filter(c => (c._count?.establecimientos || 0) > 0).length, icon: Building2, color: 'warning' as ColorScheme },
-    { key: 'inactivos', label: 'Inactivos', value: centrosAcopio.filter(c => c.estado === 'inactivo').length, icon: Building, color: 'danger' as ColorScheme },
-  ], [centrosAcopio, total]);
+  useEffect(() => {
+    if (filterMicroredId && !microredesFiltradas.some((microred) => microred.id === filterMicroredId)) {
+      setFilterMicroredId(selectedMicroredId || '');
+    }
+  }, [filterMicroredId, microredesFiltradas, selectedMicroredId]);
+
+  useEffect(() => {
+    const isFirstRun = !filterInitRef.current;
+    filterInitRef.current = true;
+
+    if (isFirstRun && !searchTerm && filterEstado === 'todos' && !filterRedId && !filterMicroredId) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const nextFilters: Record<string, string> = {};
+      if (filterRedId) nextFilters.redId = filterRedId;
+      if (filterMicroredId) nextFilters.microredId = filterMicroredId;
+      if (filterEstado !== 'todos') nextFilters.estado = filterEstado;
+      if (searchTerm.trim()) nextFilters.search = searchTerm.trim();
+      setFilters(nextFilters);
+    }, 320);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [filterEstado, filterMicroredId, filterRedId, searchTerm, setFilters]);
+
+  const stats = useMemo(
+    () => [
+      { ...STATS_CONFIG.centrosAcopio[0], value: total, color: STATS_CONFIG.centrosAcopio[0].color as ColorScheme },
+      {
+        ...STATS_CONFIG.centrosAcopio[1],
+        value: centrosAcopio.filter((centro) => centro.estado === 'activo').length,
+        color: STATS_CONFIG.centrosAcopio[1].color as ColorScheme,
+      },
+      {
+        ...STATS_CONFIG.centrosAcopio[2],
+        value: centrosAcopio.filter((centro) => (centro._count?.establecimientos || 0) > 0).length,
+        color: STATS_CONFIG.centrosAcopio[2].color as ColorScheme,
+      },
+      {
+        ...STATS_CONFIG.centrosAcopio[3],
+        value: centrosAcopio.filter((centro) => centro.estado === 'inactivo').length,
+        color: STATS_CONFIG.centrosAcopio[3].color as ColorScheme,
+      },
+    ],
+    [centrosAcopio, total],
+  );
+
+  const redesOptions = useMemo(
+    () => [{ value: '', label: 'Todas las redes' }, ...redes.map((red) => ({ value: red.id, label: red.nombre }))],
+    [redes],
+  );
+
+  const microredesOptions = useMemo(
+    () => [
+      { value: '', label: 'Todas las microredes' },
+      ...microredesFiltradas.map((microred) => ({ value: microred.id, label: microred.nombre })),
+    ],
+    [microredesFiltradas],
+  );
+
+  const filtersConfig = useMemo(
+    () => [
+      {
+        id: 'centro-red',
+        label: 'Red',
+        value: filterRedId,
+        options: redesOptions,
+        onChange: (value: string) => {
+          setFilterRedId(value);
+          if (!value) {
+            setFilterMicroredId(selectedMicroredId || '');
+            return;
+          }
+
+          if (selectedMicroredId) {
+            const selectedMicrored = microredes.find((microred) => microred.id === selectedMicroredId);
+            setFilterMicroredId(selectedMicrored?.redId === value ? selectedMicroredId : '');
+            return;
+          }
+
+          setFilterMicroredId('');
+        },
+      },
+      {
+        id: 'centro-microred',
+        label: 'Microred',
+        value: filterMicroredId,
+        options: microredesOptions,
+        onChange: setFilterMicroredId,
+        disabled: !filterRedId && microredesOptions.length <= 1,
+      },
+      {
+        id: 'centro-estado',
+        label: 'Estado',
+        value: filterEstado,
+        options: ESTADO_OPTIONS,
+        onChange: setFilterEstado,
+      },
+    ],
+    [filterEstado, filterMicroredId, filterRedId, microredes, microredesOptions, redesOptions, selectedMicroredId],
+  );
 
   const handleOpenModal = useCallback((centro?: CentroAcopio) => {
     setEditingCentro(centro || null);
@@ -128,135 +221,188 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
     setEditingCentro(null);
   }, []);
 
-  const handleDelete = useCallback((id: string, nombre: string) => {
-    setDeleteConfirmation({ isOpen: true, id, nombre });
+  const handleSubmit = useCallback(
+    async (formData: CreateCentroAcopioDto | UpdateCentroAcopioDto) => {
+      if (editingCentro) {
+        const success = await updateCentroAcopio(editingCentro.id, formData as UpdateCentroAcopioDto);
+        if (!success) {
+          toast.error('No se pudo actualizar el centro de acopio', 'Revise los datos e intente nuevamente.');
+          return;
+        }
+
+        toast.success('Centro actualizado', 'Los cambios se guardaron correctamente.');
+      } else {
+        const success = await createCentroAcopio(formData as CreateCentroAcopioDto);
+        if (!success) {
+          toast.error('No se pudo crear el centro de acopio', 'Revise los datos e intente nuevamente.');
+          return;
+        }
+
+        toast.success('Centro de acopio creado', 'El nuevo centro se registró correctamente.');
+      }
+
+      handleCloseModal();
+    },
+    [createCentroAcopio, editingCentro, handleCloseModal, toast, updateCentroAcopio],
+  );
+
+  const handleDelete = useCallback((centro: CentroAcopio) => {
+    setDeleteConfirmation({ isOpen: true, id: centro.id, nombre: centro.nombre });
   }, []);
 
   const confirmDelete = useCallback(async () => {
     const success = await deleteCentroAcopio(deleteConfirmation.id);
-    if (success) {
-      toast.success('Centro eliminado', `"${deleteConfirmation.nombre}" ha sido eliminado.`);
-    } else {
-      toast.error('Error al eliminar', 'Verifique que no tenga establecimientos asociados.');
+
+    if (!success) {
+      toast.error('No se pudo eliminar el centro de acopio', 'Verifique que no tenga establecimientos asociados.');
+      return;
     }
+
+    toast.success('Centro de acopio eliminado', `"${deleteConfirmation.nombre}" fue eliminado.`);
     setDeleteConfirmation({ isOpen: false, id: '', nombre: '' });
-  }, [deleteConfirmation, deleteCentroAcopio, toast]);
+  }, [deleteCentroAcopio, deleteConfirmation.id, deleteConfirmation.nombre, toast]);
 
-  const handleSubmit = useCallback(async (formData: CreateCentroAcopioDto | UpdateCentroAcopioDto) => {
-    if (editingCentro) {
-      const success = await updateCentroAcopio(editingCentro.id, formData as UpdateCentroAcopioDto);
-      if (success) {
-        toast.success('Centro actualizado', 'Los cambios se guardaron correctamente.');
-        handleCloseModal();
-      } else {
-        toast.error('Error al actualizar', 'No se pudieron guardar los cambios.');
-      }
-    } else {
-      const success = await createCentroAcopio(formData as CreateCentroAcopioDto);
-      if (success) {
-        toast.success('Centro creado', 'El nuevo centro se registro correctamente.');
-        handleCloseModal();
-      } else {
-        toast.error('Error al crear', 'No se pudo crear el centro.');
-      }
-    }
-  }, [editingCentro, updateCentroAcopio, createCentroAcopio, toast, handleCloseModal]);
+  const handleClearFilters = useCallback(() => {
+    const baseFilters: Record<string, string> = {};
+    if (selectedRedId) baseFilters.redId = selectedRedId;
+    if (selectedMicroredId) baseFilters.microredId = selectedMicroredId;
 
-  const changePage = useCallback((page: number) => {
+    setSearchTerm('');
+    setFilterEstado('todos');
+    setFilterRedId(selectedRedId || '');
+    setFilterMicroredId(selectedMicroredId || '');
+    setFilters(baseFilters);
+  }, [selectedMicroredId, selectedRedId, setFilters]);
+
+  const handlePageChange = useCallback((page: number) => {
     setFilters({ ...filters, page });
   }, [filters, setFilters]);
 
-  const redesOptions = useMemo(() => [
-    { value: '', label: 'Todas las redes' },
-    ...redes.map(r => ({ value: r.id, label: r.nombre })),
-  ], [redes]);
+  const desktopTable = (
+    <DataTable
+      isLoading={loading}
+      loadingMessage="Cargando centros de acopio..."
+      skeletonRows={5}
+      skeletonColumns={TABLE_COLUMNS.length}
+      loadingVariant="table"
+    >
+      <table className="min-w-full divide-y divide-slate-200">
+        <TableHeader columns={TABLE_COLUMNS} />
+        <tbody className="divide-y divide-slate-100">
+          {centrosAcopio.length === 0 ? (
+            <tr>
+              <td colSpan={TABLE_COLUMNS.length}>
+                <EmptyState
+                  icon={Building2}
+                  title="No se encontraron centros de acopio"
+                  description="Ajuste los filtros o registre un nuevo centro."
+                  action={{ label: 'Nuevo centro', onClick: () => handleOpenModal() }}
+                />
+              </td>
+            </tr>
+          ) : (
+            centrosAcopio.map((centro) => (
+              <CentroDesktopRow
+                key={centro.id}
+                centro={centro}
+                onEdit={() => handleOpenModal(centro)}
+                onDelete={() => handleDelete(centro)}
+                onNavigate={onNavigateToEstablecimientos}
+                isLoading={loading}
+              />
+            ))
+          )}
+        </tbody>
+      </table>
 
-  const microredesOptions = useMemo(() => [
-    { value: '', label: 'Todas las microredes' },
-    ...microredesFiltradas.map(m => ({ value: m.id, label: m.nombre })),
-  ], [microredesFiltradas]);
-
-  const filterConfigs = useMemo(() => [
-    { id: 'red', label: 'Red', value: filterRedId, options: redesOptions, onChange: setFilterRedId },
-    { id: 'microred', label: 'Microred', value: filterMicroredId, options: microredesOptions, onChange: setFilterMicroredId, disabled: !filterRedId },
-    { id: 'estado', label: 'Estado', value: filterEstado, options: ESTADO_OPTIONS, onChange: setFilterEstado },
-  ], [filterRedId, filterMicroredId, filterEstado, redesOptions, microredesOptions]);
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        total={total}
+        limit={filters.limit || 10}
+        onPageChange={handlePageChange}
+      />
+    </DataTable>
+  );
 
   return (
-    <div className="p-5 sm:p-6">
-      {error && <ErrorAlert message={error} />}
+    <div className="space-y-4">
+      {error ? <ErrorAlert message={error} onRetry={() => void fetchCentrosAcopio()} /> : null}
 
-      <PageHeader
-        title={selectedMicroredNombre ? `Centros de Acopio - ${selectedMicroredNombre}` : 'Centros de Acopio'}
-        subtitle="Puntos estrategicos de distribucion"
-        icon={Building}
-        count={total}
-        action={{
-          label: 'Nuevo Centro',
-          onClick: () => handleOpenModal(),
-          icon: Plus,
-          isLoading: loading,
-        }}
-      />
+      <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+        <div className="space-y-4">
+          <StatsGrid stats={stats} isLoading={loading} />
 
-      <StatsGrid stats={stats} />
-
-      <div className="space-y-5">
-        <FilterBar
-          searchValue={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Buscar por nombre, codigo o responsable..."
-          filters={filterConfigs}
-        />
-
-        <DataTable isLoading={loading} loadingMessage="Cargando centros de acopio...">
-          <table className="min-w-full divide-y divide-gray-200">
-            <TableHeader columns={TABLE_COLUMNS} />
-            <tbody className="divide-y divide-gray-100">
-              {centrosAcopio.length === 0 && !loading ? (
-                <tr>
-                  <td colSpan={8}>
-                    <EmptyState
-                      icon={Building}
-                      title="No se encontraron centros de acopio"
-                      description="Intente ajustar los filtros o cree uno nuevo"
-                    />
-                  </td>
-                </tr>
-              ) : (
-                centrosAcopio.map((centro) => (
-                  <CentroRow
-                    key={centro.id}
-                    centro={centro}
-                    onEdit={() => handleOpenModal(centro)}
-                    onDelete={() => handleDelete(centro.id, centro.nombre)}
-                    onNavigate={onNavigateToEstablecimientos}
-                    isLoading={loading}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
-
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            total={total}
-            limit={filters.limit || 10}
-            onPageChange={changePage}
+          <FilterBar
+            searchValue={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchPlaceholder="Buscar por nombre, código o responsable"
+            filters={filtersConfig}
+            onClear={handleClearFilters}
+            actions={
+              <>
+                <button
+                  type="button"
+                  className={COMPONENT_STYLES.button.secondary}
+                  onClick={() => void fetchCentrosAcopio()}
+                  disabled={loading}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Actualizar</span>
+                </button>
+                <button
+                  type="button"
+                  className={COMPONENT_STYLES.button.primary}
+                  onClick={() => handleOpenModal()}
+                  disabled={loading}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Nuevo centro</span>
+                </button>
+              </>
+            }
           />
-        </DataTable>
-      </div>
 
-      {showModal && (
+          <div className="hidden lg:block">{desktopTable}</div>
+
+          <div className="space-y-3 lg:hidden">
+            {loading ? (
+              <DataTable isLoading loadingMessage="Cargando centros de acopio..." skeletonRows={4} loadingVariant="cards" />
+            ) : centrosAcopio.length === 0 ? (
+              <div className={COMPONENT_STYLES.panel}>
+                <EmptyState
+                  icon={Building2}
+                  title="No se encontraron centros de acopio"
+                  description="Ajuste los filtros o registre un nuevo centro."
+                  action={{ label: 'Nuevo centro', onClick: () => handleOpenModal() }}
+                />
+              </div>
+            ) : (
+              centrosAcopio.map((centro) => (
+                <CentroMobileCard
+                  key={centro.id}
+                  centro={centro}
+                  onEdit={() => handleOpenModal(centro)}
+                  onDelete={() => handleDelete(centro)}
+                  onNavigate={onNavigateToEstablecimientos}
+                  isLoading={loading}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {showModal ? (
         <CentroModal
           centro={editingCentro}
           microredes={microredes}
+          defaultMicroredId={selectedMicroredId}
           onClose={handleCloseModal}
           onSubmit={handleSubmit}
           isLoading={loading}
         />
-      )}
+      ) : null}
 
       <DeleteConfirmModal
         isOpen={deleteConfirmation.isOpen}
@@ -271,10 +417,6 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
   );
 };
 
-// ============================================================================
-// TABLE ROW COMPONENT
-// ============================================================================
-
 interface CentroRowProps {
   centro: CentroAcopio;
   onEdit: () => void;
@@ -283,7 +425,7 @@ interface CentroRowProps {
   isLoading?: boolean;
 }
 
-const CentroRow: React.FC<CentroRowProps> = memo(({
+const CentroDesktopRow: React.FC<CentroRowProps> = memo(({
   centro,
   onEdit,
   onDelete,
@@ -291,88 +433,146 @@ const CentroRow: React.FC<CentroRowProps> = memo(({
   isLoading = false,
 }) => {
   const establecimientosCount = centro._count?.establecimientos || 0;
-  const canDelete = establecimientosCount === 0;
 
   return (
-    <tr className={COMPONENT_STYLES.table.row}>
-      <td className={COMPONENT_STYLES.table.cell}>
+    <TableRow>
+      <TableCell>
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 flex items-center justify-center flex-shrink-0">
-            <Building className="h-5 w-5 text-amber-600" aria-hidden="true" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
+            <Building className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{centro.nombre}</p>
+            <p className="truncate text-sm font-semibold text-slate-900">{centro.nombre}</p>
+            <p className="text-xs text-slate-500">{centro.codigo || 'Sin código registrado'}</p>
           </div>
         </div>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <span className="text-sm text-gray-900">{centro.codigo || '-'}</span>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <div>
-          <div className="flex items-center gap-2">
-            <GitBranch className="h-4 w-4 text-gray-400 flex-shrink-0" />
-            <span className="text-sm text-gray-900">{centro.microred?.nombre || 'Sin microred'}</span>
+      </TableCell>
+      <TableCell>
+        <span className="text-sm font-medium text-slate-900">{centro.codigo || '-'}</span>
+      </TableCell>
+      <TableCell>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm text-slate-700">
+            <GitBranch className="h-4 w-4 text-slate-400" aria-hidden="true" />
+            <span>{centro.microred?.nombre || 'Sin microred asignada'}</span>
           </div>
-          {centro.microred?.red && (
-            <div className="flex items-center gap-2 mt-0.5">
-              <Network className="h-3 w-3 text-gray-300 flex-shrink-0" />
-              <span className="text-xs text-gray-500">{centro.microred.red.nombre}</span>
+          {centro.microred?.red ? (
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <Network className="h-3.5 w-3.5 text-slate-300" aria-hidden="true" />
+              <span>{centro.microred.red.nombre}</span>
             </div>
-          )}
+          ) : null}
         </div>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <div className="flex items-center gap-2">
-          <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
-          <span className="text-sm text-gray-900">{centro.responsable || '-'}</span>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2 text-sm text-slate-700">
+          <User className="h-4 w-4 text-slate-400" aria-hidden="true" />
+          <span>{centro.responsable || 'Sin responsable'}</span>
         </div>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
-          <span className="text-sm text-gray-600 max-w-[150px] truncate">{centro.direccion || '-'}</span>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2 text-sm text-slate-600">
+          <MapPin className="h-4 w-4 text-slate-400" aria-hidden="true" />
+          <span className="max-w-[220px] truncate">{centro.direccion || 'Sin dirección registrada'}</span>
         </div>
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
+      </TableCell>
+      <TableCell align="center">
         <CountBadge count={establecimientosCount} icon={Building2} />
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <StatusBadge status={centro.estado as 'activo' | 'inactivo'} />
-      </td>
-      <td className={COMPONENT_STYLES.table.cell}>
-        <div className="flex items-center justify-end gap-1">
-          {onNavigate && establecimientosCount > 0 && (
+      </TableCell>
+      <TableCell align="center">
+        <StatusBadge status={centro.estado} />
+      </TableCell>
+      <TableCell align="right">
+        <div className="flex items-center justify-end gap-2">
+          {onNavigate && establecimientosCount > 0 ? (
             <button
+              type="button"
               onClick={() => onNavigate(centro.id, centro.nombre)}
-              className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconView}`}
+              className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconNavigate}`}
               title="Ver establecimientos"
+              aria-label={`Ver establecimientos de ${centro.nombre}`}
             >
-              <Building2 className="h-4 w-4" />
+              <Building2 className="h-4 w-4" aria-hidden="true" />
             </button>
-          )}
+          ) : null}
           <ActionButtons
             onEdit={onEdit}
             onDelete={onDelete}
             isLoading={isLoading}
-            canDelete={canDelete}
-            deleteTooltip="No se puede eliminar: tiene establecimientos asociados"
+            canDelete={establecimientosCount === 0}
+            deleteTooltip="No se puede eliminar: tiene establecimientos asociados."
           />
         </div>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 });
 
-CentroRow.displayName = 'CentroRow';
+CentroDesktopRow.displayName = 'CentroDesktopRow';
 
-// ============================================================================
-// MODAL COMPONENT
-// ============================================================================
+const CentroMobileCard: React.FC<CentroRowProps> = memo(({
+  centro,
+  onEdit,
+  onDelete,
+  onNavigate,
+  isLoading = false,
+}) => {
+  const establecimientosCount = centro._count?.establecimientos || 0;
+
+  return (
+    <article className={`${COMPONENT_STYLES.panel} p-4`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-base font-semibold text-slate-950">{centro.nombre}</p>
+          <p className="mt-1 text-sm text-slate-500">{centro.microred?.nombre || 'Sin microred asignada'}</p>
+        </div>
+        <StatusBadge status={centro.estado} />
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Establecimientos</p>
+          <p className="mt-2 text-lg font-semibold text-slate-900">{establecimientosCount}</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Responsable</p>
+          <p className="mt-2 text-sm font-medium text-slate-900">{centro.responsable || '-'}</p>
+        </div>
+      </div>
+
+      <p className="mt-3 text-sm text-slate-600">{centro.direccion || 'Sin dirección registrada.'}</p>
+
+      <div className="mt-4 flex items-center justify-between gap-3">
+        {onNavigate && establecimientosCount > 0 ? (
+          <button
+            type="button"
+            className={COMPONENT_STYLES.button.secondary}
+            onClick={() => onNavigate(centro.id, centro.nombre)}
+          >
+            <Building2 className="h-4 w-4" />
+            <span>Ver establecimientos</span>
+          </button>
+        ) : (
+          <div />
+        )}
+        <ActionButtons
+          onEdit={onEdit}
+          onDelete={onDelete}
+          isLoading={isLoading}
+          canDelete={establecimientosCount === 0}
+          deleteTooltip="No se puede eliminar: tiene establecimientos asociados."
+        />
+      </div>
+    </article>
+  );
+});
+
+CentroMobileCard.displayName = 'CentroMobileCard';
 
 interface CentroModalProps {
   centro: CentroAcopio | null;
-  microredes: any[];
+  microredes: Microred[];
+  defaultMicroredId?: string;
   onClose: () => void;
   onSubmit: (data: CreateCentroAcopioDto | UpdateCentroAcopioDto) => Promise<void>;
   isLoading?: boolean;
@@ -381,6 +581,7 @@ interface CentroModalProps {
 const CentroModal: React.FC<CentroModalProps> = ({
   centro,
   microredes,
+  defaultMicroredId = '',
   onClose,
   onSubmit,
   isLoading = false,
@@ -388,16 +589,29 @@ const CentroModal: React.FC<CentroModalProps> = ({
   const [formData, setFormData] = useState({
     nombre: centro?.nombre || '',
     codigo: centro?.codigo || '',
-    microredId: centro?.microredId || '',
+    microredId: centro?.microredId || defaultMicroredId,
     direccion: centro?.direccion || '',
     responsable: centro?.responsable || '',
     telefono: centro?.telefono || '',
-    ...(centro && { estado: centro.estado }),
+    estado: centro?.estado || 'activo',
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateForm = useCallback(() => {
+  const microredesOptions = useMemo(
+    () =>
+      microredes.map((microred) => ({
+        value: microred.id,
+        label: microred.red ? `${microred.nombre} (${microred.red.nombre})` : microred.nombre,
+      })),
+    [microredes],
+  );
+
+  const handleFieldChange = useCallback((field: keyof typeof formData, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: '' }));
+  }, []);
+
+  const handleSubmit = useCallback(async () => {
     const sanitizedData = {
       nombre: sanitizeInput(formData.nombre),
       codigo: formData.codigo ? sanitizeInput(formData.codigo) : '',
@@ -405,132 +619,125 @@ const CentroModal: React.FC<CentroModalProps> = ({
       responsable: sanitizeInput(formData.responsable),
       telefono: formData.telefono ? sanitizeInput(formData.telefono) : '',
       microredId: formData.microredId,
-      ...(centro && { estado: formData.estado }),
+      ...(centro ? { estado: formData.estado as 'activo' | 'inactivo' } : {}),
     };
 
     const validation = validateCentroAcopio(sanitizedData);
-    setErrors(validation.errors);
-
-    if (validation.isValid) {
-      setFormData(prev => ({
-        ...prev,
-        nombre: sanitizedData.nombre,
-        codigo: sanitizedData.codigo,
-        direccion: sanitizedData.direccion,
-        responsable: sanitizedData.responsable,
-        telefono: sanitizedData.telefono,
-      }));
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      return;
     }
 
-    return validation.isValid;
-  }, [formData, centro]);
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    const submitData = { ...formData };
-    if (!centro) delete (submitData as any).estado;
-    await onSubmit(submitData);
-  }, [formData, centro, validateForm, onSubmit]);
-
-  const handleFieldChange = useCallback((field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
-  }, [errors]);
-
-  const microredesOptions = useMemo(() => 
-    microredes.map(m => ({ 
-      value: m.id, 
-      label: m.red ? `${m.nombre} (${m.red.nombre})` : m.nombre 
-    })), 
-  [microredes]);
+    await onSubmit(sanitizedData);
+  }, [centro, formData, onSubmit]);
 
   return (
     <Modal
-      isOpen={true}
+      isOpen
       onClose={onClose}
-      title={centro ? 'Editar Centro de Acopio' : 'Nuevo Centro de Acopio'}
-      subtitle={centro ? 'Actualizar informacion' : 'Registrar nuevo punto de distribucion'}
-      icon={Building}
+      title={centro ? 'Editar centro de acopio' : 'Nuevo centro de acopio'}
+      subtitle={
+        centro
+          ? 'Mantén actualizado el punto logístico sin perder la relación territorial.'
+          : 'Registra un nuevo centro logístico dentro de la microred correspondiente.'
+      }
+      icon={Building2}
       size="xl"
       footer={
         <ModalFooter
           onCancel={onClose}
-          submitLabel={centro ? 'Actualizar' : 'Crear'}
+          onSubmit={handleSubmit}
+          submitType="button"
+          submitLabel={centro ? 'Guardar cambios' : 'Crear centro'}
           isLoading={isLoading}
         />
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <TextInput
-            id="nombre"
-            label="Nombre"
-            value={formData.nombre}
-            onChange={(v) => handleFieldChange('nombre', v)}
-            required
-            error={errors.nombre}
-          />
-          <TextInput
-            id="codigo"
-            label="Codigo"
-            value={formData.codigo}
-            onChange={(v) => handleFieldChange('codigo', v)}
-            placeholder="Opcional"
-          />
-          <SelectInput
-            id="microredId"
-            label="Microred"
-            value={formData.microredId}
-            onChange={(v) => handleFieldChange('microredId', v)}
-            options={microredesOptions}
-            placeholder="Seleccionar microred..."
-          />
-          <TextInput
-            id="responsable"
-            label="Responsable"
-            value={formData.responsable}
-            onChange={(v) => handleFieldChange('responsable', v)}
-            required
-            error={errors.responsable}
-          />
-          <TextInput
-            id="telefono"
-            label="Telefono"
-            value={formData.telefono}
-            onChange={(v) => handleFieldChange('telefono', v)}
-            type="tel"
-            placeholder="Opcional"
-          />
-          {centro && (
-            <SelectInput
-              id="estado"
-              label="Estado"
-              value={formData.estado || 'activo'}
-              onChange={(v) => handleFieldChange('estado', v)}
-              options={[
-                { value: 'activo', label: 'Activo' },
-                { value: 'inactivo', label: 'Inactivo' },
-              ]}
+      <div className="space-y-4">
+        <FormSection title="Identificación" description="Datos básicos para reconocer el centro en los listados.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextInput
+              id="centro-nombre"
+              label="Nombre"
+              value={formData.nombre}
+              onChange={(value) => handleFieldChange('nombre', value)}
+              placeholder="Ej: Centro de Acopio Chicmo"
+              required
+              error={errors.nombre}
             />
-          )}
-        </div>
+            <TextInput
+              id="centro-codigo"
+              label="Código"
+              value={formData.codigo}
+              onChange={(value) => handleFieldChange('codigo', value)}
+              placeholder="Opcional"
+              error={errors.codigo}
+            />
+          </div>
+        </FormSection>
 
-        <TextArea
-          id="direccion"
-          label="Direccion"
-          value={formData.direccion}
-          onChange={(v) => handleFieldChange('direccion', v)}
-          placeholder="Direccion completa del centro de acopio"
-          required
-          error={errors.direccion}
-        />
+        <FormSection title="Asignación territorial" description="Define la microred que tendrá a cargo el centro de acopio.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <SelectInput
+              id="centro-microred"
+              label="Microred"
+              value={formData.microredId}
+              onChange={(value) => handleFieldChange('microredId', value)}
+              options={microredesOptions}
+              placeholder="Seleccionar microred..."
+              error={errors.microredId}
+              helpText="Incluye el nombre de la red entre paréntesis para evitar confusiones."
+            />
+            {centro ? (
+              <SelectInput
+                id="centro-estado"
+                label="Estado"
+                value={formData.estado}
+                onChange={(value) => handleFieldChange('estado', value)}
+                options={[
+                  { value: 'activo', label: 'Activo' },
+                  { value: 'inactivo', label: 'Inactivo' },
+                ]}
+              />
+            ) : null}
+          </div>
+        </FormSection>
 
-        <button type="submit" className="hidden" />
-      </form>
+        <FormSection title="Contacto y ubicación" description="Información que permite operar el centro con claridad.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextInput
+              id="centro-responsable"
+              label="Responsable"
+              value={formData.responsable}
+              onChange={(value) => handleFieldChange('responsable', value)}
+              placeholder="Nombre del responsable"
+              required
+              error={errors.responsable}
+            />
+            <TextInput
+              id="centro-telefono"
+              label="Teléfono"
+              type="tel"
+              value={formData.telefono}
+              onChange={(value) => handleFieldChange('telefono', value)}
+              placeholder="Opcional"
+            />
+          </div>
+
+          <TextArea
+            id="centro-direccion"
+            label="Dirección"
+            value={formData.direccion}
+            onChange={(value) => handleFieldChange('direccion', value)}
+            placeholder="Dirección completa del centro de acopio."
+            required
+            error={errors.direccion}
+            rows={4}
+          />
+        </FormSection>
+      </div>
     </Modal>
   );
 };
 
-export default CentrosAcopio;
+export default memo(CentrosAcopio);
