@@ -1,0 +1,236 @@
+- generic [ref=e3]:
+  - navigation "Menu principal" [ref=e4]:
+    - generic [ref=e6]:
+      - img "SIVAC Logo" [ref=e8]
+      - generic [ref=e14]:
+        - heading "SIVAC" [level=1] [ref=e15]
+        - paragraph [ref=e16]: Sistema de Vacunas
+    - button "Colapsar menu" [expanded] [ref=e17] [cursor=pointer]:
+      - img [ref=e18]
+    - navigation [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]: Principal
+        - button "Dashboard" [ref=e24] [cursor=pointer]:
+          - img [ref=e26]
+          - generic [ref=e31]: Dashboard
+      - generic [ref=e32]:
+        - generic [ref=e33]: Gestión
+        - generic [ref=e34]:
+          - button "Establecimientos" [ref=e35] [cursor=pointer]:
+            - img [ref=e37]
+            - generic [ref=e41]: Establecimientos
+          - button "Inventario" [ref=e42] [cursor=pointer]:
+            - img [ref=e44]
+            - generic [ref=e48]: Inventario
+          - button "Movimientos" [ref=e49] [cursor=pointer]:
+            - img [ref=e51]
+            - generic [ref=e54]: Movimientos
+          - button "Planificación" [ref=e55] [cursor=pointer]:
+            - img [ref=e57]
+            - generic [ref=e59]: Planificación
+          - button "Kardex" [ref=e60] [cursor=pointer]:
+            - img [ref=e62]
+            - generic [ref=e65]: Kardex
+      - generic [ref=e66]:
+        - generic [ref=e67]: Reportes
+        - generic [ref=e68]:
+          - button "Reportes" [ref=e69] [cursor=pointer]:
+            - img [ref=e71]
+            - generic [ref=e74]: Reportes
+          - button "Alertas" [ref=e75] [cursor=pointer]:
+            - img [ref=e77]
+            - generic [ref=e80]: Alertas
+      - generic [ref=e81]:
+        - generic [ref=e82]: Sistema
+        - generic [ref=e83]:
+          - button "Usuarios" [ref=e84] [cursor=pointer]:
+            - img [ref=e86]
+            - generic [ref=e91]: Usuarios
+          - button "Configuración" [ref=e92] [cursor=pointer]:
+            - img [ref=e94]
+            - generic [ref=e97]: Configuración
+    - generic [ref=e99]:
+      - img [ref=e101]
+      - generic [ref=e104]:
+        - paragraph [ref=e105]: DISA Apurimac II
+        - paragraph [ref=e106]: Estrategia Sanitaria
+  - generic [ref=e107]:
+    - banner [ref=e108]:
+      - generic [ref=e109]:
+        - navigation "Breadcrumb" [ref=e112]:
+          - button "Ir al Dashboard" [ref=e113] [cursor=pointer]:
+            - img [ref=e114]
+          - img [ref=e117]
+          - generic [ref=e119]: Kardex
+        - generic [ref=e120]:
+          - button "Ver notificaciones" [ref=e122] [cursor=pointer]:
+            - img [ref=e123]
+          - button "JQ José Luis Quispe León Administrador" [ref=e128] [cursor=pointer]:
+            - generic [ref=e130]: JQ
+            - generic [ref=e131]:
+              - paragraph [ref=e132]: José Luis Quispe León
+              - paragraph [ref=e133]: Administrador
+            - img [ref=e134]
+    - main [ref=e136]:
+      - main [ref=e137]:
+        - generic [ref=e138]:
+          - generic [ref=e139]: Actualizando resultados del kardex.
+          - generic [ref=e140]:
+            - generic [ref=e142]:
+              - generic [ref=e143]:
+                - img [ref=e145]
+                - generic [ref=e148]:
+                  - generic [ref=e149]:
+                    - heading "Kardex" [level=1] [ref=e150]
+                    - generic [ref=e151]: "0"
+                  - paragraph [ref=e152]: Trazabilidad por lote, documento y saldo operativo dentro del mismo lenguaje visual del sistema.
+              - generic [ref=e153]:
+                - button "Actualizar" [disabled] [ref=e154]:
+                  - img [ref=e155]
+                  - generic [ref=e157]: Actualizar
+                - button "Exportar Excel" [disabled] [ref=e158]:
+                  - img [ref=e159]
+                  - generic [ref=e162]: Exportar Excel
+            - generic [ref=e163]:
+              - paragraph [ref=e164]: Registro operativo de entradas, salidas y ajustes con foco en claridad y trazabilidad.
+              - paragraph [ref=e165]: Seleccione un rango de fechas para exportar.
+          - region "Filtros del kardex" [ref=e166]:
+            - generic [ref=e167]:
+              - generic [ref=e168]:
+                - generic [ref=e169]:
+                  - img [ref=e171]
+                  - generic [ref=e173]:
+                    - generic [ref=e174]:
+                      - heading "Filtrar kardex" [level=2] [ref=e175]
+                      - generic [ref=e176]: "0"
+                    - paragraph [ref=e177]: Busca primero. Luego acota por periodo, movimiento y producto.
+                - button "Más filtros" [ref=e179] [cursor=pointer]:
+                  - img [ref=e180]
+                  - generic [ref=e182]: Más filtros
+              - generic [ref=e183]:
+                - generic [ref=e184]:
+                  - generic [ref=e185]: Buscar
+                  - generic [ref=e186]:
+                    - img
+                    - searchbox "Buscar" [ref=e187]
+                - generic [ref=e189]:
+                  - generic [ref=e190]:
+                    - generic [ref=e191]:
+                      - paragraph [ref=e192]: Periodo
+                      - paragraph [ref=e193]: Necesario para exportar.
+                    - generic [ref=e194]: Define el periodo para exportar.
+                  - generic [ref=e195]:
+                    - generic [ref=e196]:
+                      - generic [ref=e197]: Desde
+                      - generic [ref=e198]:
+                        - img
+                        - textbox "Desde" [ref=e199]
+                    - generic [ref=e200]:
+                      - generic [ref=e201]: Hasta
+                      - generic [ref=e202]:
+                        - img
+                        - textbox "Hasta" [ref=e203]
+                - generic [ref=e204]:
+                  - generic [ref=e205]: Movimiento
+                  - generic [ref=e206]:
+                    - button "Todos los movimientos" [ref=e207] [cursor=pointer]
+                    - button "Ingresos" [ref=e208] [cursor=pointer]
+                    - button "Salidas" [ref=e209] [cursor=pointer]
+                    - button "Transferencias" [ref=e210] [cursor=pointer]
+                    - button "Ajustes" [ref=e211] [cursor=pointer]
+              - generic [ref=e212]:
+                - generic [ref=e213]:
+                  - paragraph [ref=e214]: Producto y lote
+                  - paragraph [ref=e215]: "Sigue este orden: tipo, producto y luego lote."
+                - generic [ref=e216]:
+                  - generic [ref=e217]:
+                    - generic [ref=e218]: Tipo de producto
+                    - combobox "Tipo de producto" [ref=e219]:
+                      - option "Todos los productos" [selected]
+                      - option "Vacunas"
+                      - option "Jeringas"
+                  - generic [ref=e221]:
+                    - generic [ref=e222]: Producto específico
+                    - button "Producto específico" [disabled] [ref=e223]:
+                      - generic [ref=e224]: Seleccione antes el tipo
+                      - img [ref=e225]
+                  - generic [ref=e228]:
+                    - generic [ref=e229]: Lote
+                    - button "Lote" [disabled] [ref=e230]:
+                      - generic [ref=e231]: Seleccione antes un producto
+                      - img [ref=e232]
+          - region "Estadisticas" [ref=e234]:
+            - paragraph [ref=e238]: Ingresos
+            - paragraph [ref=e247]: Salidas
+            - paragraph [ref=e256]: Transferencias
+            - paragraph [ref=e265]: Saldo actual
+          - generic [ref=e271]:
+            - generic [ref=e273]:
+              - generic [ref=e274]:
+                - img [ref=e276]
+                - generic [ref=e279]:
+                  - heading "Movimientos del kardex" [level=2] [ref=e280]
+                  - paragraph [ref=e281]: 0 registros listos para auditoría y seguimiento por lote.
+              - generic [ref=e282]:
+                - img [ref=e283]
+                - generic [ref=e286]: Vista compacta con entrada, salida y saldo.
+            - generic [ref=e289]:
+              - generic [ref=e293]:
+                - paragraph [ref=e294]: Cargando movimientos del kardex...
+                - paragraph [ref=e295]: Mostrando una vista previa mientras llega la información.
+              - table [ref=e297]:
+                - rowgroup [ref=e298]:
+                  - row [ref=e299]:
+                    - cell [ref=e300]
+                    - cell [ref=e304]
+                    - cell [ref=e308]
+                    - cell [ref=e311]
+                    - cell [ref=e314]
+                    - cell [ref=e317]
+                    - cell [ref=e320]
+                    - cell [ref=e323]
+                  - row [ref=e326]:
+                    - cell [ref=e327]
+                    - cell [ref=e331]
+                    - cell [ref=e335]
+                    - cell [ref=e338]
+                    - cell [ref=e341]
+                    - cell [ref=e344]
+                    - cell [ref=e347]
+                    - cell [ref=e350]
+                  - row [ref=e353]:
+                    - cell [ref=e354]
+                    - cell [ref=e358]
+                    - cell [ref=e362]
+                    - cell [ref=e365]
+                    - cell [ref=e368]
+                    - cell [ref=e371]
+                    - cell [ref=e374]
+                    - cell [ref=e377]
+                  - row [ref=e380]:
+                    - cell [ref=e381]
+                    - cell [ref=e385]
+                    - cell [ref=e389]
+                    - cell [ref=e392]
+                    - cell [ref=e395]
+                    - cell [ref=e398]
+                    - cell [ref=e401]
+                    - cell [ref=e404]
+                  - row [ref=e407]:
+                    - cell [ref=e408]
+                    - cell [ref=e412]
+                    - cell [ref=e416]
+                    - cell [ref=e419]
+                    - cell [ref=e422]
+                    - cell [ref=e425]
+                    - cell [ref=e428]
+                    - cell [ref=e431]
+                  - row [ref=e434]:
+                    - cell [ref=e435]
+                    - cell [ref=e439]
+                    - cell [ref=e443]
+                    - cell [ref=e446]
+                    - cell [ref=e449]
+                    - cell [ref=e452]
+                    - cell [ref=e455]
+                    - cell [ref=e458]

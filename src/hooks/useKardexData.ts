@@ -1,368 +1,407 @@
-import { useState, useEffect, useCallback } from 'react';
-import { KardexService, KardexFilters, KardexMovimiento, KardexEstadisticas } from '../services/KardexService';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { KardexEstadisticas, KardexFilters, KardexMovimiento, KardexService } from '../services/KardexService';
 import { LotesService } from '../services/LotesService';
-import { Vacuna, Jeringa, Establecimiento } from '../types';
+import { Establecimiento, Jeringa, Vacuna } from '../types';
 
-/**
- * Estado del hook useKardexData
- */
+interface KardexLote {
+  id: string;
+  numero: string;
+  fechaVencimiento?: Date | null;
+  cantidadActual?: number;
+  cantidadInicial?: number;
+  estado?: string;
+}
+
 interface KardexDataState {
-  // Datos principales
   movimientos: KardexMovimiento[];
   estadisticas: KardexEstadisticas | null;
   total: number;
-
-  // Datos para filtros
   vacunas: Vacuna[];
   jeringas: Jeringa[];
   establecimientos: Establecimiento[];
-  lotes: any[]; // Lotes dinámicos según el item seleccionado
-
-  // Estados de paginación
+  lotes: KardexLote[];
   currentPage: number;
   itemsPerPage: number;
   totalPages: number;
-
-  // Estados de carga
   loading: boolean;
   loadingEstadisticas: boolean;
   loadingFiltros: boolean;
-  
-  // Estados de error
   error: string | null;
   errorEstadisticas: string | null;
   errorFiltros: string | null;
-  
-  // Filtros actuales
   filtros: KardexFilters;
 }
 
-/**
- * Acciones disponibles en el hook
- */
 interface KardexDataActions {
-  // Cargar datos
   cargarMovimientos: (filtros?: KardexFilters) => Promise<void>;
   cargarEstadisticas: (filtros?: Omit<KardexFilters, 'page' | 'limit'>) => Promise<void>;
   cargarDatosFiltros: () => Promise<void>;
   cargarLotes: (tipo: 'vacuna' | 'jeringa', itemId?: string) => Promise<void>;
-
-  // Actualizar filtros
-  actualizarFiltros: (nuevosFiltros: Partial<KardexFilters>) => void;
-  limpiarFiltros: () => void;
-
-  // Paginación
+  actualizarFiltros: (nuevosFiltros: Partial<KardexFilters>) => Promise<void>;
+  limpiarFiltros: () => Promise<void>;
   cambiarPagina: (page: number) => void;
   cambiarItemsPorPagina: (itemsPerPage: number) => void;
   irAPrimeraPagina: () => void;
   irAUltimaPagina: () => void;
-
-  // Refrescar datos
   refrescarTodo: () => Promise<void>;
-
-  // Limpiar errores
   limpiarErrores: () => void;
 }
 
-/**
- * Filtros por defecto - 20 items por página según ISO 25010 (carga cognitiva óptima)
- */
+const DEFAULT_ITEMS_PER_PAGE = 20;
 const FILTROS_DEFECTO: KardexFilters = {
   page: 1,
-  limit: 20, // 20 elementos por página para mejor usabilidad según ISO 25010
+  limit: DEFAULT_ITEMS_PER_PAGE,
 };
 
-/**
- * Hook personalizado para manejar datos del Kardex
- * Proporciona estado centralizado y funciones para interactuar con la API
- */
+const normalizeFilters = (filters: Partial<KardexFilters>): KardexFilters => {
+  const next: KardexFilters = {
+    page: FILTROS_DEFECTO.page,
+    limit: FILTROS_DEFECTO.limit,
+    ...filters,
+  };
+
+  if (!next.page || next.page < 1) {
+    next.page = 1;
+  }
+
+  if (!next.limit || next.limit < 1) {
+    next.limit = DEFAULT_ITEMS_PER_PAGE;
+  }
+
+  (Object.keys(next) as Array<keyof KardexFilters>).forEach((key) => {
+    const value = next[key];
+
+    if (value === '' || value === null) {
+      delete next[key];
+    }
+  });
+
+  return next;
+};
+
+const stripPagination = (filters: KardexFilters): Omit<KardexFilters, 'page' | 'limit'> => {
+  const { page, limit, ...rest } = filters;
+  return rest;
+};
+
+const toErrorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error ? error.message : fallback;
+
 export const useKardexData = () => {
   const [state, setState] = useState<KardexDataState>({
-    // Datos principales
     movimientos: [],
     estadisticas: null,
     total: 0,
-
-    // Datos para filtros
     vacunas: [],
     jeringas: [],
     establecimientos: [],
     lotes: [],
-
-    // Estados de paginación
     currentPage: 1,
-    itemsPerPage: 100, // Aumentado a 100 elementos por página por defecto
+    itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
     totalPages: 0,
-
-    // Estados de carga
     loading: false,
     loadingEstadisticas: false,
     loadingFiltros: false,
-
-    // Estados de error
     error: null,
     errorEstadisticas: null,
     errorFiltros: null,
-
-    // Filtros actuales
-    filtros: FILTROS_DEFECTO
+    filtros: FILTROS_DEFECTO,
   });
 
-  /**
-   * Cargar movimientos de kardex
-   */
-  const cargarMovimientos = useCallback(async (filtros?: KardexFilters) => {
-    // Obtener filtros finales antes de setState
-    const filtrosFinales = filtros || state.filtros;
+  const filtersRef = useRef<KardexFilters>(FILTROS_DEFECTO);
+  const mountedRef = useRef(true);
+  const movimientosRequestIdRef = useRef(0);
+  const estadisticasRequestIdRef = useRef(0);
+  const lotesRequestIdRef = useRef(0);
 
-    setState(prev => ({ ...prev, loading: true, error: null }));
+  const cargarMovimientos = useCallback(async (filtros?: KardexFilters) => {
+    const filtrosFinales = normalizeFilters(filtros ?? filtersRef.current);
+    const requestId = ++movimientosRequestIdRef.current;
+
+    filtersRef.current = filtrosFinales;
+
+    setState((prev) => ({
+      ...prev,
+      filtros: filtrosFinales,
+      currentPage: filtrosFinales.page || 1,
+      itemsPerPage: filtrosFinales.limit || DEFAULT_ITEMS_PER_PAGE,
+      loading: true,
+      error: null,
+    }));
 
     try {
-      console.log('🔍 Cargando movimientos con filtros:', filtrosFinales); // Debug log
       const resultado = await KardexService.getMovimientos(filtrosFinales);
-      console.log('📊 Resultado obtenido:', { total: resultado.total, movimientos: resultado.movimientos.length }); // Debug log
 
-      setState(prev => {
-        const totalPages = Math.ceil(resultado.total / (filtrosFinales.limit || 100));
-        return {
-          ...prev,
-          movimientos: resultado.movimientos,
-          total: resultado.total,
-          totalPages,
-          currentPage: filtrosFinales.page || 1,
-          itemsPerPage: filtrosFinales.limit || 100,
-          loading: false
-        };
-      });
+      if (!mountedRef.current || requestId !== movimientosRequestIdRef.current) {
+        return;
+      }
+
+      const totalPages = resultado.total > 0
+        ? Math.ceil(resultado.total / (filtrosFinales.limit || DEFAULT_ITEMS_PER_PAGE))
+        : 0;
+
+      setState((prev) => ({
+        ...prev,
+        movimientos: resultado.movimientos,
+        total: resultado.total,
+        totalPages,
+        currentPage: filtrosFinales.page || 1,
+        itemsPerPage: filtrosFinales.limit || DEFAULT_ITEMS_PER_PAGE,
+        filtros: filtrosFinales,
+        loading: false,
+      }));
     } catch (error) {
-      console.error('❌ Error al cargar movimientos:', error); // Debug log
-      setState(prev => ({
+      if (!mountedRef.current || requestId !== movimientosRequestIdRef.current) {
+        return;
+      }
+
+      setState((prev) => ({
         ...prev,
         loading: false,
-        error: error instanceof Error ? error.message : 'Error al cargar movimientos'
+        error: toErrorMessage(error, 'Error al cargar movimientos'),
       }));
     }
-  }, [state.filtros]); // Incluir state.filtros como dependencia
+  }, []);
 
-  /**
-   * Cargar estadísticas del kardex
-   */
   const cargarEstadisticas = useCallback(async (filtros?: Omit<KardexFilters, 'page' | 'limit'>) => {
-    // Obtener filtros finales antes de setState
-    const filtrosEstadisticas = filtros || {
-      tipo: state.filtros.tipo,
-      itemId: state.filtros.itemId,
-      loteId: state.filtros.loteId,
-      tipoMovimiento: state.filtros.tipoMovimiento,
-      establecimientoOrigenId: state.filtros.establecimientoOrigenId,
-      establecimientoDestinoId: state.filtros.establecimientoDestinoId,
-      fechaInicio: state.filtros.fechaInicio,
-      fechaFin: state.filtros.fechaFin,
-      search: state.filtros.search
-    };
+    const filtrosBase = filtros ? { ...filtros } : stripPagination(filtersRef.current);
+    const requestId = ++estadisticasRequestIdRef.current;
 
-    setState(prev => ({ ...prev, loadingEstadisticas: true, errorEstadisticas: null }));
+    setState((prev) => ({
+      ...prev,
+      loadingEstadisticas: true,
+      errorEstadisticas: null,
+    }));
 
     try {
-      console.log('📈 Cargando estadísticas con filtros:', filtrosEstadisticas); // Debug log
-      const estadisticas = await KardexService.getEstadisticas(filtrosEstadisticas);
+      const estadisticas = await KardexService.getEstadisticas(filtrosBase);
 
-      setState(prev => ({
+      if (!mountedRef.current || requestId !== estadisticasRequestIdRef.current) {
+        return;
+      }
+
+      setState((prev) => ({
         ...prev,
         estadisticas,
-        loadingEstadisticas: false
+        loadingEstadisticas: false,
       }));
     } catch (error) {
-      console.error('❌ Error al cargar estadísticas:', error); // Debug log
-      setState(prev => ({
+      if (!mountedRef.current || requestId !== estadisticasRequestIdRef.current) {
+        return;
+      }
+
+      setState((prev) => ({
         ...prev,
         loadingEstadisticas: false,
-        errorEstadisticas: error instanceof Error ? error.message : 'Error al cargar estadísticas'
+        errorEstadisticas: toErrorMessage(error, 'Error al cargar estadísticas'),
       }));
     }
-  }, [state.filtros]); // Incluir state.filtros como dependencia
+  }, []);
 
-  /**
-   * Cargar datos para filtros (vacunas, jeringas, establecimientos)
-   */
   const cargarDatosFiltros = useCallback(async () => {
-    setState(prev => ({ ...prev, loadingFiltros: true, errorFiltros: null }));
+    setState((prev) => ({
+      ...prev,
+      loadingFiltros: true,
+      errorFiltros: null,
+    }));
 
     try {
       const [vacunas, jeringas, establecimientos] = await Promise.all([
         KardexService.getVacunas(),
         KardexService.getJeringas(),
-        KardexService.getEstablecimientos()
+        KardexService.getEstablecimientos(),
       ]);
 
-      setState(prev => ({
+      if (!mountedRef.current) {
+        return;
+      }
+
+      setState((prev) => ({
         ...prev,
         vacunas,
         jeringas,
         establecimientos,
-        loadingFiltros: false
+        loadingFiltros: false,
       }));
     } catch (error) {
-      setState(prev => ({
-        ...prev,
-        loadingFiltros: false,
-        errorFiltros: error instanceof Error ? error.message : 'Error al cargar datos para filtros'
-      }));
-    }
-  }, []);
-
-  /**
-   * Cargar lotes dinámicamente según el tipo y item seleccionado
-   */
-  const cargarLotes = useCallback(async (tipo: 'vacuna' | 'jeringa', itemId?: string) => {
-    setState(prev => ({ ...prev, loadingFiltros: true, errorFiltros: null }));
-
-    try {
-      let lotes: any[] = [];
-
-      if (tipo === 'vacuna' && itemId) {
-        lotes = await LotesService.getLotesVacunas(itemId);
-      } else if (tipo === 'jeringa' && itemId) {
-        lotes = await LotesService.getLotesJeringas(itemId);
+      if (!mountedRef.current) {
+        return;
       }
 
-      setState(prev => ({
-        ...prev,
-        lotes,
-        loadingFiltros: false
-      }));
-    } catch (error) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         loadingFiltros: false,
-        errorFiltros: error instanceof Error ? error.message : 'Error al cargar lotes'
+        errorFiltros: toErrorMessage(error, 'Error al cargar datos para filtros'),
       }));
     }
   }, []);
 
-  /**
-   * Actualizar filtros y recargar datos
-   */
-  const actualizarFiltros = useCallback(async (nuevosFiltros: Partial<KardexFilters>) => {
-    // Resetear a página 1 si no se especifica página en los nuevos filtros
-    const filtrosActualizados = {
-      ...state.filtros,
-      ...nuevosFiltros,
-      page: nuevosFiltros.page || 1 // Reset to page 1 when filters change
-    };
+  const cargarLotes = useCallback(async (tipo: 'vacuna' | 'jeringa', itemId?: string) => {
+    const requestId = ++lotesRequestIdRef.current;
 
-    setState(prev => ({
+    if (!itemId) {
+      setState((prev) => ({
+        ...prev,
+        lotes: [],
+        loadingFiltros: false,
+      }));
+      return;
+    }
+
+    setState((prev) => ({
+      ...prev,
+      loadingFiltros: true,
+      errorFiltros: null,
+    }));
+
+    try {
+      const lotes = tipo === 'vacuna'
+        ? await LotesService.getLotesVacunas(itemId)
+        : await LotesService.getLotesJeringas(itemId);
+
+      if (!mountedRef.current || requestId !== lotesRequestIdRef.current) {
+        return;
+      }
+
+      setState((prev) => ({
+        ...prev,
+        lotes,
+        loadingFiltros: false,
+      }));
+    } catch (error) {
+      if (!mountedRef.current || requestId !== lotesRequestIdRef.current) {
+        return;
+      }
+
+      setState((prev) => ({
+        ...prev,
+        lotes: [],
+        loadingFiltros: false,
+        errorFiltros: toErrorMessage(error, 'Error al cargar lotes'),
+      }));
+    }
+  }, []);
+
+  const actualizarFiltros = useCallback(async (nuevosFiltros: Partial<KardexFilters>) => {
+    const shouldResetPage = Object.keys(nuevosFiltros).some((key) => key !== 'page' && key !== 'limit');
+    const filtrosActualizados = normalizeFilters({
+      ...filtersRef.current,
+      ...nuevosFiltros,
+      page: nuevosFiltros.page ?? (shouldResetPage ? 1 : filtersRef.current.page),
+    });
+
+    filtersRef.current = filtrosActualizados;
+
+    setState((prev) => ({
       ...prev,
       filtros: filtrosActualizados,
-      currentPage: filtrosActualizados.page,
-      loading: true,
-      loadingEstadisticas: true
+      currentPage: filtrosActualizados.page || 1,
+      itemsPerPage: filtrosActualizados.limit || DEFAULT_ITEMS_PER_PAGE,
     }));
 
-    // Luego cargar datos con los filtros actualizados
-    try {
-      await Promise.all([
-        cargarMovimientos(filtrosActualizados),
-        cargarEstadisticas(filtrosActualizados)
-      ]);
-    } catch (error) {
-      console.error('Error al aplicar filtros:', error);
-    }
-  }, [state.filtros, cargarMovimientos, cargarEstadisticas]);
+    await Promise.all([
+      cargarMovimientos(filtrosActualizados),
+      cargarEstadisticas(stripPagination(filtrosActualizados)),
+    ]);
+  }, [cargarEstadisticas, cargarMovimientos]);
 
-  /**
-   * Limpiar filtros y volver a los valores por defecto
-   */
   const limpiarFiltros = useCallback(async () => {
-    setState(prev => ({
+    filtersRef.current = FILTROS_DEFECTO;
+
+    setState((prev) => ({
       ...prev,
       filtros: FILTROS_DEFECTO,
-      loading: true,
-      loadingEstadisticas: true
+      lotes: [],
+      currentPage: 1,
+      itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
     }));
 
-    // Recargar datos con filtros por defecto
-    try {
-      await Promise.all([
-        cargarMovimientos(FILTROS_DEFECTO),
-        cargarEstadisticas(FILTROS_DEFECTO)
-      ]);
-    } catch (error) {
-      console.error('Error al limpiar filtros:', error);
-    }
-  }, [cargarMovimientos, cargarEstadisticas]);
-
-  /**
-   * Refrescar todos los datos
-   */
-  const refrescarTodo = useCallback(async () => {
     await Promise.all([
-      cargarMovimientos(),
-      cargarEstadisticas(),
-      cargarDatosFiltros()
+      cargarMovimientos(FILTROS_DEFECTO),
+      cargarEstadisticas(stripPagination(FILTROS_DEFECTO)),
     ]);
-  }, [cargarMovimientos, cargarEstadisticas, cargarDatosFiltros]);
+  }, [cargarEstadisticas, cargarMovimientos]);
 
-  /**
-   * Limpiar todos los errores
-   */
+  const refrescarTodo = useCallback(async () => {
+    const filtrosActuales = filtersRef.current;
+
+    await Promise.all([
+      cargarDatosFiltros(),
+      cargarMovimientos(filtrosActuales),
+      cargarEstadisticas(stripPagination(filtrosActuales)),
+      filtrosActuales.tipo && filtrosActuales.itemId
+        ? cargarLotes(filtrosActuales.tipo, filtrosActuales.itemId)
+        : Promise.resolve(),
+    ]);
+  }, [cargarDatosFiltros, cargarEstadisticas, cargarLotes, cargarMovimientos]);
+
   const limpiarErrores = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       error: null,
       errorEstadisticas: null,
-      errorFiltros: null
+      errorFiltros: null,
     }));
   }, []);
 
-  /**
-   * Cambiar página actual
-   */
   const cambiarPagina = useCallback((page: number) => {
-    const nuevosFiltros = { ...state.filtros, page };
-    setState(prev => ({ ...prev, currentPage: page }));
-    cargarMovimientos(nuevosFiltros);
-  }, [state.filtros, cargarMovimientos]);
+    const filtrosActualizados = normalizeFilters({
+      ...filtersRef.current,
+      page,
+    });
 
-  /**
-   * Cambiar items por página
-   */
-  const cambiarItemsPorPagina = useCallback((itemsPerPage: number) => {
-    const nuevosFiltros = { ...state.filtros, limit: itemsPerPage, page: 1 };
-    setState(prev => ({
+    filtersRef.current = filtrosActualizados;
+
+    setState((prev) => ({
       ...prev,
-      itemsPerPage,
-      currentPage: 1
+      filtros: filtrosActualizados,
+      currentPage: page,
     }));
-    cargarMovimientos(nuevosFiltros);
-  }, [state.filtros, cargarMovimientos]);
 
-  /**
-   * Ir a primera página
-   */
+    void cargarMovimientos(filtrosActualizados);
+  }, [cargarMovimientos]);
+
+  const cambiarItemsPorPagina = useCallback((itemsPerPage: number) => {
+    const filtrosActualizados = normalizeFilters({
+      ...filtersRef.current,
+      limit: itemsPerPage,
+      page: 1,
+    });
+
+    filtersRef.current = filtrosActualizados;
+
+    setState((prev) => ({
+      ...prev,
+      filtros: filtrosActualizados,
+      itemsPerPage,
+      currentPage: 1,
+    }));
+
+    void cargarMovimientos(filtrosActualizados);
+  }, [cargarMovimientos]);
+
   const irAPrimeraPagina = useCallback(() => {
     cambiarPagina(1);
   }, [cambiarPagina]);
 
-  /**
-   * Ir a última página
-   */
   const irAUltimaPagina = useCallback(() => {
-    if (state.totalPages > 0) {
+    if (state.totalPages > 1) {
       cambiarPagina(state.totalPages);
     }
-  }, [state.totalPages, cambiarPagina]);
+  }, [cambiarPagina, state.totalPages]);
 
-  /**
-   * Cargar datos iniciales al montar el componente
-   */
   useEffect(() => {
-    cargarDatosFiltros();
-    cargarMovimientos();
-    cargarEstadisticas();
-  }, []); // Solo se ejecuta una vez al montar
+    mountedRef.current = true;
 
-  // Retornar estado y acciones
+    void cargarDatosFiltros();
+    void cargarMovimientos(FILTROS_DEFECTO);
+    void cargarEstadisticas(stripPagination(FILTROS_DEFECTO));
+
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [cargarDatosFiltros, cargarEstadisticas, cargarMovimientos]);
+
   const actions: KardexDataActions = {
     cargarMovimientos,
     cargarEstadisticas,
@@ -375,37 +414,34 @@ export const useKardexData = () => {
     irAPrimeraPagina,
     irAUltimaPagina,
     refrescarTodo,
-    limpiarErrores
+    limpiarErrores,
   };
 
   return {
     ...state,
-    ...actions
+    ...actions,
   };
 };
 
-/**
- * Hook para obtener solo los datos de filtros (más liviano)
- */
 export const useKardexFiltros = () => {
   const [state, setState] = useState({
     vacunas: [] as Vacuna[],
     jeringas: [] as Jeringa[],
     establecimientos: [] as Establecimiento[],
-    centrosAcopio: [] as any[], // Agregar centros de acopio específicos
+    centrosAcopio: [] as Array<{ id: string; nombre: string; codigo?: string }>,
     loading: false,
-    error: null as string | null
+    error: null as string | null,
   });
 
   const cargarDatos = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
       const [vacunas, jeringas, establecimientos, centrosAcopio] = await Promise.all([
         KardexService.getVacunas(),
         KardexService.getJeringas(),
         KardexService.getEstablecimientos(),
-        KardexService.getCentrosAcopio()
+        KardexService.getCentrosAcopio(),
       ]);
 
       setState({
@@ -414,23 +450,23 @@ export const useKardexFiltros = () => {
         establecimientos,
         centrosAcopio,
         loading: false,
-        error: null
+        error: null,
       });
     } catch (error) {
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         loading: false,
-        error: error instanceof Error ? error.message : 'Error al cargar datos'
+        error: toErrorMessage(error, 'Error al cargar datos'),
       }));
     }
   }, []);
 
   useEffect(() => {
-    cargarDatos();
+    void cargarDatos();
   }, [cargarDatos]);
 
   return {
     ...state,
-    refrescar: cargarDatos
+    refrescar: cargarDatos,
   };
 };

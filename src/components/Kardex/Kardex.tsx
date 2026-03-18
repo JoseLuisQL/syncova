@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ErrorAlert } from '../Inventario/components/SharedComponents';
 import { useKardexData } from '../../hooks/useKardexData';
-import { KardexExportService, KardexExportConfig } from '../../services/KardexExportService';
-import { COMPONENT_STYLES } from './constants';
+import { KardexExportConfig, KardexExportService } from '../../services/KardexExportService';
+import { KardexFilters } from '../../services/KardexService';
+import { COMPONENT_STYLES, KARDEX_FILTER_DEBOUNCE } from './constants';
 import {
-  KardexHeader,
-  KardexFiltros,
   KardexEstadisticas,
-  KardexTabla,
+  KardexFiltros,
+  KardexHeader,
   KardexPaginacion,
+  KardexTabla,
   MovimientoDetalleModal,
 } from './components';
 
-// Tipo para movimiento de Kardex
 interface KardexMovimiento {
   id: string;
   tipo: 'vacuna' | 'jeringa';
@@ -22,22 +22,71 @@ interface KardexMovimiento {
   cantidad: number;
   saldoAnterior: number;
   saldoActual: number;
-  fechaMovimiento: string;
+  fechaMovimiento: string | Date;
   documento: string;
   numeroDocumento: string;
   observaciones?: string;
   establecimientoOrigenId?: string;
   establecimientoDestinoId?: string;
   usuarioId: string;
-  item?: { nombre: string };
-  lote?: { numero: string; fechaVencimiento?: string };
-  usuario?: { nombres: string; apellidos: string; email: string };
+  item?: { nombre: string; tipo?: string };
+  lote?: { numero: string; fechaVencimiento?: string | Date | null };
+  usuario?: { nombres: string; apellidos: string; email?: string };
   establecimientoOrigen?: { nombre: string };
   establecimientoDestino?: { nombre: string };
 }
 
+interface KardexUiFilters {
+  selectedTipo: 'vacuna' | 'jeringa' | 'todos';
+  selectedItem: string;
+  selectedLote: string;
+  fechaInicio: string;
+  fechaFin: string;
+  tipoMovimiento: string;
+  searchTerm: string;
+  establecimientoOrigenId: string;
+  establecimientoDestinoId: string;
+}
+
+const DEFAULT_UI_FILTERS: KardexUiFilters = {
+  selectedTipo: 'todos',
+  selectedItem: '',
+  selectedLote: '',
+  fechaInicio: '',
+  fechaFin: '',
+  tipoMovimiento: 'todos',
+  searchTerm: '',
+  establecimientoOrigenId: '',
+  establecimientoDestinoId: '',
+};
+
+const toUiFilters = (filtros: KardexFilters): KardexUiFilters => ({
+  selectedTipo: filtros.tipo || 'todos',
+  selectedItem: filtros.itemId || '',
+  selectedLote: filtros.loteId || '',
+  fechaInicio: filtros.fechaInicio || '',
+  fechaFin: filtros.fechaFin || '',
+  tipoMovimiento: filtros.tipoMovimiento || 'todos',
+  searchTerm: filtros.search || '',
+  establecimientoOrigenId: filtros.establecimientoOrigenId || '',
+  establecimientoDestinoId: filtros.establecimientoDestinoId || '',
+});
+
+const buildRequestFilters = (uiFilters: KardexUiFilters, limit: number) => ({
+  tipo: uiFilters.selectedTipo !== 'todos' ? uiFilters.selectedTipo : undefined,
+  itemId: uiFilters.selectedItem || undefined,
+  loteId: uiFilters.selectedLote || undefined,
+  tipoMovimiento: uiFilters.tipoMovimiento !== 'todos' ? uiFilters.tipoMovimiento : undefined,
+  fechaInicio: uiFilters.fechaInicio || undefined,
+  fechaFin: uiFilters.fechaFin || undefined,
+  search: uiFilters.searchTerm.trim() || undefined,
+  establecimientoOrigenId: uiFilters.establecimientoOrigenId || undefined,
+  establecimientoDestinoId: uiFilters.establecimientoDestinoId || undefined,
+  page: 1,
+  limit,
+});
+
 const Kardex: React.FC = () => {
-  // Hook personalizado para manejar los datos del kardex
   const {
     movimientos,
     estadisticas,
@@ -58,81 +107,92 @@ const Kardex: React.FC = () => {
     filtros,
     cargarLotes,
     actualizarFiltros,
+    limpiarFiltros,
     cambiarPagina,
     cambiarItemsPorPagina,
     irAPrimeraPagina,
     irAUltimaPagina,
     refrescarTodo,
-    limpiarErrores,
   } = useKardexData();
 
-  // Estados locales para los filtros del UI
-  const [selectedTipo, setSelectedTipo] = useState<'vacuna' | 'jeringa' | 'todos'>('todos');
-  const [selectedItem, setSelectedItem] = useState<string>('todos');
-  const [selectedLote, setSelectedLote] = useState<string>('todos');
-  const [fechaInicio, setFechaInicio] = useState<string>('');
-  const [fechaFin, setFechaFin] = useState<string>('');
-  const [tipoMovimiento, setTipoMovimiento] = useState<string>('todos');
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // Estados para exportación
+  const [uiFilters, setUiFilters] = useState<KardexUiFilters>(DEFAULT_UI_FILTERS);
   const [exportando, setExportando] = useState(false);
   const [errorExportacion, setErrorExportacion] = useState<string | null>(null);
-
-  // Estado para modal de detalles
   const [selectedMovimiento, setSelectedMovimiento] = useState<KardexMovimiento | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  // Ref para controlar inicialización de fechas (solo una vez)
-  const fechasInicializadas = useRef(false);
+  const filtersHydratedRef = useRef(false);
+  const skipNextDebounceRef = useRef(false);
+  const itemsPerPageRef = useRef(itemsPerPage);
 
-  // Inicializar fechas solo una vez al cargar
   useEffect(() => {
-    if (!fechasInicializadas.current && filtros.fechaInicio && filtros.fechaFin) {
-      setFechaInicio(filtros.fechaInicio);
-      setFechaFin(filtros.fechaFin);
-      fechasInicializadas.current = true;
-    }
-  }, [filtros.fechaInicio, filtros.fechaFin]);
+    itemsPerPageRef.current = itemsPerPage;
+  }, [itemsPerPage]);
 
-  // Cargar lotes cuando cambie el tipo o item seleccionado
   useEffect(() => {
-    if (selectedItem !== 'todos' && selectedTipo !== 'todos') {
-      cargarLotes(selectedTipo as 'vacuna' | 'jeringa', selectedItem);
+    if (filtersHydratedRef.current) {
+      return;
     }
-  }, [selectedTipo, selectedItem, cargarLotes]);
 
-  // Aplicar filtros
-  const handleAplicarFiltros = useCallback(() => {
-    const nuevosFiltros = {
-      tipo: selectedTipo !== 'todos' ? (selectedTipo as 'vacuna' | 'jeringa') : undefined,
-      itemId: selectedItem !== 'todos' ? selectedItem : undefined,
-      loteId: selectedLote !== 'todos' ? selectedLote : undefined,
-      tipoMovimiento: tipoMovimiento !== 'todos' ? tipoMovimiento : undefined,
-      fechaInicio: fechaInicio || undefined,
-      fechaFin: fechaFin || undefined,
-      search: searchTerm || undefined,
-      page: 1,
-      limit: 20, // 20 items por página según ISO 25010
-    };
-    actualizarFiltros(nuevosFiltros);
-  }, [selectedTipo, selectedItem, selectedLote, tipoMovimiento, fechaInicio, fechaFin, searchTerm, actualizarFiltros]);
+    filtersHydratedRef.current = true;
+    skipNextDebounceRef.current = true;
+    setUiFilters(toUiFilters(filtros));
+  }, [filtros]);
 
-  // Limpiar filtros
-  const handleLimpiarFiltros = useCallback(() => {
-    setSelectedTipo('todos');
-    setSelectedItem('todos');
-    setSelectedLote('todos');
-    setTipoMovimiento('todos');
-    setSearchTerm('');
-    setFechaInicio('');
-    setFechaFin('');
-  }, []);
+  useEffect(() => {
+    if (!filtersHydratedRef.current) {
+      return undefined;
+    }
 
-  // Exportar a Excel
+    if (skipNextDebounceRef.current) {
+      skipNextDebounceRef.current = false;
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void actualizarFiltros(buildRequestFilters(uiFilters, itemsPerPageRef.current));
+    }, KARDEX_FILTER_DEBOUNCE);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [actualizarFiltros, uiFilters]);
+
+  const handleTipoChange = useCallback((tipo: 'vacuna' | 'jeringa' | 'todos') => {
+    setUiFilters((current) => ({
+      ...current,
+      selectedTipo: tipo,
+      selectedItem: '',
+      selectedLote: '',
+    }));
+
+    void cargarLotes('vacuna', undefined);
+  }, [cargarLotes]);
+
+  const handleItemChange = useCallback((itemId: string) => {
+    setUiFilters((current) => ({
+      ...current,
+      selectedItem: itemId,
+      selectedLote: '',
+    }));
+
+    if (itemId && uiFilters.selectedTipo !== 'todos') {
+      void cargarLotes(uiFilters.selectedTipo, itemId);
+      return;
+    }
+
+    void cargarLotes('vacuna', undefined);
+  }, [cargarLotes, uiFilters.selectedTipo]);
+
+  const handleClearFilters = useCallback(() => {
+    skipNextDebounceRef.current = true;
+    setUiFilters(DEFAULT_UI_FILTERS);
+    setErrorExportacion(null);
+    void cargarLotes('vacuna', undefined);
+    void limpiarFiltros();
+  }, [cargarLotes, limpiarFiltros]);
+
   const handleExportarExcel = useCallback(async () => {
-    if (!fechaInicio || !fechaFin) {
-      setErrorExportacion('Debe seleccionar las fechas de inicio y fin para exportar');
+    if (!uiFilters.fechaInicio || !uiFilters.fechaFin) {
+      setErrorExportacion('Seleccione un rango de fechas para exportar el kardex.');
       return;
     }
 
@@ -140,146 +200,166 @@ const Kardex: React.FC = () => {
       setExportando(true);
       setErrorExportacion(null);
 
-      const filtrosExportacion = {
-        tipo: selectedTipo !== 'todos' ? (selectedTipo as 'vacuna' | 'jeringa') : undefined,
-        itemId: selectedItem !== 'todos' ? selectedItem : undefined,
-        loteId: selectedLote !== 'todos' ? selectedLote : undefined,
-        tipoMovimiento: tipoMovimiento !== 'todos' ? tipoMovimiento : undefined,
-        fechaInicio,
-        fechaFin,
-        search: searchTerm || undefined,
-      };
-
       const config: KardexExportConfig = {
         incluirDetalleCompleto: true,
         incluirTrazabilidad: true,
         incluirEstadisticas: true,
         formatoExportacion: 'excel',
-        filtros: filtrosExportacion,
+        filtros: buildRequestFilters(uiFilters, itemsPerPageRef.current),
       };
 
       await KardexExportService.exportToExcel(config);
-    } catch (err) {
-      setErrorExportacion(err instanceof Error ? err.message : 'Error al exportar');
+    } catch (error) {
+      setErrorExportacion(error instanceof Error ? error.message : 'No se pudo exportar el kardex.');
     } finally {
       setExportando(false);
     }
-  }, [selectedTipo, selectedItem, selectedLote, tipoMovimiento, fechaInicio, fechaFin, searchTerm]);
+  }, [uiFilters]);
 
-  // Verificar si la exportación está habilitada
-  const isExportEnabled = !!(fechaInicio && fechaFin) && !exportando;
-
-  // Obtener tooltip para exportar
-  const getExportTooltip = () => {
-    if (exportando) return 'Exportando...';
-    if (!fechaInicio || !fechaFin) return 'Seleccione fechas para exportar';
-    return 'Exportar a Excel';
-  };
-
-  // Ver detalles de movimiento
   const handleVerDetalle = useCallback((movimiento: KardexMovimiento) => {
     setSelectedMovimiento(movimiento);
-    setIsModalOpen(true);
+    setIsDetailOpen(true);
   }, []);
 
-  // Cerrar modal
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
+  const handleCloseDetalle = useCallback(() => {
+    setIsDetailOpen(false);
     setSelectedMovimiento(null);
   }, []);
 
-  // Verificar si hay filtros activos
-  const filtrosActivos = selectedTipo !== 'todos' || selectedItem !== 'todos' || 
-                          selectedLote !== 'todos' || tipoMovimiento !== 'todos' || 
-                          searchTerm || fechaInicio || fechaFin;
+  const exportHint = useMemo(() => {
+    if (exportando) {
+      return 'Preparando exportación...';
+    }
+
+    if (uiFilters.fechaInicio && uiFilters.fechaFin) {
+      return 'Exportación disponible.';
+    }
+
+    return 'Define el periodo para exportar.';
+  }, [exportando, uiFilters.fechaFin, uiFilters.fechaInicio]);
+
+  const errorMessage = useMemo(
+    () =>
+      [
+        error ? `Movimientos: ${error}` : null,
+        errorEstadisticas ? `Estadísticas: ${errorEstadisticas}` : null,
+        errorFiltros ? `Filtros: ${errorFiltros}` : null,
+        errorExportacion ? `Exportación: ${errorExportacion}` : null,
+      ]
+        .filter(Boolean)
+        .join(' | '),
+    [error, errorEstadisticas, errorExportacion, errorFiltros],
+  );
+
+  const liveRegionMessage = loading || loadingEstadisticas
+    ? 'Actualizando resultados del kardex.'
+    : `Mostrando ${total.toLocaleString()} movimientos.`;
+
+  const canRetry = Boolean(error || errorEstadisticas || errorFiltros);
+  const isExportEnabled = Boolean(uiFilters.fechaInicio && uiFilters.fechaFin) && !exportando;
 
   return (
     <main className={COMPONENT_STYLES.pageBackground}>
-      {/* Header */}
-      <KardexHeader
-        loading={loading}
-        loadingEstadisticas={loadingEstadisticas}
-        loadingFiltros={loadingFiltros}
-        onRefresh={refrescarTodo}
-        onExport={handleExportarExcel}
-        exportando={exportando}
-        isExportEnabled={isExportEnabled}
-        exportTooltip={getExportTooltip()}
-      />
+      <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
+        <div aria-live="polite" className="sr-only">
+          {liveRegionMessage}
+        </div>
 
-      {/* Contenido Principal */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Errores */}
-        {(error || errorEstadisticas || errorFiltros || errorExportacion) && (
-          <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 shadow-sm">
-            <div className="flex items-center">
-              <AlertTriangle className="h-5 w-5 text-rose-600 mr-2" />
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-rose-800">Error</h3>
-                <div className="mt-1 text-sm text-rose-700">
-                  {error && <p>• Movimientos: {error}</p>}
-                  {errorEstadisticas && <p>• Estadísticas: {errorEstadisticas}</p>}
-                  {errorFiltros && <p>• Filtros: {errorFiltros}</p>}
-                  {errorExportacion && <p>• Exportación: {errorExportacion}</p>}
-                </div>
-                <button
-                  onClick={() => {
-                    limpiarErrores();
-                    setErrorExportacion(null);
-                  }}
-                  className="mt-2 text-sm text-rose-600 hover:text-rose-800 underline"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <KardexHeader
+          loading={loading}
+          loadingEstadisticas={loadingEstadisticas}
+          loadingFiltros={loadingFiltros}
+          onRefresh={() => {
+            void refrescarTodo();
+          }}
+          onExport={() => {
+            void handleExportarExcel();
+          }}
+          exportando={exportando}
+          isExportEnabled={isExportEnabled}
+        />
 
-        {/* Filtros */}
+        {errorMessage ? (
+          <ErrorAlert
+            message={errorMessage}
+            onRetry={
+              canRetry
+                ? () => {
+                    void refrescarTodo();
+                  }
+                : undefined
+            }
+          />
+        ) : null}
+
         <KardexFiltros
-          selectedTipo={selectedTipo}
-          selectedItem={selectedItem}
-          selectedLote={selectedLote}
-          fechaInicio={fechaInicio}
-          fechaFin={fechaFin}
-          tipoMovimiento={tipoMovimiento}
-          searchTerm={searchTerm}
+          selectedTipo={uiFilters.selectedTipo}
+          selectedItem={uiFilters.selectedItem}
+          selectedLote={uiFilters.selectedLote}
+          fechaInicio={uiFilters.fechaInicio}
+          fechaFin={uiFilters.fechaFin}
+          tipoMovimiento={uiFilters.tipoMovimiento}
+          searchTerm={uiFilters.searchTerm}
+          establecimientoOrigenId={uiFilters.establecimientoOrigenId}
+          establecimientoDestinoId={uiFilters.establecimientoDestinoId}
           vacunas={vacunas}
           jeringas={jeringas}
+          establecimientos={establecimientos}
           lotes={lotes}
-          loadingFiltros={loadingFiltros}
-          onTipoChange={setSelectedTipo}
-          onItemChange={setSelectedItem}
-          onLoteChange={setSelectedLote}
-          onFechaInicioChange={setFechaInicio}
-          onFechaFinChange={setFechaFin}
-          onTipoMovimientoChange={setTipoMovimiento}
-          onSearchChange={setSearchTerm}
-          onAplicarFiltros={handleAplicarFiltros}
-          onLimpiarFiltros={handleLimpiarFiltros}
+          exportHint={exportHint}
+          onTipoChange={handleTipoChange}
+          onItemChange={handleItemChange}
+          onLoteChange={(selectedLote) =>
+            setUiFilters((current) => ({
+              ...current,
+              selectedLote,
+            }))}
+          onFechaInicioChange={(fechaInicio) =>
+            setUiFilters((current) => ({
+              ...current,
+              fechaInicio,
+            }))}
+          onFechaFinChange={(fechaFin) =>
+            setUiFilters((current) => ({
+              ...current,
+              fechaFin,
+            }))}
+          onTipoMovimientoChange={(tipoMovimiento) =>
+            setUiFilters((current) => ({
+              ...current,
+              tipoMovimiento,
+            }))}
+          onSearchChange={(searchTerm) =>
+            setUiFilters((current) => ({
+              ...current,
+              searchTerm,
+            }))}
+          onEstablecimientoOrigenChange={(establecimientoOrigenId) =>
+            setUiFilters((current) => ({
+              ...current,
+              establecimientoOrigenId,
+            }))}
+          onEstablecimientoDestinoChange={(establecimientoDestinoId) =>
+            setUiFilters((current) => ({
+              ...current,
+              establecimientoDestinoId,
+            }))}
+          onLimpiarFiltros={handleClearFilters}
         />
 
-        {/* Estadísticas */}
-        <KardexEstadisticas
-          estadisticas={estadisticas}
-          loading={loadingEstadisticas}
+        <KardexEstadisticas estadisticas={estadisticas} loading={loadingEstadisticas} />
+
+        <KardexTabla
+          movimientos={movimientos}
+          total={total}
+          loading={loading}
+          vacunas={vacunas}
+          jeringas={jeringas}
+          establecimientos={establecimientos}
+          onVerDetalle={handleVerDetalle}
         />
 
-        {/* Tabla */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <KardexTabla
-            movimientos={movimientos}
-            total={total}
-            loading={loading}
-            vacunas={vacunas}
-            jeringas={jeringas}
-            establecimientos={establecimientos}
-            onVerDetalle={handleVerDetalle}
-            filtrosActivos={filtrosActivos}
-          />
-
-          {/* Paginación */}
+        <section className={COMPONENT_STYLES.panel}>
           <KardexPaginacion
             currentPage={currentPage}
             totalPages={totalPages}
@@ -291,13 +371,12 @@ const Kardex: React.FC = () => {
             onFirstPage={irAPrimeraPagina}
             onLastPage={irAUltimaPagina}
           />
-        </div>
+        </section>
       </div>
 
-      {/* Modal de Detalles */}
       <MovimientoDetalleModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        isOpen={isDetailOpen}
+        onClose={handleCloseDetalle}
         movimiento={selectedMovimiento}
         establecimientos={establecimientos}
       />

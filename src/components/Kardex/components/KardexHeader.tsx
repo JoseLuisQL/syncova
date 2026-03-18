@@ -1,11 +1,5 @@
 import React, { memo } from 'react';
-import {
-  BookOpen,
-  RefreshCw,
-  Download,
-  Loader2,
-  Activity,
-} from 'lucide-react';
+import { BookOpen, Download, Loader2, RefreshCw } from 'lucide-react';
 import { COMPONENT_STYLES } from '../constants';
 
 interface KardexHeaderProps {
@@ -16,10 +10,9 @@ interface KardexHeaderProps {
   onExport: () => void;
   exportando: boolean;
   isExportEnabled: boolean;
-  exportTooltip: string;
 }
 
-export const KardexHeader: React.FC<KardexHeaderProps> = memo(({
+const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
   loading,
   loadingEstadisticas,
   loadingFiltros,
@@ -27,74 +20,61 @@ export const KardexHeader: React.FC<KardexHeaderProps> = memo(({
   onExport,
   exportando,
   isExportEnabled,
-  exportTooltip,
 }) => {
-  const isLoading = loading || loadingEstadisticas || loadingFiltros;
+  const isRefreshing = loading || loadingEstadisticas || loadingFiltros;
 
   return (
-    <header className={COMPONENT_STYLES.header.wrapper}>
-      <div className={COMPONENT_STYLES.header.container}>
-        <div className="flex items-center justify-between">
-          {/* Título y branding */}
-          <div className="flex items-center gap-4">
-            <div className="relative group">
-              {/* Efecto glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-2xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
-              {/* Badge de icono */}
-              <div className={COMPONENT_STYLES.header.iconBadge}>
-                <BookOpen className="h-6 w-6 text-white" />
-              </div>
+    <section className={`${COMPONENT_STYLES.surface} overflow-hidden`}>
+      <div className="border-b border-slate-200/90 px-4 py-5 sm:px-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-4">
+            <div className={COMPONENT_STYLES.header.iconWrapper}>
+              <BookOpen className="h-6 w-6" aria-hidden="true" />
             </div>
-            <div>
-              <h1 className={COMPONENT_STYLES.header.title}>
-                Kardex de Inventario
-              </h1>
-              <p className={COMPONENT_STYLES.header.subtitle}>
-                Trazabilidad y control de movimientos
+            <div className="min-w-0">
+              <h1 className={COMPONENT_STYLES.header.title}>Kardex</h1>
+              <p className={`${COMPONENT_STYLES.header.subtitle} mt-1`}>
+                Trazabilidad por lote, documento y saldo operativo dentro del mismo lenguaje visual del sistema.
               </p>
             </div>
           </div>
 
-          {/* Acciones del header */}
-          <div className="flex items-center gap-3">
-            {/* Indicador de sincronización */}
-            {isLoading && (
-              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-100">
-                <Activity className="h-4 w-4 text-teal-600 animate-pulse" />
-                <span className="text-sm font-medium text-teal-700">Sincronizando...</span>
-              </div>
-            )}
-
-            {/* Botón Actualizar */}
+          <div className="flex flex-wrap items-center gap-2 lg:justify-end">
             <button
+              type="button"
               onClick={onRefresh}
-              disabled={isLoading}
+              disabled={isRefreshing}
               className={COMPONENT_STYLES.button.secondary}
-              title="Actualizar datos"
+              aria-busy={isRefreshing}
             >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Actualizar</span>
+              {isRefreshing ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+              )}
+              <span>Actualizar</span>
             </button>
 
-            {/* Botón Exportar */}
             <button
+              type="button"
               onClick={onExport}
               disabled={!isExportEnabled || exportando}
               className={COMPONENT_STYLES.button.primary}
-              title={exportTooltip}
+              aria-busy={exportando}
             >
               {exportando ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
-                <Download className="h-4 w-4" />
+                <Download className="h-4 w-4" aria-hidden="true" />
               )}
-              <span className="hidden sm:inline">{exportando ? 'Exportando...' : 'Exportar Excel'}</span>
+              <span>{exportando ? 'Exportando...' : 'Exportar Excel'}</span>
             </button>
           </div>
         </div>
       </div>
-    </header>
+    </section>
   );
-});
+};
 
+export const KardexHeader = memo(KardexHeaderComponent);
 KardexHeader.displayName = 'KardexHeader';

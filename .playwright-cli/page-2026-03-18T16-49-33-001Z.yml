@@ -1,0 +1,193 @@
+- generic [ref=e3]:
+  - navigation "Menu principal" [ref=e4]:
+    - generic [ref=e6]:
+      - img "SIVAC Logo" [ref=e8]
+      - generic [ref=e14]:
+        - heading "SIVAC" [level=1] [ref=e15]
+        - paragraph [ref=e16]: Sistema de Vacunas
+    - button "Colapsar menu" [expanded] [ref=e17] [cursor=pointer]:
+      - img [ref=e18]
+    - navigation [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]: Principal
+        - button "Dashboard" [ref=e24] [cursor=pointer]:
+          - img [ref=e26]
+          - generic [ref=e31]: Dashboard
+      - generic [ref=e32]:
+        - generic [ref=e33]: Gestión
+        - generic [ref=e34]:
+          - button "Establecimientos" [ref=e35] [cursor=pointer]:
+            - img [ref=e37]
+            - generic [ref=e41]: Establecimientos
+          - button "Inventario" [ref=e42] [cursor=pointer]:
+            - img [ref=e44]
+            - generic [ref=e48]: Inventario
+          - button "Movimientos" [ref=e49] [cursor=pointer]:
+            - img [ref=e51]
+            - generic [ref=e54]: Movimientos
+          - button "Planificación" [ref=e55] [cursor=pointer]:
+            - img [ref=e57]
+            - generic [ref=e59]: Planificación
+          - button "Kardex" [ref=e60] [cursor=pointer]:
+            - img [ref=e62]
+            - generic [ref=e65]: Kardex
+      - generic [ref=e66]:
+        - generic [ref=e67]: Reportes
+        - generic [ref=e68]:
+          - button "Reportes" [ref=e69] [cursor=pointer]:
+            - img [ref=e71]
+            - generic [ref=e74]: Reportes
+          - button "Alertas" [ref=e75] [cursor=pointer]:
+            - img [ref=e77]
+            - generic [ref=e80]: Alertas
+      - generic [ref=e81]:
+        - generic [ref=e82]: Sistema
+        - generic [ref=e83]:
+          - button "Usuarios" [ref=e84] [cursor=pointer]:
+            - img [ref=e86]
+            - generic [ref=e91]: Usuarios
+          - button "Configuración" [ref=e92] [cursor=pointer]:
+            - img [ref=e94]
+            - generic [ref=e97]: Configuración
+    - generic [ref=e99]:
+      - img [ref=e101]
+      - generic [ref=e104]:
+        - paragraph [ref=e105]: DISA Apurimac II
+        - paragraph [ref=e106]: Estrategia Sanitaria
+  - generic [ref=e107]:
+    - banner [ref=e108]:
+      - generic [ref=e109]:
+        - navigation "Breadcrumb" [ref=e112]:
+          - button "Ir al Dashboard" [ref=e113] [cursor=pointer]:
+            - img [ref=e114]
+          - img [ref=e117]
+          - generic [ref=e119] [cursor=pointer]: Inventario
+          - img [ref=e120]
+          - generic [ref=e122]: Vacunas
+        - generic [ref=e123]:
+          - button "Ver notificaciones" [ref=e125] [cursor=pointer]:
+            - img [ref=e126]
+          - button "JQ José Luis Quispe León Administrador" [ref=e131] [cursor=pointer]:
+            - generic [ref=e133]: JQ
+            - generic [ref=e134]:
+              - paragraph [ref=e135]: José Luis Quispe León
+              - paragraph [ref=e136]: Administrador
+            - img [ref=e137]
+    - main [ref=e139]:
+      - main [ref=e140]:
+        - generic [ref=e141]:
+          - generic [ref=e142]:
+            - generic [ref=e145]:
+              - img [ref=e147]
+              - generic [ref=e150]:
+                - heading "Inventario" [level=1] [ref=e151]
+                - paragraph [ref=e152]: Catálogos, lotes y asignaciones organizados por tipo de trabajo.
+            - navigation "Secciones de inventario" [ref=e153]:
+              - generic [ref=e154]:
+                - generic [ref=e155]:
+                  - generic [ref=e156]:
+                    - img [ref=e157]
+                    - paragraph [ref=e159]: Catálogos
+                  - generic [ref=e160]:
+                    - button "Vacunas Maestro de vacunas" [ref=e161] [cursor=pointer]:
+                      - img [ref=e162]
+                      - generic [ref=e165]:
+                        - generic [ref=e166]: Vacunas
+                        - generic [ref=e167]: Maestro de vacunas
+                    - button "Jeringas Maestro de jeringas" [ref=e168] [cursor=pointer]:
+                      - img [ref=e169]
+                      - generic [ref=e176]:
+                        - generic [ref=e177]: Jeringas
+                        - generic [ref=e178]: Maestro de jeringas
+                - generic [ref=e179]:
+                  - generic [ref=e180]:
+                    - img [ref=e181]
+                    - paragraph [ref=e184]: Lotes
+                  - generic [ref=e185]:
+                    - button "Vacunas Stock y vencimientos por lote" [ref=e186] [cursor=pointer]:
+                      - img [ref=e187]
+                      - generic [ref=e190]:
+                        - generic [ref=e191]: Vacunas
+                        - generic [ref=e192]: Stock y vencimientos por lote
+                    - button "Jeringas Stock y trazabilidad por lote" [ref=e193] [cursor=pointer]:
+                      - img [ref=e194]
+                      - generic [ref=e197]:
+                        - generic [ref=e198]: Jeringas
+                        - generic [ref=e199]: Stock y trazabilidad por lote
+                - generic [ref=e200]:
+                  - generic [ref=e201]:
+                    - img [ref=e202]
+                    - paragraph [ref=e205]: Configuración
+                  - button "Asignación Relación vacuna y jeringa" [ref=e207] [cursor=pointer]:
+                    - img [ref=e208]
+                    - generic [ref=e211]:
+                      - generic [ref=e212]: Asignación
+                      - generic [ref=e213]: Relación vacuna y jeringa
+          - generic [ref=e216]:
+            - region "Estadisticas" [ref=e217]:
+              - paragraph [ref=e221]: Total vacunas
+              - paragraph [ref=e230]: Activas
+              - paragraph [ref=e239]: Con stock
+              - paragraph [ref=e248]: Sin stock
+            - region "Filtros" [ref=e254]:
+              - generic [ref=e255]:
+                - generic [ref=e256]:
+                  - generic [ref=e257]: Buscar
+                  - generic [ref=e258]:
+                    - img
+                    - textbox "Buscar" [ref=e259]:
+                      - /placeholder: Buscar por nombre, tipo o presentación
+                - generic [ref=e260]:
+                  - generic [ref=e261]: Estado
+                  - combobox "Estado" [ref=e262]:
+                    - option "Todos los estados" [selected]
+                    - option "Activo"
+                    - option "Inactivo"
+                - generic [ref=e263]:
+                  - button "Actualizar" [disabled] [ref=e264]:
+                    - img [ref=e265]
+                    - generic [ref=e270]: Actualizar
+                  - button "Nueva vacuna" [ref=e271] [cursor=pointer]:
+                    - img [ref=e272]
+                    - generic [ref=e273]: Nueva vacuna
+            - generic [ref=e276]:
+              - generic [ref=e280]:
+                - paragraph [ref=e281]: Cargando vacunas...
+                - paragraph [ref=e282]: Mostrando una vista previa mientras llega la información.
+              - table [ref=e284]:
+                - rowgroup [ref=e285]:
+                  - row [ref=e286]:
+                    - cell [ref=e287]
+                    - cell [ref=e291]
+                    - cell [ref=e295]
+                    - cell [ref=e298]
+                    - cell [ref=e301]
+                    - cell [ref=e304]
+                  - row [ref=e307]:
+                    - cell [ref=e308]
+                    - cell [ref=e312]
+                    - cell [ref=e316]
+                    - cell [ref=e319]
+                    - cell [ref=e322]
+                    - cell [ref=e325]
+                  - row [ref=e328]:
+                    - cell [ref=e329]
+                    - cell [ref=e333]
+                    - cell [ref=e337]
+                    - cell [ref=e340]
+                    - cell [ref=e343]
+                    - cell [ref=e346]
+                  - row [ref=e349]:
+                    - cell [ref=e350]
+                    - cell [ref=e354]
+                    - cell [ref=e358]
+                    - cell [ref=e361]
+                    - cell [ref=e364]
+                    - cell [ref=e367]
+                  - row [ref=e370]:
+                    - cell [ref=e371]
+                    - cell [ref=e375]
+                    - cell [ref=e379]
+                    - cell [ref=e382]
+                    - cell [ref=e385]
+                    - cell [ref=e388]

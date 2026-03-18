@@ -1,19 +1,17 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { BookOpen, Clock, FileText, Package2 } from 'lucide-react';
 import {
-  Eye,
-  Package,
-  Loader2,
-  ArrowUpCircle,
-  ArrowDownCircle,
-  ArrowRightLeft,
-  Settings,
-  Activity,
-  FileText,
-  Clock,
-  Hash,
-} from 'lucide-react';
-import { Vacuna, Jeringa, Establecimiento } from '../../../types';
-import { COMPONENT_STYLES } from '../constants';
+  ActionButtons,
+  EmptyState,
+} from '../../Inventario/components/SharedComponents';
+import {
+  DataTable,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from '../../Inventario/components/FilterAndTable';
+import { Establecimiento, Jeringa, Vacuna } from '../../../types';
+import { COMPONENT_STYLES, getMovimientoConfig } from '../constants';
 
 interface KardexMovimiento {
   id: string;
@@ -24,11 +22,16 @@ interface KardexMovimiento {
   cantidad: number;
   saldoAnterior: number;
   saldoActual: number;
-  fechaMovimiento: string;
+  fechaMovimiento: string | Date;
   documento: string;
   numeroDocumento: string;
-  item?: { nombre: string };
-  lote?: { numero: string };
+  observaciones?: string;
+  establecimientoOrigenId?: string;
+  establecimientoDestinoId?: string;
+  item?: { nombre: string; tipo?: string };
+  lote?: { numero: string; fechaVencimiento?: string | Date | null };
+  establecimientoOrigen?: { nombre: string };
+  establecimientoDestino?: { nombre: string };
 }
 
 interface KardexTablaProps {
@@ -39,244 +42,309 @@ interface KardexTablaProps {
   jeringas: Jeringa[];
   establecimientos: Establecimiento[];
   onVerDetalle: (movimiento: KardexMovimiento) => void;
-  filtrosActivos: boolean;
 }
 
-export const KardexTabla: React.FC<KardexTablaProps> = memo(({
+const TABLE_COLUMNS = [
+  { key: 'fecha', label: 'Fecha / hora' },
+  { key: 'movimiento', label: 'Movimiento' },
+  { key: 'producto', label: 'Producto / lote' },
+  { key: 'documento', label: 'Documento' },
+  { key: 'entrada', label: 'Entrada', align: 'right' as const },
+  { key: 'salida', label: 'Salida', align: 'right' as const },
+  { key: 'saldo', label: 'Saldo', align: 'right' as const },
+  { key: 'acciones', label: 'Acciones', align: 'right' as const },
+] as const;
+
+const formatDate = (value: string | Date) => {
+  const date = value instanceof Date ? value : new Date(value);
+
+  return {
+    date: date.toLocaleDateString('es-PE', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }),
+    time: date.toLocaleTimeString('es-PE', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+  };
+};
+
+const formatShortDate = (value?: string | Date | null) => {
+  if (!value) return 'Sin vencimiento';
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Sin vencimiento';
+
+  return date.toLocaleDateString('es-PE', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
+const KardexTablaComponent: React.FC<KardexTablaProps> = ({
   movimientos,
   total,
   loading,
   vacunas,
   jeringas,
+  establecimientos,
   onVerDetalle,
 }) => {
-  const getItemNombre = (tipo: string, itemId: string) => {
-    if (tipo === 'vacuna') {
-      const vacuna = vacunas.find((v) => v.id === itemId);
-      return vacuna?.nombre || 'Vacuna no encontrada';
-    } else {
-      const jeringa = jeringas.find((j) => j.id === itemId);
-      return jeringa?.tipo || 'Jeringa no encontrada';
+  const establecimientosMap = useMemo(
+    () => new Map(establecimientos.map((establecimiento) => [establecimiento.id, establecimiento.nombre])),
+    [establecimientos],
+  );
+
+  const getItemNombre = (movimiento: KardexMovimiento) => {
+    if (movimiento.item?.nombre) {
+      return movimiento.item.nombre;
     }
+
+    if (movimiento.tipo === 'vacuna') {
+      return vacunas.find((vacuna) => vacuna.id === movimiento.itemId)?.nombre || 'Producto sin referencia';
+    }
+
+    return jeringas.find((jeringa) => jeringa.id === movimiento.itemId)?.tipo || 'Producto sin referencia';
   };
 
-  const getTipoMovimientoConfig = (tipo: string) => {
-    switch (tipo) {
-      case 'ingreso':
-        return {
-          icon: ArrowUpCircle,
-          className: COMPONENT_STYLES.badge.ingreso,
-          label: 'Ingreso',
-          iconColor: 'text-emerald-500'
-        };
-      case 'salida':
-        return {
-          icon: ArrowDownCircle,
-          className: COMPONENT_STYLES.badge.salida,
-          label: 'Salida',
-          iconColor: 'text-rose-500'
-        };
-      case 'transferencia':
-        return {
-          icon: ArrowRightLeft,
-          className: COMPONENT_STYLES.badge.transferencia,
-          label: 'Transferencia',
-          iconColor: 'text-cyan-500'
-        };
-      case 'ajuste':
-        return {
-          icon: Settings,
-          className: COMPONENT_STYLES.badge.ajuste,
-          label: 'Ajuste',
-          iconColor: 'text-amber-500'
-        };
-      default:
-        return {
-          icon: Activity,
-          className: COMPONENT_STYLES.badge.neutral,
-          label: tipo.charAt(0).toUpperCase() + tipo.slice(1),
-          iconColor: 'text-gray-500'
-        };
-    }
+  const getOrigenDestino = (movimiento: KardexMovimiento) => {
+    const origen = movimiento.establecimientoOrigen?.nombre
+      || (movimiento.establecimientoOrigenId
+        ? establecimientosMap.get(movimiento.establecimientoOrigenId)
+        : '');
+    const destino = movimiento.establecimientoDestino?.nombre
+      || (movimiento.establecimientoDestinoId
+        ? establecimientosMap.get(movimiento.establecimientoDestinoId)
+        : '');
+
+    return { origen, destino };
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return {
-      date: date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
-      time: date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-    };
-  };
+  const desktopTable = (
+    <DataTable
+      isLoading={loading}
+      loadingMessage="Cargando movimientos del kardex..."
+      skeletonRows={6}
+      skeletonColumns={TABLE_COLUMNS.length}
+      loadingVariant="table"
+    >
+      <table className="min-w-full divide-y divide-slate-200">
+        <TableHeader columns={TABLE_COLUMNS as unknown as Array<{ key: string; label: string; align?: 'left' | 'center' | 'right' }>} />
+        <tbody className="divide-y divide-slate-100">
+          {movimientos.length === 0 ? (
+            <tr>
+              <td colSpan={TABLE_COLUMNS.length}>
+                <EmptyState
+                  icon={BookOpen}
+                  title="No se encontraron movimientos"
+                  description="Pruebe otro rango de fechas o ajuste los filtros avanzados para ubicar un movimiento específico."
+                />
+              </td>
+            </tr>
+          ) : (
+            movimientos.map((movimiento) => {
+              const movementConfig = getMovimientoConfig(movimiento.tipoMovimiento);
+              const Icon = movementConfig.icon;
+              const date = formatDate(movimiento.fechaMovimiento);
+              const delta = movimiento.saldoActual - movimiento.saldoAnterior;
+              const entrada = delta > 0 ? delta : null;
+              const salida = delta < 0 ? Math.abs(delta) : null;
+              const itemNombre = getItemNombre(movimiento);
+              const { origen, destino } = getOrigenDestino(movimiento);
+              const loteNumero = movimiento.lote?.numero || 'Sin lote';
+              const vencimiento = movimiento.lote?.fechaVencimiento
+                ? formatShortDate(movimiento.lote.fechaVencimiento)
+                : '';
+
+              return (
+                <TableRow key={movimiento.id}>
+                  <TableCell>
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-slate-900">{date.date}</p>
+                      <p className="text-xs text-slate-500">{date.time}</p>
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="space-y-2">
+                      <span className={movementConfig.badgeClassName}>
+                        <Icon className="h-3.5 w-3.5" />
+                        <span>{movementConfig.label}</span>
+                      </span>
+                      <p className="text-xs uppercase tracking-[0.08em] text-slate-400">{movimiento.tipo}</p>
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="max-w-[300px] space-y-1">
+                      <p className="truncate text-sm font-semibold text-slate-900">{itemNombre}</p>
+                      <p className="truncate text-xs text-slate-500">
+                        Lote: <span className="font-medium text-slate-700">{loteNumero}</span>
+                        {vencimiento ? ` · Vence ${vencimiento}` : ''}
+                      </p>
+                      {origen || destino ? (
+                        <p className="truncate text-xs text-slate-400">
+                          {origen ? `Origen: ${origen}` : 'Origen: sin referencia'}
+                          {destino ? ` · Destino: ${destino}` : ''}
+                        </p>
+                      ) : null}
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-slate-900">{movimiento.documento}</p>
+                      <p className="font-mono text-xs text-slate-500">{movimiento.numeroDocumento}</p>
+                    </div>
+                  </TableCell>
+
+                  <TableCell align="right">
+                    <span className="font-mono text-sm font-semibold text-emerald-700">
+                      {entrada ? entrada.toLocaleString() : '—'}
+                    </span>
+                  </TableCell>
+
+                  <TableCell align="right">
+                    <span className="font-mono text-sm font-semibold text-rose-700">
+                      {salida ? salida.toLocaleString() : '—'}
+                    </span>
+                  </TableCell>
+
+                  <TableCell align="right">
+                    <div className="space-y-1">
+                      <p className="font-mono text-base font-semibold text-slate-900">
+                        {movimiento.saldoActual.toLocaleString()}
+                      </p>
+                      <p className="font-mono text-xs text-slate-500">
+                        antes {movimiento.saldoAnterior.toLocaleString()}
+                      </p>
+                    </div>
+                  </TableCell>
+
+                  <TableCell align="right">
+                    <ActionButtons onView={() => onVerDetalle(movimiento)} />
+                  </TableCell>
+                </TableRow>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+    </DataTable>
+  );
 
   return (
-    <div className={COMPONENT_STYLES.table.wrapper}>
-      {/* Header de tabla */}
-      <div className="px-6 py-4 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg shadow-teal-500/20">
-              <FileText className="h-4 w-4 text-white" />
+    <section className={`${COMPONENT_STYLES.surface} overflow-hidden`}>
+      <div className="border-b border-slate-200/90 px-4 py-4 sm:px-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+              <FileText className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900">Movimientos del Kardex</h3>
-              <p className="text-sm text-gray-500">
-                <span className="font-semibold text-teal-600">{total.toLocaleString()}</span> registros encontrados
+              <h2 className="text-lg font-semibold text-slate-950">Movimientos del kardex</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                {total.toLocaleString()} registros listos para auditoría y seguimiento por lote.
               </p>
             </div>
           </div>
-          {loading && (
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-50 text-teal-700">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm font-medium">Actualizando...</span>
-            </div>
-          )}
+          <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
+            <Clock className="h-4 w-4 text-slate-400" />
+            <span>Vista compacta con entrada, salida y saldo.</span>
+          </div>
         </div>
       </div>
 
-      {/* Tabla */}
-      <div className={COMPONENT_STYLES.table.container}>
-        <table className={COMPONENT_STYLES.table.base}>
-          <thead className={COMPONENT_STYLES.table.header}>
-            <tr>
-              <th className={COMPONENT_STYLES.table.headerCell}>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-3.5 w-3.5 text-gray-400" />
-                  Fecha
-                </div>
-              </th>
-              <th className={COMPONENT_STYLES.table.headerCell}>Tipo</th>
-              <th className={COMPONENT_STYLES.table.headerCell}>
-                <div className="flex items-center gap-2">
-                  <Package className="h-3.5 w-3.5 text-gray-400" />
-                  Producto / Lote
-                </div>
-              </th>
-              <th className={COMPONENT_STYLES.table.headerCell}>
-                <div className="flex items-center gap-2">
-                  <Hash className="h-3.5 w-3.5 text-gray-400" />
-                  Documento
-                </div>
-              </th>
-              <th className={COMPONENT_STYLES.table.headerCellCenter}>Cantidad</th>
-              <th className={COMPONENT_STYLES.table.headerCellCenter}>Saldo</th>
-              <th className={COMPONENT_STYLES.table.headerCellCenter}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody className={COMPONENT_STYLES.table.body}>
-            {loading ? (
-              <tr>
-                <td colSpan={7}>
-                  <div className={COMPONENT_STYLES.empty.wrapper}>
-                    <Loader2 className="mx-auto h-10 w-10 animate-spin text-teal-500" />
-                    <p className="mt-4 text-sm font-medium text-gray-500">Cargando movimientos...</p>
-                  </div>
-                </td>
-              </tr>
-            ) : movimientos.length === 0 ? (
-              <tr>
-                <td colSpan={7}>
-                  <div className={COMPONENT_STYLES.empty.wrapper}>
-                    <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center">
-                      <Package className="h-10 w-10 text-gray-300" />
-                    </div>
-                    <p className={COMPONENT_STYLES.empty.title}>No se encontraron movimientos</p>
-                    <p className={COMPONENT_STYLES.empty.description}>
-                      Ajusta los filtros o selecciona un período diferente
+      <div className="hidden lg:block">{desktopTable}</div>
+
+      <div className="space-y-3 p-4 lg:hidden">
+        {loading ? (
+          <DataTable isLoading loadingMessage="Cargando movimientos del kardex..." skeletonRows={4} loadingVariant="cards" />
+        ) : movimientos.length === 0 ? (
+          <div className={COMPONENT_STYLES.panel}>
+            <EmptyState
+              icon={BookOpen}
+              title="No se encontraron movimientos"
+              description="Pruebe otro rango de fechas o ajuste los filtros avanzados para ubicar un movimiento específico."
+            />
+          </div>
+        ) : (
+          movimientos.map((movimiento) => {
+            const movementConfig = getMovimientoConfig(movimiento.tipoMovimiento);
+            const Icon = movementConfig.icon;
+            const date = formatDate(movimiento.fechaMovimiento);
+            const delta = movimiento.saldoActual - movimiento.saldoAnterior;
+            const entrada = delta > 0 ? delta : null;
+            const salida = delta < 0 ? Math.abs(delta) : null;
+            const itemNombre = getItemNombre(movimiento);
+            const { origen, destino } = getOrigenDestino(movimiento);
+
+            return (
+              <article key={movimiento.id} className={`${COMPONENT_STYLES.panel} p-4`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900">{itemNombre}</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {date.date} · {date.time}
                     </p>
                   </div>
-                </td>
-              </tr>
-            ) : (
-              movimientos.map((movimiento, index) => {
-                const tipoConfig = getTipoMovimientoConfig(movimiento.tipoMovimiento);
-                const TipoIcon = tipoConfig.icon;
-                const dateFormatted = formatDate(movimiento.fechaMovimiento);
-                const isPositive = movimiento.cantidad > 0;
+                  <span className={movementConfig.badgeClassName}>
+                    <Icon className="h-3.5 w-3.5" />
+                    <span>{movementConfig.label}</span>
+                  </span>
+                </div>
 
-                return (
-                  <tr
-                    key={movimiento.id}
-                    className={`${COMPONENT_STYLES.table.row} ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}
-                  >
-                    {/* Fecha */}
-                    <td className={COMPONENT_STYLES.table.cell}>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-gray-900">{dateFormatted.date}</span>
-                        <span className="text-xs text-gray-400 font-medium">{dateFormatted.time}</span>
-                      </div>
-                    </td>
+                <div className="mt-3 space-y-1 text-sm text-slate-600">
+                  <p>
+                    Documento: <span className="font-medium text-slate-900">{movimiento.documento}</span>
+                  </p>
+                  <p className="font-mono text-xs text-slate-500">{movimiento.numeroDocumento}</p>
+                  <p>
+                    Lote: <span className="font-medium text-slate-900">{movimiento.lote?.numero || 'Sin lote'}</span>
+                  </p>
+                  {origen || destino ? (
+                    <p className="text-xs text-slate-500">
+                      {origen ? `Origen ${origen}` : 'Origen sin referencia'}
+                      {destino ? ` · Destino ${destino}` : ''}
+                    </p>
+                  ) : null}
+                </div>
 
-                    {/* Tipo Movimiento */}
-                    <td className={COMPONENT_STYLES.table.cell}>
-                      <span className={`${COMPONENT_STYLES.badge.base} ${tipoConfig.className}`}>
-                        <TipoIcon className="h-3.5 w-3.5" />
-                        {tipoConfig.label}
-                      </span>
-                    </td>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+                    <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Entrada</p>
+                    <p className="mt-2 font-mono text-base font-semibold text-emerald-700">
+                      {entrada ? entrada.toLocaleString() : '—'}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+                    <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Salida</p>
+                    <p className="mt-2 font-mono text-base font-semibold text-rose-700">
+                      {salida ? salida.toLocaleString() : '—'}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+                    <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Saldo</p>
+                    <p className="mt-2 font-mono text-base font-semibold text-slate-900">
+                      {movimiento.saldoActual.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
 
-                    {/* Producto / Lote */}
-                    <td className={COMPONENT_STYLES.table.cellWrap}>
-                      <div className="max-w-xs">
-                        <p className="text-sm font-semibold text-gray-900 truncate">
-                          {movimiento.item?.nombre || getItemNombre(movimiento.tipo, movimiento.itemId)}
-                        </p>
-                        <p className="text-xs text-gray-500 font-mono mt-0.5">
-                          Lote: {movimiento.lote?.numero || 'N/A'}
-                        </p>
-                      </div>
-                    </td>
-
-                    {/* Documento */}
-                    <td className={COMPONENT_STYLES.table.cell}>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{movimiento.documento}</p>
-                        <p className="text-xs text-gray-500 font-mono">{movimiento.numeroDocumento}</p>
-                      </div>
-                    </td>
-
-                    {/* Cantidad */}
-                    <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                      <span className={`inline-flex items-center justify-center min-w-[60px] px-3 py-1.5 rounded-lg text-sm font-bold ${
-                        isPositive 
-                          ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' 
-                          : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
-                      }`}>
-                        {isPositive ? '+' : ''}{movimiento.cantidad.toLocaleString()}
-                      </span>
-                    </td>
-
-                    {/* Saldo */}
-                    <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                      <div className="inline-flex flex-col items-center gap-1">
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <span>{movimiento.saldoAnterior.toLocaleString()}</span>
-                          <span>→</span>
-                        </div>
-                        <span className="text-base font-bold text-teal-600">
-                          {movimiento.saldoActual.toLocaleString()}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Acciones */}
-                    <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                      <button
-                        onClick={() => onVerDetalle(movimiento)}
-                        className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconPrimary}`}
-                        title="Ver detalles del movimiento"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                <div className="mt-4 flex justify-end">
+                  <ActionButtons onView={() => onVerDetalle(movimiento)} />
+                </div>
+              </article>
+            );
+          })
+        )}
       </div>
-    </div>
+    </section>
   );
-});
+};
 
+export const KardexTabla = memo(KardexTablaComponent);
 KardexTabla.displayName = 'KardexTabla';
