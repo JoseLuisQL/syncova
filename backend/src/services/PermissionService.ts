@@ -213,223 +213,46 @@ export class PermissionService {
    * Crear nuevo permiso
    */
   static async create(data: CreatePermissionDto): Promise<ServiceResult<IPermission>> {
-    try {
-      // Verificar que el código no exista
-      const existingPermission = await prisma.permission.findUnique({
-        where: { codigo: data.codigo },
-      });
-
-      if (existingPermission) {
-        return {
-          success: false,
-          error: 'Ya existe un permiso con ese código',
-        };
-      }
-
-      // Verificar que el nombre no exista
-      const existingName = await prisma.permission.findUnique({
-        where: { nombre: data.nombre },
-      });
-
-      if (existingName) {
-        return {
-          success: false,
-          error: 'Ya existe un permiso con ese nombre',
-        };
-      }
-
-      const permission = await prisma.permission.create({
-        data: {
-          nombre: data.nombre,
-          descripcion: data.descripcion,
-          codigo: data.codigo,
-          recurso: data.recurso,
-          accion: data.accion,
-          categoria: data.categoria,
-          estado: data.estado || 'activo',
-        },
-        include: {
-          _count: {
-            select: {
-              rolePermissions: true,
-            },
-          },
-        },
-      });
-
-      return {
-        success: true,
-        data: permission,
-      };
-    } catch (error) {
-      console.error('Error al crear permiso:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Error al crear permiso',
-      };
-    }
+    void data;
+    return {
+      success: false,
+      error: 'El catálogo de permisos del sistema es de solo lectura',
+    };
   }
 
   /**
    * Actualizar permiso
    */
   static async update(id: string, data: UpdatePermissionDto): Promise<ServiceResult<IPermission>> {
-    try {
-      // Verificar que el permiso existe
-      const existingPermission = await prisma.permission.findUnique({
-        where: { id },
-      });
-
-      if (!existingPermission) {
-        return {
-          success: false,
-          error: 'Permiso no encontrado',
-        };
-      }
-
-      // Verificar unicidad de código si se está cambiando
-      if (data.codigo && data.codigo !== existingPermission.codigo) {
-        const codeExists = await prisma.permission.findUnique({
-          where: { codigo: data.codigo },
-        });
-
-        if (codeExists) {
-          return {
-            success: false,
-            error: 'Ya existe un permiso con ese código',
-          };
-        }
-      }
-
-      // Verificar unicidad de nombre si se está cambiando
-      if (data.nombre && data.nombre !== existingPermission.nombre) {
-        const nameExists = await prisma.permission.findUnique({
-          where: { nombre: data.nombre },
-        });
-
-        if (nameExists) {
-          return {
-            success: false,
-            error: 'Ya existe un permiso con ese nombre',
-          };
-        }
-      }
-
-      const permission = await prisma.permission.update({
-        where: { id },
-        data,
-        include: {
-          _count: {
-            select: {
-              rolePermissions: true,
-            },
-          },
-        },
-      });
-
-      return {
-        success: true,
-        data: permission,
-      };
-    } catch (error) {
-      console.error('Error al actualizar permiso:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Error al actualizar permiso',
-      };
-    }
+    void id;
+    void data;
+    return {
+      success: false,
+      error: 'El catálogo de permisos del sistema es de solo lectura',
+    };
   }
 
   /**
    * Eliminar permiso
    */
   static async delete(id: string): Promise<ServiceResult<void>> {
-    try {
-      // Verificar que el permiso existe
-      const existingPermission = await prisma.permission.findUnique({
-        where: { id },
-        include: {
-          _count: {
-            select: {
-              rolePermissions: true,
-            },
-          },
-        },
-      });
-
-      if (!existingPermission) {
-        return {
-          success: false,
-          error: 'Permiso no encontrado',
-        };
-      }
-
-      // No permitir eliminar si está asignado a roles
-      if (existingPermission._count.rolePermissions > 0) {
-        return {
-          success: false,
-          error: `No se puede eliminar el permiso porque está asignado a ${existingPermission._count.rolePermissions} rol(es)`,
-        };
-      }
-
-      // Eliminar el permiso
-      await prisma.permission.delete({
-        where: { id },
-      });
-
-      return {
-        success: true,
-        data: undefined,
-      };
-    } catch (error) {
-      console.error('Error al eliminar permiso:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Error al eliminar permiso',
-      };
-    }
+    void id;
+    return {
+      success: false,
+      error: 'El catálogo de permisos del sistema es de solo lectura',
+    };
   }
 
   /**
    * Cambiar estado del permiso
    */
   static async changeEstado(id: string, estado: EstadoGeneral): Promise<ServiceResult<IPermission>> {
-    try {
-      // Verificar que el permiso existe
-      const existingPermission = await prisma.permission.findUnique({
-        where: { id },
-      });
-
-      if (!existingPermission) {
-        return {
-          success: false,
-          error: 'Permiso no encontrado',
-        };
-      }
-
-      const permission = await prisma.permission.update({
-        where: { id },
-        data: { estado },
-        include: {
-          _count: {
-            select: {
-              rolePermissions: true,
-            },
-          },
-        },
-      });
-
-      return {
-        success: true,
-        data: permission,
-      };
-    } catch (error) {
-      console.error('Error al cambiar estado del permiso:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Error al cambiar estado del permiso',
-      };
-    }
+    void id;
+    void estado;
+    return {
+      success: false,
+      error: 'El catálogo de permisos del sistema es de solo lectura',
+    };
   }
 
   /**

@@ -10,6 +10,7 @@ export interface MovimientosFilters {
   mes?: number;
   anio?: number;
   centroAcopioId?: string;
+  centroAcopioIds?: string[];
   search?: string;
   page?: number;
   limit?: number;

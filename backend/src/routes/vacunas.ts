@@ -1,10 +1,15 @@
 import { Router } from 'express';
 import { VacunaController } from '@/controllers/VacunaController';
+import { authenticate } from '@/middleware/auth';
+import { requireCentroAcopioAssignment } from '@/middleware/accessControl';
+import { requirePermissions } from '@/middleware/permissions';
 
 /**
  * Rutas para gestión de vacunas
  */
 const router = Router();
+
+router.use(authenticate, requireCentroAcopioAssignment);
 
 /**
  * @route GET /api/vacunas
@@ -16,14 +21,14 @@ const router = Router();
  * @query {number} [page=1] - Número de página
  * @query {number} [limit=1000] - Límite de resultados por página
  */
-router.get('/', VacunaController.getAll);
+router.get('/', requirePermissions(['vacunas:read']), VacunaController.getAll);
 
 /**
  * @route GET /api/vacunas/activas
  * @desc Obtener todas las vacunas activas (para selects y formularios)
  * @access Public (TODO: Proteger con autenticación)
  */
-router.get('/activas', VacunaController.getActivas);
+router.get('/activas', requirePermissions(['vacunas:read']), VacunaController.getActivas);
 
 /**
  * @route GET /api/vacunas/stats/stock
@@ -31,7 +36,7 @@ router.get('/activas', VacunaController.getActivas);
  * @access Public (TODO: Proteger con autenticación)
  * @query {string} [vacunaId] - ID de vacuna específica (opcional)
  */
-router.get('/stats/stock', VacunaController.getStockStats);
+router.get('/stats/stock', requirePermissions(['vacunas:read']), VacunaController.getStockStats);
 
 /**
  * @route GET /api/vacunas/:id
@@ -39,7 +44,7 @@ router.get('/stats/stock', VacunaController.getStockStats);
  * @access Public (TODO: Proteger con autenticación)
  * @param {string} id - ID de la vacuna
  */
-router.get('/:id', VacunaController.getById);
+router.get('/:id', requirePermissions(['vacunas:read']), VacunaController.getById);
 
 /**
  * @route POST /api/vacunas
@@ -47,7 +52,7 @@ router.get('/:id', VacunaController.getById);
  * @access Private (TODO: Proteger con autenticación y autorización)
  * @body {CreateVacunaDto} data - Datos de la vacuna
  */
-router.post('/', VacunaController.create);
+router.post('/', requirePermissions(['vacunas:write']), VacunaController.create);
 
 /**
  * @route PUT /api/vacunas/:id
@@ -56,7 +61,7 @@ router.post('/', VacunaController.create);
  * @param {string} id - ID de la vacuna
  * @body {UpdateVacunaDto} data - Datos a actualizar
  */
-router.put('/:id', VacunaController.update);
+router.put('/:id', requirePermissions(['vacunas:write']), VacunaController.update);
 
 /**
  * @route DELETE /api/vacunas/:id
@@ -64,6 +69,6 @@ router.put('/:id', VacunaController.update);
  * @access Private (TODO: Proteger con autenticación y autorización)
  * @param {string} id - ID de la vacuna
  */
-router.delete('/:id', VacunaController.delete);
+router.delete('/:id', requirePermissions(['vacunas:write']), VacunaController.delete);
 
 export default router;

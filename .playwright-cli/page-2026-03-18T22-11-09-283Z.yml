@@ -1,0 +1,223 @@
+- generic [ref=e36]:
+  - navigation "Menu principal" [ref=e37]:
+    - generic [ref=e39]:
+      - img "SIVAC Logo" [ref=e41]
+      - generic [ref=e47]:
+        - heading "SIVAC" [level=1] [ref=e48]
+        - paragraph [ref=e49]: Sistema de Vacunas
+    - button "Colapsar menu" [expanded] [ref=e50] [cursor=pointer]:
+      - img [ref=e51]
+    - navigation [ref=e53]:
+      - generic [ref=e54]:
+        - generic [ref=e55]: Principal
+        - button "Dashboard" [ref=e57] [cursor=pointer]:
+          - img [ref=e59]
+          - generic [ref=e64]: Dashboard
+      - generic [ref=e65]:
+        - generic [ref=e66]: Gestión
+        - generic [ref=e67]:
+          - button "Establecimientos" [active] [ref=e68] [cursor=pointer]:
+            - img [ref=e70]
+            - generic [ref=e74]: Establecimientos
+          - button "Inventario" [ref=e75] [cursor=pointer]:
+            - img [ref=e77]
+            - generic [ref=e81]: Inventario
+          - button "Movimientos" [ref=e82] [cursor=pointer]:
+            - img [ref=e84]
+            - generic [ref=e87]: Movimientos
+          - button "Planificación" [ref=e88] [cursor=pointer]:
+            - img [ref=e90]
+            - generic [ref=e92]: Planificación
+          - button "Kardex" [ref=e93] [cursor=pointer]:
+            - img [ref=e95]
+            - generic [ref=e98]: Kardex
+      - generic [ref=e99]:
+        - generic [ref=e100]: Reportes
+        - generic [ref=e101]:
+          - button "Reportes" [ref=e102] [cursor=pointer]:
+            - img [ref=e104]
+            - generic [ref=e107]: Reportes
+          - button "Alertas" [ref=e108] [cursor=pointer]:
+            - img [ref=e110]
+            - generic [ref=e113]: Alertas
+      - generic [ref=e114]:
+        - generic [ref=e115]: Sistema
+        - generic [ref=e116]:
+          - button "Usuarios" [ref=e117] [cursor=pointer]:
+            - img [ref=e119]
+            - generic [ref=e124]: Usuarios
+          - button "Configuración" [ref=e125] [cursor=pointer]:
+            - img [ref=e127]
+            - generic [ref=e130]: Configuración
+    - generic [ref=e132]:
+      - img [ref=e134]
+      - generic [ref=e137]:
+        - paragraph [ref=e138]: DISA Apurimac II
+        - paragraph [ref=e139]: Estrategia Sanitaria
+  - generic [ref=e140]:
+    - banner [ref=e141]:
+      - generic [ref=e142]:
+        - navigation "Breadcrumb" [ref=e145]:
+          - button "Ir al Dashboard" [ref=e146] [cursor=pointer]:
+            - img [ref=e147]
+          - img [ref=e657]
+          - generic [ref=e659] [cursor=pointer]: Establecimientos
+          - img [ref=e660]
+          - generic [ref=e662]: Redes
+        - generic [ref=e153]:
+          - button "Ver notificaciones" [ref=e155] [cursor=pointer]:
+            - img [ref=e156]
+          - button "JQ José Luis Quispe León Administrador" [ref=e161] [cursor=pointer]:
+            - generic [ref=e163]: JQ
+            - generic [ref=e164]:
+              - paragraph [ref=e165]: José Luis Quispe León
+              - paragraph [ref=e166]: Administrador
+            - img [ref=e167]
+    - main [ref=e169]:
+      - main [ref=e663]:
+        - generic [ref=e664]:
+          - generic [ref=e665]:
+            - generic [ref=e668]:
+              - img [ref=e670]
+              - generic [ref=e674]:
+                - heading "Establecimientos" [level=1] [ref=e675]
+                - paragraph [ref=e676]: Estructura territorial, centros de acopio y establecimientos bajo un mismo lenguaje operativo.
+            - navigation "Secciones de establecimientos" [ref=e677]:
+              - generic [ref=e678]:
+                - generic [ref=e679]:
+                  - generic [ref=e680]:
+                    - img [ref=e681]
+                    - generic [ref=e686]:
+                      - paragraph [ref=e687]: Estructura
+                      - paragraph [ref=e688]: Base organizacional del sistema
+                  - generic [ref=e689]:
+                    - button "Redes Nodos principales de la organización territorial" [ref=e690] [cursor=pointer]:
+                      - img [ref=e691]
+                      - generic [ref=e696]:
+                        - generic [ref=e697]: Redes
+                        - generic [ref=e698]: Nodos principales de la organización territorial
+                    - button "Microredes Agrupaciones territoriales vinculadas a cada red" [ref=e699] [cursor=pointer]:
+                      - img [ref=e700]
+                      - generic [ref=e704]:
+                        - generic [ref=e705]: Microredes
+                        - generic [ref=e706]: Agrupaciones territoriales vinculadas a cada red
+                - generic [ref=e707]:
+                  - generic [ref=e708]:
+                    - img [ref=e709]
+                    - generic [ref=e716]:
+                      - paragraph [ref=e717]: Operación Territorial
+                      - paragraph [ref=e718]: Puntos logísticos y de atención
+                  - generic [ref=e719]:
+                    - button "Centros de Acopio Puntos de distribución y coordinación operativa" [ref=e720] [cursor=pointer]:
+                      - img [ref=e721]
+                      - generic [ref=e725]:
+                        - generic [ref=e726]: Centros de Acopio
+                        - generic [ref=e727]: Puntos de distribución y coordinación operativa
+                    - button "Establecimientos Centros y puestos de atención asociados" [ref=e728] [cursor=pointer]:
+                      - img [ref=e729]
+                      - generic [ref=e732]:
+                        - generic [ref=e733]: Establecimientos
+                        - generic [ref=e734]: Centros y puestos de atención asociados
+          - generic [ref=e737]:
+            - region "Estadisticas" [ref=e738]:
+              - generic [ref=e740]:
+                - generic [ref=e741]:
+                  - paragraph [ref=e742]: Total redes
+                  - paragraph [ref=e743]: "2"
+                - img [ref=e745]
+              - generic [ref=e751]:
+                - generic [ref=e752]:
+                  - paragraph [ref=e753]: Activas
+                  - paragraph [ref=e754]: "2"
+                - img [ref=e756]
+              - generic [ref=e759]:
+                - generic [ref=e760]:
+                  - paragraph [ref=e761]: Con microredes
+                  - paragraph [ref=e762]: "2"
+                - img [ref=e764]
+              - generic [ref=e769]:
+                - generic [ref=e770]:
+                  - paragraph [ref=e771]: Inactivas
+                  - paragraph [ref=e772]: "0"
+                - img [ref=e774]
+            - region "Filtros" [ref=e776]:
+              - generic [ref=e777]:
+                - generic [ref=e778]:
+                  - generic [ref=e779]: Buscar
+                  - generic [ref=e780]:
+                    - img
+                    - textbox "Buscar" [ref=e781]:
+                      - /placeholder: Buscar por nombre, código o descripción
+                - generic [ref=e782]:
+                  - generic [ref=e783]: Estado
+                  - combobox "Estado" [ref=e784]:
+                    - option "Todos los estados" [selected]
+                    - option "Activo"
+                    - option "Inactivo"
+                - generic [ref=e785]:
+                  - button "Actualizar" [ref=e786] [cursor=pointer]:
+                    - img [ref=e787]
+                    - generic [ref=e792]: Actualizar
+                  - button "Nueva red" [ref=e793] [cursor=pointer]:
+                    - img [ref=e794]
+                    - generic [ref=e795]: Nueva red
+            - table [ref=e799]:
+              - rowgroup [ref=e800]:
+                - row "Red Código Descripción Microredes Estado Acciones" [ref=e801]:
+                  - columnheader "Red" [ref=e802]
+                  - columnheader "Código" [ref=e803]
+                  - columnheader "Descripción" [ref=e804]
+                  - columnheader "Microredes" [ref=e805]
+                  - columnheader "Estado" [ref=e806]
+                  - columnheader "Acciones" [ref=e807]
+              - rowgroup [ref=e808]:
+                - row "JOSE MARIA ARGUEDAS JMA JMA Red de Salud José María Arguedas 7 Activo Ver microredes de JOSE MARIA ARGUEDAS Editar Eliminar" [ref=e809]:
+                  - cell "JOSE MARIA ARGUEDAS JMA" [ref=e810]:
+                    - generic [ref=e811]:
+                      - img [ref=e813]
+                      - generic [ref=e818]:
+                        - paragraph [ref=e819]: JOSE MARIA ARGUEDAS
+                        - paragraph [ref=e820]: JMA
+                  - cell "JMA" [ref=e821]
+                  - cell "Red de Salud José María Arguedas" [ref=e822]:
+                    - paragraph [ref=e823]: Red de Salud José María Arguedas
+                  - cell "7" [ref=e824]:
+                    - generic [ref=e825]:
+                      - img [ref=e826]
+                      - text: "7"
+                  - cell "Activo" [ref=e830]:
+                    - generic [ref=e831]: Activo
+                  - cell "Ver microredes de JOSE MARIA ARGUEDAS Editar Eliminar" [ref=e832]:
+                    - generic [ref=e833]:
+                      - button "Ver microredes de JOSE MARIA ARGUEDAS" [ref=e834] [cursor=pointer]:
+                        - img [ref=e835]
+                      - generic [ref=e839]:
+                        - button "Editar" [ref=e840] [cursor=pointer]:
+                          - img [ref=e841]
+                        - button "Eliminar" [disabled] [ref=e844]:
+                          - img [ref=e845]
+                - row "SONDOR SDR SDR Red de Salud Sondor 4 Activo Ver microredes de SONDOR Editar Eliminar" [ref=e848]:
+                  - cell "SONDOR SDR" [ref=e849]:
+                    - generic [ref=e850]:
+                      - img [ref=e852]
+                      - generic [ref=e857]:
+                        - paragraph [ref=e858]: SONDOR
+                        - paragraph [ref=e859]: SDR
+                  - cell "SDR" [ref=e860]
+                  - cell "Red de Salud Sondor" [ref=e861]:
+                    - paragraph [ref=e862]: Red de Salud Sondor
+                  - cell "4" [ref=e863]:
+                    - generic [ref=e864]:
+                      - img [ref=e865]
+                      - text: "4"
+                  - cell "Activo" [ref=e869]:
+                    - generic [ref=e870]: Activo
+                  - cell "Ver microredes de SONDOR Editar Eliminar" [ref=e871]:
+                    - generic [ref=e872]:
+                      - button "Ver microredes de SONDOR" [ref=e873] [cursor=pointer]:
+                        - img [ref=e874]
+                      - generic [ref=e878]:
+                        - button "Editar" [ref=e879] [cursor=pointer]:
+                          - img [ref=e880]
+                        - button "Eliminar" [disabled] [ref=e883]:
+                          - img [ref=e884]

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { DEFAULT_ROLE_PERMISSIONS } from '../../src/config/defaultRolePermissions';
 
 const prisma = new PrismaClient();
 
@@ -232,83 +233,16 @@ export async function seedRolesAndPermissionsV2() {
       }
     };
 
-    // ADMINISTRADOR - Todos los permisos
     const allPermissionCodigos = permissions.map(p => p.codigo);
-    await assignPermissionsToRole('administrador', allPermissionCodigos);
+    const resolvedDefaults: Record<string, string[]> = {
+      ...DEFAULT_ROLE_PERMISSIONS,
+      administrador: allPermissionCodigos,
+    };
 
-    // COORDINADOR - Permisos de gestión y coordinación
-    const coordinadorPermisos = [
-      'dashboard:read',
-      // Establecimientos (solo lectura)
-      'redes:read', 'microredes:read', 'centros_acopio:read', 'establecimientos:read',
-      // Inventario
-      'vacunas:read', 'vacunas:write', 'jeringas:read', 'jeringas:write',
-      'lotes_vacunas:read', 'lotes_jeringas:read',
-      'config_jeringas:read', 'config_jeringas:write',
-      // Movimientos (solo lectura)
-      'movimientos:read',
-      // Planificación (gestión completa)
-      'planificacion:read', 'planificacion:write', 'planificacion:aprobar',
-      // Kardex
-      'kardex:read', 'kardex:export',
-      // Reportes (todos)
-      'reportes_inventario:read', 'reportes_inventario:export',
-      'reportes_movimientos:read', 'reportes_movimientos:export',
-      'reportes_planificacion:read', 'reportes_planificacion:export',
-      'reportes_cenares:read', 'reportes_cenares:export',
-      'reportes_config:read', 'reportes_config:write',
-      // Alertas
-      'alertas_dashboard:read', 'alertas:read', 'alertas:marcar', 'alertas_reportes:read',
-      // Usuarios (solo lectura)
-      'usuarios:read',
-    ];
-    await assignPermissionsToRole('coordinador', coordinadorPermisos);
-
-    // RESPONSABLE DE ACOPIO - Permisos operativos
-    const responsablePermisos = [
-      'dashboard:read',
-      // Establecimientos (solo lectura)
-      'redes:read', 'microredes:read', 'centros_acopio:read', 'establecimientos:read',
-      // Inventario (gestión completa)
-      'vacunas:read', 'jeringas:read',
-      'lotes_vacunas:read', 'lotes_vacunas:write',
-      'lotes_jeringas:read', 'lotes_jeringas:write',
-      'config_jeringas:read',
-      'inventario:ingreso',
-      // Movimientos (gestión completa)
-      'movimientos:read', 'movimientos:write',
-      // Planificación (solo lectura)
-      'planificacion:read',
-      // Kardex
-      'kardex:read', 'kardex:export',
-      // Reportes (inventario y movimientos)
-      'reportes_inventario:read', 'reportes_inventario:export',
-      'reportes_movimientos:read', 'reportes_movimientos:export',
-      // Alertas
-      'alertas_dashboard:read', 'alertas:read', 'alertas:marcar',
-    ];
-    await assignPermissionsToRole('responsable_acopio', responsablePermisos);
-
-    // OPERADOR - Permisos de consulta básica
-    const operadorPermisos = [
-      'dashboard:read',
-      // Establecimientos (solo lectura)
-      'redes:read', 'microredes:read', 'centros_acopio:read', 'establecimientos:read',
-      // Inventario (solo lectura)
-      'vacunas:read', 'jeringas:read',
-      'lotes_vacunas:read', 'lotes_jeringas:read',
-      // Movimientos (solo lectura)
-      'movimientos:read',
-      // Planificación (solo lectura)
-      'planificacion:read',
-      // Kardex (solo lectura)
-      'kardex:read',
-      // Reportes (solo lectura básica)
-      'reportes_inventario:read',
-      // Alertas (solo lectura)
-      'alertas:read',
-    ];
-    await assignPermissionsToRole('operador', operadorPermisos);
+    await assignPermissionsToRole('administrador', resolvedDefaults.administrador);
+    await assignPermissionsToRole('coordinador', resolvedDefaults.coordinador || []);
+    await assignPermissionsToRole('responsable_acopio', resolvedDefaults.responsable_acopio || []);
+    await assignPermissionsToRole('operador', resolvedDefaults.operador || []);
 
     // 4. Actualizar usuarios existentes con roleId
     console.log('🔄 Actualizando usuarios existentes con roles...');

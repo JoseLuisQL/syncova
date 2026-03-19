@@ -1,12 +1,18 @@
 import { Router } from 'express';
 import { MovimientosController } from '@/controllers/MovimientosController';
 import { AjusteEntregasController } from '@/controllers/AjusteEntregasController';
+import { authenticate } from '@/middleware/auth';
+import { denyRoles, requireCentroAcopioAssignment } from '@/middleware/accessControl';
+import { requirePermissions } from '@/middleware/permissions';
 import { uploadSingleExcel, handleUploadError } from '@/middleware/upload';
 
 /**
  * Rutas para gestión de movimientos de vacunas
  */
 const router = Router();
+const denyResponsableAcopio = denyRoles(['responsable_acopio']);
+
+router.use(authenticate, requireCentroAcopioAssignment, requirePermissions(['movimientos:read']));
 
 /**
  * @route GET /api/movimientos/anios-disponibles
@@ -24,7 +30,7 @@ router.get('/anios-disponibles', MovimientosController.getAniosDisponibles);
  * @query {number} anio - Año (requerido)
  * @query {string} [centroAcopioId] - ID del centro de acopio (opcional)
  */
-router.get('/progreso-vales', MovimientosController.getProgresoVales);
+router.get('/progreso-vales', denyResponsableAcopio, MovimientosController.getProgresoVales);
 
 // =====================================================
 // RUTAS DE AJUSTE AUTOMÁTICO DE ENTREGAS
@@ -35,28 +41,28 @@ router.get('/progreso-vales', MovimientosController.getProgresoVales);
  * @desc Obtener datos para el modal de ajuste automático de entregas
  * @access Public (TODO: Proteger con autenticación)
  */
-router.get('/ajuste-entregas/datos/:vacunaId/:mes/:anio', AjusteEntregasController.obtenerDatosParaAjuste);
+router.get('/ajuste-entregas/datos/:vacunaId/:mes/:anio', denyResponsableAcopio, AjusteEntregasController.obtenerDatosParaAjuste);
 
 /**
  * @route GET /api/movimientos/ajuste-entregas/verificar/:vacunaId/:mes/:anio
  * @desc Verificar si el ajuste está disponible para una vacuna/periodo
  * @access Public (TODO: Proteger con autenticación)
  */
-router.get('/ajuste-entregas/verificar/:vacunaId/:mes/:anio', AjusteEntregasController.verificarDisponibilidad);
+router.get('/ajuste-entregas/verificar/:vacunaId/:mes/:anio', denyResponsableAcopio, AjusteEntregasController.verificarDisponibilidad);
 
 /**
  * @route POST /api/movimientos/ajuste-entregas/calcular-opciones
  * @desc Calcular opciones de ajuste automático
  * @access Public (TODO: Proteger con autenticación)
  */
-router.post('/ajuste-entregas/calcular-opciones', AjusteEntregasController.calcularOpcionesAjuste);
+router.post('/ajuste-entregas/calcular-opciones', requirePermissions(['movimientos:write']), denyResponsableAcopio, AjusteEntregasController.calcularOpcionesAjuste);
 
 /**
  * @route POST /api/movimientos/ajuste-entregas/ejecutar
  * @desc Ejecutar ajuste automático de entregas
  * @access Public (TODO: Proteger con autenticación)
  */
-router.post('/ajuste-entregas/ejecutar', AjusteEntregasController.ejecutarAjuste);
+router.post('/ajuste-entregas/ejecutar', requirePermissions(['movimientos:write']), denyResponsableAcopio, AjusteEntregasController.ejecutarAjuste);
 
 /**
  * @route GET /api/movimientos/plantilla/vacuna/:vacunaId/anio/:anio
@@ -65,7 +71,7 @@ router.post('/ajuste-entregas/ejecutar', AjusteEntregasController.ejecutarAjuste
  * @param {string} vacunaId - ID de la vacuna
  * @param {number} anio - Año de movimientos
  */
-router.get('/plantilla/vacuna/:vacunaId/anio/:anio', MovimientosController.descargarPlantillaVacuna);
+router.get('/plantilla/vacuna/:vacunaId/anio/:anio', denyResponsableAcopio, MovimientosController.descargarPlantillaVacuna);
 
 /**
  * @route GET /api/movimientos/plantilla/masiva/anio/:anio
@@ -73,7 +79,7 @@ router.get('/plantilla/vacuna/:vacunaId/anio/:anio', MovimientosController.desca
  * @access Public (TODO: Proteger con autenticación)
  * @param {number} anio - Año de movimientos
  */
-router.get('/plantilla/masiva/anio/:anio', MovimientosController.descargarPlantillaMasiva);
+router.get('/plantilla/masiva/anio/:anio', denyResponsableAcopio, MovimientosController.descargarPlantillaMasiva);
 
 /**
  * @route POST /api/movimientos/importar/vacuna/:vacunaId/anio/:anio
@@ -84,6 +90,8 @@ router.get('/plantilla/masiva/anio/:anio', MovimientosController.descargarPlanti
  * @body {file} archivo - Archivo Excel con los movimientos
  */
 router.post('/importar/vacuna/:vacunaId/anio/:anio',
+  requirePermissions(['movimientos:write']),
+  denyResponsableAcopio,
   uploadSingleExcel,
   handleUploadError,
   MovimientosController.importarDesdeExcelVacuna
@@ -97,6 +105,8 @@ router.post('/importar/vacuna/:vacunaId/anio/:anio',
  * @body {file} archivo - Archivo Excel para debug
  */
 router.post('/debug-plantilla/anio/:anio',
+  requirePermissions(['movimientos:write']),
+  denyResponsableAcopio,
   uploadSingleExcel,
   handleUploadError,
   MovimientosController.debugPlantilla
@@ -110,6 +120,8 @@ router.post('/debug-plantilla/anio/:anio',
  * @body {file} archivo - Archivo Excel para validar
  */
 router.post('/validar-plantilla/anio/:anio',
+  requirePermissions(['movimientos:write']),
+  denyResponsableAcopio,
   uploadSingleExcel,
   handleUploadError,
   MovimientosController.validarPlantilla
@@ -123,6 +135,8 @@ router.post('/validar-plantilla/anio/:anio',
  * @body {file} archivo - Archivo Excel con múltiples hojas de movimientos
  */
 router.post('/importar/masivo/anio/:anio',
+  requirePermissions(['movimientos:write']),
+  denyResponsableAcopio,
   uploadSingleExcel,
   handleUploadError,
   MovimientosController.importarDesdeExcelMasivo
@@ -135,6 +149,8 @@ router.post('/importar/masivo/anio/:anio',
  * @body {object} erroresPorVacuna - Datos de errores por vacuna
  */
 router.post('/reporte-errores',
+  requirePermissions(['movimientos:write']),
+  denyResponsableAcopio,
   MovimientosController.generarReporteErrores
 );
 
@@ -155,7 +171,7 @@ router.post('/reporte-errores',
  * @body {string} responsableReporte - Nombre del responsable del reporte
  * @body {string} [observaciones] - Observaciones adicionales
  */
-router.post('/exportar/vacuna/:vacunaId', MovimientosController.exportarPorVacuna);
+router.post('/exportar/vacuna/:vacunaId', requirePermissions(['movimientos:write']), denyResponsableAcopio, MovimientosController.exportarPorVacuna);
 
 /**
  * @route POST /api/movimientos/exportar/todas-vacunas
@@ -169,7 +185,7 @@ router.post('/exportar/vacuna/:vacunaId', MovimientosController.exportarPorVacun
  * @body {string} responsableReporte - Nombre del responsable del reporte
  * @body {string} [observaciones] - Observaciones adicionales
  */
-router.post('/exportar/todas-vacunas', MovimientosController.exportarTodasVacunas);
+router.post('/exportar/todas-vacunas', requirePermissions(['movimientos:write']), denyResponsableAcopio, MovimientosController.exportarTodasVacunas);
 
 /**
  * @route GET /api/movimientos/estadisticas
@@ -177,7 +193,7 @@ router.post('/exportar/todas-vacunas', MovimientosController.exportarTodasVacuna
  * @access Public (TODO: Proteger con autenticación)
  * @query {number} [anio] - Año para filtrar estadísticas
  */
-router.get('/estadisticas', MovimientosController.getEstadisticas);
+router.get('/estadisticas', denyResponsableAcopio, MovimientosController.getEstadisticas);
 
 /**
  * @route GET /api/movimientos/stock-disponible
@@ -187,7 +203,7 @@ router.get('/estadisticas', MovimientosController.getEstadisticas);
  * @query {number} mes - Mes (1-12)
  * @query {number} anio - Año
  */
-router.get('/stock-disponible', MovimientosController.getStockDisponible);
+router.get('/stock-disponible', denyResponsableAcopio, MovimientosController.getStockDisponible);
 
 /**
  * @route POST /api/movimientos/generar-desde-planificacion/:planificacionId
@@ -196,7 +212,7 @@ router.get('/stock-disponible', MovimientosController.getStockDisponible);
  * @param {string} planificacionId - ID de la planificación anual
  * @body {string} usuarioId - ID del usuario que ejecuta la acción
  */
-router.post('/generar-desde-planificacion/:planificacionId', MovimientosController.generarDesdeplanificacion);
+router.post('/generar-desde-planificacion/:planificacionId', requirePermissions(['movimientos:write']), denyResponsableAcopio, MovimientosController.generarDesdeplanificacion);
 
 /**
  * @route POST /api/movimientos/sincronizar-saldo-anterior
@@ -207,7 +223,7 @@ router.post('/generar-desde-planificacion/:planificacionId', MovimientosControll
  * @body {number} mes - Mes (1-12)
  * @body {number} anio - Año
  */
-router.post('/sincronizar-saldo-anterior', MovimientosController.sincronizarSaldoAnterior);
+router.post('/sincronizar-saldo-anterior', requirePermissions(['movimientos:write']), denyResponsableAcopio, MovimientosController.sincronizarSaldoAnterior);
 
 /**
  * @route POST /api/movimientos/actualizar-stock-siguiente-mes
@@ -222,7 +238,7 @@ router.post('/sincronizar-saldo-anterior', MovimientosController.sincronizarSald
  * // Ejemplo: Mes actual Abril (4), Stock Inicial: 234, Entregas: 147, Disponible: 87
  * // Resultado: Se registra 87 como stock inicial de Mayo en stock_inicial_mensual
  */
-router.post('/actualizar-stock-siguiente-mes', MovimientosController.actualizarStockInicialSiguienteMes);
+router.post('/actualizar-stock-siguiente-mes', requirePermissions(['movimientos:write']), denyResponsableAcopio, MovimientosController.actualizarStockInicialSiguienteMes);
 
 /**
  * @route GET /api/movimientos
@@ -253,7 +269,7 @@ router.get('/:id', MovimientosController.getById);
  * @access Public (TODO: Proteger con autenticación)
  * @body {CreateMovimientoDto} data - Datos del movimiento a crear
  */
-router.post('/', MovimientosController.create);
+router.post('/', requirePermissions(['movimientos:write']), denyResponsableAcopio, MovimientosController.create);
 
 /**
  * @route PUT /api/movimientos/:id
@@ -262,7 +278,7 @@ router.post('/', MovimientosController.create);
  * @param {string} id - ID del movimiento
  * @body {UpdateMovimientoDto} data - Datos del movimiento a actualizar
  */
-router.put('/:id', MovimientosController.update);
+router.put('/:id', requirePermissions(['movimientos:write']), denyResponsableAcopio, MovimientosController.update);
 
 /**
  * @route DELETE /api/movimientos/:id
@@ -270,7 +286,7 @@ router.put('/:id', MovimientosController.update);
  * @access Public (TODO: Proteger con autenticación)
  * @param {string} id - ID del movimiento
  */
-router.delete('/:id', MovimientosController.delete);
+router.delete('/:id', requirePermissions(['movimientos:write']), denyResponsableAcopio, MovimientosController.delete);
 
 // =====================================================
 // RUTAS PARA ENTREGAS ADICIONALES
@@ -283,7 +299,7 @@ router.delete('/:id', MovimientosController.delete);
  * @param {string} movimientoId - ID del movimiento de vacuna
  * @body {CreateEntregaAdicionalDto} data - Datos de la entrega adicional
  */
-router.post('/:movimientoId/entregas-adicionales', MovimientosController.createEntregaAdicional);
+router.post('/:movimientoId/entregas-adicionales', requirePermissions(['movimientos:write']), denyResponsableAcopio, MovimientosController.createEntregaAdicional);
 
 /**
  * @route PUT /api/movimientos/entregas-adicionales/:id
@@ -293,7 +309,7 @@ router.post('/:movimientoId/entregas-adicionales', MovimientosController.createE
  * @body {number} cantidad - Nueva cantidad
  * @body {string} [motivo] - Motivo de la entrega adicional
  */
-router.put('/entregas-adicionales/:id', MovimientosController.updateEntregaAdicional);
+router.put('/entregas-adicionales/:id', requirePermissions(['movimientos:write']), denyResponsableAcopio, MovimientosController.updateEntregaAdicional);
 
 /**
  * @route DELETE /api/movimientos/entregas-adicionales/:id
@@ -301,6 +317,6 @@ router.put('/entregas-adicionales/:id', MovimientosController.updateEntregaAdici
  * @access Public (TODO: Proteger con autenticación)
  * @param {string} id - ID de la entrega adicional
  */
-router.delete('/entregas-adicionales/:id', MovimientosController.deleteEntregaAdicional);
+router.delete('/entregas-adicionales/:id', requirePermissions(['movimientos:write']), denyResponsableAcopio, MovimientosController.deleteEntregaAdicional);
 
 export default router;

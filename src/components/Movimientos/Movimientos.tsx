@@ -52,6 +52,12 @@ interface StockInfo {
   }>;
 }
 
+interface CentroAcopioFilterOption {
+  id: string;
+  nombre: string;
+  codigo?: string;
+}
+
 const Movimientos: React.FC = () => {
   // ============================================================================
   // HOOKS Y SERVICIOS
@@ -98,6 +104,60 @@ const Movimientos: React.FC = () => {
 
   const { toast } = useToastContext();
   const { user } = useAuth();
+  const isReadOnlyMode = user?.rol === 'responsable_acopio';
+  const lockedCentroAcopioIds = user?.centroAcopioIds?.length
+    ? user.centroAcopioIds
+    : user?.centroAcopioId
+      ? [user.centroAcopioId]
+      : [];
+  const lockedCentroAcopioLabel = lockedCentroAcopioIds.length > 1
+    ? `${lockedCentroAcopioIds.length} centros asignados`
+    : user?.centroAcopio?.nombre || 'Centro asignado';
+  const centrosAcopioPermitidos = useMemo<CentroAcopioFilterOption[]>(() => {
+    const options = new Map<string, CentroAcopioFilterOption>();
+
+    user?.centrosAcopioAsignados?.forEach(({ centroAcopio }) => {
+      if (!centroAcopio?.id) {
+        return;
+      }
+
+      options.set(centroAcopio.id, {
+        id: centroAcopio.id,
+        nombre: centroAcopio.nombre,
+        codigo: centroAcopio.codigo,
+      });
+    });
+
+    establecimientos.forEach((establecimiento) => {
+      const centro = establecimiento.centroAcopio;
+      if (!centro?.id || !lockedCentroAcopioIds.includes(centro.id) || options.has(centro.id)) {
+        return;
+      }
+
+      options.set(centro.id, {
+        id: centro.id,
+        nombre: centro.nombre,
+        codigo: centro.codigo,
+      });
+    });
+
+    centrosAcopio.forEach((centro) => {
+      if (!lockedCentroAcopioIds.includes(centro.id) || options.has(centro.id)) {
+        return;
+      }
+
+      options.set(centro.id, {
+        id: centro.id,
+        nombre: centro.nombre,
+        codigo: centro.codigo,
+      });
+    });
+
+    return Array.from(options.values());
+  }, [centrosAcopio, establecimientos, lockedCentroAcopioIds, user?.centrosAcopioAsignados]);
+  const centrosAcopioFiltro = isReadOnlyMode ? centrosAcopioPermitidos : centrosAcopio;
+  const canFilterAssignedCentros = isReadOnlyMode && centrosAcopioPermitidos.length > 1;
+  const allCentrosLabel = canFilterAssignedCentros ? 'Todos mis centros' : 'Todos';
 
   const {
     onEntregaBaseChanged,
@@ -193,6 +253,7 @@ const Movimientos: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const voucherValidationTimeouts = useRef<{ [key: string]: NodeJS.Timeout }>({});
   const [isTyping, setIsTyping] = useState<{ [key: string]: boolean }>({});
+  const initialDataLoadedRef = useRef(false);
 
   // ============================================================================
   // FUNCIONES AUXILIARES
@@ -373,19 +434,44 @@ const Movimientos: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (initialDataLoadedRef.current) {
+      return;
+    }
+
+    if (isReadOnlyMode && lockedCentroAcopioIds.length === 0) {
+      return;
+    }
+
+    initialDataLoadedRef.current = true;
     const loadInitialData = async () => {
       try {
         await Promise.all([
           loadEstablecimientos({ noPagination: true }),
-          loadCentrosAcopio(),
+          isReadOnlyMode ? Promise.resolve() : loadCentrosAcopio(),
           loadVacunasActivas()
         ]);
       } catch (err) {
         toast.error('Error al cargar datos iniciales');
       }
     };
-    loadInitialData();
-  }, []);
+    void loadInitialData();
+  }, [isReadOnlyMode, lockedCentroAcopioIds.length, toast]);
+
+  useEffect(() => {
+    if (isReadOnlyMode) {
+      setSelectedCentroAcopio('todos');
+    }
+  }, [isReadOnlyMode]);
+
+  useEffect(() => {
+    if (selectedCentroAcopio === 'todos') {
+      return;
+    }
+
+    if (!centrosAcopioFiltro.some((centro) => centro.id === selectedCentroAcopio)) {
+      setSelectedCentroAcopio('todos');
+    }
+  }, [centrosAcopioFiltro, selectedCentroAcopio]);
 
   useEffect(() => {
     if (vacunasActivas.length > 0 && !selectedVacuna) {
@@ -406,6 +492,12 @@ const Movimientos: React.FC = () => {
   }, [selectedVacuna, selectedMes, selectedAnio, selectedCentroAcopio]);
 
   useEffect(() => {
+    if (isReadOnlyMode) {
+      setStockInfo(null);
+      setStockError(null);
+      return;
+    }
+
     const loadStock = async () => {
       if (selectedVacuna) {
         setIsLoadingStock(true);
@@ -431,10 +523,15 @@ const Movimientos: React.FC = () => {
       }
     };
     loadStock();
-  }, [selectedVacuna, selectedMes, selectedAnio, vacunasActivas]);
+  }, [isReadOnlyMode, selectedVacuna, selectedMes, selectedAnio, toast, vacunasActivas]);
 
   // Verificar disponibilidad de ajuste de deficit
   useEffect(() => {
+    if (isReadOnlyMode) {
+      setAjusteDeficitDisponible(false);
+      return;
+    }
+
     const verificarAjusteDeficit = async () => {
       if (selectedVacuna && stockInfo && stockInfo.stockDisponible < 0) {
         try {
@@ -456,10 +553,15 @@ const Movimientos: React.FC = () => {
       }
     };
     verificarAjusteDeficit();
-  }, [selectedVacuna, selectedMes, selectedAnio, stockInfo]);
+  }, [isReadOnlyMode, selectedVacuna, selectedMes, selectedAnio, stockInfo]);
 
   // Cargar progreso de vales
   useEffect(() => {
+    if (isReadOnlyMode) {
+      setProgresoVales(null);
+      return;
+    }
+
     const loadProgresoVales = async () => {
       if (selectedVacuna) {
         setIsLoadingProgresoVales(true);
@@ -482,9 +584,13 @@ const Movimientos: React.FC = () => {
       }
     };
     loadProgresoVales();
-  }, [selectedVacuna, selectedMes, selectedAnio, selectedCentroAcopio]);
+  }, [isReadOnlyMode, selectedVacuna, selectedMes, selectedAnio, selectedCentroAcopio]);
 
   useEffect(() => {
+    if (isReadOnlyMode) {
+      return undefined;
+    }
+
     const unsubscribe = onValeGenerated(async (event) => {
       if (event.mes === selectedMes && event.anio === selectedAnio) {
         if (selectedVacuna) {
@@ -528,7 +634,7 @@ const Movimientos: React.FC = () => {
       }
     });
     return unsubscribe;
-  }, [onValeGenerated, selectedVacuna, selectedMes, selectedAnio, selectedCentroAcopio, forceRefreshStock, loadMovimientos, toast]);
+  }, [forceRefreshStock, isReadOnlyMode, loadMovimientos, onValeGenerated, selectedAnio, selectedCentroAcopio, selectedMes, selectedVacuna, toast]);
 
   useEffect(() => {
     return () => {
@@ -1561,12 +1667,17 @@ const Movimientos: React.FC = () => {
     <main className={COMPONENT_STYLES.pageBackground}>
       {/* Header Compacto con Filtros y Stock Integrados */}
       <MovimientosHeaderCompact
+        isReadOnly={isReadOnlyMode}
+        lockedCentroAcopioLabel={lockedCentroAcopioLabel}
+        showReadOnlyCentroFilter={canFilterAssignedCentros}
+        allCentrosLabel={allCentrosLabel}
+        hideStockMetrics={isReadOnlyMode}
         // Filtros
         selectedCentroAcopio={selectedCentroAcopio}
         selectedVacuna={selectedVacuna}
         selectedMes={selectedMes}
         selectedAnio={selectedAnio}
-        centrosAcopio={centrosAcopio}
+        centrosAcopio={centrosAcopioFiltro}
         vacunasActivas={vacunasActivas}
         aniosDisponibles={aniosDisponibles}
         isLoadingEstablecimientos={isLoadingEstablecimientos}
@@ -1606,6 +1717,29 @@ const Movimientos: React.FC = () => {
 
       {/* Content */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {isReadOnlyMode && lockedCentroAcopioIds.length > 0 ? (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            {canFilterAssignedCentros ? (
+              <>
+                Vista restringida para responsable de acopio. Por defecto se consolidan los establecimientos de
+                {' '}
+                <strong>{lockedCentroAcopioLabel}</strong>
+                {' '}
+                y puede filtrar solo entre esos centros autorizados. Todas las acciones de edición, importación,
+                exportación y generación de vales están bloqueadas.
+              </>
+            ) : (
+              <>
+                Vista restringida para responsable de acopio. El centro de acopio queda fijado en
+                {' '}
+                <strong>{lockedCentroAcopioLabel}</strong>
+                {' '}
+                y todas las acciones de edición, importación, exportación y generación de vales están bloqueadas.
+              </>
+            )}
+          </div>
+        ) : null}
+
         {/* Alertas de Estado - Solo errores */}
         {error && (
           <AlertaEstado tipo="error" mensaje={error} />
@@ -1613,6 +1747,7 @@ const Movimientos: React.FC = () => {
 
         {/* Tabla */}
         <MovimientosTabla
+          readOnly={isReadOnlyMode}
           datosTabla={datosTabla}
           totalesGenerales={totalesGenerales}
           selectedMes={selectedMes}

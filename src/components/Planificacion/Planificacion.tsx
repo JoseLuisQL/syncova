@@ -12,6 +12,7 @@ import { PlanificacionExportService } from '../../services/planificacionExportSe
 import { usePlanificacion } from '../../hooks/usePlanificacion';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useVacunas } from '../../hooks/useVacunas';
+import { useAuth } from '../../contexts/AuthContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import { PlanificacionService } from '../../services/planificacionService';
 import { ValesService } from '../../services/valesService';
@@ -33,7 +34,23 @@ interface EstablecimientoData {
   planificacionId?: string;
 }
 
+interface CentroAcopioFilterOption {
+  id: string;
+  nombre: string;
+  codigo?: string;
+}
+
 const Planificacion: React.FC = () => {
+  const { user } = useAuth();
+  const isReadOnlyMode = user?.rol === 'responsable_acopio';
+  const lockedCentroAcopioIds = user?.centroAcopioIds?.length
+    ? user.centroAcopioIds
+    : user?.centroAcopioId
+      ? [user.centroAcopioId]
+      : [];
+  const lockedCentroAcopioLabel = lockedCentroAcopioIds.length > 1
+    ? `${lockedCentroAcopioIds.length} centros asignados`
+    : user?.centroAcopio?.nombre || 'Centro asignado';
   // Estados de filtros
   const [selectedAnio, setSelectedAnio] = useState<number>(new Date().getFullYear());
   const [aniosDisponibles, setAniosDisponibles] = useState<number[]>([]);
@@ -48,6 +65,7 @@ const Planificacion: React.FC = () => {
   const [tempValues, setTempValues] = useState<{[key: string]: number}>({});
   const [pendingChanges, setPendingChanges] = useState<{[key: string]: boolean}>({});
   const debounceTimeouts = useRef<{[key: string]: NodeJS.Timeout}>({});
+  const initialDataLoadedRef = useRef(false);
 
   // Estados para modal de confirmación de vale
   const [showConfirmacionValeModal, setShowConfirmacionValeModal] = useState(false);
@@ -93,6 +111,51 @@ const Planificacion: React.FC = () => {
   } = useEstablecimientos({ limit: 1000 });
 
   const { vacunas, loadVacunasActivas, isLoading: isLoadingVacunas } = useVacunas();
+  const centrosAcopioPermitidos = useMemo<CentroAcopioFilterOption[]>(() => {
+    const options = new Map<string, CentroAcopioFilterOption>();
+
+    user?.centrosAcopioAsignados?.forEach(({ centroAcopio }) => {
+      if (!centroAcopio?.id) {
+        return;
+      }
+
+      options.set(centroAcopio.id, {
+        id: centroAcopio.id,
+        nombre: centroAcopio.nombre,
+        codigo: centroAcopio.codigo,
+      });
+    });
+
+    establecimientos.forEach((establecimiento) => {
+      const centro = establecimiento.centroAcopio;
+      if (!centro?.id || !lockedCentroAcopioIds.includes(centro.id) || options.has(centro.id)) {
+        return;
+      }
+
+      options.set(centro.id, {
+        id: centro.id,
+        nombre: centro.nombre,
+        codigo: centro.codigo,
+      });
+    });
+
+    centrosAcopio.forEach((centro) => {
+      if (!lockedCentroAcopioIds.includes(centro.id) || options.has(centro.id)) {
+        return;
+      }
+
+      options.set(centro.id, {
+        id: centro.id,
+        nombre: centro.nombre,
+        codigo: centro.codigo,
+      });
+    });
+
+    return Array.from(options.values());
+  }, [centrosAcopio, establecimientos, lockedCentroAcopioIds, user?.centrosAcopioAsignados]);
+  const centrosAcopioFiltro = isReadOnlyMode ? centrosAcopioPermitidos : centrosAcopio;
+  const canFilterAssignedCentros = isReadOnlyMode && centrosAcopioPermitidos.length > 1;
+  const allCentrosLabel = canFilterAssignedCentros ? 'Todos mis centros' : 'Todos los centros';
 
   // Obtener establecimientos filtrados
   const establecimientosFiltrados = useMemo(() => {
@@ -136,10 +199,37 @@ const Planificacion: React.FC = () => {
 
   // Cargar datos iniciales
   useEffect(() => {
+    if (initialDataLoadedRef.current) {
+      return;
+    }
+
+    if (isReadOnlyMode && lockedCentroAcopioIds.length === 0) {
+      return;
+    }
+
+    initialDataLoadedRef.current = true;
     loadEstablecimientos({ limit: 1000 });
-    loadCentrosAcopio();
+    if (!isReadOnlyMode) {
+      loadCentrosAcopio();
+    }
     loadVacunasActivas();
-  }, []);
+  }, [isReadOnlyMode, lockedCentroAcopioIds.length]);
+
+  useEffect(() => {
+    if (isReadOnlyMode) {
+      setSelectedCentroAcopio('todos');
+    }
+  }, [isReadOnlyMode]);
+
+  useEffect(() => {
+    if (selectedCentroAcopio === 'todos') {
+      return;
+    }
+
+    if (!centrosAcopioFiltro.some((centro) => centro.id === selectedCentroAcopio)) {
+      setSelectedCentroAcopio('todos');
+    }
+  }, [centrosAcopioFiltro, selectedCentroAcopio]);
 
   // Limpiar timeouts al desmontar
   useEffect(() => {
@@ -897,10 +987,14 @@ const Planificacion: React.FC = () => {
     <main className={COMPONENT_STYLES.pageBackground}>
       {/* Header */}
       <PlanificacionHeader
+        isReadOnly={isReadOnlyMode}
+        lockedCentroAcopioLabel={lockedCentroAcopioLabel}
+        showReadOnlyCentroFilter={canFilterAssignedCentros}
+        allCentrosLabel={allCentrosLabel}
         selectedAnio={selectedAnio}
         selectedCentroAcopio={selectedCentroAcopio}
         selectedVacuna={selectedVacuna}
-        centrosAcopio={centrosAcopio}
+        centrosAcopio={centrosAcopioFiltro}
         vacunas={vacunas}
         aniosDisponibles={aniosDisponibles}
         establecimientosCount={datosVacuna?.establecimientos.length || 0}
@@ -922,8 +1016,29 @@ const Planificacion: React.FC = () => {
 
       {/* Contenido */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {isReadOnlyMode && lockedCentroAcopioIds.length > 0 ? (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            {canFilterAssignedCentros ? (
+              <>
+                Vista restringida para responsable de acopio. La planificación se consulta en modo solo lectura con
+                {' '}
+                <strong>{lockedCentroAcopioLabel}</strong>
+                {' '}
+                consolidados por defecto y puede filtrar solo entre esos centros autorizados.
+              </>
+            ) : (
+              <>
+                Vista restringida para responsable de acopio. La planificación se consulta en modo solo lectura y el centro
+                {' '}
+                de acopio queda fijado en <strong>{lockedCentroAcopioLabel}</strong>.
+              </>
+            )}
+          </div>
+        ) : null}
+
         {/* Tabla */}
         <PlanificacionTabla
+          readOnly={isReadOnlyMode}
           establecimientos={datosVacuna?.establecimientos || []}
           selectedCentroAcopio={selectedCentroAcopio}
           isLoading={isLoading}
@@ -938,6 +1053,7 @@ const Planificacion: React.FC = () => {
 
         {/* Acciones */}
         <PlanificacionAcciones
+          readOnly={isReadOnlyMode}
           isLoading={isLoading}
           isUpdating={isUpdating}
           pendingChangesCount={pendingChangesCount}
@@ -953,20 +1069,22 @@ const Planificacion: React.FC = () => {
       </div>
 
       {/* Modal Importar */}
-      <ImportarModal
-        isOpen={showModalImportar}
-        onClose={() => setShowModalImportar(false)}
-        vacunas={vacunas}
-        onDescargarPlantillaVacuna={handleDescargarPlantillaVacuna}
-        onDescargarPlantillaMasiva={handleDescargarPlantillaMasiva}
-        onImportarVacuna={handleImportarDesdeExcelVacuna}
-        onImportarMasivo={handleImportarDesdeExcelMasivo}
-        isDownloadingTemplate={isDownloadingTemplate}
-        isImportingExcel={isImportingExcel}
-      />
+      {!isReadOnlyMode ? (
+        <ImportarModal
+          isOpen={showModalImportar}
+          onClose={() => setShowModalImportar(false)}
+          vacunas={vacunas}
+          onDescargarPlantillaVacuna={handleDescargarPlantillaVacuna}
+          onDescargarPlantillaMasiva={handleDescargarPlantillaMasiva}
+          onImportarVacuna={handleImportarDesdeExcelVacuna}
+          onImportarMasivo={handleImportarDesdeExcelMasivo}
+          isDownloadingTemplate={isDownloadingTemplate}
+          isImportingExcel={isImportingExcel}
+        />
+      ) : null}
 
       {/* Modal de Confirmación de Vale */}
-      {showConfirmacionValeModal && pendingValeModification && (
+      {!isReadOnlyMode && showConfirmacionValeModal && pendingValeModification && (
         <ConfirmacionValeModal
           isOpen={showConfirmacionValeModal}
           onClose={() => !isProcessingValeChange && handleCancelValeModification()}

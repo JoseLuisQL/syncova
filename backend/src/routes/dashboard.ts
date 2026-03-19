@@ -1,10 +1,15 @@
 import { Router } from 'express';
 import { DashboardController } from '@/controllers/DashboardController';
+import { authenticate } from '@/middleware/auth';
+import { requireCentroAcopioAssignment } from '@/middleware/accessControl';
+import { requirePermissions } from '@/middleware/permissions';
 
 /**
  * Rutas para el Dashboard
  */
 const router = Router();
+
+router.use(authenticate, requireCentroAcopioAssignment, requirePermissions(['dashboard:read']));
 
 /**
  * @route GET /api/dashboard

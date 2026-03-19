@@ -74,7 +74,7 @@ export class DashboardService {
   /**
    * Obtener todas las estadísticas del dashboard
    */
-  static async getDashboardData(): Promise<ServiceResult<DashboardData>> {
+  static async getDashboardData(scopeCentroAcopioId?: string): Promise<ServiceResult<DashboardData>> {
     try {
       console.log('🔄 Obteniendo datos completos del dashboard...');
 
@@ -87,12 +87,12 @@ export class DashboardService {
         alertasRecientes,
         actividadReciente
       ] = await Promise.all([
-        this.getEstadisticasGenerales(),
-        this.getMovimientosMensuales(),
-        this.getStockPorVacuna(),
-        this.getCentrosAcopioStatus(1, 5), // Primera página, 5 elementos
-        this.getAlertasRecientes(1, 3),    // Primera página, 3 elementos
-        this.getActividadReciente(1, 5)    // Primera página, 5 elementos
+        this.getEstadisticasGenerales(scopeCentroAcopioId),
+        this.getMovimientosMensuales(scopeCentroAcopioId),
+        this.getStockPorVacuna(scopeCentroAcopioId),
+        this.getCentrosAcopioStatus(1, 5, scopeCentroAcopioId), // Primera página, 5 elementos
+        this.getAlertasRecientes(1, 3, scopeCentroAcopioId),    // Primera página, 3 elementos
+        this.getActividadReciente(1, 5, scopeCentroAcopioId)    // Primera página, 5 elementos
       ]);
 
       const dashboardData: DashboardData = {
@@ -121,7 +121,7 @@ export class DashboardService {
   /**
    * Obtener estadísticas generales del sistema
    */
-  static async getEstadisticasGenerales(): Promise<ServiceResult<DashboardStats>> {
+  static async getEstadisticasGenerales(scopeCentroAcopioId?: string): Promise<ServiceResult<DashboardStats>> {
     try {
       console.log('📊 Calculando estadísticas generales...');
 
@@ -142,52 +142,87 @@ export class DashboardService {
         movimientosUltimoMes
       ] = await Promise.all([
         // Total de vacunas activas
-        prisma.vacuna.count({
-          where: { estado: 'activo' }
-        }),
+        scopeCentroAcopioId
+          ? prisma.movimientoVacuna.groupBy({
+              by: ['vacunaId'],
+              where: {
+                establecimiento: {
+                  centroAcopioId: scopeCentroAcopioId,
+                },
+              },
+            }).then((rows) => rows.length)
+          : prisma.vacuna.count({
+              where: { estado: 'activo' }
+            }),
 
         // Total de establecimientos activos
         prisma.establecimiento.count({
-          where: { estado: 'activo' }
+          where: {
+            estado: 'activo',
+            ...(scopeCentroAcopioId ? { centroAcopioId: scopeCentroAcopioId } : {}),
+          }
         }),
 
         // Total de usuarios activos
         prisma.usuario.count({
-          where: { estado: 'activo' }
+          where: {
+            estado: 'activo',
+            ...(scopeCentroAcopioId ? { centroAcopioId: scopeCentroAcopioId } : {}),
+          }
         }),
 
         // Alertas pendientes (no leídas)
         prisma.alerta.count({
-          where: { leida: false }
+          where: {
+            leida: false,
+            ...(scopeCentroAcopioId
+              ? {
+                  usuario: {
+                    centroAcopioId: scopeCentroAcopioId,
+                  },
+                }
+              : {}),
+          }
         }),
 
         // Stock crítico (lotes con cantidad baja)
-        prisma.$queryRaw<Array<{ count: bigint }>>`
-          SELECT COUNT(*) as count
-          FROM lotes_vacunas lv
-          JOIN vacunas v ON lv.vacuna_id = v.id
-          WHERE lv.estado = 'disponible' 
-            AND v.estado = 'activo'
-            AND lv.cantidad_actual <= (lv.cantidad_inicial * 0.2)
-        `,
+        scopeCentroAcopioId
+          ? Promise.resolve([{ count: BigInt(0) }])
+          : prisma.$queryRaw<Array<{ count: bigint }>>`
+              SELECT COUNT(*) as count
+              FROM lotes_vacunas lv
+              JOIN vacunas v ON lv.vacuna_id = v.id
+              WHERE lv.estado = 'disponible' 
+                AND v.estado = 'activo'
+                AND lv.cantidad_actual <= (lv.cantidad_inicial * 0.2)
+            `,
 
         // Lotes próximos a vencer
-        prisma.loteVacuna.count({
-          where: {
-            estado: 'disponible',
-            fechaVencimiento: {
-              lte: fechaLimiteVencimiento,
-              gte: fechaActual
-            }
-          }
-        }),
+        scopeCentroAcopioId
+          ? Promise.resolve(0)
+          : prisma.loteVacuna.count({
+              where: {
+                estado: 'disponible',
+                fechaVencimiento: {
+                  lte: fechaLimiteVencimiento,
+                  gte: fechaActual
+                }
+              }
+            }),
 
         // Entregas del mes actual
         prisma.movimientoVacuna.aggregate({
           where: {
             anio: fechaActual.getFullYear(),
             mes: fechaActual.getMonth() + 1,
-            entrega: { gt: 0 }
+            entrega: { gt: 0 },
+            ...(scopeCentroAcopioId
+              ? {
+                  establecimiento: {
+                    centroAcopioId: scopeCentroAcopioId,
+                  },
+                }
+              : {}),
           },
           _sum: { entrega: true }
         }),
@@ -197,7 +232,15 @@ export class DashboardService {
           where: {
             fechaMovimiento: {
               gte: inicioMes
-            }
+            },
+            ...(scopeCentroAcopioId
+              ? {
+                  OR: [
+                    { establecimientoOrigen: { centroAcopioId: scopeCentroAcopioId } },
+                    { establecimientoDestino: { centroAcopioId: scopeCentroAcopioId } },
+                  ],
+                }
+              : {}),
           }
         })
       ]);
@@ -231,7 +274,7 @@ export class DashboardService {
   /**
    * Obtener movimientos mensuales para gráficos
    */
-  static async getMovimientosMensuales(): Promise<ServiceResult<MovimientosMensuales[]>> {
+  static async getMovimientosMensuales(scopeCentroAcopioId?: string): Promise<ServiceResult<MovimientosMensuales[]>> {
     try {
       console.log('📈 Obteniendo movimientos mensuales...');
 
@@ -245,29 +288,70 @@ export class DashboardService {
           by: ['mes'],
           where: {
             anio: anioActual,
-            entrega: { gt: 0 }
+            entrega: { gt: 0 },
+            ...(scopeCentroAcopioId
+              ? {
+                  establecimiento: {
+                    centroAcopioId: scopeCentroAcopioId,
+                  },
+                }
+              : {}),
           },
           _sum: { entrega: true },
           orderBy: { mes: 'asc' }
         }),
 
         // Movimientos de kardex por mes
-        prisma.$queryRaw<Array<{
-          mes: number;
-          ingresos: bigint;
-          salidas: bigint;
-          transferencias: bigint;
-        }>>`
-          SELECT
-            EXTRACT(MONTH FROM fecha_movimiento) as mes,
-            COALESCE(SUM(CASE WHEN tipo_movimiento = 'ingreso' THEN cantidad ELSE 0 END), 0) as ingresos,
-            COALESCE(SUM(CASE WHEN tipo_movimiento = 'salida' THEN cantidad ELSE 0 END), 0) as salidas,
-            COALESCE(SUM(CASE WHEN tipo_movimiento = 'transferencia' THEN cantidad ELSE 0 END), 0) as transferencias
-          FROM kardex
-          WHERE EXTRACT(YEAR FROM fecha_movimiento) = ${anioActual}
-          GROUP BY EXTRACT(MONTH FROM fecha_movimiento)
-          ORDER BY mes
-        `
+        scopeCentroAcopioId
+          ? prisma.kardex.findMany({
+              where: {
+                fechaMovimiento: {
+                  gte: new Date(anioActual, 0, 1),
+                  lt: new Date(anioActual + 1, 0, 1),
+                },
+                OR: [
+                  { establecimientoOrigen: { centroAcopioId: scopeCentroAcopioId } },
+                  { establecimientoDestino: { centroAcopioId: scopeCentroAcopioId } },
+                ],
+              },
+              select: {
+                fechaMovimiento: true,
+                tipoMovimiento: true,
+                cantidad: true,
+              },
+            }).then((rows) => {
+              const months = new Map<number, { mes: number; ingresos: bigint; salidas: bigint; transferencias: bigint }>();
+              rows.forEach((row) => {
+                const mes = row.fechaMovimiento.getMonth() + 1;
+                const current = months.get(mes) || {
+                  mes,
+                  ingresos: BigInt(0),
+                  salidas: BigInt(0),
+                  transferencias: BigInt(0),
+                };
+                if (row.tipoMovimiento === 'ingreso') current.ingresos += BigInt(row.cantidad);
+                if (row.tipoMovimiento === 'salida') current.salidas += BigInt(row.cantidad);
+                if (row.tipoMovimiento === 'transferencia') current.transferencias += BigInt(row.cantidad);
+                months.set(mes, current);
+              });
+              return Array.from(months.values()).sort((a, b) => a.mes - b.mes);
+            })
+          : prisma.$queryRaw<Array<{
+              mes: number;
+              ingresos: bigint;
+              salidas: bigint;
+              transferencias: bigint;
+            }>>`
+              SELECT
+                EXTRACT(MONTH FROM fecha_movimiento) as mes,
+                COALESCE(SUM(CASE WHEN tipo_movimiento = 'ingreso' THEN cantidad ELSE 0 END), 0) as ingresos,
+                COALESCE(SUM(CASE WHEN tipo_movimiento = 'salida' THEN cantidad ELSE 0 END), 0) as salidas,
+                COALESCE(SUM(CASE WHEN tipo_movimiento = 'transferencia' THEN cantidad ELSE 0 END), 0) as transferencias
+              FROM kardex
+              WHERE EXTRACT(YEAR FROM fecha_movimiento) = ${anioActual}
+              GROUP BY EXTRACT(MONTH FROM fecha_movimiento)
+              ORDER BY mes
+            `
       ]);
 
       // Nombres de meses
@@ -308,26 +392,60 @@ export class DashboardService {
   /**
    * Obtener stock por vacuna para gráfico de torta
    */
-  static async getStockPorVacuna(): Promise<ServiceResult<StockPorVacuna[]>> {
+  static async getStockPorVacuna(scopeCentroAcopioId?: string): Promise<ServiceResult<StockPorVacuna[]>> {
     try {
       console.log('🥧 Obteniendo stock por vacuna...');
 
       // Obtener stock actual por vacuna
-      const stockData = await prisma.$queryRaw<Array<{
-        vacuna_id: string;
-        vacuna_nombre: string;
-        stock_total: bigint;
-      }>>`
-        SELECT
-          v.id as vacuna_id,
-          v.nombre as vacuna_nombre,
-          COALESCE(SUM(lv.cantidad_actual), 0) as stock_total
-        FROM vacunas v
-        LEFT JOIN lotes_vacunas lv ON v.id = lv.vacuna_id AND lv.estado = 'disponible'
-        WHERE v.estado = 'activo'
-        GROUP BY v.id, v.nombre
-        ORDER BY stock_total DESC
-      `;
+      const stockData = scopeCentroAcopioId
+        ? await prisma.movimientoVacuna.findMany({
+            where: {
+              establecimiento: {
+                centroAcopioId: scopeCentroAcopioId,
+              },
+            },
+            select: {
+              saldoAnterior: true,
+              transIngreso: true,
+              salida: true,
+              transSalida: true,
+              entrega: true,
+              vacuna: {
+                select: {
+                  id: true,
+                  nombre: true,
+                },
+              },
+            },
+          }).then((rows) => {
+            const grouped = new Map<string, { vacuna_id: string; vacuna_nombre: string; stock_total: bigint }>();
+            rows.forEach((row) => {
+              const current = grouped.get(row.vacuna.id) || {
+                vacuna_id: row.vacuna.id,
+                vacuna_nombre: row.vacuna.nombre,
+                stock_total: BigInt(0),
+              };
+              const stock = Math.max(row.saldoAnterior + row.transIngreso - row.salida - row.transSalida + row.entrega, 0);
+              current.stock_total += BigInt(stock);
+              grouped.set(row.vacuna.id, current);
+            });
+            return Array.from(grouped.values()).sort((a, b) => Number(b.stock_total - a.stock_total));
+          })
+        : await prisma.$queryRaw<Array<{
+            vacuna_id: string;
+            vacuna_nombre: string;
+            stock_total: bigint;
+          }>>`
+            SELECT
+              v.id as vacuna_id,
+              v.nombre as vacuna_nombre,
+              COALESCE(SUM(lv.cantidad_actual), 0) as stock_total
+            FROM vacunas v
+            LEFT JOIN lotes_vacunas lv ON v.id = lv.vacuna_id AND lv.estado = 'disponible'
+            WHERE v.estado = 'activo'
+            GROUP BY v.id, v.nombre
+            ORDER BY stock_total DESC
+          `;
 
       // Calcular total para porcentajes
       const totalStock = stockData.reduce((sum, item) => sum + Number(item.stock_total), 0);
@@ -363,7 +481,7 @@ export class DashboardService {
   /**
    * Obtener estado de centros de acopio con paginación
    */
-  static async getCentrosAcopioStatus(page: number = 1, limit: number = 5): Promise<ServiceResult<{
+  static async getCentrosAcopioStatus(page: number = 1, limit: number = 5, scopeCentroAcopioId?: string): Promise<ServiceResult<{
     data: CentroAcopioStatus[];
     pagination: {
       page: number;
@@ -378,35 +496,60 @@ export class DashboardService {
       const offset = (page - 1) * limit;
 
       // Obtener total de centros
-      const totalResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
-        SELECT COUNT(*) as count
-        FROM centros_acopio ca
-        WHERE ca.estado = 'activo'
-      `;
+      const totalResult = scopeCentroAcopioId
+        ? [{ count: BigInt(1) }]
+        : await prisma.$queryRaw<Array<{ count: bigint }>>`
+            SELECT COUNT(*) as count
+            FROM centros_acopio ca
+            WHERE ca.estado = 'activo'
+          `;
       const total = Number(totalResult[0]?.count || 0);
 
-      const centrosData = await prisma.$queryRaw<Array<{
-        id: string;
-        nombre: string;
-        establecimientos: bigint;
-        stock_total: bigint;
-        alertas: bigint;
-      }>>`
-        SELECT
-          ca.id,
-          ca.nombre,
-          COUNT(DISTINCT e.id) as establecimientos,
-          COALESCE(SUM(lv.cantidad_actual), 0) as stock_total,
-          0 as alertas
-        FROM centros_acopio ca
-        LEFT JOIN establecimientos e ON ca.id = e.centro_acopio_id AND e.estado = 'activo'
-        LEFT JOIN kardex k ON k.establecimiento_destino_id = e.id
-        LEFT JOIN lotes_vacunas lv ON lv.id = k.lote_id AND lv.estado = 'disponible'
-        WHERE ca.estado = 'activo'
-        GROUP BY ca.id, ca.nombre
-        ORDER BY ca.nombre
-        LIMIT ${limit} OFFSET ${offset}
-      `;
+      const centrosData = scopeCentroAcopioId
+        ? await prisma.$queryRaw<Array<{
+            id: string;
+            nombre: string;
+            establecimientos: bigint;
+            stock_total: bigint;
+            alertas: bigint;
+          }>>`
+            SELECT
+              ca.id,
+              ca.nombre,
+              COUNT(DISTINCT e.id) as establecimientos,
+              COALESCE(SUM(lv.cantidad_actual), 0) as stock_total,
+              0 as alertas
+            FROM centros_acopio ca
+            LEFT JOIN establecimientos e ON ca.id = e.centro_acopio_id AND e.estado = 'activo'
+            LEFT JOIN kardex k ON k.establecimiento_destino_id = e.id
+            LEFT JOIN lotes_vacunas lv ON lv.id = k.lote_id AND lv.estado = 'disponible'
+            WHERE ca.estado = 'activo' AND ca.id = ${scopeCentroAcopioId}
+            GROUP BY ca.id, ca.nombre
+            ORDER BY ca.nombre
+            LIMIT ${limit} OFFSET ${offset}
+          `
+        : await prisma.$queryRaw<Array<{
+            id: string;
+            nombre: string;
+            establecimientos: bigint;
+            stock_total: bigint;
+            alertas: bigint;
+          }>>`
+            SELECT
+              ca.id,
+              ca.nombre,
+              COUNT(DISTINCT e.id) as establecimientos,
+              COALESCE(SUM(lv.cantidad_actual), 0) as stock_total,
+              0 as alertas
+            FROM centros_acopio ca
+            LEFT JOIN establecimientos e ON ca.id = e.centro_acopio_id AND e.estado = 'activo'
+            LEFT JOIN kardex k ON k.establecimiento_destino_id = e.id
+            LEFT JOIN lotes_vacunas lv ON lv.id = k.lote_id AND lv.estado = 'disponible'
+            WHERE ca.estado = 'activo'
+            GROUP BY ca.id, ca.nombre
+            ORDER BY ca.nombre
+            LIMIT ${limit} OFFSET ${offset}
+          `;
 
       const centrosAcopio: CentroAcopioStatus[] = centrosData.map(centro => {
         const stockTotal = Number(centro.stock_total);
@@ -453,7 +596,7 @@ export class DashboardService {
   /**
    * Obtener alertas recientes con paginación
    */
-  static async getAlertasRecientes(page: number = 1, limit: number = 3): Promise<ServiceResult<{
+  static async getAlertasRecientes(page: number = 1, limit: number = 3, scopeCentroAcopioId?: string): Promise<ServiceResult<{
     data: AlertaReciente[];
     pagination: {
       page: number;
@@ -469,7 +612,14 @@ export class DashboardService {
       const whereClause = {
         fechaCreacion: {
           gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Últimos 7 días
-        }
+        },
+        ...(scopeCentroAcopioId
+          ? {
+              usuario: {
+                centroAcopioId: scopeCentroAcopioId,
+              },
+            }
+          : {}),
       };
 
       // Obtener total de alertas
@@ -532,7 +682,7 @@ export class DashboardService {
   /**
    * Obtener actividad reciente del sistema con paginación
    */
-  static async getActividadReciente(page: number = 1, limit: number = 5): Promise<ServiceResult<{
+  static async getActividadReciente(page: number = 1, limit: number = 5, scopeCentroAcopioId?: string): Promise<ServiceResult<{
     data: ActividadReciente[];
     pagination: {
       page: number;
@@ -552,7 +702,8 @@ export class DashboardService {
         // Vales generados recientemente
         prisma.valeEntrega.findMany({
           where: {
-            fechaGeneracion: { gte: fechaLimite }
+            fechaGeneracion: { gte: fechaLimite },
+            ...(scopeCentroAcopioId ? { centroAcopioId: scopeCentroAcopioId } : {}),
           },
           include: {
             usuario: { select: { nombres: true, apellidos: true } },
@@ -564,22 +715,32 @@ export class DashboardService {
         }),
 
         // Lotes recibidos recientemente
-        prisma.loteVacuna.findMany({
-          where: {
-            createdAt: { gte: fechaLimite }
-          },
-          include: {
-            vacuna: { select: { nombre: true } }
-          },
-          orderBy: { createdAt: 'desc' },
-          skip,
-          take: Math.ceil(limit / 3)
-        }),
+        scopeCentroAcopioId
+          ? Promise.resolve([])
+          : prisma.loteVacuna.findMany({
+              where: {
+                createdAt: { gte: fechaLimite }
+              },
+              include: {
+                vacuna: { select: { nombre: true } }
+              },
+              orderBy: { createdAt: 'desc' },
+              skip,
+              take: Math.ceil(limit / 3)
+            }),
 
         // Movimientos registrados recientemente
         prisma.kardex.findMany({
           where: {
-            fechaMovimiento: { gte: fechaLimite }
+            fechaMovimiento: { gte: fechaLimite },
+            ...(scopeCentroAcopioId
+              ? {
+                  OR: [
+                    { establecimientoOrigen: { centroAcopioId: scopeCentroAcopioId } },
+                    { establecimientoDestino: { centroAcopioId: scopeCentroAcopioId } },
+                  ],
+                }
+              : {}),
           },
           include: {
             establecimientoOrigen: { select: { nombre: true } },
@@ -594,13 +755,28 @@ export class DashboardService {
       // Obtener totales para paginación
       const [totalVales, totalLotes, totalMovimientos] = await Promise.all([
         prisma.valeEntrega.count({
-          where: { fechaGeneracion: { gte: fechaLimite } }
+          where: {
+            fechaGeneracion: { gte: fechaLimite },
+            ...(scopeCentroAcopioId ? { centroAcopioId: scopeCentroAcopioId } : {}),
+          }
         }),
-        prisma.loteVacuna.count({
-          where: { createdAt: { gte: fechaLimite } }
-        }),
+        scopeCentroAcopioId
+          ? Promise.resolve(0)
+          : prisma.loteVacuna.count({
+              where: { createdAt: { gte: fechaLimite } }
+            }),
         prisma.kardex.count({
-          where: { fechaMovimiento: { gte: fechaLimite } }
+          where: {
+            fechaMovimiento: { gte: fechaLimite },
+            ...(scopeCentroAcopioId
+              ? {
+                  OR: [
+                    { establecimientoOrigen: { centroAcopioId: scopeCentroAcopioId } },
+                    { establecimientoDestino: { centroAcopioId: scopeCentroAcopioId } },
+                  ],
+                }
+              : {}),
+          }
         })
       ]);
 

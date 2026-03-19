@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Plus,
   Search,
@@ -21,9 +21,9 @@ import { RoleService } from '../../services/roleService';
 import { PermissionService } from '../../services/permissionService';
 import { useToastContext } from '../../contexts/ToastContext';
 import { logger } from '../../utils/debug';
-import { COMPONENT_STYLES } from './constants';
 import RoleModal from './RoleModal';
 import PermissionsModal from './PermissionsModal';
+import { DEFAULT_ROLE_ASSIGNABLE_PERMISSION_CODES } from './constants';
 
 interface RolesManagementProps {
   onNavigateToPermissions?: () => void;
@@ -44,6 +44,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [permissionsReadOnly, setPermissionsReadOnly] = useState(false);
   
   // Estados para operaciones
   const [isCreating, setIsCreating] = useState(false);
@@ -52,7 +53,6 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
   
   // Estados para permisos
   const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [rolePermissions, setRolePermissions] = useState<Permission[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [loadingPermissions, setLoadingPermissions] = useState(false);
   
@@ -67,6 +67,19 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
   });
 
   const { toast } = useToastContext();
+
+  const modalPermissions = useMemo(() => {
+    if (!selectedRole?.esDefault) {
+      return permissions;
+    }
+
+    const allowedCodes = DEFAULT_ROLE_ASSIGNABLE_PERMISSION_CODES[selectedRole.codigo];
+    if (!allowedCodes) {
+      return permissions;
+    }
+
+    return permissions.filter((permission) => allowedCodes.includes(permission.codigo));
+  }, [permissions, selectedRole]);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -146,7 +159,6 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     try {
       setLoadingPermissions(true);
       const result = await RoleService.getRolePermissions(roleId);
-      setRolePermissions(result);
       setSelectedPermissions(result.map(p => p.id));
     } catch (error) {
       logger.error('Error al cargar permisos del rol:', error);
@@ -238,6 +250,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
    */
   const handleManagePermissions = async (role: Role) => {
     setSelectedRole(role);
+    setPermissionsReadOnly(role.codigo === 'administrador');
     await loadPermissions();
     await loadRolePermissions(role.id);
     setShowPermissionsModal(true);
@@ -396,7 +409,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
             {/* Filtro por estado */}
             <select
               value={filterEstado}
-              onChange={(e) => setFilterEstado(e.target.value as any)}
+              onChange={(e) => setFilterEstado(e.target.value as 'todos' | 'activo' | 'inactivo')}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             >
               <option value="todos">Todos los estados</option>
@@ -546,8 +559,13 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                         {/* Botón editar */}
                         <button
                           onClick={() => handleEdit(role)}
-                          className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
-                          title="Editar rol"
+                          className={`p-1 rounded ${
+                            role.esDefault
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : 'text-blue-600 hover:text-blue-900 hover:bg-blue-50'
+                          }`}
+                          title={role.esDefault ? 'Rol protegido del sistema' : 'Editar rol'}
+                          disabled={role.esDefault}
                         >
                           <Edit className="h-4 w-4" />
                         </button>
@@ -561,7 +579,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                               : 'text-green-600 hover:text-green-900 hover:bg-green-50'
                           }`}
                           title={role.estado === 'activo' ? 'Desactivar' : 'Activar'}
-                          disabled={role.esDefault && role.estado === 'activo'}
+                          disabled={role.esDefault}
                         >
                           {role.estado === 'activo' ? (
                             <XCircle className="h-4 w-4" />
@@ -614,10 +632,11 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
           setShowPermissionsModal(false);
           setSelectedRole(null);
           setSelectedPermissions([]);
+          setPermissionsReadOnly(false);
         }}
         onSave={handleSavePermissions}
         role={selectedRole}
-        permissions={permissions}
+        permissions={modalPermissions}
         selectedPermissions={selectedPermissions}
         onPermissionToggle={(permissionId) => {
           setSelectedPermissions(prev =>
@@ -627,6 +646,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
           );
         }}
         isLoading={loadingPermissions}
+        isReadOnly={permissionsReadOnly}
       />
     </div>
   );

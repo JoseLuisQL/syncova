@@ -1,11 +1,17 @@
 import { Router } from 'express';
 import { PlanificacionController } from '@/controllers/PlanificacionController';
+import { authenticate } from '@/middleware/auth';
+import { denyRoles, requireCentroAcopioAssignment } from '@/middleware/accessControl';
+import { requirePermissions } from '@/middleware/permissions';
 import { uploadSingleExcel, handleUploadError } from '@/middleware/upload';
 
 /**
  * Rutas para gestión de planificación anual de vacunas
  */
 const router = Router();
+const denyResponsableAcopio = denyRoles(['responsable_acopio']);
+
+router.use(authenticate, requireCentroAcopioAssignment, requirePermissions(['planificacion:read']));
 
 /**
  * @route GET /api/planificacion/anios-disponibles
@@ -38,7 +44,7 @@ router.get('/vacuna/:vacunaId/anio/:anio', PlanificacionController.getByVacunaAn
  * @access Public (TODO: Proteger con autenticación)
  * @body {ImportarPlanificacionDto} data - Datos de planificación a importar
  */
-router.post('/importar', PlanificacionController.importar);
+router.post('/importar', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.importar);
 
 /**
  * @route POST /api/planificacion/distribucion-automatica
@@ -46,7 +52,7 @@ router.post('/importar', PlanificacionController.importar);
  * @access Public (TODO: Proteger con autenticación)
  * @body {DistribucionAutomaticaDto} data - Parámetros para distribución automática
  */
-router.post('/distribucion-automatica', PlanificacionController.distribucionAutomatica);
+router.post('/distribucion-automatica', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.distribucionAutomatica);
 
 /**
  * @route GET /api/planificacion
@@ -77,7 +83,7 @@ router.get('/:id', PlanificacionController.getById);
  * @access Public (TODO: Proteger con autenticación)
  * @body {CreatePlanificacionDto} data - Datos de la nueva planificación
  */
-router.post('/', PlanificacionController.create);
+router.post('/', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.create);
 
 /**
  * @route PUT /api/planificacion/:id
@@ -86,7 +92,7 @@ router.post('/', PlanificacionController.create);
  * @param {string} id - ID de la planificación
  * @body {UpdatePlanificacionDto} data - Datos a actualizar
  */
-router.put('/:id', PlanificacionController.update);
+router.put('/:id', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.update);
 
 
 
@@ -96,7 +102,7 @@ router.put('/:id', PlanificacionController.update);
  * @access Public (TODO: Proteger con autenticación)
  * @param {string} id - ID de la planificación
  */
-router.delete('/:id', PlanificacionController.delete);
+router.delete('/:id', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.delete);
 
 /**
  * @route GET /api/planificacion/plantilla/vacuna/:vacunaId/anio/:anio
@@ -105,7 +111,7 @@ router.delete('/:id', PlanificacionController.delete);
  * @param {string} vacunaId - ID de la vacuna
  * @param {number} anio - Año de planificación
  */
-router.get('/plantilla/vacuna/:vacunaId/anio/:anio', PlanificacionController.descargarPlantillaVacuna);
+router.get('/plantilla/vacuna/:vacunaId/anio/:anio', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.descargarPlantillaVacuna);
 
 /**
  * @route GET /api/planificacion/plantilla/masiva/anio/:anio
@@ -113,7 +119,7 @@ router.get('/plantilla/vacuna/:vacunaId/anio/:anio', PlanificacionController.des
  * @access Public (TODO: Proteger con autenticación)
  * @param {number} anio - Año de planificación
  */
-router.get('/plantilla/masiva/anio/:anio', PlanificacionController.descargarPlantillaMasiva);
+router.get('/plantilla/masiva/anio/:anio', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.descargarPlantillaMasiva);
 
 /**
  * @route POST /api/planificacion/importar/vacuna/:vacunaId/anio/:anio
@@ -124,6 +130,8 @@ router.get('/plantilla/masiva/anio/:anio', PlanificacionController.descargarPlan
  * @body {file} archivo - Archivo Excel con la programación
  */
 router.post('/importar/vacuna/:vacunaId/anio/:anio',
+  requirePermissions(['planificacion:write']),
+  denyResponsableAcopio,
   uploadSingleExcel,
   handleUploadError,
   PlanificacionController.importarDesdeExcelVacuna
@@ -137,6 +145,8 @@ router.post('/importar/vacuna/:vacunaId/anio/:anio',
  * @body {file} archivo - Archivo Excel con múltiples hojas de programación
  */
 router.post('/importar/masivo/anio/:anio',
+  requirePermissions(['planificacion:write']),
+  denyResponsableAcopio,
   uploadSingleExcel,
   handleUploadError,
   PlanificacionController.importarDesdeExcelMasivo
@@ -148,7 +158,7 @@ router.post('/importar/masivo/anio/:anio',
  * @access Public (TODO: Proteger con autenticación)
  * @param {string} id - ID de la planificación
  */
-router.post('/:id/sincronizar-movimientos', PlanificacionController.sincronizarConMovimientos);
+router.post('/:id/sincronizar-movimientos', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.sincronizarConMovimientos);
 
 /**
  * @route GET /api/planificacion/verificar/:establecimientoId/:vacunaId/:anio
@@ -158,7 +168,7 @@ router.post('/:id/sincronizar-movimientos', PlanificacionController.sincronizarC
  * @param {string} vacunaId - ID de la vacuna
  * @param {number} anio - Año de planificación
  */
-router.get('/verificar/:establecimientoId/:vacunaId/:anio', PlanificacionController.verificarExistenciaPlanificacion);
+router.get('/verificar/:establecimientoId/:vacunaId/:anio', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.verificarExistenciaPlanificacion);
 
 /**
  * @route GET /api/planificacion/verificar-disponibilidad/:establecimientoId/:vacunaId/:mes/:anio
@@ -169,7 +179,7 @@ router.get('/verificar/:establecimientoId/:vacunaId/:anio', PlanificacionControl
  * @param {number} mes - Mes actual (1-12)
  * @param {number} anio - Año de planificación
  */
-router.get('/verificar-disponibilidad/:establecimientoId/:vacunaId/:mes/:anio', PlanificacionController.verificarDisponibilidadEntregas);
+router.get('/verificar-disponibilidad/:establecimientoId/:vacunaId/:mes/:anio', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.verificarDisponibilidadEntregas);
 
 /**
  * @route POST /api/planificacion/registrar-mes-actual
@@ -182,7 +192,7 @@ router.get('/verificar-disponibilidad/:establecimientoId/:vacunaId/:mes/:anio', 
  * @body {number} cantidad - Cantidad a registrar
  * @body {string} [usuarioId] - ID del usuario (opcional)
  */
-router.post('/registrar-mes-actual', PlanificacionController.registrarEntregaMesActual);
+router.post('/registrar-mes-actual', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.registrarEntregaMesActual);
 
 /**
  * @route POST /api/planificacion/exportar/vacuna/:vacunaId
@@ -195,7 +205,7 @@ router.post('/registrar-mes-actual', PlanificacionController.registrarEntregaMes
  * @body {string} responsableReporte - Nombre del responsable del reporte
  * @body {string} [observaciones] - Observaciones adicionales
  */
-router.post('/exportar/vacuna/:vacunaId', PlanificacionController.exportarPorVacuna);
+router.post('/exportar/vacuna/:vacunaId', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.exportarPorVacuna);
 
 /**
  * @route POST /api/planificacion/exportar/todas-vacunas
@@ -207,6 +217,6 @@ router.post('/exportar/vacuna/:vacunaId', PlanificacionController.exportarPorVac
  * @body {string} responsableReporte - Nombre del responsable del reporte
  * @body {string} [observaciones] - Observaciones adicionales
  */
-router.post('/exportar/todas-vacunas', PlanificacionController.exportarTodasVacunas);
+router.post('/exportar/todas-vacunas', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.exportarTodasVacunas);
 
 export default router;

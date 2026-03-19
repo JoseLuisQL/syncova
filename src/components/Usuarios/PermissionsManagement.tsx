@@ -8,7 +8,8 @@ import {
   AlertTriangle,
   RefreshCw,
   Loader2,
-  Clock
+  Clock,
+  Lock,
 } from 'lucide-react';
 import { Permission } from '../../types';
 import { PermissionService } from '../../services/permissionService';
@@ -31,9 +32,6 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
   const [filterCategoria, setFilterCategoria] = useState<string>('todas');
   const [filterRecurso, setFilterRecurso] = useState<string>('todos');
   const [filterAccion, setFilterAccion] = useState<string>('todas');
-  
-  // Estados para operaciones
-  const [isDeleting, setIsDeleting] = useState(false);
   
   // Estados para estadísticas
   const [stats, setStats] = useState({
@@ -126,46 +124,6 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
       setAcciones(accionesResult);
     } catch (error) {
       logger.error('Error al cargar metadatos:', error);
-    }
-  };
-
-  /**
-   * Manejar eliminación de permiso
-   */
-  const handleDelete = async (permission: Permission) => {
-    if (!confirm(`¿Está seguro de eliminar el permiso "${permission.nombre}"?`)) {
-      return;
-    }
-
-    try {
-      setIsDeleting(true);
-      await PermissionService.delete(permission.id);
-      toast.success('Permiso eliminado correctamente');
-      await loadPermissions();
-      await loadStats();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al eliminar permiso';
-      toast.error(errorMessage);
-      logger.error('Error al eliminar permiso:', error);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  /**
-   * Manejar cambio de estado
-   */
-  const handleToggleEstado = async (permission: Permission) => {
-    try {
-      const nuevoEstado = permission.estado === 'activo' ? 'inactivo' : 'activo';
-      await PermissionService.changeEstado(permission.id, nuevoEstado);
-      toast.success(`Permiso ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} correctamente`);
-      await loadPermissions();
-      await loadStats();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al cambiar estado';
-      toast.error(errorMessage);
-      logger.error('Error al cambiar estado:', error);
     }
   };
 
@@ -318,7 +276,7 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
             {/* Filtro por estado */}
             <select
               value={filterEstado}
-              onChange={(e) => setFilterEstado(e.target.value as any)}
+              onChange={(e) => setFilterEstado(e.target.value as 'todos' | 'activo' | 'inactivo')}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             >
               <option value="todos">Todos los estados</option>
@@ -399,7 +357,7 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
                   Creado
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
+                  Auditoría
                 </th>
               </tr>
             </thead>
@@ -471,23 +429,9 @@ const PermissionsManagement: React.FC<PermissionsManagementProps> = ({ onNavigat
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-2">
-                        {/* Botón cambiar estado */}
-                        <button
-                          onClick={() => handleToggleEstado(permission)}
-                          className={`p-1 rounded ${
-                            permission.estado === 'activo'
-                              ? 'text-red-600 hover:text-red-900 hover:bg-red-50'
-                              : 'text-green-600 hover:text-green-900 hover:bg-green-50'
-                          }`}
-                          title={permission.estado === 'activo' ? 'Desactivar' : 'Activar'}
-                        >
-                          {permission.estado === 'activo' ? (
-                            <XCircle className="h-4 w-4" />
-                          ) : (
-                            <CheckCircle className="h-4 w-4" />
-                          )}
-                        </button>
+                      <div className="flex items-center justify-end gap-2 text-xs font-medium text-slate-500">
+                        <Lock className="h-3.5 w-3.5" />
+                        Solo lectura
                       </div>
                     </td>
                   </tr>

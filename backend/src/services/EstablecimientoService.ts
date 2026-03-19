@@ -14,6 +14,7 @@ export class EstablecimientoService {
     estado?: EstadoGeneral | 'todos';
     search?: string;
     centroAcopioId?: string;
+    centroAcopioIds?: string[];
     page?: number;
     limit?: number;
     noPagination?: boolean; // NUEVO: Opción para desactivar paginación
@@ -24,6 +25,7 @@ export class EstablecimientoService {
         estado,
         search,
         centroAcopioId,
+        centroAcopioIds,
         page = 1,
         limit = 50,
         noPagination = false
@@ -53,7 +55,9 @@ export class EstablecimientoService {
         ];
       }
 
-      if (centroAcopioId) {
+      if (centroAcopioIds && centroAcopioIds.length > 0) {
+        where.centroAcopioId = { in: centroAcopioIds };
+      } else if (centroAcopioId) {
         where.centroAcopioId = centroAcopioId;
       }
 
@@ -169,11 +173,12 @@ export class EstablecimientoService {
   /**
    * Obtener centros de acopio (ahora desde la tabla centros_acopio)
    */
-  static async getCentrosAcopio(): Promise<ServiceResult<any[]>> {
+  static async getCentrosAcopio(centroAcopioIds?: string[]): Promise<ServiceResult<any[]>> {
     try {
       const centrosAcopio = await prisma.centroAcopio.findMany({
         where: {
-          estado: 'activo'
+          estado: 'activo',
+          ...(centroAcopioIds?.length ? { id: { in: centroAcopioIds } } : {}),
         },
         include: {
           microred: {

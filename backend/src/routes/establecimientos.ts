@@ -1,10 +1,15 @@
 import { Router } from 'express';
 import { EstablecimientoController } from '@/controllers/EstablecimientoController';
+import { authenticate } from '@/middleware/auth';
+import { requireCentroAcopioAssignment } from '@/middleware/accessControl';
+import { requirePermissions } from '@/middleware/permissions';
 
 /**
  * Rutas para gestión de establecimientos
  */
 const router = Router();
+
+router.use(authenticate, requireCentroAcopioAssignment);
 
 /**
  * @route GET /api/establecimientos
@@ -17,21 +22,21 @@ const router = Router();
  * @query {number} [page=1] - Número de página
  * @query {number} [limit=50] - Límite de resultados por página
  */
-router.get('/', EstablecimientoController.getAll);
+router.get('/', requirePermissions(['establecimientos:read']), EstablecimientoController.getAll);
 
 /**
  * @route GET /api/establecimientos/centros-acopio
  * @desc Obtener todos los centros de acopio
  * @access Public (TODO: Proteger con autenticación)
  */
-router.get('/centros-acopio', EstablecimientoController.getCentrosAcopio);
+router.get('/centros-acopio', requirePermissions(['establecimientos:read']), EstablecimientoController.getCentrosAcopio);
 
 /**
  * @route GET /api/establecimientos/opciones-jerarquicas
  * @desc Obtener opciones jerárquicas para formularios (redes, microredes, centros de acopio)
  * @access Public (TODO: Proteger con autenticación)
  */
-router.get('/opciones-jerarquicas', EstablecimientoController.getOpcionesJerarquicas);
+router.get('/opciones-jerarquicas', requirePermissions(['establecimientos:read']), EstablecimientoController.getOpcionesJerarquicas);
 
 /**
  * @route GET /api/establecimientos/centro-acopio/:centroAcopioId
@@ -39,7 +44,7 @@ router.get('/opciones-jerarquicas', EstablecimientoController.getOpcionesJerarqu
  * @access Public (TODO: Proteger con autenticación)
  * @param {string} centroAcopioId - ID del centro de acopio
  */
-router.get('/centro-acopio/:centroAcopioId', EstablecimientoController.getByCentroAcopio);
+router.get('/centro-acopio/:centroAcopioId', requirePermissions(['establecimientos:read']), EstablecimientoController.getByCentroAcopio);
 
 /**
  * @route GET /api/establecimientos/codigo/:codigo
@@ -47,7 +52,7 @@ router.get('/centro-acopio/:centroAcopioId', EstablecimientoController.getByCent
  * @access Public (TODO: Proteger con autenticación)
  * @param {string} codigo - Código del establecimiento
  */
-router.get('/codigo/:codigo', EstablecimientoController.getByCodigo);
+router.get('/codigo/:codigo', requirePermissions(['establecimientos:read']), EstablecimientoController.getByCodigo);
 
 /**
  * @route GET /api/establecimientos/:id
@@ -55,7 +60,7 @@ router.get('/codigo/:codigo', EstablecimientoController.getByCodigo);
  * @access Public (TODO: Proteger con autenticación)
  * @param {string} id - ID del establecimiento
  */
-router.get('/:id', EstablecimientoController.getById);
+router.get('/:id', requirePermissions(['establecimientos:read']), EstablecimientoController.getById);
 
 /**
  * @route POST /api/establecimientos
@@ -63,7 +68,7 @@ router.get('/:id', EstablecimientoController.getById);
  * @access Private (TODO: Proteger con autenticación y autorización)
  * @body {CreateEstablecimientoDto} data - Datos del establecimiento
  */
-router.post('/', EstablecimientoController.create);
+router.post('/', requirePermissions(['establecimientos:write']), EstablecimientoController.create);
 
 /**
  * @route PUT /api/establecimientos/:id
@@ -72,7 +77,7 @@ router.post('/', EstablecimientoController.create);
  * @param {string} id - ID del establecimiento
  * @body {UpdateEstablecimientoDto} data - Datos a actualizar
  */
-router.put('/:id', EstablecimientoController.update);
+router.put('/:id', requirePermissions(['establecimientos:write']), EstablecimientoController.update);
 
 /**
  * @route DELETE /api/establecimientos/:id
@@ -80,6 +85,6 @@ router.put('/:id', EstablecimientoController.update);
  * @access Private (TODO: Proteger con autenticación y autorización)
  * @param {string} id - ID del establecimiento
  */
-router.delete('/:id', EstablecimientoController.delete);
+router.delete('/:id', requirePermissions(['establecimientos:write']), EstablecimientoController.delete);
 
 export default router;

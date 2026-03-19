@@ -11,7 +11,7 @@ import Planificacion from '../Planificacion/Planificacion';
 import Kardex from '../Kardex/Kardex';
 import Reportes from '../Reportes/Reportes';
 import AlertasModule from '../Alertas/AlertasModule';
-import Usuarios from '../Usuarios/Usuarios';
+import UsuariosModule from '../Usuarios/UsuariosModule';
 import Configuracion from '../Configuracion/Configuracion';
 
 /**
@@ -105,10 +105,10 @@ const AppRoutes: React.FC = () => {
       
       {/* Usuarios */}
       <Route 
-        path="/usuarios" 
+        path="/usuarios/*" 
         element={
           <ProtectedRoute requiredRoles={['administrador']}>
-            <Usuarios />
+            <UsuariosModule />
           </ProtectedRoute>
         } 
       />

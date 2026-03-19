@@ -54,6 +54,10 @@ export const MODULE_PERMISSIONS: Record<string, string[]> = {
   ],
 };
 
+const ROLE_MODULE_OVERRIDES: Partial<Record<'administrador' | 'coordinador' | 'responsable_acopio' | 'operador', string[]>> = {
+  responsable_acopio: ['dashboard', 'movimientos', 'planificacion'],
+};
+
 /**
  * Mapeo de secciones internas de cada módulo a sus permisos
  */
@@ -144,11 +148,22 @@ export const usePermissions = () => {
    */
   const canAccessModule = useCallback((moduleId: string): boolean => {
     const requiredPermissions = MODULE_PERMISSIONS[moduleId];
+    const roleOverride = user?.rol ? ROLE_MODULE_OVERRIDES[user.rol] : undefined;
+    if (roleOverride) {
+      if (!roleOverride.includes(moduleId)) {
+        return false;
+      }
+      if (!requiredPermissions || requiredPermissions.length === 0) {
+        return true;
+      }
+      return hasAnyPermission(requiredPermissions);
+    }
+
     if (!requiredPermissions || requiredPermissions.length === 0) {
       return true; // Si no hay permisos definidos, se permite acceso
     }
     return hasAnyPermission(requiredPermissions);
-  }, [hasAnyPermission]);
+  }, [hasAnyPermission, user?.rol]);
 
   /**
    * Verifica si el usuario puede acceder a una sección de un módulo

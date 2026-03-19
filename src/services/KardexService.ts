@@ -1,4 +1,5 @@
 import { Vacuna, Jeringa, Establecimiento } from '../types';
+import { STORAGE_KEYS, SYSTEM_EVENTS } from '../constants';
 import { getApiBaseUrl } from '../utils/apiConfig';
 
 /**
@@ -149,6 +150,28 @@ export interface PaginatedResponse<T> {
 export class KardexService {
   private static readonly BASE_URL = getApiBaseUrl();
 
+  private static getAuthHeaders(contentType = 'application/json'): HeadersInit {
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    return {
+      'Content-Type': contentType,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  }
+
+  private static async handleFetchResponse<T>(response: Response): Promise<T> {
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        window.dispatchEvent(new CustomEvent(SYSTEM_EVENTS.AUTH_LOGOUT));
+      }
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+
+    return response.json() as Promise<T>;
+  }
+
   /**
    * Obtener todos los movimientos de kardex con filtros
    */
@@ -168,16 +191,9 @@ export class KardexService {
       
       const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
       });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const result: ApiResponse<KardexResponse> = await response.json();
+      const result = await this.handleFetchResponse<ApiResponse<KardexResponse>>(response);
       
       if (!result.success) {
         throw new Error(result.message || 'Error al obtener movimientos de kardex');
@@ -223,16 +239,9 @@ export class KardexService {
       
       const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
       });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const result: ApiResponse<KardexEstadisticas> = await response.json();
+      const result = await this.handleFetchResponse<ApiResponse<KardexEstadisticas>>(response);
       
       if (!result.success) {
         throw new Error(result.message || 'Error al obtener estadísticas del kardex');
@@ -252,16 +261,9 @@ export class KardexService {
     try {
       const response = await fetch(`${this.BASE_URL}/vacunas`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
       });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const result: ApiResponse<Vacuna[]> = await response.json();
+      const result = await this.handleFetchResponse<ApiResponse<Vacuna[]>>(response);
       
       if (!result.success) {
         throw new Error(result.message || 'Error al obtener vacunas');
@@ -285,16 +287,9 @@ export class KardexService {
     try {
       const response = await fetch(`${this.BASE_URL}/jeringas?estado=activo&limit=1000`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
       });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const result: PaginatedResponse<Jeringa[]> = await response.json();
+      const result = await this.handleFetchResponse<PaginatedResponse<Jeringa[]>>(response);
 
       if (!result.success) {
         throw new Error(result.message || 'Error al obtener jeringas');
@@ -322,16 +317,9 @@ export class KardexService {
       // Add noPagination=true to get all establishments without pagination
       const response = await fetch(`${this.BASE_URL}/establecimientos?noPagination=true`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
       });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const result: PaginatedResponse<Establecimiento> = await response.json();
+      const result = await this.handleFetchResponse<PaginatedResponse<Establecimiento>>(response);
 
       if (!result.success) {
         throw new Error(result.message || 'Error al obtener establecimientos');
@@ -357,16 +345,9 @@ export class KardexService {
       // Usar el endpoint de establecimientos que no requiere autenticación especial
       const response = await fetch(`${this.BASE_URL}/establecimientos/centros-acopio`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result: any = await response.json();
+      const result: any = await this.handleFetchResponse(response);
 
       if (!result.success) {
         throw new Error(result.message || 'Error al obtener centros de acopio');
@@ -401,16 +382,9 @@ export class KardexService {
 
       const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
       });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const result: PaginatedResponse<any[]> = await response.json();
+      const result = await this.handleFetchResponse<PaginatedResponse<any[]>>(response);
 
       if (!result.success) {
         throw new Error(result.message || 'Error al obtener lotes de vacunas');
@@ -442,16 +416,9 @@ export class KardexService {
 
       const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
       });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const result: PaginatedResponse<any[]> = await response.json();
+      const result = await this.handleFetchResponse<PaginatedResponse<any[]>>(response);
 
       if (!result.success) {
         throw new Error(result.message || 'Error al obtener lotes de jeringas');
@@ -480,16 +447,9 @@ export class KardexService {
       // Buscar el vale por número de documento en la lista de vales
       const response = await fetch(`${this.BASE_URL}/vales?limit=100`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
       });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-
-      const result: ApiResponse<{vales: any[], total: number}> = await response.json();
+      const result = await this.handleFetchResponse<ApiResponse<{vales: any[], total: number}>>(response);
 
       if (!result.success) {
         return null;
@@ -505,16 +465,9 @@ export class KardexService {
       // Obtener detalles completos del vale
       const valeDetailResponse = await fetch(`${this.BASE_URL}/vales/${vale.id}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
       });
-
-      if (!valeDetailResponse.ok) {
-        throw new Error(`Error HTTP: ${valeDetailResponse.status}`);
-      }
-
-      const valeDetailResult: ApiResponse<any> = await valeDetailResponse.json();
+      const valeDetailResult = await this.handleFetchResponse<ApiResponse<any>>(valeDetailResponse);
 
       if (!valeDetailResult.success) {
         return null;

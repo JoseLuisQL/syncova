@@ -3,6 +3,7 @@ import { Save, RefreshCw, Loader2, CheckCircle, BarChart3, Building2 } from 'luc
 import { COMPONENT_STYLES } from '../constants';
 
 interface PlanificacionAccionesProps {
+  readOnly?: boolean;
   isLoading: boolean;
   isUpdating: boolean;
   pendingChangesCount: number;
@@ -14,6 +15,7 @@ interface PlanificacionAccionesProps {
 }
 
 export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(({
+  readOnly = false,
   isLoading,
   isUpdating,
   pendingChangesCount,
@@ -24,6 +26,15 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
   onGuardarPendientes,
 }) => {
   if (!hasData) return null;
+
+  if (readOnly) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600 shadow-sm">
+        Esta planificación se muestra en modo de solo lectura para el responsable de acopio. Las acciones de importación,
+        guardado, sincronización y recalculo quedan bloqueadas por política de acceso.
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 p-6 shadow-sm">

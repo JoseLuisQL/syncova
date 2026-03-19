@@ -1,6 +1,8 @@
 import { prisma } from '@/config/database';
 import { ServiceResult } from '@/types';
 import { EstadoGeneral } from '@prisma/client';
+import { clearPermissionsCache } from '@/middleware/permissions';
+import { getAssignablePermissionCodesForRole } from '@/config/defaultRolePermissions';
 
 export interface IRole {
   id: string;
@@ -306,11 +308,10 @@ export class RoleService {
         };
       }
 
-      // Verificar que no sea un rol por defecto si se intenta cambiar código
-      if (data.codigo && existingRole.esDefault && data.codigo !== existingRole.codigo) {
+      if (existingRole.esDefault) {
         return {
           success: false,
-          error: 'No se puede cambiar el código de un rol por defecto del sistema',
+          error: 'Los roles por defecto del sistema son de solo lectura',
         };
       }
 
@@ -540,19 +541,29 @@ export class RoleService {
         };
       }
 
-      // Verificar que todos los permisos existen
       const permissions = await prisma.permission.findMany({
         where: {
-          id: { in: permissionIds },
           estado: 'activo',
+          ...(role.codigo !== 'administrador' ? { id: { in: permissionIds } } : {}),
         },
       });
 
-      if (permissions.length !== permissionIds.length) {
+      if (role.codigo !== 'administrador' && permissions.length !== permissionIds.length) {
         return {
           success: false,
           error: 'Uno o más permisos no existen o están inactivos',
         };
+      }
+
+      const assignableCodes = getAssignablePermissionCodesForRole(role.codigo);
+      if (assignableCodes) {
+        const invalidPermissions = permissions.filter((permission) => !assignableCodes.includes(permission.codigo));
+        if (invalidPermissions.length > 0) {
+          return {
+            success: false,
+            error: `El rol ${role.nombre} solo permite permisos operativos compatibles con su alcance`,
+          };
+        }
       }
 
       // Eliminar permisos actuales y asignar los nuevos en una transacción
@@ -563,15 +574,22 @@ export class RoleService {
         });
 
         // Asignar nuevos permisos
-        if (permissionIds.length > 0) {
+        if (permissions.length > 0) {
           await tx.rolePermission.createMany({
-            data: permissionIds.map(permissionId => ({
+            data: permissions.map(({ id: permissionId }) => ({
               roleId,
               permissionId,
             })),
           });
         }
       });
+
+      const usuariosAfectados = await prisma.usuario.findMany({
+        where: { roleId },
+        select: { id: true },
+      });
+
+      usuariosAfectados.forEach((usuario) => clearPermissionsCache(usuario.id));
 
       return {
         success: true,

@@ -1,5 +1,7 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { DashboardService } from '@/services/DashboardService';
+import { getScopedCentroAcopioId } from '@/middleware/accessControl';
+import { AuthenticatedRequest } from '@/types';
 
 /**
  * Controlador para el Dashboard
@@ -8,11 +10,12 @@ export class DashboardController {
   /**
    * Obtener todos los datos del dashboard
    */
-  static async getDashboardData(req: Request, res: Response): Promise<void> {
+  static async getDashboardData(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       console.log('🔄 Obteniendo datos completos del dashboard');
+      const scopedCentroAcopioId = getScopedCentroAcopioId(req);
 
-      const result = await DashboardService.getDashboardData();
+      const result = await DashboardService.getDashboardData(scopedCentroAcopioId);
 
       if (!result.success) {
         console.error('❌ Error al obtener datos del dashboard:', result.error);
@@ -43,11 +46,12 @@ export class DashboardController {
   /**
    * Obtener solo las estadísticas generales
    */
-  static async getEstadisticas(req: Request, res: Response): Promise<void> {
+  static async getEstadisticas(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       console.info('📊 Obteniendo estadísticas generales del dashboard');
+      const scopedCentroAcopioId = getScopedCentroAcopioId(req);
 
-      const result = await DashboardService.getEstadisticasGenerales();
+      const result = await DashboardService.getEstadisticasGenerales(scopedCentroAcopioId);
 
       if (!result.success) {
         console.error('❌ Error al obtener estadísticas:', result.error);
@@ -78,11 +82,12 @@ export class DashboardController {
   /**
    * Obtener datos de movimientos mensuales para gráficos
    */
-  static async getMovimientosMensuales(req: Request, res: Response): Promise<void> {
+  static async getMovimientosMensuales(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       console.info('📈 Obteniendo movimientos mensuales para gráficos');
+      const scopedCentroAcopioId = getScopedCentroAcopioId(req);
 
-      const result = await DashboardService.getMovimientosMensuales();
+      const result = await DashboardService.getMovimientosMensuales(scopedCentroAcopioId);
 
       if (!result.success) {
         console.error('❌ Error al obtener movimientos mensuales:', result.error);
@@ -113,11 +118,12 @@ export class DashboardController {
   /**
    * Obtener datos de stock por vacuna para gráfico de torta
    */
-  static async getStockPorVacuna(req: Request, res: Response): Promise<void> {
+  static async getStockPorVacuna(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       console.info('🥧 Obteniendo stock por vacuna para gráfico');
+      const scopedCentroAcopioId = getScopedCentroAcopioId(req);
 
-      const result = await DashboardService.getStockPorVacuna();
+      const result = await DashboardService.getStockPorVacuna(scopedCentroAcopioId);
 
       if (!result.success) {
         console.error('❌ Error al obtener stock por vacuna:', result.error);
@@ -148,11 +154,12 @@ export class DashboardController {
   /**
    * Obtener estado de centros de acopio
    */
-  static async getCentrosAcopioStatus(req: Request, res: Response): Promise<void> {
+  static async getCentrosAcopioStatus(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       console.info('🏢 Obteniendo estado de centros de acopio');
+      const scopedCentroAcopioId = getScopedCentroAcopioId(req);
 
-      const result = await DashboardService.getCentrosAcopioStatus();
+      const result = await DashboardService.getCentrosAcopioStatus(1, 5, scopedCentroAcopioId);
 
       if (!result.success) {
         console.error('❌ Error al obtener estado de centros de acopio:', result.error);
@@ -183,14 +190,15 @@ export class DashboardController {
   /**
    * Obtener centros de acopio con paginación
    */
-  static async getCentrosAcopio(req: Request, res: Response): Promise<void> {
+  static async getCentrosAcopio(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
+      const scopedCentroAcopioId = getScopedCentroAcopioId(req);
 
       console.log(`🏢 Obteniendo centros de acopio (página ${page}, límite ${limit})`);
 
-      const result = await DashboardService.getCentrosAcopioStatus(page, limit);
+      const result = await DashboardService.getCentrosAcopioStatus(page, limit, scopedCentroAcopioId);
 
       if (!result.success) {
         console.error('❌ Error al obtener centros de acopio:', result.error);
@@ -221,14 +229,15 @@ export class DashboardController {
   /**
    * Obtener alertas recientes con paginación
    */
-  static async getAlertasRecientes(req: Request, res: Response): Promise<void> {
+  static async getAlertasRecientes(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 3;
+      const scopedCentroAcopioId = getScopedCentroAcopioId(req);
 
       console.log(`🚨 Obteniendo alertas recientes (página ${page}, límite ${limit})`);
 
-      const result = await DashboardService.getAlertasRecientes(page, limit);
+      const result = await DashboardService.getAlertasRecientes(page, limit, scopedCentroAcopioId);
 
       if (!result.success) {
         console.error('❌ Error al obtener alertas recientes:', result.error);
@@ -259,14 +268,15 @@ export class DashboardController {
   /**
    * Obtener actividad reciente con paginación
    */
-  static async getActividadReciente(req: Request, res: Response): Promise<void> {
+  static async getActividadReciente(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
+      const scopedCentroAcopioId = getScopedCentroAcopioId(req);
 
       console.log(`📋 Obteniendo actividad reciente (página ${page}, límite ${limit})`);
 
-      const result = await DashboardService.getActividadReciente(page, limit);
+      const result = await DashboardService.getActividadReciente(page, limit, scopedCentroAcopioId);
 
       if (!result.success) {
         console.error('❌ Error al obtener actividad reciente:', result.error);

@@ -3,7 +3,6 @@ import { PlanificacionService } from '@/services/PlanificacionService';
 import { PlanificacionExportService, PlanificacionExportConfig } from '@/services/PlanificacionExportService';
 import { successResponse, errorResponse } from '@/utils/response';
 import { validateUUID } from '@/utils/validation';
-import { prisma } from '@/config/database';
 import {
   CreatePlanificacionDto,
   UpdatePlanificacionDto,
@@ -11,6 +10,8 @@ import {
   ImportarPlanificacionDto,
   DistribucionAutomaticaDto
 } from '@/types';
+import { AuthenticatedRequest } from '@/types';
+import { ensureEstablecimientoInScope, resolveScopedCentroAcopioId, resolveScopedCentroAcopioIds } from '@/middleware/accessControl';
 
 /**
  * Controlador para gestión de planificación anual de vacunas
@@ -20,7 +21,7 @@ export class PlanificacionController {
    * Obtener todas las planificaciones con filtros opcionales
    * GET /api/planificacion
    */
-  static async getAll(req: Request, res: Response): Promise<void> {
+  static async getAll(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const {
         establecimientoId,
@@ -70,12 +71,24 @@ export class PlanificacionController {
         return;
       }
 
+      let scopedCentroAcopioId: string | undefined;
+      let scopedCentroAcopioIds: string[] | undefined;
+      try {
+        scopedCentroAcopioId = resolveScopedCentroAcopioId(req, centroAcopioId as string | undefined);
+        scopedCentroAcopioIds = resolveScopedCentroAcopioIds(req, centroAcopioId as string | undefined);
+        await ensureEstablecimientoInScope(req, establecimientoId as string | undefined);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para acceder a estos datos', 403);
+        return;
+      }
+
       const filters: PlanificacionFilters = {
         establecimientoId: establecimientoId as string,
         vacunaId: vacunaId as string,
         anio: anioNum || 2025, // Valor por defecto
-        estado: estado as any,
-        centroAcopioId: centroAcopioId as string,
+        estado: estado as 'borrador' | 'aprobado' | 'ejecutado' | 'todos',
+        centroAcopioId: scopedCentroAcopioId,
+        centroAcopioIds: scopedCentroAcopioIds,
         search: search as string,
         page: pageNum,
         limit: limitNum
@@ -108,7 +121,7 @@ export class PlanificacionController {
    * Obtener planificación por ID
    * GET /api/planificacion/:id
    */
-  static async getById(req: Request, res: Response): Promise<void> {
+  static async getById(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -129,6 +142,13 @@ export class PlanificacionController {
         return;
       }
 
+      try {
+        await ensureEstablecimientoInScope(req, result.data.establecimiento?.id);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para acceder a esta planificación', 403);
+        return;
+      }
+
       successResponse(res, result.data, 'Planificación obtenida exitosamente');
     } catch (error) {
       console.error('Error en PlanificacionController.getById:', error);
@@ -140,7 +160,7 @@ export class PlanificacionController {
    * Crear nueva planificación
    * POST /api/planificacion
    */
-  static async create(req: Request, res: Response): Promise<void> {
+  static async create(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const data: CreatePlanificacionDto = req.body;
 
@@ -170,7 +190,7 @@ export class PlanificacionController {
         return;
       }
 
-      const result = await PlanificacionService.create(data);
+      const result = await PlanificacionService.create(data, req.user?.id);
 
       if (!result.success) {
         errorResponse(res, result.error || 'Error al crear planificación', 400);
@@ -188,7 +208,7 @@ export class PlanificacionController {
    * Actualizar planificación
    * PUT /api/planificacion/:id
    */
-  static async update(req: Request, res: Response): Promise<void> {
+  static async update(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const data: UpdatePlanificacionDto = req.body;
@@ -211,22 +231,7 @@ export class PlanificacionController {
         return;
       }
 
-      // Obtener usuarioId para sincronización automática
-      let { usuarioId } = req.body;
-
-      // Manejar usuario temporal hasta implementar autenticación completa
-      if (!usuarioId || usuarioId === 'temp-user-id' || !validateUUID(usuarioId)) {
-        // Buscar un usuario administrador para usar como temporal
-        const usuarioAdmin = await prisma.usuario.findFirst({
-          where: { rol: 'administrador', estado: 'activo' }
-        });
-
-        if (usuarioAdmin) {
-          usuarioId = usuarioAdmin.id;
-        }
-      }
-
-      const result = await PlanificacionService.update(id, data, usuarioId);
+      const result = await PlanificacionService.update(id, data, req.user?.id);
 
       if (!result.success) {
         errorResponse(res, result.error || 'Error al actualizar planificación', 400);
@@ -310,7 +315,7 @@ export class PlanificacionController {
    * Obtener planificaciones por vacuna y año
    * GET /api/planificacion/vacuna/:vacunaId/anio/:anio
    */
-  static async getByVacunaAndYear(req: Request, res: Response): Promise<void> {
+  static async getByVacunaAndYear(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { vacunaId, anio } = req.params;
       const { centroAcopioId } = req.query;
@@ -332,10 +337,21 @@ export class PlanificacionController {
         return;
       }
 
+      let scopedCentroAcopioId: string | undefined;
+      let scopedCentroAcopioIds: string[] | undefined;
+      try {
+        scopedCentroAcopioId = resolveScopedCentroAcopioId(req, centroAcopioId as string | undefined);
+        scopedCentroAcopioIds = resolveScopedCentroAcopioIds(req, centroAcopioId as string | undefined);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para acceder a estos datos', 403);
+        return;
+      }
+
       const result = await PlanificacionService.getByVacunaAndYear(
         vacunaId || '',
         anioNum,
-        centroAcopioId as string
+        scopedCentroAcopioId,
+        scopedCentroAcopioIds,
       );
 
       if (!result.success) {
@@ -354,7 +370,7 @@ export class PlanificacionController {
    * Importar planificaciones desde datos estructurados
    * POST /api/planificacion/importar
    */
-  static async importar(req: Request, res: Response): Promise<void> {
+  static async importar(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const data: ImportarPlanificacionDto = req.body;
 
@@ -392,7 +408,7 @@ export class PlanificacionController {
         }
       }
 
-      const result = await PlanificacionService.importarPlanificaciones(data);
+      const result = await PlanificacionService.importarPlanificaciones(data, req.user?.id);
 
       if (!result.success) {
         errorResponse(res, result.error || 'Error al importar planificaciones', 400);
@@ -410,7 +426,7 @@ export class PlanificacionController {
    * Generar distribución automática
    * POST /api/planificacion/distribucion-automatica
    */
-  static async distribucionAutomatica(req: Request, res: Response): Promise<void> {
+  static async distribucionAutomatica(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const data: DistribucionAutomaticaDto = req.body;
 
@@ -539,7 +555,7 @@ export class PlanificacionController {
    * Importar planificaciones desde archivo Excel por vacuna específica
    * POST /api/planificacion/importar/vacuna/:vacunaId/anio/:anio
    */
-  static async importarDesdeExcelVacuna(req: Request, res: Response): Promise<void> {
+  static async importarDesdeExcelVacuna(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { vacunaId, anio } = req.params;
 
@@ -570,7 +586,8 @@ export class PlanificacionController {
       const result = await PlanificacionService.importarDesdeExcelVacuna(
         vacunaId,
         anioNum,
-        req.file.buffer
+        req.file.buffer,
+        req.user?.id
       );
 
       if (!result.success) {
@@ -590,7 +607,7 @@ export class PlanificacionController {
    * Importar planificaciones masivas desde archivo Excel (múltiples hojas)
    * POST /api/planificacion/importar/masivo/anio/:anio
    */
-  static async importarDesdeExcelMasivo(req: Request, res: Response): Promise<void> {
+  static async importarDesdeExcelMasivo(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { anio } = req.params;
 
@@ -614,7 +631,8 @@ export class PlanificacionController {
 
       const result = await PlanificacionService.importarDesdeExcelMasivo(
         anioNum,
-        req.file.buffer
+        req.file.buffer,
+        req.user?.id
       );
 
       if (!result.success) {
@@ -634,32 +652,15 @@ export class PlanificacionController {
    * Sincronizar planificación con movimientos
    * POST /api/planificacion/:id/sincronizar-movimientos
    */
-  static async sincronizarConMovimientos(req: Request, res: Response): Promise<void> {
+  static async sincronizarConMovimientos(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      let { usuarioId } = req.body;
-
       if (!validateUUID(id)) {
         errorResponse(res, 'ID de planificación inválido', 400);
         return;
       }
 
-      // Manejar usuario temporal hasta implementar autenticación completa
-      if (!usuarioId || usuarioId === 'temp-user-id' || !validateUUID(usuarioId)) {
-        // Buscar un usuario administrador para usar como temporal
-        const usuarioAdmin = await prisma.usuario.findFirst({
-          where: { rol: 'administrador', estado: 'activo' }
-        });
-
-        if (!usuarioAdmin) {
-          errorResponse(res, 'No se encontró usuario válido para la operación', 400);
-          return;
-        }
-
-        usuarioId = usuarioAdmin.id;
-      }
-
-      const result = await PlanificacionService.sincronizarConMovimientosManual(id, usuarioId);
+      const result = await PlanificacionService.sincronizarConMovimientosManual(id, req.user?.id || '');
 
       if (!result.success) {
         errorResponse(res, result.error || 'Error al sincronizar con movimientos', result.error === 'Planificación no encontrada' ? 404 : 400);
@@ -677,7 +678,7 @@ export class PlanificacionController {
    * Verificar existencia de planificación para un establecimiento
    * GET /api/planificacion/verificar/:establecimientoId/:vacunaId/:anio
    */
-  static async verificarExistenciaPlanificacion(req: Request, res: Response): Promise<void> {
+  static async verificarExistenciaPlanificacion(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { establecimientoId, vacunaId, anio } = req.params;
 
@@ -694,6 +695,13 @@ export class PlanificacionController {
       const anioNum = parseInt(anio, 10);
       if (isNaN(anioNum) || anioNum < 2020 || anioNum > 2050) {
         errorResponse(res, 'El año debe estar entre 2020 y 2050', 400);
+        return;
+      }
+
+      try {
+        await ensureEstablecimientoInScope(req, establecimientoId);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para acceder a esta planificación', 403);
         return;
       }
 
@@ -719,7 +727,7 @@ export class PlanificacionController {
    * Exportar planificación por vacuna específica a Excel
    * POST /api/planificacion/exportar/vacuna/:vacunaId
    */
-  static async exportarPorVacuna(req: Request, res: Response): Promise<void> {
+  static async exportarPorVacuna(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { vacunaId } = req.params;
       const { anio, centroAcopioId, incluirEstablecimientosSinProgramacion, responsableReporte, observaciones } = req.body;
@@ -778,7 +786,7 @@ export class PlanificacionController {
    * Exportar todas las vacunas a Excel (hojas separadas)
    * POST /api/planificacion/exportar/todas-vacunas
    */
-  static async exportarTodasVacunas(req: Request, res: Response): Promise<void> {
+  static async exportarTodasVacunas(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { anio, centroAcopioId, incluirEstablecimientosSinProgramacion, responsableReporte, observaciones } = req.body;
 
@@ -830,7 +838,7 @@ export class PlanificacionController {
    * Verificar disponibilidad de entregas en próximos meses
    * GET /api/planificacion/verificar-disponibilidad/:establecimientoId/:vacunaId/:mes/:anio
    */
-  static async verificarDisponibilidadEntregas(req: Request, res: Response): Promise<void> {
+  static async verificarDisponibilidadEntregas(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { establecimientoId, vacunaId, mes, anio } = req.params;
 
@@ -857,6 +865,13 @@ export class PlanificacionController {
         return;
       }
 
+      try {
+        await ensureEstablecimientoInScope(req, establecimientoId);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para acceder a esta planificación', 403);
+        return;
+      }
+
       const result = await PlanificacionService.verificarDisponibilidadEntregas(
         establecimientoId,
         vacunaId,
@@ -880,7 +895,7 @@ export class PlanificacionController {
    * Registrar entrega en mes actual cuando no hay disponibilidad futura
    * POST /api/planificacion/registrar-mes-actual
    */
-  static async registrarEntregaMesActual(req: Request, res: Response): Promise<void> {
+  static async registrarEntregaMesActual(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { establecimientoId, vacunaId, mesActual, anio, cantidad, usuarioId } = req.body;
 
@@ -910,25 +925,13 @@ export class PlanificacionController {
         return;
       }
 
-      // Obtener usuarioId si no se proporciona
-      let userIdToUse = usuarioId;
-      if (!userIdToUse || userIdToUse === 'temp-user-id' || !validateUUID(userIdToUse)) {
-        const usuarioAdmin = await prisma.usuario.findFirst({
-          where: { rol: 'administrador', estado: 'activo' }
-        });
-
-        if (usuarioAdmin) {
-          userIdToUse = usuarioAdmin.id;
-        }
-      }
-
       const result = await PlanificacionService.registrarEntregaMesActual(
         establecimientoId,
         vacunaId,
         mesActual,
         anio,
         cantidad,
-        userIdToUse
+        req.user?.id || usuarioId
       );
 
       if (!result.success) {
@@ -947,7 +950,7 @@ export class PlanificacionController {
    * Obtener años disponibles con planificaciones registradas
    * GET /api/planificacion/anios-disponibles
    */
-  static async getAniosDisponibles(_req: Request, res: Response): Promise<void> {
+  static async getAniosDisponibles(_req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const result = await PlanificacionService.getAniosDisponibles();
 

@@ -21,6 +21,9 @@ interface JwtPayload {
   usuario: string;
   rol: RolUsuario;
   establecimientoId?: string;
+  centroAcopioId?: string;
+  centroAcopioIds?: string[];
+  roleId?: string;
   iat: number;
   exp: number;
 }
@@ -76,6 +79,25 @@ export class AuthService {
               tipo: true
             }
           },
+          centroAcopio: {
+            select: {
+              id: true,
+              nombre: true,
+              codigo: true
+            }
+          },
+          centrosAcopioAsignados: {
+            select: {
+              centroAcopioId: true,
+              centroAcopio: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  codigo: true,
+                },
+              },
+            },
+          },
           role: {
             include: {
               rolePermissions: {
@@ -121,11 +143,12 @@ export class AuthService {
 
       // Extraer códigos de permisos del rol
       const permissions = role?.rolePermissions?.map(rp => rp.permission.codigo) || [];
+      const centroAcopioIds = user.centrosAcopioAsignados?.map((item: { centroAcopioId: string }) => item.centroAcopioId) || [];
 
       return {
         success: true,
         data: {
-          user: { ...userWithoutPassword, permissions },
+          user: { ...userWithoutPassword, centroAcopioIds, permissions },
           tokens
         }
       };
@@ -164,7 +187,9 @@ export class AuthService {
           id: true,
           usuario: true,
           rol: true,
+          roleId: true,
           establecimientoId: true,
+          centroAcopioId: true,
           estado: true
         }
       });
@@ -367,6 +392,25 @@ export class AuthService {
               tipo: true
             }
           },
+          centroAcopio: {
+            select: {
+              id: true,
+              nombre: true,
+              codigo: true
+            }
+          },
+          centrosAcopioAsignados: {
+            select: {
+              centroAcopioId: true,
+              centroAcopio: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  codigo: true,
+                },
+              },
+            },
+          },
           role: {
             include: {
               rolePermissions: {
@@ -394,10 +438,11 @@ export class AuthService {
       // Remover hash de contraseña y extraer permisos
       const { passwordHash, role, ...userWithoutPassword } = user;
       const permissions = role?.rolePermissions?.map(rp => rp.permission.codigo) || [];
+      const centroAcopioIds = user.centrosAcopioAsignados?.map((item: { centroAcopioId: string }) => item.centroAcopioId) || [];
 
       return {
         success: true,
-        data: { ...userWithoutPassword, permissions }
+        data: { ...userWithoutPassword, centroAcopioIds, permissions }
       };
     } catch (error) {
       console.error('Error al obtener perfil:', error);
@@ -416,7 +461,10 @@ export class AuthService {
       id: user.id,
       usuario: user.usuario,
       rol: user.rol,
-      establecimientoId: user.establecimientoId
+      roleId: user.roleId,
+      establecimientoId: user.establecimientoId,
+      centroAcopioId: user.centroAcopioId,
+      centroAcopioIds: user.centrosAcopioAsignados?.map((item: { centroAcopioId: string }) => item.centroAcopioId) || []
     };
 
     const accessToken = jwt.sign(payload, this.JWT_SECRET, {

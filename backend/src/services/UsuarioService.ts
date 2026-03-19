@@ -15,7 +15,7 @@ export class UsuarioService {
     estado?: EstadoGeneral | 'todos';
     search?: string;
     rol?: RolUsuario | 'todos';
-    establecimientoId?: string;
+    centroAcopioId?: string;
     page?: number;
     limit?: number;
   }): Promise<ServiceResult<{ usuarios: IUsuario[]; total: number }>> {
@@ -24,7 +24,7 @@ export class UsuarioService {
         estado,
         search,
         rol,
-        establecimientoId,
+        centroAcopioId,
         page = 1,
         limit = 50
       } = filters || {};
@@ -37,11 +37,13 @@ export class UsuarioService {
       }
 
       if (rol && rol !== 'todos') {
-        where.rol = rol;
+        where.role = {
+          codigo: rol,
+        };
       }
 
-      if (establecimientoId) {
-        where.establecimientoId = establecimientoId;
+      if (centroAcopioId) {
+        where.centroAcopioId = centroAcopioId;
       }
 
       if (search) {
@@ -66,6 +68,26 @@ export class UsuarioService {
                 id: true,
                 nombre: true,
                 codigo: true
+              }
+            },
+            centrosAcopioAsignados: {
+              select: {
+                centroAcopioId: true,
+                centroAcopio: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    codigo: true,
+                  },
+                },
+              },
+            },
+            role: {
+              select: {
+                id: true,
+                nombre: true,
+                codigo: true,
+                esDefault: true,
               }
             }
           },
@@ -106,6 +128,18 @@ export class UsuarioService {
               nombre: true,
               codigo: true
             }
+          },
+          centrosAcopioAsignados: {
+            select: {
+              centroAcopioId: true,
+              centroAcopio: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  codigo: true,
+                },
+              },
+            },
           }
         }
       });
@@ -141,6 +175,18 @@ export class UsuarioService {
               nombre: true,
               codigo: true
             }
+          },
+          centrosAcopioAsignados: {
+            select: {
+              centroAcopioId: true,
+              centroAcopio: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  codigo: true,
+                },
+              },
+            },
           }
         },
         orderBy: [
@@ -179,6 +225,18 @@ export class UsuarioService {
               nombre: true,
               codigo: true
             }
+          },
+          centrosAcopioAsignados: {
+            select: {
+              centroAcopioId: true,
+              centroAcopio: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  codigo: true,
+                },
+              },
+            },
           }
         },
         orderBy: [
@@ -246,26 +304,60 @@ export class UsuarioService {
       // Encriptar contraseña
       const passwordHash = await PasswordUtils.hashPassword(data.password);
 
-      const usuario = await prisma.usuario.create({
-        data: {
-          nombres: data.nombres,
-          apellidos: data.apellidos,
-          email: data.email,
-          usuario: data.usuario,
-          passwordHash,
-          rol: rolEnum, // Valor del enum para compatibilidad
-          roleId: roleResult.data.id, // Nueva relación con tabla roles
-          centroAcopioId: data.centroAcopioId
-        },
-        include: {
-          centroAcopio: {
-            select: {
-              id: true,
-              nombre: true,
-              codigo: true
-            }
-          }
+      const assignedCentroAcopioIds = data.centroAcopioIds?.length
+        ? data.centroAcopioIds
+        : data.centroAcopioId
+          ? [data.centroAcopioId]
+          : [];
+
+      const usuario = await prisma.$transaction(async (tx) => {
+        const created = await tx.usuario.create({
+          data: {
+            nombres: data.nombres,
+            apellidos: data.apellidos,
+            email: data.email,
+            usuario: data.usuario,
+            passwordHash,
+            rol: rolEnum,
+            roleId: roleResult.data.id,
+            centroAcopioId: assignedCentroAcopioIds[0],
+          },
+        });
+
+        if (assignedCentroAcopioIds.length > 0) {
+          await tx.usuarioCentroAcopio.createMany({
+            data: assignedCentroAcopioIds.map((centroId) => ({
+              usuarioId: created.id,
+              centroAcopioId: centroId,
+            })),
+            skipDuplicates: true,
+          });
         }
+
+        return tx.usuario.findUniqueOrThrow({
+          where: { id: created.id },
+          include: {
+            centroAcopio: {
+              select: {
+                id: true,
+                nombre: true,
+                codigo: true,
+              },
+            },
+            centrosAcopioAsignados: {
+              select: {
+                centroAcopioId: true,
+                centroAcopio: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    codigo: true,
+                  },
+                },
+              },
+            },
+          },
+        });
       });
 
       return {
@@ -304,9 +396,14 @@ export class UsuarioService {
         apellidos: data.apellidos,
         email: data.email,
         usuario: data.usuario,
-        centroAcopioId: data.centroAcopioId,
         estado: data.estado
       };
+
+      const assignedCentroAcopioIds = data.centroAcopioIds
+        ? data.centroAcopioIds
+        : data.centroAcopioId
+          ? [data.centroAcopioId]
+          : undefined;
 
       // Si se está cambiando el rol, actualizar tanto rol como roleId
       if (data.rol) {
@@ -322,18 +419,58 @@ export class UsuarioService {
         }
       }
 
-      const usuario = await prisma.usuario.update({
-        where: { id },
-        data: updateData,
-        include: {
-          centroAcopio: {
-            select: {
-              id: true,
-              nombre: true,
-              codigo: true
-            }
+      if (assignedCentroAcopioIds !== undefined) {
+        updateData.centroAcopioId = assignedCentroAcopioIds[0] || null;
+      } else {
+        updateData.centroAcopioId = data.centroAcopioId;
+      }
+
+      const usuario = await prisma.$transaction(async (tx) => {
+        await tx.usuario.update({
+          where: { id },
+          data: updateData,
+        });
+
+        if (assignedCentroAcopioIds !== undefined) {
+          await tx.usuarioCentroAcopio.deleteMany({
+            where: { usuarioId: id },
+          });
+
+          if (assignedCentroAcopioIds.length > 0) {
+            await tx.usuarioCentroAcopio.createMany({
+              data: assignedCentroAcopioIds.map((centroId) => ({
+                usuarioId: id,
+                centroAcopioId: centroId,
+              })),
+              skipDuplicates: true,
+            });
           }
         }
+
+        return tx.usuario.findUniqueOrThrow({
+          where: { id },
+          include: {
+            centroAcopio: {
+              select: {
+                id: true,
+                nombre: true,
+                codigo: true,
+              },
+            },
+            centrosAcopioAsignados: {
+              select: {
+                centroAcopioId: true,
+                centroAcopio: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    codigo: true,
+                  },
+                },
+              },
+            },
+          },
+        });
       });
 
       return {
@@ -355,11 +492,35 @@ export class UsuarioService {
   static async delete(id: string): Promise<ServiceResult<void>> {
     try {
       const usuarioExistente = await prisma.usuario.findUnique({
-        where: { id }
+        where: { id },
+        include: {
+          role: {
+            select: {
+              codigo: true,
+            },
+          },
+        },
       });
 
       if (!usuarioExistente) {
         throw createError.notFound('Usuario no encontrado');
+      }
+
+      if (usuarioExistente.rol === 'administrador' || usuarioExistente.role?.codigo === 'administrador') {
+        const adminsActivos = await prisma.usuario.count({
+          where: {
+            estado: 'activo',
+            OR: [
+              { rol: 'administrador' },
+              { role: { codigo: 'administrador' } },
+            ],
+            id: { not: id },
+          },
+        });
+
+        if (adminsActivos === 0) {
+          throw createError.badRequest('No se puede eliminar al último administrador activo del sistema');
+        }
       }
 
       // Verificar si el usuario tiene dependencias activas
@@ -453,11 +614,38 @@ export class UsuarioService {
   static async changeEstado(id: string, estado: EstadoGeneral): Promise<ServiceResult<IUsuario>> {
     try {
       const usuarioExistente = await prisma.usuario.findUnique({
-        where: { id }
+        where: { id },
+        include: {
+          role: {
+            select: {
+              codigo: true,
+            },
+          },
+        },
       });
 
       if (!usuarioExistente) {
         throw createError.notFound('Usuario no encontrado');
+      }
+
+      if (
+        estado === 'inactivo' &&
+        (usuarioExistente.rol === 'administrador' || usuarioExistente.role?.codigo === 'administrador')
+      ) {
+        const adminsActivos = await prisma.usuario.count({
+          where: {
+            estado: 'activo',
+            OR: [
+              { rol: 'administrador' },
+              { role: { codigo: 'administrador' } },
+            ],
+            id: { not: id },
+          },
+        });
+
+        if (adminsActivos === 0) {
+          throw createError.badRequest('No se puede desactivar al último administrador activo del sistema');
+        }
       }
 
       const usuario = await prisma.usuario.update({
@@ -469,6 +657,26 @@ export class UsuarioService {
               id: true,
               nombre: true,
               codigo: true
+            }
+          },
+          centrosAcopioAsignados: {
+            select: {
+              centroAcopioId: true,
+              centroAcopio: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  codigo: true,
+                },
+              },
+            },
+          },
+          role: {
+            select: {
+              id: true,
+              nombre: true,
+              codigo: true,
+              esDefault: true,
             }
           }
         }
@@ -603,23 +811,28 @@ export class UsuarioService {
       }
     }
 
-    // Validar que responsable_acopio tenga centro de acopio
-    if (data.rol === 'responsable_acopio' && !data.centroAcopioId) {
-      throw createError.badRequest('Los usuarios con rol "responsable_acopio" deben tener un centro de acopio asignado');
+    const assignedCentroAcopioIds = data.centroAcopioIds?.length
+      ? data.centroAcopioIds
+      : data.centroAcopioId
+        ? [data.centroAcopioId]
+        : [];
+
+    // Validar que responsable_acopio tenga al menos un centro de acopio
+    if (data.rol === 'responsable_acopio' && assignedCentroAcopioIds.length === 0) {
+      throw createError.badRequest('Los usuarios con rol "responsable_acopio" deben tener al menos un centro de acopio asignado');
     }
 
-    // Validar que el centro de acopio existe si se proporciona
-    if (data.centroAcopioId) {
-      const centroAcopio = await prisma.centroAcopio.findUnique({
-        where: { id: data.centroAcopioId }
+    // Validar que los centros de acopio existan y estén activos
+    if (assignedCentroAcopioIds.length > 0) {
+      const centrosAcopio = await prisma.centroAcopio.findMany({
+        where: { id: { in: assignedCentroAcopioIds } }
       });
 
-      if (!centroAcopio) {
-        throw createError.badRequest('El centro de acopio especificado no existe');
+      if (centrosAcopio.length !== assignedCentroAcopioIds.length) {
+        throw createError.badRequest('Uno o más centros de acopio especificados no existen');
       }
 
-      // Validar que el centro de acopio esté activo
-      if (centroAcopio.estado !== 'activo') {
+      if (centrosAcopio.some((centroAcopio) => centroAcopio.estado !== 'activo')) {
         throw createError.badRequest('No se puede asignar un centro de acopio inactivo');
       }
     }

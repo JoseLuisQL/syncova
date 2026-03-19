@@ -36,6 +36,7 @@ interface PermissionsModalProps {
   selectedPermissions: string[];
   onPermissionToggle: (permissionId: string) => void;
   isLoading?: boolean;
+  isReadOnly?: boolean;
 }
 
 // Iconos por categoría
@@ -91,7 +92,8 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
   permissions,
   selectedPermissions,
   onPermissionToggle,
-  isLoading = false
+  isLoading = false,
+  isReadOnly = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('todas');
@@ -179,6 +181,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
     const categoryPermissions = groupedPermissions[category] || [];
     const allSelected = categoryPermissions.every(p => selectedPermissions.includes(p.id));
     
+    if (isReadOnly) return;
     categoryPermissions.forEach(permission => {
       if (allSelected && selectedPermissions.includes(permission.id)) {
         onPermissionToggle(permission.id);
@@ -186,23 +189,25 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
         onPermissionToggle(permission.id);
       }
     });
-  }, [groupedPermissions, selectedPermissions, onPermissionToggle]);
+  }, [groupedPermissions, isReadOnly, selectedPermissions, onPermissionToggle]);
 
   const selectAll = useCallback(() => {
+    if (isReadOnly) return;
     filteredPermissions.forEach(permission => {
       if (!selectedPermissions.includes(permission.id)) {
         onPermissionToggle(permission.id);
       }
     });
-  }, [filteredPermissions, selectedPermissions, onPermissionToggle]);
+  }, [filteredPermissions, isReadOnly, selectedPermissions, onPermissionToggle]);
 
   const deselectAll = useCallback(() => {
+    if (isReadOnly) return;
     filteredPermissions.forEach(permission => {
       if (selectedPermissions.includes(permission.id)) {
         onPermissionToggle(permission.id);
       }
     });
-  }, [filteredPermissions, selectedPermissions, onPermissionToggle]);
+  }, [filteredPermissions, isReadOnly, selectedPermissions, onPermissionToggle]);
 
   const getCategoryStats = useCallback((category: string) => {
     const categoryPermissions = groupedPermissions[category] || [];
@@ -274,6 +279,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                 </h2>
                 <p className="text-sm text-gray-600 mt-0.5">
                   Rol: <span className="font-semibold text-teal-700">{role.nombre}</span>
+                  {isReadOnly ? ' · consulta protegida' : ''}
                 </p>
               </div>
             </div>
@@ -288,6 +294,12 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
             </button>
           </div>
         </div>
+
+        {isReadOnly && (
+          <div className="mx-6 mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Este rol es parte de la configuración base del sistema. Sus permisos se muestran solo para auditoría.
+          </div>
+        )}
 
         {/* Filtros y estadísticas */}
         <div className="px-6 py-4 border-b border-gray-100 bg-white">
@@ -354,20 +366,22 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={selectAll}
-                className="px-3 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
-              >
-                Seleccionar visibles
-              </button>
-              <button
-                onClick={deselectAll}
-                className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Deseleccionar visibles
-              </button>
-            </div>
+            {!isReadOnly ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={selectAll}
+                  className="px-3 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
+                >
+                  Seleccionar visibles
+                </button>
+                <button
+                  onClick={deselectAll}
+                  className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Deseleccionar visibles
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -433,7 +447,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                               : someSelected 
                                 ? 'bg-teal-100 border-teal-400' 
                                 : 'bg-white border-gray-300 hover:border-teal-400'
-                          }`}
+                          } ${isReadOnly ? 'cursor-not-allowed opacity-60' : ''}`}
                           role="checkbox"
                           aria-checked={allSelected ? 'true' : someSelected ? 'mixed' : 'false'}
                           aria-label={`Seleccionar todos los permisos de ${category}`}
@@ -474,7 +488,12 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                                 <input
                                   type="checkbox"
                                   checked={isSelected}
-                                  onChange={() => onPermissionToggle(permission.id)}
+                                  onChange={() => {
+                                    if (!isReadOnly) {
+                                      onPermissionToggle(permission.id);
+                                    }
+                                  }}
+                                  disabled={isReadOnly}
                                   className="sr-only"
                                   aria-describedby={`perm-desc-${permission.id}`}
                                 />
@@ -547,15 +566,17 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
               >
                 Cancelar
               </button>
-              <button
-                onClick={handleSave}
-                disabled={isLoading || isSaving}
-                className={COMPONENT_STYLES.button.primary}
-              >
-                {(isLoading || isSaving) && <Loader2 className="h-4 w-4 animate-spin" />}
-                <Check className="h-4 w-4" />
-                <span>Guardar Permisos</span>
-              </button>
+              {!isReadOnly ? (
+                <button
+                  onClick={handleSave}
+                  disabled={isLoading || isSaving}
+                  className={COMPONENT_STYLES.button.primary}
+                >
+                  {(isLoading || isSaving) && <Loader2 className="h-4 w-4 animate-spin" />}
+                  <Check className="h-4 w-4" />
+                  <span>Guardar Permisos</span>
+                </button>
+              ) : null}
             </div>
           </div>
         </div>

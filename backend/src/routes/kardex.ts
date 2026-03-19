@@ -1,11 +1,16 @@
 import { Router } from 'express';
 import { KardexController } from '@/controllers/KardexController';
+import { authenticate } from '@/middleware/auth';
+import { denyRoles } from '@/middleware/accessControl';
 
 /**
  * Rutas para gestión del Kardex
  * Módulo 12: KARDEX
  */
 const router = Router();
+const denyResponsableAcopio = denyRoles(['responsable_acopio']);
+
+router.use(authenticate, denyResponsableAcopio);
 
 /**
  * @route GET /api/kardex/estadisticas

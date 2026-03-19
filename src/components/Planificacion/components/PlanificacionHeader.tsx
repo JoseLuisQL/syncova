@@ -14,6 +14,10 @@ import {
 import { Vacuna, CentroAcopio } from '../../../types';
 
 interface PlanificacionHeaderProps {
+  isReadOnly?: boolean;
+  lockedCentroAcopioLabel?: string;
+  showReadOnlyCentroFilter?: boolean;
+  allCentrosLabel?: string;
   // Filtros
   selectedAnio: number;
   selectedCentroAcopio: string;
@@ -41,6 +45,10 @@ interface PlanificacionHeaderProps {
 }
 
 export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
+  isReadOnly = false,
+  lockedCentroAcopioLabel,
+  showReadOnlyCentroFilter = false,
+  allCentrosLabel = 'Todos los centros',
   selectedAnio,
   selectedCentroAcopio,
   selectedVacuna,
@@ -64,8 +72,9 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
   onGuardarPendientes,
 }) => {
   const vacunaSeleccionada = vacunas.find(v => v.id === selectedVacuna);
+  const shouldRenderCentroSelect = !isReadOnly || showReadOnlyCentroFilter;
   const centroNombre = selectedCentroAcopio === 'todos'
-    ? 'Todos los centros'
+    ? allCentrosLabel
     : centrosAcopio.find(c => c.id === selectedCentroAcopio)?.nombre || '';
 
   return (
@@ -102,26 +111,33 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                 
                 <div className="flex-1 grid grid-cols-3 gap-2">
                   {/* Centro de Acopio */}
-                  <div className="relative group">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-500 z-10 transition-colors group-hover:text-teal-600" />
-                    <select
-                      value={selectedCentroAcopio}
-                      onChange={(e) => onCentroAcopioChange(e.target.value)}
-                      disabled={isLoading}
-                      className="w-full pl-10 pr-8 py-2.5 text-sm font-medium bg-white rounded-xl border border-gray-200
-                                 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400
-                                 hover:border-teal-300 hover:shadow-sm transition-all duration-200 cursor-pointer
-                                 disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
-                    >
-                      <option value="todos">Todos los Centros</option>
-                      {centrosAcopio.map((centro) => (
-                        <option key={centro.id} value={centro.id}>
-                          {centro.nombre}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                  </div>
+                  {shouldRenderCentroSelect ? (
+                    <div className="relative group">
+                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-500 z-10 transition-colors group-hover:text-teal-600" />
+                      <select
+                        value={selectedCentroAcopio}
+                        onChange={(e) => onCentroAcopioChange(e.target.value)}
+                        disabled={isLoading}
+                        className="w-full pl-10 pr-8 py-2.5 text-sm font-medium bg-white rounded-xl border border-gray-200
+                                   focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400
+                                   hover:border-teal-300 hover:shadow-sm transition-all duration-200 cursor-pointer
+                                   disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
+                      >
+                        <option value="todos">{allCentrosLabel}</option>
+                        {centrosAcopio.map((centro) => (
+                          <option key={centro.id} value={centro.id}>
+                            {centro.nombre}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-3 py-2.5 text-sm font-semibold text-teal-700">
+                      <Building2 className="h-4 w-4 text-teal-600" />
+                      <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
+                    </div>
+                  )}
 
                   {/* Vacuna */}
                   <div className="relative group">
@@ -171,7 +187,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
 
             {/* Derecha: Acciones */}
             <div className="flex items-center gap-2">
-              {pendingChangesCount > 0 && (
+              {!isReadOnly && pendingChangesCount > 0 && (
                 <button
                   onClick={onGuardarPendientes}
                   disabled={isUpdating}
@@ -195,26 +211,34 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                 >
                   <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 </button>
-                <button
-                  onClick={onImportar}
-                  disabled={isImporting}
-                  className="flex items-center justify-center p-2.5 text-gray-600 hover:bg-cyan-50 hover:text-cyan-700 transition-all"
-                >
-                  <Upload className={`h-4 w-4 ${isImporting ? 'animate-spin' : ''}`} />
-                </button>
+                {!isReadOnly ? (
+                  <button
+                    onClick={onImportar}
+                    disabled={isImporting}
+                    className="flex items-center justify-center p-2.5 text-gray-600 hover:bg-cyan-50 hover:text-cyan-700 transition-all"
+                  >
+                    <Upload className={`h-4 w-4 ${isImporting ? 'animate-spin' : ''}`} />
+                  </button>
+                ) : null}
               </div>
 
-              <button
-                onClick={onExportar}
-                disabled={isExporting || !selectedVacuna}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
-                           text-white bg-gradient-to-r from-teal-500 to-cyan-500
-                           hover:from-teal-600 hover:to-cyan-600 shadow-lg shadow-teal-500/25
-                           disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              >
-                {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                <span className="hidden sm:inline">{isExporting ? 'Exportando...' : 'Exportar'}</span>
-              </button>
+              {!isReadOnly ? (
+                <button
+                  onClick={onExportar}
+                  disabled={isExporting || !selectedVacuna}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
+                             text-white bg-gradient-to-r from-teal-500 to-cyan-500
+                             hover:from-teal-600 hover:to-cyan-600 shadow-lg shadow-teal-500/25
+                             disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  <span className="hidden sm:inline">{isExporting ? 'Exportando...' : 'Exportar'}</span>
+                </button>
+              ) : (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600">
+                  Vista solo lectura
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,60 +1,36 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { AlertTriangle, Download, Loader2, RefreshCw, UserPlus } from 'lucide-react';
 import { Usuario, CreateUsuarioDto, UpdateUsuarioDto, ChangePasswordDto, Role } from '../../types';
 import { useUsuarios } from '../../hooks/useUsuarios';
 import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
 import { useToastContext } from '../../contexts/ToastContext';
-import { usePermissions } from '../../hooks/usePermissions';
 import { RoleService } from '../../services/roleService';
-import { COMPONENT_STYLES, SectionId, USER_SECTIONS } from './constants';
+import { COMPONENT_STYLES } from './constants';
 import {
-  UsuariosHeader,
   UsuariosFiltros,
   UsuariosTabla,
   UsuarioModal,
   CambiarPasswordModal,
   BulkActionsBar,
 } from './components';
-import RolesManagement from './RolesManagement';
-import PermissionsManagement from './PermissionsManagement';
 
 const Usuarios: React.FC = () => {
-  // Permisos
-  const { canAccessSection, hasPermission } = usePermissions();
-  
-  // Filtrar secciones según permisos
-  const filteredSections = useMemo(() => {
-    return USER_SECTIONS.filter(section => canAccessSection('usuarios', section.id));
-  }, [canAccessSection]);
-
-  // Permisos específicos
-  const canCreateUser = hasPermission('usuarios:write');
-  const canExportUsers = hasPermission('usuarios:read');
-
-  // Estados de navegación
-  const [activeSection, setActiveSection] = useState<SectionId>('usuarios');
-
-  // Estados de filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRol, setFilterRol] = useState<string>('todos');
   const [filterEstado, setFilterEstado] = useState<string>('todos');
-
-  // Estados de selección
+  const [filterCentroAcopio, setFilterCentroAcopio] = useState<string>('todos');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-
-  // Estados de modales
   const [showModal, setShowModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
   const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
-
-  // Estados de roles
   const [roles, setRoles] = useState<Role[]>([]);
 
-  // Hooks personalizados
   const {
     usuarios,
     pagination,
     isLoading,
+    error,
     createUsuario,
     updateUsuario,
     deleteUsuario,
@@ -64,6 +40,7 @@ const Usuarios: React.FC = () => {
     applyFilters,
     changePage,
     refresh,
+    exportUsuarios,
     isCreating,
     isUpdating,
   } = useUsuarios();
@@ -71,62 +48,57 @@ const Usuarios: React.FC = () => {
   const { centrosAcopio, fetchCentrosAcopio } = useCentrosAcopio({ estado: 'activo', limit: 1000 });
   const { toast } = useToastContext();
 
-  // Cargar roles
   const loadRoles = useCallback(async () => {
     try {
       const result = await RoleService.getAll({ includePermissions: false, limit: 100 });
       setRoles(result.roles);
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar roles');
     }
   }, [toast]);
 
-  // Efectos iniciales
   useEffect(() => {
-    fetchCentrosAcopio();
-    loadRoles();
-  }, []);
+    void fetchCentrosAcopio();
+    void loadRoles();
+  }, [fetchCentrosAcopio, loadRoles]);
 
-  // Efecto de búsqueda con debounce
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (searchTerm !== undefined) {
-        search(searchTerm);
-      }
-    }, 500);
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm]);
+    const timeoutId = window.setTimeout(() => {
+      void search(searchTerm);
+    }, 350);
 
-  // Efecto de filtros
+    return () => window.clearTimeout(timeoutId);
+  }, [searchTerm, search]);
+
   useEffect(() => {
-    applyFilters({
-      rol: filterRol === 'todos' ? undefined : filterRol as any,
-      estado: filterEstado === 'todos' ? undefined : filterEstado as any,
+    void applyFilters({
+      rol: filterRol === 'todos' ? undefined : filterRol as UpdateUsuarioDto['rol'],
+      estado: filterEstado === 'todos' ? undefined : filterEstado as UpdateUsuarioDto['estado'],
+      centroAcopioId: filterCentroAcopio === 'todos' ? undefined : filterCentroAcopio,
     });
-  }, [filterRol, filterEstado]);
+  }, [applyFilters, filterCentroAcopio, filterEstado, filterRol]);
 
-  // Estadísticas memoizadas
   const usuariosActivos = useMemo(
-    () => usuarios.filter(u => u.estado === 'activo').length,
-    [usuarios]
+    () => usuarios.filter((usuario) => usuario.estado === 'activo').length,
+    [usuarios],
   );
 
-  // Handlers
+  const usuariosInactivos = usuarios.length - usuariosActivos;
+
   const handleSelectUser = useCallback((userId: string) => {
-    setSelectedUsers(prev =>
-      prev.includes(userId)
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
+    setSelectedUsers((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId],
     );
   }, []);
 
   const handleSelectAll = useCallback(() => {
     if (selectedUsers.length === usuarios.length) {
       setSelectedUsers([]);
-    } else {
-      setSelectedUsers(usuarios.map(u => u.id));
+      return;
     }
-  }, [usuarios, selectedUsers.length]);
+
+    setSelectedUsers(usuarios.map((usuario) => usuario.id));
+  }, [selectedUsers.length, usuarios]);
 
   const handleEdit = useCallback((usuario: Usuario) => {
     setEditingUser(usuario);
@@ -134,29 +106,37 @@ const Usuarios: React.FC = () => {
   }, []);
 
   const handleDelete = useCallback(async (id: string) => {
-    const usuario = usuarios.find(u => u.id === id);
+    const usuario = usuarios.find((item) => item.id === id);
     const nombreCompleto = usuario ? `${usuario.nombres} ${usuario.apellidos}` : 'este usuario';
 
-    if (window.confirm(`¿Está seguro de eliminar a ${nombreCompleto}?`)) {
-      const success = await deleteUsuario(id);
-      if (success) {
-        toast.success(`Usuario ${nombreCompleto} eliminado exitosamente`);
-        setSelectedUsers(prev => prev.filter(userId => userId !== id));
-      }
+    if (!window.confirm(`¿Está seguro de eliminar a ${nombreCompleto}?`)) {
+      return;
     }
-  }, [usuarios, deleteUsuario, toast]);
+
+    const success = await deleteUsuario(id);
+    if (!success) {
+      toast.error('No se pudo eliminar el usuario');
+      return;
+    }
+
+    toast.success(`Usuario ${nombreCompleto} eliminado exitosamente`);
+    setSelectedUsers((prev) => prev.filter((userId) => userId !== id));
+  }, [deleteUsuario, toast, usuarios]);
 
   const handleToggleEstado = useCallback(async (id: string) => {
-    const usuario = usuarios.find(u => u.id === id);
+    const usuario = usuarios.find((item) => item.id === id);
     if (!usuario) return;
 
     const nuevoEstado = usuario.estado === 'activo' ? 'inactivo' : 'activo';
     const success = await changeEstado(id, nuevoEstado);
 
-    if (success) {
-      toast.success(`Usuario ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} exitosamente`);
+    if (!success) {
+      toast.error('No se pudo cambiar el estado del usuario');
+      return;
     }
-  }, [usuarios, changeEstado, toast]);
+
+    toast.success(`Usuario ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} exitosamente`);
+  }, [changeEstado, toast, usuarios]);
 
   const handleChangePassword = useCallback((usuario: Usuario) => {
     setSelectedUser(usuario);
@@ -169,32 +149,48 @@ const Usuarios: React.FC = () => {
     const passwordData: ChangePasswordDto = { newPassword };
     const success = await changePassword(selectedUser.id, passwordData);
 
-    if (success) {
-      toast.success('Contraseña actualizada exitosamente');
-      setShowPasswordModal(false);
-      setSelectedUser(null);
+    if (!success) {
+      toast.error('No se pudo actualizar la contraseña');
+      return;
     }
-  }, [selectedUser, changePassword, toast]);
 
-  const handleSubmit = useCallback(async (formData: any) => {
+    toast.success('Contraseña actualizada exitosamente');
+    setShowPasswordModal(false);
+    setSelectedUser(null);
+  }, [changePassword, selectedUser, toast]);
+
+  const handleSubmit = useCallback(async (formData: {
+    nombres: string;
+    apellidos: string;
+    email: string;
+    usuario: string;
+    password: string;
+    rol: string;
+    centroAcopioIds: string[];
+    estado: string;
+  }) => {
     try {
+      const primaryCentroAcopioId = formData.centroAcopioIds[0] || undefined;
+
       if (editingUser) {
         const updateData: UpdateUsuarioDto = {
           nombres: formData.nombres,
           apellidos: formData.apellidos,
           email: formData.email,
           usuario: formData.usuario,
-          rol: formData.rol,
-          centroAcopioId: formData.centroAcopioId || undefined,
-          estado: formData.estado,
+          rol: formData.rol as UpdateUsuarioDto['rol'],
+          centroAcopioId: primaryCentroAcopioId,
+          centroAcopioIds: formData.centroAcopioIds,
+          estado: formData.estado as UpdateUsuarioDto['estado'],
         };
 
         const success = await updateUsuario(editingUser.id, updateData);
-        if (success) {
-          toast.success('Usuario actualizado exitosamente');
-          setShowModal(false);
-          setEditingUser(null);
+        if (!success) {
+          toast.error('No se pudo actualizar el usuario');
+          return;
         }
+
+        toast.success('Usuario actualizado exitosamente');
       } else {
         const createData: CreateUsuarioDto = {
           nombres: formData.nombres,
@@ -202,30 +198,34 @@ const Usuarios: React.FC = () => {
           email: formData.email,
           usuario: formData.usuario,
           password: formData.password,
-          rol: formData.rol,
-          centroAcopioId: formData.centroAcopioId || undefined,
+          rol: formData.rol as CreateUsuarioDto['rol'],
+          centroAcopioId: primaryCentroAcopioId,
+          centroAcopioIds: formData.centroAcopioIds,
         };
 
         const success = await createUsuario(createData);
-        if (success) {
-          toast.success('Usuario creado exitosamente');
-          setShowModal(false);
-          setEditingUser(null);
+        if (!success) {
+          toast.error('No se pudo crear el usuario');
+          return;
         }
+
+        toast.success('Usuario creado exitosamente');
       }
-    } catch (error) {
+
+      setShowModal(false);
+      setEditingUser(null);
+    } catch {
       toast.error('Error al guardar usuario');
     }
-  }, [editingUser, createUsuario, updateUsuario, toast]);
+  }, [createUsuario, editingUser, toast, updateUsuario]);
 
   const handleBulkAction = useCallback(async (action: 'activar' | 'desactivar' | 'eliminar') => {
-    if (action === 'eliminar') {
-      if (!window.confirm(`¿Está seguro de eliminar ${selectedUsers.length} usuarios?`)) {
-        return;
-      }
+    if (action === 'eliminar' && !window.confirm(`¿Está seguro de eliminar ${selectedUsers.length} usuarios?`)) {
+      return;
     }
 
     let exitosos = 0;
+
     for (const userId of selectedUsers) {
       let success = false;
       if (action === 'activar') {
@@ -235,7 +235,12 @@ const Usuarios: React.FC = () => {
       } else {
         success = await deleteUsuario(userId);
       }
-      if (success) exitosos++;
+      if (success) exitosos += 1;
+    }
+
+    if (exitosos === 0) {
+      toast.error('No se pudieron completar las acciones masivas');
+      return;
     }
 
     const mensajes = {
@@ -246,11 +251,17 @@ const Usuarios: React.FC = () => {
 
     toast.success(`${exitosos} usuarios ${mensajes[action]} exitosamente`);
     setSelectedUsers([]);
-  }, [selectedUsers, changeEstado, deleteUsuario, toast]);
+  }, [changeEstado, deleteUsuario, selectedUsers, toast]);
 
-  const handleExportar = useCallback(() => {
-    toast.info('Exportando usuarios...');
-  }, [toast]);
+  const handleExportar = useCallback(async () => {
+    const success = await exportUsuarios();
+    if (!success) {
+      toast.error('No se pudo exportar el listado de usuarios');
+      return;
+    }
+
+    toast.success('Listado de usuarios exportado correctamente');
+  }, [exportUsuarios, toast]);
 
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
@@ -263,89 +274,101 @@ const Usuarios: React.FC = () => {
   }, []);
 
   return (
-    <main className={COMPONENT_STYLES.pageBackground}>
-      {/* Header con navegación */}
-      <UsuariosHeader
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-        onNuevoUsuario={() => {
-          setEditingUser(null);
-          setShowModal(true);
-        }}
-        onRefresh={refresh}
-        onExportar={handleExportar}
-        isLoading={isLoading}
-        isCreating={isCreating}
-        sections={filteredSections}
-        canCreateUser={canCreateUser}
-        canExportUsers={canExportUsers}
-      />
-
-      {/* Contenido */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          {activeSection === 'usuarios' && (
-            <div className="p-6 space-y-4">
-              {/* Filtros y Stats */}
-              <UsuariosFiltros
-                searchTerm={searchTerm}
-                filterRol={filterRol}
-                filterEstado={filterEstado}
-                roles={roles}
-                totalUsuarios={usuarios.length}
-                usuariosActivos={usuariosActivos}
-                onSearchChange={setSearchTerm}
-                onRolChange={setFilterRol}
-                onEstadoChange={setFilterEstado}
-              />
-
-              {/* Bulk Actions */}
-              <BulkActionsBar
-                selectedCount={selectedUsers.length}
-                onActivar={() => handleBulkAction('activar')}
-                onDesactivar={() => handleBulkAction('desactivar')}
-                onEliminar={() => handleBulkAction('eliminar')}
-                onClearSelection={() => setSelectedUsers([])}
-              />
-
-              {/* Tabla */}
-              <UsuariosTabla
-                usuarios={usuarios}
-                selectedUsers={selectedUsers}
-                roles={roles}
-                centrosAcopio={centrosAcopio}
-                isLoading={isLoading}
-                pagination={pagination}
-                onSelectUser={handleSelectUser}
-                onSelectAll={handleSelectAll}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onToggleEstado={handleToggleEstado}
-                onChangePassword={handleChangePassword}
-                onChangePage={changePage}
-              />
-            </div>
-          )}
-
-          {activeSection === 'roles' && (
-            <div className="p-6">
-              <RolesManagement
-                onNavigateToPermissions={() => setActiveSection('permisos')}
-              />
-            </div>
-          )}
-
-          {activeSection === 'permisos' && (
-            <div className="p-6">
-              <PermissionsManagement
-                onNavigateToRoles={() => setActiveSection('roles')}
-              />
-            </div>
-          )}
+    <div className="space-y-4">
+      {error ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <span>{error}</span>
         </div>
-      </div>
+      ) : null}
 
-      {/* Modales */}
+      <section className="rounded-[26px] border border-slate-200 bg-white shadow-sm">
+        <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h3 className="text-base font-semibold text-slate-900">Cuentas y auditoría operativa</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Filtra por rol, estado y centro de acopio. La exportación respeta los filtros activos.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => void refresh()}
+                className={COMPONENT_STYLES.button.secondary}
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                <span>Actualizar</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleExportar()}
+                className={COMPONENT_STYLES.button.secondary}
+              >
+                <Download className="h-4 w-4" />
+                <span>Exportar CSV</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingUser(null);
+                  setShowModal(true);
+                }}
+                className={COMPONENT_STYLES.button.primary}
+                disabled={isCreating}
+              >
+                {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                <span>Nuevo usuario</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4 p-4 sm:p-6">
+          <UsuariosFiltros
+            searchTerm={searchTerm}
+            filterRol={filterRol}
+            filterEstado={filterEstado}
+            filterCentroAcopio={filterCentroAcopio}
+            roles={roles}
+            centrosAcopio={centrosAcopio}
+            totalUsuarios={usuarios.length}
+            usuariosActivos={usuariosActivos}
+            usuariosInactivos={usuariosInactivos}
+            onSearchChange={setSearchTerm}
+            onRolChange={setFilterRol}
+            onEstadoChange={setFilterEstado}
+            onCentroAcopioChange={setFilterCentroAcopio}
+          />
+
+          <BulkActionsBar
+            selectedCount={selectedUsers.length}
+            onActivar={() => void handleBulkAction('activar')}
+            onDesactivar={() => void handleBulkAction('desactivar')}
+            onEliminar={() => void handleBulkAction('eliminar')}
+            onClearSelection={() => setSelectedUsers([])}
+          />
+
+          <UsuariosTabla
+            usuarios={usuarios}
+            selectedUsers={selectedUsers}
+            roles={roles}
+            centrosAcopio={centrosAcopio}
+            isLoading={isLoading}
+            pagination={pagination}
+            onSelectUser={handleSelectUser}
+            onSelectAll={handleSelectAll}
+            onEdit={handleEdit}
+            onDelete={(id) => void handleDelete(id)}
+            onToggleEstado={(id) => void handleToggleEstado(id)}
+            onChangePassword={handleChangePassword}
+            onChangePage={(page) => void changePage(page)}
+          />
+        </div>
+      </section>
+
       <UsuarioModal
         usuario={editingUser}
         centrosAcopio={centrosAcopio}
@@ -356,16 +379,16 @@ const Usuarios: React.FC = () => {
         onSubmit={handleSubmit}
       />
 
-      {selectedUser && (
+      {selectedUser ? (
         <CambiarPasswordModal
           usuario={selectedUser}
           isOpen={showPasswordModal}
           isLoading={false}
           onClose={handleClosePasswordModal}
-          onSubmit={handlePasswordSubmit}
+          onSubmit={(password) => void handlePasswordSubmit(password)}
         />
-      )}
-    </main>
+      ) : null}
+    </div>
   );
 };
 

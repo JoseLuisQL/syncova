@@ -147,8 +147,14 @@ const UserMenu: React.FC = memo(() => {
               </div>
               
               {/* Additional Info */}
-              {(user.establecimiento || user.ultimoAcceso) && (
+              {(user.establecimiento || user.centroAcopio || user.ultimoAcceso) && (
                 <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+                  {user.centroAcopio && (
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <Building className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="truncate">Centro de acopio: {user.centroAcopio.nombre}</span>
+                    </div>
+                  )}
                   {user.establecimiento && (
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                       <Building className="w-3.5 h-3.5 text-gray-400" />

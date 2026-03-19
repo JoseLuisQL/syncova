@@ -73,21 +73,21 @@ export const USER_SECTIONS = [
   {
     id: 'usuarios',
     label: 'Usuarios',
-    description: 'Gestión de usuarios',
+    description: 'Cuentas, trazabilidad y alcance operativo',
     icon: Users,
     path: '/usuarios/usuarios',
   },
   {
     id: 'roles',
     label: 'Roles',
-    description: 'Gestión de roles',
+    description: 'Roles del sistema y perfiles personalizados',
     icon: Shield,
     path: '/usuarios/roles',
   },
   {
     id: 'permisos',
     label: 'Permisos',
-    description: 'Permisos del sistema',
+    description: 'Catálogo auditable de permisos del sistema',
     icon: Key,
     path: '/usuarios/permisos',
   },
@@ -270,6 +270,46 @@ export const ROLE_COLORS: Record<string, string> = {
   responsable_acopio: 'bg-cyan-100 text-cyan-800',
   operador: 'bg-amber-100 text-amber-800',
   default: 'bg-gray-100 text-gray-800',
+};
+
+export const DEFAULT_ROLE_ASSIGNABLE_PERMISSION_CODES: Record<string, string[] | null> = {
+  administrador: null,
+  coordinador: [
+    'dashboard:read',
+    'redes:read',
+    'microredes:read',
+    'centros_acopio:read',
+    'establecimientos:read',
+    'vacunas:read',
+    'jeringas:read',
+    'movimientos:read',
+    'planificacion:read',
+    'planificacion:write',
+    'planificacion:aprobar',
+    'reportes_inventario:read',
+    'reportes_inventario:export',
+    'reportes_movimientos:read',
+    'reportes_movimientos:export',
+    'reportes_planificacion:read',
+    'reportes_planificacion:export',
+    'roles:read',
+    'permisos:read',
+    'usuarios:read',
+  ],
+  responsable_acopio: [
+    'dashboard:read',
+    'establecimientos:read',
+    'vacunas:read',
+    'movimientos:read',
+    'planificacion:read',
+  ],
+  operador: [
+    'dashboard:read',
+    'establecimientos:read',
+    'vacunas:read',
+    'movimientos:read',
+    'planificacion:read',
+  ],
 };
 
 export type ColorScheme = keyof typeof COLORS;

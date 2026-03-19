@@ -13,6 +13,9 @@ interface JwtPayload {
   usuario: string;
   rol: RolUsuario;
   establecimientoId?: string;
+  centroAcopioId?: string;
+  centroAcopioIds?: string[];
+  roleId?: string;
   iat: number;
   exp: number;
 }
@@ -21,7 +24,10 @@ export interface ResolvedAuthUser {
   id: string;
   usuario: string;
   rol: RolUsuario;
+  roleId?: string;
   establecimientoId?: string;
+  centroAcopioId?: string;
+  centroAcopioIds?: string[];
 }
 
 export const resolveAuthenticatedUserFromToken = async (token: string): Promise<ResolvedAuthUser | null> => {
@@ -34,7 +40,14 @@ export const resolveAuthenticatedUserFromToken = async (token: string): Promise<
         id: true,
         usuario: true,
         rol: true,
+        roleId: true,
         establecimientoId: true,
+        centroAcopioId: true,
+        centrosAcopioAsignados: {
+          select: {
+            centroAcopioId: true,
+          },
+        },
         estado: true,
       },
     });
@@ -47,7 +60,10 @@ export const resolveAuthenticatedUserFromToken = async (token: string): Promise<
       id: user.id,
       usuario: user.usuario,
       rol: user.rol as RolUsuario,
+      roleId: user.roleId || undefined,
       establecimientoId: user.establecimientoId || undefined,
+      centroAcopioId: user.centroAcopioId || undefined,
+      centroAcopioIds: user.centrosAcopioAsignados?.map((item) => item.centroAcopioId) || [],
     };
   } catch {
     return null;
@@ -97,7 +113,14 @@ export const authenticate = async (
         id: true,
         usuario: true,
         rol: true,
+        roleId: true,
         establecimientoId: true,
+        centroAcopioId: true,
+        centrosAcopioAsignados: {
+          select: {
+            centroAcopioId: true,
+          },
+        },
         estado: true,
       },
     });
@@ -123,7 +146,10 @@ export const authenticate = async (
       id: user.id,
       usuario: user.usuario,
       rol: user.rol as RolUsuario,
+      roleId: user.roleId || undefined,
       establecimientoId: user.establecimientoId || undefined,
+      centroAcopioId: user.centroAcopioId || undefined,
+      centroAcopioIds: user.centrosAcopioAsignados?.map((item) => item.centroAcopioId) || [],
     };
 
     next();
@@ -213,7 +239,14 @@ export const optionalAuth = async (
           id: true,
           usuario: true,
           rol: true,
+          roleId: true,
           establecimientoId: true,
+          centroAcopioId: true,
+          centrosAcopioAsignados: {
+            select: {
+              centroAcopioId: true,
+            },
+          },
           estado: true,
         },
       });
@@ -223,7 +256,10 @@ export const optionalAuth = async (
           id: user.id,
           usuario: user.usuario,
           rol: user.rol as RolUsuario,
+          roleId: user.roleId || undefined,
           establecimientoId: user.establecimientoId || undefined,
+          centroAcopioId: user.centroAcopioId || undefined,
+          centroAcopioIds: user.centrosAcopioAsignados?.map((item) => item.centroAcopioId) || [],
         };
       }
     } catch {

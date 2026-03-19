@@ -134,7 +134,10 @@ export interface IUsuario {
   usuario: string;
   passwordHash: string;
   rol: RolUsuario;
+  roleId?: string;
   establecimientoId?: string;
+  centroAcopioId?: string;
+  centroAcopioIds?: string[];
   estado: EstadoGeneral;
   ultimoAcceso?: Date;
   createdAt: Date;
@@ -335,6 +338,7 @@ export interface CreateUsuarioDto {
   password: string;
   rol: string; // Código del rol para buscar en la tabla roles
   centroAcopioId?: string;
+  centroAcopioIds?: string[];
 }
 
 export interface UpdateUsuarioDto {
@@ -344,6 +348,7 @@ export interface UpdateUsuarioDto {
   usuario?: string;
   rol?: RolUsuario;
   centroAcopioId?: string;
+  centroAcopioIds?: string[];
   estado?: EstadoGeneral;
 }
 
@@ -430,6 +435,7 @@ export interface PlanificacionFilters {
   anio?: number;
   estado?: EstadoPlanificacion | 'todos';
   centroAcopioId?: string;
+  centroAcopioIds?: string[];
   search?: string;
   page?: number;
   limit?: number;
@@ -572,7 +578,10 @@ export interface AuthenticatedRequest extends Request {
     id: string;
     usuario: string;
     rol: RolUsuario;
+    roleId?: string;
     establecimientoId?: string;
+    centroAcopioId?: string;
+    centroAcopioIds?: string[];
     permissions?: string[]; // Códigos de permisos del usuario
   };
 }

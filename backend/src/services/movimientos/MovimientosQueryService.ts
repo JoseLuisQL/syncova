@@ -51,6 +51,7 @@ export class MovimientosQueryService {
         mes,
         anio,
         centroAcopioId,
+        centroAcopioIds,
         search,
         page = 1,
         limit = 1000
@@ -96,7 +97,12 @@ export class MovimientosQueryService {
         where.anio = anioBusqueda;
       }
 
-      if (centroAcopioId && centroAcopioId !== 'todos') {
+      if (centroAcopioIds && centroAcopioIds.length > 0) {
+        where.establecimiento = {
+          centroAcopioId: { in: centroAcopioIds }
+        };
+        console.log('🏥 Aplicando filtro por múltiples centros de acopio:', centroAcopioIds);
+      } else if (centroAcopioId && centroAcopioId !== 'todos') {
         where.establecimiento = {
           centroAcopioId: centroAcopioId
         };
@@ -176,7 +182,13 @@ export class MovimientosQueryService {
       console.log(`🏥 Establecimientos con movimientos: ${establecimientosUnicos.length}`, establecimientosUnicos);
 
       // Enriquecer movimientos con información de vales generados (usar mesBusqueda/anioBusqueda para vales)
-      const movimientosEnriquecidos = await this.enriquecerConInfoVales(movimientos as any[], mesBusqueda, anioBusqueda, centroAcopioId);
+      const movimientosEnriquecidos = await this.enriquecerConInfoVales(
+        movimientos as any[],
+        mesBusqueda,
+        anioBusqueda,
+        centroAcopioId,
+        centroAcopioIds,
+      );
 
       console.log(`📅 [Desplazamiento] Retornando ${movimientosEnriquecidos.length} movimientos de ${mesBusqueda}/${anioBusqueda} (usuario seleccionó ${mes}/${anio})`);
 
@@ -489,7 +501,8 @@ export class MovimientosQueryService {
     movimientos: any[],
     mes?: number,
     anio?: number,
-    centroAcopioId?: string
+    centroAcopioId?: string,
+    centroAcopioIds?: string[],
   ): Promise<any[]> {
     if (!mes || !anio || movimientos.length === 0) {
       return movimientos;
@@ -498,7 +511,9 @@ export class MovimientosQueryService {
     try {
       // Obtener todos los vales del período (sin filtrar por centro si es "todos")
       const whereVales: any = { mes, anio };
-      if (centroAcopioId && centroAcopioId !== 'todos') {
+      if (centroAcopioIds && centroAcopioIds.length > 0) {
+        whereVales.centroAcopioId = { in: centroAcopioIds };
+      } else if (centroAcopioId && centroAcopioId !== 'todos') {
         whereVales.centroAcopioId = centroAcopioId;
       }
 

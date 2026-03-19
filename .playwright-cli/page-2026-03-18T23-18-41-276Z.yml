@@ -1,0 +1,1859 @@
+- generic [ref=e2]:
+  - generic [ref=e36]:
+    - navigation "Menu principal" [ref=e37]:
+      - generic [ref=e39]:
+        - img "SIVAC Logo" [ref=e41]
+        - generic [ref=e47]:
+          - heading "SIVAC" [level=1] [ref=e48]
+          - paragraph [ref=e49]: Sistema de Vacunas
+      - button "Colapsar menu" [expanded] [ref=e50] [cursor=pointer]:
+        - img [ref=e51]
+      - navigation [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]: Principal
+          - button "Dashboard" [ref=e57] [cursor=pointer]:
+            - img [ref=e59]
+            - generic [ref=e64]: Dashboard
+        - generic [ref=e65]:
+          - generic [ref=e66]: Gestión
+          - generic [ref=e67]:
+            - button "Establecimientos" [ref=e68] [cursor=pointer]:
+              - img [ref=e70]
+              - generic [ref=e74]: Establecimientos
+            - button "Inventario" [ref=e75] [cursor=pointer]:
+              - img [ref=e77]
+              - generic [ref=e81]: Inventario
+            - button "Movimientos" [ref=e82] [cursor=pointer]:
+              - img [ref=e84]
+              - generic [ref=e87]: Movimientos
+            - button "Planificación" [ref=e88] [cursor=pointer]:
+              - img [ref=e90]
+              - generic [ref=e92]: Planificación
+            - button "Kardex" [ref=e93] [cursor=pointer]:
+              - img [ref=e95]
+              - generic [ref=e98]: Kardex
+        - generic [ref=e99]:
+          - generic [ref=e100]: Reportes
+          - generic [ref=e101]:
+            - button "Reportes" [ref=e102] [cursor=pointer]:
+              - img [ref=e104]
+              - generic [ref=e107]: Reportes
+            - button "Alertas" [ref=e108] [cursor=pointer]:
+              - img [ref=e110]
+              - generic [ref=e113]: Alertas
+        - generic [ref=e114]:
+          - generic [ref=e115]: Sistema
+          - generic [ref=e116]:
+            - button "Usuarios" [ref=e117] [cursor=pointer]:
+              - img [ref=e119]
+              - generic [ref=e124]: Usuarios
+            - button "Configuración" [ref=e125] [cursor=pointer]:
+              - img [ref=e127]
+              - generic [ref=e130]: Configuración
+      - generic [ref=e132]:
+        - img [ref=e134]
+        - generic [ref=e137]:
+          - paragraph [ref=e138]: DISA Apurimac II
+          - paragraph [ref=e139]: Estrategia Sanitaria
+    - generic [ref=e140]:
+      - banner [ref=e141]:
+        - generic [ref=e142]:
+          - navigation "Breadcrumb" [ref=e145]:
+            - button "Ir al Dashboard" [ref=e146] [cursor=pointer]:
+              - img [ref=e147]
+            - img [ref=e150]
+            - generic [ref=e152] [cursor=pointer]: Usuarios
+            - img [ref=e153]
+            - generic [ref=e155]: Permisos
+          - generic [ref=e156]:
+            - button "Ver notificaciones" [ref=e158] [cursor=pointer]:
+              - img [ref=e159]
+            - button "JQ José Luis Quispe León Administrador" [ref=e164] [cursor=pointer]:
+              - generic [ref=e166]: JQ
+              - generic [ref=e167]:
+                - paragraph [ref=e168]: José Luis Quispe León
+                - paragraph [ref=e169]: Administrador
+              - img [ref=e170]
+      - main [ref=e172]:
+        - main [ref=e173]:
+          - generic [ref=e174]:
+            - generic [ref=e175]:
+              - generic [ref=e177]:
+                - img [ref=e179]
+                - generic [ref=e184]:
+                  - heading "Usuarios" [level=1] [ref=e185]
+                  - paragraph [ref=e186]: Administración de cuentas, roles por defecto y auditoría de permisos bajo un mismo estándar visual del sistema.
+              - navigation "Secciones de usuarios" [ref=e187]:
+                - generic [ref=e188]:
+                  - generic [ref=e189]:
+                    - generic [ref=e190]:
+                      - img [ref=e191]
+                      - generic [ref=e196]:
+                        - paragraph [ref=e197]: Operación
+                        - paragraph [ref=e198]: Cuentas y seguimiento operativo
+                    - button "Usuarios Cuentas, trazabilidad y alcance operativo" [ref=e200] [cursor=pointer]:
+                      - img [ref=e201]
+                      - generic [ref=e206]:
+                        - generic [ref=e207]: Usuarios
+                        - generic [ref=e208]: Cuentas, trazabilidad y alcance operativo
+                  - generic [ref=e209]:
+                    - generic [ref=e210]:
+                      - img [ref=e211]
+                      - generic [ref=e213]:
+                        - paragraph [ref=e214]: Gobierno
+                        - paragraph [ref=e215]: Roles y catálogo de permisos
+                    - generic [ref=e216]:
+                      - button "Roles Roles del sistema y perfiles personalizados" [ref=e217] [cursor=pointer]:
+                        - img [ref=e218]
+                        - generic [ref=e220]:
+                          - generic [ref=e221]: Roles
+                          - generic [ref=e222]: Roles del sistema y perfiles personalizados
+                      - button "Permisos Catálogo auditable de permisos del sistema" [ref=e223] [cursor=pointer]:
+                        - img [ref=e224]
+                        - generic [ref=e227]:
+                          - generic [ref=e228]: Permisos
+                          - generic [ref=e229]: Catálogo auditable de permisos del sistema
+            - generic [ref=e230]:
+              - generic [ref=e231]:
+                - generic [ref=e233]:
+                  - generic [ref=e234]:
+                    - paragraph [ref=e235]: Total Permisos
+                    - paragraph [ref=e236]: "71"
+                  - img [ref=e237]
+                - generic [ref=e242]:
+                  - generic [ref=e243]:
+                    - paragraph [ref=e244]: Activos
+                    - paragraph [ref=e245]: "71"
+                  - img [ref=e246]
+                - generic [ref=e250]:
+                  - generic [ref=e251]:
+                    - paragraph [ref=e252]: Inactivos
+                    - paragraph [ref=e253]: "0"
+                  - img [ref=e254]
+                - generic [ref=e259]:
+                  - generic [ref=e260]:
+                    - paragraph [ref=e261]: Asignados
+                    - paragraph [ref=e262]: "71"
+                  - img [ref=e263]
+              - generic [ref=e266]:
+                - generic [ref=e268]:
+                  - img [ref=e269]
+                  - textbox "Buscar permisos..." [ref=e272]
+                - generic [ref=e273]:
+                  - combobox [ref=e274]:
+                    - option "Todos los estados" [selected]
+                    - option "Activos"
+                    - option "Inactivos"
+                  - combobox [ref=e275]:
+                    - option "Todas las categorías" [selected]
+                    - option "Alertas"
+                    - option "Configuración"
+                    - option "Dashboard"
+                    - option "Establecimientos"
+                    - option "Inventario"
+                    - option "Kardex"
+                    - option "Movimientos"
+                    - option "Planificación"
+                    - option "Reportes"
+                    - option "Usuarios"
+                  - combobox [ref=e276]:
+                    - option "Todos los recursos" [selected]
+                    - option "Alertas"
+                    - option "Alertas_config"
+                    - option "Alertas_dashboard"
+                    - option "Alertas_reportes"
+                    - option "Centros_acopio"
+                    - option "Config_avanzado"
+                    - option "Config_general"
+                    - option "Config_integraciones"
+                    - option "Config_jeringas"
+                    - option "Config_mantenimiento"
+                    - option "Config_notificaciones"
+                    - option "Config_respaldos"
+                    - option "Config_seguridad"
+                    - option "Config_sistema"
+                    - option "Dashboard"
+                    - option "Establecimientos"
+                    - option "Inventario"
+                    - option "Jeringas"
+                    - option "Kardex"
+                    - option "Lotes_jeringas"
+                    - option "Lotes_vacunas"
+                    - option "Microredes"
+                    - option "Movimientos"
+                    - option "Permisos"
+                    - option "Planificacion"
+                    - option "Redes"
+                    - option "Reportes_cenares"
+                    - option "Reportes_config"
+                    - option "Reportes_inventario"
+                    - option "Reportes_movimientos"
+                    - option "Reportes_planificacion"
+                    - option "Roles"
+                    - option "Usuarios"
+                    - option "Vacunas"
+                  - combobox [ref=e277]:
+                    - option "Todas las acciones" [selected]
+                    - option "Anular"
+                    - option "Aprobar"
+                    - option "Assign"
+                    - option "Delete"
+                    - option "Estado"
+                    - option "Export"
+                    - option "Ingreso"
+                    - option "Marcar"
+                    - option "Password"
+                    - option "Read"
+                    - option "Update"
+                    - option "Write"
+              - table [ref=e280]:
+                - rowgroup [ref=e281]:
+                  - row "Permiso Código Categoría Recurso Acción Estado Creado Auditoría" [ref=e282]:
+                    - columnheader "Permiso" [ref=e283]
+                    - columnheader "Código" [ref=e284]
+                    - columnheader "Categoría" [ref=e285]
+                    - columnheader "Recurso" [ref=e286]
+                    - columnheader "Acción" [ref=e287]
+                    - columnheader "Estado" [ref=e288]
+                    - columnheader "Creado" [ref=e289]
+                    - columnheader "Auditoría" [ref=e290]
+                - rowgroup [ref=e291]:
+                  - row "Marcar Alertas Leídas Marcar alertas como leídas alertas:marcar Alertas alertas marcar Activo 7/1/2026 Solo lectura" [ref=e292]:
+                    - cell "Marcar Alertas Leídas Marcar alertas como leídas" [ref=e293]:
+                      - generic [ref=e294]:
+                        - img [ref=e297]
+                        - generic [ref=e301]:
+                          - generic [ref=e302]: Marcar Alertas Leídas
+                          - generic [ref=e303]: Marcar alertas como leídas
+                    - cell "alertas:marcar" [ref=e304]
+                    - cell "Alertas" [ref=e305]:
+                      - generic [ref=e306]: Alertas
+                    - cell "alertas" [ref=e307]
+                    - cell "marcar" [ref=e308]:
+                      - generic [ref=e309]: marcar
+                    - cell "Activo" [ref=e310]:
+                      - generic [ref=e311]: Activo
+                    - cell "7/1/2026" [ref=e312]:
+                      - generic [ref=e313]:
+                        - img [ref=e314]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e317]:
+                      - generic [ref=e318]:
+                        - img [ref=e319]
+                        - text: Solo lectura
+                  - row "Ver Alertas Ver listado de alertas alertas:read Alertas alertas read Activo 7/1/2026 Solo lectura" [ref=e322]:
+                    - cell "Ver Alertas Ver listado de alertas" [ref=e323]:
+                      - generic [ref=e324]:
+                        - img [ref=e327]
+                        - generic [ref=e331]:
+                          - generic [ref=e332]: Ver Alertas
+                          - generic [ref=e333]: Ver listado de alertas
+                    - cell "alertas:read" [ref=e334]
+                    - cell "Alertas" [ref=e335]:
+                      - generic [ref=e336]: Alertas
+                    - cell "alertas" [ref=e337]
+                    - cell "read" [ref=e338]:
+                      - generic [ref=e339]: read
+                    - cell "Activo" [ref=e340]:
+                      - generic [ref=e341]: Activo
+                    - cell "7/1/2026" [ref=e342]:
+                      - generic [ref=e343]:
+                        - img [ref=e344]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e347]:
+                      - generic [ref=e348]:
+                        - img [ref=e349]
+                        - text: Solo lectura
+                  - row "Gestionar Alertas Crear y eliminar alertas alertas:write Alertas alertas write Activo 7/1/2026 Solo lectura" [ref=e352]:
+                    - cell "Gestionar Alertas Crear y eliminar alertas" [ref=e353]:
+                      - generic [ref=e354]:
+                        - img [ref=e357]
+                        - generic [ref=e361]:
+                          - generic [ref=e362]: Gestionar Alertas
+                          - generic [ref=e363]: Crear y eliminar alertas
+                    - cell "alertas:write" [ref=e364]
+                    - cell "Alertas" [ref=e365]:
+                      - generic [ref=e366]: Alertas
+                    - cell "alertas" [ref=e367]
+                    - cell "write" [ref=e368]:
+                      - generic [ref=e369]: write
+                    - cell "Activo" [ref=e370]:
+                      - generic [ref=e371]: Activo
+                    - cell "7/1/2026" [ref=e372]:
+                      - generic [ref=e373]:
+                        - img [ref=e374]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e377]:
+                      - generic [ref=e378]:
+                        - img [ref=e379]
+                        - text: Solo lectura
+                  - row "Ver Config Alertas Ver configuración de alertas alertas_config:read Alertas alertas_config read Activo 7/1/2026 Solo lectura" [ref=e382]:
+                    - cell "Ver Config Alertas Ver configuración de alertas" [ref=e383]:
+                      - generic [ref=e384]:
+                        - img [ref=e387]
+                        - generic [ref=e391]:
+                          - generic [ref=e392]: Ver Config Alertas
+                          - generic [ref=e393]: Ver configuración de alertas
+                    - cell "alertas_config:read" [ref=e394]
+                    - cell "Alertas" [ref=e395]:
+                      - generic [ref=e396]: Alertas
+                    - cell "alertas_config" [ref=e397]
+                    - cell "read" [ref=e398]:
+                      - generic [ref=e399]: read
+                    - cell "Activo" [ref=e400]:
+                      - generic [ref=e401]: Activo
+                    - cell "7/1/2026" [ref=e402]:
+                      - generic [ref=e403]:
+                        - img [ref=e404]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e407]:
+                      - generic [ref=e408]:
+                        - img [ref=e409]
+                        - text: Solo lectura
+                  - row "Gestionar Config Alertas Configurar umbrales y notificaciones alertas_config:write Alertas alertas_config write Activo 7/1/2026 Solo lectura" [ref=e412]:
+                    - cell "Gestionar Config Alertas Configurar umbrales y notificaciones" [ref=e413]:
+                      - generic [ref=e414]:
+                        - img [ref=e417]
+                        - generic [ref=e421]:
+                          - generic [ref=e422]: Gestionar Config Alertas
+                          - generic [ref=e423]: Configurar umbrales y notificaciones
+                    - cell "alertas_config:write" [ref=e424]
+                    - cell "Alertas" [ref=e425]:
+                      - generic [ref=e426]: Alertas
+                    - cell "alertas_config" [ref=e427]
+                    - cell "write" [ref=e428]:
+                      - generic [ref=e429]: write
+                    - cell "Activo" [ref=e430]:
+                      - generic [ref=e431]: Activo
+                    - cell "7/1/2026" [ref=e432]:
+                      - generic [ref=e433]:
+                        - img [ref=e434]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e437]:
+                      - generic [ref=e438]:
+                        - img [ref=e439]
+                        - text: Solo lectura
+                  - row "Ver Dashboard Alertas Ver dashboard de alertas alertas_dashboard:read Alertas alertas_dashboard read Activo 7/1/2026 Solo lectura" [ref=e442]:
+                    - cell "Ver Dashboard Alertas Ver dashboard de alertas" [ref=e443]:
+                      - generic [ref=e444]:
+                        - img [ref=e447]
+                        - generic [ref=e451]:
+                          - generic [ref=e452]: Ver Dashboard Alertas
+                          - generic [ref=e453]: Ver dashboard de alertas
+                    - cell "alertas_dashboard:read" [ref=e454]
+                    - cell "Alertas" [ref=e455]:
+                      - generic [ref=e456]: Alertas
+                    - cell "alertas_dashboard" [ref=e457]
+                    - cell "read" [ref=e458]:
+                      - generic [ref=e459]: read
+                    - cell "Activo" [ref=e460]:
+                      - generic [ref=e461]: Activo
+                    - cell "7/1/2026" [ref=e462]:
+                      - generic [ref=e463]:
+                        - img [ref=e464]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e467]:
+                      - generic [ref=e468]:
+                        - img [ref=e469]
+                        - text: Solo lectura
+                  - row "Ver Rep Alertas Ver reportes de alertas alertas_reportes:read Alertas alertas_reportes read Activo 7/1/2026 Solo lectura" [ref=e472]:
+                    - cell "Ver Rep Alertas Ver reportes de alertas" [ref=e473]:
+                      - generic [ref=e474]:
+                        - img [ref=e477]
+                        - generic [ref=e481]:
+                          - generic [ref=e482]: Ver Rep Alertas
+                          - generic [ref=e483]: Ver reportes de alertas
+                    - cell "alertas_reportes:read" [ref=e484]
+                    - cell "Alertas" [ref=e485]:
+                      - generic [ref=e486]: Alertas
+                    - cell "alertas_reportes" [ref=e487]
+                    - cell "read" [ref=e488]:
+                      - generic [ref=e489]: read
+                    - cell "Activo" [ref=e490]:
+                      - generic [ref=e491]: Activo
+                    - cell "7/1/2026" [ref=e492]:
+                      - generic [ref=e493]:
+                        - img [ref=e494]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e497]:
+                      - generic [ref=e498]:
+                        - img [ref=e499]
+                        - text: Solo lectura
+                  - row "Ver Config Avanzado Ver configuración avanzada config_avanzado:read Configuración config_avanzado read Activo 7/1/2026 Solo lectura" [ref=e502]:
+                    - cell "Ver Config Avanzado Ver configuración avanzada" [ref=e503]:
+                      - generic [ref=e504]:
+                        - img [ref=e507]
+                        - generic [ref=e511]:
+                          - generic [ref=e512]: Ver Config Avanzado
+                          - generic [ref=e513]: Ver configuración avanzada
+                    - cell "config_avanzado:read" [ref=e514]
+                    - cell "Configuración" [ref=e515]:
+                      - generic [ref=e516]: Configuración
+                    - cell "config_avanzado" [ref=e517]
+                    - cell "read" [ref=e518]:
+                      - generic [ref=e519]: read
+                    - cell "Activo" [ref=e520]:
+                      - generic [ref=e521]: Activo
+                    - cell "7/1/2026" [ref=e522]:
+                      - generic [ref=e523]:
+                        - img [ref=e524]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e527]:
+                      - generic [ref=e528]:
+                        - img [ref=e529]
+                        - text: Solo lectura
+                  - row "Gestionar Config Avanzado Modificar configuración avanzada config_avanzado:write Configuración config_avanzado write Activo 7/1/2026 Solo lectura" [ref=e532]:
+                    - cell "Gestionar Config Avanzado Modificar configuración avanzada" [ref=e533]:
+                      - generic [ref=e534]:
+                        - img [ref=e537]
+                        - generic [ref=e541]:
+                          - generic [ref=e542]: Gestionar Config Avanzado
+                          - generic [ref=e543]: Modificar configuración avanzada
+                    - cell "config_avanzado:write" [ref=e544]
+                    - cell "Configuración" [ref=e545]:
+                      - generic [ref=e546]: Configuración
+                    - cell "config_avanzado" [ref=e547]
+                    - cell "write" [ref=e548]:
+                      - generic [ref=e549]: write
+                    - cell "Activo" [ref=e550]:
+                      - generic [ref=e551]: Activo
+                    - cell "7/1/2026" [ref=e552]:
+                      - generic [ref=e553]:
+                        - img [ref=e554]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e557]:
+                      - generic [ref=e558]:
+                        - img [ref=e559]
+                        - text: Solo lectura
+                  - row "Ver Config General Ver configuración general config_general:read Configuración config_general read Activo 7/1/2026 Solo lectura" [ref=e562]:
+                    - cell "Ver Config General Ver configuración general" [ref=e563]:
+                      - generic [ref=e564]:
+                        - img [ref=e567]
+                        - generic [ref=e571]:
+                          - generic [ref=e572]: Ver Config General
+                          - generic [ref=e573]: Ver configuración general
+                    - cell "config_general:read" [ref=e574]
+                    - cell "Configuración" [ref=e575]:
+                      - generic [ref=e576]: Configuración
+                    - cell "config_general" [ref=e577]
+                    - cell "read" [ref=e578]:
+                      - generic [ref=e579]: read
+                    - cell "Activo" [ref=e580]:
+                      - generic [ref=e581]: Activo
+                    - cell "7/1/2026" [ref=e582]:
+                      - generic [ref=e583]:
+                        - img [ref=e584]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e587]:
+                      - generic [ref=e588]:
+                        - img [ref=e589]
+                        - text: Solo lectura
+                  - row "Gestionar Config General Modificar configuración general config_general:write Configuración config_general write Activo 7/1/2026 Solo lectura" [ref=e592]:
+                    - cell "Gestionar Config General Modificar configuración general" [ref=e593]:
+                      - generic [ref=e594]:
+                        - img [ref=e597]
+                        - generic [ref=e601]:
+                          - generic [ref=e602]: Gestionar Config General
+                          - generic [ref=e603]: Modificar configuración general
+                    - cell "config_general:write" [ref=e604]
+                    - cell "Configuración" [ref=e605]:
+                      - generic [ref=e606]: Configuración
+                    - cell "config_general" [ref=e607]
+                    - cell "write" [ref=e608]:
+                      - generic [ref=e609]: write
+                    - cell "Activo" [ref=e610]:
+                      - generic [ref=e611]: Activo
+                    - cell "7/1/2026" [ref=e612]:
+                      - generic [ref=e613]:
+                        - img [ref=e614]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e617]:
+                      - generic [ref=e618]:
+                        - img [ref=e619]
+                        - text: Solo lectura
+                  - row "Ver Config Integraciones Ver integraciones externas config_integraciones:read Configuración config_integraciones read Activo 7/1/2026 Solo lectura" [ref=e622]:
+                    - cell "Ver Config Integraciones Ver integraciones externas" [ref=e623]:
+                      - generic [ref=e624]:
+                        - img [ref=e627]
+                        - generic [ref=e631]:
+                          - generic [ref=e632]: Ver Config Integraciones
+                          - generic [ref=e633]: Ver integraciones externas
+                    - cell "config_integraciones:read" [ref=e634]
+                    - cell "Configuración" [ref=e635]:
+                      - generic [ref=e636]: Configuración
+                    - cell "config_integraciones" [ref=e637]
+                    - cell "read" [ref=e638]:
+                      - generic [ref=e639]: read
+                    - cell "Activo" [ref=e640]:
+                      - generic [ref=e641]: Activo
+                    - cell "7/1/2026" [ref=e642]:
+                      - generic [ref=e643]:
+                        - img [ref=e644]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e647]:
+                      - generic [ref=e648]:
+                        - img [ref=e649]
+                        - text: Solo lectura
+                  - row "Gestionar Config Integraciones Configurar integraciones externas config_integraciones:write Configuración config_integraciones write Activo 7/1/2026 Solo lectura" [ref=e652]:
+                    - cell "Gestionar Config Integraciones Configurar integraciones externas" [ref=e653]:
+                      - generic [ref=e654]:
+                        - img [ref=e657]
+                        - generic [ref=e661]:
+                          - generic [ref=e662]: Gestionar Config Integraciones
+                          - generic [ref=e663]: Configurar integraciones externas
+                    - cell "config_integraciones:write" [ref=e664]
+                    - cell "Configuración" [ref=e665]:
+                      - generic [ref=e666]: Configuración
+                    - cell "config_integraciones" [ref=e667]
+                    - cell "write" [ref=e668]:
+                      - generic [ref=e669]: write
+                    - cell "Activo" [ref=e670]:
+                      - generic [ref=e671]: Activo
+                    - cell "7/1/2026" [ref=e672]:
+                      - generic [ref=e673]:
+                        - img [ref=e674]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e677]:
+                      - generic [ref=e678]:
+                        - img [ref=e679]
+                        - text: Solo lectura
+                  - row "Ver Config Mantenimiento Ver tareas de mantenimiento config_mantenimiento:read Configuración config_mantenimiento read Activo 7/1/2026 Solo lectura" [ref=e682]:
+                    - cell "Ver Config Mantenimiento Ver tareas de mantenimiento" [ref=e683]:
+                      - generic [ref=e684]:
+                        - img [ref=e687]
+                        - generic [ref=e691]:
+                          - generic [ref=e692]: Ver Config Mantenimiento
+                          - generic [ref=e693]: Ver tareas de mantenimiento
+                    - cell "config_mantenimiento:read" [ref=e694]
+                    - cell "Configuración" [ref=e695]:
+                      - generic [ref=e696]: Configuración
+                    - cell "config_mantenimiento" [ref=e697]
+                    - cell "read" [ref=e698]:
+                      - generic [ref=e699]: read
+                    - cell "Activo" [ref=e700]:
+                      - generic [ref=e701]: Activo
+                    - cell "7/1/2026" [ref=e702]:
+                      - generic [ref=e703]:
+                        - img [ref=e704]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e707]:
+                      - generic [ref=e708]:
+                        - img [ref=e709]
+                        - text: Solo lectura
+                  - row "Ejecutar Mantenimiento Ejecutar tareas de mantenimiento config_mantenimiento:write Configuración config_mantenimiento write Activo 7/1/2026 Solo lectura" [ref=e712]:
+                    - cell "Ejecutar Mantenimiento Ejecutar tareas de mantenimiento" [ref=e713]:
+                      - generic [ref=e714]:
+                        - img [ref=e717]
+                        - generic [ref=e721]:
+                          - generic [ref=e722]: Ejecutar Mantenimiento
+                          - generic [ref=e723]: Ejecutar tareas de mantenimiento
+                    - cell "config_mantenimiento:write" [ref=e724]
+                    - cell "Configuración" [ref=e725]:
+                      - generic [ref=e726]: Configuración
+                    - cell "config_mantenimiento" [ref=e727]
+                    - cell "write" [ref=e728]:
+                      - generic [ref=e729]: write
+                    - cell "Activo" [ref=e730]:
+                      - generic [ref=e731]: Activo
+                    - cell "7/1/2026" [ref=e732]:
+                      - generic [ref=e733]:
+                        - img [ref=e734]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e737]:
+                      - generic [ref=e738]:
+                        - img [ref=e739]
+                        - text: Solo lectura
+                  - row "Ver Config Notificaciones Ver configuración de notificaciones config_notificaciones:read Configuración config_notificaciones read Activo 7/1/2026 Solo lectura" [ref=e742]:
+                    - cell "Ver Config Notificaciones Ver configuración de notificaciones" [ref=e743]:
+                      - generic [ref=e744]:
+                        - img [ref=e747]
+                        - generic [ref=e751]:
+                          - generic [ref=e752]: Ver Config Notificaciones
+                          - generic [ref=e753]: Ver configuración de notificaciones
+                    - cell "config_notificaciones:read" [ref=e754]
+                    - cell "Configuración" [ref=e755]:
+                      - generic [ref=e756]: Configuración
+                    - cell "config_notificaciones" [ref=e757]
+                    - cell "read" [ref=e758]:
+                      - generic [ref=e759]: read
+                    - cell "Activo" [ref=e760]:
+                      - generic [ref=e761]: Activo
+                    - cell "7/1/2026" [ref=e762]:
+                      - generic [ref=e763]:
+                        - img [ref=e764]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e767]:
+                      - generic [ref=e768]:
+                        - img [ref=e769]
+                        - text: Solo lectura
+                  - row "Gestionar Config Notificaciones Modificar configuración de notificaciones config_notificaciones:write Configuración config_notificaciones write Activo 7/1/2026 Solo lectura" [ref=e772]:
+                    - cell "Gestionar Config Notificaciones Modificar configuración de notificaciones" [ref=e773]:
+                      - generic [ref=e774]:
+                        - img [ref=e777]
+                        - generic [ref=e781]:
+                          - generic [ref=e782]: Gestionar Config Notificaciones
+                          - generic [ref=e783]: Modificar configuración de notificaciones
+                    - cell "config_notificaciones:write" [ref=e784]
+                    - cell "Configuración" [ref=e785]:
+                      - generic [ref=e786]: Configuración
+                    - cell "config_notificaciones" [ref=e787]
+                    - cell "write" [ref=e788]:
+                      - generic [ref=e789]: write
+                    - cell "Activo" [ref=e790]:
+                      - generic [ref=e791]: Activo
+                    - cell "7/1/2026" [ref=e792]:
+                      - generic [ref=e793]:
+                        - img [ref=e794]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e797]:
+                      - generic [ref=e798]:
+                        - img [ref=e799]
+                        - text: Solo lectura
+                  - row "Ver Config Respaldos Ver configuración de respaldos config_respaldos:read Configuración config_respaldos read Activo 7/1/2026 Solo lectura" [ref=e802]:
+                    - cell "Ver Config Respaldos Ver configuración de respaldos" [ref=e803]:
+                      - generic [ref=e804]:
+                        - img [ref=e807]
+                        - generic [ref=e811]:
+                          - generic [ref=e812]: Ver Config Respaldos
+                          - generic [ref=e813]: Ver configuración de respaldos
+                    - cell "config_respaldos:read" [ref=e814]
+                    - cell "Configuración" [ref=e815]:
+                      - generic [ref=e816]: Configuración
+                    - cell "config_respaldos" [ref=e817]
+                    - cell "read" [ref=e818]:
+                      - generic [ref=e819]: read
+                    - cell "Activo" [ref=e820]:
+                      - generic [ref=e821]: Activo
+                    - cell "7/1/2026" [ref=e822]:
+                      - generic [ref=e823]:
+                        - img [ref=e824]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e827]:
+                      - generic [ref=e828]:
+                        - img [ref=e829]
+                        - text: Solo lectura
+                  - row "Gestionar Config Respaldos Configurar respaldos automáticos config_respaldos:write Configuración config_respaldos write Activo 7/1/2026 Solo lectura" [ref=e832]:
+                    - cell "Gestionar Config Respaldos Configurar respaldos automáticos" [ref=e833]:
+                      - generic [ref=e834]:
+                        - img [ref=e837]
+                        - generic [ref=e841]:
+                          - generic [ref=e842]: Gestionar Config Respaldos
+                          - generic [ref=e843]: Configurar respaldos automáticos
+                    - cell "config_respaldos:write" [ref=e844]
+                    - cell "Configuración" [ref=e845]:
+                      - generic [ref=e846]: Configuración
+                    - cell "config_respaldos" [ref=e847]
+                    - cell "write" [ref=e848]:
+                      - generic [ref=e849]: write
+                    - cell "Activo" [ref=e850]:
+                      - generic [ref=e851]: Activo
+                    - cell "7/1/2026" [ref=e852]:
+                      - generic [ref=e853]:
+                        - img [ref=e854]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e857]:
+                      - generic [ref=e858]:
+                        - img [ref=e859]
+                        - text: Solo lectura
+                  - row "Ver Config Seguridad Ver configuración de seguridad config_seguridad:read Configuración config_seguridad read Activo 7/1/2026 Solo lectura" [ref=e862]:
+                    - cell "Ver Config Seguridad Ver configuración de seguridad" [ref=e863]:
+                      - generic [ref=e864]:
+                        - img [ref=e867]
+                        - generic [ref=e871]:
+                          - generic [ref=e872]: Ver Config Seguridad
+                          - generic [ref=e873]: Ver configuración de seguridad
+                    - cell "config_seguridad:read" [ref=e874]
+                    - cell "Configuración" [ref=e875]:
+                      - generic [ref=e876]: Configuración
+                    - cell "config_seguridad" [ref=e877]
+                    - cell "read" [ref=e878]:
+                      - generic [ref=e879]: read
+                    - cell "Activo" [ref=e880]:
+                      - generic [ref=e881]: Activo
+                    - cell "7/1/2026" [ref=e882]:
+                      - generic [ref=e883]:
+                        - img [ref=e884]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e887]:
+                      - generic [ref=e888]:
+                        - img [ref=e889]
+                        - text: Solo lectura
+                  - row "Gestionar Config Seguridad Modificar políticas de seguridad config_seguridad:write Configuración config_seguridad write Activo 7/1/2026 Solo lectura" [ref=e892]:
+                    - cell "Gestionar Config Seguridad Modificar políticas de seguridad" [ref=e893]:
+                      - generic [ref=e894]:
+                        - img [ref=e897]
+                        - generic [ref=e901]:
+                          - generic [ref=e902]: Gestionar Config Seguridad
+                          - generic [ref=e903]: Modificar políticas de seguridad
+                    - cell "config_seguridad:write" [ref=e904]
+                    - cell "Configuración" [ref=e905]:
+                      - generic [ref=e906]: Configuración
+                    - cell "config_seguridad" [ref=e907]
+                    - cell "write" [ref=e908]:
+                      - generic [ref=e909]: write
+                    - cell "Activo" [ref=e910]:
+                      - generic [ref=e911]: Activo
+                    - cell "7/1/2026" [ref=e912]:
+                      - generic [ref=e913]:
+                        - img [ref=e914]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e917]:
+                      - generic [ref=e918]:
+                        - img [ref=e919]
+                        - text: Solo lectura
+                  - row "Ver Config Sistema Ver parámetros del sistema config_sistema:read Configuración config_sistema read Activo 7/1/2026 Solo lectura" [ref=e922]:
+                    - cell "Ver Config Sistema Ver parámetros del sistema" [ref=e923]:
+                      - generic [ref=e924]:
+                        - img [ref=e927]
+                        - generic [ref=e931]:
+                          - generic [ref=e932]: Ver Config Sistema
+                          - generic [ref=e933]: Ver parámetros del sistema
+                    - cell "config_sistema:read" [ref=e934]
+                    - cell "Configuración" [ref=e935]:
+                      - generic [ref=e936]: Configuración
+                    - cell "config_sistema" [ref=e937]
+                    - cell "read" [ref=e938]:
+                      - generic [ref=e939]: read
+                    - cell "Activo" [ref=e940]:
+                      - generic [ref=e941]: Activo
+                    - cell "7/1/2026" [ref=e942]:
+                      - generic [ref=e943]:
+                        - img [ref=e944]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e947]:
+                      - generic [ref=e948]:
+                        - img [ref=e949]
+                        - text: Solo lectura
+                  - row "Gestionar Config Sistema Modificar parámetros del sistema config_sistema:write Configuración config_sistema write Activo 7/1/2026 Solo lectura" [ref=e952]:
+                    - cell "Gestionar Config Sistema Modificar parámetros del sistema" [ref=e953]:
+                      - generic [ref=e954]:
+                        - img [ref=e957]
+                        - generic [ref=e961]:
+                          - generic [ref=e962]: Gestionar Config Sistema
+                          - generic [ref=e963]: Modificar parámetros del sistema
+                    - cell "config_sistema:write" [ref=e964]
+                    - cell "Configuración" [ref=e965]:
+                      - generic [ref=e966]: Configuración
+                    - cell "config_sistema" [ref=e967]
+                    - cell "write" [ref=e968]:
+                      - generic [ref=e969]: write
+                    - cell "Activo" [ref=e970]:
+                      - generic [ref=e971]: Activo
+                    - cell "7/1/2026" [ref=e972]:
+                      - generic [ref=e973]:
+                        - img [ref=e974]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e977]:
+                      - generic [ref=e978]:
+                        - img [ref=e979]
+                        - text: Solo lectura
+                  - row "Ver Dashboard Acceso al dashboard principal dashboard:read Dashboard dashboard read Activo 7/1/2026 Solo lectura" [ref=e982]:
+                    - cell "Ver Dashboard Acceso al dashboard principal" [ref=e983]:
+                      - generic [ref=e984]:
+                        - img [ref=e987]
+                        - generic [ref=e991]:
+                          - generic [ref=e992]: Ver Dashboard
+                          - generic [ref=e993]: Acceso al dashboard principal
+                    - cell "dashboard:read" [ref=e994]
+                    - cell "Dashboard" [ref=e995]:
+                      - generic [ref=e996]: Dashboard
+                    - cell "dashboard" [ref=e997]
+                    - cell "read" [ref=e998]:
+                      - generic [ref=e999]: read
+                    - cell "Activo" [ref=e1000]:
+                      - generic [ref=e1001]: Activo
+                    - cell "7/1/2026" [ref=e1002]:
+                      - generic [ref=e1003]:
+                        - img [ref=e1004]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1007]:
+                      - generic [ref=e1008]:
+                        - img [ref=e1009]
+                        - text: Solo lectura
+                  - row "Ver Centros de Acopio Ver listado de centros de acopio centros_acopio:read Establecimientos centros_acopio read Activo 7/1/2026 Solo lectura" [ref=e1012]:
+                    - cell "Ver Centros de Acopio Ver listado de centros de acopio" [ref=e1013]:
+                      - generic [ref=e1014]:
+                        - img [ref=e1017]
+                        - generic [ref=e1021]:
+                          - generic [ref=e1022]: Ver Centros de Acopio
+                          - generic [ref=e1023]: Ver listado de centros de acopio
+                    - cell "centros_acopio:read" [ref=e1024]
+                    - cell "Establecimientos" [ref=e1025]:
+                      - generic [ref=e1026]: Establecimientos
+                    - cell "centros_acopio" [ref=e1027]
+                    - cell "read" [ref=e1028]:
+                      - generic [ref=e1029]: read
+                    - cell "Activo" [ref=e1030]:
+                      - generic [ref=e1031]: Activo
+                    - cell "7/1/2026" [ref=e1032]:
+                      - generic [ref=e1033]:
+                        - img [ref=e1034]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1037]:
+                      - generic [ref=e1038]:
+                        - img [ref=e1039]
+                        - text: Solo lectura
+                  - row "Gestionar Centros de Acopio Crear, editar y eliminar centros de acopio centros_acopio:write Establecimientos centros_acopio write Activo 7/1/2026 Solo lectura" [ref=e1042]:
+                    - cell "Gestionar Centros de Acopio Crear, editar y eliminar centros de acopio" [ref=e1043]:
+                      - generic [ref=e1044]:
+                        - img [ref=e1047]
+                        - generic [ref=e1051]:
+                          - generic [ref=e1052]: Gestionar Centros de Acopio
+                          - generic [ref=e1053]: Crear, editar y eliminar centros de acopio
+                    - cell "centros_acopio:write" [ref=e1054]
+                    - cell "Establecimientos" [ref=e1055]:
+                      - generic [ref=e1056]: Establecimientos
+                    - cell "centros_acopio" [ref=e1057]
+                    - cell "write" [ref=e1058]:
+                      - generic [ref=e1059]: write
+                    - cell "Activo" [ref=e1060]:
+                      - generic [ref=e1061]: Activo
+                    - cell "7/1/2026" [ref=e1062]:
+                      - generic [ref=e1063]:
+                        - img [ref=e1064]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1067]:
+                      - generic [ref=e1068]:
+                        - img [ref=e1069]
+                        - text: Solo lectura
+                  - row "Ver Establecimientos Ver listado de establecimientos de salud establecimientos:read Establecimientos establecimientos read Activo 7/1/2026 Solo lectura" [ref=e1072]:
+                    - cell "Ver Establecimientos Ver listado de establecimientos de salud" [ref=e1073]:
+                      - generic [ref=e1074]:
+                        - img [ref=e1077]
+                        - generic [ref=e1081]:
+                          - generic [ref=e1082]: Ver Establecimientos
+                          - generic [ref=e1083]: Ver listado de establecimientos de salud
+                    - cell "establecimientos:read" [ref=e1084]
+                    - cell "Establecimientos" [ref=e1085]:
+                      - generic [ref=e1086]: Establecimientos
+                    - cell "establecimientos" [ref=e1087]
+                    - cell "read" [ref=e1088]:
+                      - generic [ref=e1089]: read
+                    - cell "Activo" [ref=e1090]:
+                      - generic [ref=e1091]: Activo
+                    - cell "7/1/2026" [ref=e1092]:
+                      - generic [ref=e1093]:
+                        - img [ref=e1094]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1097]:
+                      - generic [ref=e1098]:
+                        - img [ref=e1099]
+                        - text: Solo lectura
+                  - row "Gestionar Establecimientos Crear, editar y eliminar establecimientos establecimientos:write Establecimientos establecimientos write Activo 7/1/2026 Solo lectura" [ref=e1102]:
+                    - cell "Gestionar Establecimientos Crear, editar y eliminar establecimientos" [ref=e1103]:
+                      - generic [ref=e1104]:
+                        - img [ref=e1107]
+                        - generic [ref=e1111]:
+                          - generic [ref=e1112]: Gestionar Establecimientos
+                          - generic [ref=e1113]: Crear, editar y eliminar establecimientos
+                    - cell "establecimientos:write" [ref=e1114]
+                    - cell "Establecimientos" [ref=e1115]:
+                      - generic [ref=e1116]: Establecimientos
+                    - cell "establecimientos" [ref=e1117]
+                    - cell "write" [ref=e1118]:
+                      - generic [ref=e1119]: write
+                    - cell "Activo" [ref=e1120]:
+                      - generic [ref=e1121]: Activo
+                    - cell "7/1/2026" [ref=e1122]:
+                      - generic [ref=e1123]:
+                        - img [ref=e1124]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1127]:
+                      - generic [ref=e1128]:
+                        - img [ref=e1129]
+                        - text: Solo lectura
+                  - row "Ver Microredes Ver listado de microredes microredes:read Establecimientos microredes read Activo 7/1/2026 Solo lectura" [ref=e1132]:
+                    - cell "Ver Microredes Ver listado de microredes" [ref=e1133]:
+                      - generic [ref=e1134]:
+                        - img [ref=e1137]
+                        - generic [ref=e1141]:
+                          - generic [ref=e1142]: Ver Microredes
+                          - generic [ref=e1143]: Ver listado de microredes
+                    - cell "microredes:read" [ref=e1144]
+                    - cell "Establecimientos" [ref=e1145]:
+                      - generic [ref=e1146]: Establecimientos
+                    - cell "microredes" [ref=e1147]
+                    - cell "read" [ref=e1148]:
+                      - generic [ref=e1149]: read
+                    - cell "Activo" [ref=e1150]:
+                      - generic [ref=e1151]: Activo
+                    - cell "7/1/2026" [ref=e1152]:
+                      - generic [ref=e1153]:
+                        - img [ref=e1154]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1157]:
+                      - generic [ref=e1158]:
+                        - img [ref=e1159]
+                        - text: Solo lectura
+                  - row "Gestionar Microredes Crear, editar y eliminar microredes microredes:write Establecimientos microredes write Activo 7/1/2026 Solo lectura" [ref=e1162]:
+                    - cell "Gestionar Microredes Crear, editar y eliminar microredes" [ref=e1163]:
+                      - generic [ref=e1164]:
+                        - img [ref=e1167]
+                        - generic [ref=e1171]:
+                          - generic [ref=e1172]: Gestionar Microredes
+                          - generic [ref=e1173]: Crear, editar y eliminar microredes
+                    - cell "microredes:write" [ref=e1174]
+                    - cell "Establecimientos" [ref=e1175]:
+                      - generic [ref=e1176]: Establecimientos
+                    - cell "microredes" [ref=e1177]
+                    - cell "write" [ref=e1178]:
+                      - generic [ref=e1179]: write
+                    - cell "Activo" [ref=e1180]:
+                      - generic [ref=e1181]: Activo
+                    - cell "7/1/2026" [ref=e1182]:
+                      - generic [ref=e1183]:
+                        - img [ref=e1184]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1187]:
+                      - generic [ref=e1188]:
+                        - img [ref=e1189]
+                        - text: Solo lectura
+                  - row "Ver Redes Ver listado de redes de salud redes:read Establecimientos redes read Activo 7/1/2026 Solo lectura" [ref=e1192]:
+                    - cell "Ver Redes Ver listado de redes de salud" [ref=e1193]:
+                      - generic [ref=e1194]:
+                        - img [ref=e1197]
+                        - generic [ref=e1201]:
+                          - generic [ref=e1202]: Ver Redes
+                          - generic [ref=e1203]: Ver listado de redes de salud
+                    - cell "redes:read" [ref=e1204]
+                    - cell "Establecimientos" [ref=e1205]:
+                      - generic [ref=e1206]: Establecimientos
+                    - cell "redes" [ref=e1207]
+                    - cell "read" [ref=e1208]:
+                      - generic [ref=e1209]: read
+                    - cell "Activo" [ref=e1210]:
+                      - generic [ref=e1211]: Activo
+                    - cell "7/1/2026" [ref=e1212]:
+                      - generic [ref=e1213]:
+                        - img [ref=e1214]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1217]:
+                      - generic [ref=e1218]:
+                        - img [ref=e1219]
+                        - text: Solo lectura
+                  - row "Gestionar Redes Crear, editar y eliminar redes redes:write Establecimientos redes write Activo 7/1/2026 Solo lectura" [ref=e1222]:
+                    - cell "Gestionar Redes Crear, editar y eliminar redes" [ref=e1223]:
+                      - generic [ref=e1224]:
+                        - img [ref=e1227]
+                        - generic [ref=e1231]:
+                          - generic [ref=e1232]: Gestionar Redes
+                          - generic [ref=e1233]: Crear, editar y eliminar redes
+                    - cell "redes:write" [ref=e1234]
+                    - cell "Establecimientos" [ref=e1235]:
+                      - generic [ref=e1236]: Establecimientos
+                    - cell "redes" [ref=e1237]
+                    - cell "write" [ref=e1238]:
+                      - generic [ref=e1239]: write
+                    - cell "Activo" [ref=e1240]:
+                      - generic [ref=e1241]: Activo
+                    - cell "7/1/2026" [ref=e1242]:
+                      - generic [ref=e1243]:
+                        - img [ref=e1244]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1247]:
+                      - generic [ref=e1248]:
+                        - img [ref=e1249]
+                        - text: Solo lectura
+                  - row "Ver Config Jeringas Ver configuración de jeringas por vacuna config_jeringas:read Inventario config_jeringas read Activo 7/1/2026 Solo lectura" [ref=e1252]:
+                    - cell "Ver Config Jeringas Ver configuración de jeringas por vacuna" [ref=e1253]:
+                      - generic [ref=e1254]:
+                        - img [ref=e1257]
+                        - generic [ref=e1261]:
+                          - generic [ref=e1262]: Ver Config Jeringas
+                          - generic [ref=e1263]: Ver configuración de jeringas por vacuna
+                    - cell "config_jeringas:read" [ref=e1264]
+                    - cell "Inventario" [ref=e1265]:
+                      - generic [ref=e1266]: Inventario
+                    - cell "config_jeringas" [ref=e1267]
+                    - cell "read" [ref=e1268]:
+                      - generic [ref=e1269]: read
+                    - cell "Activo" [ref=e1270]:
+                      - generic [ref=e1271]: Activo
+                    - cell "7/1/2026" [ref=e1272]:
+                      - generic [ref=e1273]:
+                        - img [ref=e1274]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1277]:
+                      - generic [ref=e1278]:
+                        - img [ref=e1279]
+                        - text: Solo lectura
+                  - row "Gestionar Config Jeringas Configurar jeringas por vacuna config_jeringas:write Inventario config_jeringas write Activo 7/1/2026 Solo lectura" [ref=e1282]:
+                    - cell "Gestionar Config Jeringas Configurar jeringas por vacuna" [ref=e1283]:
+                      - generic [ref=e1284]:
+                        - img [ref=e1287]
+                        - generic [ref=e1291]:
+                          - generic [ref=e1292]: Gestionar Config Jeringas
+                          - generic [ref=e1293]: Configurar jeringas por vacuna
+                    - cell "config_jeringas:write" [ref=e1294]
+                    - cell "Inventario" [ref=e1295]:
+                      - generic [ref=e1296]: Inventario
+                    - cell "config_jeringas" [ref=e1297]
+                    - cell "write" [ref=e1298]:
+                      - generic [ref=e1299]: write
+                    - cell "Activo" [ref=e1300]:
+                      - generic [ref=e1301]: Activo
+                    - cell "7/1/2026" [ref=e1302]:
+                      - generic [ref=e1303]:
+                        - img [ref=e1304]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1307]:
+                      - generic [ref=e1308]:
+                        - img [ref=e1309]
+                        - text: Solo lectura
+                  - row "Registrar Ingresos Registrar nuevos ingresos de lotes inventario:ingreso Inventario inventario ingreso Activo 7/1/2026 Solo lectura" [ref=e1312]:
+                    - cell "Registrar Ingresos Registrar nuevos ingresos de lotes" [ref=e1313]:
+                      - generic [ref=e1314]:
+                        - img [ref=e1317]
+                        - generic [ref=e1321]:
+                          - generic [ref=e1322]: Registrar Ingresos
+                          - generic [ref=e1323]: Registrar nuevos ingresos de lotes
+                    - cell "inventario:ingreso" [ref=e1324]
+                    - cell "Inventario" [ref=e1325]:
+                      - generic [ref=e1326]: Inventario
+                    - cell "inventario" [ref=e1327]
+                    - cell "ingreso" [ref=e1328]:
+                      - generic [ref=e1329]: ingreso
+                    - cell "Activo" [ref=e1330]:
+                      - generic [ref=e1331]: Activo
+                    - cell "7/1/2026" [ref=e1332]:
+                      - generic [ref=e1333]:
+                        - img [ref=e1334]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1337]:
+                      - generic [ref=e1338]:
+                        - img [ref=e1339]
+                        - text: Solo lectura
+                  - row "Ver Catálogo Jeringas Ver catálogo de jeringas jeringas:read Inventario jeringas read Activo 7/1/2026 Solo lectura" [ref=e1342]:
+                    - cell "Ver Catálogo Jeringas Ver catálogo de jeringas" [ref=e1343]:
+                      - generic [ref=e1344]:
+                        - img [ref=e1347]
+                        - generic [ref=e1351]:
+                          - generic [ref=e1352]: Ver Catálogo Jeringas
+                          - generic [ref=e1353]: Ver catálogo de jeringas
+                    - cell "jeringas:read" [ref=e1354]
+                    - cell "Inventario" [ref=e1355]:
+                      - generic [ref=e1356]: Inventario
+                    - cell "jeringas" [ref=e1357]
+                    - cell "read" [ref=e1358]:
+                      - generic [ref=e1359]: read
+                    - cell "Activo" [ref=e1360]:
+                      - generic [ref=e1361]: Activo
+                    - cell "7/1/2026" [ref=e1362]:
+                      - generic [ref=e1363]:
+                        - img [ref=e1364]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1367]:
+                      - generic [ref=e1368]:
+                        - img [ref=e1369]
+                        - text: Solo lectura
+                  - row "Gestionar Jeringas Crear, editar y eliminar jeringas del catálogo jeringas:write Inventario jeringas write Activo 7/1/2026 Solo lectura" [ref=e1372]:
+                    - cell "Gestionar Jeringas Crear, editar y eliminar jeringas del catálogo" [ref=e1373]:
+                      - generic [ref=e1374]:
+                        - img [ref=e1377]
+                        - generic [ref=e1381]:
+                          - generic [ref=e1382]: Gestionar Jeringas
+                          - generic [ref=e1383]: Crear, editar y eliminar jeringas del catálogo
+                    - cell "jeringas:write" [ref=e1384]
+                    - cell "Inventario" [ref=e1385]:
+                      - generic [ref=e1386]: Inventario
+                    - cell "jeringas" [ref=e1387]
+                    - cell "write" [ref=e1388]:
+                      - generic [ref=e1389]: write
+                    - cell "Activo" [ref=e1390]:
+                      - generic [ref=e1391]: Activo
+                    - cell "7/1/2026" [ref=e1392]:
+                      - generic [ref=e1393]:
+                        - img [ref=e1394]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1397]:
+                      - generic [ref=e1398]:
+                        - img [ref=e1399]
+                        - text: Solo lectura
+                  - row "Ver Lotes Jeringas Ver lotes de jeringas lotes_jeringas:read Inventario lotes_jeringas read Activo 7/1/2026 Solo lectura" [ref=e1402]:
+                    - cell "Ver Lotes Jeringas Ver lotes de jeringas" [ref=e1403]:
+                      - generic [ref=e1404]:
+                        - img [ref=e1407]
+                        - generic [ref=e1411]:
+                          - generic [ref=e1412]: Ver Lotes Jeringas
+                          - generic [ref=e1413]: Ver lotes de jeringas
+                    - cell "lotes_jeringas:read" [ref=e1414]
+                    - cell "Inventario" [ref=e1415]:
+                      - generic [ref=e1416]: Inventario
+                    - cell "lotes_jeringas" [ref=e1417]
+                    - cell "read" [ref=e1418]:
+                      - generic [ref=e1419]: read
+                    - cell "Activo" [ref=e1420]:
+                      - generic [ref=e1421]: Activo
+                    - cell "7/1/2026" [ref=e1422]:
+                      - generic [ref=e1423]:
+                        - img [ref=e1424]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1427]:
+                      - generic [ref=e1428]:
+                        - img [ref=e1429]
+                        - text: Solo lectura
+                  - row "Gestionar Lotes Jeringas Crear, editar y eliminar lotes de jeringas lotes_jeringas:write Inventario lotes_jeringas write Activo 7/1/2026 Solo lectura" [ref=e1432]:
+                    - cell "Gestionar Lotes Jeringas Crear, editar y eliminar lotes de jeringas" [ref=e1433]:
+                      - generic [ref=e1434]:
+                        - img [ref=e1437]
+                        - generic [ref=e1441]:
+                          - generic [ref=e1442]: Gestionar Lotes Jeringas
+                          - generic [ref=e1443]: Crear, editar y eliminar lotes de jeringas
+                    - cell "lotes_jeringas:write" [ref=e1444]
+                    - cell "Inventario" [ref=e1445]:
+                      - generic [ref=e1446]: Inventario
+                    - cell "lotes_jeringas" [ref=e1447]
+                    - cell "write" [ref=e1448]:
+                      - generic [ref=e1449]: write
+                    - cell "Activo" [ref=e1450]:
+                      - generic [ref=e1451]: Activo
+                    - cell "7/1/2026" [ref=e1452]:
+                      - generic [ref=e1453]:
+                        - img [ref=e1454]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1457]:
+                      - generic [ref=e1458]:
+                        - img [ref=e1459]
+                        - text: Solo lectura
+                  - row "Ver Lotes Vacunas Ver lotes de vacunas lotes_vacunas:read Inventario lotes_vacunas read Activo 7/1/2026 Solo lectura" [ref=e1462]:
+                    - cell "Ver Lotes Vacunas Ver lotes de vacunas" [ref=e1463]:
+                      - generic [ref=e1464]:
+                        - img [ref=e1467]
+                        - generic [ref=e1471]:
+                          - generic [ref=e1472]: Ver Lotes Vacunas
+                          - generic [ref=e1473]: Ver lotes de vacunas
+                    - cell "lotes_vacunas:read" [ref=e1474]
+                    - cell "Inventario" [ref=e1475]:
+                      - generic [ref=e1476]: Inventario
+                    - cell "lotes_vacunas" [ref=e1477]
+                    - cell "read" [ref=e1478]:
+                      - generic [ref=e1479]: read
+                    - cell "Activo" [ref=e1480]:
+                      - generic [ref=e1481]: Activo
+                    - cell "7/1/2026" [ref=e1482]:
+                      - generic [ref=e1483]:
+                        - img [ref=e1484]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1487]:
+                      - generic [ref=e1488]:
+                        - img [ref=e1489]
+                        - text: Solo lectura
+                  - row "Gestionar Lotes Vacunas Crear, editar y eliminar lotes de vacunas lotes_vacunas:write Inventario lotes_vacunas write Activo 7/1/2026 Solo lectura" [ref=e1492]:
+                    - cell "Gestionar Lotes Vacunas Crear, editar y eliminar lotes de vacunas" [ref=e1493]:
+                      - generic [ref=e1494]:
+                        - img [ref=e1497]
+                        - generic [ref=e1501]:
+                          - generic [ref=e1502]: Gestionar Lotes Vacunas
+                          - generic [ref=e1503]: Crear, editar y eliminar lotes de vacunas
+                    - cell "lotes_vacunas:write" [ref=e1504]
+                    - cell "Inventario" [ref=e1505]:
+                      - generic [ref=e1506]: Inventario
+                    - cell "lotes_vacunas" [ref=e1507]
+                    - cell "write" [ref=e1508]:
+                      - generic [ref=e1509]: write
+                    - cell "Activo" [ref=e1510]:
+                      - generic [ref=e1511]: Activo
+                    - cell "7/1/2026" [ref=e1512]:
+                      - generic [ref=e1513]:
+                        - img [ref=e1514]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1517]:
+                      - generic [ref=e1518]:
+                        - img [ref=e1519]
+                        - text: Solo lectura
+                  - row "Ver Catálogo Vacunas Ver catálogo de vacunas vacunas:read Inventario vacunas read Activo 7/1/2026 Solo lectura" [ref=e1522]:
+                    - cell "Ver Catálogo Vacunas Ver catálogo de vacunas" [ref=e1523]:
+                      - generic [ref=e1524]:
+                        - img [ref=e1527]
+                        - generic [ref=e1531]:
+                          - generic [ref=e1532]: Ver Catálogo Vacunas
+                          - generic [ref=e1533]: Ver catálogo de vacunas
+                    - cell "vacunas:read" [ref=e1534]
+                    - cell "Inventario" [ref=e1535]:
+                      - generic [ref=e1536]: Inventario
+                    - cell "vacunas" [ref=e1537]
+                    - cell "read" [ref=e1538]:
+                      - generic [ref=e1539]: read
+                    - cell "Activo" [ref=e1540]:
+                      - generic [ref=e1541]: Activo
+                    - cell "7/1/2026" [ref=e1542]:
+                      - generic [ref=e1543]:
+                        - img [ref=e1544]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1547]:
+                      - generic [ref=e1548]:
+                        - img [ref=e1549]
+                        - text: Solo lectura
+                  - row "Gestionar Vacunas Crear, editar y eliminar vacunas del catálogo vacunas:write Inventario vacunas write Activo 7/1/2026 Solo lectura" [ref=e1552]:
+                    - cell "Gestionar Vacunas Crear, editar y eliminar vacunas del catálogo" [ref=e1553]:
+                      - generic [ref=e1554]:
+                        - img [ref=e1557]
+                        - generic [ref=e1561]:
+                          - generic [ref=e1562]: Gestionar Vacunas
+                          - generic [ref=e1563]: Crear, editar y eliminar vacunas del catálogo
+                    - cell "vacunas:write" [ref=e1564]
+                    - cell "Inventario" [ref=e1565]:
+                      - generic [ref=e1566]: Inventario
+                    - cell "vacunas" [ref=e1567]
+                    - cell "write" [ref=e1568]:
+                      - generic [ref=e1569]: write
+                    - cell "Activo" [ref=e1570]:
+                      - generic [ref=e1571]: Activo
+                    - cell "7/1/2026" [ref=e1572]:
+                      - generic [ref=e1573]:
+                        - img [ref=e1574]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1577]:
+                      - generic [ref=e1578]:
+                        - img [ref=e1579]
+                        - text: Solo lectura
+                  - row "Exportar Kardex Exportar kardex a Excel/PDF kardex:export Kardex kardex export Activo 7/1/2026 Solo lectura" [ref=e1582]:
+                    - cell "Exportar Kardex Exportar kardex a Excel/PDF" [ref=e1583]:
+                      - generic [ref=e1584]:
+                        - img [ref=e1587]
+                        - generic [ref=e1591]:
+                          - generic [ref=e1592]: Exportar Kardex
+                          - generic [ref=e1593]: Exportar kardex a Excel/PDF
+                    - cell "kardex:export" [ref=e1594]
+                    - cell "Kardex" [ref=e1595]:
+                      - generic [ref=e1596]: Kardex
+                    - cell "kardex" [ref=e1597]
+                    - cell "export" [ref=e1598]:
+                      - generic [ref=e1599]: export
+                    - cell "Activo" [ref=e1600]:
+                      - generic [ref=e1601]: Activo
+                    - cell "7/1/2026" [ref=e1602]:
+                      - generic [ref=e1603]:
+                        - img [ref=e1604]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1607]:
+                      - generic [ref=e1608]:
+                        - img [ref=e1609]
+                        - text: Solo lectura
+                  - row "Ver Kardex Ver kardex de inventario kardex:read Kardex kardex read Activo 7/1/2026 Solo lectura" [ref=e1612]:
+                    - cell "Ver Kardex Ver kardex de inventario" [ref=e1613]:
+                      - generic [ref=e1614]:
+                        - img [ref=e1617]
+                        - generic [ref=e1621]:
+                          - generic [ref=e1622]: Ver Kardex
+                          - generic [ref=e1623]: Ver kardex de inventario
+                    - cell "kardex:read" [ref=e1624]
+                    - cell "Kardex" [ref=e1625]:
+                      - generic [ref=e1626]: Kardex
+                    - cell "kardex" [ref=e1627]
+                    - cell "read" [ref=e1628]:
+                      - generic [ref=e1629]: read
+                    - cell "Activo" [ref=e1630]:
+                      - generic [ref=e1631]: Activo
+                    - cell "7/1/2026" [ref=e1632]:
+                      - generic [ref=e1633]:
+                        - img [ref=e1634]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1637]:
+                      - generic [ref=e1638]:
+                        - img [ref=e1639]
+                        - text: Solo lectura
+                  - row "Anular Movimientos Anular movimientos registrados movimientos:anular Movimientos movimientos anular Activo 7/1/2026 Solo lectura" [ref=e1642]:
+                    - cell "Anular Movimientos Anular movimientos registrados" [ref=e1643]:
+                      - generic [ref=e1644]:
+                        - img [ref=e1647]
+                        - generic [ref=e1651]:
+                          - generic [ref=e1652]: Anular Movimientos
+                          - generic [ref=e1653]: Anular movimientos registrados
+                    - cell "movimientos:anular" [ref=e1654]
+                    - cell "Movimientos" [ref=e1655]:
+                      - generic [ref=e1656]: Movimientos
+                    - cell "movimientos" [ref=e1657]
+                    - cell "anular" [ref=e1658]:
+                      - generic [ref=e1659]: anular
+                    - cell "Activo" [ref=e1660]:
+                      - generic [ref=e1661]: Activo
+                    - cell "7/1/2026" [ref=e1662]:
+                      - generic [ref=e1663]:
+                        - img [ref=e1664]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1667]:
+                      - generic [ref=e1668]:
+                        - img [ref=e1669]
+                        - text: Solo lectura
+                  - row "Ver Movimientos Ver listado de movimientos de inventario movimientos:read Movimientos movimientos read Activo 7/1/2026 Solo lectura" [ref=e1672]:
+                    - cell "Ver Movimientos Ver listado de movimientos de inventario" [ref=e1673]:
+                      - generic [ref=e1674]:
+                        - img [ref=e1677]
+                        - generic [ref=e1681]:
+                          - generic [ref=e1682]: Ver Movimientos
+                          - generic [ref=e1683]: Ver listado de movimientos de inventario
+                    - cell "movimientos:read" [ref=e1684]
+                    - cell "Movimientos" [ref=e1685]:
+                      - generic [ref=e1686]: Movimientos
+                    - cell "movimientos" [ref=e1687]
+                    - cell "read" [ref=e1688]:
+                      - generic [ref=e1689]: read
+                    - cell "Activo" [ref=e1690]:
+                      - generic [ref=e1691]: Activo
+                    - cell "7/1/2026" [ref=e1692]:
+                      - generic [ref=e1693]:
+                        - img [ref=e1694]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1697]:
+                      - generic [ref=e1698]:
+                        - img [ref=e1699]
+                        - text: Solo lectura
+                  - row "Registrar Movimientos Registrar nuevos movimientos movimientos:write Movimientos movimientos write Activo 7/1/2026 Solo lectura" [ref=e1702]:
+                    - cell "Registrar Movimientos Registrar nuevos movimientos" [ref=e1703]:
+                      - generic [ref=e1704]:
+                        - img [ref=e1707]
+                        - generic [ref=e1711]:
+                          - generic [ref=e1712]: Registrar Movimientos
+                          - generic [ref=e1713]: Registrar nuevos movimientos
+                    - cell "movimientos:write" [ref=e1714]
+                    - cell "Movimientos" [ref=e1715]:
+                      - generic [ref=e1716]: Movimientos
+                    - cell "movimientos" [ref=e1717]
+                    - cell "write" [ref=e1718]:
+                      - generic [ref=e1719]: write
+                    - cell "Activo" [ref=e1720]:
+                      - generic [ref=e1721]: Activo
+                    - cell "7/1/2026" [ref=e1722]:
+                      - generic [ref=e1723]:
+                        - img [ref=e1724]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1727]:
+                      - generic [ref=e1728]:
+                        - img [ref=e1729]
+                        - text: Solo lectura
+                  - row "Aprobar Planificación Aprobar planificaciones para ejecución planificacion:aprobar Planificación planificacion aprobar Activo 7/1/2026 Solo lectura" [ref=e1732]:
+                    - cell "Aprobar Planificación Aprobar planificaciones para ejecución" [ref=e1733]:
+                      - generic [ref=e1734]:
+                        - img [ref=e1737]
+                        - generic [ref=e1741]:
+                          - generic [ref=e1742]: Aprobar Planificación
+                          - generic [ref=e1743]: Aprobar planificaciones para ejecución
+                    - cell "planificacion:aprobar" [ref=e1744]
+                    - cell "Planificación" [ref=e1745]:
+                      - generic [ref=e1746]: Planificación
+                    - cell "planificacion" [ref=e1747]
+                    - cell "aprobar" [ref=e1748]:
+                      - generic [ref=e1749]: aprobar
+                    - cell "Activo" [ref=e1750]:
+                      - generic [ref=e1751]: Activo
+                    - cell "7/1/2026" [ref=e1752]:
+                      - generic [ref=e1753]:
+                        - img [ref=e1754]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1757]:
+                      - generic [ref=e1758]:
+                        - img [ref=e1759]
+                        - text: Solo lectura
+                  - row "Ver Planificación Ver planificaciones anuales planificacion:read Planificación planificacion read Activo 7/1/2026 Solo lectura" [ref=e1762]:
+                    - cell "Ver Planificación Ver planificaciones anuales" [ref=e1763]:
+                      - generic [ref=e1764]:
+                        - img [ref=e1767]
+                        - generic [ref=e1771]:
+                          - generic [ref=e1772]: Ver Planificación
+                          - generic [ref=e1773]: Ver planificaciones anuales
+                    - cell "planificacion:read" [ref=e1774]
+                    - cell "Planificación" [ref=e1775]:
+                      - generic [ref=e1776]: Planificación
+                    - cell "planificacion" [ref=e1777]
+                    - cell "read" [ref=e1778]:
+                      - generic [ref=e1779]: read
+                    - cell "Activo" [ref=e1780]:
+                      - generic [ref=e1781]: Activo
+                    - cell "7/1/2026" [ref=e1782]:
+                      - generic [ref=e1783]:
+                        - img [ref=e1784]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1787]:
+                      - generic [ref=e1788]:
+                        - img [ref=e1789]
+                        - text: Solo lectura
+                  - row "Gestionar Planificación Crear y editar planificaciones planificacion:write Planificación planificacion write Activo 7/1/2026 Solo lectura" [ref=e1792]:
+                    - cell "Gestionar Planificación Crear y editar planificaciones" [ref=e1793]:
+                      - generic [ref=e1794]:
+                        - img [ref=e1797]
+                        - generic [ref=e1801]:
+                          - generic [ref=e1802]: Gestionar Planificación
+                          - generic [ref=e1803]: Crear y editar planificaciones
+                    - cell "planificacion:write" [ref=e1804]
+                    - cell "Planificación" [ref=e1805]:
+                      - generic [ref=e1806]: Planificación
+                    - cell "planificacion" [ref=e1807]
+                    - cell "write" [ref=e1808]:
+                      - generic [ref=e1809]: write
+                    - cell "Activo" [ref=e1810]:
+                      - generic [ref=e1811]: Activo
+                    - cell "7/1/2026" [ref=e1812]:
+                      - generic [ref=e1813]:
+                        - img [ref=e1814]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1817]:
+                      - generic [ref=e1818]:
+                        - img [ref=e1819]
+                        - text: Solo lectura
+                  - row "Exportar Rep CENARES Exportar reportes CENARES reportes_cenares:export Reportes reportes_cenares export Activo 7/1/2026 Solo lectura" [ref=e1822]:
+                    - cell "Exportar Rep CENARES Exportar reportes CENARES" [ref=e1823]:
+                      - generic [ref=e1824]:
+                        - img [ref=e1827]
+                        - generic [ref=e1831]:
+                          - generic [ref=e1832]: Exportar Rep CENARES
+                          - generic [ref=e1833]: Exportar reportes CENARES
+                    - cell "reportes_cenares:export" [ref=e1834]
+                    - cell "Reportes" [ref=e1835]:
+                      - generic [ref=e1836]: Reportes
+                    - cell "reportes_cenares" [ref=e1837]
+                    - cell "export" [ref=e1838]:
+                      - generic [ref=e1839]: export
+                    - cell "Activo" [ref=e1840]:
+                      - generic [ref=e1841]: Activo
+                    - cell "7/1/2026" [ref=e1842]:
+                      - generic [ref=e1843]:
+                        - img [ref=e1844]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1847]:
+                      - generic [ref=e1848]:
+                        - img [ref=e1849]
+                        - text: Solo lectura
+                  - row "Ver Rep CENARES Ver reportes CENARES reportes_cenares:read Reportes reportes_cenares read Activo 7/1/2026 Solo lectura" [ref=e1852]:
+                    - cell "Ver Rep CENARES Ver reportes CENARES" [ref=e1853]:
+                      - generic [ref=e1854]:
+                        - img [ref=e1857]
+                        - generic [ref=e1861]:
+                          - generic [ref=e1862]: Ver Rep CENARES
+                          - generic [ref=e1863]: Ver reportes CENARES
+                    - cell "reportes_cenares:read" [ref=e1864]
+                    - cell "Reportes" [ref=e1865]:
+                      - generic [ref=e1866]: Reportes
+                    - cell "reportes_cenares" [ref=e1867]
+                    - cell "read" [ref=e1868]:
+                      - generic [ref=e1869]: read
+                    - cell "Activo" [ref=e1870]:
+                      - generic [ref=e1871]: Activo
+                    - cell "7/1/2026" [ref=e1872]:
+                      - generic [ref=e1873]:
+                        - img [ref=e1874]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1877]:
+                      - generic [ref=e1878]:
+                        - img [ref=e1879]
+                        - text: Solo lectura
+                  - row "Ver Config Reportes Ver configuración de reportes reportes_config:read Reportes reportes_config read Activo 7/1/2026 Solo lectura" [ref=e1882]:
+                    - cell "Ver Config Reportes Ver configuración de reportes" [ref=e1883]:
+                      - generic [ref=e1884]:
+                        - img [ref=e1887]
+                        - generic [ref=e1891]:
+                          - generic [ref=e1892]: Ver Config Reportes
+                          - generic [ref=e1893]: Ver configuración de reportes
+                    - cell "reportes_config:read" [ref=e1894]
+                    - cell "Reportes" [ref=e1895]:
+                      - generic [ref=e1896]: Reportes
+                    - cell "reportes_config" [ref=e1897]
+                    - cell "read" [ref=e1898]:
+                      - generic [ref=e1899]: read
+                    - cell "Activo" [ref=e1900]:
+                      - generic [ref=e1901]: Activo
+                    - cell "7/1/2026" [ref=e1902]:
+                      - generic [ref=e1903]:
+                        - img [ref=e1904]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1907]:
+                      - generic [ref=e1908]:
+                        - img [ref=e1909]
+                        - text: Solo lectura
+                  - row "Gestionar Config Reportes Configurar reportes programados reportes_config:write Reportes reportes_config write Activo 7/1/2026 Solo lectura" [ref=e1912]:
+                    - cell "Gestionar Config Reportes Configurar reportes programados" [ref=e1913]:
+                      - generic [ref=e1914]:
+                        - img [ref=e1917]
+                        - generic [ref=e1921]:
+                          - generic [ref=e1922]: Gestionar Config Reportes
+                          - generic [ref=e1923]: Configurar reportes programados
+                    - cell "reportes_config:write" [ref=e1924]
+                    - cell "Reportes" [ref=e1925]:
+                      - generic [ref=e1926]: Reportes
+                    - cell "reportes_config" [ref=e1927]
+                    - cell "write" [ref=e1928]:
+                      - generic [ref=e1929]: write
+                    - cell "Activo" [ref=e1930]:
+                      - generic [ref=e1931]: Activo
+                    - cell "7/1/2026" [ref=e1932]:
+                      - generic [ref=e1933]:
+                        - img [ref=e1934]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1937]:
+                      - generic [ref=e1938]:
+                        - img [ref=e1939]
+                        - text: Solo lectura
+                  - row "Exportar Rep Inventario Exportar reportes de inventario reportes_inventario:export Reportes reportes_inventario export Activo 7/1/2026 Solo lectura" [ref=e1942]:
+                    - cell "Exportar Rep Inventario Exportar reportes de inventario" [ref=e1943]:
+                      - generic [ref=e1944]:
+                        - img [ref=e1947]
+                        - generic [ref=e1951]:
+                          - generic [ref=e1952]: Exportar Rep Inventario
+                          - generic [ref=e1953]: Exportar reportes de inventario
+                    - cell "reportes_inventario:export" [ref=e1954]
+                    - cell "Reportes" [ref=e1955]:
+                      - generic [ref=e1956]: Reportes
+                    - cell "reportes_inventario" [ref=e1957]
+                    - cell "export" [ref=e1958]:
+                      - generic [ref=e1959]: export
+                    - cell "Activo" [ref=e1960]:
+                      - generic [ref=e1961]: Activo
+                    - cell "7/1/2026" [ref=e1962]:
+                      - generic [ref=e1963]:
+                        - img [ref=e1964]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1967]:
+                      - generic [ref=e1968]:
+                        - img [ref=e1969]
+                        - text: Solo lectura
+                  - row "Ver Rep Inventario Ver reportes de inventario reportes_inventario:read Reportes reportes_inventario read Activo 7/1/2026 Solo lectura" [ref=e1972]:
+                    - cell "Ver Rep Inventario Ver reportes de inventario" [ref=e1973]:
+                      - generic [ref=e1974]:
+                        - img [ref=e1977]
+                        - generic [ref=e1981]:
+                          - generic [ref=e1982]: Ver Rep Inventario
+                          - generic [ref=e1983]: Ver reportes de inventario
+                    - cell "reportes_inventario:read" [ref=e1984]
+                    - cell "Reportes" [ref=e1985]:
+                      - generic [ref=e1986]: Reportes
+                    - cell "reportes_inventario" [ref=e1987]
+                    - cell "read" [ref=e1988]:
+                      - generic [ref=e1989]: read
+                    - cell "Activo" [ref=e1990]:
+                      - generic [ref=e1991]: Activo
+                    - cell "7/1/2026" [ref=e1992]:
+                      - generic [ref=e1993]:
+                        - img [ref=e1994]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e1997]:
+                      - generic [ref=e1998]:
+                        - img [ref=e1999]
+                        - text: Solo lectura
+                  - row "Exportar Rep Movimientos Exportar reportes de movimientos reportes_movimientos:export Reportes reportes_movimientos export Activo 7/1/2026 Solo lectura" [ref=e2002]:
+                    - cell "Exportar Rep Movimientos Exportar reportes de movimientos" [ref=e2003]:
+                      - generic [ref=e2004]:
+                        - img [ref=e2007]
+                        - generic [ref=e2011]:
+                          - generic [ref=e2012]: Exportar Rep Movimientos
+                          - generic [ref=e2013]: Exportar reportes de movimientos
+                    - cell "reportes_movimientos:export" [ref=e2014]
+                    - cell "Reportes" [ref=e2015]:
+                      - generic [ref=e2016]: Reportes
+                    - cell "reportes_movimientos" [ref=e2017]
+                    - cell "export" [ref=e2018]:
+                      - generic [ref=e2019]: export
+                    - cell "Activo" [ref=e2020]:
+                      - generic [ref=e2021]: Activo
+                    - cell "7/1/2026" [ref=e2022]:
+                      - generic [ref=e2023]:
+                        - img [ref=e2024]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2027]:
+                      - generic [ref=e2028]:
+                        - img [ref=e2029]
+                        - text: Solo lectura
+                  - row "Ver Rep Movimientos Ver reportes de movimientos reportes_movimientos:read Reportes reportes_movimientos read Activo 7/1/2026 Solo lectura" [ref=e2032]:
+                    - cell "Ver Rep Movimientos Ver reportes de movimientos" [ref=e2033]:
+                      - generic [ref=e2034]:
+                        - img [ref=e2037]
+                        - generic [ref=e2041]:
+                          - generic [ref=e2042]: Ver Rep Movimientos
+                          - generic [ref=e2043]: Ver reportes de movimientos
+                    - cell "reportes_movimientos:read" [ref=e2044]
+                    - cell "Reportes" [ref=e2045]:
+                      - generic [ref=e2046]: Reportes
+                    - cell "reportes_movimientos" [ref=e2047]
+                    - cell "read" [ref=e2048]:
+                      - generic [ref=e2049]: read
+                    - cell "Activo" [ref=e2050]:
+                      - generic [ref=e2051]: Activo
+                    - cell "7/1/2026" [ref=e2052]:
+                      - generic [ref=e2053]:
+                        - img [ref=e2054]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2057]:
+                      - generic [ref=e2058]:
+                        - img [ref=e2059]
+                        - text: Solo lectura
+                  - row "Exportar Rep Planificación Exportar reportes de planificación reportes_planificacion:export Reportes reportes_planificacion export Activo 7/1/2026 Solo lectura" [ref=e2062]:
+                    - cell "Exportar Rep Planificación Exportar reportes de planificación" [ref=e2063]:
+                      - generic [ref=e2064]:
+                        - img [ref=e2067]
+                        - generic [ref=e2071]:
+                          - generic [ref=e2072]: Exportar Rep Planificación
+                          - generic [ref=e2073]: Exportar reportes de planificación
+                    - cell "reportes_planificacion:export" [ref=e2074]
+                    - cell "Reportes" [ref=e2075]:
+                      - generic [ref=e2076]: Reportes
+                    - cell "reportes_planificacion" [ref=e2077]
+                    - cell "export" [ref=e2078]:
+                      - generic [ref=e2079]: export
+                    - cell "Activo" [ref=e2080]:
+                      - generic [ref=e2081]: Activo
+                    - cell "7/1/2026" [ref=e2082]:
+                      - generic [ref=e2083]:
+                        - img [ref=e2084]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2087]:
+                      - generic [ref=e2088]:
+                        - img [ref=e2089]
+                        - text: Solo lectura
+                  - row "Ver Rep Planificación Ver reportes de planificación reportes_planificacion:read Reportes reportes_planificacion read Activo 7/1/2026 Solo lectura" [ref=e2092]:
+                    - cell "Ver Rep Planificación Ver reportes de planificación" [ref=e2093]:
+                      - generic [ref=e2094]:
+                        - img [ref=e2097]
+                        - generic [ref=e2101]:
+                          - generic [ref=e2102]: Ver Rep Planificación
+                          - generic [ref=e2103]: Ver reportes de planificación
+                    - cell "reportes_planificacion:read" [ref=e2104]
+                    - cell "Reportes" [ref=e2105]:
+                      - generic [ref=e2106]: Reportes
+                    - cell "reportes_planificacion" [ref=e2107]
+                    - cell "read" [ref=e2108]:
+                      - generic [ref=e2109]: read
+                    - cell "Activo" [ref=e2110]:
+                      - generic [ref=e2111]: Activo
+                    - cell "7/1/2026" [ref=e2112]:
+                      - generic [ref=e2113]:
+                        - img [ref=e2114]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2117]:
+                      - generic [ref=e2118]:
+                        - img [ref=e2119]
+                        - text: Solo lectura
+                  - row "Asignar Permisos Asignar permisos a roles permisos:assign Usuarios permisos assign Activo 7/1/2026 Solo lectura" [ref=e2122]:
+                    - cell "Asignar Permisos Asignar permisos a roles" [ref=e2123]:
+                      - generic [ref=e2124]:
+                        - img [ref=e2127]
+                        - generic [ref=e2131]:
+                          - generic [ref=e2132]: Asignar Permisos
+                          - generic [ref=e2133]: Asignar permisos a roles
+                    - cell "permisos:assign" [ref=e2134]
+                    - cell "Usuarios" [ref=e2135]:
+                      - generic [ref=e2136]: Usuarios
+                    - cell "permisos" [ref=e2137]
+                    - cell "assign" [ref=e2138]:
+                      - generic [ref=e2139]: assign
+                    - cell "Activo" [ref=e2140]:
+                      - generic [ref=e2141]: Activo
+                    - cell "7/1/2026" [ref=e2142]:
+                      - generic [ref=e2143]:
+                        - img [ref=e2144]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2147]:
+                      - generic [ref=e2148]:
+                        - img [ref=e2149]
+                        - text: Solo lectura
+                  - row "Ver Permisos Ver listado de permisos permisos:read Usuarios permisos read Activo 7/1/2026 Solo lectura" [ref=e2152]:
+                    - cell "Ver Permisos Ver listado de permisos" [ref=e2153]:
+                      - generic [ref=e2154]:
+                        - img [ref=e2157]
+                        - generic [ref=e2161]:
+                          - generic [ref=e2162]: Ver Permisos
+                          - generic [ref=e2163]: Ver listado de permisos
+                    - cell "permisos:read" [ref=e2164]
+                    - cell "Usuarios" [ref=e2165]:
+                      - generic [ref=e2166]: Usuarios
+                    - cell "permisos" [ref=e2167]
+                    - cell "read" [ref=e2168]:
+                      - generic [ref=e2169]: read
+                    - cell "Activo" [ref=e2170]:
+                      - generic [ref=e2171]: Activo
+                    - cell "7/1/2026" [ref=e2172]:
+                      - generic [ref=e2173]:
+                        - img [ref=e2174]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2177]:
+                      - generic [ref=e2178]:
+                        - img [ref=e2179]
+                        - text: Solo lectura
+                  - row "Ver Roles Ver listado de roles roles:read Usuarios roles read Activo 7/1/2026 Solo lectura" [ref=e2182]:
+                    - cell "Ver Roles Ver listado de roles" [ref=e2183]:
+                      - generic [ref=e2184]:
+                        - img [ref=e2187]
+                        - generic [ref=e2191]:
+                          - generic [ref=e2192]: Ver Roles
+                          - generic [ref=e2193]: Ver listado de roles
+                    - cell "roles:read" [ref=e2194]
+                    - cell "Usuarios" [ref=e2195]:
+                      - generic [ref=e2196]: Usuarios
+                    - cell "roles" [ref=e2197]
+                    - cell "read" [ref=e2198]:
+                      - generic [ref=e2199]: read
+                    - cell "Activo" [ref=e2200]:
+                      - generic [ref=e2201]: Activo
+                    - cell "7/1/2026" [ref=e2202]:
+                      - generic [ref=e2203]:
+                        - img [ref=e2204]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2207]:
+                      - generic [ref=e2208]:
+                        - img [ref=e2209]
+                        - text: Solo lectura
+                  - row "Gestionar Roles Crear, editar y eliminar roles roles:write Usuarios roles write Activo 7/1/2026 Solo lectura" [ref=e2212]:
+                    - cell "Gestionar Roles Crear, editar y eliminar roles" [ref=e2213]:
+                      - generic [ref=e2214]:
+                        - img [ref=e2217]
+                        - generic [ref=e2221]:
+                          - generic [ref=e2222]: Gestionar Roles
+                          - generic [ref=e2223]: Crear, editar y eliminar roles
+                    - cell "roles:write" [ref=e2224]
+                    - cell "Usuarios" [ref=e2225]:
+                      - generic [ref=e2226]: Usuarios
+                    - cell "roles" [ref=e2227]
+                    - cell "write" [ref=e2228]:
+                      - generic [ref=e2229]: write
+                    - cell "Activo" [ref=e2230]:
+                      - generic [ref=e2231]: Activo
+                    - cell "7/1/2026" [ref=e2232]:
+                      - generic [ref=e2233]:
+                        - img [ref=e2234]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2237]:
+                      - generic [ref=e2238]:
+                        - img [ref=e2239]
+                        - text: Solo lectura
+                  - row "Eliminar Usuarios Eliminar usuarios usuarios:delete Usuarios usuarios delete Activo 7/1/2026 Solo lectura" [ref=e2242]:
+                    - cell "Eliminar Usuarios Eliminar usuarios" [ref=e2243]:
+                      - generic [ref=e2244]:
+                        - img [ref=e2247]
+                        - generic [ref=e2251]:
+                          - generic [ref=e2252]: Eliminar Usuarios
+                          - generic [ref=e2253]: Eliminar usuarios
+                    - cell "usuarios:delete" [ref=e2254]
+                    - cell "Usuarios" [ref=e2255]:
+                      - generic [ref=e2256]: Usuarios
+                    - cell "usuarios" [ref=e2257]
+                    - cell "delete" [ref=e2258]:
+                      - generic [ref=e2259]: delete
+                    - cell "Activo" [ref=e2260]:
+                      - generic [ref=e2261]: Activo
+                    - cell "7/1/2026" [ref=e2262]:
+                      - generic [ref=e2263]:
+                        - img [ref=e2264]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2267]:
+                      - generic [ref=e2268]:
+                        - img [ref=e2269]
+                        - text: Solo lectura
+                  - row "Cambiar Estado Usuarios Activar/desactivar usuarios usuarios:estado Usuarios usuarios estado Activo 7/1/2026 Solo lectura" [ref=e2272]:
+                    - cell "Cambiar Estado Usuarios Activar/desactivar usuarios" [ref=e2273]:
+                      - generic [ref=e2274]:
+                        - img [ref=e2277]
+                        - generic [ref=e2281]:
+                          - generic [ref=e2282]: Cambiar Estado Usuarios
+                          - generic [ref=e2283]: Activar/desactivar usuarios
+                    - cell "usuarios:estado" [ref=e2284]
+                    - cell "Usuarios" [ref=e2285]:
+                      - generic [ref=e2286]: Usuarios
+                    - cell "usuarios" [ref=e2287]
+                    - cell "estado" [ref=e2288]:
+                      - generic [ref=e2289]: estado
+                    - cell "Activo" [ref=e2290]:
+                      - generic [ref=e2291]: Activo
+                    - cell "7/1/2026" [ref=e2292]:
+                      - generic [ref=e2293]:
+                        - img [ref=e2294]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2297]:
+                      - generic [ref=e2298]:
+                        - img [ref=e2299]
+                        - text: Solo lectura
+                  - row "Cambiar Contraseñas Cambiar contraseñas de usuarios usuarios:password Usuarios usuarios password Activo 7/1/2026 Solo lectura" [ref=e2302]:
+                    - cell "Cambiar Contraseñas Cambiar contraseñas de usuarios" [ref=e2303]:
+                      - generic [ref=e2304]:
+                        - img [ref=e2307]
+                        - generic [ref=e2311]:
+                          - generic [ref=e2312]: Cambiar Contraseñas
+                          - generic [ref=e2313]: Cambiar contraseñas de usuarios
+                    - cell "usuarios:password" [ref=e2314]
+                    - cell "Usuarios" [ref=e2315]:
+                      - generic [ref=e2316]: Usuarios
+                    - cell "usuarios" [ref=e2317]
+                    - cell "password" [ref=e2318]:
+                      - generic [ref=e2319]: password
+                    - cell "Activo" [ref=e2320]:
+                      - generic [ref=e2321]: Activo
+                    - cell "7/1/2026" [ref=e2322]:
+                      - generic [ref=e2323]:
+                        - img [ref=e2324]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2327]:
+                      - generic [ref=e2328]:
+                        - img [ref=e2329]
+                        - text: Solo lectura
+                  - row "Ver Usuarios Ver listado de usuarios usuarios:read Usuarios usuarios read Activo 7/1/2026 Solo lectura" [ref=e2332]:
+                    - cell "Ver Usuarios Ver listado de usuarios" [ref=e2333]:
+                      - generic [ref=e2334]:
+                        - img [ref=e2337]
+                        - generic [ref=e2341]:
+                          - generic [ref=e2342]: Ver Usuarios
+                          - generic [ref=e2343]: Ver listado de usuarios
+                    - cell "usuarios:read" [ref=e2344]
+                    - cell "Usuarios" [ref=e2345]:
+                      - generic [ref=e2346]: Usuarios
+                    - cell "usuarios" [ref=e2347]
+                    - cell "read" [ref=e2348]:
+                      - generic [ref=e2349]: read
+                    - cell "Activo" [ref=e2350]:
+                      - generic [ref=e2351]: Activo
+                    - cell "7/1/2026" [ref=e2352]:
+                      - generic [ref=e2353]:
+                        - img [ref=e2354]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2357]:
+                      - generic [ref=e2358]:
+                        - img [ref=e2359]
+                        - text: Solo lectura
+                  - row "Editar Usuarios Editar usuarios existentes usuarios:update Usuarios usuarios update Activo 7/1/2026 Solo lectura" [ref=e2362]:
+                    - cell "Editar Usuarios Editar usuarios existentes" [ref=e2363]:
+                      - generic [ref=e2364]:
+                        - img [ref=e2367]
+                        - generic [ref=e2371]:
+                          - generic [ref=e2372]: Editar Usuarios
+                          - generic [ref=e2373]: Editar usuarios existentes
+                    - cell "usuarios:update" [ref=e2374]
+                    - cell "Usuarios" [ref=e2375]:
+                      - generic [ref=e2376]: Usuarios
+                    - cell "usuarios" [ref=e2377]
+                    - cell "update" [ref=e2378]:
+                      - generic [ref=e2379]: update
+                    - cell "Activo" [ref=e2380]:
+                      - generic [ref=e2381]: Activo
+                    - cell "7/1/2026" [ref=e2382]:
+                      - generic [ref=e2383]:
+                        - img [ref=e2384]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2387]:
+                      - generic [ref=e2388]:
+                        - img [ref=e2389]
+                        - text: Solo lectura
+                  - row "Crear Usuarios Crear nuevos usuarios usuarios:write Usuarios usuarios write Activo 7/1/2026 Solo lectura" [ref=e2392]:
+                    - cell "Crear Usuarios Crear nuevos usuarios" [ref=e2393]:
+                      - generic [ref=e2394]:
+                        - img [ref=e2397]
+                        - generic [ref=e2401]:
+                          - generic [ref=e2402]: Crear Usuarios
+                          - generic [ref=e2403]: Crear nuevos usuarios
+                    - cell "usuarios:write" [ref=e2404]
+                    - cell "Usuarios" [ref=e2405]:
+                      - generic [ref=e2406]: Usuarios
+                    - cell "usuarios" [ref=e2407]
+                    - cell "write" [ref=e2408]:
+                      - generic [ref=e2409]: write
+                    - cell "Activo" [ref=e2410]:
+                      - generic [ref=e2411]: Activo
+                    - cell "7/1/2026" [ref=e2412]:
+                      - generic [ref=e2413]:
+                        - img [ref=e2414]
+                        - text: 7/1/2026
+                    - cell "Solo lectura" [ref=e2417]:
+                      - generic [ref=e2418]:
+                        - img [ref=e2419]
+                        - text: Solo lectura
+  - region "Notificaciones":
+    - alert [ref=e2423]:
+      - img [ref=e2424]
+      - paragraph [ref=e2428]: Inicio de sesión exitoso
+      - button "Cerrar" [ref=e2429] [cursor=pointer]:
+        - img [ref=e2430]

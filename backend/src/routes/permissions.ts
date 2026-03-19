@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { PermissionController } from '@/controllers/PermissionController';
 import { authenticate } from '@/middleware/auth';
-import { validatePermissions } from '@/middleware/permissions';
+import { requirePermissions, validatePermissions } from '@/middleware/permissions';
 
 const router = Router();
 
@@ -10,42 +10,42 @@ const router = Router();
  * @desc Obtener estadísticas de permisos
  * @access Private (Administradores y Coordinadores)
  */
-router.get('/stats', authenticate, validatePermissions(['admin', 'supervisor']), PermissionController.getStats);
+router.get('/stats', authenticate, requirePermissions(['permisos:read']), validatePermissions(['admin']), PermissionController.getStats);
 
 /**
  * @route GET /api/permissions/categorias
  * @desc Obtener categorías de permisos
  * @access Private (Administradores y Coordinadores)
  */
-router.get('/categorias', authenticate, validatePermissions(['admin', 'supervisor']), PermissionController.getCategorias);
+router.get('/categorias', authenticate, requirePermissions(['permisos:read']), validatePermissions(['admin']), PermissionController.getCategorias);
 
 /**
  * @route GET /api/permissions/recursos
  * @desc Obtener recursos de permisos
  * @access Private (Administradores y Coordinadores)
  */
-router.get('/recursos', authenticate, validatePermissions(['admin', 'supervisor']), PermissionController.getRecursos);
+router.get('/recursos', authenticate, requirePermissions(['permisos:read']), validatePermissions(['admin']), PermissionController.getRecursos);
 
 /**
  * @route GET /api/permissions/acciones
  * @desc Obtener acciones de permisos
  * @access Private (Administradores y Coordinadores)
  */
-router.get('/acciones', authenticate, validatePermissions(['admin', 'supervisor']), PermissionController.getAcciones);
+router.get('/acciones', authenticate, requirePermissions(['permisos:read']), validatePermissions(['admin']), PermissionController.getAcciones);
 
 /**
  * @route GET /api/permissions/grouped
  * @desc Obtener permisos agrupados por categoría
  * @access Private (Administradores y Coordinadores)
  */
-router.get('/grouped', authenticate, validatePermissions(['admin', 'supervisor']), PermissionController.getGroupedByCategory);
+router.get('/grouped', authenticate, requirePermissions(['permisos:read']), validatePermissions(['admin']), PermissionController.getGroupedByCategory);
 
 /**
  * @route GET /api/permissions/codigo/:codigo
  * @desc Obtener un permiso por código
  * @access Private (Administradores y Coordinadores)
  */
-router.get('/codigo/:codigo', authenticate, validatePermissions(['admin', 'supervisor']), PermissionController.getByCodigo);
+router.get('/codigo/:codigo', authenticate, requirePermissions(['permisos:read']), validatePermissions(['admin']), PermissionController.getByCodigo);
 
 /**
  * @route GET /api/permissions
@@ -59,7 +59,7 @@ router.get('/codigo/:codigo', authenticate, validatePermissions(['admin', 'super
  * @query {number} [page=1] - Número de página
  * @query {number} [limit=100] - Límite de resultados por página
  */
-router.get('/', authenticate, validatePermissions(['admin', 'supervisor']), PermissionController.getAll);
+router.get('/', authenticate, requirePermissions(['permisos:read']), validatePermissions(['admin']), PermissionController.getAll);
 
 /**
  * @route POST /api/permissions
@@ -73,14 +73,14 @@ router.get('/', authenticate, validatePermissions(['admin', 'supervisor']), Perm
  * @body {string} [descripcion] - Descripción del permiso
  * @body {string} [estado=activo] - Estado del permiso
  */
-router.post('/', authenticate, validatePermissions(['admin']), PermissionController.create);
+router.post('/', authenticate, requirePermissions(['permisos:assign']), validatePermissions(['admin']), PermissionController.create);
 
 /**
  * @route GET /api/permissions/:id
  * @desc Obtener un permiso por ID
  * @access Private (Administradores y Coordinadores)
  */
-router.get('/:id', authenticate, validatePermissions(['admin', 'supervisor']), PermissionController.getById);
+router.get('/:id', authenticate, requirePermissions(['permisos:read']), validatePermissions(['admin']), PermissionController.getById);
 
 /**
  * @route PUT /api/permissions/:id
@@ -94,14 +94,14 @@ router.get('/:id', authenticate, validatePermissions(['admin', 'supervisor']), P
  * @body {string} [descripcion] - Descripción del permiso
  * @body {string} [estado] - Estado del permiso
  */
-router.put('/:id', authenticate, validatePermissions(['admin']), PermissionController.update);
+router.put('/:id', authenticate, requirePermissions(['permisos:assign']), validatePermissions(['admin']), PermissionController.update);
 
 /**
  * @route DELETE /api/permissions/:id
  * @desc Eliminar permiso
  * @access Private (Solo Administradores)
  */
-router.delete('/:id', authenticate, validatePermissions(['admin']), PermissionController.delete);
+router.delete('/:id', authenticate, requirePermissions(['permisos:assign']), validatePermissions(['admin']), PermissionController.delete);
 
 /**
  * @route PATCH /api/permissions/:id/estado
@@ -109,6 +109,6 @@ router.delete('/:id', authenticate, validatePermissions(['admin']), PermissionCo
  * @access Private (Solo Administradores)
  * @body {string} estado - Nuevo estado (activo, inactivo)
  */
-router.patch('/:id/estado', authenticate, validatePermissions(['admin']), PermissionController.changeEstado);
+router.patch('/:id/estado', authenticate, requirePermissions(['permisos:assign']), validatePermissions(['admin']), PermissionController.changeEstado);
 
 export default router;

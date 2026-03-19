@@ -3,8 +3,9 @@ import { MovimientosService, MovimientosFilters, CreateMovimientoDto, UpdateMovi
 import { MovimientosExportService, MovimientosExportConfig } from '@/services/MovimientosExportService';
 import { ResponseUtil } from '@/utils/response';
 import { validateUUID } from '@/utils/validation';
-import { prisma } from '@/config/database';
 import { successResponse, errorResponse } from '@/utils/response';
+import { AuthenticatedRequest } from '@/types';
+import { ensureEstablecimientoInScope, resolveScopedCentroAcopioId, resolveScopedCentroAcopioIds } from '@/middleware/accessControl';
 
 /**
  * Controlador para gestión de movimientos de vacunas
@@ -14,7 +15,7 @@ export class MovimientosController {
    * Obtener todos los movimientos con filtros opcionales
    * GET /api/movimientos
    */
-  static async getAll(req: Request, res: Response): Promise<void> {
+  static async getAll(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const {
         establecimientoId,
@@ -71,12 +72,24 @@ export class MovimientosController {
         return;
       }
 
+      let scopedCentroAcopioId: string | undefined;
+      let scopedCentroAcopioIds: string[] | undefined;
+      try {
+        scopedCentroAcopioId = resolveScopedCentroAcopioId(req, centroAcopioId as string | undefined);
+        scopedCentroAcopioIds = resolveScopedCentroAcopioIds(req, centroAcopioId as string | undefined);
+        await ensureEstablecimientoInScope(req, establecimientoId as string | undefined);
+      } catch (scopeError) {
+        ResponseUtil.forbidden(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para acceder a estos datos');
+        return;
+      }
+
       const filters: MovimientosFilters = {
         establecimientoId: establecimientoId as string,
         vacunaId: vacunaId as string,
         mes: mesNum,
         anio: anioNum || new Date().getFullYear(), // Valor por defecto
-        centroAcopioId: centroAcopioId as string,
+        centroAcopioId: scopedCentroAcopioId,
+        centroAcopioIds: scopedCentroAcopioIds,
         search: search as string,
         page: pageNum,
         limit: limitNum
@@ -100,7 +113,7 @@ export class MovimientosController {
    * Obtener movimiento por ID
    * GET /api/movimientos/:id
    */
-  static async getById(req: Request, res: Response): Promise<void> {
+  static async getById(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -116,6 +129,13 @@ export class MovimientosController {
         return;
       }
 
+      try {
+        await ensureEstablecimientoInScope(req, result.data?.establecimiento?.id);
+      } catch (scopeError) {
+        ResponseUtil.forbidden(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para acceder a este movimiento');
+        return;
+      }
+
       ResponseUtil.success(res, result.data, 'Movimiento obtenido exitosamente');
     } catch (error) {
       console.error('Error en MovimientosController.getById:', error);
@@ -127,7 +147,7 @@ export class MovimientosController {
    * Crear nuevo movimiento
    * POST /api/movimientos
    */
-  static async create(req: Request, res: Response): Promise<void> {
+  static async create(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const data: CreateMovimientoDto = req.body;
 
@@ -142,10 +162,7 @@ export class MovimientosController {
         return;
       }
 
-      if (!data.usuarioId || !validateUUID(data.usuarioId)) {
-        ResponseUtil.error(res, 'ID de usuario inválido', 400);
-        return;
-      }
+      await ensureEstablecimientoInScope(req, data.establecimientoId);
 
       if (!data.mes || data.mes < 1 || data.mes > 12) {
         ResponseUtil.error(res, 'El mes debe estar entre 1 y 12', 400);
@@ -157,7 +174,10 @@ export class MovimientosController {
         return;
       }
 
-      const result = await MovimientosService.create(data);
+      const result = await MovimientosService.create({
+        ...data,
+        usuarioId: req.user?.id || data.usuarioId,
+      });
 
       if (!result.success) {
         ResponseUtil.error(res, result.error || 'Error al crear movimiento', 400);
@@ -175,7 +195,7 @@ export class MovimientosController {
    * Actualizar movimiento existente
    * PUT /api/movimientos/:id
    */
-  static async update(req: Request, res: Response): Promise<void> {
+  static async update(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const data: UpdateMovimientoDto = req.body;
@@ -185,7 +205,10 @@ export class MovimientosController {
         return;
       }
 
-      const result = await MovimientosService.update(id, data);
+      const result = await MovimientosService.update(id, {
+        ...data,
+        usuarioId: req.user?.id || data.usuarioId,
+      });
 
       if (!result.success) {
         ResponseUtil.error(res, result.error || 'Error al actualizar movimiento', result.error === 'Movimiento no encontrado' ? 404 : 400);
@@ -230,10 +253,10 @@ export class MovimientosController {
    * FUNCIONALIDAD CLAVE: Generar movimientos desde planificación anual
    * POST /api/movimientos/generar-desde-planificacion/:planificacionId
    */
-  static async generarDesdeplanificacion(req: Request, res: Response): Promise<void> {
+  static async generarDesdeplanificacion(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { planificacionId } = req.params;
-      const { usuarioId } = req.body;
+      const usuarioId = req.user?.id || req.body.usuarioId;
 
       if (!validateUUID(planificacionId)) {
         ResponseUtil.error(res, 'ID de planificación inválido', 400);
@@ -292,7 +315,7 @@ export class MovimientosController {
    * FUNCIONALIDAD CLAVE: Crear entrega adicional
    * POST /api/movimientos/:movimientoId/entregas-adicionales
    */
-  static async createEntregaAdicional(req: Request, res: Response): Promise<void> {
+  static async createEntregaAdicional(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { movimientoId } = req.params;
       const data: CreateEntregaAdicionalDto = {
@@ -305,20 +328,10 @@ export class MovimientosController {
         return;
       }
 
-      // Manejar usuario temporal hasta implementar autenticación completa
-      let usuarioId = data.usuarioId;
-      if (!data.usuarioId || data.usuarioId === 'temp-user-id' || !validateUUID(data.usuarioId)) {
-        // Buscar un usuario administrador para usar como temporal
-        const usuarioAdmin = await prisma.usuario.findFirst({
-          where: { rol: 'administrador', estado: 'activo' }
-        });
-
-        if (!usuarioAdmin) {
-          ResponseUtil.error(res, 'No se encontró usuario válido para la operación', 400);
-          return;
-        }
-
-        usuarioId = usuarioAdmin.id;
+      const usuarioId = req.user?.id || data.usuarioId;
+      if (!usuarioId || !validateUUID(usuarioId)) {
+        ResponseUtil.error(res, 'ID de usuario inválido', 400);
+        return;
       }
 
       if (!data.numeroEntrega || data.numeroEntrega < 1) {
@@ -356,7 +369,7 @@ export class MovimientosController {
    * Actualizar entrega adicional
    * PUT /api/movimientos/entregas-adicionales/:id
    */
-  static async updateEntregaAdicional(req: Request, res: Response): Promise<void> {
+  static async updateEntregaAdicional(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { cantidad, motivo, skipRedistribucion } = req.body;
@@ -371,7 +384,7 @@ export class MovimientosController {
         return;
       }
 
-      const result = await MovimientosService.updateEntregaAdicional(id, cantidad, motivo, skipRedistribucion);
+      const result = await MovimientosService.updateEntregaAdicional(id, cantidad, motivo, req.user?.id, skipRedistribucion);
 
       if (!result.success) {
         ResponseUtil.error(res, result.error || 'Error al actualizar entrega adicional', result.error === 'Entrega adicional no encontrada' ? 404 : 400);
@@ -646,8 +659,6 @@ export class MovimientosController {
    */
   static async debugPlantilla(req: Request, res: Response): Promise<void> {
     try {
-      const { anio } = req.params;
-
       if (!req.file) {
         errorResponse(res, 'No se ha subido ningún archivo', 400);
         return;

@@ -9,6 +9,7 @@ import {
   Loader2,
   Users,
   Building2,
+  Clock3,
 } from 'lucide-react';
 import { Usuario, Role, CentroAcopio } from '../../../types';
 import { COMPONENT_STYLES, ROLE_COLORS } from '../constants';
@@ -58,7 +59,8 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
 
   const getRolColor = (rol: string) => {
     const roleData = roles.find(r => r.id === rol || r.codigo === rol);
-    if (roleData && (roleData as any).color) return (roleData as any).color;
+    const roleWithColor = roleData as (Role & { color?: string }) | undefined;
+    if (roleWithColor?.color) return roleWithColor.color;
     return ROLE_COLORS[rol] || ROLE_COLORS.default;
   };
 
@@ -66,6 +68,24 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
     if (!centroAcopioId) return '-';
     const centroAcopio = centrosAcopio.find(ca => ca.id === centroAcopioId);
     return centroAcopio?.nombre || '-';
+  };
+
+  const getCentrosAsignados = (usuario: Usuario) => {
+    if (usuario.centrosAcopioAsignados?.length) {
+      return usuario.centrosAcopioAsignados.map((item) => item.centroAcopio.nombre);
+    }
+
+    if (usuario.centroAcopioIds?.length) {
+      return usuario.centroAcopioIds
+        .map((id) => getCentroAcopioNombre(id))
+        .filter((nombre) => nombre !== '-');
+    }
+
+    if (usuario.centroAcopioId) {
+      return [getCentroAcopioNombre(usuario.centroAcopioId)];
+    }
+
+    return [];
   };
 
   return (
@@ -84,6 +104,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
               </th>
               <th className={COMPONENT_STYLES.table.headerCell}>Usuario</th>
               <th className={COMPONENT_STYLES.table.headerCell}>Rol</th>
+              <th className={COMPONENT_STYLES.table.headerCell}>Último Acceso</th>
               <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Estado</th>
               <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Acciones</th>
             </tr>
@@ -91,7 +112,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
           <tbody className="bg-white divide-y divide-gray-100">
             {isLoading ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center">
+                <td colSpan={6} className="px-6 py-12 text-center">
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-8 w-8 animate-spin text-teal-600 mr-3" />
                     <span className="text-gray-500">Cargando usuarios...</span>
@@ -100,7 +121,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
               </tr>
             ) : usuarios.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center">
+                <td colSpan={6} className="px-6 py-12 text-center">
                   <Users className={COMPONENT_STYLES.table.emptyIcon} />
                   <p className="text-lg font-medium text-gray-900 mb-1">No se encontraron usuarios</p>
                   <p className="text-sm text-gray-500">Intenta ajustar los filtros o crear un nuevo usuario</p>
@@ -143,14 +164,36 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                       <span className={`${COMPONENT_STYLES.badge.role} ${getRolColor(usuario.rol)}`}>
                         {getRolLabel(usuario.rol)}
                       </span>
-                      {usuario.centroAcopioId && (
+                      {getCentrosAsignados(usuario).length > 0 ? (
                         <div className="flex items-center text-xs text-gray-500">
                           <Building2 className="h-3 w-3 mr-1" />
-                          <span className="truncate max-w-[150px]">
-                            {getCentroAcopioNombre(usuario.centroAcopioId)}
+                          <span className="truncate max-w-[180px]">
+                            {getCentrosAsignados(usuario)[0]}
+                            {getCentrosAsignados(usuario).length > 1 ? ` +${getCentrosAsignados(usuario).length - 1}` : ''}
                           </span>
                         </div>
-                      )}
+                      ) : null}
+                    </div>
+                  </td>
+                  <td className={COMPONENT_STYLES.table.cell}>
+                    <div className="space-y-1 text-sm text-gray-600">
+                      <div className="flex items-center gap-2">
+                        <Clock3 className="h-4 w-4 text-gray-400" />
+                        <span>
+                          {usuario.ultimoAcceso
+                            ? new Date(usuario.ultimoAcceso).toLocaleString('es-PE', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })
+                            : 'Sin registro'}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        Creado: {new Date(usuario.createdAt).toLocaleDateString('es-PE')}
+                      </div>
                     </div>
                   </td>
                   <td className={`${COMPONENT_STYLES.table.cell} text-center`}>

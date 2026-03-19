@@ -5,6 +5,7 @@ import { MovimientoCalculado } from '../../../types';
 import { getEstiloEstablecimiento } from '../../../utils/centroAcopioUtils';
 
 interface MovimientosTablaProps {
+  readOnly?: boolean;
   datosTabla: Array<MovimientoCalculado & { tieneMovimiento: boolean }>;
   totalesGenerales: {
     saldoAnterior: number;
@@ -43,6 +44,7 @@ interface MovimientosTablaProps {
 }
 
 export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
+  readOnly = false,
   datosTabla,
   totalesGenerales,
   selectedMes,
@@ -70,7 +72,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
   selectedRowId,
   onRowSelect,
 }) => {
-  const isDisabled = isCreating || isUpdating || isAutoSaving;
+  const isDisabled = readOnly || isCreating || isUpdating || isAutoSaving;
 
   const renderEditableInput = (
     movimiento: MovimientoCalculado & { tieneMovimiento: boolean },
@@ -88,22 +90,30 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
 
     return (
       <div className="relative inline-block" onClick={handleInteraction}>
-        <input
-          type="number"
-          min="0"
-          value={currentValue}
-          onChange={(e) => onTempValueChange(movimiento.establecimientoId, campo, parseInt(e.target.value) || 0)}
-          onBlur={() => onFieldBlur(movimiento.establecimientoId, campo)}
-          className={`w-20 px-2 py-1.5 text-center text-sm font-semibold border-2 rounded-lg 
-                     focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed 
-                     transition-all duration-200 tabular-nums ${
-            isPending ? styles.pending : `${styles.normal} ${styles.focus}`
-          }`}
-          disabled={isDisabled}
-          aria-label={`${campo} para ${movimiento.establecimiento.nombre}`}
-        />
-        {isPending && (
-          <div className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-amber-400 rounded-full animate-pulse border border-white" />
+        {readOnly ? (
+          <span className="inline-flex min-w-[5rem] justify-center rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm font-semibold text-slate-700 tabular-nums">
+            {currentValue.toLocaleString()}
+          </span>
+        ) : (
+          <>
+            <input
+              type="number"
+              min="0"
+              value={currentValue}
+              onChange={(e) => onTempValueChange(movimiento.establecimientoId, campo, parseInt(e.target.value) || 0)}
+              onBlur={() => onFieldBlur(movimiento.establecimientoId, campo)}
+              className={`w-20 px-2 py-1.5 text-center text-sm font-semibold border-2 rounded-lg 
+                       focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed 
+                       transition-all duration-200 tabular-nums ${
+                isPending ? styles.pending : `${styles.normal} ${styles.focus}`
+              }`}
+              disabled={isDisabled}
+              aria-label={`${campo} para ${movimiento.establecimiento.nombre}`}
+            />
+            {isPending && (
+              <div className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-amber-400 rounded-full animate-pulse border border-white" />
+            )}
+          </>
         )}
       </div>
     );
@@ -125,6 +135,23 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
       e.stopPropagation();
       onRowSelect(movimiento.establecimientoId);
     };
+
+    if (readOnly) {
+      const totalEntregaAdicional = movimiento.entregasAdicionales?.reduce((sum, entrega) => sum + entrega.cantidad, 0) || 0;
+
+      return (
+        <div className="flex items-center justify-center gap-1.5 flex-wrap" onClick={handleInteraction}>
+          <span className="inline-flex min-w-[5rem] justify-center rounded-lg border border-teal-200 bg-teal-50 px-2 py-1.5 text-sm font-semibold text-teal-700 tabular-nums">
+            {currentValue.toLocaleString()}
+          </span>
+          {totalEntregaAdicional > 0 ? (
+            <span className="inline-flex rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">
+              Adicionales: {totalEntregaAdicional.toLocaleString()}
+            </span>
+          ) : null}
+        </div>
+      );
+    }
 
     return (
       <div className="flex items-center justify-center gap-1.5 flex-wrap" onClick={handleInteraction}>
@@ -492,7 +519,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                         >
                           <Eye className="h-4 w-4" />
                         </button>
-                        {movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0 && (
+                        {!readOnly && movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0 && (
                           <button
                             onClick={() => onGestionarEntregas(movimiento)}
                             className="p-2 rounded-lg text-amber-600 bg-amber-50 hover:bg-amber-100 focus:ring-amber-500 transition-all"

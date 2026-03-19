@@ -45,6 +45,7 @@ export class PlanificacionService {
         anio,
         estado,
         centroAcopioId,
+        centroAcopioIds,
         search,
         page = 1,
         limit = 50
@@ -70,7 +71,11 @@ export class PlanificacionService {
       }
 
       // Filtro por centro de acopio
-      if (centroAcopioId) {
+      if (centroAcopioIds && centroAcopioIds.length > 0) {
+        where.establecimiento = {
+          centroAcopioId: { in: centroAcopioIds }
+        };
+      } else if (centroAcopioId) {
         where.establecimiento = {
           centroAcopioId: centroAcopioId
         };
@@ -469,7 +474,12 @@ export class PlanificacionService {
   /**
    * Obtener planificaciones por vacuna y año
    */
-  static async getByVacunaAndYear(vacunaId: string, anio: number, centroAcopioId?: string): Promise<ServiceResult<PlanificacionConRelaciones[]>> {
+  static async getByVacunaAndYear(
+    vacunaId: string,
+    anio: number,
+    centroAcopioId?: string,
+    centroAcopioIds?: string[],
+  ): Promise<ServiceResult<PlanificacionConRelaciones[]>> {
     try {
       const where: any = {
         vacunaId,
@@ -477,7 +487,11 @@ export class PlanificacionService {
       };
 
       // Filtrar por centro de acopio si se especifica
-      if (centroAcopioId && centroAcopioId !== 'todos') {
+      if (centroAcopioIds && centroAcopioIds.length > 0) {
+        where.establecimiento = {
+          centroAcopioId: { in: centroAcopioIds }
+        };
+      } else if (centroAcopioId && centroAcopioId !== 'todos') {
         where.establecimiento = {
           centroAcopioId: centroAcopioId
         };
@@ -1730,7 +1744,8 @@ export class PlanificacionService {
   static async importarDesdeExcelVacuna(
     vacunaId: string,
     anio: number,
-    buffer: Buffer
+    buffer: Buffer,
+    usuarioId?: string
   ): Promise<ServiceResult<{ creadas: number; actualizadas: number; errores: string[] }>> {
     try {
       // Validar parámetros
@@ -1844,12 +1859,6 @@ export class PlanificacionService {
         };
       }
 
-      // Obtener usuarioId del sistema para sincronización automática con movimientos
-      const usuarioAdmin = await prisma.usuario.findFirst({
-        where: { rol: 'administrador', estado: 'activo' }
-      });
-      const usuarioId = usuarioAdmin?.id;
-
       // Importar usando el método existente (con usuarioId para sincronización automática)
       const importResult = await this.importarPlanificaciones({
         vacunaId,
@@ -1884,7 +1893,8 @@ export class PlanificacionService {
    */
   static async importarDesdeExcelMasivo(
     anio: number,
-    buffer: Buffer
+    buffer: Buffer,
+    usuarioId?: string
   ): Promise<ServiceResult<{
     totalCreadas: number;
     totalActualizadas: number;
@@ -1915,12 +1925,6 @@ export class PlanificacionService {
       let totalActualizadas = 0;
       const erroresPorVacuna: { vacuna: string; errores: string[] }[] = [];
       let vacunasProcesadas = 0;
-
-      // Obtener usuarioId del sistema para sincronización automática con movimientos
-      const usuarioAdmin = await prisma.usuario.findFirst({
-        where: { rol: 'administrador', estado: 'activo' }
-      });
-      const usuarioId = usuarioAdmin?.id;
 
       // Obtener todas las vacunas para mapear por nombre
       const vacunas = await prisma.vacuna.findMany({

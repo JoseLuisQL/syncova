@@ -19,7 +19,7 @@ export class UsuarioController {
         estado = 'todos',
         search,
         rol = 'todos',
-        establecimientoId,
+        centroAcopioId,
         page = '1',
         limit = '50'
       } = req.query;
@@ -48,8 +48,8 @@ export class UsuarioController {
         return;
       }
 
-      if (establecimientoId && !validateUUID(establecimientoId as string)) {
-        errorResponse(res, 'ID de establecimiento inválido', 400);
+      if (centroAcopioId && !validateUUID(centroAcopioId as string)) {
+        errorResponse(res, 'ID de centro de acopio inválido', 400);
         return;
       }
 
@@ -57,7 +57,7 @@ export class UsuarioController {
         estado: estado as EstadoGeneral | 'todos',
         search: search as string,
         rol: rol as RolUsuario | 'todos',
-        establecimientoId: establecimientoId as string,
+        centroAcopioId: centroAcopioId as string,
         page: pageNum,
         limit: limitNum
       });
@@ -223,6 +223,11 @@ export class UsuarioController {
         return;
       }
 
+      if (data.centroAcopioIds && (!Array.isArray(data.centroAcopioIds) || data.centroAcopioIds.some((id) => !validateUUID(id)))) {
+        errorResponse(res, 'Uno o más IDs de centros de acopio son inválidos', 400);
+        return;
+      }
+
       const result = await UsuarioService.create(data);
 
       if (!result.success) {
@@ -278,6 +283,11 @@ export class UsuarioController {
       // Validar centro de acopio si se proporciona
       if (data.centroAcopioId && !validateUUID(data.centroAcopioId)) {
         errorResponse(res, 'ID de centro de acopio inválido', 400);
+        return;
+      }
+
+      if (data.centroAcopioIds && (!Array.isArray(data.centroAcopioIds) || data.centroAcopioIds.some((centroId) => !validateUUID(centroId)))) {
+        errorResponse(res, 'Uno o más IDs de centros de acopio son inválidos', 400);
         return;
       }
 

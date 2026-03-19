@@ -741,6 +741,7 @@ export interface Usuario {
   usuario: string;
   rol: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
   centroAcopioId?: string;
+  centroAcopioIds?: string[];
   estado: 'activo' | 'inactivo';
   ultimoAcceso?: Date;
   createdAt: Date;
@@ -751,6 +752,14 @@ export interface Usuario {
     nombre: string;
     codigo: string;
   };
+  centrosAcopioAsignados?: Array<{
+    centroAcopioId: string;
+    centroAcopio: {
+      id: string;
+      nombre: string;
+      codigo: string;
+    };
+  }>;
 }
 
 // DTOs para el backend - Usuarios
@@ -762,6 +771,7 @@ export interface CreateUsuarioDto {
   password: string;
   rol: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
   centroAcopioId?: string;
+  centroAcopioIds?: string[];
 }
 
 export interface UpdateUsuarioDto {
@@ -771,6 +781,7 @@ export interface UpdateUsuarioDto {
   usuario?: string;
   rol?: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
   centroAcopioId?: string;
+  centroAcopioIds?: string[];
   estado?: 'activo' | 'inactivo';
 }
 
@@ -807,6 +818,8 @@ export interface AuthUser {
   rol: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador';
   roleId?: string;
   establecimientoId?: string;
+  centroAcopioId?: string;
+  centroAcopioIds?: string[];
   estado: 'activo' | 'inactivo';
   ultimoAcceso?: Date;
   createdAt: Date;
@@ -816,6 +829,19 @@ export interface AuthUser {
     nombre: string;
     tipo: string;
   };
+  centroAcopio?: {
+    id: string;
+    nombre: string;
+    codigo?: string;
+  };
+  centrosAcopioAsignados?: Array<{
+    centroAcopioId: string;
+    centroAcopio: {
+      id: string;
+      nombre: string;
+      codigo: string;
+    };
+  }>;
   permissions?: string[];
 }
 
@@ -845,6 +871,7 @@ export interface UsuarioFilters {
   estado?: 'activo' | 'inactivo' | 'todos';
   search?: string;
   rol?: 'administrador' | 'coordinador' | 'responsable_acopio' | 'operador' | 'todos';
+  centroAcopioId?: string;
   establecimientoId?: string;
   page?: number;
   limit?: number;

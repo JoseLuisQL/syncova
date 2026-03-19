@@ -146,13 +146,7 @@ export class PlanificacionService {
     try {
       logger.debug('Actualizando planificación:', { id, data });
 
-      // Agregar usuarioId para sincronización automática
-      const dataWithUser = {
-        ...data,
-        usuarioId: 'temp-user-id' // Usuario temporal hasta implementar autenticación completa
-      };
-
-      const response = await apiClient.put<ApiResponse<PlanificacionAnual>>(`${this.BASE_PATH}/${id}`, dataWithUser);
+      const response = await apiClient.put<ApiResponse<PlanificacionAnual>>(`${this.BASE_PATH}/${id}`, data);
 
       if (!response.data.success || !response.data.data) {
         throw new Error(response.data.error || 'Error al actualizar planificación');
@@ -452,9 +446,7 @@ export class PlanificacionService {
         movimientosActualizados: number;
         movimientosCreados: number;
         errores: string[];
-      }>>(`${this.BASE_PATH}/${planificacionId}/sincronizar-movimientos`, {
-        usuarioId: 'temp-user-id' // Usuario temporal hasta implementar autenticación completa
-      });
+      }>>(`${this.BASE_PATH}/${planificacionId}/sincronizar-movimientos`);
 
       if (!response.data.success || !response.data.data) {
         throw new Error(response.data.error || 'Error al sincronizar con movimientos');

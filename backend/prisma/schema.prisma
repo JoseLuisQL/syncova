@@ -143,7 +143,8 @@ model CentroAcopio {
   // Relaciones
   microred        Microred?         @relation(fields: [microredId], references: [id])
   establecimientos Establecimiento[]
-  usuarios        Usuario[]         @relation("UsuarioCentroAcopio")
+  usuarios        Usuario[]         @relation("UsuarioCentroAcopioPrincipal")
+  usuariosAsignados UsuarioCentroAcopio[]
   valesEntrega    ValeEntrega[]
   configuracionesJeringaVacuna ConfiguracionJeringaVacunaCentro[]
 
@@ -281,7 +282,8 @@ model Usuario {
 
   // Relaciones
   establecimiento   Establecimiento? @relation(fields: [establecimientoId], references: [id])
-  centroAcopio      CentroAcopio?    @relation("UsuarioCentroAcopio", fields: [centroAcopioId], references: [id])
+  centroAcopio      CentroAcopio?    @relation("UsuarioCentroAcopioPrincipal", fields: [centroAcopioId], references: [id])
+  centrosAcopioAsignados UsuarioCentroAcopio[]
   role              Role?            @relation("UsuarioRole", fields: [roleId], references: [id])
   movimientos       MovimientoVacuna[]
   entregas          EntregaAdicional[]
@@ -292,6 +294,21 @@ model Usuario {
   @@index([roleId], name: "idx_usuario_role")
   @@index([centroAcopioId], name: "idx_usuario_centro_acopio")
   @@map("usuarios")
+}
+
+model UsuarioCentroAcopio {
+  id              String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  usuarioId       String       @map("usuario_id") @db.Uuid
+  centroAcopioId  String       @map("centro_acopio_id") @db.Uuid
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  usuario         Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  centroAcopio    CentroAcopio @relation(fields: [centroAcopioId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, centroAcopioId], name: "uk_usuario_centro_acopio")
+  @@index([usuarioId], name: "idx_usuario_centro_usuario")
+  @@index([centroAcopioId], name: "idx_usuario_centro_centro")
+  @@map("usuarios_centros_acopio")
 }
 
 model PlanificacionAnual {

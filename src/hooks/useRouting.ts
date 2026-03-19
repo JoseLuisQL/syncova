@@ -211,6 +211,10 @@ const getSegmentLabel = (segment: string, _index: number): string => {
     'usuarios': 'Usuarios',
     'configuracion': 'Configuración',
     'debug': 'Debug',
+
+    // Sub-módulos de Usuarios
+    'roles': 'Roles',
+    'permisos': 'Permisos',
     
     // Sub-módulos de Establecimientos
     'redes': 'Redes',
@@ -303,7 +307,12 @@ export const ROUTES = {
     REPORTES: '/alertas/reportes',
     CONFIGURACION: '/alertas/configuracion'
   },
-  USUARIOS: '/usuarios',
+  USUARIOS: {
+    ROOT: '/usuarios',
+    USUARIOS: '/usuarios/usuarios',
+    ROLES: '/usuarios/roles',
+    PERMISOS: '/usuarios/permisos',
+  },
   CONFIGURACION: '/configuracion',
   DEBUG: '/debug'
 } as const;

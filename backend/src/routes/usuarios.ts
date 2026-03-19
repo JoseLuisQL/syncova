@@ -1,10 +1,13 @@
 import { Router } from 'express';
 import { UsuarioController } from '@/controllers/UsuarioController';
+import { authenticate, authorize } from '@/middleware/auth';
 
 /**
  * Rutas para gestión de usuarios
  */
 const router = Router();
+
+router.use(authenticate, authorize(['administrador']));
 
 /**
  * @route GET /api/usuarios

@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { EstablecimientoService } from '@/services/EstablecimientoService';
-import { CreateEstablecimientoDto, UpdateEstablecimientoDto, TipoEstablecimiento, EstadoGeneral } from '@/types';
+import { CreateEstablecimientoDto, UpdateEstablecimientoDto, TipoEstablecimiento, EstadoGeneral, AuthenticatedRequest } from '@/types';
 import { successResponse, errorResponse, paginatedResponse } from '@/utils/response';
 import { validateRequired, validateEnum, validateUUID } from '@/utils/validation';
+import { ensureEstablecimientoInScope, resolveScopedCentroAcopioId, resolveScopedCentroAcopioIds } from '@/middleware/accessControl';
 
 /**
  * Controlador para gestión de establecimientos
@@ -12,7 +13,7 @@ export class EstablecimientoController {
    * Obtener todos los establecimientos
    * GET /api/establecimientos
    */
-  static async getAll(req: Request, res: Response): Promise<void> {
+  static async getAll(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const {
         tipo,
@@ -57,11 +58,22 @@ export class EstablecimientoController {
         return;
       }
 
+      let scopedCentroAcopioId: string | undefined;
+      let scopedCentroAcopioIds: string[] | undefined;
+      try {
+        scopedCentroAcopioId = resolveScopedCentroAcopioId(req, centroAcopioId as string | undefined);
+        scopedCentroAcopioIds = resolveScopedCentroAcopioIds(req, centroAcopioId as string | undefined);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para acceder a estos datos', 403);
+        return;
+      }
+
       const result = await EstablecimientoService.getAll({
         tipo: tipo as TipoEstablecimiento,
         estado: estado as EstadoGeneral | 'todos',
         search: search as string,
-        centroAcopioId: centroAcopioId as string,
+        centroAcopioId: scopedCentroAcopioId,
+        centroAcopioIds: scopedCentroAcopioIds,
         page: pageNum,
         limit: limitNum,
         noPagination: noPagination === 'true' // NUEVO: Convertir string a boolean
@@ -91,7 +103,7 @@ export class EstablecimientoController {
    * Obtener establecimiento por ID
    * GET /api/establecimientos/:id
    */
-  static async getById(req: Request, res: Response): Promise<void> {
+  static async getById(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -109,6 +121,13 @@ export class EstablecimientoController {
 
       if (!result.data) {
         errorResponse(res, 'Establecimiento no encontrado', 404);
+        return;
+      }
+
+      try {
+        await ensureEstablecimientoInScope(req, result.data.id);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para acceder a este establecimiento', 403);
         return;
       }
 
@@ -155,9 +174,10 @@ export class EstablecimientoController {
    * Obtener centros de acopio (ahora desde la tabla centros_acopio)
    * GET /api/establecimientos/centros-acopio
    */
-  static async getCentrosAcopio(req: Request, res: Response): Promise<void> {
+  static async getCentrosAcopio(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const result = await EstablecimientoService.getCentrosAcopio();
+      const scopedCentroAcopioIds = resolveScopedCentroAcopioIds(req);
+      const result = await EstablecimientoService.getCentrosAcopio(scopedCentroAcopioIds);
 
       if (!result.success) {
         errorResponse(res, result.error || 'Error al obtener centros de acopio', 500);
@@ -175,7 +195,7 @@ export class EstablecimientoController {
    * Obtener opciones jerárquicas para formularios
    * GET /api/establecimientos/opciones-jerarquicas
    */
-  static async getOpcionesJerarquicas(req: Request, res: Response): Promise<void> {
+  static async getOpcionesJerarquicas(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       // Importar servicios dinámicamente para evitar dependencias circulares
       const { RedService } = await import('@/services/RedService');
@@ -208,12 +228,19 @@ export class EstablecimientoController {
    * Obtener establecimientos por centro de acopio
    * GET /api/establecimientos/centro-acopio/:centroAcopioId
    */
-  static async getByCentroAcopio(req: Request, res: Response): Promise<void> {
+  static async getByCentroAcopio(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { centroAcopioId } = req.params;
 
       if (!validateUUID(centroAcopioId)) {
         errorResponse(res, 'ID de centro de acopio inválido', 400);
+        return;
+      }
+
+      try {
+        resolveScopedCentroAcopioId(req, centroAcopioId);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para acceder a este centro de acopio', 403);
         return;
       }
 

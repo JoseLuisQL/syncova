@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { AlertaController } from '@/controllers/AlertaController';
 import { authenticate } from '@/middleware/auth';
+import { denyRoles } from '@/middleware/accessControl';
 import { validatePermissions } from '@/middleware/permissions';
 
 const router = Router();
+const denyResponsableAcopio = denyRoles(['responsable_acopio']);
 
 router.get('/stream', AlertaController.stream);
 
@@ -12,14 +14,14 @@ router.get('/stream', AlertaController.stream);
  * @desc Obtener estadísticas de alertas
  * @access Private (Todos los usuarios autenticados)
  */
-router.get('/stats', authenticate, AlertaController.getStats);
+router.get('/stats', authenticate, denyResponsableAcopio, AlertaController.getStats);
 
 /**
  * @route GET /api/alertas/no-leidas
  * @desc Obtener alertas no leídas para el usuario autenticado
  * @access Private (Usuario autenticado)
  */
-router.get('/no-leidas', authenticate, AlertaController.getUnreadForUser);
+router.get('/no-leidas', authenticate, denyResponsableAcopio, AlertaController.getUnreadForUser);
 
 /**
  * @route GET /api/alertas/verificar-y-generar
@@ -28,7 +30,7 @@ router.get('/no-leidas', authenticate, AlertaController.getUnreadForUser);
  * @query {number} [diasAnticipacion=30] - Días de anticipación para vencimiento
  * @query {number} [porcentajeMinimo=20] - Porcentaje mínimo de stock
  */
-router.get('/verificar-y-generar', authenticate, AlertaController.verifyAndGenerate);
+router.get('/verificar-y-generar', authenticate, denyResponsableAcopio, AlertaController.verifyAndGenerate);
 
 /**
  * @route DELETE /api/alertas/limpiar-antiguas
@@ -60,7 +62,7 @@ router.delete('/limpiar-resueltas', authenticate, validatePermissions(['admin'])
  * @access Private (Todos los usuarios autenticados)
  * @body {string[]} ids - Array de IDs de alertas a marcar como leídas
  */
-router.put('/leer-multiples', authenticate, AlertaController.markMultipleAsRead);
+router.put('/leer-multiples', authenticate, denyResponsableAcopio, AlertaController.markMultipleAsRead);
 
 /**
  * @route GET /api/alertas
@@ -76,7 +78,7 @@ router.put('/leer-multiples', authenticate, AlertaController.markMultipleAsRead)
  * @query {number} [page=1] - Página para paginación
  * @query {number} [limit=50] - Límite de resultados por página
  */
-router.get('/', authenticate, AlertaController.getAll);
+router.get('/', authenticate, denyResponsableAcopio, AlertaController.getAll);
 
 /**
  * @route POST /api/alertas
@@ -90,7 +92,7 @@ router.get('/', authenticate, AlertaController.getAll);
  * @body {string} [usuarioId] - ID del usuario (opcional, por defecto el usuario autenticado)
  * @body {object} [parametros] - Parámetros adicionales en formato JSON
  */
-router.post('/', authenticate, AlertaController.create);
+router.post('/', authenticate, denyResponsableAcopio, AlertaController.create);
 
 /**
  * @route GET /api/alertas/:id
@@ -98,7 +100,7 @@ router.post('/', authenticate, AlertaController.create);
  * @access Private (Todos los usuarios autenticados)
  * @param {string} id - ID de la alerta
  */
-router.get('/:id', authenticate, AlertaController.getById);
+router.get('/:id', authenticate, denyResponsableAcopio, AlertaController.getById);
 
 /**
  * @route PUT /api/alertas/:id
@@ -114,7 +116,7 @@ router.get('/:id', authenticate, AlertaController.getById);
  * @body {string} [usuarioId] - ID del usuario
  * @body {object} [parametros] - Parámetros adicionales
  */
-router.put('/:id', authenticate, AlertaController.update);
+router.put('/:id', authenticate, denyResponsableAcopio, AlertaController.update);
 
 /**
  * @route DELETE /api/alertas/:id
@@ -130,6 +132,6 @@ router.delete('/:id', authenticate, validatePermissions(['admin', 'coordinador']
  * @access Private (Todos los usuarios autenticados)
  * @param {string} id - ID de la alerta
  */
-router.put('/:id/leer', authenticate, AlertaController.markAsRead);
+router.put('/:id/leer', authenticate, denyResponsableAcopio, AlertaController.markAsRead);
 
 export default router;

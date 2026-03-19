@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { ReporteController } from '@/controllers/ReporteController';
 import { authenticateToken } from '@/middleware/auth';
+import { denyRoles } from '@/middleware/accessControl';
 
 const router = Router();
+const denyResponsableAcopio = denyRoles(['responsable_acopio']);
 
 /**
  * Rutas para reportes de inventario y stock
@@ -11,6 +13,7 @@ const router = Router();
 
 // Aplicar middleware de autenticación a todas las rutas
 router.use(authenticateToken);
+router.use(denyResponsableAcopio);
 
 /**
  * Rutas para generación de reportes (datos JSON)

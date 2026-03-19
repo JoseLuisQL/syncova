@@ -1,5 +1,7 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import LoginForm from './LoginForm';
 
 /**
@@ -76,6 +78,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRoles = [] 
 }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { canAccessModule } = usePermissions();
+  const location = useLocation();
+  const currentModule = location.pathname.split('/').filter(Boolean)[0] || 'dashboard';
 
   // Mostrar loading mientras se verifica la autenticación
   if (isLoading) {
@@ -99,6 +104,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         />
       );
     }
+  }
+
+  if (user && !canAccessModule(currentModule)) {
+    return (
+      <AccessDenied
+        userRole={user.rol}
+        requiredRoles={['Acceso al módulo autorizado']}
+      />
+    );
   }
 
   // Usuario autenticado y autorizado, mostrar contenido

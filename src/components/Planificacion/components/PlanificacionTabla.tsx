@@ -13,6 +13,7 @@ interface EstablecimientoData {
 }
 
 interface PlanificacionTablaProps {
+  readOnly?: boolean;
   establecimientos: EstablecimientoData[];
   selectedCentroAcopio: string;
   isLoading: boolean;
@@ -28,6 +29,7 @@ interface PlanificacionTablaProps {
 }
 
 export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
+  readOnly = false,
   establecimientos,
   selectedCentroAcopio,
   isLoading,
@@ -39,7 +41,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
   calcularTotalMes,
   calcularTotalGeneral,
 }) => {
-  const isDisabled = isUpdating || isLoading;
+  const isDisabled = readOnly || isUpdating || isLoading;
 
   if (!establecimientos || establecimientos.length === 0) {
     return (
@@ -164,27 +166,35 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                       return (
                         <td key={mesIndex} className="planning-col-mes px-3 py-4 text-center border-r border-gray-100 relative">
                           <div className="relative">
-                            <input
-                              type="number"
-                              min="0"
-                              value={currentValue}
-                              onChange={(e) => onTempValueChange(estIndex, mesIndex, parseInt(e.target.value) || 0)}
-                              onBlur={() => onFieldBlur(estIndex, mesIndex)}
-                              disabled={isDisabled}
-                              className={`planning-enhanced-input w-16 px-2 py-2 text-center text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-all ${
-                                isPending
-                                  ? styles.pending
-                                  : 'border-gray-300 hover:border-teal-400'
-                              }`}
-                              title={isPending ? 'Cambios pendientes - Se guardará automáticamente' : ''}
-                            />
-                            {isPending && (
-                              <div 
-                                className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse shadow-sm"
-                                title="Cambios pendientes"
-                              >
-                                <div className="w-full h-full bg-amber-400 rounded-full animate-ping"></div>
-                              </div>
+                            {readOnly ? (
+                              <span className="inline-flex min-w-[4rem] justify-center rounded-lg border border-slate-200 bg-slate-50 px-2 py-2 text-sm font-semibold text-slate-700 tabular-nums">
+                                {currentValue.toLocaleString()}
+                              </span>
+                            ) : (
+                              <>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={currentValue}
+                                  onChange={(e) => onTempValueChange(estIndex, mesIndex, parseInt(e.target.value) || 0)}
+                                  onBlur={() => onFieldBlur(estIndex, mesIndex)}
+                                  disabled={isDisabled}
+                                  className={`planning-enhanced-input w-16 px-2 py-2 text-center text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-all ${
+                                    isPending
+                                      ? styles.pending
+                                      : 'border-gray-300 hover:border-teal-400'
+                                  }`}
+                                  title={isPending ? 'Cambios pendientes - Se guardará automáticamente' : ''}
+                                />
+                                {isPending && (
+                                  <div 
+                                    className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse shadow-sm"
+                                    title="Cambios pendientes"
+                                  >
+                                    <div className="w-full h-full bg-amber-400 rounded-full animate-ping"></div>
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
                         </td>

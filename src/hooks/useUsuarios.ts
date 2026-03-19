@@ -44,6 +44,21 @@ export const useUsuarios = () => {
   const passwordApi = useApi<void>();
   const estadoApi = useApi<Usuario>();
 
+  const listExecute = listApi.execute;
+  const listReset = listApi.reset;
+  const activosExecute = activosApi.execute;
+  const activosReset = activosApi.reset;
+  const statsExecute = statsApi.execute;
+  const statsReset = statsApi.reset;
+  const passwordExecute = passwordApi.execute;
+  const passwordReset = passwordApi.reset;
+  const estadoExecute = estadoApi.execute;
+  const estadoReset = estadoApi.reset;
+  const createExecute = crudApi.create.execute;
+  const updateExecute = crudApi.update.execute;
+  const deleteExecute = crudApi.delete.execute;
+  const crudReset = crudApi.reset;
+
   // Estados derivados
   const isLoading = listApi.loading;
   const error = listApi.error;
@@ -81,19 +96,19 @@ export const useUsuarios = () => {
       cleanFilters.search = currentFilters.search;
     }
 
-    if (currentFilters.establecimientoId) {
-      cleanFilters.establecimientoId = currentFilters.establecimientoId;
+    if (currentFilters.centroAcopioId) {
+      cleanFilters.centroAcopioId = currentFilters.centroAcopioId;
     }
 
     logger.debug('Cargando usuarios con filtros limpios:', cleanFilters);
 
-    const result = await listApi.execute(() => UsuarioService.getAll(cleanFilters));
+    const result = await listExecute(() => UsuarioService.getAll(cleanFilters));
 
     if (result) {
       setUsuarios(result.usuarios);
       setPagination(result.pagination);
     }
-  }, [listApi]);
+  }, [listExecute]);
 
   /**
    * Cargar usuarios activos
@@ -101,12 +116,12 @@ export const useUsuarios = () => {
   const loadUsuariosActivos = useCallback(async () => {
     logger.debug('Cargando usuarios activos');
 
-    const result = await activosApi.execute(() => UsuarioService.getActivos());
+    const result = await activosExecute(() => UsuarioService.getActivos());
     
     if (result) {
       setUsuariosActivos(result);
     }
-  }, [activosApi]);
+  }, [activosExecute]);
 
   /**
    * Crear usuario
@@ -114,7 +129,7 @@ export const useUsuarios = () => {
   const createUsuario = useCallback(async (data: CreateUsuarioDto): Promise<boolean> => {
     logger.debug('Creando usuario:', { ...data, password: '[OCULTA]' });
 
-    const result = await crudApi.create.execute(() => UsuarioService.create(data));
+    const result = await createExecute(() => UsuarioService.create(data));
     
     if (result) {
       // Recargar la lista después de crear
@@ -124,7 +139,7 @@ export const useUsuarios = () => {
     }
     
     return false;
-  }, [crudApi.create, loadUsuarios, loadUsuariosActivos]);
+  }, [createExecute, loadUsuarios, loadUsuariosActivos]);
 
   /**
    * Actualizar usuario
@@ -132,7 +147,7 @@ export const useUsuarios = () => {
   const updateUsuario = useCallback(async (id: string, data: UpdateUsuarioDto): Promise<boolean> => {
     logger.debug('Actualizando usuario:', { id, data });
 
-    const result = await crudApi.update.execute(() => UsuarioService.update(id, data));
+    const result = await updateExecute(() => UsuarioService.update(id, data));
     
     if (result) {
       // Actualizar en la lista local
@@ -149,7 +164,7 @@ export const useUsuarios = () => {
     }
     
     return false;
-  }, [crudApi.update, loadUsuariosActivos]);
+  }, [loadUsuariosActivos, updateExecute]);
 
   /**
    * Eliminar usuario
@@ -158,7 +173,7 @@ export const useUsuarios = () => {
     logger.debug('Hook deleteUsuario - Iniciando eliminación:', id);
 
     try {
-      const result = await crudApi.delete.execute(() => UsuarioService.delete(id));
+      const result = await deleteExecute(() => UsuarioService.delete(id));
 
       logger.debug('Hook deleteUsuario - Resultado de execute:', {
         result,
@@ -198,7 +213,7 @@ export const useUsuarios = () => {
       logger.error('Hook deleteUsuario - Excepción capturada:', error);
       return false;
     }
-  }, [crudApi.delete]);
+  }, [deleteExecute]);
 
   /**
    * Cambiar contraseña
@@ -206,10 +221,10 @@ export const useUsuarios = () => {
   const changePassword = useCallback(async (id: string, data: ChangePasswordDto): Promise<boolean> => {
     logger.debug('Cambiando contraseña de usuario:', id);
 
-    const result = await passwordApi.execute(() => UsuarioService.changePassword(id, data));
+    const result = await passwordExecute(() => UsuarioService.changePassword(id, data));
     
     return result !== undefined;
-  }, [passwordApi]);
+  }, [passwordExecute]);
 
   /**
    * Cambiar estado de usuario
@@ -217,7 +232,7 @@ export const useUsuarios = () => {
   const changeEstado = useCallback(async (id: string, estado: 'activo' | 'inactivo'): Promise<boolean> => {
     logger.debug('Cambiando estado de usuario:', { id, estado });
 
-    const result = await estadoApi.execute(() => UsuarioService.changeEstado(id, estado));
+    const result = await estadoExecute(() => UsuarioService.changeEstado(id, estado));
     
     if (result) {
       // Actualizar en la lista local
@@ -232,7 +247,7 @@ export const useUsuarios = () => {
     }
     
     return false;
-  }, [estadoApi, loadUsuariosActivos]);
+  }, [estadoExecute, loadUsuariosActivos]);
 
   /**
    * Buscar usuarios
@@ -290,21 +305,77 @@ export const useUsuarios = () => {
   const getStats = useCallback(async () => {
     logger.debug('Obteniendo estadísticas de usuarios');
 
-    const result = await statsApi.execute(() => UsuarioService.getStats());
+    const result = await statsExecute(() => UsuarioService.getStats());
     return result;
-  }, [statsApi]);
+  }, [statsExecute]);
+
+  /**
+   * Exportar usuarios filtrados a CSV
+   */
+  const exportUsuarios = useCallback(async (): Promise<boolean> => {
+    try {
+      const exportResult = await UsuarioService.getAll({
+        ...filtersRef.current,
+        page: 1,
+        limit: 1000,
+      });
+
+      const rows = exportResult.usuarios.map((usuario) => ({
+        nombres: usuario.nombres,
+        apellidos: usuario.apellidos,
+        email: usuario.email,
+        usuario: usuario.usuario,
+        rol: usuario.rol,
+        centroAcopio: usuario.centroAcopio?.nombre || '',
+        estado: usuario.estado,
+        ultimoAcceso: usuario.ultimoAcceso ? new Date(usuario.ultimoAcceso).toLocaleString('es-PE') : '',
+        creado: new Date(usuario.createdAt).toLocaleDateString('es-PE'),
+      }));
+
+      const headers = ['Nombres', 'Apellidos', 'Email', 'Usuario', 'Rol', 'Centro de acopio', 'Estado', 'Último acceso', 'Creado'];
+      const csv = [
+        headers.join(','),
+        ...rows.map((row) => [
+          row.nombres,
+          row.apellidos,
+          row.email,
+          row.usuario,
+          row.rol,
+          row.centroAcopio,
+          row.estado,
+          row.ultimoAcceso,
+          row.creado,
+        ].map((value) => `"${String(value ?? '').replace(/"/g, '""')}"`).join(',')),
+      ].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `usuarios-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      return true;
+    } catch (error) {
+      logger.error('Error al exportar usuarios:', error);
+      return false;
+    }
+  }, []);
 
   /**
    * Limpiar errores
    */
   const clearErrors = useCallback(() => {
-    crudApi.reset();
-    listApi.reset();
-    activosApi.reset();
-    statsApi.reset();
-    passwordApi.reset();
-    estadoApi.reset();
-  }, [crudApi, listApi, activosApi, statsApi, passwordApi, estadoApi]);
+    crudReset();
+    listReset();
+    activosReset();
+    statsReset();
+    passwordReset();
+    estadoReset();
+  }, [activosReset, crudReset, estadoReset, listReset, passwordReset, statsReset]);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -343,6 +414,7 @@ export const useUsuarios = () => {
     changePage,
     refresh,
     getStats,
+    exportUsuarios,
     clearErrors,
     
     // Utilidades
