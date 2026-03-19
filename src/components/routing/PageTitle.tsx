@@ -68,6 +68,10 @@ const getMetaDescription = (module: string, subModule?: string | null): string =
       programacion: 'Programación anual por tipo de vacuna',
       importar: 'Importación masiva de datos de planificación',
       distribucion: 'Distribución automática de vacunas',
+      identidad: 'Configuración institucional y experiencia visual',
+      alertas: 'Umbrales de alertas y acciones operativas del sistema',
+      seguridad: 'Parámetros de seguridad y acceso del sistema',
+      operacion: 'Controles operativos, reportes y diagnóstico del sistema',
     };
 
     if (subDescriptions[subModule]) {
@@ -113,7 +117,11 @@ const getMetaKeywords = (module: string, subModule?: string | null): string => {
       recepcion: 'recepción ingresos',
       programacion: 'programación anual',
       importar: 'importación datos',
-      distribucion: 'distribución automática'
+      distribucion: 'distribución automática',
+      identidad: 'identidad configuracion experiencia',
+      alertas: 'alertas notificaciones configuracion',
+      seguridad: 'seguridad acceso configuracion',
+      operacion: 'operacion sistema api respaldos'
     };
 
     if (subKeywords[subModule]) {

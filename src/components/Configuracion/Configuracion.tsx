@@ -1,154 +1,212 @@
-import React, { useCallback, useMemo } from 'react';
-import { Loader2 } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { AlertTriangle } from 'lucide-react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { useToastContext } from '../../contexts/ToastContext';
-import { usePermissions } from '../../hooks/usePermissions';
+import { ErrorAlert, EmptyState, Modal } from '../Establecimientos/components';
+import { getGroupById } from './constants';
+import { ConfiguracionGroupView, ConfiguracionShell, ConfiguracionSkeleton } from './components';
 import { useConfiguracion } from './hooks/useConfiguracion';
-import { COMPONENT_STYLES, CONFIG_SECTIONS } from './constants';
-import {
-  ConfiguracionHeader,
-  ConfiguracionSidebar,
-  ConfiguracionGeneral,
-  ConfiguracionSistema,
-  ConfiguracionAlertas,
-} from './components';
+import { usePermissions } from '../../hooks/usePermissions';
+import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
+import type { ConfiguracionGroupId } from './types';
 
 const Configuracion: React.FC = () => {
   const { toast } = useToastContext();
   const { canAccessSection } = usePermissions();
-  
-  // Filtrar secciones según permisos
-  const filteredSections = useMemo(() => {
-    return CONFIG_SECTIONS.filter(section => canAccessSection('configuracion', section.id));
-  }, [canAccessSection]);
-  
+  const { currentSubModule } = useCurrentRoute();
+  const { navigateToModule } = useAppNavigation();
+  const [pendingNavigationGroup, setPendingNavigationGroup] = useState<ConfiguracionGroupId | null>(null);
+
   const {
-    config,
-    activeSection,
+    groups,
+    values,
+    logo,
     isLoading,
-    isSaving,
-    hasChanges,
+    isRefreshing,
     error,
-    setActiveSection,
+    lastLoadedAt,
+    savingGroups,
     updateField,
-    saveSection,
-    resetSection,
-    refreshConfig,
+    resetGroup,
+    saveGroup,
+    refresh,
+    getGroupStats,
+    getDirtyCount,
+    hasPendingChanges,
+    hasPendingChangesInGroup,
+    uploadLogo,
+    deleteLogo,
+    runAlertGeneration,
+    cleanupResolvedAlerts,
   } = useConfiguracion();
 
-  const handleSave = useCallback(async (section: string) => {
-    const success = await saveSection(section);
-    if (success) {
-      toast.success(`Configuracion de ${section} guardada exitosamente`);
-    } else {
-      toast.error(`Error al guardar configuracion de ${section}`);
+  const accessibleGroups = useMemo(
+    () => groups.filter((group) => canAccessSection('configuracion', group.id)),
+    [canAccessSection, groups],
+  );
+
+  const firstGroupId = accessibleGroups[0]?.id || 'identidad';
+  const activeGroupId = useMemo(() => {
+    const candidate = currentSubModule as ConfiguracionGroupId | null;
+    if (!candidate) {
+      return firstGroupId;
     }
-  }, [saveSection, toast]);
+    return accessibleGroups.some((group) => group.id === candidate) ? candidate : firstGroupId;
+  }, [accessibleGroups, currentSubModule, firstGroupId]);
 
-  const handleReset = useCallback((section: string) => {
-    resetSection(section);
-    toast.info(`Configuracion de ${section} restablecida`);
-  }, [resetSection, toast]);
+  const activeGroup = getGroupById(activeGroupId);
+  const activeDirtyCount = getDirtyCount(activeGroupId);
 
-  const renderActiveSection = () => {
-    const commonProps = {
-      isSaving,
-      hasChanges,
+  useEffect(() => {
+    const shouldWarn = hasPendingChangesInGroup(activeGroupId);
+    if (!shouldWarn) {
+      return undefined;
+    }
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
     };
 
-    switch (activeSection) {
-      case 'general':
-        return (
-          <ConfiguracionGeneral
-            config={config.general}
-            onUpdate={(field, value) => updateField('general', field, value)}
-            onSave={() => handleSave('general')}
-            onReset={() => handleReset('general')}
-            {...commonProps}
-          />
-        );
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [activeGroupId, hasPendingChangesInGroup]);
 
-      case 'alertas':
-        return (
-          <ConfiguracionAlertas
-            config={config.alertas}
-            onUpdate={(field, value) => updateField('alertas', field, value)}
-            onSave={() => handleSave('alertas')}
-            onReset={() => handleReset('alertas')}
-            {...commonProps}
-          />
-        );
-
-      case 'sistema':
-        return (
-          <ConfiguracionSistema
-            config={config.sistema}
-            onUpdate={(field, value) => updateField('sistema', field, value)}
-            onSave={() => handleSave('sistema')}
-            onReset={() => handleReset('sistema')}
-            {...commonProps}
-          />
-        );
-
-      default:
-        return null;
+  const handleInternalNavigation = (groupId: ConfiguracionGroupId) => {
+    if (groupId === activeGroupId) {
+      return;
     }
+
+    if (hasPendingChangesInGroup(activeGroupId)) {
+      setPendingNavigationGroup(groupId);
+      return;
+    }
+
+    navigateToModule('configuracion', groupId);
   };
 
-  if (isLoading) {
-    return (
-      <main className={COMPONENT_STYLES.pageBackground}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-            <p className="text-gray-600">Cargando configuracion...</p>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  const handleConfirmNavigation = () => {
+    if (!pendingNavigationGroup) {
+      return;
+    }
 
-  if (error) {
+    resetGroup(activeGroupId);
+    navigateToModule('configuracion', pendingNavigationGroup);
+    setPendingNavigationGroup(null);
+    toast.info('Cambios descartados', 'Se restauro el bloque actual antes de navegar.');
+  };
+
+  if (accessibleGroups.length === 0) {
     return (
-      <main className={COMPONENT_STYLES.pageBackground}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="bg-white rounded-xl p-6 shadow-lg max-w-md text-center">
-            <p className="text-rose-600 mb-4">{error}</p>
-            <button
-              onClick={refreshConfig}
-              className={COMPONENT_STYLES.button.primary}
-            >
-              Reintentar
-            </button>
-          </div>
+      <main className="min-h-screen">
+        <div className="mx-auto max-w-[980px] py-6">
+          <EmptyState
+            icon={AlertTriangle}
+            title="Sin acceso a Configuracion"
+            description="Tu rol actual no tiene bloques habilitados dentro del modulo."
+          />
         </div>
       </main>
     );
   }
 
   return (
-    <main className={COMPONENT_STYLES.pageBackground}>
-      {/* Header */}
-      <ConfiguracionHeader
-        hasChanges={hasChanges}
-      />
+    <>
+      <ConfiguracionShell
+        activeGroupId={activeGroupId}
+        groups={accessibleGroups}
+        hasPendingChanges={hasPendingChanges}
+        isRefreshing={isRefreshing}
+        onRefresh={() => void refresh()}
+        onNavigate={handleInternalNavigation}
+      >
+        {error ? <ErrorAlert message={error} onRetry={() => void refresh()} /> : null}
 
-      {/* Content */}
-      <div className="flex">
-        {/* Sidebar */}
-        <ConfiguracionSidebar
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-          sections={filteredSections}
-        />
+        {isLoading || !activeGroup ? (
+          <ConfiguracionSkeleton />
+        ) : (
+          <Routes>
+            <Route index element={<Navigate to={firstGroupId} replace />} />
+            {accessibleGroups.map((group) => (
+              <Route
+                key={group.id}
+                path={group.id}
+                element={
+                  <ConfiguracionGroupView
+                    group={group}
+                    values={values}
+                    logo={logo}
+                    stats={getGroupStats(group.id)}
+                    dirtyCount={getDirtyCount(group.id)}
+                    isSaving={savingGroups[group.id]}
+                    lastLoadedAt={lastLoadedAt}
+                    onUpdateField={updateField}
+                    onSaveGroup={async () => {
+                      const result = await saveGroup(group.id);
+                      if (result.success && result.updatedCount > 0) {
+                        toast.success('Configuracion guardada', 'Los cambios del bloque actual quedaron persistidos.');
+                      } else if (!result.success) {
+                        toast.error('No se pudo guardar', 'Verifica la conexion y vuelve a intentarlo.');
+                      }
+                    }}
+                    onResetGroup={() => {
+                      const hadChanges = getDirtyCount(group.id) > 0;
+                      resetGroup(group.id);
+                      if (hadChanges) {
+                        toast.info('Bloque restablecido', 'Se recuperaron los valores originales de esta vista.');
+                      }
+                    }}
+                    onUploadLogo={uploadLogo}
+                    onDeleteLogo={deleteLogo}
+                    onRunAlertGeneration={runAlertGeneration}
+                    onCleanupResolvedAlerts={cleanupResolvedAlerts}
+                  />
+                }
+              />
+            ))}
+            <Route path="*" element={<Navigate to={firstGroupId} replace />} />
+          </Routes>
+        )}
+      </ConfiguracionShell>
 
-        {/* Main Content */}
-        <div className="flex-1 p-6 lg:p-8">
-          <div className="max-w-4xl">
-            {renderActiveSection()}
+      <Modal
+        isOpen={pendingNavigationGroup !== null}
+        onClose={() => setPendingNavigationGroup(null)}
+        title="Cambios pendientes"
+        subtitle="Este bloque tiene datos sin guardar. Decide antes de cambiar de seccion."
+        icon={AlertTriangle}
+        size="md"
+        footer={
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              onClick={() => setPendingNavigationGroup(null)}
+            >
+              Seguir editando
+            </button>
+            <button
+              type="button"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-gradient-to-r from-rose-600 to-red-600 px-4 py-2 text-sm font-medium text-white transition hover:from-rose-700 hover:to-red-700"
+              onClick={handleConfirmNavigation}
+            >
+              Descartar y navegar
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div className="rounded-[20px] border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-600">
+            El bloque actual tiene <span className="font-semibold text-slate-950">{activeDirtyCount}</span> cambio(s) sin guardar.
+          </div>
+          <div className="rounded-[20px] border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-800">
+            Si continuas, se restauraran los valores originales del bloque actual.
           </div>
         </div>
-      </div>
-    </main>
+      </Modal>
+    </>
   );
 };
 

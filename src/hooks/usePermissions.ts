@@ -100,14 +100,10 @@ export const SECTION_PERMISSIONS: Record<string, Record<string, string[]>> = {
   },
   // Configuración
   configuracion: {
-    general: ['config_general:read'],
-    notificaciones: ['config_notificaciones:read'],
+    identidad: ['config_general:read'],
+    alertas: ['config_notificaciones:read'],
     seguridad: ['config_seguridad:read'],
-    respaldos: ['config_respaldos:read'],
-    sistema: ['config_sistema:read'],
-    mantenimiento: ['config_mantenimiento:read'],
-    integraciones: ['config_integraciones:read'],
-    avanzado: ['config_avanzado:read'],
+    operacion: ['config_sistema:read', 'config_respaldos:read', 'config_integraciones:read', 'config_avanzado:read'],
   },
 };
 

@@ -64,13 +64,13 @@ export const useCurrentRoute = () => {
   }, [pathSegments]);
 
   const breadcrumbs = useMemo(() => {
-    const crumbs = [];
+    const crumbs: Array<{ label: string; path: string; isLast: boolean }> = [];
     let path = '';
 
     pathSegments.forEach((segment, index) => {
       path += `/${segment}`;
       crumbs.push({
-        label: getSegmentLabel(segment, index),
+        label: getSegmentLabel(segment),
         path,
         isLast: index === pathSegments.length - 1
       });
@@ -93,7 +93,7 @@ export const useCurrentRoute = () => {
 /**
  * Hook para sincronizar estado con URL
  */
-export const useUrlState = <T extends Record<string, any>>(
+export const useUrlState = <T extends Record<string, unknown>>(
   initialState: T,
   options: {
     syncToUrl?: boolean;
@@ -156,7 +156,7 @@ export const useUrlState = <T extends Record<string, any>>(
 /**
  * Hook para gestionar estado de componente sincronizado con URL
  */
-export const useUrlSyncedState = <T extends Record<string, any>>(
+export const useUrlSyncedState = <T extends Record<string, unknown>>(
   initialState: T,
   options: {
     syncToUrl?: boolean;
@@ -197,7 +197,7 @@ export const useUrlSyncedState = <T extends Record<string, any>>(
 /**
  * Obtener etiqueta legible para un segmento de ruta
  */
-const getSegmentLabel = (segment: string, _index: number): string => {
+const getSegmentLabel = (segment: string): string => {
   const labels: Record<string, string> = {
     // Módulos principales
     'dashboard': 'Dashboard',
@@ -210,6 +210,9 @@ const getSegmentLabel = (segment: string, _index: number): string => {
     'alertas': 'Alertas',
     'usuarios': 'Usuarios',
     'configuracion': 'Configuración',
+    'identidad': 'Identidad',
+    'seguridad': 'Seguridad',
+    'operacion': 'Operación',
     'debug': 'Debug',
 
     // Sub-módulos de Usuarios
@@ -248,7 +251,7 @@ const getSegmentLabel = (segment: string, _index: number): string => {
  * Hook para obtener el título de la página basado en la ruta actual
  */
 export const usePageTitle = () => {
-  const { currentModule, currentSubModule, breadcrumbs } = useCurrentRoute();
+  const { currentModule, currentSubModule } = useCurrentRoute();
 
   const pageTitle = useMemo(() => {
     const baseTitle = 'SIVAC - Sistema de Gestión de Vacunas';
@@ -257,15 +260,15 @@ export const usePageTitle = () => {
       return baseTitle;
     }
 
-    const moduleTitle = getSegmentLabel(currentModule, 0);
+    const moduleTitle = getSegmentLabel(currentModule);
     
     if (currentSubModule) {
-      const subModuleTitle = getSegmentLabel(currentSubModule, 1);
+      const subModuleTitle = getSegmentLabel(currentSubModule);
       return `${subModuleTitle} - ${moduleTitle} | ${baseTitle}`;
     }
 
     return `${moduleTitle} | ${baseTitle}`;
-  }, [currentModule, currentSubModule, breadcrumbs]);
+  }, [currentModule, currentSubModule]);
 
   return pageTitle;
 };
@@ -313,6 +316,12 @@ export const ROUTES = {
     ROLES: '/usuarios/roles',
     PERMISOS: '/usuarios/permisos',
   },
-  CONFIGURACION: '/configuracion',
+  CONFIGURACION: {
+    ROOT: '/configuracion',
+    IDENTIDAD: '/configuracion/identidad',
+    ALERTAS: '/configuracion/alertas',
+    SEGURIDAD: '/configuracion/seguridad',
+    OPERACION: '/configuracion/operacion',
+  },
   DEBUG: '/debug'
 } as const;

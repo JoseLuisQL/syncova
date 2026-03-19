@@ -275,7 +275,7 @@ export class ConfiguracionService {
       }
 
       return response.data.data;
-    } catch (error) {
+    } catch {
       logger.debug('No hay logo configurado');
       return null;
     }

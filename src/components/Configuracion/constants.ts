@@ -1,265 +1,561 @@
 import {
-  Bell,
-  Server,
+  BellRing,
+  Blocks,
   Building2,
+  Globe2,
+  Layers3,
+  Mail,
+  Server,
+  Settings2,
+  ShieldCheck,
+  Siren,
 } from 'lucide-react';
+import type {
+  ConfiguracionCategoryDefinition,
+  ConfiguracionFieldDefinition,
+  ConfiguracionGroupDefinition,
+  ConfiguracionNavGroup,
+} from './types';
 
-// Paleta de colores unificada con Inventario/Movimientos (teal/cyan)
-export const COLORS = {
-  primary: {
-    gradient: 'from-teal-600 to-cyan-600',
-    gradientHover: 'from-teal-700 to-cyan-700',
-    bg: 'bg-teal-50',
-    bgHover: 'hover:bg-teal-100',
-    text: 'text-teal-700',
-    textDark: 'text-teal-800',
-    border: 'border-teal-200',
-    icon: 'text-teal-600',
-    ring: 'ring-teal-500',
-    focus: 'focus:ring-teal-500 focus:border-teal-500',
-  },
-  secondary: {
-    gradient: 'from-cyan-500 to-teal-500',
-    bg: 'bg-cyan-50',
-    text: 'text-cyan-700',
-    textDark: 'text-cyan-800',
-    border: 'border-cyan-200',
-    icon: 'text-cyan-600',
-  },
-  success: {
-    gradient: 'from-emerald-500 to-teal-500',
-    bg: 'bg-emerald-50',
-    bgGradient: 'from-emerald-50 to-emerald-100',
-    text: 'text-emerald-700',
-    textDark: 'text-emerald-800',
-    border: 'border-emerald-200',
-    icon: 'text-emerald-600',
-    badge: 'bg-emerald-100 text-emerald-800',
-  },
-  warning: {
-    gradient: 'from-amber-500 to-orange-500',
-    bg: 'bg-amber-50',
-    bgGradient: 'from-amber-50 to-amber-100',
-    text: 'text-amber-700',
-    textDark: 'text-amber-800',
-    border: 'border-amber-200',
-    icon: 'text-amber-600',
-    badge: 'bg-amber-100 text-amber-800',
-  },
-  danger: {
-    gradient: 'from-rose-500 to-red-500',
-    bg: 'bg-rose-50',
-    bgGradient: 'from-rose-50 to-rose-100',
-    text: 'text-rose-700',
-    textDark: 'text-rose-800',
-    border: 'border-rose-200',
-    icon: 'text-rose-600',
-    badge: 'bg-rose-100 text-rose-800',
-  },
-  neutral: {
-    bg: 'bg-gray-50',
-    bgGradient: 'from-gray-50 to-gray-100',
-    text: 'text-gray-700',
-    textDark: 'text-gray-800',
-    textLight: 'text-gray-500',
-    border: 'border-gray-200',
-    icon: 'text-gray-600',
-  },
-} as const;
-
-// Configuración de secciones del módulo Configuración - Simplificado a 3 secciones esenciales
-export interface ConfigSection {
-  id: string;
-  label: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
-  category: 'general' | 'alertas' | 'sistema';
-}
-
-export const CONFIG_SECTIONS: ConfigSection[] = [
+export const CONFIG_GROUPS: ConfiguracionGroupDefinition[] = [
   {
-    id: 'general',
-    label: 'General',
-    description: 'Informacion de la institucion',
+    id: 'identidad',
+    label: 'Identidad',
+    contextLabel: 'Identidad y experiencia',
+    description: 'Marca institucional, metadatos publicos y preferencias visibles.',
     icon: Building2,
-    category: 'general',
+    category: 'experiencia',
+    path: '/configuracion/identidad',
   },
   {
     id: 'alertas',
     label: 'Alertas',
-    description: 'Umbrales y notificaciones',
-    icon: Bell,
-    category: 'alertas',
+    contextLabel: 'Alertas y notificaciones',
+    description: 'Umbrales operativos y comunicacion del sistema.',
+    icon: BellRing,
+    category: 'experiencia',
+    path: '/configuracion/alertas',
   },
   {
-    id: 'sistema',
-    label: 'Sistema',
-    description: 'Informacion del sistema',
+    id: 'seguridad',
+    label: 'Seguridad',
+    contextLabel: 'Seguridad y acceso',
+    description: 'Parametros de acceso y endurecimiento con trazabilidad.',
+    icon: ShieldCheck,
+    category: 'plataforma',
+    path: '/configuracion/seguridad',
+  },
+  {
+    id: 'operacion',
+    label: 'Operacion',
+    contextLabel: 'Operacion y sistema',
+    description: 'Respaldos, reportes, API y diagnostico del sistema.',
     icon: Server,
-    category: 'sistema',
+    category: 'plataforma',
+    path: '/configuracion/operacion',
   },
 ];
 
-export const CATEGORY_LABELS = {
-  general: 'General',
-  alertas: 'Alertas',
-  sistema: 'Sistema',
-} as const;
-
-// Estilos de componentes reutilizables
-export const COMPONENT_STYLES = {
-  pageBackground: 'min-h-screen bg-gradient-to-br from-teal-50/30 via-cyan-50/30 to-blue-50/30',
-
-  card: 'bg-white rounded-2xl border border-gray-100 shadow-sm',
-  cardHover: 'hover:shadow-md transition-all duration-200',
-
-  header: {
-    container: 'bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-20',
-    title: 'text-xl sm:text-2xl font-bold text-gray-900',
-    subtitle: 'text-sm text-gray-600 mt-0.5',
-    iconWrapper: 'p-3 rounded-xl bg-gradient-to-br from-teal-600 to-cyan-600 shadow-lg',
+export const CONFIG_NAV_GROUPS: ConfiguracionNavGroup[] = [
+  {
+    key: 'experiencia',
+    label: 'Experiencia',
+    description: 'Lo que el equipo ve y ajusta dia a dia.',
+    icon: Layers3,
   },
-
-  button: {
-    primary: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white 
-              bg-gradient-to-r from-teal-600 to-cyan-600 
-              hover:from-teal-700 hover:to-cyan-700 
-              shadow-md hover:shadow-lg 
-              transition-all duration-200 
-              focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
-              disabled:opacity-50 disabled:cursor-not-allowed`,
-    secondary: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium 
-                text-gray-700 bg-white border border-gray-200 
-                hover:bg-gray-50 hover:border-gray-300
-                transition-all duration-200
-                focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
-                disabled:opacity-50 disabled:cursor-not-allowed`,
-    success: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white 
-              bg-gradient-to-r from-emerald-600 to-emerald-700 
-              hover:from-emerald-700 hover:to-emerald-800 
-              shadow-md hover:shadow-lg transition-all duration-200
-              disabled:opacity-50 disabled:cursor-not-allowed`,
-    danger: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white 
-             bg-gradient-to-r from-rose-600 to-rose-700 
-             hover:from-rose-700 hover:to-rose-800 
-             shadow-md hover:shadow-lg transition-all duration-200
-             disabled:opacity-50 disabled:cursor-not-allowed`,
-    icon: `p-2 rounded-lg transition-all duration-200 
-           focus:outline-none focus:ring-2 focus:ring-offset-1`,
+  {
+    key: 'plataforma',
+    label: 'Plataforma',
+    description: 'Controles avanzados, seguridad y operacion tecnica.',
+    icon: Settings2,
   },
+];
 
-  input: {
-    base: `w-full px-4 py-2.5 rounded-xl border text-sm
-           transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-offset-0`,
-    normal: 'border-gray-200 focus:ring-teal-500 focus:border-teal-500 hover:border-gray-300',
-    error: 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30',
-    label: 'block text-sm font-medium text-gray-700 mb-1.5',
-    helpText: 'text-xs text-gray-500 mt-1',
-    errorText: 'mt-1 text-xs text-rose-600',
+export const CONFIG_CATEGORIES: ConfiguracionCategoryDefinition[] = [
+  {
+    id: 'general',
+    groupId: 'identidad',
+    label: 'Identidad institucional',
+    description: 'Datos usados en documentos, cabeceras y metadatos publicos.',
+    icon: Building2,
+    editable: true,
+    source: 'database',
   },
+  {
+    id: 'alertas',
+    groupId: 'alertas',
+    label: 'Umbrales activos',
+    description: 'Valores usados al ejecutar acciones operativas desde este modulo.',
+    icon: Siren,
+    editable: true,
+    source: 'database',
+  },
+  {
+    id: 'notificaciones',
+    groupId: 'alertas',
+    label: 'Canales y envio',
+    description: 'Configuracion registrada; el runtime actual no consume estos flags desde la base.',
+    icon: Mail,
+    editable: false,
+    source: 'database',
+    runtimeNote: 'El envio real sigue gobernado por la configuracion tecnica del servidor.',
+  },
+  {
+    id: 'seguridad',
+    groupId: 'seguridad',
+    label: 'Politicas registradas',
+    description: 'Parametros persistidos para referencia operativa y futura conexion runtime.',
+    icon: ShieldCheck,
+    editable: false,
+    source: 'database',
+    runtimeNote: 'El tiempo real de sesion y validaciones criticas aun no toman estos valores desde la base.',
+  },
+  {
+    id: 'backup',
+    groupId: 'operacion',
+    label: 'Respaldos',
+    description: 'El runtime del backend usa variables de entorno para estos controles.',
+    icon: Blocks,
+    editable: false,
+    source: 'env',
+    runtimeNote: 'Se muestra la configuracion registrada, pero la ejecucion real depende del servidor.',
+  },
+  {
+    id: 'reportes',
+    groupId: 'operacion',
+    label: 'Limites de reportes',
+    description: 'Parametros almacenados para operacion avanzada y observabilidad.',
+    icon: Globe2,
+    editable: false,
+    source: 'database',
+    runtimeNote: 'Todavia no existe un consumidor global uniforme en frontend o backend.',
+  },
+  {
+    id: 'api',
+    groupId: 'operacion',
+    label: 'API y rate limiting',
+    description: 'El rate limiting productivo sigue viniendo de variables de entorno.',
+    icon: Settings2,
+    editable: false,
+    source: 'env',
+    runtimeNote: 'Los limites reales del servidor no leen estos registros desde la base.',
+  },
+  {
+    id: 'sistema',
+    groupId: 'operacion',
+    label: 'Diagnostico del sistema',
+    description: 'Lectura operativa del estado visible del modulo.',
+    icon: Server,
+    editable: false,
+    source: 'derived',
+  },
+];
 
-  select: {
-    base: `w-full px-4 py-2.5 rounded-xl border text-sm font-medium
-           bg-white transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-offset-0
-           disabled:bg-gray-50 disabled:cursor-not-allowed`,
-    normal: 'border-gray-200 focus:ring-teal-500 focus:border-teal-500 hover:border-gray-300',
+export const CONFIG_FIELDS: ConfiguracionFieldDefinition[] = [
+  {
+    id: 'sistemaNombre',
+    key: 'sistema_nombre',
+    groupId: 'identidad',
+    categoryId: 'general',
+    label: 'Nombre del sistema',
+    description: 'Nombre publico de la plataforma en vistas y documentos.',
+    placeholder: 'SIVAC - Sistema de Gestion de Vacunas',
+    type: 'text',
+    editable: true,
+    source: 'database',
+    status: 'editable',
+    defaultValue: 'SIVAC - Sistema de Gestion de Vacunas',
+    createMeta: {
+      categoria: 'general',
+      tipoDato: 'string',
+      esPublico: true,
+      descripcion: 'Nombre del sistema',
+    },
   },
+  {
+    id: 'institucionNombre',
+    key: 'institucion_nombre',
+    groupId: 'identidad',
+    categoryId: 'general',
+    label: 'Institucion',
+    description: 'Nombre institucional usado en exportaciones y encabezados.',
+    placeholder: 'Direccion de Salud Apurimac II',
+    type: 'text',
+    editable: true,
+    source: 'database',
+    status: 'editable',
+    defaultValue: 'DISA Apurimac II',
+    createMeta: {
+      categoria: 'general',
+      tipoDato: 'string',
+      esPublico: true,
+      descripcion: 'Nombre de la institucion',
+    },
+  },
+  {
+    id: 'institucionDireccion',
+    key: 'institucion_direccion',
+    groupId: 'identidad',
+    categoryId: 'general',
+    label: 'Direccion institucional',
+    description: 'Direccion de referencia para documentos y ficha del sistema.',
+    placeholder: 'Jr. Lima 123, Andahuaylas, Apurimac',
+    type: 'textarea',
+    editable: true,
+    source: 'database',
+    status: 'editable',
+    rows: 3,
+    defaultValue: 'Jr. Lima 123, Andahuaylas, Apurimac',
+    createMeta: {
+      categoria: 'general',
+      tipoDato: 'string',
+      esPublico: true,
+    },
+  },
+  {
+    id: 'institucionTelefono',
+    key: 'institucion_telefono',
+    groupId: 'identidad',
+    categoryId: 'general',
+    label: 'Telefono',
+    description: 'Contacto operativo visible para usuarios internos.',
+    placeholder: '+51 983 456 789',
+    type: 'tel',
+    editable: true,
+    source: 'database',
+    status: 'editable',
+    defaultValue: '+51 983 456 789',
+    createMeta: {
+      categoria: 'general',
+      tipoDato: 'string',
+      esPublico: true,
+    },
+  },
+  {
+    id: 'institucionEmail',
+    key: 'institucion_email',
+    groupId: 'identidad',
+    categoryId: 'general',
+    label: 'Correo institucional',
+    description: 'Contacto principal mostrado por el sistema.',
+    placeholder: 'contacto@saludapurimac.gob.pe',
+    type: 'email',
+    editable: true,
+    source: 'database',
+    status: 'editable',
+    defaultValue: 'contacto@saludapurimac.gob.pe',
+    createMeta: {
+      categoria: 'general',
+      tipoDato: 'string',
+      esPublico: true,
+    },
+  },
+  {
+    id: 'timezone',
+    key: 'timezone',
+    groupId: 'identidad',
+    categoryId: 'general',
+    label: 'Zona horaria',
+    description: 'Metadato base del sistema y exportaciones.',
+    type: 'select',
+    editable: true,
+    source: 'database',
+    status: 'editable',
+    defaultValue: 'America/Lima',
+    options: [
+      { value: 'America/Lima', label: 'Lima (UTC-5)' },
+      { value: 'America/Bogota', label: 'Bogota (UTC-5)' },
+      { value: 'America/Mexico_City', label: 'Ciudad de Mexico (UTC-6)' },
+    ],
+    createMeta: {
+      categoria: 'general',
+      tipoDato: 'string',
+      esPublico: false,
+      descripcion: 'Zona horaria del sistema',
+    },
+  },
+  {
+    id: 'formatoFecha',
+    key: 'formato_fecha',
+    groupId: 'identidad',
+    categoryId: 'general',
+    label: 'Formato de fecha',
+    description: 'Formato visible para documentos y datos exportados.',
+    type: 'select',
+    editable: true,
+    source: 'database',
+    status: 'editable',
+    defaultValue: 'DD/MM/YYYY',
+    options: [
+      { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
+      { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
+      { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
+    ],
+    createMeta: {
+      categoria: 'general',
+      tipoDato: 'string',
+      esPublico: true,
+    },
+  },
+  {
+    id: 'anioNombre',
+    key: 'anio_nombre',
+    groupId: 'identidad',
+    categoryId: 'general',
+    label: 'Nombre oficial del ano',
+    description: 'Texto extendido usado en reportes y exportaciones institucionales.',
+    placeholder: 'Ej: Ano de la recuperacion y consolidacion...',
+    type: 'textarea',
+    editable: true,
+    source: 'database',
+    status: 'editable',
+    rows: 3,
+    defaultValue: '',
+    createMeta: {
+      categoria: 'general',
+      tipoDato: 'string',
+      esPublico: true,
+    },
+  },
+  {
+    id: 'diasAlertaVencimiento',
+    key: 'dias_alerta_vencimiento',
+    legacyKeys: ['alertas_dias_anticipacion'],
+    groupId: 'alertas',
+    categoryId: 'alertas',
+    label: 'Anticipacion de vencimiento',
+    description: 'Dias previos al vencimiento para priorizar revision y generacion de alertas.',
+    type: 'number',
+    editable: true,
+    source: 'database',
+    status: 'editable',
+    min: 1,
+    max: 180,
+    step: 1,
+    defaultValue: 30,
+    formatValue: (value) => `${value} dias`,
+    createMeta: {
+      categoria: 'alertas',
+      tipoDato: 'number',
+      esPublico: false,
+      descripcion: 'Dias antes del vencimiento para generar alerta',
+    },
+  },
+  {
+    id: 'stockMinimoDefault',
+    key: 'stock_minimo_default',
+    legacyKeys: ['alertas_stock_minimo'],
+    groupId: 'alertas',
+    categoryId: 'alertas',
+    label: 'Stock minimo de referencia',
+    description: 'Umbral base usado al ejecutar la generacion automatica desde este modulo.',
+    type: 'number',
+    editable: true,
+    source: 'database',
+    status: 'editable',
+    min: 1,
+    max: 100000,
+    step: 1,
+    defaultValue: 100,
+    createMeta: {
+      categoria: 'alertas',
+      tipoDato: 'number',
+      esPublico: false,
+      descripcion: 'Stock minimo por defecto para alertas',
+    },
+  },
+  {
+    id: 'notificationsEnabled',
+    key: 'notifications_enabled',
+    groupId: 'alertas',
+    categoryId: 'notificaciones',
+    label: 'Notificaciones del sistema',
+    description: 'Flag persistido para notificaciones generales.',
+    type: 'text',
+    editable: false,
+    source: 'database',
+    status: 'stored',
+    defaultValue: 'true',
+  },
+  {
+    id: 'alertasEmailEnabled',
+    key: 'alertas_email_enabled',
+    groupId: 'alertas',
+    categoryId: 'notificaciones',
+    label: 'Alertas por correo',
+    description: 'Valor registrado para correo de alertas.',
+    type: 'text',
+    editable: false,
+    source: 'database',
+    status: 'stored',
+    defaultValue: 'false',
+  },
+  {
+    id: 'emailFrom',
+    key: 'email_from',
+    groupId: 'alertas',
+    categoryId: 'notificaciones',
+    label: 'Remitente',
+    description: 'Direccion remitente registrada en la base.',
+    type: 'email',
+    editable: false,
+    source: 'database',
+    status: 'stored',
+    defaultValue: 'noreply@saludapurimac.gob.pe',
+  },
+  {
+    id: 'sessionTimeout',
+    key: 'session_timeout',
+    legacyKeys: ['tiempo_sesion'],
+    groupId: 'seguridad',
+    categoryId: 'seguridad',
+    label: 'Expiracion de sesion',
+    description: 'Tiempo persistido para expiracion; el runtime actual usa configuracion tecnica separada.',
+    type: 'number',
+    editable: false,
+    source: 'database',
+    status: 'stored',
+    defaultValue: 1440,
+    formatValue: (value) => `${value} min`,
+  },
+  {
+    id: 'maxLoginAttempts',
+    key: 'max_login_attempts',
+    groupId: 'seguridad',
+    categoryId: 'seguridad',
+    label: 'Maximo de intentos de login',
+    description: 'Valor de referencia almacenado para politicas de acceso.',
+    type: 'number',
+    editable: false,
+    source: 'database',
+    status: 'stored',
+    defaultValue: 5,
+  },
+  {
+    id: 'passwordMinLength',
+    key: 'password_min_length',
+    groupId: 'seguridad',
+    categoryId: 'seguridad',
+    label: 'Longitud minima de contrasena',
+    description: 'Longitud registrada; la validacion activa del backend aun es fija.',
+    type: 'number',
+    editable: false,
+    source: 'database',
+    status: 'stored',
+    defaultValue: 8,
+  },
+  {
+    id: 'backupEnabled',
+    key: 'backup_enabled',
+    groupId: 'operacion',
+    categoryId: 'backup',
+    label: 'Respaldos automaticos',
+    description: 'El backend productivo resuelve este valor desde variables de entorno.',
+    type: 'text',
+    editable: false,
+    source: 'env',
+    status: 'env',
+    defaultValue: 'false',
+  },
+  {
+    id: 'backupSchedule',
+    key: 'backup_schedule',
+    groupId: 'operacion',
+    categoryId: 'backup',
+    label: 'Programacion de respaldo',
+    description: 'Cron registrado en la base para referencia operativa.',
+    type: 'text',
+    editable: false,
+    source: 'env',
+    status: 'env',
+    defaultValue: '0 2 * * *',
+  },
+  {
+    id: 'backupRetentionDays',
+    key: 'backup_retention_days',
+    groupId: 'operacion',
+    categoryId: 'backup',
+    label: 'Retencion de respaldos',
+    description: 'Cantidad de dias almacenada para respaldo.',
+    type: 'number',
+    editable: false,
+    source: 'env',
+    status: 'env',
+    defaultValue: 30,
+    formatValue: (value) => `${value} dias`,
+  },
+  {
+    id: 'reportesCacheDuration',
+    key: 'reportes_cache_duration',
+    groupId: 'operacion',
+    categoryId: 'reportes',
+    label: 'Cache de reportes',
+    description: 'Duracion registrada para cache de reportes.',
+    type: 'number',
+    editable: false,
+    source: 'database',
+    status: 'stored',
+    defaultValue: 300,
+    formatValue: (value) => `${value} s`,
+  },
+  {
+    id: 'reportesMaxRegistros',
+    key: 'reportes_max_registros',
+    groupId: 'operacion',
+    categoryId: 'reportes',
+    label: 'Maximo de registros',
+    description: 'Limite guardado para consultas masivas de reportes.',
+    type: 'number',
+    editable: false,
+    source: 'database',
+    status: 'stored',
+    defaultValue: 10000,
+  },
+  {
+    id: 'apiRateLimit',
+    key: 'api_rate_limit',
+    groupId: 'operacion',
+    categoryId: 'api',
+    label: 'Requests por ventana',
+    description: 'Referencia registrada; el rate limiting real del servidor usa `.env`.',
+    type: 'number',
+    editable: false,
+    source: 'env',
+    status: 'env',
+    defaultValue: 100,
+  },
+  {
+    id: 'apiRateWindow',
+    key: 'api_rate_window',
+    groupId: 'operacion',
+    categoryId: 'api',
+    label: 'Ventana de rate limit',
+    description: 'Ventana registrada en milisegundos.',
+    type: 'number',
+    editable: false,
+    source: 'env',
+    status: 'env',
+    defaultValue: 900000,
+    formatValue: (value) => `${Math.round(Number(value) / 60000)} min`,
+  },
+  {
+    id: 'sistemaVersion',
+    key: 'sistema_version',
+    groupId: 'operacion',
+    categoryId: 'sistema',
+    label: 'Version del sistema',
+    description: 'Version visible para diagnostico del modulo.',
+    type: 'text',
+    editable: false,
+    source: 'database',
+    status: 'stored',
+    defaultValue: '1.0.0',
+  },
+];
 
-  toggle: {
-    container: 'flex items-center justify-between py-3',
-    wrapper: 'relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer',
-    active: 'bg-teal-600',
-    inactive: 'bg-gray-200',
-    dot: 'inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
-    dotActive: 'translate-x-6',
-    dotInactive: 'translate-x-1',
-    label: 'text-sm font-medium text-gray-700',
-    description: 'text-xs text-gray-500',
-  },
-
-  modal: {
-    overlay: 'fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4',
-    container: 'bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl',
-    header: 'px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100',
-    body: 'px-6 py-5 overflow-y-auto max-h-[calc(90vh-180px)]',
-    footer: 'px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/50',
-  },
-
-  section: {
-    container: 'bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden',
-    header: 'px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100',
-    headerTitle: 'text-lg font-bold text-gray-900',
-    headerSubtitle: 'text-sm text-gray-600',
-    body: 'p-6',
-    footer: 'px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3',
-  },
-
-  sidebar: {
-    container: 'w-64 flex-shrink-0 bg-white border-r border-gray-100',
-    containerMobile: 'fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-100 shadow-xl transform transition-transform duration-300',
-    item: `flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl
-           transition-all duration-200 cursor-pointer`,
-    itemActive: 'bg-teal-50 text-teal-700 border border-teal-200',
-    itemInactive: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-    category: 'px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider',
-  },
-
-  alert: {
-    info: 'bg-cyan-50 border border-cyan-200 text-cyan-800 rounded-xl p-4',
-    warning: 'bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4',
-    error: 'bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4',
-    success: 'bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4',
-  },
-} as const;
-
-// Claves de configuración en la base de datos
-export const CONFIG_KEYS = {
-  // General
-  SISTEMA_NOMBRE: 'sistema_nombre',
-  INSTITUCION_NOMBRE: 'institucion_nombre',
-  INSTITUCION_DIRECCION: 'institucion_direccion',
-  INSTITUCION_TELEFONO: 'institucion_telefono',
-  INSTITUCION_EMAIL: 'institucion_email',
-  TIMEZONE: 'timezone',
-  FORMATO_FECHA: 'formato_fecha',
-  ANIO_NOMBRE: 'anio_nombre',
-  LOGO_PATH: 'logo_path',
-  
-  // Alertas
-  ALERTAS_DIAS_ANTICIPACION: 'alertas_dias_anticipacion',
-  ALERTAS_STOCK_MINIMO: 'alertas_stock_minimo',
-  ALERTAS_DIAS_RETENCION: 'alertas_dias_retencion',
-  
-  // Sistema
-  SISTEMA_VERSION: 'sistema_version',
-  TIEMPO_SESION: 'tiempo_sesion',
-} as const;
-
-// Valores por defecto de configuración
-export const DEFAULT_CONFIG = {
-  general: {
-    sistemaNombre: 'SIVAC - Sistema de Gestion de Vacunas',
-    institucionNombre: 'DISA Apurimac II',
-    institucionDireccion: 'Jr. Lima 123, Andahuaylas, Apurimac',
-    institucionTelefono: '+51 983 456 789',
-    institucionEmail: 'contacto@saludapurimac.gob.pe',
-    timezone: 'America/Lima',
-    formatoFecha: 'DD/MM/YYYY',
-    anioNombre: '',
-  },
-  alertas: {
-    diasAnticipacion: 30,
-    stockMinimo: 100,
-    diasRetencion: 30,
-  },
-  sistema: {
-    version: '2.1.0',
-    tiempoSesion: 480,
-  },
-} as const;
-
-export type ConfiguracionState = typeof DEFAULT_CONFIG;
-export type SectionId = typeof CONFIG_SECTIONS[number]['id'];
-export type ColorScheme = keyof typeof COLORS;
+export const getGroupById = (groupId: string) => CONFIG_GROUPS.find((group) => group.id === groupId);
+export const getCategoryById = (categoryId: string) => CONFIG_CATEGORIES.find((category) => category.id === categoryId);
+export const getFieldsByGroup = (groupId: string) => CONFIG_FIELDS.filter((field) => field.groupId === groupId);
+export const getFieldsByCategory = (categoryId: string) => CONFIG_FIELDS.filter((field) => field.categoryId === categoryId);
+export const getEditableFieldsByGroup = (groupId: string) =>
+  CONFIG_FIELDS.filter((field) => field.groupId === groupId && field.editable);

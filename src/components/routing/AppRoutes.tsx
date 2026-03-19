@@ -115,7 +115,7 @@ const AppRoutes: React.FC = () => {
       
       {/* Configuración */}
       <Route 
-        path="/configuracion" 
+        path="/configuracion/*" 
         element={
           <ProtectedRoute requiredRoles={['administrador']}>
             <Configuracion />
