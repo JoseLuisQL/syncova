@@ -48,7 +48,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
   isReadOnly = false,
   lockedCentroAcopioLabel,
   showReadOnlyCentroFilter = false,
-  allCentrosLabel = 'Todos los centros',
+  allCentrosLabel = 'Todos',
   selectedAnio,
   selectedCentroAcopio,
   selectedVacuna,

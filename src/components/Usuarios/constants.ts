@@ -121,6 +121,9 @@ export const COMPONENT_STYLES = {
                 transition-all duration-200
                 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
                 disabled:opacity-50 disabled:cursor-not-allowed`,
+    ghost: `inline-flex h-10 w-10 items-center justify-center rounded-xl border border-transparent
+            text-gray-500 transition-all duration-200 hover:bg-gray-100 hover:text-gray-700
+            focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2`,
     success: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white 
               bg-gradient-to-r from-emerald-600 to-emerald-700 
               hover:from-emerald-700 hover:to-emerald-800 
@@ -153,6 +156,7 @@ export const COMPONENT_STYLES = {
     error: 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30',
     label: 'block text-sm font-medium text-gray-700 mb-1.5',
     errorText: 'mt-1 text-xs text-rose-600',
+    helpText: 'mt-1 text-xs text-slate-500',
   },
 
   select: {
@@ -185,6 +189,7 @@ export const COMPONENT_STYLES = {
 
   modal: {
     overlay: 'fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 overflow-y-auto',
+    containerShell: 'mx-auto w-full overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-2xl',
     container: 'bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl',
     containerMedium: 'bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl',
     containerLarge: 'bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl',

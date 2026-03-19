@@ -1,5 +1,13 @@
-import React, { memo } from 'react';
-import { Search, Users, CheckCircle, Shield, UserMinus, Building2 } from 'lucide-react';
+import React, { memo, useMemo } from 'react';
+import {
+  Building2,
+  Download,
+  Loader2,
+  RefreshCw,
+  Search,
+  Settings2,
+  UserPlus,
+} from 'lucide-react';
 import { CentroAcopio, Role } from '../../../types';
 import { COMPONENT_STYLES } from '../constants';
 
@@ -10,13 +18,15 @@ interface UsuariosFiltrosProps {
   filterCentroAcopio: string;
   roles: Role[];
   centrosAcopio: CentroAcopio[];
-  totalUsuarios: number;
-  usuariosActivos: number;
-  usuariosInactivos: number;
   onSearchChange: (value: string) => void;
   onRolChange: (value: string) => void;
   onEstadoChange: (value: string) => void;
   onCentroAcopioChange: (value: string) => void;
+  onRefresh: () => void;
+  onExportar: () => void;
+  onNuevoUsuario: () => void;
+  isRefreshing: boolean;
+  isCreating: boolean;
 }
 
 const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
@@ -26,98 +36,133 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
   filterCentroAcopio,
   roles,
   centrosAcopio,
-  totalUsuarios,
-  usuariosActivos,
-  usuariosInactivos,
   onSearchChange,
   onRolChange,
   onEstadoChange,
   onCentroAcopioChange,
+  onRefresh,
+  onExportar,
+  onNuevoUsuario,
+  isRefreshing,
+  isCreating,
 }) => {
-  const stats = [
-    { key: 'total', value: totalUsuarios, label: 'Total', icon: Users, gradient: 'from-teal-500 to-teal-600' },
-    { key: 'activos', value: usuariosActivos, label: 'Activos', icon: CheckCircle, gradient: 'from-emerald-500 to-emerald-600' },
-    { key: 'inactivos', value: usuariosInactivos, label: 'Inactivos', icon: UserMinus, gradient: 'from-slate-500 to-slate-600' },
-    { key: 'roles', value: roles.length, label: 'Roles', icon: Shield, gradient: 'from-cyan-500 to-cyan-600' },
-  ];
+  const centrosActivos = useMemo(
+    () => centrosAcopio.filter((centro) => centro.estado === 'activo'),
+    [centrosAcopio],
+  );
+
+  const rolesActivos = useMemo(
+    () => roles.filter((rol) => rol.estado === 'activo'),
+    [roles],
+  );
 
   return (
     <div className="space-y-4">
-      {/* Stats Cards Compactos */}
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.key}
-              className={`${COMPONENT_STYLES.stats.cardGradient} bg-gradient-to-r ${stat.gradient}`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={COMPONENT_STYLES.stats.label}>{stat.label}</p>
-                  <p className={COMPONENT_STYLES.stats.value}>{stat.value}</p>
-                </div>
-                <Icon className="h-8 w-8 opacity-80" />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <section className="rounded-[24px] border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+        <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <Settings2 className="h-4 w-4 text-slate-500" aria-hidden="true" />
+            <span>Filtros y búsqueda</span>
+          </div>
 
-      {/* Filtros */}
-      <div className={COMPONENT_STYLES.filter.container}>
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Búsqueda */}
-          <div className="flex-1 relative">
-            <Search className={COMPONENT_STYLES.filter.searchIcon} />
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={onRefresh}
+              className={COMPONENT_STYLES.button.secondary}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              <span>Actualizar</span>
+            </button>
+            <button
+              type="button"
+              onClick={onExportar}
+              className={COMPONENT_STYLES.button.secondary}
+            >
+              <Download className="h-4 w-4" />
+              <span>Exportar CSV</span>
+            </button>
+            <button
+              type="button"
+              onClick={onNuevoUsuario}
+              className={COMPONENT_STYLES.button.primary}
+              disabled={isCreating}
+            >
+              {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+              <span>Nuevo usuario</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid gap-3 xl:grid-cols-[minmax(0,1.55fr)_repeat(3,minmax(0,0.85fr))]">
+          <div className="relative">
+            <label htmlFor="usuarios-search" className="mb-1.5 block text-sm font-medium text-slate-700">
+              Buscar usuario
+            </label>
+            <Search className="pointer-events-none absolute left-3.5 top-[calc(50%+0.875rem)] h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
+              id="usuarios-search"
               type="text"
-              placeholder="Buscar por nombre, email o usuario..."
+              placeholder="Buscar por nombre, correo o usuario"
               value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className={COMPONENT_STYLES.filter.searchInput}
+              onChange={(event) => onSearchChange(event.target.value)}
+              className={`${COMPONENT_STYLES.filter.searchInput} pl-10`}
             />
           </div>
 
-          {/* Filtros */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div>
+            <label htmlFor="usuarios-filter-rol" className="mb-1.5 block text-sm font-medium text-slate-700">
+              Rol
+            </label>
             <select
+              id="usuarios-filter-rol"
               value={filterRol}
-              onChange={(e) => onRolChange(e.target.value)}
+              onChange={(event) => onRolChange(event.target.value)}
               className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
             >
               <option value="todos">Todos los roles</option>
-              {roles.map((rol) => (
-                <option key={rol.id} value={rol.codigo}>{rol.nombre}</option>
+              {rolesActivos.map((rol) => (
+                <option key={rol.id} value={rol.codigo || rol.id}>{rol.nombre}</option>
               ))}
             </select>
+          </div>
 
+          <div>
+            <label htmlFor="usuarios-filter-estado" className="mb-1.5 block text-sm font-medium text-slate-700">
+              Estado
+            </label>
             <select
+              id="usuarios-filter-estado"
               value={filterEstado}
-              onChange={(e) => onEstadoChange(e.target.value)}
+              onChange={(event) => onEstadoChange(event.target.value)}
               className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
             >
               <option value="todos">Todos los estados</option>
               <option value="activo">Activos</option>
               <option value="inactivo">Inactivos</option>
             </select>
+          </div>
 
-            <div className="relative">
-              <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <select
-                value={filterCentroAcopio}
-                onChange={(e) => onCentroAcopioChange(e.target.value)}
-                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal} pl-10`}
-              >
-                <option value="todos">Todos los centros</option>
-                {centrosAcopio.filter((centro) => centro.estado === 'activo').map((centro) => (
-                  <option key={centro.id} value={centro.id}>{centro.nombre}</option>
-                ))}
-              </select>
-            </div>
+          <div className="relative">
+            <label htmlFor="usuarios-filter-centro" className="mb-1.5 block text-sm font-medium text-slate-700">
+              Centro de acopio
+            </label>
+            <Building2 className="pointer-events-none absolute left-3 top-[calc(50%+0.875rem)] h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <select
+              id="usuarios-filter-centro"
+              value={filterCentroAcopio}
+              onChange={(event) => onCentroAcopioChange(event.target.value)}
+              className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal} pl-10`}
+            >
+              <option value="todos">Todos los centros</option>
+              {centrosActivos.map((centro) => (
+                <option key={centro.id} value={centro.id}>{centro.nombre}</option>
+              ))}
+            </select>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 });

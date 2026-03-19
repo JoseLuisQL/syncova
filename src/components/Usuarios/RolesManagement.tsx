@@ -1,70 +1,61 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Shield,
-  Settings,
-  CheckCircle,
-  XCircle,
-  Users,
-  Key,
   AlertTriangle,
-  RefreshCw,
-  Loader2,
+  CheckCircle,
   Clock,
-  Database
+  Edit,
+  Key,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Search,
+  Settings2,
+  Shield,
+  Trash2,
+  Users,
+  XCircle,
 } from 'lucide-react';
-import { Role, CreateRoleDto, UpdateRoleDto, Permission } from '../../types';
-import { RoleService } from '../../services/roleService';
-import { PermissionService } from '../../services/permissionService';
+import { CreateRoleDto, Permission, Role, UpdateRoleDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
+import { PermissionService } from '../../services/permissionService';
+import { RoleService } from '../../services/roleService';
 import { logger } from '../../utils/debug';
-import RoleModal from './RoleModal';
+import { DeleteConfirmModal } from './components';
+import { COMPONENT_STYLES, DEFAULT_ROLE_ASSIGNABLE_PERMISSION_CODES } from './constants';
 import PermissionsModal from './PermissionsModal';
-import { DEFAULT_ROLE_ASSIGNABLE_PERMISSION_CODES } from './constants';
+import RoleModal from './RoleModal';
 
 interface RolesManagementProps {
   onNavigateToPermissions?: () => void;
 }
 
+interface DeleteRoleState {
+  isOpen: boolean;
+  role: Role | null;
+}
+
 const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissions }) => {
-  // Estados principales
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // Estados para filtros y búsqueda
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState<'todos' | 'activo' | 'inactivo'>('todos');
-  
-  // Estados para modales
+
   const [showModal, setShowModal] = useState(false);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [permissionsReadOnly, setPermissionsReadOnly] = useState(false);
-  
-  // Estados para operaciones
+  const [deleteRoleState, setDeleteRoleState] = useState<DeleteRoleState>({ isOpen: false, role: null });
+
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  
-  // Estados para permisos
+
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [loadingPermissions, setLoadingPermissions] = useState(false);
-  
-  // Estados para estadísticas
-  const [stats, setStats] = useState({
-    total: 0,
-    activos: 0,
-    inactivos: 0,
-    porDefecto: 0,
-    personalizados: 0,
-    conUsuarios: 0
-  });
 
   const { toast } = useToastContext();
 
@@ -81,96 +72,74 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     return permissions.filter((permission) => allowedCodes.includes(permission.codigo));
   }, [permissions, selectedRole]);
 
-  // Cargar datos iniciales
-  useEffect(() => {
-    loadRoles();
-    loadStats();
-  }, []);
+  const filteredRoles = useMemo(
+    () =>
+      roles.filter((role) => {
+        const matchesSearch = searchTerm === ''
+          || role.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+          || role.descripcion?.toLowerCase().includes(searchTerm.toLowerCase())
+          || role.codigo.toLowerCase().includes(searchTerm.toLowerCase());
 
-  // Filtrar roles
-  const filteredRoles = roles.filter(role => {
-    const matchesSearch = searchTerm === '' || 
-      role.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      role.descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      role.codigo.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesEstado = filterEstado === 'todos' || role.estado === filterEstado;
-    
-    return matchesSearch && matchesEstado;
-  });
+        const matchesEstado = filterEstado === 'todos' || role.estado === filterEstado;
+        return matchesSearch && matchesEstado;
+      }),
+    [filterEstado, roles, searchTerm],
+  );
 
-  /**
-   * Cargar roles
-   */
-  const loadRoles = async () => {
+  const hasActiveFilters = searchTerm.trim() !== '' || filterEstado !== 'todos';
+
+  const loadRoles = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const result = await RoleService.getAll({
         includePermissions: false,
-        limit: 100
+        limit: 100,
       });
-      
+
       setRoles(result.roles);
       logger.debug('Roles cargados:', result.roles);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al cargar roles';
+    } catch (loadError) {
+      const errorMessage = loadError instanceof Error ? loadError.message : 'Error al cargar roles';
       setError(errorMessage);
       toast.error(errorMessage);
-      logger.error('Error al cargar roles:', error);
+      logger.error('Error al cargar roles:', loadError);
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  /**
-   * Cargar estadísticas
-   */
-  const loadStats = async () => {
-    try {
-      const result = await RoleService.getStats();
-      setStats(result);
-    } catch (error) {
-      logger.error('Error al cargar estadísticas:', error);
-    }
-  };
-
-  /**
-   * Cargar permisos disponibles
-   */
-  const loadPermissions = async () => {
+  const loadPermissions = useCallback(async () => {
     try {
       setLoadingPermissions(true);
       const result = await PermissionService.getAll({ limit: 200 });
       setPermissions(result.permissions);
-    } catch (error) {
-      logger.error('Error al cargar permisos:', error);
+    } catch (loadError) {
+      logger.error('Error al cargar permisos:', loadError);
       toast.error('Error al cargar permisos disponibles');
     } finally {
       setLoadingPermissions(false);
     }
-  };
+  }, [toast]);
 
-  /**
-   * Cargar permisos de un rol
-   */
-  const loadRolePermissions = async (roleId: string) => {
+  const loadRolePermissions = useCallback(async (roleId: string) => {
     try {
       setLoadingPermissions(true);
       const result = await RoleService.getRolePermissions(roleId);
-      setSelectedPermissions(result.map(p => p.id));
-    } catch (error) {
-      logger.error('Error al cargar permisos del rol:', error);
+      setSelectedPermissions(result.map((permission) => permission.id));
+    } catch (loadError) {
+      logger.error('Error al cargar permisos del rol:', loadError);
       toast.error('Error al cargar permisos del rol');
     } finally {
       setLoadingPermissions(false);
     }
-  };
+  }, [toast]);
 
-  /**
-   * Manejar creación/edición de rol
-   */
+  useEffect(() => {
+    void loadRoles();
+  }, [loadRoles]);
+
   const handleSubmit = async (formData: CreateRoleDto | UpdateRoleDto) => {
     try {
       if (editingRole) {
@@ -182,72 +151,60 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
         await RoleService.create(formData as CreateRoleDto);
         toast.success('Rol creado correctamente');
       }
-      
+
       setShowModal(false);
       setEditingRole(null);
       await loadRoles();
-      await loadStats();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al guardar rol';
+    } catch (submitError) {
+      const errorMessage = submitError instanceof Error ? submitError.message : 'Error al guardar rol';
       toast.error(errorMessage);
-      logger.error('Error al guardar rol:', error);
+      logger.error('Error al guardar rol:', submitError);
     } finally {
       setIsCreating(false);
       setIsUpdating(false);
     }
   };
 
-  /**
-   * Manejar eliminación de rol
-   */
-  const handleDelete = async (role: Role) => {
-    if (!confirm(`¿Está seguro de eliminar el rol "${role.nombre}"?`)) {
-      return;
-    }
+  const handleDelete = (role: Role) => {
+    setDeleteRoleState({ isOpen: true, role });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteRoleState.role) return;
 
     try {
       setIsDeleting(true);
-      await RoleService.delete(role.id);
+      await RoleService.delete(deleteRoleState.role.id);
       toast.success('Rol eliminado correctamente');
+      setDeleteRoleState({ isOpen: false, role: null });
       await loadRoles();
-      await loadStats();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al eliminar rol';
+    } catch (deleteError) {
+      const errorMessage = deleteError instanceof Error ? deleteError.message : 'Error al eliminar rol';
       toast.error(errorMessage);
-      logger.error('Error al eliminar rol:', error);
+      logger.error('Error al eliminar rol:', deleteError);
     } finally {
       setIsDeleting(false);
     }
   };
 
-  /**
-   * Manejar cambio de estado
-   */
   const handleToggleEstado = async (role: Role) => {
     try {
       const nuevoEstado = role.estado === 'activo' ? 'inactivo' : 'activo';
       await RoleService.changeEstado(role.id, nuevoEstado);
       toast.success(`Rol ${nuevoEstado === 'activo' ? 'activado' : 'desactivado'} correctamente`);
       await loadRoles();
-      await loadStats();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al cambiar estado';
+    } catch (toggleError) {
+      const errorMessage = toggleError instanceof Error ? toggleError.message : 'Error al cambiar estado';
       toast.error(errorMessage);
-      logger.error('Error al cambiar estado:', error);
+      logger.error('Error al cambiar estado:', toggleError);
     }
   };
 
-  /**
-   * Manejar edición de rol
-   */
   const handleEdit = (role: Role) => {
     setEditingRole(role);
     setShowModal(true);
   };
 
-  /**
-   * Manejar gestión de permisos
-   */
   const handleManagePermissions = async (role: Role) => {
     setSelectedRole(role);
     setPermissionsReadOnly(role.codigo === 'administrador');
@@ -256,9 +213,6 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     setShowPermissionsModal(true);
   };
 
-  /**
-   * Guardar permisos del rol
-   */
   const handleSavePermissions = async () => {
     if (!selectedRole) return;
 
@@ -268,39 +222,36 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
       toast.success('Permisos asignados correctamente');
       setShowPermissionsModal(false);
       setSelectedRole(null);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al asignar permisos';
+    } catch (saveError) {
+      const errorMessage = saveError instanceof Error ? saveError.message : 'Error al asignar permisos';
       toast.error(errorMessage);
-      logger.error('Error al asignar permisos:', error);
+      logger.error('Error al asignar permisos:', saveError);
     } finally {
       setLoadingPermissions(false);
     }
   };
 
-  /**
-   * Obtener color del estado
-   */
-  const getEstadoColor = (estado: string) => {
-    return estado === 'activo' 
-      ? 'bg-green-100 text-green-800' 
-      : 'bg-red-100 text-red-800';
-  };
+  const getEstadoColor = (estado: string) =>
+    estado === 'activo'
+      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+      : 'border-rose-200 bg-rose-50 text-rose-700';
 
-  /**
-   * Obtener color del tipo de rol
-   */
-  const getTipoColor = (esDefault: boolean) => {
-    return esDefault
-      ? 'bg-blue-100 text-blue-800'
-      : 'bg-purple-100 text-purple-800';
-  };
+  const getTipoColor = (esDefault: boolean) =>
+    esDefault
+      ? 'border-cyan-200 bg-cyan-50 text-cyan-700'
+      : 'border-indigo-200 bg-indigo-50 text-indigo-700';
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex items-center space-x-2">
-          <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-          <span className="text-gray-600">Cargando roles...</span>
+      <div className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-3 text-slate-700">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 text-teal-700">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Cargando roles</p>
+            <p className="text-xs text-slate-500">Preparando métricas, filtros y listado de roles.</p>
+          </div>
         </div>
       </div>
     );
@@ -308,15 +259,15 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-        <div className="flex items-center space-x-2 text-red-800">
+      <div className="rounded-[24px] border border-rose-200 bg-rose-50/80 p-6">
+        <div className="flex items-center gap-2 text-rose-800">
           <AlertTriangle className="h-5 w-5" />
           <span className="font-medium">Error al cargar roles</span>
         </div>
-        <p className="text-red-600 mt-2">{error}</p>
+        <p className="mt-2 text-rose-700">{error}</p>
         <button
-          onClick={loadRoles}
-          className="mt-4 flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          onClick={() => void loadRoles()}
+          className={`${COMPONENT_STYLES.button.secondary} mt-4`}
         >
           <RefreshCw className="h-4 w-4" />
           <span>Reintentar</span>
@@ -326,91 +277,68 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header con estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl p-4 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-teal-100 text-sm">Total Roles</p>
-              <p className="text-2xl font-bold">{stats.total}</p>
-            </div>
-            <Shield className="h-8 w-8 text-teal-200" />
+    <div className="space-y-4">
+      <section className="rounded-[24px] border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+        <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <Settings2 className="h-4 w-4 text-slate-500" aria-hidden="true" />
+            <span>Filtros y acciones</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => {
+                void loadRoles();
+              }}
+              className={COMPONENT_STYLES.button.secondary}
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span>Actualizar</span>
+            </button>
+            {onNavigateToPermissions ? (
+              <button
+                onClick={onNavigateToPermissions}
+                className={COMPONENT_STYLES.button.secondary}
+              >
+                <Key className="h-4 w-4" />
+                <span>Ver permisos</span>
+              </button>
+            ) : null}
+            <button
+              onClick={() => setShowModal(true)}
+              className={COMPONENT_STYLES.button.primary}
+            >
+              <Plus className="h-4 w-4" />
+              <span>Nuevo rol</span>
+            </button>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-4 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-emerald-100 text-sm">Activos</p>
-              <p className="text-2xl font-bold">{stats.activos}</p>
-            </div>
-            <CheckCircle className="h-8 w-8 text-emerald-200" />
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_240px_auto]">
+          <div className="relative">
+            <label htmlFor="roles-search" className="mb-1.5 block text-sm font-medium text-slate-700">
+              Buscar rol
+            </label>
+            <Search className="pointer-events-none absolute left-3.5 top-[calc(50%+0.875rem)] h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              id="roles-search"
+              type="text"
+              placeholder="Buscar por nombre, descripción o código"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className={`${COMPONENT_STYLES.filter.searchInput} pl-10`}
+            />
           </div>
-        </div>
 
-        <div className="bg-gradient-to-r from-rose-500 to-rose-600 rounded-xl p-4 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-rose-100 text-sm">Inactivos</p>
-              <p className="text-2xl font-bold">{stats.inactivos}</p>
-            </div>
-            <XCircle className="h-8 w-8 text-rose-200" />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-xl p-4 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-cyan-100 text-sm">Por Defecto</p>
-              <p className="text-2xl font-bold">{stats.porDefecto}</p>
-            </div>
-            <Database className="h-8 w-8 text-cyan-200" />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl p-4 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-teal-100 text-sm">Personalizados</p>
-              <p className="text-2xl font-bold">{stats.personalizados}</p>
-            </div>
-            <Settings className="h-8 w-8 text-teal-200" />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-4 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-amber-100 text-sm">Con Usuarios</p>
-              <p className="text-2xl font-bold">{stats.conUsuarios}</p>
-            </div>
-            <Users className="h-8 w-8 text-amber-200" />
-          </div>
-        </div>
-      </div>
-
-      {/* Controles y filtros */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-            {/* Búsqueda */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <input
-                type="text"
-                placeholder="Buscar roles..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent w-full sm:w-64"
-              />
-            </div>
-
-            {/* Filtro por estado */}
+          <div>
+            <label htmlFor="roles-estado" className="mb-1.5 block text-sm font-medium text-slate-700">
+              Estado
+            </label>
             <select
+              id="roles-estado"
               value={filterEstado}
-              onChange={(e) => setFilterEstado(e.target.value as 'todos' | 'activo' | 'inactivo')}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              onChange={(event) => setFilterEstado(event.target.value as 'todos' | 'activo' | 'inactivo')}
+              className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
             >
               <option value="todos">Todos los estados</option>
               <option value="activo">Activos</option>
@@ -418,191 +346,157 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
             </select>
           </div>
 
-          <div className="flex space-x-2">
-            {/* Botón gestionar permisos */}
-            {onNavigateToPermissions && (
+          <div className="flex items-end">
+            {hasActiveFilters ? (
               <button
-                onClick={onNavigateToPermissions}
-                className="flex items-center px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
+                type="button"
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterEstado('todos');
+                }}
+                className={COMPONENT_STYLES.button.secondary}
               >
-                <Key className="h-4 w-4 mr-2" />
-                Gestionar Permisos
+                <RefreshCw className="h-4 w-4" />
+                <span>Limpiar filtros</span>
               </button>
+            ) : (
+              <div className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600">
+                {filteredRoles.length} roles visibles
+              </div>
             )}
-
-            {/* Botón nuevo rol */}
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo Rol
-            </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Tabla de roles */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50/90">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rol
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Código
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tipo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Usuarios
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Permisos
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Creado
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
-                </th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Rol</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Código</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Tipo</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Estado</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Usuarios</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Permisos</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Creado</th>
+                <th className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Acciones</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-slate-200 bg-white">
               {filteredRoles.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center">
+                  <td colSpan={8} className="px-6 py-14 text-center">
                     <div className="flex flex-col items-center space-y-2">
-                      <Shield className="h-12 w-12 text-gray-300" />
-                      <p className="text-gray-500 font-medium">No se encontraron roles</p>
-                      <p className="text-gray-400 text-sm">
-                        {searchTerm || filterEstado !== 'todos'
-                          ? 'Intenta ajustar los filtros de búsqueda'
-                          : 'Comienza creando tu primer rol personalizado'
-                        }
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+                        <Shield className="h-8 w-8 text-slate-400" />
+                      </div>
+                      <p className="text-base font-medium text-slate-900">No se encontraron roles</p>
+                      <p className="max-w-md text-sm text-slate-500">
+                        {hasActiveFilters
+                          ? 'Intenta ajustar los filtros para encontrar el rol que buscas.'
+                          : 'Todavía no hay roles personalizados registrados en el sistema.'}
                       </p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 filteredRoles.map((role) => (
-                  <tr key={role.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                            <Shield className="h-5 w-5 text-purple-600" />
-                          </div>
+                  <tr key={role.id} className="transition-colors duration-150 hover:bg-slate-50/70">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${
+                          role.esDefault
+                            ? 'border-cyan-200 bg-cyan-50 text-cyan-700'
+                            : 'border-violet-200 bg-violet-50 text-violet-700'
+                        }`}>
+                          <Shield className="h-5 w-5" />
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {role.nombre}
-                          </div>
-                          {role.descripcion && (
-                            <div className="text-sm text-gray-500">
-                              {role.descripcion}
-                            </div>
-                          )}
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-slate-900">{role.nombre}</div>
+                          <div className="text-sm text-slate-500">{role.descripcion || 'Sin descripción registrada.'}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                    <td className="px-6 py-4">
+                      <span className="inline-flex rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-sm text-slate-800">
                         {role.codigo}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTipoColor(role.esDefault)}`}>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getTipoColor(role.esDefault)}`}>
                         {role.esDefault ? 'Sistema' : 'Personalizado'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getEstadoColor(role.estado)}`}>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getEstadoColor(role.estado)}`}>
                         {role.estado === 'activo' ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="flex items-center">
-                        <Users className="h-4 w-4 text-gray-400 mr-1" />
-                        {role._count?.usuarios || 0}
+                    <td className="px-6 py-4 text-sm text-slate-700">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-slate-400" />
+                        <span>{role._count?.usuarios || 0}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="flex items-center">
-                        <Key className="h-4 w-4 text-gray-400 mr-1" />
-                        {role._count?.rolePermissions || 0}
+                    <td className="px-6 py-4 text-sm text-slate-700">
+                      <div className="flex items-center gap-2">
+                        <Key className="h-4 w-4 text-slate-400" />
+                        <span>{role._count?.rolePermissions || 0}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 text-gray-400 mr-1" />
-                        {role.createdAt.toLocaleDateString()}
+                    <td className="px-6 py-4 text-sm text-slate-500">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-slate-400" />
+                        <span>{new Date(role.createdAt).toLocaleDateString('es-PE')}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-2">
-                        {/* Botón gestionar permisos */}
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleManagePermissions(role)}
-                          className="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50"
+                          onClick={() => void handleManagePermissions(role)}
+                          className={`${COMPONENT_STYLES.button.icon} text-indigo-600 bg-indigo-50 hover:bg-indigo-100 focus:ring-indigo-500`}
                           title="Gestionar permisos"
                         >
                           <Key className="h-4 w-4" />
                         </button>
 
-                        {/* Botón editar */}
                         <button
                           onClick={() => handleEdit(role)}
-                          className={`p-1 rounded ${
-                            role.esDefault
-                              ? 'text-gray-300 cursor-not-allowed'
-                              : 'text-blue-600 hover:text-blue-900 hover:bg-blue-50'
-                          }`}
+                          className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconEdit}`}
                           title={role.esDefault ? 'Rol protegido del sistema' : 'Editar rol'}
                           disabled={role.esDefault}
                         >
                           <Edit className="h-4 w-4" />
                         </button>
 
-                        {/* Botón cambiar estado */}
                         <button
-                          onClick={() => handleToggleEstado(role)}
-                          className={`p-1 rounded ${
+                          onClick={() => void handleToggleEstado(role)}
+                          className={`${COMPONENT_STYLES.button.icon} ${
                             role.estado === 'activo'
-                              ? 'text-red-600 hover:text-red-900 hover:bg-red-50'
-                              : 'text-green-600 hover:text-green-900 hover:bg-green-50'
+                              ? 'text-amber-600 bg-amber-50 hover:bg-amber-100 focus:ring-amber-500'
+                              : 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100 focus:ring-emerald-500'
                           }`}
-                          title={role.estado === 'activo' ? 'Desactivar' : 'Activar'}
+                          title={role.estado === 'activo' ? 'Desactivar rol' : 'Activar rol'}
                           disabled={role.esDefault}
                         >
-                          {role.estado === 'activo' ? (
-                            <XCircle className="h-4 w-4" />
-                          ) : (
-                            <CheckCircle className="h-4 w-4" />
-                          )}
+                          {role.estado === 'activo' ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
                         </button>
 
-                        {/* Botón eliminar */}
-                        {!role.esDefault && (
+                        {!role.esDefault ? (
                           <button
                             onClick={() => handleDelete(role)}
-                            className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
+                            className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconDelete}`}
                             title="Eliminar rol"
                             disabled={isDeleting}
                           >
-                            {isDeleting ? (
+                            {isDeleting && deleteRoleState.role?.id === role.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                               <Trash2 className="h-4 w-4" />
                             )}
                           </button>
-                        )}
+                        ) : null}
                       </div>
                     </td>
                   </tr>
@@ -611,9 +505,8 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      {/* Modal para crear/editar rol */}
       <RoleModal
         isOpen={showModal}
         onClose={() => {
@@ -625,7 +518,6 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
         isLoading={isCreating || isUpdating}
       />
 
-      {/* Modal para gestionar permisos */}
       <PermissionsModal
         isOpen={showPermissionsModal}
         onClose={() => {
@@ -639,14 +531,30 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
         permissions={modalPermissions}
         selectedPermissions={selectedPermissions}
         onPermissionToggle={(permissionId) => {
-          setSelectedPermissions(prev =>
+          setSelectedPermissions((prev) =>
             prev.includes(permissionId)
-              ? prev.filter(id => id !== permissionId)
-              : [...prev, permissionId]
+              ? prev.filter((id) => id !== permissionId)
+              : [...prev, permissionId],
           );
         }}
         isLoading={loadingPermissions}
         isReadOnly={permissionsReadOnly}
+      />
+
+      <DeleteConfirmModal
+        isOpen={deleteRoleState.isOpen}
+        onClose={() => setDeleteRoleState({ isOpen: false, role: null })}
+        onConfirm={() => void confirmDelete()}
+        title="Eliminar rol"
+        description="El rol será retirado del sistema y dejará de estar disponible para nuevas asignaciones."
+        itemName={deleteRoleState.role?.nombre}
+        confirmLabel="Eliminar rol"
+        isLoading={isDeleting}
+        warningMessage={
+          deleteRoleState.role && (deleteRoleState.role._count?.usuarios || 0) > 0
+            ? 'Este rol tiene usuarios asociados. Verifica primero la reasignación o el impacto operativo antes de eliminarlo.'
+            : 'Verifica que el rol no forme parte de un flujo operativo pendiente antes de confirmar la eliminación.'
+        }
       />
     </div>
   );

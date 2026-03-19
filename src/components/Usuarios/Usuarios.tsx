@@ -1,18 +1,30 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, Download, Loader2, RefreshCw, UserPlus } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { Usuario, CreateUsuarioDto, UpdateUsuarioDto, ChangePasswordDto, Role } from '../../types';
 import { useUsuarios } from '../../hooks/useUsuarios';
 import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
 import { useToastContext } from '../../contexts/ToastContext';
 import { RoleService } from '../../services/roleService';
-import { COMPONENT_STYLES } from './constants';
 import {
   UsuariosFiltros,
   UsuariosTabla,
   UsuarioModal,
   CambiarPasswordModal,
   BulkActionsBar,
+  DeleteConfirmModal,
 } from './components';
+
+interface DeleteConfirmationState {
+  isOpen: boolean;
+  ids: string[];
+  names: string[];
+}
+
+const createInitialDeleteConfirmation = (): DeleteConfirmationState => ({
+  isOpen: false,
+  ids: [],
+  names: [],
+});
 
 const Usuarios: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,6 +37,7 @@ const Usuarios: React.FC = () => {
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
   const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<DeleteConfirmationState>(createInitialDeleteConfirmation);
 
   const {
     usuarios,
@@ -43,6 +56,8 @@ const Usuarios: React.FC = () => {
     exportUsuarios,
     isCreating,
     isUpdating,
+    isDeleting,
+    isChangingPassword,
   } = useUsuarios();
 
   const { centrosAcopio, fetchCentrosAcopio } = useCentrosAcopio({ estado: 'activo', limit: 1000 });
@@ -78,12 +93,9 @@ const Usuarios: React.FC = () => {
     });
   }, [applyFilters, filterCentroAcopio, filterEstado, filterRol]);
 
-  const usuariosActivos = useMemo(
-    () => usuarios.filter((usuario) => usuario.estado === 'activo').length,
-    [usuarios],
-  );
-
-  const usuariosInactivos = usuarios.length - usuariosActivos;
+  const closeDeleteConfirmation = useCallback(() => {
+    setDeleteConfirmation(createInitialDeleteConfirmation());
+  }, []);
 
   const handleSelectUser = useCallback((userId: string) => {
     setSelectedUsers((prev) =>
@@ -105,23 +117,18 @@ const Usuarios: React.FC = () => {
     setShowModal(true);
   }, []);
 
-  const handleDelete = useCallback(async (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     const usuario = usuarios.find((item) => item.id === id);
-    const nombreCompleto = usuario ? `${usuario.nombres} ${usuario.apellidos}` : 'este usuario';
-
-    if (!window.confirm(`¿Está seguro de eliminar a ${nombreCompleto}?`)) {
+    if (!usuario) {
       return;
     }
 
-    const success = await deleteUsuario(id);
-    if (!success) {
-      toast.error('No se pudo eliminar el usuario');
-      return;
-    }
-
-    toast.success(`Usuario ${nombreCompleto} eliminado exitosamente`);
-    setSelectedUsers((prev) => prev.filter((userId) => userId !== id));
-  }, [deleteUsuario, toast, usuarios]);
+    setDeleteConfirmation({
+      isOpen: true,
+      ids: [id],
+      names: [`${usuario.nombres} ${usuario.apellidos}`.trim()],
+    });
+  }, [usuarios]);
 
   const handleToggleEstado = useCallback(async (id: string) => {
     const usuario = usuarios.find((item) => item.id === id);
@@ -220,7 +227,17 @@ const Usuarios: React.FC = () => {
   }, [createUsuario, editingUser, toast, updateUsuario]);
 
   const handleBulkAction = useCallback(async (action: 'activar' | 'desactivar' | 'eliminar') => {
-    if (action === 'eliminar' && !window.confirm(`¿Está seguro de eliminar ${selectedUsers.length} usuarios?`)) {
+    if (action === 'eliminar') {
+      const selectedUserNames = selectedUsers
+        .map((userId) => usuarios.find((usuario) => usuario.id === userId))
+        .filter((usuario): usuario is Usuario => Boolean(usuario))
+        .map((usuario) => `${usuario.nombres} ${usuario.apellidos}`.trim());
+
+      setDeleteConfirmation({
+        isOpen: true,
+        ids: selectedUsers,
+        names: selectedUserNames,
+      });
       return;
     }
 
@@ -230,10 +247,8 @@ const Usuarios: React.FC = () => {
       let success = false;
       if (action === 'activar') {
         success = await changeEstado(userId, 'activo');
-      } else if (action === 'desactivar') {
-        success = await changeEstado(userId, 'inactivo');
       } else {
-        success = await deleteUsuario(userId);
+        success = await changeEstado(userId, 'inactivo');
       }
       if (success) exitosos += 1;
     }
@@ -246,12 +261,50 @@ const Usuarios: React.FC = () => {
     const mensajes = {
       activar: 'activados',
       desactivar: 'desactivados',
-      eliminar: 'eliminados',
     };
 
     toast.success(`${exitosos} usuarios ${mensajes[action]} exitosamente`);
     setSelectedUsers([]);
-  }, [changeEstado, deleteUsuario, selectedUsers, toast]);
+  }, [changeEstado, selectedUsers, toast, usuarios]);
+
+  const confirmDelete = useCallback(async () => {
+    if (deleteConfirmation.ids.length === 0) {
+      return;
+    }
+
+    const successfulIds: string[] = [];
+    let exitosos = 0;
+
+    for (const userId of deleteConfirmation.ids) {
+      const success = await deleteUsuario(userId);
+      if (success) {
+        exitosos += 1;
+        successfulIds.push(userId);
+      }
+    }
+
+    if (exitosos === 0) {
+      toast.error(
+        deleteConfirmation.ids.length > 1
+          ? 'No se pudieron eliminar los usuarios seleccionados'
+          : 'No se pudo eliminar el usuario',
+      );
+      return;
+    }
+
+    setSelectedUsers((prev) => prev.filter((userId) => !successfulIds.includes(userId)));
+
+    if (deleteConfirmation.ids.length === 1) {
+      toast.success(`Usuario ${deleteConfirmation.names[0]} eliminado exitosamente`);
+    } else {
+      toast.success(`${exitosos} usuarios eliminados exitosamente`);
+      if (exitosos < deleteConfirmation.ids.length) {
+        toast.error('Algunos usuarios no pudieron eliminarse. Revise dependencias o intente nuevamente.');
+      }
+    }
+
+    closeDeleteConfirmation();
+  }, [closeDeleteConfirmation, deleteConfirmation.ids, deleteConfirmation.names, deleteUsuario, toast]);
 
   const handleExportar = useCallback(async () => {
     const success = await exportUsuarios();
@@ -283,49 +336,6 @@ const Usuarios: React.FC = () => {
       ) : null}
 
       <section className="rounded-[26px] border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h3 className="text-base font-semibold text-slate-900">Cuentas y auditoría operativa</h3>
-              <p className="mt-1 text-sm text-slate-500">
-                Filtra por rol, estado y centro de acopio. La exportación respeta los filtros activos.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => void refresh()}
-                className={COMPONENT_STYLES.button.secondary}
-                disabled={isLoading}
-              >
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                <span>Actualizar</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => void handleExportar()}
-                className={COMPONENT_STYLES.button.secondary}
-              >
-                <Download className="h-4 w-4" />
-                <span>Exportar CSV</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingUser(null);
-                  setShowModal(true);
-                }}
-                className={COMPONENT_STYLES.button.primary}
-                disabled={isCreating}
-              >
-                {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-                <span>Nuevo usuario</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
         <div className="space-y-4 p-4 sm:p-6">
           <UsuariosFiltros
             searchTerm={searchTerm}
@@ -334,13 +344,18 @@ const Usuarios: React.FC = () => {
             filterCentroAcopio={filterCentroAcopio}
             roles={roles}
             centrosAcopio={centrosAcopio}
-            totalUsuarios={usuarios.length}
-            usuariosActivos={usuariosActivos}
-            usuariosInactivos={usuariosInactivos}
             onSearchChange={setSearchTerm}
             onRolChange={setFilterRol}
             onEstadoChange={setFilterEstado}
             onCentroAcopioChange={setFilterCentroAcopio}
+            onRefresh={() => void refresh()}
+            onExportar={() => void handleExportar()}
+            onNuevoUsuario={() => {
+              setEditingUser(null);
+              setShowModal(true);
+            }}
+            isRefreshing={isLoading}
+            isCreating={isCreating}
           />
 
           <BulkActionsBar
@@ -349,6 +364,7 @@ const Usuarios: React.FC = () => {
             onDesactivar={() => void handleBulkAction('desactivar')}
             onEliminar={() => void handleBulkAction('eliminar')}
             onClearSelection={() => setSelectedUsers([])}
+            isProcessing={isUpdating || isDeleting}
           />
 
           <UsuariosTabla
@@ -383,11 +399,35 @@ const Usuarios: React.FC = () => {
         <CambiarPasswordModal
           usuario={selectedUser}
           isOpen={showPasswordModal}
-          isLoading={false}
+          isLoading={isChangingPassword}
           onClose={handleClosePasswordModal}
           onSubmit={(password) => void handlePasswordSubmit(password)}
         />
       ) : null}
+
+      <DeleteConfirmModal
+        isOpen={deleteConfirmation.isOpen}
+        onClose={closeDeleteConfirmation}
+        onConfirm={() => void confirmDelete()}
+        title={deleteConfirmation.ids.length > 1 ? 'Eliminar usuarios' : 'Eliminar usuario'}
+        description={
+          deleteConfirmation.ids.length > 1
+            ? `Se eliminarán permanentemente ${deleteConfirmation.ids.length} usuarios seleccionados del sistema.`
+            : 'La cuenta será eliminada del sistema y dejará de estar disponible para futuras operaciones.'
+        }
+        itemName={
+          deleteConfirmation.ids.length > 1
+            ? deleteConfirmation.names.slice(0, 2).join(', ') + (deleteConfirmation.names.length > 2 ? ` y ${deleteConfirmation.names.length - 2} más` : '')
+            : deleteConfirmation.names[0]
+        }
+        confirmLabel={deleteConfirmation.ids.length > 1 ? 'Eliminar usuarios' : 'Eliminar usuario'}
+        isLoading={isDeleting}
+        warningMessage={
+          deleteConfirmation.ids.length > 1
+            ? 'Verifica que los usuarios no tengan dependencias activas antes de confirmar la eliminación masiva.'
+            : 'Verifica que el usuario no tenga procesos operativos pendientes o relaciones activas en otros módulos.'
+        }
+      />
     </div>
   );
 };

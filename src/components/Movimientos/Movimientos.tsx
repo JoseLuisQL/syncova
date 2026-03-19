@@ -157,7 +157,7 @@ const Movimientos: React.FC = () => {
   }, [centrosAcopio, establecimientos, lockedCentroAcopioIds, user?.centrosAcopioAsignados]);
   const centrosAcopioFiltro = isReadOnlyMode ? centrosAcopioPermitidos : centrosAcopio;
   const canFilterAssignedCentros = isReadOnlyMode && centrosAcopioPermitidos.length > 1;
-  const allCentrosLabel = canFilterAssignedCentros ? 'Todos mis centros' : 'Todos';
+  const allCentrosLabel = 'Todos';
 
   const {
     onEntregaBaseChanged,
@@ -1717,29 +1717,6 @@ const Movimientos: React.FC = () => {
 
       {/* Content */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {isReadOnlyMode && lockedCentroAcopioIds.length > 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-            {canFilterAssignedCentros ? (
-              <>
-                Vista restringida para responsable de acopio. Por defecto se consolidan los establecimientos de
-                {' '}
-                <strong>{lockedCentroAcopioLabel}</strong>
-                {' '}
-                y puede filtrar solo entre esos centros autorizados. Todas las acciones de edición, importación,
-                exportación y generación de vales están bloqueadas.
-              </>
-            ) : (
-              <>
-                Vista restringida para responsable de acopio. El centro de acopio queda fijado en
-                {' '}
-                <strong>{lockedCentroAcopioLabel}</strong>
-                {' '}
-                y todas las acciones de edición, importación, exportación y generación de vales están bloqueadas.
-              </>
-            )}
-          </div>
-        ) : null}
-
         {/* Alertas de Estado - Solo errores */}
         {error && (
           <AlertaEstado tipo="error" mensaje={error} />

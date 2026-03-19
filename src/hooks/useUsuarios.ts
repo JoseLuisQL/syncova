@@ -65,6 +65,7 @@ export const useUsuarios = () => {
   const isCreating = crudApi.create.loading;
   const isUpdating = crudApi.update.loading;
   const isDeleting = crudApi.delete.loading;
+  const isChangingPassword = passwordApi.loading;
   const createError = crudApi.create.error;
   const updateError = crudApi.update.error;
   const deleteError = crudApi.delete.error;
@@ -394,6 +395,7 @@ export const useUsuarios = () => {
     isCreating,
     isUpdating,
     isDeleting,
+    isChangingPassword,
     
     // Errores
     error,

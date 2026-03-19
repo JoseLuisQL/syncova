@@ -264,13 +264,13 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
     >
       <div 
         ref={modalRef}
-        className="bg-white rounded-2xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl"
+        className={`${COMPONENT_STYLES.modal.containerShell} max-w-5xl max-h-[92vh] flex flex-col sm:rounded-[30px]`}
       >
         {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100/80">
+        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-100/80">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-teal-600 to-cyan-600 shadow-lg">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-600 shadow-[0_16px_30px_-18px_rgba(13,148,136,0.75)]">
                 <Key className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
               <div>
@@ -287,7 +287,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
             <button
               onClick={onClose}
               disabled={isLoading || isSaving}
-              className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              className={COMPONENT_STYLES.button.ghost}
               aria-label="Cerrar modal"
             >
               <X className="h-5 w-5" />
@@ -296,13 +296,13 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
         </div>
 
         {isReadOnly && (
-          <div className="mx-6 mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <div className="mx-6 mt-4 rounded-[20px] border border-amber-200 bg-amber-50/80 px-4 py-3.5 text-sm text-amber-800">
             Este rol es parte de la configuración base del sistema. Sus permisos se muestran solo para auditoría.
           </div>
         )}
 
         {/* Filtros y estadísticas */}
-        <div className="px-6 py-4 border-b border-gray-100 bg-white">
+        <div className="px-6 py-4 border-b border-slate-200 bg-white">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Búsqueda */}
             <div className="relative flex-1">
@@ -386,7 +386,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
         </div>
 
         {/* Lista de permisos */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 bg-gray-50/30">
+        <div className="flex-1 overflow-y-auto bg-slate-50/40 px-6 py-4">
           {Object.keys(groupedPermissions).length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="p-4 rounded-2xl bg-gray-100 mb-4">
@@ -416,7 +416,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                 return (
                   <div 
                     key={category} 
-                    className={`rounded-2xl border ${colors.border} overflow-hidden bg-white shadow-sm transition-all duration-200 hover:shadow-md`}
+                    className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_10px_26px_-22px_rgba(15,23,42,0.22)] transition-all duration-200 hover:shadow-[0_18px_38px_-28px_rgba(15,23,42,0.28)]"
                   >
                     {/* Header de categoría */}
                     <button
@@ -426,7 +426,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                       aria-controls={`category-${category}`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-xl ${colors.iconBg}`}>
+                        <div className={`p-2.5 rounded-2xl ${colors.iconBg}`}>
                           <CategoryIcon className={`h-5 w-5 ${colors.text}`} />
                         </div>
                         <div className="text-left">
@@ -441,12 +441,12 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                         {/* Checkbox de categoría */}
                         <div 
                           onClick={(e) => toggleAllInCategory(category, e)}
-                          className={`flex items-center justify-center w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                          className={`flex items-center justify-center w-6 h-6 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
                             allSelected 
                               ? 'bg-teal-600 border-teal-600' 
                               : someSelected 
                                 ? 'bg-teal-100 border-teal-400' 
-                                : 'bg-white border-gray-300 hover:border-teal-400'
+                                : 'bg-white border-slate-300 hover:border-teal-300'
                           } ${isReadOnly ? 'cursor-not-allowed opacity-60' : ''}`}
                           role="checkbox"
                           aria-checked={allSelected ? 'true' : someSelected ? 'mixed' : 'false'}
@@ -469,8 +469,8 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
 
                     {/* Permisos de la categoría */}
                     {isExpanded && (
-                      <div id={`category-${category}`} className="p-4 border-t border-gray-100">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div id={`category-${category}`} className="border-t border-slate-200 p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {categoryPermissions.map((permission) => {
                             const isSelected = selectedPermissions.includes(permission.id);
                             const actionStyle = getActionStyle(permission.accion);
@@ -479,10 +479,10 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                             return (
                               <label
                                 key={permission.id}
-                                className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all duration-200 ${
+                                className={`flex items-start gap-3 rounded-[20px] border p-3.5 cursor-pointer transition-all duration-200 ${
                                   isSelected
-                                    ? 'bg-teal-50/70 border-teal-200 ring-1 ring-teal-200'
-                                    : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200'
+                                    ? 'border-teal-200 bg-teal-50/65 shadow-sm ring-1 ring-teal-100'
+                                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                                 }`}
                               >
                                 <input
@@ -547,7 +547,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/70">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Resumen */}
             <div className="flex items-center gap-2 text-sm text-gray-600">

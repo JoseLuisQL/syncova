@@ -210,7 +210,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
       };
 
       await onSubmit(submitData);
-    } catch (error) {
+    } catch {
       // El error se maneja en el componente padre
     } finally {
       setIsSubmitting(false);
@@ -237,13 +237,13 @@ const RoleModal: React.FC<RoleModalProps> = ({
     >
       <div 
         ref={modalRef}
-        className="bg-white rounded-2xl w-full max-w-lg max-h-[92vh] flex flex-col shadow-2xl"
+        className={`${COMPONENT_STYLES.modal.containerShell} max-w-lg max-h-[92vh] flex flex-col sm:rounded-[28px]`}
       >
         {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100/80">
+        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-100/80">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-teal-600 to-cyan-600 shadow-lg">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-600 shadow-[0_16px_30px_-18px_rgba(13,148,136,0.75)]">
                 <Shield className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
               <div>
@@ -261,7 +261,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
             <button
               onClick={onClose}
               disabled={isLoading || isSubmitting}
-              className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              className={COMPONENT_STYLES.button.ghost}
               aria-label="Cerrar modal"
             >
               <X className="h-5 w-5" />
@@ -271,7 +271,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
 
         {/* Aviso de rol del sistema */}
         {isSystemRole && (
-          <div className="mx-6 mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+          <div className="mx-6 mt-4 rounded-[20px] border border-amber-200 bg-amber-50/80 px-4 py-3.5 flex items-start gap-3">
             <Info className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium text-amber-800">Rol del Sistema</p>
@@ -283,7 +283,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-5">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto bg-white px-6 py-5">
           <div className="space-y-5">
             {/* Nombre */}
             <div>
@@ -405,10 +405,10 @@ const RoleModal: React.FC<RoleModalProps> = ({
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, estado: 'activo' }))}
                   disabled={isLoading || isSubmitting}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
                     formData.estado === 'activo'
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                      : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                      ? 'border-emerald-300 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 shadow-sm'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
                   <ToggleRight className={`h-5 w-5 ${formData.estado === 'activo' ? 'text-emerald-600' : 'text-gray-400'}`} />
@@ -421,10 +421,10 @@ const RoleModal: React.FC<RoleModalProps> = ({
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, estado: 'inactivo' }))}
                   disabled={isLoading || isSubmitting}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
                     formData.estado === 'inactivo'
-                      ? 'border-gray-500 bg-gray-100 text-gray-700'
-                      : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                      ? 'border-slate-300 bg-slate-100 text-slate-700 ring-1 ring-slate-200 shadow-sm'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
                   <ToggleLeft className={`h-5 w-5 ${formData.estado === 'inactivo' ? 'text-gray-600' : 'text-gray-400'}`} />
@@ -444,7 +444,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/70">
           <div className="flex items-center justify-end gap-3">
             <button
               type="button"
