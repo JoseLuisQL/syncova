@@ -164,6 +164,340 @@ const AvailabilityBadge: React.FC<{ value: number }> = memo(({ value }) => {
 
 AvailabilityBadge.displayName = 'AvailabilityBadge';
 
+// ============================================================================
+// MOBILE METRIC ROW
+// ============================================================================
+
+interface MobileMetricRowProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+const MobileMetricRow: React.FC<MobileMetricRowProps> = ({ label, children }) => (
+  <div className="flex items-center justify-between gap-2">
+    <span className="text-[0.7rem] font-medium uppercase tracking-wide text-slate-500">{label}</span>
+    {children}
+  </div>
+);
+
+// ============================================================================
+// MOBILE CARD COMPONENT
+// ============================================================================
+
+interface MobileMovimientoCardProps {
+  readOnly: boolean;
+  movimiento: TablaMovimiento;
+  isSelected: boolean;
+  isDisabled: boolean;
+  isProcessingEntrega: boolean;
+  isTyping: { [key: string]: boolean };
+  selectedCentroAcopio: string;
+  periodoEntrega: string;
+  getCurrentValue: MovimientosTablaProps['getCurrentValue'];
+  hasPendingChange: MovimientosTablaProps['hasPendingChange'];
+  getCurrentEntregaValue: MovimientosTablaProps['getCurrentEntregaValue'];
+  hasPendingEntregaChange: MovimientosTablaProps['hasPendingEntregaChange'];
+  getFieldKey: MovimientosTablaProps['getFieldKey'];
+  onTempValueChange: MovimientosTablaProps['onTempValueChange'];
+  onFieldBlur: MovimientosTablaProps['onFieldBlur'];
+  onTempEntregaValueChange: MovimientosTablaProps['onTempEntregaValueChange'];
+  onEntregaFieldBlur: MovimientosTablaProps['onEntregaFieldBlur'];
+  onAgregarEntregaAdicional: MovimientosTablaProps['onAgregarEntregaAdicional'];
+  onEliminarEntregaAdicional: MovimientosTablaProps['onEliminarEntregaAdicional'];
+  onRowSelect: (id: string | null) => void;
+}
+
+const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
+  readOnly,
+  movimiento,
+  isSelected,
+  isDisabled,
+  isProcessingEntrega,
+  isTyping: isTypingState,
+  selectedCentroAcopio,
+  getCurrentValue,
+  hasPendingChange,
+  getCurrentEntregaValue,
+  hasPendingEntregaChange,
+  getFieldKey,
+  onTempValueChange,
+  onFieldBlur,
+  onTempEntregaValueChange,
+  onEntregaFieldBlur,
+  onAgregarEntregaAdicional,
+  onEliminarEntregaAdicional,
+  onRowSelect,
+}) => {
+  const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento);
+  const { colores, centro } = estiloEstablecimiento;
+
+  const tieneEntregasAdicionales = Boolean(
+    movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0,
+  );
+  const entregaFieldKey = tieneEntregasAdicionales ? 'entregaBase' : 'entrega';
+  const entregaOriginalValue = tieneEntregasAdicionales
+    ? movimiento.entregaBase ?? movimiento.entrega
+    : movimiento.entrega;
+  const entregaCurrentValue = getCurrentValue(movimiento.establecimientoId, entregaFieldKey, entregaOriginalValue);
+  const entregaIsPending = hasPendingChange(movimiento.establecimientoId, entregaFieldKey);
+  const entregaKey = getFieldKey(movimiento.establecimientoId, entregaFieldKey);
+  const totalEntregaAdicional =
+    movimiento.entregasAdicionales?.reduce(
+      (acumulado, entrega) => acumulado + getCurrentEntregaValue(entrega.id, entrega.cantidad),
+      0,
+    ) || 0;
+
+  return (
+    <div
+      onClick={() => onRowSelect(movimiento.establecimientoId)}
+      className={`rounded-xl border p-3 transition-all ${
+        isSelected
+          ? 'border-teal-400 bg-teal-50/50 shadow-sm ring-1 ring-teal-300'
+          : `border-slate-200 ${colores.bg} hover:border-slate-300 hover:shadow-sm`
+      }`}
+    >
+      {/* Card header: nombre + estado */}
+      <div className="flex items-start gap-2.5">
+        <span
+          className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
+            movimiento.tieneMovimiento ? 'bg-emerald-500' : 'bg-slate-300'
+          } ${isSelected ? 'ring-3 ring-teal-300' : 'ring-2 ring-white/80'}`}
+        />
+        <div className="min-w-0 flex-1">
+          <p className={`truncate text-sm font-semibold ${isSelected ? 'text-teal-800' : colores.text}`}>
+            {movimiento.establecimiento.nombre}
+          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-slate-500">
+            <span>{movimiento.establecimiento.codigo}</span>
+            <span className="text-slate-300">•</span>
+            <span>{movimiento.tieneMovimiento ? 'Con movimiento' : 'Pendiente'}</span>
+          </div>
+          {selectedCentroAcopio === 'todos' ? (
+            <span className={`mt-1.5 inline-flex rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] ${colores.border} ${colores.text}`}>
+              {centro !== 'DEFAULT' ? centro : 'Regional'}
+            </span>
+          ) : null}
+        </div>
+        {/* Disponibilidad badge compacto */}
+        <AvailabilityBadge value={movimiento.disponibilidad} />
+      </div>
+
+      {/* Metrics grid */}
+      <div className="mt-3 space-y-1.5 rounded-lg border border-slate-100 bg-white/60 p-2.5">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+          <MobileMetricRow label="Saldo Ant.">
+            <MetricPill value={movimiento.saldoAnterior} tone="neutral" />
+          </MobileMetricRow>
+          <MobileMetricRow label="Total">
+            <MetricPill value={movimiento.totalSaldo} tone="teal" />
+          </MobileMetricRow>
+          <MobileMetricRow label="Saldo">
+            <MetricPill value={movimiento.saldo} tone="emerald" />
+          </MobileMetricRow>
+          <MobileMetricRow label="Stock">
+            <MetricPill value={movimiento.stock} tone="cyan" />
+          </MobileMetricRow>
+        </div>
+
+        {/* Editable fields */}
+        <div className="grid grid-cols-3 gap-2 border-t border-slate-100 pt-2">
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-teal-600">T. Ingreso</span>
+            <EditableNumberField
+              readOnly={readOnly}
+              value={getCurrentValue(movimiento.establecimientoId, 'transIngreso', movimiento.transIngreso)}
+              pending={hasPendingChange(movimiento.establecimientoId, 'transIngreso')}
+              typing={Boolean(isTypingState[getFieldKey(movimiento.establecimientoId, 'transIngreso')])}
+              disabled={isDisabled}
+              styles={INPUT_FIELD_STYLES.transIngreso}
+              ariaLabel={`Trans ingreso para ${movimiento.establecimiento.nombre}`}
+              widthClass="w-full"
+              onRowFocus={() => onRowSelect(movimiento.establecimientoId)}
+              onChange={(v) => onTempValueChange(movimiento.establecimientoId, 'transIngreso', v)}
+              onBlur={() => onFieldBlur(movimiento.establecimientoId, 'transIngreso')}
+            />
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-cyan-600">Salida</span>
+            <EditableNumberField
+              readOnly={readOnly}
+              value={getCurrentValue(movimiento.establecimientoId, 'salida', movimiento.salida)}
+              pending={hasPendingChange(movimiento.establecimientoId, 'salida')}
+              typing={Boolean(isTypingState[getFieldKey(movimiento.establecimientoId, 'salida')])}
+              disabled={isDisabled}
+              styles={INPUT_FIELD_STYLES.salida}
+              ariaLabel={`Salida para ${movimiento.establecimiento.nombre}`}
+              widthClass="w-full"
+              onRowFocus={() => onRowSelect(movimiento.establecimientoId)}
+              onChange={(v) => onTempValueChange(movimiento.establecimientoId, 'salida', v)}
+              onBlur={() => onFieldBlur(movimiento.establecimientoId, 'salida')}
+            />
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-sky-600">T. Salida</span>
+            <EditableNumberField
+              readOnly={readOnly}
+              value={getCurrentValue(movimiento.establecimientoId, 'transSalida', movimiento.transSalida)}
+              pending={hasPendingChange(movimiento.establecimientoId, 'transSalida')}
+              typing={Boolean(isTypingState[getFieldKey(movimiento.establecimientoId, 'transSalida')])}
+              disabled={isDisabled}
+              styles={INPUT_FIELD_STYLES.transSalida}
+              ariaLabel={`Trans salida para ${movimiento.establecimiento.nombre}`}
+              widthClass="w-full"
+              onRowFocus={() => onRowSelect(movimiento.establecimientoId)}
+              onChange={(v) => onTempValueChange(movimiento.establecimientoId, 'transSalida', v)}
+              onBlur={() => onFieldBlur(movimiento.establecimientoId, 'transSalida')}
+            />
+          </div>
+        </div>
+
+        {/* Entrega section */}
+        <div className="border-t border-slate-100 pt-2">
+          <div className="flex flex-wrap items-center gap-2" onClick={(event) => { event.stopPropagation(); onRowSelect(movimiento.establecimientoId); }}>
+            <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-emerald-600">Entrega</span>
+            <EditableNumberField
+              readOnly={readOnly}
+              value={entregaCurrentValue}
+              pending={entregaIsPending}
+              typing={Boolean(isTypingState[entregaKey])}
+              disabled={isDisabled}
+              styles={INPUT_FIELD_STYLES.entrega}
+              ariaLabel={`Entrega para ${movimiento.establecimiento.nombre}`}
+              title={
+                movimiento.entregaBaseTieneVale
+                  ? `Vale: ${movimiento.valeNumeroEntregaBase}`
+                  : tieneEntregasAdicionales
+                  ? 'Entrega base'
+                  : 'Entrega'
+              }
+              hasVale={Boolean(movimiento.entregaBaseTieneVale)}
+              widthClass="w-20"
+              onRowFocus={() => onRowSelect(movimiento.establecimientoId)}
+              onChange={(v) => onTempValueChange(movimiento.establecimientoId, entregaFieldKey, v)}
+              onBlur={() => onFieldBlur(movimiento.establecimientoId, entregaFieldKey)}
+            />
+
+            {totalEntregaAdicional > 0 ? (
+              <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[0.65rem] font-semibold text-amber-700">
+                +{totalEntregaAdicional.toLocaleString()}
+              </span>
+            ) : null}
+
+            {!readOnly ? (
+              <button
+                type="button"
+                onClick={(event) => { event.stopPropagation(); onAgregarEntregaAdicional(movimiento.establecimientoId); }}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-dashed border-teal-300 bg-white text-teal-600 transition hover:border-teal-400 hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isDisabled}
+                title="Agregar entrega adicional"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
+          </div>
+
+          {movimiento.entregasAdicionales?.length ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {movimiento.entregasAdicionales.map((entrega) => (
+                <div
+                  key={entrega.id}
+                  className={`flex items-center gap-1 rounded-xl border px-1.5 py-1 ${
+                    entrega.tieneValeGenerado
+                      ? 'border-emerald-200 bg-emerald-50/80'
+                      : 'border-amber-200 bg-white/80'
+                  }`}
+                >
+                  <EditableNumberField
+                    readOnly={readOnly}
+                    value={getCurrentEntregaValue(entrega.id, entrega.cantidad)}
+                    pending={hasPendingEntregaChange(entrega.id)}
+                    typing={false}
+                    disabled={isDisabled || isProcessingEntrega}
+                    styles={INPUT_FIELD_STYLES.entregaAdicional}
+                    ariaLabel={`Entrega adicional ${entrega.numeroEntrega} para ${movimiento.establecimiento.nombre}`}
+                    title={entrega.tieneValeGenerado ? `Vale: ${entrega.valeNumero}` : `Adicional #${entrega.numeroEntrega}`}
+                    hasVale={Boolean(entrega.tieneValeGenerado)}
+                    widthClass="w-14"
+                    onRowFocus={() => onRowSelect(movimiento.establecimientoId)}
+                    onChange={(v) => onTempEntregaValueChange(entrega.id, v)}
+                    onBlur={() => onEntregaFieldBlur(entrega.id)}
+                  />
+                  <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold text-slate-500">
+                    #{entrega.numeroEntrega}
+                  </span>
+                  {!readOnly ? (
+                    <button
+                      type="button"
+                      onClick={(event) => { event.stopPropagation(); onEliminarEntregaAdicional(entrega.id); }}
+                      className={`inline-flex h-6 w-6 items-center justify-center rounded-md transition ${
+                        entrega.tieneValeGenerado
+                          ? 'text-emerald-600 hover:bg-emerald-100'
+                          : 'text-rose-500 hover:bg-rose-50'
+                      } disabled:cursor-not-allowed disabled:opacity-50`}
+                      disabled={isDisabled || isProcessingEntrega}
+                      title="Eliminar"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        {/* Promedio */}
+        <div className="flex items-center justify-between border-t border-slate-100 pt-2">
+          <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-slate-500">Promedio</span>
+          <span className="inline-flex min-w-[4rem] justify-center rounded-xl border border-slate-200 bg-white/80 px-2 py-1.5 text-sm font-semibold text-slate-700 tabular-nums">
+            {movimiento.promedioConsumo.toLocaleString()}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+MobileMovimientoCard.displayName = 'MobileMovimientoCard';
+
+// ============================================================================
+// MOBILE TOTALS SUMMARY
+// ============================================================================
+
+const MobileTotalesSummary: React.FC<{
+  totalesGenerales: MovimientosTablaProps['totalesGenerales'];
+  count: number;
+}> = memo(({ totalesGenerales, count }) => (
+  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">Totales</p>
+        <p className="text-[0.68rem] text-slate-500">{count} establecimientos</p>
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="rounded-lg bg-slate-100 px-2 py-1 text-[0.65rem] font-semibold text-slate-600">
+          Ant: {totalesGenerales.saldoAnterior.toLocaleString()}
+        </span>
+        <span className="rounded-lg bg-teal-50 px-2 py-1 text-[0.65rem] font-semibold text-teal-700">
+          Total: {totalesGenerales.totalSaldo.toLocaleString()}
+        </span>
+        <span className="rounded-lg bg-emerald-50 px-2 py-1 text-[0.65rem] font-semibold text-emerald-700">
+          Saldo: {totalesGenerales.saldo.toLocaleString()}
+        </span>
+        <span className="rounded-lg bg-cyan-50 px-2 py-1 text-[0.65rem] font-semibold text-cyan-700">
+          Stock: {totalesGenerales.stock.toLocaleString()}
+        </span>
+      </div>
+    </div>
+  </div>
+));
+
+MobileTotalesSummary.displayName = 'MobileTotalesSummary';
+
+// ============================================================================
+// MAIN TABLE COMPONENT
+// ============================================================================
+
 export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
   readOnly = false,
   datosTabla,
@@ -343,7 +677,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
   };
 
   return (
-    <section className={COMPONENT_STYLES.panel} aria-label="Tabla de movimientos">
+    <section className={`${COMPONENT_STYLES.panel} flex h-full flex-col`} aria-label="Tabla de movimientos">
       <DataTable
         isLoading={isLoading}
         loadingMessage="Cargando movimientos..."
@@ -351,7 +685,10 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         skeletonColumns={TABLA_COLUMNAS.length}
         loadingVariant="table"
       >
-        <div className="max-h-[calc(100vh-28rem)] overflow-auto">
+        {/* ============================================================== */}
+        {/* DESKTOP TABLE (hidden on mobile) */}
+        {/* ============================================================== */}
+        <div className="hidden min-h-0 flex-1 overflow-auto md:block">
           <table className="min-w-[1580px] divide-y divide-slate-200">
             <thead className="sticky top-0 z-20 bg-white">
               <tr className="border-b border-slate-200 bg-slate-50/95">
@@ -425,23 +762,24 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento);
                 const { colores, centro } = estiloEstablecimiento;
                 const isSelected = selectedRowId === movimiento.establecimientoId;
-                const stickyCellBase = `${colores.bg} ${isSelected ? 'ring-2 ring-inset ring-teal-500/70' : ''}`;
+                const rowBg = isSelected ? 'bg-teal-50' : colores.bg;
+                const stickyCellBg = isSelected ? 'bg-teal-50' : colores.bg;
 
                 return (
                   <tr
                     key={`${movimiento.establecimientoId}-${selectedMes}-${selectedAnio}`}
                     onClick={() => onRowSelect(movimiento.establecimientoId)}
-                    className={`${colores.bg} ${COMPONENT_STYLES.table.row} cursor-pointer ${isSelected ? 'shadow-[inset_0_0_0_1px_rgba(13,148,136,0.25)]' : ''}`}
+                    className={`${rowBg} ${COMPONENT_STYLES.table.row} cursor-pointer ${isSelected ? 'relative z-[1] shadow-[inset_0_0_0_2px_rgba(13,148,136,0.6)]' : 'hover:bg-slate-50/50'}`}
                   >
-                    <td className={`sticky left-0 z-10 border-r border-white/60 px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)] ${stickyCellBase}`}>
-                      <div className={`flex items-start gap-3 ${isSelected ? 'pl-1' : ''}`}>
+                    <td className={`sticky left-0 z-10 border-r border-white/60 px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)] ${stickyCellBg} ${isSelected ? 'shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12),inset_0_0_0_2px_rgba(13,148,136,0.6)]' : ''}`}>
+                      <div className={`flex items-start gap-3`}>
                         <span
                           className={`mt-2 h-2.5 w-2.5 rounded-full ${
                             movimiento.tieneMovimiento ? 'bg-emerald-500' : 'bg-slate-300'
-                          } ${isSelected ? 'ring-4 ring-teal-200' : 'ring-2 ring-white/80'}`}
+                          } ${isSelected ? 'ring-4 ring-teal-300' : 'ring-2 ring-white/80'}`}
                         />
                         <div className="min-w-0">
-                          <p className={`truncate text-sm font-semibold ${colores.text}`}>{movimiento.establecimiento.nombre}</p>
+                          <p className={`truncate text-sm font-semibold ${isSelected ? 'text-teal-800' : colores.text}`}>{movimiento.establecimiento.nombre}</p>
                           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                             <span>{movimiento.establecimiento.codigo}</span>
                             <span className="text-slate-300">•</span>
@@ -477,6 +815,53 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
               })}
             </tbody>
           </table>
+        </div>
+
+        {/* ============================================================== */}
+        {/* MOBILE CARD VIEW (shown only on mobile) */}
+        {/* ============================================================== */}
+        <div className="min-h-0 flex-1 overflow-auto p-2.5 md:hidden">
+          {/* Totals summary */}
+          <MobileTotalesSummary totalesGenerales={totalesGenerales} count={datosTabla.length} />
+
+          {/* Card list */}
+          {datosTabla.length === 0 && !isLoading ? (
+            <div className="flex flex-col items-center py-10">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-300">
+                <Package className="h-5 w-5" />
+              </div>
+              <p className="text-sm font-semibold text-slate-800">No hay establecimientos</p>
+              <p className="mt-1 text-xs text-slate-500">Ajusta los filtros para ver los movimientos.</p>
+            </div>
+          ) : (
+            <div className="mt-2.5 space-y-2">
+              {datosTabla.map((movimiento) => (
+                <MobileMovimientoCard
+                  key={`mobile-${movimiento.establecimientoId}-${selectedMes}-${selectedAnio}`}
+                  readOnly={readOnly}
+                  movimiento={movimiento}
+                  isSelected={selectedRowId === movimiento.establecimientoId}
+                  isDisabled={isDisabled}
+                  isProcessingEntrega={isProcessingEntrega}
+                  isTyping={isTyping}
+                  selectedCentroAcopio={selectedCentroAcopio}
+                  periodoEntrega={periodoEntrega}
+                  getCurrentValue={getCurrentValue}
+                  hasPendingChange={hasPendingChange}
+                  getCurrentEntregaValue={getCurrentEntregaValue}
+                  hasPendingEntregaChange={hasPendingEntregaChange}
+                  getFieldKey={getFieldKey}
+                  onTempValueChange={onTempValueChange}
+                  onFieldBlur={onFieldBlur}
+                  onTempEntregaValueChange={onTempEntregaValueChange}
+                  onEntregaFieldBlur={onEntregaFieldBlur}
+                  onAgregarEntregaAdicional={onAgregarEntregaAdicional}
+                  onEliminarEntregaAdicional={onEliminarEntregaAdicional}
+                  onRowSelect={onRowSelect}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </DataTable>
     </section>

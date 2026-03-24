@@ -109,7 +109,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     title={label}
   >
     {icon}
-    <span className="hidden sm:inline">{label}</span>
+    <span className="hidden lg:inline">{label}</span>
     {count ? (
       <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold text-inherit">{count}</span>
     ) : null}
@@ -225,17 +225,17 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
 
 
   const stockPanelContent = hideStockMetrics ? null : (
-    <div className="border-t border-slate-100 px-4 py-3">
+    <div className="border-t border-slate-100 px-3 py-2.5 sm:px-4 sm:py-3">
       {/* Contenido del resumen */}
       {!selectedVacuna ? (
-        <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 px-4 py-3">
+        <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 px-3 py-2.5 sm:px-4 sm:py-3">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
             <Package className="h-4 w-4 text-white" />
           </div>
           <p className="text-sm font-medium text-white/90">Selecciona una vacuna para ver el resumen operativo</p>
         </div>
       ) : isLoadingStock || isUpdatingStock ? (
-        <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 px-4 py-3">
+        <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 px-3 py-2.5 sm:px-4 sm:py-3">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
             <Loader2 className="h-4 w-4 animate-spin text-white" />
           </div>
@@ -261,33 +261,33 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
         <div className="space-y-2">
           {/* Barra de resumen estilo gradiente */}
           <div className="relative rounded-2xl bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 px-1 py-1">
-            <div className="flex items-center">
+            <div className="flex flex-wrap items-center gap-y-1">
               {/* PERÍODO */}
-              <div className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
-                  <Calendar className="h-4 w-4 text-white" />
+              <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
+                  <Calendar className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
                 </div>
                 <div>
-                  <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-white/70">Período</p>
-                  <p className="text-sm font-bold text-white">{periodoEntrega.etiqueta.toUpperCase()}</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">Período</p>
+                  <p className="text-xs font-bold text-white sm:text-sm">{periodoEntrega.etiqueta.toUpperCase()}</p>
                 </div>
               </div>
 
-              <ArrowRight className="mx-1 h-3.5 w-3.5 shrink-0 text-white/40" />
+              <ArrowRight className="mx-0.5 h-3 w-3 shrink-0 text-white/40 sm:mx-1 sm:h-3.5 sm:w-3.5" />
 
               {/* INICIAL - expandible */}
               <div className="relative" ref={stockInicialRef}>
                 <button
                   type="button"
                   onClick={() => setShowStockInicialDropdown((prev) => !prev)}
-                  className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2 text-left transition hover:bg-white/15"
+                  className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 text-left transition hover:bg-white/15 sm:gap-2.5 sm:px-3"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
-                    <Package className="h-4 w-4 text-white" />
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
+                    <Package className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
                   </div>
                   <div>
-                    <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-white/70">Inicial</p>
-                    <p className="text-sm font-bold text-white">
+                    <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">Inicial</p>
+                    <p className="text-xs font-bold text-white sm:text-sm">
                       {stockInfo.tieneHistorialInicial
                         ? (stockInfo.stockInicialHistorico?.toLocaleString() || '0')
                         : '—'}
@@ -297,7 +297,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 </button>
 
                 {showStockInicialDropdown ? (
-                  <div className="absolute left-0 top-full z-50 mt-2 min-w-[280px] rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl">
+                  <div className="absolute left-0 top-full z-50 mt-2 min-w-[260px] rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl sm:min-w-[280px]">
                     <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Desglose stock inicial</h4>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5">
@@ -318,7 +318,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 ) : null}
               </div>
 
-              <ArrowRight className="mx-1 h-3.5 w-3.5 shrink-0 text-white/40" />
+              <ArrowRight className="mx-0.5 h-3 w-3 shrink-0 text-white/40 sm:mx-1 sm:h-3.5 sm:w-3.5" />
 
               {/* ENTREGAS */}
               <div className="relative">
@@ -330,61 +330,61 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 />
               </div>
 
-              <ArrowRight className="mx-1 h-3.5 w-3.5 shrink-0 text-white/40" />
+              <ArrowRight className="mx-0.5 h-3 w-3 shrink-0 text-white/40 sm:mx-1 sm:h-3.5 sm:w-3.5" />
 
               {/* DISPONIBLE */}
               <button
                 type="button"
                 onClick={stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit ? onOpenAjusteDeficit : undefined}
                 disabled={stockInfo.stockDisponible >= 0 || !ajusteDeficitDisponible || !onOpenAjusteDeficit}
-                className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-left transition ${
+                className={`flex items-center gap-2 rounded-xl px-2.5 py-2 text-left transition sm:gap-2.5 sm:px-3 ${
                   stockInfo.stockDisponible < 0
                     ? 'bg-rose-500/30 hover:bg-rose-500/40'
                     : 'bg-white/10 hover:bg-white/15'
                 }`}
               >
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full sm:h-8 sm:w-8 ${
                   stockInfo.stockDisponible < 0 ? 'bg-rose-400/30' : 'bg-white/20'
                 }`}>
                   {stockInfo.stockDisponible < 0
-                    ? <AlertTriangle className="h-4 w-4 text-white" />
-                    : <CheckCircle2 className="h-4 w-4 text-white" />}
+                    ? <AlertTriangle className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
+                    : <CheckCircle2 className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />}
                 </div>
                 <div>
-                  <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-white/70">
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">
                     {stockInfo.stockDisponible < 0 ? 'Déficit' : 'Disponible'}
                   </p>
-                  <p className="text-sm font-bold text-white">{stockInfo.stockDisponible.toLocaleString()}</p>
+                  <p className="text-xs font-bold text-white sm:text-sm">{stockInfo.stockDisponible.toLocaleString()}</p>
                 </div>
                 {stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit ? (
                   <Settings2 className="h-3.5 w-3.5 text-white/60" />
                 ) : null}
               </button>
 
-              <ArrowRight className="mx-1 h-3.5 w-3.5 shrink-0 text-white/40" />
+              <ArrowRight className="mx-0.5 h-3 w-3 shrink-0 text-white/40 sm:mx-1 sm:h-3.5 sm:w-3.5" />
 
               {/* ACTUAL + LOTES */}
               <div className="relative" ref={stockActualRef}>
                 <button
                   type="button"
                   onClick={() => setShowStockActualDropdown((prev) => !prev)}
-                  className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2 text-left transition hover:bg-white/15"
+                  className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 text-left transition hover:bg-white/15 sm:gap-2.5 sm:px-3"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
-                    <Boxes className="h-4 w-4 text-white" />
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
+                    <Boxes className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
                   </div>
                   <div>
-                    <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-white/70">Actual</p>
-                    <p className="text-sm font-bold text-white">{stockInfo.stockActual.toLocaleString()}</p>
+                    <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">Actual</p>
+                    <p className="text-xs font-bold text-white sm:text-sm">{stockInfo.stockActual.toLocaleString()}</p>
                   </div>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[0.65rem] font-semibold text-white">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-1.5 py-0.5 text-[0.6rem] font-semibold text-white sm:px-2 sm:text-[0.65rem]">
                     {lotesDisponibles.length} Lote{lotesDisponibles.length === 1 ? '' : 's'}
                   </span>
                   <ChevronDown className={`h-3 w-3 text-white/50 transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {showStockActualDropdown ? (
-                  <div className="absolute right-0 top-full z-50 mt-2 min-w-[300px] rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl">
+                  <div className="absolute right-0 top-full z-50 mt-2 min-w-[280px] rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl sm:min-w-[300px]">
                     <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       Lotes disponibles ({lotesDisponibles.length})
                     </h4>
@@ -424,23 +424,26 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
 
           {/* Botón actualizar sig. mes */}
           {stockInfo.tieneHistorialInicial ? (
-            <button
-              type="button"
-              onClick={onActualizarStockSiguienteMes}
-              disabled={isUpdatingStockSiguienteMes}
-              className={COMPONENT_STYLES.button.secondary}
-              title={`Actualizar stock inicial de ${periodoSiguiente}`}
-            >
-              {isUpdatingStockSiguienteMes ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <RefreshCw className="h-3.5 w-3.5" />
-              )}
-              <span>Actualizar sig. mes</span>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-                {periodoSiguiente}
-              </span>
-            </button>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={onActualizarStockSiguienteMes}
+                disabled={isUpdatingStockSiguienteMes}
+                className={COMPONENT_STYLES.button.secondary}
+                title={`Actualizar stock inicial de ${periodoSiguiente}`}
+              >
+                {isUpdatingStockSiguienteMes ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3.5 w-3.5" />
+                )}
+                <span className="hidden sm:inline">Actualizar sig. mes</span>
+                <span className="sm:hidden">Sig. mes</span>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                  {periodoSiguiente}
+                </span>
+              </button>
+            </div>
           ) : null}
         </div>
       ) : null}
@@ -449,151 +452,154 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
 
   return (
     <section className={COMPONENT_STYLES.panel}>
-      {/* Barra de acciones compacta */}
-      <div className="border-b border-slate-100 px-4 py-2.5">
-        <div className="flex flex-wrap gap-1.5">
-          {!isReadOnly && pendingChangesCount > 0 ? (
-            <ActionButton
-              label={isAutoSaving ? 'Guardando' : 'Guardar cambios'}
-              icon={isAutoSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              onClick={onSaveChanges}
-              disabled={isAutoSaving}
-              isPrimary
-              count={pendingChangesCount}
-            />
-          ) : null}
+      {/* Filtros + Acciones */}
+      <div className="border-b border-slate-100 px-3 py-2.5 sm:px-4 sm:py-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end lg:gap-4">
+          {/* Filtros - grid 2-col on mobile, 4-col on xl */}
+          <div className="min-w-0 flex-1">
+            <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+              {shouldRenderCentroSelect ? (
+                <label className="block">
+                  <span className={COMPONENT_STYLES.input.label}>Centro de acopio</span>
+                  <div className="relative">
+                    <Building2 className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-teal-500 sm:left-3 sm:h-4 sm:w-4" />
+                    <select
+                      value={selectedCentroAcopio}
+                      onChange={(event) => onCentroAcopioChange(event.target.value)}
+                      disabled={isLoadingEstablecimientos}
+                      className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm`}
+                    >
+                      <option value="todos">{allCentrosLabel}</option>
+                      {centrosAcopio.map((centro) => (
+                        <option key={centro.id} value={centro.id}>
+                          {centro.nombre}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 sm:right-3 sm:h-4 sm:w-4" />
+                  </div>
+                </label>
+              ) : (
+                <div>
+                  <span className={COMPONENT_STYLES.input.label}>Centro asignado</span>
+                  <div className="flex min-h-[40px] items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-700 sm:min-h-[44px] sm:px-4 sm:py-2.5 sm:text-sm">
+                    <Building2 className="h-3.5 w-3.5 shrink-0 text-teal-600 sm:h-4 sm:w-4" />
+                    <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
+                  </div>
+                </div>
+              )}
 
-          {!isReadOnly ? (
-            <ActionButton
-              label="Vales"
-              icon={<Receipt className="h-4 w-4" />}
-              onClick={onOpenVales}
-              disabled={!selectedVacuna || selectedCentroAcopio === 'todos'}
-            />
-          ) : (
-            <span className="inline-flex min-h-[38px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600">
-              Vista solo lectura
-            </span>
-          )}
+              <label className="block">
+                <span className={COMPONENT_STYLES.input.label}>Vacuna</span>
+                <div className="relative">
+                  <Package className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-cyan-500 sm:left-3 sm:h-4 sm:w-4" />
+                  <select
+                    value={selectedVacuna}
+                    onChange={(event) => onVacunaChange(event.target.value)}
+                    disabled={isLoadingVacunas}
+                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm`}
+                  >
+                    {vacunasActivas.length === 0 ? <option value="">Seleccione...</option> : null}
+                    {vacunasActivas.map((vacuna) => (
+                      <option key={vacuna.id} value={vacuna.id}>
+                        {vacuna.nombre}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 sm:right-3 sm:h-4 sm:w-4" />
+                </div>
+              </label>
 
-          <ActionButton
-            label="Actualizar"
-            icon={<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />}
-            onClick={onRefresh}
-            disabled={isLoading || !selectedVacuna}
-          />
+              <label className="block">
+                <span className={COMPONENT_STYLES.input.label}>Mes base</span>
+                <div className="relative">
+                  <Calendar className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-teal-500 sm:left-3 sm:h-4 sm:w-4" />
+                  <select
+                    value={selectedMes}
+                    onChange={(event) => onMesChange(Number(event.target.value))}
+                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm`}
+                  >
+                    {MESES.map((mes, index) => (
+                      <option key={mes} value={index + 1}>
+                        {mes}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 sm:right-3 sm:h-4 sm:w-4" />
+                </div>
+              </label>
 
-          {!isReadOnly ? (
-            <ActionButton label="Importar" icon={<Upload className="h-4 w-4" />} onClick={onImport} />
-          ) : null}
-
-          {!isReadOnly ? (
-            <ActionButton
-              label={isExporting ? 'Exportando' : 'Exportar'}
-              icon={isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-              onClick={onExport}
-              disabled={isExporting || !selectedVacuna}
-              isPrimary
-            />
-          ) : null}
-        </div>
-      </div>
-
-      {/* Filtros en fila compacta */}
-      <div className="px-4 py-3">
-        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
-          {shouldRenderCentroSelect ? (
-            <label className="block">
-              <span className={COMPONENT_STYLES.input.label}>Centro de acopio</span>
-              <div className="relative">
-                <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-500" />
-                <select
-                  value={selectedCentroAcopio}
-                  onChange={(event) => onCentroAcopioChange(event.target.value)}
-                  disabled={isLoadingEstablecimientos}
-                  className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-10 pr-10`}
-                >
-                  <option value="todos">{allCentrosLabel}</option>
-                  {centrosAcopio.map((centro) => (
-                    <option key={centro.id} value={centro.id}>
-                      {centro.nombre}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              </div>
-            </label>
-          ) : (
-            <div>
-              <span className={COMPONENT_STYLES.input.label}>Centro asignado</span>
-              <div className="flex min-h-[44px] items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-700">
-                <Building2 className="h-4 w-4 text-teal-600" />
-                <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
-              </div>
+              <label className="block">
+                <span className={COMPONENT_STYLES.input.label}>Año</span>
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-cyan-600 sm:left-3 sm:text-[10px]">
+                    AÑO
+                  </span>
+                  <select
+                    value={selectedAnio}
+                    onChange={(event) => onAnioChange(Number(event.target.value))}
+                    disabled={isLoadingAnios}
+                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-10 pr-8 text-xs sm:pl-12 sm:pr-10 sm:text-sm`}
+                  >
+                    {aniosDisponibles.map((anio) => (
+                      <option key={anio} value={anio}>
+                        {anio}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 sm:right-3 sm:h-4 sm:w-4" />
+                </div>
+              </label>
             </div>
-          )}
+          </div>
 
-          <label className="block">
-            <span className={COMPONENT_STYLES.input.label}>Vacuna</span>
-            <div className="relative">
-              <Package className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-cyan-500" />
-              <select
-                value={selectedVacuna}
-                onChange={(event) => onVacunaChange(event.target.value)}
-                disabled={isLoadingVacunas}
-                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-10 pr-10`}
-              >
-                {vacunasActivas.length === 0 ? <option value="">Seleccione...</option> : null}
-                {vacunasActivas.map((vacuna) => (
-                  <option key={vacuna.id} value={vacuna.id}>
-                    {vacuna.nombre}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            </div>
-          </label>
+          {/* Botones de acción - horizontal scroll on small screens */}
+          <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+            {!isReadOnly && pendingChangesCount > 0 ? (
+              <ActionButton
+                label={isAutoSaving ? 'Guardando' : 'Guardar cambios'}
+                icon={isAutoSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                onClick={onSaveChanges}
+                disabled={isAutoSaving}
+                isPrimary
+                count={pendingChangesCount}
+              />
+            ) : null}
 
-          <label className="block">
-            <span className={COMPONENT_STYLES.input.label}>Mes base</span>
-            <div className="relative">
-              <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-500" />
-              <select
-                value={selectedMes}
-                onChange={(event) => onMesChange(Number(event.target.value))}
-                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-10 pr-10`}
-              >
-                {MESES.map((mes, index) => (
-                  <option key={mes} value={index + 1}>
-                    {mes}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            </div>
-          </label>
-
-          <label className="block">
-            <span className={COMPONENT_STYLES.input.label}>Año</span>
-            <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-cyan-600">
-                AÑO
+            {!isReadOnly ? (
+              <ActionButton
+                label="Vales"
+                icon={<Receipt className="h-4 w-4" />}
+                onClick={onOpenVales}
+                disabled={!selectedVacuna || selectedCentroAcopio === 'todos'}
+              />
+            ) : (
+              <span className="inline-flex min-h-[38px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 sm:text-sm">
+                Solo lectura
               </span>
-              <select
-                value={selectedAnio}
-                onChange={(event) => onAnioChange(Number(event.target.value))}
-                disabled={isLoadingAnios}
-                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-12 pr-10`}
-              >
-                {aniosDisponibles.map((anio) => (
-                  <option key={anio} value={anio}>
-                    {anio}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            </div>
-          </label>
+            )}
+
+            <ActionButton
+              label="Actualizar"
+              icon={<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />}
+              onClick={onRefresh}
+              disabled={isLoading || !selectedVacuna}
+            />
+
+            {!isReadOnly ? (
+              <ActionButton label="Importar" icon={<Upload className="h-4 w-4" />} onClick={onImport} />
+            ) : null}
+
+            {!isReadOnly ? (
+              <ActionButton
+                label={isExporting ? 'Exportando' : 'Exportar'}
+                icon={isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                onClick={onExport}
+                disabled={isExporting || !selectedVacuna}
+                isPrimary
+              />
+            ) : null}
+          </div>
         </div>
       </div>
 

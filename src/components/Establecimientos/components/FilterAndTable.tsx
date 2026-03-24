@@ -323,7 +323,7 @@ export const DataTable: React.FC<DataTableProps> = memo(({
   skeletonColumns = 5,
   loadingVariant = 'table',
 }) => (
-  <div className={COMPONENT_STYLES.table.container}>
+  <div className={`${COMPONENT_STYLES.table.container} flex min-h-0 flex-1 flex-col`}>
     {isLoading ? (
       <div className="inventory-loading-shell p-4 sm:p-5">
         <div className="flex items-center gap-3 pb-4 text-slate-700">
@@ -397,7 +397,7 @@ export const DataTable: React.FC<DataTableProps> = memo(({
         )}
       </div>
     ) : (
-      <div className="inventory-reveal overflow-x-auto">{children}</div>
+      <div className="inventory-reveal flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>
     )}
   </div>
 ));
