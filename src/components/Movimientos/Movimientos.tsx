@@ -1757,11 +1757,6 @@ const Movimientos: React.FC = () => {
           onEntregaFieldBlur={handleEntregaFieldBlur}
           onAgregarEntregaAdicional={handleAgregarEntregaAdicional}
           onEliminarEntregaAdicional={handleEliminarEntregaAdicional}
-          onVerDetalle={(mov) => setSelectedMovimiento(mov)}
-          onGestionarEntregas={(mov) => {
-            setMovimientoParaEntregas(mov);
-            setShowEntregasAdicionalesModal(true);
-          }}
           selectedRowId={selectedRowId}
           onRowSelect={setSelectedRowId}
         />

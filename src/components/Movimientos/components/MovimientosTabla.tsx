@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { Eye, Package, Plus, Settings2, X } from 'lucide-react';
+import { Package, Plus, X } from 'lucide-react';
 import { DataTable } from '../../Establecimientos/components';
 import { COMPONENT_STYLES, INPUT_FIELD_STYLES, MESES, TABLA_COLUMNAS } from '../constants';
 import { MovimientoCalculado } from '../../../types';
@@ -40,8 +40,7 @@ interface MovimientosTablaProps {
   onEntregaFieldBlur: (entregaId: string) => void;
   onAgregarEntregaAdicional: (establecimientoId: string) => void;
   onEliminarEntregaAdicional: (entregaId: string) => void;
-  onVerDetalle: (movimiento: TablaMovimiento) => void;
-  onGestionarEntregas: (movimiento: TablaMovimiento) => void;
+
   selectedRowId: string | null;
   onRowSelect: (id: string | null) => void;
 }
@@ -189,8 +188,6 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
   onEntregaFieldBlur,
   onAgregarEntregaAdicional,
   onEliminarEntregaAdicional,
-  onVerDetalle,
-  onGestionarEntregas,
   selectedRowId,
   onRowSelect,
 }) => {
@@ -354,13 +351,12 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         skeletonColumns={TABLA_COLUMNAS.length}
         loadingVariant="table"
       >
-        <div className="overflow-x-auto">
+        <div className="max-h-[calc(100vh-28rem)] overflow-auto">
           <table className="min-w-[1580px] divide-y divide-slate-200">
             <thead className="sticky top-0 z-20 bg-white">
               <tr className="border-b border-slate-200 bg-slate-50/95">
                 {TABLA_COLUMNAS.map((column, index) => {
                   const isFirst = index === 0;
-                  const isLast = index === TABLA_COLUMNAS.length - 1;
 
                   return (
                     <th
@@ -370,9 +366,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                           ? 'sticky left-0 z-30 bg-slate-50/95 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.16)]'
                           : ''
                       } ${
-                        isLast
-                          ? 'sticky right-0 z-30 bg-slate-50/95 text-center shadow-[-8px_0_14px_-12px_rgba(15,23,42,0.16)]'
-                          : column.align === 'center'
+                        column.align === 'center'
                           ? 'text-center'
                           : 'text-left'
                       }`}
@@ -392,26 +386,23 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
             </thead>
 
             <tbody className="divide-y divide-slate-100">
-              <tr className="bg-slate-50/90">
-                <td className="sticky left-0 z-10 border-r border-slate-200 bg-slate-50/90 px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)]">
+              <tr className="sticky top-[52px] z-[15] bg-slate-50 shadow-[0_1px_3px_-1px_rgba(0,0,0,0.1)]">
+                <td className="sticky left-0 z-20 border-r border-slate-200 bg-slate-50 px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)]">
                   <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-600">Totales</p>
                     <p className="mt-1 text-xs text-slate-500">{datosTabla.length} establecimientos</p>
                   </div>
                 </td>
-                <td className="px-3 py-3 text-center"><MetricPill value={totalesGenerales.saldoAnterior} tone="neutral" /></td>
-                <td className="px-3 py-3 text-center"><MetricPill value={totalesGenerales.transIngreso} tone="teal" /></td>
-                <td className="px-3 py-3 text-center"><MetricPill value={totalesGenerales.totalSaldo} tone="teal" /></td>
-                <td className="px-3 py-3 text-center"><MetricPill value={totalesGenerales.salida} tone="neutral" /></td>
-                <td className="px-3 py-3 text-center"><MetricPill value={totalesGenerales.transSalida} tone="neutral" /></td>
-                <td className="px-3 py-3 text-center"><MetricPill value={totalesGenerales.saldo} tone="emerald" /></td>
-                <td className="px-3 py-3 text-center"><MetricPill value={totalesGenerales.entrega} tone="teal" /></td>
-                <td className="px-3 py-3 text-center"><MetricPill value={totalesGenerales.stock} tone="cyan" /></td>
-                <td className="px-3 py-3 text-center text-sm text-slate-400">-</td>
-                <td className="px-3 py-3 text-center text-sm text-slate-400">-</td>
-                <td className="sticky right-0 z-10 bg-slate-50/90 px-3 py-3 text-center shadow-[-8px_0_14px_-12px_rgba(15,23,42,0.12)]">
-                  <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-500">Resumen</span>
-                </td>
+                <td className="bg-slate-50 px-3 py-3 text-center"><MetricPill value={totalesGenerales.saldoAnterior} tone="neutral" /></td>
+                <td className="bg-slate-50 px-3 py-3 text-center"><MetricPill value={totalesGenerales.transIngreso} tone="teal" /></td>
+                <td className="bg-slate-50 px-3 py-3 text-center"><MetricPill value={totalesGenerales.totalSaldo} tone="teal" /></td>
+                <td className="bg-slate-50 px-3 py-3 text-center"><MetricPill value={totalesGenerales.salida} tone="neutral" /></td>
+                <td className="bg-slate-50 px-3 py-3 text-center"><MetricPill value={totalesGenerales.transSalida} tone="neutral" /></td>
+                <td className="bg-slate-50 px-3 py-3 text-center"><MetricPill value={totalesGenerales.saldo} tone="emerald" /></td>
+                <td className="bg-slate-50 px-3 py-3 text-center"><MetricPill value={totalesGenerales.entrega} tone="teal" /></td>
+                <td className="bg-slate-50 px-3 py-3 text-center"><MetricPill value={totalesGenerales.stock} tone="cyan" /></td>
+                <td className="bg-slate-50 px-3 py-3 text-center text-sm text-slate-400">-</td>
+                <td className="bg-slate-50 px-3 py-3 text-center text-sm text-slate-400">-</td>
               </tr>
 
               {datosTabla.length === 0 && !isLoading ? (
@@ -480,37 +471,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                     </td>
                     <td className="px-3 py-3 text-center"><AvailabilityBadge value={movimiento.disponibilidad} /></td>
 
-                    <td
-                      className={`sticky right-0 z-10 border-l border-white/60 px-3 py-3 shadow-[-8px_0_14px_-12px_rgba(15,23,42,0.12)] ${stickyCellBase}`}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onRowSelect(movimiento.establecimientoId);
-                      }}
-                    >
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => onVerDetalle(movimiento)}
-                          className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconView}`}
-                          title="Ver detalle"
-                          disabled={isLoading}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
 
-                        {!readOnly && movimiento.entregasAdicionales?.length ? (
-                          <button
-                            type="button"
-                            onClick={() => onGestionarEntregas(movimiento)}
-                            className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconNavigate}`}
-                            title="Gestionar entregas"
-                            disabled={isLoading}
-                          >
-                            <Settings2 className="h-4 w-4" />
-                          </button>
-                        ) : null}
-                      </div>
-                    </td>
                   </tr>
                 );
               })}

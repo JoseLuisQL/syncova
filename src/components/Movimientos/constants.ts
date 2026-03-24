@@ -232,7 +232,6 @@ export const TABLA_COLUMNAS = [
   { key: 'stock', label: 'Stock', align: 'center' as const, width: 'min-w-[96px]' },
   { key: 'promedioConsumo', label: 'Promedio', align: 'center' as const, width: 'min-w-[96px]' },
   { key: 'disponibilidad', label: 'Disponib.', align: 'center' as const, width: 'min-w-[110px]' },
-  { key: 'acciones', label: 'Acciones', align: 'center' as const, width: 'min-w-[120px]' },
 ] as const;
 
 export const INPUT_FIELD_STYLES = {
