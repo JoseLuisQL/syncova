@@ -123,53 +123,42 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
   };
 
   return (
-    <div className="relative h-full" ref={dropdownRef}>
+    <div className="relative" ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setShowDropdown((prev) => !prev)}
         disabled={isLoading}
-        className={`flex h-full w-full items-center justify-between rounded-[20px] border px-4 py-3 text-left transition hover:brightness-[0.99] ${statusConfig.card}`}
+        className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2 text-left transition hover:bg-white/15"
       >
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/70 bg-white text-teal-600 shadow-sm">
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Entregas</p>
-              {statusConfig.icon}
-            </div>
-            <p className="mt-1 text-sm font-semibold text-slate-900">
-              {totalEntregas.toLocaleString()} unidades
-            </p>
-          </div>
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Truck className="h-4 w-4 text-white" />}
         </div>
-
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusConfig.pill}`}>
-              {statusConfig.label}
-            </span>
-            {progresoVales?.totalEstablecimientosConEntregas ? (
-              <p className="mt-1 text-xs text-slate-500">
-                {progresoVales.establecimientosConValeCompleto}/{progresoVales.totalEstablecimientosConEntregas} con vale
-              </p>
-            ) : null}
-          </div>
-          <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+        <div className="min-w-0">
+          <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-white/70">Entregas</p>
+          <p className="text-sm font-bold text-white">
+            {totalEntregas.toLocaleString()}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`inline-flex rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${
+            !progresoVales || progresoVales.estado === 'sin_vales'
+              ? 'bg-white/15 text-white/80'
+              : progresoVales.estado === 'completo'
+                ? 'bg-emerald-400/30 text-white'
+                : 'bg-amber-400/30 text-white'
+          }`}>
+            {progresoVales?.totalEstablecimientosConEntregas
+              ? `${progresoVales.establecimientosConValeCompleto}/${progresoVales.totalEstablecimientosConEntregas}`
+              : statusConfig.label}
+            {progresoVales?.porcentajeProgreso ? ` ${progresoVales.porcentajeProgreso}%` : ''}
+          </span>
+          <ChevronDown className={`h-3 w-3 text-white/50 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
         </div>
       </button>
 
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
-        <div
-          className={`h-full rounded-full transition-all duration-300 ${statusConfig.bar}`}
-          style={{ width: `${Math.min(100, Math.max(0, porcentaje))}%` }}
-        />
-      </div>
-
       {showDropdown ? (
-        <div className="absolute left-0 right-0 top-full z-40 mt-3 overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-xl">
-          <div className="border-b border-slate-100 bg-slate-50/80 px-4 py-3">
+        <div className="absolute right-0 top-full z-40 mt-1.5 min-w-[340px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+          <div className="border-b border-slate-100 bg-slate-50/80 px-3 py-2.5">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Progreso de vales</h3>

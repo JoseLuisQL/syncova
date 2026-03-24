@@ -1,9 +1,11 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
+  ArrowRight,
   Boxes,
   Building2,
   Calendar,
+  CheckCircle2,
   ChevronDown,
   Download,
   Loader2,
@@ -114,20 +116,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   </button>
 );
 
-const StatChip: React.FC<{
-  label: string;
-  value: string;
-  subtle?: boolean;
-}> = ({ label, value, subtle = false }) => (
-  <div
-    className={`rounded-2xl border px-3 py-2 ${
-      subtle ? 'border-slate-200 bg-slate-50/80' : 'border-teal-100 bg-teal-50/60'
-    }`}
-  >
-    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</p>
-    <p className="mt-1 text-sm font-semibold text-slate-800">{value}</p>
-  </div>
-);
+
 
 export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> = memo(({
   isReadOnly = false,
@@ -233,406 +222,384 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
     [stockInfo?.lotes],
   );
 
-  const disponibilidadConfig = useMemo(() => {
-    if (!stockInfo) {
-      return {
-        className: 'border-slate-200 bg-slate-50 text-slate-700',
-        label: 'Sin datos',
-      };
-    }
 
-    if (stockInfo.stockDisponible < 0) {
-      return {
-        className: 'border-rose-200 bg-rose-50 text-rose-700',
-        label: 'Déficit',
-      };
-    }
 
-    if (stockInfo.estado === 'critico') {
-      return {
-        className: 'border-amber-200 bg-amber-50 text-amber-700',
-        label: 'Crítico',
-      };
-    }
-
-    return {
-      className: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-      label: 'Disponible',
-    };
-  }, [stockInfo]);
-
-  const stockPanel = hideStockMetrics ? null : (
-    <section className={COMPONENT_STYLES.panel}>
-      <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">Resumen operativo</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Estado del período de entrega, disponibilidad y progreso de vales.
-            </p>
+  const stockPanelContent = hideStockMetrics ? null : (
+    <div className="border-t border-slate-100 px-4 py-3">
+      {/* Contenido del resumen */}
+      {!selectedVacuna ? (
+        <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 px-4 py-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
+            <Package className="h-4 w-4 text-white" />
           </div>
-          <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${disponibilidadConfig.className}`}>
-            {disponibilidadConfig.label}
-          </span>
+          <p className="text-sm font-medium text-white/90">Selecciona una vacuna para ver el resumen operativo</p>
         </div>
-      </div>
+      ) : isLoadingStock || isUpdatingStock ? (
+        <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 px-4 py-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
+            <Loader2 className="h-4 w-4 animate-spin text-white" />
+          </div>
+          <p className="text-sm font-medium text-white/90">Cargando resumen de stock...</p>
+        </div>
+      ) : stockError ? (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50/70 px-3 py-3">
+          <div className="flex items-start gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-rose-200 bg-white text-rose-600">
+              <AlertTriangle className="h-4 w-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.8rem] font-semibold text-rose-900">No se pudo cargar el stock</p>
+              <p className="mt-0.5 text-[0.7rem] text-rose-700">{stockError}</p>
+            </div>
+            <button type="button" onClick={onRetryStock} className={COMPONENT_STYLES.button.secondary}>
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span>Reintentar</span>
+            </button>
+          </div>
+        </div>
+      ) : stockInfo ? (
+        <div className="space-y-2">
+          {/* Barra de resumen estilo gradiente */}
+          <div className="relative rounded-2xl bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 px-1 py-1">
+            <div className="flex items-center">
+              {/* PERÍODO */}
+              <div className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
+                  <Calendar className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-white/70">Período</p>
+                  <p className="text-sm font-bold text-white">{periodoEntrega.etiqueta.toUpperCase()}</p>
+                </div>
+              </div>
 
-      <div className="px-5 py-5 sm:px-6">
-        {!selectedVacuna ? (
-          <div className="inventory-loading-shell rounded-[20px] border border-slate-200 bg-slate-50/70 px-4 py-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500">
-                <Package className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-900">Selecciona una vacuna</p>
-                <p className="text-xs text-slate-500">
-                  El resumen de stock y entregas se activa cuando eliges una vacuna.
-                </p>
-              </div>
-            </div>
-          </div>
-        ) : isLoadingStock || isUpdatingStock ? (
-          <div className="inventory-loading-shell rounded-[20px] border border-slate-200 bg-slate-50/80 p-4">
-            <div className="flex items-center gap-3 text-slate-700">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 inventory-breathe">
-                <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-900">Cargando resumen de stock</p>
-                <p className="text-xs text-slate-500">Preparando disponibilidad, entregas y lotes.</p>
-              </div>
-            </div>
-          </div>
-        ) : stockError ? (
-          <div className="rounded-[20px] border border-rose-200 bg-rose-50/70 p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-rose-200 bg-white text-rose-600">
-                <AlertTriangle className="h-4 w-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-rose-900">No se pudo cargar el stock</p>
-                <p className="mt-1 text-xs text-rose-700">{stockError}</p>
-              </div>
-              <button type="button" onClick={onRetryStock} className={COMPONENT_STYLES.button.secondary}>
-                <RefreshCw className="h-4 w-4" />
-                <span>Reintentar</span>
-              </button>
-            </div>
-          </div>
-        ) : stockInfo ? (
-          <div className="grid gap-3 sm:grid-cols-2">
-            <StatChip label="Periodo de entrega" value={periodoEntrega.etiqueta} />
-            <StatChip label="Stock actual" value={`${stockInfo.stockActual.toLocaleString()} unidades`} subtle />
+              <ArrowRight className="mx-1 h-3.5 w-3.5 shrink-0 text-white/40" />
 
-            <div className="relative sm:col-span-2" ref={stockInicialRef}>
-              <button
-                type="button"
-                onClick={() => setShowStockInicialDropdown((prev) => !prev)}
-                className="flex w-full items-center justify-between rounded-[20px] border border-slate-200 bg-slate-50/80 px-4 py-3 text-left transition hover:border-slate-300 hover:bg-slate-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-teal-200 bg-white text-teal-600">
-                    <Package className="h-4 w-4" />
+              {/* INICIAL - expandible */}
+              <div className="relative" ref={stockInicialRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowStockInicialDropdown((prev) => !prev)}
+                  className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2 text-left transition hover:bg-white/15"
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
+                    <Package className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Stock inicial</p>
-                    <p className="mt-1 text-sm font-semibold text-slate-900">
+                    <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-white/70">Inicial</p>
+                    <p className="text-sm font-bold text-white">
                       {stockInfo.tieneHistorialInicial
-                        ? `${stockInfo.stockInicialHistorico?.toLocaleString() || 0} unidades`
-                        : 'No disponible'}
+                        ? (stockInfo.stockInicialHistorico?.toLocaleString() || '0')
+                        : '—'}
                     </p>
                   </div>
-                </div>
-                <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${showStockInicialDropdown ? 'rotate-180' : ''}`} />
-              </button>
+                  <ChevronDown className={`h-3 w-3 text-white/50 transition-transform ${showStockInicialDropdown ? 'rotate-180' : ''}`} />
+                </button>
 
-              {showStockInicialDropdown ? (
-                <div className="absolute left-0 right-0 top-full z-40 mt-2 rounded-[20px] border border-slate-200 bg-white p-4 shadow-xl">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <StatChip label="Base" value={`${stockInfo.stockInicialOriginal?.toLocaleString() || 0}`} subtle />
-                    <StatChip label="Ingresos del mes" value={stockInfo.ingresosLotesDelMes.toLocaleString()} />
+                {showStockInicialDropdown ? (
+                  <div className="absolute left-0 top-full z-50 mt-2 min-w-[280px] rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl">
+                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Desglose stock inicial</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+                        <p className="text-[0.6rem] font-semibold uppercase tracking-wider text-slate-400">Base</p>
+                        <p className="text-sm font-bold text-slate-800">{stockInfo.stockInicialOriginal?.toLocaleString() || 0}</p>
+                      </div>
+                      <div className="rounded-xl border border-teal-200 bg-teal-50 px-2.5 py-1.5">
+                        <p className="text-[0.6rem] font-semibold uppercase tracking-wider text-teal-500">Ingresos del mes</p>
+                        <p className="text-sm font-bold text-teal-800">{stockInfo.ingresosLotesDelMes.toLocaleString()}</p>
+                      </div>
+                    </div>
+                    {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial ? (
+                      <p className="mt-2 text-[0.68rem] text-slate-500">
+                        Capturado el {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString()}
+                      </p>
+                    ) : null}
                   </div>
-                  {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial ? (
-                    <p className="mt-3 text-xs text-slate-500">
-                      Capturado el {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString()}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
+                ) : null}
+              </div>
 
-            <div className="sm:col-span-2">
-              <EntregasProgressBadge
-                totalEntregas={stockInfo.totalEntregas}
-                progresoVales={progresoVales}
-                isLoading={isLoadingProgresoVales}
-                onRefresh={onRefreshProgresoVales}
-              />
-            </div>
+              <ArrowRight className="mx-1 h-3.5 w-3.5 shrink-0 text-white/40" />
 
-            <div className="relative" ref={stockActualRef}>
+              {/* ENTREGAS */}
+              <div className="relative">
+                <EntregasProgressBadge
+                  totalEntregas={stockInfo.totalEntregas}
+                  progresoVales={progresoVales}
+                  isLoading={isLoadingProgresoVales}
+                  onRefresh={onRefreshProgresoVales}
+                />
+              </div>
+
+              <ArrowRight className="mx-1 h-3.5 w-3.5 shrink-0 text-white/40" />
+
+              {/* DISPONIBLE */}
               <button
                 type="button"
-                onClick={() => setShowStockActualDropdown((prev) => !prev)}
-                className="flex h-full w-full items-center justify-between rounded-[20px] border border-slate-200 bg-slate-50/80 px-4 py-3 text-left transition hover:border-slate-300 hover:bg-slate-50"
+                onClick={stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit ? onOpenAjusteDeficit : undefined}
+                disabled={stockInfo.stockDisponible >= 0 || !ajusteDeficitDisponible || !onOpenAjusteDeficit}
+                className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-left transition ${
+                  stockInfo.stockDisponible < 0
+                    ? 'bg-rose-500/30 hover:bg-rose-500/40'
+                    : 'bg-white/10 hover:bg-white/15'
+                }`}
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600">
-                    <Boxes className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Lotes disponibles</p>
-                    <p className="mt-1 text-sm font-semibold text-slate-900">
-                      {lotesDisponibles.length} lote{lotesDisponibles.length === 1 ? '' : 's'}
-                    </p>
-                  </div>
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                  stockInfo.stockDisponible < 0 ? 'bg-rose-400/30' : 'bg-white/20'
+                }`}>
+                  {stockInfo.stockDisponible < 0
+                    ? <AlertTriangle className="h-4 w-4 text-white" />
+                    : <CheckCircle2 className="h-4 w-4 text-white" />}
                 </div>
-                <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} />
+                <div>
+                  <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-white/70">
+                    {stockInfo.stockDisponible < 0 ? 'Déficit' : 'Disponible'}
+                  </p>
+                  <p className="text-sm font-bold text-white">{stockInfo.stockDisponible.toLocaleString()}</p>
+                </div>
+                {stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit ? (
+                  <Settings2 className="h-3.5 w-3.5 text-white/60" />
+                ) : null}
               </button>
 
-              {showStockActualDropdown ? (
-                <div className="absolute left-0 right-0 top-full z-40 mt-2 rounded-[20px] border border-slate-200 bg-white p-4 shadow-xl">
-                  {lotesDisponibles.length > 0 ? (
-                    <div className="space-y-2">
-                      {lotesDisponibles.map((lote, index) => (
-                        <div
-                          key={lote.id}
-                          className={`rounded-2xl border px-3 py-2 ${
-                            index === 0
-                              ? 'border-teal-200 bg-teal-50/80'
-                              : 'border-slate-200 bg-slate-50/80'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-slate-800">{lote.numero}</p>
-                              <p className="text-xs text-slate-500">
-                                Vence {new Date(lote.fechaVencimiento).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <span className="text-sm font-semibold text-slate-900">
-                              {lote.cantidadActual.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-slate-500">No hay lotes con disponibilidad actual.</p>
-                  )}
-                </div>
-              ) : null}
-            </div>
+              <ArrowRight className="mx-1 h-3.5 w-3.5 shrink-0 text-white/40" />
 
+              {/* ACTUAL + LOTES */}
+              <div className="relative" ref={stockActualRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowStockActualDropdown((prev) => !prev)}
+                  className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2 text-left transition hover:bg-white/15"
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
+                    <Boxes className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-white/70">Actual</p>
+                    <p className="text-sm font-bold text-white">{stockInfo.stockActual.toLocaleString()}</p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[0.65rem] font-semibold text-white">
+                    {lotesDisponibles.length} Lote{lotesDisponibles.length === 1 ? '' : 's'}
+                  </span>
+                  <ChevronDown className={`h-3 w-3 text-white/50 transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showStockActualDropdown ? (
+                  <div className="absolute right-0 top-full z-50 mt-2 min-w-[300px] rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl">
+                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Lotes disponibles ({lotesDisponibles.length})
+                    </h4>
+                    {lotesDisponibles.length > 0 ? (
+                      <div className="max-h-48 space-y-1.5 overflow-y-auto">
+                        {lotesDisponibles.map((lote, index) => (
+                          <div
+                            key={lote.id}
+                            className={`rounded-xl border px-3 py-2 ${
+                              index === 0
+                                ? 'border-teal-200 bg-teal-50/80'
+                                : 'border-slate-200 bg-slate-50/80'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="truncate text-[0.8rem] font-semibold text-slate-800">{lote.numero}</p>
+                                <p className="text-[0.68rem] text-slate-500">
+                                  Vence {new Date(lote.fechaVencimiento).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <span className="shrink-0 rounded-lg bg-slate-100 px-2 py-0.5 text-[0.8rem] font-bold text-slate-900">
+                                {lote.cantidadActual.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="py-3 text-center text-[0.8rem] text-slate-500">No hay lotes con disponibilidad.</p>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          {/* Botón actualizar sig. mes */}
+          {stockInfo.tieneHistorialInicial ? (
             <button
               type="button"
-              onClick={stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit ? onOpenAjusteDeficit : undefined}
-              className={`flex items-center justify-between rounded-[20px] border px-4 py-3 text-left ${
-                stockInfo.stockDisponible < 0
-                  ? 'border-rose-200 bg-rose-50/80'
-                  : 'border-emerald-200 bg-emerald-50/80'
-              } ${
-                stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit
-                  ? 'transition hover:brightness-[0.98]'
-                  : ''
-              }`}
-              disabled={stockInfo.stockDisponible >= 0 || !ajusteDeficitDisponible || !onOpenAjusteDeficit}
+              onClick={onActualizarStockSiguienteMes}
+              disabled={isUpdatingStockSiguienteMes}
+              className={COMPONENT_STYLES.button.secondary}
+              title={`Actualizar stock inicial de ${periodoSiguiente}`}
             >
-              <div>
-                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">
-                  {stockInfo.stockDisponible < 0 ? 'Déficit' : 'Disponible'}
-                </p>
-                <p className={`mt-1 text-sm font-semibold ${stockInfo.stockDisponible < 0 ? 'text-rose-900' : 'text-emerald-900'}`}>
-                  {stockInfo.stockDisponible.toLocaleString()} unidades
-                </p>
-              </div>
-              {stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-xs font-semibold text-rose-700">
-                  <Settings2 className="h-3 w-3" />
-                  Ajustar
-                </span>
-              ) : null}
+              {isUpdatingStockSiguienteMes ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3.5 w-3.5" />
+              )}
+              <span>Actualizar sig. mes</span>
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                {periodoSiguiente}
+              </span>
             </button>
-
-            {stockInfo.tieneHistorialInicial ? (
-              <button
-                type="button"
-                onClick={onActualizarStockSiguienteMes}
-                disabled={isUpdatingStockSiguienteMes}
-                className={`${COMPONENT_STYLES.button.secondary} sm:col-span-2`}
-                title={`Actualizar stock inicial de ${periodoSiguiente}`}
-              >
-                {isUpdatingStockSiguienteMes ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                <span>Actualizar sig. mes</span>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-                  {periodoSiguiente}
-                </span>
-              </button>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-    </section>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
   );
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)]">
-      <section className={COMPONENT_STYLES.panel}>
-        <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
-          <div className="flex flex-wrap gap-2">
-            {!isReadOnly && pendingChangesCount > 0 ? (
-              <ActionButton
-                label={isAutoSaving ? 'Guardando' : 'Guardar cambios'}
-                icon={isAutoSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                onClick={onSaveChanges}
-                disabled={isAutoSaving}
-                isPrimary
-                count={pendingChangesCount}
-              />
-            ) : null}
-
-            {!isReadOnly ? (
-              <ActionButton
-                label="Vales"
-                icon={<Receipt className="h-4 w-4" />}
-                onClick={onOpenVales}
-                disabled={!selectedVacuna || selectedCentroAcopio === 'todos'}
-              />
-            ) : (
-              <span className="inline-flex min-h-[44px] items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-600">
-                Vista solo lectura
-              </span>
-            )}
-
+    <section className={COMPONENT_STYLES.panel}>
+      {/* Barra de acciones compacta */}
+      <div className="border-b border-slate-100 px-4 py-2.5">
+        <div className="flex flex-wrap gap-1.5">
+          {!isReadOnly && pendingChangesCount > 0 ? (
             <ActionButton
-              label="Actualizar"
-              icon={<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />}
-              onClick={onRefresh}
-              disabled={isLoading || !selectedVacuna}
+              label={isAutoSaving ? 'Guardando' : 'Guardar cambios'}
+              icon={isAutoSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              onClick={onSaveChanges}
+              disabled={isAutoSaving}
+              isPrimary
+              count={pendingChangesCount}
             />
+          ) : null}
 
-            {!isReadOnly ? (
-              <ActionButton label="Importar" icon={<Upload className="h-4 w-4" />} onClick={onImport} />
-            ) : null}
+          {!isReadOnly ? (
+            <ActionButton
+              label="Vales"
+              icon={<Receipt className="h-4 w-4" />}
+              onClick={onOpenVales}
+              disabled={!selectedVacuna || selectedCentroAcopio === 'todos'}
+            />
+          ) : (
+            <span className="inline-flex min-h-[38px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600">
+              Vista solo lectura
+            </span>
+          )}
 
-            {!isReadOnly ? (
-              <ActionButton
-                label={isExporting ? 'Exportando' : 'Exportar'}
-                icon={isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                onClick={onExport}
-                disabled={isExporting || !selectedVacuna}
-                isPrimary
-              />
-            ) : null}
-          </div>
+          <ActionButton
+            label="Actualizar"
+            icon={<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />}
+            onClick={onRefresh}
+            disabled={isLoading || !selectedVacuna}
+          />
+
+          {!isReadOnly ? (
+            <ActionButton label="Importar" icon={<Upload className="h-4 w-4" />} onClick={onImport} />
+          ) : null}
+
+          {!isReadOnly ? (
+            <ActionButton
+              label={isExporting ? 'Exportando' : 'Exportar'}
+              icon={isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              onClick={onExport}
+              disabled={isExporting || !selectedVacuna}
+              isPrimary
+            />
+          ) : null}
         </div>
+      </div>
 
-        <div className="space-y-4 px-5 py-5 sm:px-6">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {shouldRenderCentroSelect ? (
-              <label className="block">
-                <span className={COMPONENT_STYLES.input.label}>Centro de acopio</span>
-                <div className="relative">
-                  <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-500" />
-                  <select
-                    value={selectedCentroAcopio}
-                    onChange={(event) => onCentroAcopioChange(event.target.value)}
-                    disabled={isLoadingEstablecimientos}
-                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-10 pr-10`}
-                  >
-                    <option value="todos">{allCentrosLabel}</option>
-                    {centrosAcopio.map((centro) => (
-                      <option key={centro.id} value={centro.id}>
-                        {centro.nombre}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                </div>
-              </label>
-            ) : (
-              <div>
-                <span className={COMPONENT_STYLES.input.label}>Centro asignado</span>
-                <div className="flex min-h-[44px] items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-700">
-                  <Building2 className="h-4 w-4 text-teal-600" />
-                  <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
-                </div>
-              </div>
-            )}
-
+      {/* Filtros en fila compacta */}
+      <div className="px-4 py-3">
+        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+          {shouldRenderCentroSelect ? (
             <label className="block">
-              <span className={COMPONENT_STYLES.input.label}>Vacuna</span>
+              <span className={COMPONENT_STYLES.input.label}>Centro de acopio</span>
               <div className="relative">
-                <Package className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-cyan-500" />
+                <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-500" />
                 <select
-                  value={selectedVacuna}
-                  onChange={(event) => onVacunaChange(event.target.value)}
-                  disabled={isLoadingVacunas}
-                  className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-10 pr-10`}
-                >
-                  {vacunasActivas.length === 0 ? <option value="">Seleccione...</option> : null}
-                  {vacunasActivas.map((vacuna) => (
-                    <option key={vacuna.id} value={vacuna.id}>
-                      {vacuna.nombre}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              </div>
-            </label>
-
-            <label className="block">
-              <span className={COMPONENT_STYLES.input.label}>Mes base</span>
-              <div className="relative">
-                <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-500" />
-                <select
-                  value={selectedMes}
-                  onChange={(event) => onMesChange(Number(event.target.value))}
+                  value={selectedCentroAcopio}
+                  onChange={(event) => onCentroAcopioChange(event.target.value)}
+                  disabled={isLoadingEstablecimientos}
                   className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-10 pr-10`}
                 >
-                  {MESES.map((mes, index) => (
-                    <option key={mes} value={index + 1}>
-                      {mes}
+                  <option value="todos">{allCentrosLabel}</option>
+                  {centrosAcopio.map((centro) => (
+                    <option key={centro.id} value={centro.id}>
+                      {centro.nombre}
                     </option>
                   ))}
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
             </label>
-
-            <label className="block">
-              <span className={COMPONENT_STYLES.input.label}>Año</span>
-              <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-cyan-600">
-                  AÑO
-                </span>
-                <select
-                  value={selectedAnio}
-                  onChange={(event) => onAnioChange(Number(event.target.value))}
-                  disabled={isLoadingAnios}
-                  className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-12 pr-10`}
-                >
-                  {aniosDisponibles.map((anio) => (
-                    <option key={anio} value={anio}>
-                      {anio}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          ) : (
+            <div>
+              <span className={COMPONENT_STYLES.input.label}>Centro asignado</span>
+              <div className="flex min-h-[44px] items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-700">
+                <Building2 className="h-4 w-4 text-teal-600" />
+                <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
               </div>
-            </label>
-          </div>
+            </div>
+          )}
 
+          <label className="block">
+            <span className={COMPONENT_STYLES.input.label}>Vacuna</span>
+            <div className="relative">
+              <Package className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-cyan-500" />
+              <select
+                value={selectedVacuna}
+                onChange={(event) => onVacunaChange(event.target.value)}
+                disabled={isLoadingVacunas}
+                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-10 pr-10`}
+              >
+                {vacunasActivas.length === 0 ? <option value="">Seleccione...</option> : null}
+                {vacunasActivas.map((vacuna) => (
+                  <option key={vacuna.id} value={vacuna.id}>
+                    {vacuna.nombre}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+          </label>
+
+          <label className="block">
+            <span className={COMPONENT_STYLES.input.label}>Mes base</span>
+            <div className="relative">
+              <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-500" />
+              <select
+                value={selectedMes}
+                onChange={(event) => onMesChange(Number(event.target.value))}
+                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-10 pr-10`}
+              >
+                {MESES.map((mes, index) => (
+                  <option key={mes} value={index + 1}>
+                    {mes}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+          </label>
+
+          <label className="block">
+            <span className={COMPONENT_STYLES.input.label}>Año</span>
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-cyan-600">
+                AÑO
+              </span>
+              <select
+                value={selectedAnio}
+                onChange={(event) => onAnioChange(Number(event.target.value))}
+                disabled={isLoadingAnios}
+                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-12 pr-10`}
+              >
+                {aniosDisponibles.map((anio) => (
+                  <option key={anio} value={anio}>
+                    {anio}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+          </label>
         </div>
-      </section>
+      </div>
 
-      {stockPanel}
-    </div>
+      {/* Resumen operativo debajo de los filtros */}
+      {stockPanelContent}
+    </section>
   );
 });
 
