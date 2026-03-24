@@ -10,3 +10,4 @@ export { AlertaEstado } from './AlertaEstado';
 export { ValeIndicator } from './ValeIndicator';
 export { AjusteDeficitModal } from './AjusteDeficitModal';
 export { EntregasProgressBadge } from './EntregasProgressBadge';
+export { MovimientosColumnSettingsModal } from './MovimientosColumnSettingsModal';

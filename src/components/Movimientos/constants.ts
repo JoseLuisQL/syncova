@@ -221,18 +221,34 @@ export const MESES = [
 export const ANIOS_DISPONIBLES = [2024, 2025, 2026] as const;
 
 export const TABLA_COLUMNAS = [
-  { key: 'establecimiento', label: 'Establecimiento', align: 'left' as const, width: 'min-w-[270px]' },
-  { key: 'saldoAnterior', label: 'Saldo Ant.', align: 'center' as const, width: 'min-w-[96px]' },
-  { key: 'transIngreso', label: 'Trans. Ing.', align: 'center' as const, width: 'min-w-[120px]', editable: true },
-  { key: 'totalSaldo', label: 'Total', align: 'center' as const, width: 'min-w-[96px]' },
-  { key: 'salida', label: 'Salida', align: 'center' as const, width: 'min-w-[120px]', editable: true },
-  { key: 'transSalida', label: 'Trans. Sal.', align: 'center' as const, width: 'min-w-[120px]', editable: true },
-  { key: 'saldo', label: 'Saldo', align: 'center' as const, width: 'min-w-[96px]' },
-  { key: 'entrega', label: 'Entrega', align: 'center' as const, width: 'min-w-[220px]', editable: true },
-  { key: 'stock', label: 'Stock', align: 'center' as const, width: 'min-w-[96px]' },
-  { key: 'promedioConsumo', label: 'Promedio', align: 'center' as const, width: 'min-w-[96px]' },
-  { key: 'disponibilidad', label: 'Disponib.', align: 'center' as const, width: 'min-w-[110px]' },
+  { key: 'establecimiento', label: 'Establecimiento', align: 'left' as const, width: 'w-[270px] min-w-[270px]' },
+  { key: 'saldoAnterior', label: 'Saldo Ant.', align: 'center' as const, width: 'w-[96px] min-w-[96px]' },
+  { key: 'transIngreso', label: 'Trans. Ing.', align: 'center' as const, width: 'w-[120px] min-w-[120px]', editable: true },
+  { key: 'totalSaldo', label: 'Total', align: 'center' as const, width: 'w-[96px] min-w-[96px]' },
+  { key: 'salida', label: 'Salida', align: 'center' as const, width: 'w-[120px] min-w-[120px]', editable: true },
+  { key: 'transSalida', label: 'Trans. Sal.', align: 'center' as const, width: 'w-[120px] min-w-[120px]', editable: true },
+  { key: 'saldo', label: 'Saldo', align: 'center' as const, width: 'w-[96px] min-w-[96px]' },
+  { key: 'entrega', label: 'Entrega', align: 'center' as const, width: 'w-[220px] min-w-[220px]', editable: true },
+  { key: 'stock', label: 'Stock', align: 'center' as const, width: 'w-[96px] min-w-[96px]' },
+  { key: 'promedioConsumo', label: 'Promedio', align: 'center' as const, width: 'w-[96px] min-w-[96px]' },
+  { key: 'disponibilidad', label: 'Disponib.', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
 ] as const;
+
+export const COLUMNAS_CONFIGURABLES = TABLA_COLUMNAS.filter(
+  (column) => column.key !== 'establecimiento',
+);
+
+export type ColumnaConfigurableKey = typeof COLUMNAS_CONFIGURABLES[number]['key'];
+
+export type VisibleColumnsState = Record<ColumnaConfigurableKey, boolean>;
+
+export const DEFAULT_VISIBLE_COLUMNS: VisibleColumnsState = COLUMNAS_CONFIGURABLES.reduce(
+  (acc, column) => {
+    acc[column.key] = true;
+    return acc;
+  },
+  {} as VisibleColumnsState,
+);
 
 export const INPUT_FIELD_STYLES = {
   transIngreso: {

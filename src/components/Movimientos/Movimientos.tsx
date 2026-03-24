@@ -23,7 +23,13 @@ import ConfirmacionModificacionModal from './ConfirmacionModificacionModal';
 import ConfirmacionSinDisponibilidadModal from './ConfirmacionSinDisponibilidadModal';
 import ConfirmacionEliminacionModal, { EntregaToDelete } from './ConfirmacionEliminacionModal';
 
-import { COMPONENT_STYLES, MESES } from './constants';
+import {
+  COMPONENT_STYLES,
+  DEFAULT_VISIBLE_COLUMNS,
+  MESES,
+  type ColumnaConfigurableKey,
+  type VisibleColumnsState,
+} from './constants';
 import {
   MovimientosHeaderCompact,
   MovimientosTabla,
@@ -32,6 +38,7 @@ import {
   EntregasAdicionalesModal,
   AlertaEstado,
   AjusteDeficitModal,
+  MovimientosColumnSettingsModal,
 } from './components';
 import { AjusteEntregasService } from '../../services/ajusteEntregasService';
 
@@ -59,6 +66,30 @@ interface CentroAcopioFilterOption {
   nombre: string;
   codigo?: string;
 }
+
+const MOVIMIENTOS_VISIBLE_COLUMNS_STORAGE_KEY = 'sivac_movimientos_visible_columns';
+
+const getStoredVisibleColumns = (): VisibleColumnsState => {
+  if (typeof window === 'undefined') {
+    return DEFAULT_VISIBLE_COLUMNS;
+  }
+
+  try {
+    const stored = window.localStorage.getItem(MOVIMIENTOS_VISIBLE_COLUMNS_STORAGE_KEY);
+    if (!stored) {
+      return DEFAULT_VISIBLE_COLUMNS;
+    }
+
+    const parsed = JSON.parse(stored) as Partial<VisibleColumnsState>;
+
+    return {
+      ...DEFAULT_VISIBLE_COLUMNS,
+      ...parsed,
+    };
+  } catch {
+    return DEFAULT_VISIBLE_COLUMNS;
+  }
+};
 
 const Movimientos: React.FC = () => {
   // ============================================================================
@@ -199,6 +230,8 @@ const Movimientos: React.FC = () => {
   const [ajusteDeficitDisponible, setAjusteDeficitDisponible] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [entregaToDelete, setEntregaToDelete] = useState<EntregaToDelete | null>(null);
+  const [showColumnSettingsModal, setShowColumnSettingsModal] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState<VisibleColumnsState>(() => getStoredVisibleColumns());
 
   // Estado para fila seleccionada (persistente al cambiar pestañas/modales)
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
@@ -677,6 +710,17 @@ const Movimientos: React.FC = () => {
       });
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(
+      MOVIMIENTOS_VISIBLE_COLUMNS_STORAGE_KEY,
+      JSON.stringify(visibleColumns),
+    );
+  }, [visibleColumns]);
 
   // ============================================================================
   // FUNCIONES DE STOCK
@@ -1753,6 +1797,21 @@ const Movimientos: React.FC = () => {
     }
   };
 
+  const handleToggleColumn = useCallback((column: ColumnaConfigurableKey) => {
+    setVisibleColumns((prev) => ({
+      ...prev,
+      [column]: !prev[column],
+    }));
+  }, []);
+
+  const handleSelectAllColumns = useCallback(() => {
+    setVisibleColumns(DEFAULT_VISIBLE_COLUMNS);
+  }, []);
+
+  const handleResetColumns = useCallback(() => {
+    setVisibleColumns(DEFAULT_VISIBLE_COLUMNS);
+  }, []);
+
   // ============================================================================
   // RENDER
   // ============================================================================
@@ -1832,8 +1891,19 @@ const Movimientos: React.FC = () => {
           onEliminarEntregaAdicional={handleEliminarEntregaAdicional}
           selectedRowId={selectedRowId}
           onRowSelect={setSelectedRowId}
+          visibleColumns={visibleColumns}
+          onOpenColumnSettings={() => setShowColumnSettingsModal(true)}
         />
       </MovimientosShell>
+
+      <MovimientosColumnSettingsModal
+        isOpen={showColumnSettingsModal}
+        visibleColumns={visibleColumns}
+        onClose={() => setShowColumnSettingsModal(false)}
+        onToggleColumn={handleToggleColumn}
+        onSelectAll={handleSelectAllColumns}
+        onReset={handleResetColumns}
+      />
 
       {/* Modales */}
       {selectedMovimiento && (
