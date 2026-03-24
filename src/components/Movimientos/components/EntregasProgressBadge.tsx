@@ -1,19 +1,20 @@
-import React, { memo, useState, useRef, useEffect } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Truck,
+  AlertCircle,
+  Building2,
+  CheckCircle2,
   ChevronDown,
   ChevronRight,
-  Building2,
+  Clock,
+  Loader2,
   MapPin,
   Package,
   Plus,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
+  RefreshCw,
+  Truck,
   X,
-  Loader2
 } from 'lucide-react';
-import { ProgresoValesResponse, CentroAcopioConPendientes, EstablecimientoPendiente } from '../../../services/movimientosService';
+import { ProgresoValesResponse, EstablecimientoPendiente } from '../../../services/movimientosService';
 
 interface EntregasProgressBadgeProps {
   totalEntregas: number;
@@ -22,11 +23,37 @@ interface EntregasProgressBadgeProps {
   onRefresh?: () => void;
 }
 
+const getTipoEntregaIcon = (tipo: EstablecimientoPendiente['tipoEntregaPendiente']) => {
+  switch (tipo) {
+    case 'base':
+      return <Package className="h-3.5 w-3.5 text-teal-600" />;
+    case 'adicional':
+      return <Plus className="h-3.5 w-3.5 text-amber-600" />;
+    case 'ambos':
+      return <AlertCircle className="h-3.5 w-3.5 text-rose-600" />;
+    default:
+      return <Package className="h-3.5 w-3.5 text-teal-600" />;
+  }
+};
+
+const getTipoEntregaLabel = (tipo: EstablecimientoPendiente['tipoEntregaPendiente']) => {
+  switch (tipo) {
+    case 'base':
+      return 'Base';
+    case 'adicional':
+      return 'Adicional';
+    case 'ambos':
+      return 'Base + adicional';
+    default:
+      return 'Base';
+  }
+};
+
 export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(({
   totalEntregas,
   progresoVales,
   isLoading,
-  onRefresh
+  onRefresh,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [expandedCentros, setExpandedCentros] = useState<Set<string>>(new Set());
@@ -38,12 +65,53 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
         setShowDropdown(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const porcentaje = progresoVales?.porcentajeProgreso ?? 0;
+  const totalPendientes = useMemo(
+    () =>
+      progresoVales?.establecimientosPendientes.reduce(
+        (acumulado, grupo) => acumulado + grupo.totalPendientes,
+        0,
+      ) ?? 0,
+    [progresoVales?.establecimientosPendientes],
+  );
+
+  const statusConfig = useMemo(() => {
+    if (!progresoVales || progresoVales.estado === 'sin_vales') {
+      return {
+        card: 'border-slate-200 bg-slate-50/80',
+        pill: 'bg-slate-100 text-slate-700',
+        bar: 'bg-slate-300',
+        icon: <Clock className="h-4 w-4 text-slate-500" />,
+        label: 'Sin vales',
+      };
+    }
+
+    if (progresoVales.estado === 'completo') {
+      return {
+        card: 'border-emerald-200 bg-emerald-50/80',
+        pill: 'bg-emerald-100 text-emerald-700',
+        bar: 'bg-emerald-500',
+        icon: <CheckCircle2 className="h-4 w-4 text-emerald-600" />,
+        label: 'Completo',
+      };
+    }
+
+    return {
+      card: 'border-amber-200 bg-amber-50/80',
+      pill: 'bg-amber-100 text-amber-700',
+      bar: 'bg-amber-500',
+      icon: <AlertCircle className="h-4 w-4 text-amber-600" />,
+      label: 'En progreso',
+    };
+  }, [progresoVales]);
+
   const toggleCentro = (centroId: string) => {
-    setExpandedCentros(prev => {
+    setExpandedCentros((prev) => {
       const next = new Set(prev);
       if (next.has(centroId)) {
         next.delete(centroId);
@@ -54,297 +122,183 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
     });
   };
 
-  const expandAll = () => {
-    if (progresoVales) {
-      setExpandedCentros(new Set(progresoVales.establecimientosPendientes.map(c => c.centroAcopio.id)));
-    }
-  };
-
-  const collapseAll = () => {
-    setExpandedCentros(new Set());
-  };
-
-  const getBadgeColors = () => {
-    if (!progresoVales || progresoVales.estado === 'sin_vales') {
-      return {
-        bg: 'bg-white/20',
-        border: 'border-white/20',
-        progressBg: 'bg-white/30',
-        progressFill: 'bg-white/50'
-      };
-    }
-    if (progresoVales.estado === 'completo') {
-      return {
-        bg: 'bg-emerald-500/40',
-        border: 'border-emerald-300/50',
-        progressBg: 'bg-emerald-900/30',
-        progressFill: 'bg-emerald-400'
-      };
-    }
-    return {
-      bg: 'bg-amber-500/40',
-      border: 'border-amber-300/50',
-      progressBg: 'bg-amber-900/30',
-      progressFill: 'bg-amber-400'
-    };
-  };
-
-  const getStatusIcon = () => {
-    if (!progresoVales || progresoVales.estado === 'sin_vales') {
-      return <Clock className="h-3 w-3 text-white/70" />;
-    }
-    if (progresoVales.estado === 'completo') {
-      return <CheckCircle2 className="h-3 w-3 text-emerald-200" />;
-    }
-    return <AlertCircle className="h-3 w-3 text-amber-200" />;
-  };
-
-  const getTipoEntregaIcon = (tipo: EstablecimientoPendiente['tipoEntregaPendiente']) => {
-    switch (tipo) {
-      case 'base':
-        return <Package className="h-3.5 w-3.5 text-blue-500" />;
-      case 'adicional':
-        return <Plus className="h-3.5 w-3.5 text-purple-500" />;
-      case 'ambos':
-        return <AlertCircle className="h-3.5 w-3.5 text-orange-500" />;
-    }
-  };
-
-  const getTipoEntregaLabel = (tipo: EstablecimientoPendiente['tipoEntregaPendiente']) => {
-    switch (tipo) {
-      case 'base':
-        return 'Entrega Base';
-      case 'adicional':
-        return 'Adicional';
-      case 'ambos':
-        return 'Base + Adicional';
-    }
-  };
-
-  const colors = getBadgeColors();
-  const porcentaje = progresoVales?.porcentajeProgreso ?? 0;
-  const hasPendientes = progresoVales && progresoVales.establecimientosPendientes.length > 0;
-  const totalPendientes = progresoVales?.establecimientosPendientes.reduce(
-    (sum, c) => sum + c.totalPendientes, 0
-  ) ?? 0;
-
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative h-full" ref={dropdownRef}>
       <button
-        onClick={() => setShowDropdown(!showDropdown)}
+        type="button"
+        onClick={() => setShowDropdown((prev) => !prev)}
         disabled={isLoading}
-        className={`flex items-center gap-3 px-4 py-2 rounded-xl ${colors.bg} ${colors.border} border
-                   hover:bg-white/30 transition-all group cursor-pointer relative overflow-hidden`}
+        className={`flex h-full w-full items-center justify-between rounded-[20px] border px-4 py-3 text-left transition hover:brightness-[0.99] ${statusConfig.card}`}
       >
-        <div className="p-1.5 bg-white/30 rounded-lg">
-          {isLoading ? (
-            <Loader2 className="h-4 w-4 text-white animate-spin" />
-          ) : (
-            <Truck className="h-4 w-4 text-white" />
-          )}
-        </div>
-        
-        <div className="text-left min-w-[70px]">
-          <div className="text-[10px] text-white/80 font-medium uppercase tracking-wide flex items-center gap-1">
-            Entregas
-            {getStatusIcon()}
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/70 bg-white text-teal-600 shadow-sm">
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
           </div>
-          <div className="text-lg font-bold text-white leading-none">
-            {totalEntregas.toLocaleString()}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Entregas</p>
+              {statusConfig.icon}
+            </div>
+            <p className="mt-1 text-sm font-semibold text-slate-900">
+              {totalEntregas.toLocaleString()} unidades
+            </p>
           </div>
         </div>
 
-        {progresoVales && progresoVales.totalEstablecimientosConEntregas > 0 && (
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-white/80 font-medium">
-                {progresoVales.establecimientosConValeCompleto}/{progresoVales.totalEstablecimientosConEntregas}
-              </span>
-              <span className="text-xs font-bold text-white">
-                {porcentaje}%
-              </span>
-            </div>
-            <div className={`w-16 h-1.5 rounded-full ${colors.progressBg} overflow-hidden`}>
-              <div
-                className={`h-full ${colors.progressFill} rounded-full transition-all duration-500 ease-out`}
-                style={{ width: `${porcentaje}%` }}
-              />
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusConfig.pill}`}>
+              {statusConfig.label}
+            </span>
+            {progresoVales?.totalEstablecimientosConEntregas ? (
+              <p className="mt-1 text-xs text-slate-500">
+                {progresoVales.establecimientosConValeCompleto}/{progresoVales.totalEstablecimientosConEntregas} con vale
+              </p>
+            ) : null}
           </div>
-        )}
-
-        <ChevronDown className={`h-4 w-4 text-white/80 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+        </div>
       </button>
 
-      {showDropdown && (
-        <div className="absolute top-full left-0 mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="bg-gradient-to-r from-teal-500 to-cyan-500 px-4 py-3">
-            <div className="flex items-center justify-between">
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200">
+        <div
+          className={`h-full rounded-full transition-all duration-300 ${statusConfig.bar}`}
+          style={{ width: `${Math.min(100, Math.max(0, porcentaje))}%` }}
+        />
+      </div>
+
+      {showDropdown ? (
+        <div className="absolute left-0 right-0 top-full z-40 mt-3 overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-xl">
+          <div className="border-b border-slate-100 bg-slate-50/80 px-4 py-3">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Progreso de vales</h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  {progresoVales?.totalEstablecimientosConEntregas
+                    ? `${progresoVales.establecimientosConValeCompleto} de ${progresoVales.totalEstablecimientosConEntregas} establecimientos con vale generado`
+                    : 'Aún no hay establecimientos con entrega registrada'}
+                </p>
+              </div>
               <div className="flex items-center gap-2">
-                <Truck className="h-5 w-5 text-white" />
-                <span className="font-bold text-white">Progreso de Vales</span>
+                {onRefresh ? (
+                  <button
+                    type="button"
+                    onClick={onRefresh}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+                    title="Actualizar progreso"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setShowDropdown(false)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <button
-                onClick={() => setShowDropdown(false)}
-                className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <X className="h-4 w-4 text-white" />
-              </button>
             </div>
-            
-            {progresoVales && (
-              <div className="mt-2 flex items-center gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between text-sm text-white/90 mb-1">
-                    <span>
-                      {progresoVales.establecimientosConValeCompleto} de {progresoVales.totalEstablecimientosConEntregas} establecimientos
-                    </span>
-                    <span className="font-bold">{porcentaje}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-white/30 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-white rounded-full transition-all duration-500"
-                      style={{ width: `${porcentaje}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="max-h-80 overflow-y-auto">
             {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 text-teal-500 animate-spin" />
-                <span className="ml-2 text-gray-500">Cargando...</span>
+              <div className="flex items-center justify-center gap-2 px-4 py-10 text-sm text-slate-500">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Cargando progreso...</span>
               </div>
             ) : !progresoVales || progresoVales.totalEstablecimientosConEntregas === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                <Package className="h-10 w-10 mb-2 opacity-50" />
-                <span className="text-sm">No hay entregas registradas</span>
+              <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-400">
+                  <Package className="h-5 w-5" />
+                </div>
+                <p className="text-sm font-semibold text-slate-800">No hay entregas registradas</p>
+                <p className="mt-1 text-xs text-slate-500">El avance aparecerá cuando existan entregas para vales.</p>
               </div>
             ) : progresoVales.estado === 'completo' ? (
-              <div className="flex flex-col items-center justify-center py-8">
-                <div className="p-3 bg-emerald-100 rounded-full mb-3">
-                  <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+              <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-600">
+                  <CheckCircle2 className="h-6 w-6" />
                 </div>
-                <span className="font-semibold text-emerald-700">Todos los vales generados</span>
-                <span className="text-sm text-gray-500 mt-1">
-                  {progresoVales.totalEstablecimientosConEntregas} establecimientos con vale
-                </span>
+                <p className="text-sm font-semibold text-emerald-900">Todos los vales fueron generados</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {progresoVales.totalEstablecimientosConEntregas} establecimientos procesados.
+                </p>
               </div>
             ) : (
               <>
-                <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    {totalPendientes} establecimiento{totalPendientes !== 1 ? 's' : ''} pendiente{totalPendientes !== 1 ? 's' : ''}
+                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 text-xs text-slate-500">
+                  <span className="font-semibold uppercase tracking-[0.12em]">
+                    {totalPendientes} pendiente{totalPendientes === 1 ? '' : 's'}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={expandAll}
-                      className="text-xs text-teal-600 hover:text-teal-700 font-medium"
-                    >
-                      Expandir
-                    </button>
-                    <span className="text-gray-300">|</span>
-                    <button
-                      onClick={collapseAll}
-                      className="text-xs text-teal-600 hover:text-teal-700 font-medium"
-                    >
-                      Colapsar
-                    </button>
-                  </div>
+                  <span>{porcentaje}% completado</span>
                 </div>
 
-                {progresoVales.establecimientosPendientes.map((grupo) => (
-                  <div key={grupo.centroAcopio.id} className="border-b border-gray-100 last:border-b-0">
-                    <button
-                      onClick={() => toggleCentro(grupo.centroAcopio.id)}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center justify-center w-6 h-6">
-                        {expandedCentros.has(grupo.centroAcopio.id) ? (
-                          <ChevronDown className="h-4 w-4 text-gray-400" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4 text-gray-400" />
-                        )}
-                      </div>
-                      <div className="p-1.5 bg-teal-100 rounded-lg">
-                        <Building2 className="h-4 w-4 text-teal-600" />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <div className="font-semibold text-gray-800 text-sm">
-                          {grupo.centroAcopio.nombre}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {grupo.centroAcopio.codigo}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 rounded-full">
-                        <span className="text-xs font-bold text-amber-700">
-                          {grupo.totalPendientes}
-                        </span>
-                        <span className="text-[10px] text-amber-600">pendiente{grupo.totalPendientes !== 1 ? 's' : ''}</span>
-                      </div>
-                    </button>
+                <div className="space-y-2 p-3">
+                  {progresoVales.establecimientosPendientes.map((grupo) => {
+                    const isExpanded = expandedCentros.has(grupo.centroAcopio.id);
 
-                    {expandedCentros.has(grupo.centroAcopio.id) && (
-                      <div className="bg-gray-50 px-4 py-2 space-y-2">
-                        {grupo.establecimientos.map((est) => (
-                          <div
-                            key={est.id}
-                            className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm"
-                          >
-                            <div className="p-1.5 bg-gray-100 rounded-lg">
-                              <MapPin className="h-3.5 w-3.5 text-gray-500" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-gray-800 text-sm truncate">
-                                {est.nombre}
-                              </div>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[10px] text-gray-400">{est.codigo}</span>
-                                <span className="text-gray-300">|</span>
-                                <div className="flex items-center gap-1">
-                                  {getTipoEntregaIcon(est.tipoEntregaPendiente)}
-                                  <span className="text-[10px] font-medium text-gray-600">
-                                    {getTipoEntregaLabel(est.tipoEntregaPendiente)}
-                                  </span>
+                    return (
+                      <div key={grupo.centroAcopio.id} className="overflow-hidden rounded-[18px] border border-slate-200 bg-slate-50/70">
+                        <button
+                          type="button"
+                          onClick={() => toggleCentro(grupo.centroAcopio.id)}
+                          className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50"
+                        >
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500">
+                            {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                          </div>
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-teal-200 bg-white text-teal-600">
+                            <Building2 className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-slate-800">{grupo.centroAcopio.nombre}</p>
+                            <p className="text-xs text-slate-500">{grupo.centroAcopio.codigo}</p>
+                          </div>
+                          <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                            {grupo.totalPendientes}
+                          </span>
+                        </button>
+
+                        {isExpanded ? (
+                          <div className="space-y-2 border-t border-slate-200 bg-white/70 p-3">
+                            {grupo.establecimientos.map((establecimiento) => (
+                              <div key={establecimiento.id} className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5">
+                                <div className="flex items-start gap-3">
+                                  <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500">
+                                    <MapPin className="h-3.5 w-3.5" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-semibold text-slate-800">{establecimiento.nombre}</p>
+                                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                                      <span>{establecimiento.codigo}</span>
+                                      <span className="text-slate-300">•</span>
+                                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                                        {getTipoEntregaIcon(establecimiento.tipoEntregaPendiente)}
+                                        {getTipoEntregaLabel(establecimiento.tipoEntregaPendiente)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-sm font-semibold text-slate-900">
+                                      {establecimiento.totalCantidadPendiente.toLocaleString()}
+                                    </p>
+                                    <p className="text-[11px] text-slate-500">unidades</p>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-sm font-bold text-gray-800">
-                                {est.totalCantidadPendiente.toLocaleString()}
-                              </div>
-                              <div className="text-[10px] text-gray-500">unidades</div>
-                            </div>
+                            ))}
                           </div>
-                        ))}
+                        ) : null}
                       </div>
-                    )}
-                  </div>
-                ))}
+                    );
+                  })}
+                </div>
               </>
             )}
           </div>
-
-          {onRefresh && (
-            <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
-              <button
-                onClick={onRefresh}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium
-                         text-teal-600 bg-teal-50 hover:bg-teal-100 rounded-xl transition-colors
-                         disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Loader2 className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                Actualizar progreso
-              </button>
-            </div>
-          )}
         </div>
-      )}
+      ) : null}
     </div>
   );
 });

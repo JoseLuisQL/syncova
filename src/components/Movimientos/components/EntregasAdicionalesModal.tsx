@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
-import { X, Package, Plus, Trash2, Loader2 } from 'lucide-react';
-import { COMPONENT_STYLES, INPUT_FIELD_STYLES } from '../constants';
+import { Loader2, Package, Plus, Trash2 } from 'lucide-react';
+import { Modal } from '../../Establecimientos/components';
+import { INPUT_FIELD_STYLES } from '../constants';
 import { MovimientoCalculado } from '../../../types';
 import { ValeIndicator } from './ValeIndicator';
 
@@ -20,6 +21,26 @@ interface EntregasAdicionalesModalProps {
   onEliminarEntrega: (entregaId: string) => void;
 }
 
+const SummaryMetric: React.FC<{
+  label: string;
+  value: string;
+  tone?: 'teal' | 'amber' | 'emerald';
+}> = ({ label, value, tone = 'teal' }) => {
+  const className =
+    tone === 'amber'
+      ? 'border-amber-200 bg-amber-50 text-amber-900'
+      : tone === 'emerald'
+      ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+      : 'border-teal-200 bg-teal-50 text-teal-900';
+
+  return (
+    <div className={`rounded-[18px] border px-4 py-3 ${className}`}>
+      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</p>
+      <p className="mt-1 text-lg font-semibold">{value}</p>
+    </div>
+  );
+};
+
 export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> = memo(({
   movimiento,
   isProcessing,
@@ -33,225 +54,144 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
   onBlur,
   onEliminarEntrega,
 }) => {
-  const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
-  const entregaBase = tieneEntregasAdicionales
-    ? (movimiento.entregaBase ?? 0)
+  const entregaBase = movimiento.entregasAdicionales?.length
+    ? movimiento.entregaBase ?? movimiento.entrega
     : movimiento.entrega;
-
-  const totalAdicionales = movimiento.entregasAdicionales?.reduce((sum, e) => {
-    return sum + getCurrentEntregaValue(e.id, e.cantidad);
-  }, 0) || 0;
+  const totalAdicionales =
+    movimiento.entregasAdicionales?.reduce(
+      (acumulado, entrega) => acumulado + getCurrentEntregaValue(entrega.id, entrega.cantidad),
+      0,
+    ) || 0;
 
   return (
-    <div className={COMPONENT_STYLES.modal.overlay} onClick={onClose}>
-      <div 
-        className={COMPONENT_STYLES.modal.containerLarge}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className={COMPONENT_STYLES.modal.header}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-amber-500 to-amber-600 p-2 rounded-xl">
-                <Package className="h-5 w-5 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900">
-                Gestionar Entregas Adicionales
-              </h3>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Body */}
-        <div className={COMPONENT_STYLES.modal.body}>
-          {/* Info Establecimiento */}
-          <div className="bg-gray-50 rounded-xl p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-gray-900">{movimiento.establecimiento.nombre}</p>
-                <p className="text-sm text-gray-600">{movimiento.establecimiento.codigo}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-600">Entrega Base</p>
-                <p className="text-xl font-bold text-emerald-600">
-                  {entregaBase.toLocaleString()} unidades
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Lista de Entregas Adicionales */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="font-semibold text-gray-900">Entregas Adicionales</h4>
-              <button
-                onClick={() => onAgregarEntrega(movimiento.establecimientoId)}
-                className={COMPONENT_STYLES.button.primary}
-                disabled={isCreating || isUpdating || isProcessing}
-              >
-                {isProcessing ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Plus className="h-4 w-4" />
-                )}
-                <span>{isProcessing ? 'Procesando...' : 'Agregar Entrega'}</span>
-              </button>
-            </div>
-
-            {movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0 ? (
-              <div className="space-y-3">
-                {movimiento.entregasAdicionales.map((entrega) => (
-                  <div 
-                    key={entrega.id}
-                    className={`rounded-xl p-4 transition-all duration-300 ${
-                      entrega.tieneValeGenerado 
-                        ? 'bg-gradient-to-r from-emerald-50/80 to-teal-50/60 border-2 border-emerald-300 shadow-sm' 
-                        : 'bg-amber-50 border border-amber-200'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className={`rounded-full p-2.5 shadow-sm ${
-                          entrega.tieneValeGenerado 
-                            ? 'bg-gradient-to-br from-emerald-400 to-teal-500' 
-                            : 'bg-amber-100'
-                        }`}>
-                          <Package className={`h-5 w-5 ${
-                            entrega.tieneValeGenerado 
-                              ? 'text-white' 
-                              : 'text-amber-600'
-                          }`} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-gray-900">
-                              Entrega #{entrega.numeroEntrega}
-                            </p>
-                            <ValeIndicator 
-                              tieneVale={entrega.tieneValeGenerado || false} 
-                              valeNumero={entrega.valeNumero}
-                            />
-                          </div>
-                          <p className="text-sm text-gray-600">
-                            {new Date(entrega.fechaEntrega).toLocaleDateString('es-ES', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </p>
-                          {entrega.motivo && (
-                            <p className="text-sm text-gray-500 mt-1">{entrega.motivo}</p>
-                          )}
-                          {entrega.tieneValeGenerado && entrega.valeNumero && (
-                            <span className="inline-flex items-center gap-1 mt-2 px-2.5 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
-                              Vale: {entrega.valeNumero}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="text-right relative">
-                          <label className={`block text-sm mb-1 font-medium ${
-                            entrega.tieneValeGenerado ? 'text-emerald-700' : 'text-gray-600'
-                          }`}>Cantidad</label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={getCurrentEntregaValue(entrega.id, entrega.cantidad)}
-                            onChange={(e) => onTempValueChange(entrega.id, parseInt(e.target.value) || 0)}
-                            onBlur={() => onBlur(entrega.id)}
-                            className={`w-24 px-3 py-2 text-center text-sm font-semibold border-2 rounded-xl 
-                                       focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:cursor-not-allowed 
-                                       transition-all duration-200 ${
-                              entrega.tieneValeGenerado
-                                ? 'border-emerald-400 bg-white focus:ring-emerald-300 focus:border-emerald-500'
-                                : hasPendingEntregaChange(entrega.id)
-                                  ? INPUT_FIELD_STYLES.entregaAdicional.pending
-                                  : `${INPUT_FIELD_STYLES.entregaAdicional.normal} ${INPUT_FIELD_STYLES.entregaAdicional.focus}`
-                            }`}
-                            disabled={isCreating || isUpdating || isProcessing}
-                          />
-                          {hasPendingEntregaChange(entrega.id) && !entrega.tieneValeGenerado && (
-                            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full animate-pulse" />
-                          )}
-                        </div>
-
-                        <button
-                          onClick={() => onEliminarEntrega(entrega.id)}
-                          className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${
-                            entrega.tieneValeGenerado
-                              ? 'text-emerald-500 hover:text-emerald-700 hover:bg-emerald-100'
-                              : 'text-rose-500 hover:text-rose-700 hover:bg-rose-50'
-                          }`}
-                          disabled={isCreating || isUpdating || isProcessing}
-                          title="Eliminar entrega adicional"
-                        >
-                          {isProcessing ? (
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-5 w-5" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No hay entregas adicionales</p>
-                <p className="text-sm text-gray-400">
-                  Haga clic en "Agregar Entrega" para crear una nueva
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Resumen Total */}
-          <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
-            <h5 className="font-semibold text-teal-900 mb-3">Resumen Total</h5>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <p className="text-sm text-teal-600">Entrega Base</p>
-                <p className="text-xl font-bold text-teal-800">
-                  {entregaBase.toLocaleString()}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-teal-600">Adicionales</p>
-                <p className="text-xl font-bold text-teal-800">
-                  {totalAdicionales.toLocaleString()}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-teal-600">Total General</p>
-                <p className="text-xl font-bold text-teal-800">
-                  {movimiento.entrega.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className={COMPONENT_STYLES.modal.footer}>
-          <button
-            onClick={onClose}
-            className={COMPONENT_STYLES.button.secondary}
-          >
+    <Modal
+      isOpen
+      onClose={onClose}
+      title="Entregas adicionales"
+      subtitle={movimiento.establecimiento.nombre}
+      icon={Package}
+      size="xl"
+      footer={
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+          <button type="button" onClick={onClose} className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
             Cerrar
           </button>
+          <button
+            type="button"
+            onClick={() => onAgregarEntrega(movimiento.establecimientoId)}
+            disabled={isCreating || isUpdating || isProcessing}
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-teal-700 hover:to-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            <span>Agregar entrega</span>
+          </button>
         </div>
+      }
+    >
+      <div className="space-y-5">
+        <section className="rounded-[20px] border border-slate-200 bg-slate-50/70 p-4">
+          <p className="text-sm font-semibold text-slate-900">{movimiento.establecimiento.nombre}</p>
+          <p className="mt-1 text-sm text-slate-500">{movimiento.establecimiento.codigo}</p>
+        </section>
+
+        <section className="grid gap-3 sm:grid-cols-3">
+          <SummaryMetric label="Entrega base" value={entregaBase.toLocaleString()} tone="emerald" />
+          <SummaryMetric label="Adicionales" value={totalAdicionales.toLocaleString()} tone="amber" />
+          <SummaryMetric label="Total general" value={movimiento.entrega.toLocaleString()} tone="teal" />
+        </section>
+
+        <section className="space-y-3 rounded-[22px] border border-slate-200 bg-white p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">Detalle editable</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Ajusta cantidades existentes con validación inmediata y conserva el control por vale.
+              </p>
+            </div>
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+              {movimiento.entregasAdicionales?.length || 0} registros
+            </span>
+          </div>
+
+          {movimiento.entregasAdicionales?.length ? (
+            <div className="space-y-3">
+              {movimiento.entregasAdicionales.map((entrega) => (
+                <div
+                  key={entrega.id}
+                  className={`rounded-[20px] border px-4 py-3 ${
+                    entrega.tieneValeGenerado
+                      ? 'border-emerald-200 bg-emerald-50/70'
+                      : 'border-slate-200 bg-slate-50/70'
+                  }`}
+                >
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold text-slate-900">Entrega #{entrega.numeroEntrega}</p>
+                        <ValeIndicator tieneVale={Boolean(entrega.tieneValeGenerado)} valeNumero={entrega.valeNumero} />
+                      </div>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {new Date(entrega.fechaEntrega).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </p>
+                      {entrega.motivo ? <p className="mt-2 text-sm text-slate-600">{entrega.motivo}</p> : null}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          value={getCurrentEntregaValue(entrega.id, entrega.cantidad)}
+                          onChange={(event) => onTempValueChange(entrega.id, parseInt(event.target.value, 10) || 0)}
+                          onBlur={() => onBlur(entrega.id)}
+                          disabled={isCreating || isUpdating || isProcessing}
+                          className={`w-24 rounded-xl border px-3 py-2 text-center text-sm font-semibold tabular-nums transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                            entrega.tieneValeGenerado
+                              ? 'border-emerald-300 bg-white text-emerald-800 focus:border-emerald-500 focus:ring-emerald-500/20'
+                              : hasPendingEntregaChange(entrega.id)
+                              ? INPUT_FIELD_STYLES.entregaAdicional.pending
+                              : `${INPUT_FIELD_STYLES.entregaAdicional.normal} ${INPUT_FIELD_STYLES.entregaAdicional.focus}`
+                          }`}
+                        />
+                        {hasPendingEntregaChange(entrega.id) && !entrega.tieneValeGenerado ? (
+                          <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border border-white bg-amber-400 animate-pulse" />
+                        ) : null}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => onEliminarEntrega(entrega.id)}
+                        disabled={isCreating || isUpdating || isProcessing}
+                        className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition ${
+                          entrega.tieneValeGenerado
+                            ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                            : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                        } disabled:cursor-not-allowed disabled:opacity-50`}
+                        title="Eliminar entrega adicional"
+                      >
+                        {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-[20px] border border-dashed border-slate-200 bg-slate-50/60 px-4 py-10 text-center">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-300">
+                <Package className="h-5 w-5" />
+              </div>
+              <p className="text-sm font-semibold text-slate-800">No hay entregas adicionales</p>
+              <p className="mt-1 text-sm text-slate-500">Agrega una entrega para habilitar la edición detallada.</p>
+            </div>
+          )}
+        </section>
       </div>
-    </div>
+    </Modal>
   );
 });
 

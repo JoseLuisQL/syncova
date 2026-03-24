@@ -3,6 +3,7 @@ export { MovimientosHeaderCompact } from './MovimientosHeaderCompact';
 export { MovimientosFiltros } from './MovimientosFiltros';
 export { MovimientosStock } from './MovimientosStock';
 export { MovimientosTabla } from './MovimientosTabla';
+export { default as MovimientosShell } from './MovimientosShell';
 export { MovimientoDetalle } from './MovimientoDetalle';
 export { EntregasAdicionalesModal } from './EntregasAdicionalesModal';
 export { AlertaEstado } from './AlertaEstado';

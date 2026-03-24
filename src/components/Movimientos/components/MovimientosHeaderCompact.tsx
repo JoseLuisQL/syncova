@@ -1,25 +1,20 @@
-import React, { memo, useState, useRef, useEffect } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  BarChart3,
-  RefreshCw,
-  Download,
-  Upload,
-  Receipt,
-  Save,
-  Loader2,
+  AlertTriangle,
+  Boxes,
   Building2,
-  Package,
   Calendar,
   ChevronDown,
-  Filter,
-  Truck,
-  TrendingUp,
-  Boxes,
-  AlertTriangle,
-  ArrowRight,
+  Download,
+  Loader2,
+  Package,
+  Receipt,
+  RefreshCw,
+  Save,
   Settings2,
+  Upload,
 } from 'lucide-react';
-import { MESES } from '../constants';
+import { MESES, COMPONENT_STYLES } from '../constants';
 import { Vacuna, CentroAcopio } from '../../../types';
 import { EntregasProgressBadge } from './EntregasProgressBadge';
 import { ProgresoValesResponse } from '../../../services/movimientosService';
@@ -49,7 +44,6 @@ interface MovimientosHeaderCompactProps {
   showReadOnlyCentroFilter?: boolean;
   allCentrosLabel?: string;
   hideStockMetrics?: boolean;
-  // Filtros
   selectedCentroAcopio: string;
   selectedVacuna: string;
   selectedMes: number;
@@ -65,7 +59,6 @@ interface MovimientosHeaderCompactProps {
   onVacunaChange: (value: string) => void;
   onMesChange: (value: number) => void;
   onAnioChange: (value: number) => void;
-  // Stock
   stockInfo: StockInfo | null;
   stockError: string | null;
   isLoadingStock: boolean;
@@ -73,7 +66,6 @@ interface MovimientosHeaderCompactProps {
   isUpdatingStockSiguienteMes: boolean;
   onRetryStock: () => void;
   onActualizarStockSiguienteMes: () => void;
-  // Acciones
   pendingChangesCount: number;
   isAutoSaving: boolean;
   isLoading: boolean;
@@ -83,14 +75,59 @@ interface MovimientosHeaderCompactProps {
   onExport: () => void;
   onImport: () => void;
   onOpenVales: () => void;
-  // Ajuste de Deficit
   onOpenAjusteDeficit?: () => void;
   ajusteDeficitDisponible?: boolean;
-  // Progreso de Vales
   progresoVales?: ProgresoValesResponse | null;
   isLoadingProgresoVales?: boolean;
   onRefreshProgresoVales?: () => void;
 }
+
+interface ActionButtonProps {
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  isPrimary?: boolean;
+  count?: number;
+}
+
+const ActionButton: React.FC<ActionButtonProps> = ({
+  label,
+  icon,
+  onClick,
+  disabled = false,
+  isPrimary = false,
+  count,
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className={isPrimary ? COMPONENT_STYLES.button.primary : COMPONENT_STYLES.button.secondary}
+    title={label}
+  >
+    {icon}
+    <span className="hidden sm:inline">{label}</span>
+    {count ? (
+      <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold text-inherit">{count}</span>
+    ) : null}
+  </button>
+);
+
+const StatChip: React.FC<{
+  label: string;
+  value: string;
+  subtle?: boolean;
+}> = ({ label, value, subtle = false }) => (
+  <div
+    className={`rounded-2xl border px-3 py-2 ${
+      subtle ? 'border-slate-200 bg-slate-50/80' : 'border-teal-100 bg-teal-50/60'
+    }`}
+  >
+    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</p>
+    <p className="mt-1 text-sm font-semibold text-slate-800">{value}</p>
+  </div>
+);
 
 export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> = memo(({
   isReadOnly = false,
@@ -98,7 +135,6 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   showReadOnlyCentroFilter = false,
   allCentrosLabel = 'Todos',
   hideStockMetrics = false,
-  // Filtros
   selectedCentroAcopio,
   selectedVacuna,
   selectedMes,
@@ -108,13 +144,11 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   aniosDisponibles,
   isLoadingEstablecimientos,
   isLoadingVacunas,
-  isLoadingAnios,
-  datosTablaLength,
+  isLoadingAnios = false,
   onCentroAcopioChange,
   onVacunaChange,
   onMesChange,
   onAnioChange,
-  // Stock
   stockInfo,
   stockError,
   isLoadingStock,
@@ -122,7 +156,6 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   isUpdatingStockSiguienteMes,
   onRetryStock,
   onActualizarStockSiguienteMes,
-  // Acciones
   pendingChangesCount,
   isAutoSaving,
   isLoading,
@@ -132,17 +165,14 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   onExport,
   onImport,
   onOpenVales,
-  // Ajuste de Deficit
   onOpenAjusteDeficit,
   ajusteDeficitDisponible = false,
-  // Progreso de Vales
-  progresoVales,
+  progresoVales = null,
   isLoadingProgresoVales = false,
   onRefreshProgresoVales,
 }) => {
   const [showStockInicialDropdown, setShowStockInicialDropdown] = useState(false);
   const [showStockActualDropdown, setShowStockActualDropdown] = useState(false);
-  
   const stockInicialRef = useRef<HTMLDivElement>(null);
   const stockActualRef = useRef<HTMLDivElement>(null);
 
@@ -155,604 +185,454 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
         setShowStockActualDropdown(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const shouldRenderCentroSelect = !isReadOnly || showReadOnlyCentroFilter;
-  const centroNombre = selectedCentroAcopio === 'todos'
-    ? allCentrosLabel
-    : centrosAcopio.find(c => c.id === selectedCentroAcopio)?.nombre || '';
+  const centroNombre = useMemo(() => {
+    if (selectedCentroAcopio === 'todos') return allCentrosLabel;
+    return centrosAcopio.find((centro) => centro.id === selectedCentroAcopio)?.nombre || allCentrosLabel;
+  }, [allCentrosLabel, centrosAcopio, selectedCentroAcopio]);
 
-  const lotesDisponibles = stockInfo?.lotes.filter(l => l.cantidadActual > 0) || [];
+  const periodoEntrega = useMemo(() => {
+    let mesEntrega = selectedMes + 1;
+    let anioEntrega = selectedAnio;
+    if (mesEntrega > 12) {
+      mesEntrega = 1;
+      anioEntrega += 1;
+    }
 
-  return (
-    <header className="sticky top-0 z-20">
-      {/* Barra Principal - Fondo blanco elegante */}
-      <div className="bg-white border-b border-gray-100 shadow-sm">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            
-            {/* Izquierda: Título */}
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-2xl blur-lg opacity-40"></div>
-                <div className="relative p-3 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-600 shadow-lg">
-                  <BarChart3 className="h-6 w-6 text-white" />
-                </div>
+    return {
+      mesEntrega,
+      anioEntrega,
+      etiqueta: `${MESES[mesEntrega - 1]} ${anioEntrega}`,
+    };
+  }, [selectedAnio, selectedMes]);
+
+  const periodoSiguiente = useMemo(() => {
+    let mesSiguiente = periodoEntrega.mesEntrega + 1;
+    let anioSiguiente = periodoEntrega.anioEntrega;
+    if (mesSiguiente > 12) {
+      mesSiguiente = 1;
+      anioSiguiente += 1;
+    }
+
+    return `${MESES[mesSiguiente - 1]} ${anioSiguiente}`;
+  }, [periodoEntrega.anioEntrega, periodoEntrega.mesEntrega]);
+
+  const lotesDisponibles = useMemo(
+    () =>
+      stockInfo?.lotes
+        .filter((lote) => lote.cantidadActual > 0)
+        .sort(
+          (a, b) =>
+            new Date(a.fechaVencimiento).getTime() - new Date(b.fechaVencimiento).getTime(),
+        ) || [],
+    [stockInfo?.lotes],
+  );
+
+  const disponibilidadConfig = useMemo(() => {
+    if (!stockInfo) {
+      return {
+        className: 'border-slate-200 bg-slate-50 text-slate-700',
+        label: 'Sin datos',
+      };
+    }
+
+    if (stockInfo.stockDisponible < 0) {
+      return {
+        className: 'border-rose-200 bg-rose-50 text-rose-700',
+        label: 'Déficit',
+      };
+    }
+
+    if (stockInfo.estado === 'critico') {
+      return {
+        className: 'border-amber-200 bg-amber-50 text-amber-700',
+        label: 'Crítico',
+      };
+    }
+
+    return {
+      className: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+      label: 'Disponible',
+    };
+  }, [stockInfo]);
+
+  const stockPanel = hideStockMetrics ? null : (
+    <section className={COMPONENT_STYLES.panel}>
+      <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-500">Resumen operativo</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Estado del período de entrega, disponibilidad y progreso de vales.
+            </p>
+          </div>
+          <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${disponibilidadConfig.className}`}>
+            {disponibilidadConfig.label}
+          </span>
+        </div>
+      </div>
+
+      <div className="px-5 py-5 sm:px-6">
+        {!selectedVacuna ? (
+          <div className="inventory-loading-shell rounded-[20px] border border-slate-200 bg-slate-50/70 px-4 py-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500">
+                <Package className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                  Movimientos de Vacunas
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Gestión de entregas y movimientos por establecimiento
+                <p className="text-sm font-semibold text-slate-900">Selecciona una vacuna</p>
+                <p className="text-xs text-slate-500">
+                  El resumen de stock y entregas se activa cuando eliges una vacuna.
                 </p>
               </div>
             </div>
+          </div>
+        ) : isLoadingStock || isUpdatingStock ? (
+          <div className="inventory-loading-shell rounded-[20px] border border-slate-200 bg-slate-50/80 p-4">
+            <div className="flex items-center gap-3 text-slate-700">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 inventory-breathe">
+                <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Cargando resumen de stock</p>
+                <p className="text-xs text-slate-500">Preparando disponibilidad, entregas y lotes.</p>
+              </div>
+            </div>
+          </div>
+        ) : stockError ? (
+          <div className="rounded-[20px] border border-rose-200 bg-rose-50/70 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-rose-200 bg-white text-rose-600">
+                <AlertTriangle className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-rose-900">No se pudo cargar el stock</p>
+                <p className="mt-1 text-xs text-rose-700">{stockError}</p>
+              </div>
+              <button type="button" onClick={onRetryStock} className={COMPONENT_STYLES.button.secondary}>
+                <RefreshCw className="h-4 w-4" />
+                <span>Reintentar</span>
+              </button>
+            </div>
+          </div>
+        ) : stockInfo ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <StatChip label="Periodo de entrega" value={periodoEntrega.etiqueta} />
+            <StatChip label="Stock actual" value={`${stockInfo.stockActual.toLocaleString()} unidades`} subtle />
 
-            {/* Centro: Filtros */}
-            <div className="flex-1 max-w-3xl">
-              <div className="flex items-center gap-3 p-1.5 bg-gray-50 rounded-2xl border border-gray-100">
-                <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-white shadow-sm border border-gray-100">
-                  <Filter className="h-4 w-4 text-teal-600" />
+            <div className="relative sm:col-span-2" ref={stockInicialRef}>
+              <button
+                type="button"
+                onClick={() => setShowStockInicialDropdown((prev) => !prev)}
+                className="flex w-full items-center justify-between rounded-[20px] border border-slate-200 bg-slate-50/80 px-4 py-3 text-left transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-teal-200 bg-white text-teal-600">
+                    <Package className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Stock inicial</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-900">
+                      {stockInfo.tieneHistorialInicial
+                        ? `${stockInfo.stockInicialHistorico?.toLocaleString() || 0} unidades`
+                        : 'No disponible'}
+                    </p>
+                  </div>
                 </div>
-                
-                <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {/* Centro de Acopio */}
-                  {shouldRenderCentroSelect ? (
-                    <div className="relative group">
-                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-500 z-10 transition-colors group-hover:text-teal-600" />
-                      <select
-                        value={selectedCentroAcopio}
-                        onChange={(e) => onCentroAcopioChange(e.target.value)}
-                        disabled={isLoadingEstablecimientos}
-                        className="w-full pl-10 pr-8 py-2.5 text-sm font-medium bg-white rounded-xl border border-gray-200
-                                   focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400
-                                   hover:border-teal-300 hover:shadow-sm transition-all duration-200 cursor-pointer
-                                   disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
-                      >
-                        <option value="todos">{allCentrosLabel}</option>
-                        {centrosAcopio.map((centro) => (
-                          <option key={centro.id} value={centro.id}>
-                            {centro.nombre}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${showStockInicialDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showStockInicialDropdown ? (
+                <div className="absolute left-0 right-0 top-full z-40 mt-2 rounded-[20px] border border-slate-200 bg-white p-4 shadow-xl">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <StatChip label="Base" value={`${stockInfo.stockInicialOriginal?.toLocaleString() || 0}`} subtle />
+                    <StatChip label="Ingresos del mes" value={stockInfo.ingresosLotesDelMes.toLocaleString()} />
+                  </div>
+                  {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial ? (
+                    <p className="mt-3 text-xs text-slate-500">
+                      Capturado el {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString()}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+
+            <div className="sm:col-span-2">
+              <EntregasProgressBadge
+                totalEntregas={stockInfo.totalEntregas}
+                progresoVales={progresoVales}
+                isLoading={isLoadingProgresoVales}
+                onRefresh={onRefreshProgresoVales}
+              />
+            </div>
+
+            <div className="relative" ref={stockActualRef}>
+              <button
+                type="button"
+                onClick={() => setShowStockActualDropdown((prev) => !prev)}
+                className="flex h-full w-full items-center justify-between rounded-[20px] border border-slate-200 bg-slate-50/80 px-4 py-3 text-left transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600">
+                    <Boxes className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Lotes disponibles</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-900">
+                      {lotesDisponibles.length} lote{lotesDisponibles.length === 1 ? '' : 's'}
+                    </p>
+                  </div>
+                </div>
+                <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showStockActualDropdown ? (
+                <div className="absolute left-0 right-0 top-full z-40 mt-2 rounded-[20px] border border-slate-200 bg-white p-4 shadow-xl">
+                  {lotesDisponibles.length > 0 ? (
+                    <div className="space-y-2">
+                      {lotesDisponibles.map((lote, index) => (
+                        <div
+                          key={lote.id}
+                          className={`rounded-2xl border px-3 py-2 ${
+                            index === 0
+                              ? 'border-teal-200 bg-teal-50/80'
+                              : 'border-slate-200 bg-slate-50/80'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-slate-800">{lote.numero}</p>
+                              <p className="text-xs text-slate-500">
+                                Vence {new Date(lote.fechaVencimiento).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <span className="text-sm font-semibold text-slate-900">
+                              {lote.cantidadActual.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-3 py-2.5 text-sm font-semibold text-teal-700">
-                      <Building2 className="h-4 w-4 text-teal-600" />
-                      <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
-                    </div>
+                    <p className="text-sm text-slate-500">No hay lotes con disponibilidad actual.</p>
                   )}
-
-                  {/* Vacuna */}
-                  <div className="relative group">
-                    <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-cyan-500 z-10 transition-colors group-hover:text-cyan-600" />
-                    <select
-                      value={selectedVacuna}
-                      onChange={(e) => onVacunaChange(e.target.value)}
-                      disabled={isLoadingVacunas}
-                      className="w-full pl-10 pr-8 py-2.5 text-sm font-medium bg-white rounded-xl border border-gray-200
-                                 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400
-                                 hover:border-cyan-300 hover:shadow-sm transition-all duration-200 cursor-pointer
-                                 disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
-                    >
-                      {vacunasActivas.length === 0 && <option value="">Seleccione...</option>}
-                      {vacunasActivas.map((vacuna) => (
-                        <option key={vacuna.id} value={vacuna.id}>{vacuna.nombre}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                  </div>
-
-                  {/* Mes */}
-                  <div className="relative group">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-500 z-10 transition-colors group-hover:text-teal-600" />
-                    <select
-                      value={selectedMes}
-                      onChange={(e) => onMesChange(Number(e.target.value))}
-                      className="w-full pl-10 pr-8 py-2.5 text-sm font-medium bg-white rounded-xl border border-gray-200
-                                 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400
-                                 hover:border-teal-300 hover:shadow-sm transition-all duration-200 cursor-pointer appearance-none"
-                    >
-                      {MESES.map((mes, index) => (
-                        <option key={index + 1} value={index + 1}>{mes}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                  </div>
-
-                  {/* Año */}
-                  <div className="relative group">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-cyan-600 z-10">AÑO</span>
-                    <select
-                      value={selectedAnio}
-                      onChange={(e) => onAnioChange(Number(e.target.value))}
-                      disabled={isLoadingAnios}
-                      className="w-full pl-12 pr-8 py-2.5 text-sm font-medium bg-white rounded-xl border border-gray-200
-                                 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400
-                                 hover:border-cyan-300 hover:shadow-sm transition-all duration-200 cursor-pointer appearance-none
-                                 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {aniosDisponibles.map((anio) => (
-                        <option key={anio} value={anio}>{anio}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                  </div>
                 </div>
+              ) : null}
+            </div>
 
-                {(isLoadingEstablecimientos || isLoadingVacunas || isLoading) && (
-                  <Loader2 className="h-5 w-5 text-teal-600 animate-spin" />
+            <button
+              type="button"
+              onClick={stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit ? onOpenAjusteDeficit : undefined}
+              className={`flex items-center justify-between rounded-[20px] border px-4 py-3 text-left ${
+                stockInfo.stockDisponible < 0
+                  ? 'border-rose-200 bg-rose-50/80'
+                  : 'border-emerald-200 bg-emerald-50/80'
+              } ${
+                stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit
+                  ? 'transition hover:brightness-[0.98]'
+                  : ''
+              }`}
+              disabled={stockInfo.stockDisponible >= 0 || !ajusteDeficitDisponible || !onOpenAjusteDeficit}
+            >
+              <div>
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  {stockInfo.stockDisponible < 0 ? 'Déficit' : 'Disponible'}
+                </p>
+                <p className={`mt-1 text-sm font-semibold ${stockInfo.stockDisponible < 0 ? 'text-rose-900' : 'text-emerald-900'}`}>
+                  {stockInfo.stockDisponible.toLocaleString()} unidades
+                </p>
+              </div>
+              {stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-xs font-semibold text-rose-700">
+                  <Settings2 className="h-3 w-3" />
+                  Ajustar
+                </span>
+              ) : null}
+            </button>
+
+            {stockInfo.tieneHistorialInicial ? (
+              <button
+                type="button"
+                onClick={onActualizarStockSiguienteMes}
+                disabled={isUpdatingStockSiguienteMes}
+                className={`${COMPONENT_STYLES.button.secondary} sm:col-span-2`}
+                title={`Actualizar stock inicial de ${periodoSiguiente}`}
+              >
+                {isUpdatingStockSiguienteMes ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
                 )}
-              </div>
-            </div>
+                <span>Actualizar sig. mes</span>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                  {periodoSiguiente}
+                </span>
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
 
-            {/* Derecha: Acciones */}
-            <div className="flex items-center gap-2">
-              {!isReadOnly && pendingChangesCount > 0 && (
-                <button
-                  onClick={onSaveChanges}
-                  disabled={isAutoSaving}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
-                             text-white bg-gradient-to-r from-amber-500 to-orange-500
-                             hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/25
-                             disabled:opacity-50 transition-all duration-200"
-                >
-                  <Save className={`h-4 w-4 ${isAutoSaving ? 'animate-spin' : ''}`} />
-                  <span className="hidden xl:inline">Guardar</span>
-                  <span className="bg-white/25 px-1.5 py-0.5 rounded-full text-xs">{pendingChangesCount}</span>
-                </button>
-              )}
+  return (
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)]">
+      <section className={COMPONENT_STYLES.panel}>
+        <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
+          <div className="flex flex-wrap gap-2">
+            {!isReadOnly && pendingChangesCount > 0 ? (
+              <ActionButton
+                label={isAutoSaving ? 'Guardando' : 'Guardar cambios'}
+                icon={isAutoSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                onClick={onSaveChanges}
+                disabled={isAutoSaving}
+                isPrimary
+                count={pendingChangesCount}
+              />
+            ) : null}
 
-              <div className="flex items-center rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-                {!isReadOnly ? (
-                  <button
-                    onClick={onOpenVales}
-                    disabled={!selectedVacuna || selectedCentroAcopio === 'todos'}
-                    className="flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium text-gray-600
-                               hover:bg-teal-50 hover:text-teal-700 border-r border-gray-200
-                               disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                  >
-                    <Receipt className="h-4 w-4" />
-                    <span className="hidden xl:inline">Vales</span>
-                  </button>
-                ) : null}
-                <button
-                  onClick={onRefresh}
-                  disabled={isLoading || !selectedVacuna}
-                  className={`flex items-center justify-center p-2.5 text-gray-600 hover:bg-gray-50
-                             disabled:opacity-40 disabled:cursor-not-allowed transition-all ${!isReadOnly ? 'border-r border-gray-200' : ''}`}
-                >
-                  <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                </button>
-                {!isReadOnly ? (
-                  <button
-                    onClick={onImport}
-                    className="flex items-center justify-center p-2.5 text-gray-600 hover:bg-cyan-50 hover:text-cyan-700 transition-all"
-                  >
-                    <Upload className="h-4 w-4" />
-                  </button>
-                ) : null}
-              </div>
+            {!isReadOnly ? (
+              <ActionButton
+                label="Vales"
+                icon={<Receipt className="h-4 w-4" />}
+                onClick={onOpenVales}
+                disabled={!selectedVacuna || selectedCentroAcopio === 'todos'}
+              />
+            ) : (
+              <span className="inline-flex min-h-[44px] items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-600">
+                Vista solo lectura
+              </span>
+            )}
 
-              {!isReadOnly ? (
-                <button
-                  onClick={onExport}
-                  disabled={isExporting || !selectedVacuna}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
-                             text-white bg-gradient-to-r from-teal-500 to-cyan-500
-                             hover:from-teal-600 hover:to-cyan-600 shadow-lg shadow-teal-500/25
-                             disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                  <span className="hidden sm:inline">{isExporting ? 'Exportando...' : 'Exportar'}</span>
-                </button>
-              ) : (
-                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600">
-                  Vista solo lectura
-                </div>
-              )}
-            </div>
+            <ActionButton
+              label="Actualizar"
+              icon={<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />}
+              onClick={onRefresh}
+              disabled={isLoading || !selectedVacuna}
+            />
+
+            {!isReadOnly ? (
+              <ActionButton label="Importar" icon={<Upload className="h-4 w-4" />} onClick={onImport} />
+            ) : null}
+
+            {!isReadOnly ? (
+              <ActionButton
+                label={isExporting ? 'Exportando' : 'Exportar'}
+                icon={isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                onClick={onExport}
+                disabled={isExporting || !selectedVacuna}
+                isPrimary
+              />
+            ) : null}
           </div>
         </div>
-      </div>
 
-      {/* Barra de Stock - Color sólido teal */}
-      {!hideStockMetrics ? (
-      <div style={{ backgroundColor: '#11a394' }}>
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center justify-between gap-4">
-            
-            {/* Izquierda: Contexto + Registros */}
-            <div className="flex items-center gap-4">
-              {/* Badge de Vacuna */}
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
-                <Package className="h-4 w-4 text-white" />
-                <span className="text-sm font-semibold text-white">
-                  {vacunasActivas.find(v => v.id === selectedVacuna)?.nombre || 'Sin seleccionar'}
-                </span>
-              </div>
-
-              {/* Separador */}
-              <div className="hidden sm:block w-px h-5 bg-white/30"></div>
-
-              {/* Periodo y Centro */}
-              <div className="hidden sm:flex items-center gap-3 text-sm text-white/90">
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5 text-white/70" />
-                  {MESES[selectedMes - 1]} {selectedAnio}
-                </span>
-                <span className="text-white/50">•</span>
-                <span className="flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5 text-white/70" />
-                  {centroNombre}
-                </span>
-              </div>
-
-              {/* Separador */}
-              <div className="hidden md:block w-px h-5 bg-white/30"></div>
-
-              {/* Contador de Registros */}
-              <div className="flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                </span>
-                <span className="text-sm font-medium text-white">{datosTablaLength}</span>
-                <span className="text-xs text-white/70">registros</span>
-              </div>
-            </div>
-
-            {/* Centro/Derecha: Stock Cards */}
-            {selectedVacuna && (
-              <div className="hidden lg:flex items-center gap-2">
-                {isLoadingStock || isUpdatingStock ? (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl border border-white/20">
-                    <Loader2 className="h-4 w-4 animate-spin text-white" />
-                    <span className="text-sm text-white/80">Cargando stock...</span>
-                  </div>
-                ) : stockError ? (
-                  <button
-                    onClick={onRetryStock}
-                    className="flex items-center gap-2 px-4 py-2 bg-rose-500/30 hover:bg-rose-500/40 rounded-xl border border-rose-300/50 transition-colors"
+        <div className="space-y-4 px-5 py-5 sm:px-6">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {shouldRenderCentroSelect ? (
+              <label className="block">
+                <span className={COMPONENT_STYLES.input.label}>Centro de acopio</span>
+                <div className="relative">
+                  <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-500" />
+                  <select
+                    value={selectedCentroAcopio}
+                    onChange={(event) => onCentroAcopioChange(event.target.value)}
+                    disabled={isLoadingEstablecimientos}
+                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-10 pr-10`}
                   >
-                    <AlertTriangle className="h-4 w-4 text-white" />
-                    <span className="text-sm text-white">Error - Reintentar</span>
-                  </button>
-                ) : stockInfo ? (
-                  <>
-                    {/* Badge del Período - Separado */}
-                    {(() => {
-                      let mesRealVisualizado = selectedMes + 1;
-                      let anioRealVisualizado = selectedAnio;
-                      if (mesRealVisualizado > 12) {
-                        mesRealVisualizado = 1;
-                        anioRealVisualizado++;
-                      }
-                      return (
-                        <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20 border border-white/20">
-                          <div className="p-1.5 bg-white/30 rounded-lg">
-                            <Calendar className="h-4 w-4 text-white" />
-                          </div>
-                          <div className="text-left">
-                            <div className="text-[10px] text-white/80 font-medium uppercase tracking-wide">Período</div>
-                            <div className="text-lg font-bold text-white leading-none">
-                              {MESES[mesRealVisualizado - 1]?.slice(0, 3).toUpperCase()} {anioRealVisualizado}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    <ArrowRight className="h-4 w-4 text-white/50" />
-
-                    <div className="flex items-center gap-1 p-1 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
-                      {/* Stock Inicial */}
-                      <div className="relative" ref={stockInicialRef}>
-                      <button
-                        onClick={() => setShowStockInicialDropdown(!showStockInicialDropdown)}
-                        className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20 
-                                   hover:bg-white/30 border border-white/20 transition-all group"
-                      >
-                        <div className="p-1.5 bg-white/30 rounded-lg">
-                          <Package className="h-4 w-4 text-white" />
-                        </div>
-                        <div className="text-left">
-                          <div className="text-[10px] text-white/80 font-medium uppercase tracking-wide">Inicial</div>
-                          <div className="text-lg font-bold text-white leading-none">
-                            {stockInfo.tieneHistorialInicial ? stockInfo.stockInicialHistorico?.toLocaleString() : 'N/A'}
-                          </div>
-                        </div>
-                        <ChevronDown className={`h-4 w-4 text-white/80 transition-transform ${showStockInicialDropdown ? 'rotate-180' : ''}`} />
-                      </button>
-                      
-                      {showStockInicialDropdown && (
-                        <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 z-50">
-                          <div className="flex items-center gap-2 pb-3 border-b border-gray-100">
-                            <div className="p-2 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl">
-                              <Package className="h-4 w-4 text-white" />
-                            </div>
-                            <span className="font-bold text-gray-800">Stock Inicial</span>
-                          </div>
-                          {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial && (
-                            <div className="flex items-center gap-2 mt-3 text-sm text-gray-600">
-                              <Calendar className="h-4 w-4 text-gray-400" />
-                              Capturado: <span className="font-semibold text-gray-800">
-                                {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString()}
-                              </span>
-                            </div>
-                          )}
-                          <div className="grid grid-cols-2 gap-2 mt-3">
-                            <div className="p-3 bg-gray-50 rounded-xl">
-                              <div className="text-xs text-gray-500 font-medium">Base</div>
-                              <div className="text-xl font-bold text-gray-800">{stockInfo.stockInicialOriginal?.toLocaleString() || 0}</div>
-                            </div>
-                            <div className="p-3 bg-emerald-50 rounded-xl">
-                              <div className="text-xs text-emerald-600 font-medium">+ Ingresos</div>
-                              <div className="text-xl font-bold text-emerald-700">{stockInfo.ingresosLotesDelMes.toLocaleString()}</div>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                            <span className="text-sm text-gray-500">Total Inicial</span>
-                            <span className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                              {stockInfo.stockInicialHistorico?.toLocaleString() || 'N/A'}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <ArrowRight className="h-4 w-4 text-white/50" />
-
-                    {/* Total Entregas con Progreso de Vales */}
-                    <EntregasProgressBadge
-                      totalEntregas={stockInfo.totalEntregas}
-                      progresoVales={progresoVales ?? null}
-                      isLoading={isLoadingProgresoVales}
-                      onRefresh={onRefreshProgresoVales}
-                    />
-
-                    <ArrowRight className="h-4 w-4 text-white/50" />
-
-                    {/* Disponible */}
-                    {(() => {
-                      const isDeficit = stockInfo.stockDisponible < 0;
-                      const canAdjust = isDeficit && ajusteDeficitDisponible && onOpenAjusteDeficit;
-                      
-                      const content = (
-                        <div className={`flex items-center gap-3 px-4 py-2 rounded-xl border ${
-                          isDeficit 
-                            ? 'bg-rose-500/40 border-rose-300/50' 
-                            : 'bg-emerald-500/40 border-emerald-300/50'
-                        } ${canAdjust ? 'cursor-pointer hover:bg-rose-500/60 transition-colors' : ''}`}>
-                          <div className={`p-1.5 rounded-lg ${isDeficit ? 'bg-rose-500/50' : 'bg-emerald-500/50'}`}>
-                            <TrendingUp className="h-4 w-4 text-white" />
-                          </div>
-                          <div className="text-left">
-                            <div className="text-[10px] font-medium uppercase tracking-wide text-white/90">
-                              {isDeficit ? 'Deficit' : 'Disponible'}
-                            </div>
-                            <div className="text-lg font-bold text-white leading-none">{stockInfo.stockDisponible.toLocaleString()}</div>
-                          </div>
-                          {canAdjust && (
-                            <div className="flex items-center gap-1 px-2 py-0.5 bg-white/20 rounded-full">
-                              <Settings2 className="h-3 w-3 text-white" />
-                              <span className="text-[10px] text-white font-medium">Ajustar</span>
-                            </div>
-                          )}
-                        </div>
-                      );
-
-                      if (canAdjust) {
-                        return (
-                          <button onClick={onOpenAjusteDeficit} className="focus:outline-none">
-                            {content}
-                          </button>
-                        );
-                      }
-                      return content;
-                    })()}
-
-                    <ArrowRight className="h-4 w-4 text-white/50" />
-
-                    {/* Stock Actual */}
-                    <div className="relative" ref={stockActualRef}>
-                      <button
-                        onClick={() => setShowStockActualDropdown(!showStockActualDropdown)}
-                        className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/20 
-                                   hover:bg-white/30 border border-white/20 transition-all group"
-                      >
-                        <div className="p-1.5 bg-white/30 rounded-lg">
-                          <Boxes className="h-4 w-4 text-white" />
-                        </div>
-                        <div className="text-left">
-                          <div className="text-[10px] text-white/80 font-medium uppercase tracking-wide">Actual</div>
-                          <div className="text-lg font-bold text-white leading-none">{stockInfo.stockActual.toLocaleString()}</div>
-                        </div>
-                        <span className="flex items-center gap-1 px-2 py-0.5 bg-white/20 rounded-full text-xs text-white">
-                          {lotesDisponibles.length} <span className="text-white/70">lotes</span>
-                        </span>
-                        <ChevronDown className={`h-4 w-4 text-white/80 transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} />
-                      </button>
-                      
-                      {showStockActualDropdown && (
-                        <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 z-50">
-                          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                            <div className="flex items-center gap-2">
-                              <div className="p-2 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl">
-                                <Boxes className="h-4 w-4 text-white" />
-                              </div>
-                              <span className="font-bold text-gray-800">Stock Actual</span>
-                            </div>
-                            <span className="px-2 py-1 bg-teal-100 text-teal-700 rounded-full text-xs font-semibold">
-                              {lotesDisponibles.length} lote(s)
-                            </span>
-                          </div>
-                          
-                          {lotesDisponibles.length > 0 ? (
-                            <div className="mt-3">
-                              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
-                                Lotes (FEFO - Primero en Expirar)
-                              </div>
-                              <div className="space-y-2 max-h-48 overflow-y-auto">
-                                {lotesDisponibles
-                                  .sort((a, b) => new Date(a.fechaVencimiento).getTime() - new Date(b.fechaVencimiento).getTime())
-                                  .map((lote, index) => {
-                                    const esPrimero = index === 0;
-                                    return (
-                                      <div
-                                        key={lote.id}
-                                        className={`flex items-center justify-between p-3 rounded-xl transition-colors ${
-                                          esPrimero 
-                                            ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
-                                            : 'bg-gray-50 hover:bg-gray-100'
-                                        }`}
-                                      >
-                                        <div>
-                                          <div className={`font-semibold text-sm ${esPrimero ? 'text-white' : 'text-gray-800'}`}>{lote.numero}</div>
-                                          <div className={`text-[10px] ${esPrimero ? 'text-teal-100' : 'text-gray-500'}`}>
-                                            Vence: {new Date(lote.fechaVencimiento).toLocaleDateString()}
-                                          </div>
-                                        </div>
-                                        <div className={`text-xl font-bold ${esPrimero ? 'text-white' : 'text-teal-700'}`}>
-                                          {lote.cantidadActual.toLocaleString()}
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="text-center py-6 text-gray-400">No hay lotes disponibles</div>
-                          )}
-                          
-                          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                            <span className="text-sm text-gray-500">Total Stock</span>
-                            <span className="text-2xl font-bold text-gray-800">{stockInfo.stockActual.toLocaleString()}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Botón Actualizar Siguiente Mes */}
-                    {/* NOTA: Debido al desplazamiento de +1 mes en el filtro, el mes REAL visualizado es selectedMes+1 */}
-                    {/* Por lo tanto, el "siguiente mes" para actualizar es selectedMes+2 desde el filtro original */}
-                    {stockInfo.tieneHistorialInicial && (() => {
-                      // Calcular el mes REAL visualizado (filtro + 1 por desplazamiento)
-                      let mesRealVisualizado = selectedMes + 1;
-                      let anioRealVisualizado = selectedAnio;
-                      if (mesRealVisualizado > 12) {
-                        mesRealVisualizado = 1;
-                        anioRealVisualizado++;
-                      }
-                      // Calcular el mes SIGUIENTE al real visualizado
-                      let mesSiguiente = mesRealVisualizado + 1;
-                      let anioSiguiente = anioRealVisualizado;
-                      if (mesSiguiente > 12) {
-                        mesSiguiente = 1;
-                        anioSiguiente++;
-                      }
-                      return (
-                      <>
-                        <div className="w-px h-8 bg-white/30 mx-1"></div>
-                        <button
-                          onClick={onActualizarStockSiguienteMes}
-                          disabled={isUpdatingStockSiguienteMes}
-                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/20 
-                                     hover:bg-white/30 border border-white/30 
-                                     text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-                          title={`Actualizar stock inicial de ${MESES[mesSiguiente - 1]} ${anioSiguiente}`}
-                        >
-                          {isUpdatingStockSiguienteMes ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <RefreshCw className="h-4 w-4 group-hover:rotate-180 transition-transform duration-500" />
-                          )}
-                          <span className="text-sm font-medium">Sig. Mes</span>
-                        </button>
-                      </>
-                    );
-                    })()}
-                    </div>
-                  </>
-                ) : null}
+                    <option value="todos">{allCentrosLabel}</option>
+                    {centrosAcopio.map((centro) => (
+                      <option key={centro.id} value={centro.id}>
+                        {centro.nombre}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                </div>
+              </label>
+            ) : (
+              <div>
+                <span className={COMPONENT_STYLES.input.label}>Centro asignado</span>
+                <div className="flex min-h-[44px] items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-700">
+                  <Building2 className="h-4 w-4 text-teal-600" />
+                  <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
+                </div>
               </div>
             )}
-          </div>
-        </div>
-      </div>
-      ) : null}
 
-      {/* Barra Mobile para Stock */}
-      {!hideStockMetrics && selectedVacuna && stockInfo && !isLoadingStock && (
-        <div className="lg:hidden" style={{ backgroundColor: '#0e8a7d' }}>
-          <div className="w-full px-4 py-2 overflow-x-auto">
-            <div className="flex items-center gap-2">
-              {/* Badge del Período - Mobile */}
-              {(() => {
-                let mesRealVisualizadoMobile = selectedMes + 1;
-                let anioRealVisualizadoMobile = selectedAnio;
-                if (mesRealVisualizadoMobile > 12) {
-                  mesRealVisualizadoMobile = 1;
-                  anioRealVisualizadoMobile++;
-                }
-                return (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 rounded-lg text-xs font-medium text-white whitespace-nowrap">
-                    <Calendar className="h-3.5 w-3.5" />
-                    <span className="font-bold">{MESES[mesRealVisualizadoMobile - 1]?.slice(0, 3).toUpperCase()} {anioRealVisualizadoMobile}</span>
-                  </div>
-                );
-              })()}
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 rounded-lg text-xs font-medium text-white whitespace-nowrap">
-                <Package className="h-3.5 w-3.5" />
-                Inicial: <span className="font-bold">{stockInfo.stockInicialHistorico?.toLocaleString() || 'N/A'}</span>
-              </div>
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white whitespace-nowrap ${
-                progresoVales?.estado === 'completo' ? 'bg-emerald-500/50' :
-                progresoVales?.estado === 'en_progreso' ? 'bg-amber-500/50' : 'bg-white/20'
-              }`}>
-                <Truck className="h-3.5 w-3.5" />
-                Entregas: <span className="font-bold">{stockInfo.totalEntregas.toLocaleString()}</span>
-                {progresoVales && progresoVales.totalEstablecimientosConEntregas > 0 && (
-                  <span className="text-white/80">({progresoVales.porcentajeProgreso}%)</span>
-                )}
-              </div>
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${
-                stockInfo.stockDisponible < 0 ? 'bg-rose-500/50 text-white' : 'bg-emerald-500/50 text-white'
-              } ${stockInfo.stockDisponible < 0 && ajusteDeficitDisponible ? 'cursor-pointer' : ''}`}
-              onClick={stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && onOpenAjusteDeficit ? onOpenAjusteDeficit : undefined}
-              >
-                <TrendingUp className="h-3.5 w-3.5" />
-                {stockInfo.stockDisponible < 0 ? 'Deficit:' : 'Disponible:'} 
-                <span className="font-bold">{stockInfo.stockDisponible.toLocaleString()}</span>
-                {stockInfo.stockDisponible < 0 && ajusteDeficitDisponible && (
-                  <Settings2 className="h-3 w-3 ml-1" />
-                )}
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 rounded-lg text-xs font-medium text-white whitespace-nowrap">
-                <Boxes className="h-3.5 w-3.5" />
-                Actual: <span className="font-bold">{stockInfo.stockActual.toLocaleString()}</span>
-                <span className="text-white/70">({lotesDisponibles.length})</span>
-              </div>
-              {stockInfo.tieneHistorialInicial && (
-                <button
-                  onClick={onActualizarStockSiguienteMes}
-                  disabled={isUpdatingStockSiguienteMes}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 rounded-lg text-xs font-medium text-white whitespace-nowrap"
+            <label className="block">
+              <span className={COMPONENT_STYLES.input.label}>Vacuna</span>
+              <div className="relative">
+                <Package className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-cyan-500" />
+                <select
+                  value={selectedVacuna}
+                  onChange={(event) => onVacunaChange(event.target.value)}
+                  disabled={isLoadingVacunas}
+                  className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-10 pr-10`}
                 >
-                  {isUpdatingStockSiguienteMes ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                  Sig. Mes
-                </button>
-              )}
-            </div>
+                  {vacunasActivas.length === 0 ? <option value="">Seleccione...</option> : null}
+                  {vacunasActivas.map((vacuna) => (
+                    <option key={vacuna.id} value={vacuna.id}>
+                      {vacuna.nombre}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              </div>
+            </label>
+
+            <label className="block">
+              <span className={COMPONENT_STYLES.input.label}>Mes base</span>
+              <div className="relative">
+                <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-teal-500" />
+                <select
+                  value={selectedMes}
+                  onChange={(event) => onMesChange(Number(event.target.value))}
+                  className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-10 pr-10`}
+                >
+                  {MESES.map((mes, index) => (
+                    <option key={mes} value={index + 1}>
+                      {mes}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              </div>
+            </label>
+
+            <label className="block">
+              <span className={COMPONENT_STYLES.input.label}>Año</span>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-cyan-600">
+                  AÑO
+                </span>
+                <select
+                  value={selectedAnio}
+                  onChange={(event) => onAnioChange(Number(event.target.value))}
+                  disabled={isLoadingAnios}
+                  className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-12 pr-10`}
+                >
+                  {aniosDisponibles.map((anio) => (
+                    <option key={anio} value={anio}>
+                      {anio}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              </div>
+            </label>
           </div>
+
         </div>
-      )}
-    </header>
+      </section>
+
+      {stockPanel}
+    </div>
   );
 });
 

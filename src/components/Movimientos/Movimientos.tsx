@@ -15,7 +15,7 @@ import { PlanificacionService } from '../../services/planificacionService';
 import { MovimientosService, ProgresoValesResponse } from '../../services/movimientosService';
 import { MovimientosExportService, MovimientosExportConfig } from '../../services/movimientosExportService';
 import { ValesService, ImpactoModificacion } from '../../services/valesService';
-import { ordenarEstablecimientos, COLORES_CENTROS_ACOPIO } from '../../utils/centroAcopioUtils';
+import { ordenarEstablecimientos } from '../../utils/centroAcopioUtils';
 import Vales from '../Vales/Vales';
 import ValesErrorBoundary from '../Vales/ValesErrorBoundary';
 import ImportarModal from './ImportarModal';
@@ -26,6 +26,7 @@ import { COMPONENT_STYLES, MESES } from './constants';
 import {
   MovimientosHeaderCompact,
   MovimientosTabla,
+  MovimientosShell,
   MovimientoDetalle,
   EntregasAdicionalesModal,
   AlertaEstado,
@@ -292,7 +293,7 @@ const Movimientos: React.FC = () => {
   );
 
   const establecimientosFiltrados = useMemo(() => {
-    let filtrados = selectedCentroAcopio === 'todos'
+    const filtrados = selectedCentroAcopio === 'todos'
       ? establecimientos
       : establecimientos.filter(e => e.centroAcopioId === selectedCentroAcopio);
 
@@ -304,11 +305,29 @@ const Movimientos: React.FC = () => {
     [movimientos, calcularCamposDerivados]
   );
 
+  const movimientosCalculadosMap = useMemo(
+    () => new Map(movimientosCalculados.map((movimiento) => [movimiento.establecimientoId, movimiento])),
+    [movimientosCalculados]
+  );
+
+  const establecimientosFiltradosMap = useMemo(
+    () => new Map(establecimientosFiltrados.map((establecimiento) => [establecimiento.id, establecimiento])),
+    [establecimientosFiltrados]
+  );
+
+  const movimientoPorEntregaId = useMemo(() => {
+    const map = new Map<string, typeof movimientos[number]>();
+    movimientos.forEach((movimiento) => {
+      movimiento.entregasAdicionales?.forEach((entrega) => {
+        map.set(entrega.id, movimiento);
+      });
+    });
+    return map;
+  }, [movimientos]);
+
   const datosTabla = useMemo(() => {
     return establecimientosFiltrados.map(establecimiento => {
-      const movimientoExistente = movimientosCalculados.find(
-        m => m.establecimientoId === establecimiento.id
-      );
+      const movimientoExistente = movimientosCalculadosMap.get(establecimiento.id);
 
       if (movimientoExistente) {
         const transIngreso = getCurrentValue(establecimiento.id, 'transIngreso', movimientoExistente.transIngreso);
@@ -371,7 +390,12 @@ const Movimientos: React.FC = () => {
         } as MovimientoCalculado & { tieneMovimiento: boolean };
       }
     });
-  }, [establecimientosFiltrados, movimientosCalculados, selectedVacuna, selectedMes, selectedAnio, vacunaSeleccionada, getCurrentValue]);
+  }, [establecimientosFiltrados, movimientosCalculadosMap, selectedVacuna, selectedMes, selectedAnio, vacunaSeleccionada, getCurrentValue]);
+
+  const datosTablaMap = useMemo(
+    () => new Map(datosTabla.map((movimiento) => [movimiento.establecimientoId, movimiento])),
+    [datosTabla]
+  );
 
   const totalesGenerales = useMemo(() => {
     return datosTabla.reduce((totales, movimiento) => {
@@ -742,7 +766,7 @@ const Movimientos: React.FC = () => {
   const checkForVoucherConfirmation = async (establecimientoId: string, campo: string, value: number): Promise<boolean> => {
     if (showConfirmacionModal) return true;
 
-    const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
+    const movimientoExistente = datosTablaMap.get(establecimientoId);
     const esCreacion = !movimientoExistente?.tieneMovimiento;
     const valorOriginal = movimientoExistente?.[campo as keyof typeof movimientoExistente] as number || 0;
 
@@ -756,7 +780,7 @@ const Movimientos: React.FC = () => {
         );
 
         if (verificacionVales.success && verificacionVales.data?.existenVales) {
-          const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
+          const establecimiento = establecimientosFiltradosMap.get(establecimientoId);
           const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
 
           const key = getFieldKey(establecimientoId, campo);
@@ -827,7 +851,7 @@ const Movimientos: React.FC = () => {
       );
 
       if (!disponibilidad.tieneDisponibilidad) {
-        const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
+        const establecimiento = establecimientosFiltradosMap.get(establecimientoId);
         const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
 
         setPendingSinDisponibilidad({
@@ -851,9 +875,9 @@ const Movimientos: React.FC = () => {
   // ============================================================================
   const saveFieldValueToDatabase = async (establecimientoId: string, campo: string, value: number) => {
     const key = getFieldKey(establecimientoId, campo);
-    const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
+    const establecimiento = establecimientosFiltradosMap.get(establecimientoId);
     const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
-    const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
+    const movimientoExistente = datosTablaMap.get(establecimientoId);
     const esCreacion = !movimientoExistente?.tieneMovimiento;
 
     try {
@@ -946,7 +970,7 @@ const Movimientos: React.FC = () => {
 
       await saveFieldValueToDatabase(establecimientoId, campo, value);
     } catch (err: any) {
-      const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
+      const establecimiento = establecimientosFiltradosMap.get(establecimientoId);
       const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
       toast.error(`Error al guardar - ${nombreEstablecimiento}`);
     } finally {
@@ -969,8 +993,8 @@ const Movimientos: React.FC = () => {
       throw new Error('Vacuna no seleccionada');
     }
 
-    const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
-    const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
+    const movimientoExistente = datosTablaMap.get(establecimientoId);
+    const establecimiento = establecimientosFiltradosMap.get(establecimientoId);
     const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
 
     if (movimientoExistente && movimientoExistente.tieneMovimiento) {
@@ -1071,7 +1095,7 @@ const Movimientos: React.FC = () => {
     const voucherTimeout = setTimeout(async () => {
       setIsTyping(prev => ({ ...prev, [key]: false }));
 
-      const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
+      const movimientoExistente = datosTablaMap.get(establecimientoId);
       const esCreacion = !movimientoExistente?.tieneMovimiento;
       const valorOriginal = movimientoExistente?.[campo as keyof typeof movimientoExistente] as number || 0;
 
@@ -1105,7 +1129,7 @@ const Movimientos: React.FC = () => {
 
     if (tempValue !== undefined && pendingChanges[key]) {
       if ((campo === 'entrega' || campo === 'entregaBase') && selectedVacuna) {
-        const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
+        const movimientoExistente = datosTablaMap.get(establecimientoId);
         const esCreacion = !movimientoExistente?.tieneMovimiento;
         const valorOriginal = movimientoExistente?.[campo as keyof typeof movimientoExistente] as number || 0;
 
@@ -1146,7 +1170,7 @@ const Movimientos: React.FC = () => {
       );
 
       if (!disponibilidad.tieneDisponibilidad) {
-        const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
+        const establecimiento = establecimientosFiltradosMap.get(movimientoAsociado.establecimientoId);
         const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
 
         setPendingSinDisponibilidad({
@@ -1172,9 +1196,7 @@ const Movimientos: React.FC = () => {
   const handleTempEntregaValueChange = async (entregaId: string, newValue: number) => {
     const key = getEntregaFieldKey(entregaId);
 
-    const movimientoAsociado = movimientos.find(m =>
-      m.entregasAdicionales?.some(e => e.id === entregaId)
-    );
+    const movimientoAsociado = movimientoPorEntregaId.get(entregaId);
 
     if (movimientoAsociado && newValue > 0) {
       try {
@@ -1226,9 +1248,7 @@ const Movimientos: React.FC = () => {
         delete entregasDebounceTimeouts.current[key];
       }
 
-      const movimientoAsociado = movimientos.find(m =>
-        m.entregasAdicionales?.some(e => e.id === entregaId)
-      );
+      const movimientoAsociado = movimientoPorEntregaId.get(entregaId);
 
       // Verificar disponibilidad antes de guardar
       const puedeGuardar = await verificarDisponibilidadAntesDeGuardarEntrega(entregaId, value, movimientoAsociado);
@@ -1241,7 +1261,7 @@ const Movimientos: React.FC = () => {
       await loadMovimientos();
 
       if (movimientoAsociado) {
-        const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
+        const establecimiento = establecimientosFiltradosMap.get(movimientoAsociado.establecimientoId);
         toast.success(`Entrega adicional actualizada - ${establecimiento?.nombre || 'Establecimiento'}`);
 
         onEntregaAdicionalChanged(
@@ -1267,8 +1287,10 @@ const Movimientos: React.FC = () => {
         errorMessage.includes('redistribuir') ||
         errorMessage.includes('no tiene planificación')) {
 
-        const movimientoAsociado = movimientos.find(m => m.entregasAdicionales?.some(e => e.id === entregaId));
-        const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado!.establecimientoId);
+        const movimientoAsociado = movimientoPorEntregaId.get(entregaId);
+        const establecimiento = movimientoAsociado
+          ? establecimientosFiltradosMap.get(movimientoAsociado.establecimientoId)
+          : undefined;
 
         setPendingSinDisponibilidad({
           establecimientoId: movimientoAsociado!.establecimientoId,
@@ -1301,8 +1323,8 @@ const Movimientos: React.FC = () => {
     try {
       setIsProcessingEntrega(true);
 
-      const movimientoExistente = datosTabla.find(m => m.establecimientoId === establecimientoId);
-      const establecimiento = establecimientosFiltrados.find(e => e.id === establecimientoId);
+      const movimientoExistente = datosTablaMap.get(establecimientoId);
+      const establecimiento = establecimientosFiltradosMap.get(establecimientoId);
       const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
 
       if (!movimientoExistente?.tieneMovimiento) {
@@ -1353,9 +1375,7 @@ const Movimientos: React.FC = () => {
     }
 
     try {
-      const movimientoAsociado = movimientos.find(m =>
-        m.entregasAdicionales?.some(e => e.id === entregaId)
-      );
+      const movimientoAsociado = movimientoPorEntregaId.get(entregaId);
 
       await deleteEntregaAdicional(entregaId);
 
@@ -1367,7 +1387,7 @@ const Movimientos: React.FC = () => {
           movimientoAsociado.anio
         );
 
-        const establecimiento = establecimientosFiltrados.find(e => e.id === movimientoAsociado.establecimientoId);
+        const establecimiento = establecimientosFiltradosMap.get(movimientoAsociado.establecimientoId);
         toast.success(`Entrega adicional eliminada - ${establecimiento?.nombre || 'Establecimiento'}`);
       }
 
@@ -1664,65 +1684,55 @@ const Movimientos: React.FC = () => {
   // RENDER
   // ============================================================================
   return (
-    <main className={COMPONENT_STYLES.pageBackground}>
-      {/* Header Compacto con Filtros y Stock Integrados */}
-      <MovimientosHeaderCompact
-        isReadOnly={isReadOnlyMode}
-        lockedCentroAcopioLabel={lockedCentroAcopioLabel}
-        showReadOnlyCentroFilter={canFilterAssignedCentros}
-        allCentrosLabel={allCentrosLabel}
-        hideStockMetrics={isReadOnlyMode}
-        // Filtros
-        selectedCentroAcopio={selectedCentroAcopio}
-        selectedVacuna={selectedVacuna}
-        selectedMes={selectedMes}
-        selectedAnio={selectedAnio}
-        centrosAcopio={centrosAcopioFiltro}
-        vacunasActivas={vacunasActivas}
-        aniosDisponibles={aniosDisponibles}
-        isLoadingEstablecimientos={isLoadingEstablecimientos}
-        isLoadingVacunas={isLoadingActivas}
-        isLoadingAnios={isLoadingAnios}
-        datosTablaLength={datosTabla.length}
-        onCentroAcopioChange={setSelectedCentroAcopio}
-        onVacunaChange={setSelectedVacuna}
-        onMesChange={setSelectedMes}
-        onAnioChange={setSelectedAnio}
-        // Stock
-        stockInfo={stockInfo}
-        stockError={stockError}
-        isLoadingStock={isLoadingStock}
-        isUpdatingStock={isUpdatingStock}
-        isUpdatingStockSiguienteMes={isUpdatingStockSiguienteMes}
-        onRetryStock={handleRetryStock}
-        onActualizarStockSiguienteMes={handleActualizarStockSiguienteMes}
-        // Acciones
-        pendingChangesCount={pendingChangesCount}
-        isAutoSaving={isAutoSaving}
-        isLoading={isLoading}
-        isExporting={isExporting}
-        onSaveChanges={handleSaveAllPendingChanges}
-        onRefresh={handleRefresh}
-        onExport={handleExportar}
-        onImport={() => setShowImportarModal(true)}
-        onOpenVales={() => setShowValesModal(true)}
-        // Ajuste de Deficit
-        onOpenAjusteDeficit={() => setShowAjusteDeficitModal(true)}
-        ajusteDeficitDisponible={ajusteDeficitDisponible}
-        // Progreso de Vales
-        progresoVales={progresoVales}
-        isLoadingProgresoVales={isLoadingProgresoVales}
-        onRefreshProgresoVales={handleRefreshProgresoVales}
-      />
-
-      {/* Content */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Alertas de Estado - Solo errores */}
-        {error && (
-          <AlertaEstado tipo="error" mensaje={error} />
+    <>
+      <MovimientosShell
+        header={(
+          <MovimientosHeaderCompact
+            isReadOnly={isReadOnlyMode}
+            lockedCentroAcopioLabel={lockedCentroAcopioLabel}
+            showReadOnlyCentroFilter={canFilterAssignedCentros}
+            allCentrosLabel={allCentrosLabel}
+            hideStockMetrics={isReadOnlyMode}
+            selectedCentroAcopio={selectedCentroAcopio}
+            selectedVacuna={selectedVacuna}
+            selectedMes={selectedMes}
+            selectedAnio={selectedAnio}
+            centrosAcopio={centrosAcopioFiltro}
+            vacunasActivas={vacunasActivas}
+            aniosDisponibles={aniosDisponibles}
+            isLoadingEstablecimientos={isLoadingEstablecimientos}
+            isLoadingVacunas={isLoadingActivas}
+            isLoadingAnios={isLoadingAnios}
+            datosTablaLength={datosTabla.length}
+            onCentroAcopioChange={setSelectedCentroAcopio}
+            onVacunaChange={setSelectedVacuna}
+            onMesChange={setSelectedMes}
+            onAnioChange={setSelectedAnio}
+            stockInfo={stockInfo}
+            stockError={stockError}
+            isLoadingStock={isLoadingStock}
+            isUpdatingStock={isUpdatingStock}
+            isUpdatingStockSiguienteMes={isUpdatingStockSiguienteMes}
+            onRetryStock={handleRetryStock}
+            onActualizarStockSiguienteMes={handleActualizarStockSiguienteMes}
+            pendingChangesCount={pendingChangesCount}
+            isAutoSaving={isAutoSaving}
+            isLoading={isLoading}
+            isExporting={isExporting}
+            onSaveChanges={handleSaveAllPendingChanges}
+            onRefresh={handleRefresh}
+            onExport={handleExportar}
+            onImport={() => setShowImportarModal(true)}
+            onOpenVales={() => setShowValesModal(true)}
+            onOpenAjusteDeficit={() => setShowAjusteDeficitModal(true)}
+            ajusteDeficitDisponible={ajusteDeficitDisponible}
+            progresoVales={progresoVales}
+            isLoadingProgresoVales={isLoadingProgresoVales}
+            onRefreshProgresoVales={handleRefreshProgresoVales}
+          />
         )}
-
-        {/* Tabla */}
+        status={error ? <AlertaEstado tipo="error" mensaje={error} /> : undefined}
+      >
         <MovimientosTabla
           readOnly={isReadOnlyMode}
           datosTabla={datosTabla}
@@ -1755,7 +1765,7 @@ const Movimientos: React.FC = () => {
           selectedRowId={selectedRowId}
           onRowSelect={setSelectedRowId}
         />
-      </div>
+      </MovimientosShell>
 
       {/* Modales */}
       {selectedMovimiento && (
@@ -1890,7 +1900,7 @@ const Movimientos: React.FC = () => {
           }}
         />
       )}
-    </main>
+    </>
   );
 };
 

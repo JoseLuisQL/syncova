@@ -1,7 +1,16 @@
-import React, { useState, useRef } from 'react';
-import { X, Download, Upload, FileSpreadsheet, CheckCircle, AlertCircle, Syringe, Layers } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import {
+  AlertCircle,
+  CheckCircle,
+  Download,
+  FileSpreadsheet,
+  Layers,
+  Loader2,
+  Syringe,
+  Upload,
+} from 'lucide-react';
+import { Modal } from '../Establecimientos/components';
 import { Vacuna } from '../../types';
-import { COMPONENT_STYLES, COLORS } from './constants';
 
 interface ImportarModalProps {
   isOpen: boolean;
@@ -37,7 +46,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
   onImportarMasivo,
   onGenerarReporteErrores,
   isDownloadingTemplate,
-  isImportingExcel
+  isImportingExcel,
 }) => {
   const [tipoImportacion, setTipoImportacion] = useState<TipoImportacion>('vacuna');
   const [selectedVacuna, setSelectedVacuna] = useState<string>('');
@@ -66,10 +75,11 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
 
   const handleDescargarPlantilla = async () => {
     if (tipoImportacion === 'vacuna' && !selectedVacuna) return;
-    
-    const success = tipoImportacion === 'vacuna'
-      ? await onDescargarPlantillaVacuna(selectedVacuna, selectedAnio)
-      : await onDescargarPlantillaMasiva(selectedAnio);
+
+    const success =
+      tipoImportacion === 'vacuna'
+        ? await onDescargarPlantillaVacuna(selectedVacuna, selectedAnio)
+        : await onDescargarPlantillaMasiva(selectedAnio);
 
     if (!success) {
       console.error('Error al descargar plantilla');
@@ -80,9 +90,10 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
     if (!archivo) return;
     if (tipoImportacion === 'vacuna' && !selectedVacuna) return;
 
-    const resultado = tipoImportacion === 'vacuna'
-      ? await onImportarVacuna(selectedVacuna, selectedAnio, archivo)
-      : await onImportarMasivo(selectedAnio, archivo);
+    const resultado =
+      tipoImportacion === 'vacuna'
+        ? await onImportarVacuna(selectedVacuna, selectedAnio, archivo)
+        : await onImportarMasivo(selectedAnio, archivo);
 
     if (resultado) {
       setResultadoImportacion(resultado);
@@ -94,7 +105,9 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
     setArchivo(null);
     setResultadoImportacion(null);
     setMostrarResultado(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleClose = () => {
@@ -102,271 +115,253 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
     onClose();
   };
 
-  if (!isOpen) return null;
-
-  const canDownload = tipoImportacion === 'masivo' || selectedVacuna;
-  const canImport = archivo && (tipoImportacion === 'masivo' || selectedVacuna);
+  const canDownload = tipoImportacion === 'masivo' || Boolean(selectedVacuna);
+  const canImport = Boolean(archivo) && (tipoImportacion === 'masivo' || Boolean(selectedVacuna));
+  const hasErrors =
+    (tipoImportacion === 'vacuna' && Boolean(resultadoImportacion?.errores?.length)) ||
+    (tipoImportacion === 'masivo' && Boolean(resultadoImportacion?.erroresPorVacuna?.length));
 
   return (
-    <div className={COMPONENT_STYLES.modal.overlay} onClick={handleClose}>
-      <div 
-        className="bg-white rounded-2xl max-w-lg w-full shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-teal-600 to-cyan-600 p-2.5 rounded-xl shadow-lg">
-                <FileSpreadsheet className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Importar Movimientos</h3>
-                <p className="text-sm text-gray-500">Desde archivo Excel</p>
-              </div>
-            </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Importar movimientos"
+      subtitle="Carga controlada desde Excel, con plantilla y resumen de resultados."
+      icon={FileSpreadsheet}
+      size="lg"
+      footer={
+        !mostrarResultado ? (
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
+              type="button"
               onClick={handleClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
-              <X className="h-5 w-5" />
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleImportar}
+              disabled={!canImport || isImportingExcel}
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-emerald-700 hover:to-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isImportingExcel ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              <span>{isImportingExcel ? 'Importando...' : 'Importar'}</span>
             </button>
           </div>
+        ) : (
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                setMostrarResultado(false);
+                resetForm();
+              }}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Importar otro
+            </button>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-teal-700 hover:to-cyan-700"
+            >
+              Cerrar
+            </button>
+          </div>
+        )
+      }
+    >
+      {!mostrarResultado ? (
+        <div className="space-y-5">
+          <section className="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => {
+                setTipoImportacion('vacuna');
+                resetForm();
+              }}
+              className={`rounded-[20px] border p-4 text-left transition ${
+                tipoImportacion === 'vacuna'
+                  ? 'border-teal-200 bg-teal-50/80'
+                  : 'border-slate-200 bg-white hover:bg-slate-50'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Syringe className={`h-4 w-4 ${tipoImportacion === 'vacuna' ? 'text-teal-600' : 'text-slate-400'}`} />
+                <span className="text-sm font-semibold text-slate-900">Por vacuna</span>
+              </div>
+              <p className="mt-2 text-sm text-slate-500">Carga controlada para una vacuna específica.</p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setTipoImportacion('masivo');
+                resetForm();
+              }}
+              className={`rounded-[20px] border p-4 text-left transition ${
+                tipoImportacion === 'masivo'
+                  ? 'border-teal-200 bg-teal-50/80'
+                  : 'border-slate-200 bg-white hover:bg-slate-50'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Layers className={`h-4 w-4 ${tipoImportacion === 'masivo' ? 'text-teal-600' : 'text-slate-400'}`} />
+                <span className="text-sm font-semibold text-slate-900">Masivo</span>
+              </div>
+              <p className="mt-2 text-sm text-slate-500">Procesa todas las vacunas del archivo en un solo flujo.</p>
+            </button>
+          </section>
+
+          <section className="grid gap-3 sm:grid-cols-2">
+            {tipoImportacion === 'vacuna' ? (
+              <label className="sm:col-span-2">
+                <span className="mb-1 block text-[0.84rem] font-medium text-slate-700">Vacuna</span>
+                <select
+                  value={selectedVacuna}
+                  onChange={(event) => setSelectedVacuna(event.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition hover:border-slate-300 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18"
+                >
+                  <option value="">Seleccione una vacuna</option>
+                  {vacunas.map((vacuna) => (
+                    <option key={vacuna.id} value={vacuna.id}>
+                      {vacuna.nombre}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+
+            <label className={tipoImportacion === 'masivo' ? 'sm:col-span-2' : ''}>
+              <span className="mb-1 block text-[0.84rem] font-medium text-slate-700">Año</span>
+              <select
+                value={selectedAnio}
+                onChange={(event) => setSelectedAnio(parseInt(event.target.value, 10))}
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition hover:border-slate-300 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18"
+              >
+                {[2024, 2025, 2026].map((anio) => (
+                  <option key={anio} value={anio}>
+                    {anio}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </section>
+
+          <section className="rounded-[22px] border border-slate-200 bg-slate-50/70 p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Paso 1. Descargar plantilla</p>
+                <p className="mt-1 text-sm text-slate-500">
+                  Completa los campos del archivo respetando el formato entregado.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleDescargarPlantilla}
+                disabled={isDownloadingTemplate || !canDownload}
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-teal-700 hover:to-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isDownloadingTemplate ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                <span>Descargar plantilla</span>
+              </button>
+            </div>
+          </section>
+
+          <section className="rounded-[22px] border border-slate-200 bg-white p-4">
+            <p className="text-sm font-semibold text-slate-900">Paso 2. Subir archivo</p>
+            <p className="mt-1 text-sm text-slate-500">Selecciona un archivo `.xlsx` o `.xls` previamente completado.</p>
+            <label className="mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-[20px] border border-dashed border-slate-300 bg-slate-50/70 px-4 py-8 text-center transition hover:border-teal-300 hover:bg-teal-50/40">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-teal-600">
+                <Upload className="h-5 w-5" />
+              </div>
+              <p className="text-sm font-semibold text-slate-800">
+                {archivo ? archivo.name : 'Haz clic para seleccionar el archivo'}
+              </p>
+              <p className="text-xs text-slate-500">Solo se aceptan archivos de Excel.</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </label>
+          </section>
         </div>
+      ) : (
+        <div className="space-y-5">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-emerald-600" />
+            <h3 className="text-sm font-semibold text-slate-900">Importación completada</h3>
+          </div>
 
-        {/* Body */}
-        <div className="px-6 py-5 overflow-y-auto max-h-[calc(90vh-140px)]">
-          {!mostrarResultado ? (
-            <div className="space-y-5">
-              {/* Tipo de importación */}
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => { setTipoImportacion('vacuna'); resetForm(); }}
-                  className={`p-4 rounded-xl border-2 text-left transition-all ${
-                    tipoImportacion === 'vacuna'
-                      ? `${COLORS.primary.border} ${COLORS.primary.bg} border-teal-500`
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <Syringe className={`h-4 w-4 ${tipoImportacion === 'vacuna' ? COLORS.primary.icon : 'text-gray-400'}`} />
-                    <span className={`font-semibold text-sm ${tipoImportacion === 'vacuna' ? COLORS.primary.textDark : 'text-gray-700'}`}>
-                      Por Vacuna
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500">Una vacuna específica</p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setTipoImportacion('masivo'); resetForm(); }}
-                  className={`p-4 rounded-xl border-2 text-left transition-all ${
-                    tipoImportacion === 'masivo'
-                      ? `${COLORS.primary.border} ${COLORS.primary.bg} border-teal-500`
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <Layers className={`h-4 w-4 ${tipoImportacion === 'masivo' ? COLORS.primary.icon : 'text-gray-400'}`} />
-                    <span className={`font-semibold text-sm ${tipoImportacion === 'masivo' ? COLORS.primary.textDark : 'text-gray-700'}`}>
-                      Masivo
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500">Todas las vacunas</p>
-                </button>
+          {tipoImportacion === 'vacuna' ? (
+            <section className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-[18px] border border-emerald-200 bg-emerald-50 px-4 py-3">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Creados</p>
+                <p className="mt-1 text-2xl font-semibold text-emerald-900">{resultadoImportacion?.creadas || 0}</p>
               </div>
+              <div className="rounded-[18px] border border-teal-200 bg-teal-50 px-4 py-3">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Actualizados</p>
+                <p className="mt-1 text-2xl font-semibold text-teal-900">{resultadoImportacion?.actualizadas || 0}</p>
+              </div>
+            </section>
+          ) : (
+            <section className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[18px] border border-emerald-200 bg-emerald-50 px-4 py-3">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Creados</p>
+                <p className="mt-1 text-2xl font-semibold text-emerald-900">{resultadoImportacion?.totalCreadas || 0}</p>
+              </div>
+              <div className="rounded-[18px] border border-teal-200 bg-teal-50 px-4 py-3">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Actualizados</p>
+                <p className="mt-1 text-2xl font-semibold text-teal-900">{resultadoImportacion?.totalActualizadas || 0}</p>
+              </div>
+              <div className="rounded-[18px] border border-cyan-200 bg-cyan-50 px-4 py-3">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Vacunas</p>
+                <p className="mt-1 text-2xl font-semibold text-cyan-900">{resultadoImportacion?.vacunasProcesadas || 0}</p>
+              </div>
+            </section>
+          )}
 
-              {/* Configuración */}
-              <div className="grid grid-cols-2 gap-3">
-                {tipoImportacion === 'vacuna' && (
-                  <div className="col-span-2">
-                    <label className="block text-xs font-medium text-gray-600 mb-1.5">Vacuna</label>
-                    <select
-                      value={selectedVacuna}
-                      onChange={(e) => setSelectedVacuna(e.target.value)}
-                      className={`w-full ${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal}`}
-                    >
-                      <option value="">Seleccione una vacuna</option>
-                      {vacunas.map((vacuna) => (
-                        <option key={vacuna.id} value={vacuna.id}>{vacuna.nombre}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                <div className={tipoImportacion === 'masivo' ? 'col-span-2' : ''}>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">Año</label>
-                  <select
-                    value={selectedAnio}
-                    onChange={(e) => setSelectedAnio(parseInt(e.target.value))}
-                    className={`w-full ${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal}`}
-                  >
-                    {[2024, 2025, 2026].map((anio) => (
-                      <option key={anio} value={anio}>{anio}</option>
-                    ))}
-                  </select>
+          {hasErrors ? (
+            <section className="rounded-[22px] border border-rose-200 bg-rose-50/70 p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-rose-600" />
+                  <p className="text-sm font-semibold text-rose-900">
+                    {tipoImportacion === 'vacuna'
+                      ? `${resultadoImportacion?.errores?.length || 0} errores encontrados`
+                      : `${resultadoImportacion?.erroresPorVacuna?.length || 0} vacunas con errores`}
+                  </p>
                 </div>
-              </div>
-
-              {/* Paso 1: Plantilla */}
-              <div className={`p-4 rounded-xl ${COLORS.primary.bg} border ${COLORS.primary.border}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`text-sm font-medium ${COLORS.primary.textDark}`}>1. Descargar plantilla</p>
-                    <p className="text-xs text-gray-500 mt-0.5">Complete Trans. Ingreso, Salida, Trans. Salida</p>
-                  </div>
+                {tipoImportacion === 'masivo' && onGenerarReporteErrores && resultadoImportacion?.erroresPorVacuna ? (
                   <button
-                    onClick={handleDescargarPlantilla}
-                    disabled={isDownloadingTemplate || !canDownload}
-                    className={`${COMPONENT_STYLES.button.primary} px-3 py-2 text-xs`}
+                    type="button"
+                    onClick={() => onGenerarReporteErrores(resultadoImportacion.erroresPorVacuna || [])}
+                    className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-500 to-red-500 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:from-rose-600 hover:to-red-600"
                   >
-                    {isDownloadingTemplate ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4" />
-                        <span>Descargar</span>
-                      </>
-                    )}
+                    <Download className="h-3.5 w-3.5" />
+                    <span>Generar reporte</span>
                   </button>
-                </div>
+                ) : null}
               </div>
 
-              {/* Paso 2: Subir archivo */}
-              <div className={`p-4 rounded-xl ${COLORS.success.bg} border ${COLORS.success.border}`}>
-                <p className={`text-sm font-medium ${COLORS.success.textDark} mb-2`}>2. Subir archivo completado</p>
-                <label className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-emerald-300 rounded-lg cursor-pointer hover:bg-emerald-100/50 transition-colors">
-                  <Upload className="h-4 w-4 text-emerald-600" />
-                  <span className="text-sm text-emerald-700">
-                    {archivo ? archivo.name : 'Seleccionar archivo .xlsx'}
-                  </span>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </label>
+              <div className="mt-3 max-h-32 overflow-y-auto space-y-1 text-sm text-rose-700">
+                {tipoImportacion === 'vacuna'
+                  ? resultadoImportacion?.errores?.slice(0, 5).map((error, index) => (
+                      <p key={`${error}-${index}`}>• {error}</p>
+                    ))
+                  : resultadoImportacion?.erroresPorVacuna?.slice(0, 4).map((item, index) => (
+                      <p key={`${item.vacuna}-${index}`}>• {item.vacuna}: {item.errores.length} errores</p>
+                    ))}
               </div>
-            </div>
-          ) : (
-            /* Resultado */
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <h4 className="font-semibold text-gray-900">Importación completada</h4>
-              </div>
-
-              {tipoImportacion === 'vacuna' ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className={`p-4 rounded-xl ${COLORS.success.bg} border ${COLORS.success.border}`}>
-                    <p className={`text-2xl font-bold ${COLORS.success.textDark}`}>{resultadoImportacion?.creadas || 0}</p>
-                    <p className="text-xs text-emerald-600">Creados</p>
-                  </div>
-                  <div className={`p-4 rounded-xl ${COLORS.primary.bg} border ${COLORS.primary.border}`}>
-                    <p className={`text-2xl font-bold ${COLORS.primary.textDark}`}>{resultadoImportacion?.actualizadas || 0}</p>
-                    <p className="text-xs text-teal-600">Actualizados</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-2">
-                  <div className={`p-3 rounded-xl ${COLORS.success.bg} border ${COLORS.success.border} text-center`}>
-                    <p className={`text-xl font-bold ${COLORS.success.textDark}`}>{resultadoImportacion?.totalCreadas || 0}</p>
-                    <p className="text-xs text-emerald-600">Creados</p>
-                  </div>
-                  <div className={`p-3 rounded-xl ${COLORS.primary.bg} border ${COLORS.primary.border} text-center`}>
-                    <p className={`text-xl font-bold ${COLORS.primary.textDark}`}>{resultadoImportacion?.totalActualizadas || 0}</p>
-                    <p className="text-xs text-teal-600">Actualizados</p>
-                  </div>
-                  <div className={`p-3 rounded-xl ${COLORS.secondary.bg} border ${COLORS.secondary.border} text-center`}>
-                    <p className={`text-xl font-bold ${COLORS.secondary.textDark}`}>{resultadoImportacion?.vacunasProcesadas || 0}</p>
-                    <p className="text-xs text-cyan-600">Vacunas</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Errores */}
-              {((tipoImportacion === 'vacuna' && resultadoImportacion?.errores && resultadoImportacion.errores.length > 0) ||
-                (tipoImportacion === 'masivo' && resultadoImportacion?.erroresPorVacuna && resultadoImportacion.erroresPorVacuna.length > 0)) && (
-                <div className={`p-4 rounded-xl ${COLORS.danger.bg} border ${COLORS.danger.border}`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className={`h-4 w-4 ${COLORS.danger.icon}`} />
-                      <span className={`text-sm font-medium ${COLORS.danger.textDark}`}>
-                        {tipoImportacion === 'vacuna' 
-                          ? `${resultadoImportacion?.errores?.length || 0} errores`
-                          : `${resultadoImportacion?.erroresPorVacuna?.length || 0} vacunas con errores`
-                        }
-                      </span>
-                    </div>
-                    {tipoImportacion === 'masivo' && onGenerarReporteErrores && resultadoImportacion?.erroresPorVacuna && (
-                      <button
-                        onClick={() => onGenerarReporteErrores(resultadoImportacion.erroresPorVacuna!)}
-                        className={`${COMPONENT_STYLES.button.danger} px-2 py-1 text-xs`}
-                      >
-                        <Download className="h-3 w-3" />
-                        <span>Reporte</span>
-                      </button>
-                    )}
-                  </div>
-                  <div className="max-h-24 overflow-y-auto text-xs text-rose-700 space-y-1">
-                    {tipoImportacion === 'vacuna' 
-                      ? resultadoImportacion?.errores?.slice(0, 5).map((error, i) => (
-                          <p key={i}>• {error}</p>
-                        ))
-                      : resultadoImportacion?.erroresPorVacuna?.slice(0, 3).map((item, i) => (
-                          <p key={i}>• {item.vacuna}: {item.errores.length} errores</p>
-                        ))
-                    }
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+            </section>
+          ) : null}
         </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex gap-3">
-          {!mostrarResultado ? (
-            <>
-              <button onClick={handleClose} className={`flex-1 ${COMPONENT_STYLES.button.secondary}`}>
-                Cancelar
-              </button>
-              <button
-                onClick={handleImportar}
-                disabled={!canImport || isImportingExcel}
-                className={`flex-1 ${COMPONENT_STYLES.button.success}`}
-              >
-                {isImportingExcel ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Importando...</span>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4" />
-                    <span>Importar</span>
-                  </>
-                )}
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => { setMostrarResultado(false); resetForm(); }}
-                className={`flex-1 ${COMPONENT_STYLES.button.secondary}`}
-              >
-                Importar otro
-              </button>
-              <button onClick={handleClose} className={`flex-1 ${COMPONENT_STYLES.button.primary}`}>
-                Cerrar
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+      )}
+    </Modal>
   );
 };
 
