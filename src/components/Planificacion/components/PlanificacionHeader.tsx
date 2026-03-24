@@ -1,24 +1,25 @@
 import React, { memo } from 'react';
 import {
-  Calendar,
-  RefreshCw,
-  Download,
-  Upload,
-  Save,
-  Loader2,
+  ArrowRight,
   Building2,
-  Package,
-  Filter,
+  Calendar,
+  CheckCircle2,
   ChevronDown,
+  Download,
+  Loader2,
+  Package,
+  RefreshCw,
+  Save,
+  Upload,
 } from 'lucide-react';
 import { Vacuna, CentroAcopio } from '../../../types';
+import { COMPONENT_STYLES } from '../constants';
 
 interface PlanificacionHeaderProps {
   isReadOnly?: boolean;
   lockedCentroAcopioLabel?: string;
   showReadOnlyCentroFilter?: boolean;
   allCentrosLabel?: string;
-  // Filtros
   selectedAnio: number;
   selectedCentroAcopio: string;
   selectedVacuna: string;
@@ -30,19 +31,49 @@ interface PlanificacionHeaderProps {
   onAnioChange: (anio: number) => void;
   onCentroAcopioChange: (id: string) => void;
   onVacunaChange: (id: string) => void;
-  // Estados
   isLoading: boolean;
   isLoadingAnios?: boolean;
   isUpdating: boolean;
   isImporting: boolean;
   isExporting: boolean;
   pendingChangesCount: number;
-  // Acciones
   onRefresh: () => void;
   onImportar: () => void;
   onExportar: () => void;
   onGuardarPendientes: () => void;
 }
+
+interface ActionButtonProps {
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+  isPrimary?: boolean;
+  count?: number;
+}
+
+const ActionButton: React.FC<ActionButtonProps> = ({
+  label,
+  icon,
+  onClick,
+  disabled = false,
+  isPrimary = false,
+  count,
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className={isPrimary ? COMPONENT_STYLES.button.primary : COMPONENT_STYLES.button.secondary}
+    title={label}
+  >
+    {icon}
+    <span className="hidden lg:inline">{label}</span>
+    {count ? (
+      <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold text-inherit">{count}</span>
+    ) : null}
+  </button>
+);
 
 export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
   isReadOnly = false,
@@ -71,237 +102,215 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
   onExportar,
   onGuardarPendientes,
 }) => {
-  const vacunaSeleccionada = vacunas.find(v => v.id === selectedVacuna);
+  const vacunaSeleccionada = vacunas.find((vacuna) => vacuna.id === selectedVacuna);
   const shouldRenderCentroSelect = !isReadOnly || showReadOnlyCentroFilter;
   const centroNombre = selectedCentroAcopio === 'todos'
     ? allCentrosLabel
-    : centrosAcopio.find(c => c.id === selectedCentroAcopio)?.nombre || '';
+    : centrosAcopio.find((centro) => centro.id === selectedCentroAcopio)?.nombre || lockedCentroAcopioLabel || allCentrosLabel;
 
   return (
-    <header className="sticky top-0 z-20">
-      {/* Barra Principal */}
-      <div className="bg-white border-b border-gray-100 shadow-sm">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            
-            {/* Izquierda: Título */}
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-2xl blur-lg opacity-40"></div>
-                <div className="relative p-3 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-600 shadow-lg">
-                  <Calendar className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                  Planificación Anual
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Programación de vacunas por establecimiento
-                </p>
-              </div>
-            </div>
-
-            {/* Centro: Filtros */}
-            <div className="flex-1 max-w-3xl">
-              <div className="flex items-center gap-3 p-1.5 bg-gray-50 rounded-2xl border border-gray-100">
-                <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-white shadow-sm border border-gray-100">
-                  <Filter className="h-4 w-4 text-teal-600" />
-                </div>
-                
-                <div className="flex-1 grid grid-cols-3 gap-2">
-                  {/* Centro de Acopio */}
-                  {shouldRenderCentroSelect ? (
-                    <div className="relative group">
-                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-500 z-10 transition-colors group-hover:text-teal-600" />
-                      <select
-                        value={selectedCentroAcopio}
-                        onChange={(e) => onCentroAcopioChange(e.target.value)}
-                        disabled={isLoading}
-                        className="w-full pl-10 pr-8 py-2.5 text-sm font-medium bg-white rounded-xl border border-gray-200
-                                   focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400
-                                   hover:border-teal-300 hover:shadow-sm transition-all duration-200 cursor-pointer
-                                   disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
-                      >
-                        <option value="todos">{allCentrosLabel}</option>
-                        {centrosAcopio.map((centro) => (
-                          <option key={centro.id} value={centro.id}>
-                            {centro.nombre}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-3 py-2.5 text-sm font-semibold text-teal-700">
-                      <Building2 className="h-4 w-4 text-teal-600" />
-                      <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
-                    </div>
-                  )}
-
-                  {/* Vacuna */}
-                  <div className="relative group">
-                    <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-cyan-500 z-10 transition-colors group-hover:text-cyan-600" />
+    <section className={COMPONENT_STYLES.panel}>
+      <div className="border-b border-slate-100 px-3 py-2.5 sm:px-4 sm:py-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end lg:gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              {shouldRenderCentroSelect ? (
+                <label className="block">
+                  <span className={COMPONENT_STYLES.input.label}>Centro de acopio</span>
+                  <div className="relative">
+                    <Building2 className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-teal-500 sm:left-3 sm:h-4 sm:w-4" />
                     <select
-                      value={selectedVacuna}
-                      onChange={(e) => onVacunaChange(e.target.value)}
+                      value={selectedCentroAcopio}
+                      onChange={(event) => onCentroAcopioChange(event.target.value)}
                       disabled={isLoading}
-                      className="w-full pl-10 pr-8 py-2.5 text-sm font-medium bg-white rounded-xl border border-gray-200
-                                 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400
-                                 hover:border-cyan-300 hover:shadow-sm transition-all duration-200 cursor-pointer
-                                 disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
+                      className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm`}
                     >
-                      {vacunas.length === 0 && <option value="">Seleccione...</option>}
-                      {vacunas.map((vacuna) => (
-                        <option key={vacuna.id} value={vacuna.id}>{vacuna.nombre}</option>
+                      <option value="todos">{allCentrosLabel}</option>
+                      {centrosAcopio.map((centro) => (
+                        <option key={centro.id} value={centro.id}>
+                          {centro.nombre}
+                        </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 sm:right-3 sm:h-4 sm:w-4" />
                   </div>
-
-                  {/* Año */}
-                  <div className="relative group">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-teal-600 z-10">AÑO</span>
-                    <select
-                      value={selectedAnio}
-                      onChange={(e) => onAnioChange(Number(e.target.value))}
-                      disabled={isLoadingAnios}
-                      className="w-full pl-12 pr-8 py-2.5 text-sm font-medium bg-white rounded-xl border border-gray-200
-                                 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400
-                                 hover:border-teal-300 hover:shadow-sm transition-all duration-200 cursor-pointer appearance-none
-                                 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {aniosDisponibles.map((anio) => (
-                        <option key={anio} value={anio}>{anio}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                </label>
+              ) : (
+                <div>
+                  <span className={COMPONENT_STYLES.input.label}>Centro asignado</span>
+                  <div className="flex min-h-[40px] items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-700 sm:min-h-[44px] sm:px-4 sm:py-2.5 sm:text-sm">
+                    <Building2 className="h-3.5 w-3.5 shrink-0 text-teal-600 sm:h-4 sm:w-4" />
+                    <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
                   </div>
                 </div>
+              )}
 
-                {isLoading && (
-                  <Loader2 className="h-5 w-5 text-teal-600 animate-spin" />
+              <label className="block">
+                <span className={COMPONENT_STYLES.input.label}>Vacuna</span>
+                <div className="relative">
+                  <Package className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-cyan-500 sm:left-3 sm:h-4 sm:w-4" />
+                  <select
+                    value={selectedVacuna}
+                    onChange={(event) => onVacunaChange(event.target.value)}
+                    disabled={isLoading}
+                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm`}
+                  >
+                    {vacunas.length === 0 ? <option value="">Seleccione...</option> : null}
+                    {vacunas.map((vacuna) => (
+                      <option key={vacuna.id} value={vacuna.id}>
+                        {vacuna.nombre}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 sm:right-3 sm:h-4 sm:w-4" />
+                </div>
+              </label>
+
+              <label className="block">
+                <span className={COMPONENT_STYLES.input.label}>Año</span>
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-cyan-600 sm:left-3 sm:text-[10px]">
+                    AÑO
+                  </span>
+                  <select
+                    value={selectedAnio}
+                    onChange={(event) => onAnioChange(Number(event.target.value))}
+                    disabled={isLoadingAnios}
+                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-10 pr-8 text-xs sm:pl-12 sm:pr-10 sm:text-sm`}
+                  >
+                    {aniosDisponibles.map((anio) => (
+                      <option key={anio} value={anio}>
+                        {anio}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 sm:right-3 sm:h-4 sm:w-4" />
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+            {!isReadOnly && pendingChangesCount > 0 ? (
+              <ActionButton
+                label={isUpdating ? 'Guardando' : 'Guardar cambios'}
+                icon={isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                onClick={onGuardarPendientes}
+                disabled={isUpdating}
+                isPrimary
+                count={pendingChangesCount}
+              />
+            ) : null}
+
+            <ActionButton
+              label="Actualizar"
+              icon={<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />}
+              onClick={onRefresh}
+              disabled={isLoading || !selectedVacuna}
+            />
+
+            {!isReadOnly ? (
+              <ActionButton
+                label="Importar"
+                icon={isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                onClick={onImportar}
+                disabled={isImporting}
+              />
+            ) : (
+              <span className="inline-flex min-h-[38px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 sm:text-sm">
+                Solo lectura
+              </span>
+            )}
+
+            {!isReadOnly ? (
+              <ActionButton
+                label={isExporting ? 'Exportando' : 'Exportar'}
+                icon={isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                onClick={onExportar}
+                disabled={isExporting || !selectedVacuna}
+                isPrimary
+              />
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-slate-100 px-3 py-2.5 sm:px-4 sm:py-3">
+        {!selectedVacuna ? (
+          <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 px-3 py-2.5 sm:px-4 sm:py-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
+              <Package className="h-4 w-4 text-white" />
+            </div>
+            <p className="text-sm font-medium text-white/90">Selecciona una vacuna para ver el resumen anual de programación</p>
+          </div>
+        ) : (
+          <div className="rounded-2xl bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-1 py-1">
+            <div className="flex flex-wrap items-center gap-y-1">
+              <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
+                  <Package className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
+                </div>
+                <div>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">Vacuna</p>
+                  <p className="text-xs font-bold text-white sm:text-sm">{vacunaSeleccionada?.nombre || 'Sin seleccionar'}</p>
+                </div>
+              </div>
+
+              <ArrowRight className="mx-0.5 h-3 w-3 shrink-0 text-white/40 sm:mx-1 sm:h-3.5 sm:w-3.5" />
+
+              <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
+                  <Calendar className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
+                </div>
+                <div>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">Período</p>
+                  <p className="text-xs font-bold text-white sm:text-sm">{selectedAnio}</p>
+                </div>
+              </div>
+
+              <ArrowRight className="mx-0.5 h-3 w-3 shrink-0 text-white/40 sm:mx-1 sm:h-3.5 sm:w-3.5" />
+
+              <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
+                  <Building2 className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
+                </div>
+                <div>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">Cobertura</p>
+                  <p className="text-xs font-bold text-white sm:text-sm">{centroNombre}</p>
+                </div>
+              </div>
+
+              <ArrowRight className="mx-0.5 h-3 w-3 shrink-0 text-white/40 sm:mx-1 sm:h-3.5 sm:w-3.5" />
+
+              <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
+                </div>
+                <div>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">Establecimientos</p>
+                  <p className="text-xs font-bold text-white sm:text-sm">{establecimientosCount.toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div className="ml-auto flex flex-wrap items-center gap-2 px-1 py-1">
+                <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white">
+                  Total anual: {totalGeneral.toLocaleString()}
+                </span>
+                {pendingChangesCount > 0 ? (
+                  <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white">
+                    {pendingChangesCount} cambios pendientes
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white/90">
+                    Todo sincronizado
+                  </span>
                 )}
               </div>
             </div>
-
-            {/* Derecha: Acciones */}
-            <div className="flex items-center gap-2">
-              {!isReadOnly && pendingChangesCount > 0 && (
-                <button
-                  onClick={onGuardarPendientes}
-                  disabled={isUpdating}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
-                             text-white bg-gradient-to-r from-amber-500 to-orange-500
-                             hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/25
-                             disabled:opacity-50 transition-all duration-200"
-                >
-                  <Save className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} />
-                  <span className="hidden xl:inline">Guardar</span>
-                  <span className="bg-white/25 px-1.5 py-0.5 rounded-full text-xs">{pendingChangesCount}</span>
-                </button>
-              )}
-
-              <div className="flex items-center rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-                <button
-                  onClick={onRefresh}
-                  disabled={isLoading || !selectedVacuna}
-                  className="flex items-center justify-center p-2.5 text-gray-600 hover:bg-gray-50
-                             disabled:opacity-40 disabled:cursor-not-allowed transition-all border-r border-gray-200"
-                >
-                  <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                </button>
-                {!isReadOnly ? (
-                  <button
-                    onClick={onImportar}
-                    disabled={isImporting}
-                    className="flex items-center justify-center p-2.5 text-gray-600 hover:bg-cyan-50 hover:text-cyan-700 transition-all"
-                  >
-                    <Upload className={`h-4 w-4 ${isImporting ? 'animate-spin' : ''}`} />
-                  </button>
-                ) : null}
-              </div>
-
-              {!isReadOnly ? (
-                <button
-                  onClick={onExportar}
-                  disabled={isExporting || !selectedVacuna}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
-                             text-white bg-gradient-to-r from-teal-500 to-cyan-500
-                             hover:from-teal-600 hover:to-cyan-600 shadow-lg shadow-teal-500/25
-                             disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                  <span className="hidden sm:inline">{isExporting ? 'Exportando...' : 'Exportar'}</span>
-                </button>
-              ) : (
-                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600">
-                  Vista solo lectura
-                </div>
-              )}
-            </div>
           </div>
-        </div>
+        )}
       </div>
-
-      {/* Barra de Contexto */}
-      <div style={{ backgroundColor: '#11a394' }}>
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center justify-between gap-4">
-            
-            {/* Izquierda: Contexto */}
-            <div className="flex items-center gap-4">
-              {/* Badge de Vacuna */}
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
-                <Package className="h-4 w-4 text-white" />
-                <span className="text-sm font-semibold text-white">
-                  {vacunaSeleccionada?.nombre || 'Sin seleccionar'}
-                </span>
-              </div>
-
-              {/* Separador */}
-              <div className="hidden sm:block w-px h-5 bg-white/30"></div>
-
-              {/* Año y Centro */}
-              <div className="hidden sm:flex items-center gap-3 text-sm text-white/90">
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5 text-white/70" />
-                  {selectedAnio}
-                </span>
-                <span className="text-white/50">•</span>
-                <span className="flex items-center gap-1.5">
-                  <Building2 className="h-3.5 w-3.5 text-white/70" />
-                  {centroNombre}
-                </span>
-              </div>
-
-              {/* Separador */}
-              <div className="hidden md:block w-px h-5 bg-white/30"></div>
-
-              {/* Contador de Establecimientos */}
-              <div className="flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                </span>
-                <span className="text-sm font-medium text-white">{establecimientosCount}</span>
-                <span className="text-xs text-white/70">establecimientos</span>
-              </div>
-            </div>
-
-            {/* Derecha: Total */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-3 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
-                <div className="text-right">
-                  <div className="text-[10px] text-white/80 font-medium uppercase tracking-wide">Total Programado</div>
-                  <div className="text-xl font-bold text-white leading-none">{totalGeneral.toLocaleString()}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    </section>
   );
 });
 

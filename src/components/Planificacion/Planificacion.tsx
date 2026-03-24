@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Loader2, AlertTriangle } from 'lucide-react';
-import './enhanced-planning-table.css';
+import { AlertTriangle } from 'lucide-react';
 import {
   Establecimiento,
   PlanificacionConRelaciones,
@@ -16,12 +15,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import { PlanificacionService } from '../../services/planificacionService';
 import { ValesService } from '../../services/valesService';
-import { COMPONENT_STYLES, MESES } from './constants';
+import { MESES } from './constants';
 import {
   PlanificacionHeader,
   PlanificacionTabla,
   PlanificacionAcciones,
-  PlanificacionLeyenda,
   ConfirmacionValeModal,
 } from './components';
 import ImportarModal from './ImportarModal';
@@ -66,6 +64,7 @@ const Planificacion: React.FC = () => {
   const [pendingChanges, setPendingChanges] = useState<{[key: string]: boolean}>({});
   const debounceTimeouts = useRef<{[key: string]: NodeJS.Timeout}>({});
   const initialDataLoadedRef = useRef(false);
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   // Estados para modal de confirmación de vale
   const [showConfirmacionValeModal, setShowConfirmacionValeModal] = useState(false);
@@ -952,100 +951,91 @@ const Planificacion: React.FC = () => {
   };
 
   const pendingChangesCount = Object.values(pendingChanges).filter(Boolean).length;
-
-  // Loading state
-  if (isLoadingEstablecimientos || isLoadingVacunas) {
-    return (
-      <div className={COMPONENT_STYLES.pageBackground}>
-        <div className="flex items-center justify-center h-64">
-          <div className="flex items-center space-x-2">
-            <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
-            <span className="text-gray-600">Cargando datos...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className={COMPONENT_STYLES.pageBackground}>
-        <div className="p-6">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-center">
-              <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
-              <span className="text-red-800">Error al cargar datos: {error}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const isContextLoading = isLoadingEstablecimientos || isLoadingVacunas;
+  const isPageLoading = isLoading || isContextLoading;
 
   return (
-    <main className={COMPONENT_STYLES.pageBackground}>
-      {/* Header */}
-      <PlanificacionHeader
-        isReadOnly={isReadOnlyMode}
-        lockedCentroAcopioLabel={lockedCentroAcopioLabel}
-        showReadOnlyCentroFilter={canFilterAssignedCentros}
-        allCentrosLabel={allCentrosLabel}
-        selectedAnio={selectedAnio}
-        selectedCentroAcopio={selectedCentroAcopio}
-        selectedVacuna={selectedVacuna}
-        centrosAcopio={centrosAcopioFiltro}
-        vacunas={vacunas}
-        aniosDisponibles={aniosDisponibles}
-        establecimientosCount={datosVacuna?.establecimientos.length || 0}
-        totalGeneral={calcularTotalGeneral()}
-        onAnioChange={setSelectedAnio}
-        onCentroAcopioChange={setSelectedCentroAcopio}
-        onVacunaChange={setSelectedVacuna}
-        isLoading={isLoading}
-        isLoadingAnios={isLoadingAnios}
-        isUpdating={isUpdating}
-        isImporting={isImporting}
-        isExporting={isExporting}
-        pendingChangesCount={pendingChangesCount}
-        onRefresh={loadPlanificacionesPorVacuna}
-        onImportar={() => setShowModalImportar(true)}
-        onExportar={handleExportar}
-        onGuardarPendientes={handleSaveAllPendingChanges}
-      />
+    <main className="flex h-[calc(100vh-4rem)] flex-col bg-gradient-to-br from-slate-50 via-white to-teal-50/30">
+      <div className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col gap-1.5 overflow-hidden px-2 py-2 sm:gap-2 sm:px-4 sm:py-3 lg:px-8">
+        <section className="flex flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl">
+          <div className="shrink-0">
+            <PlanificacionHeader
+              isReadOnly={isReadOnlyMode}
+              lockedCentroAcopioLabel={lockedCentroAcopioLabel}
+              showReadOnlyCentroFilter={canFilterAssignedCentros}
+              allCentrosLabel={allCentrosLabel}
+              selectedAnio={selectedAnio}
+              selectedCentroAcopio={selectedCentroAcopio}
+              selectedVacuna={selectedVacuna}
+              centrosAcopio={centrosAcopioFiltro}
+              vacunas={vacunas}
+              aniosDisponibles={aniosDisponibles}
+              establecimientosCount={datosVacuna?.establecimientos.length || 0}
+              totalGeneral={calcularTotalGeneral()}
+              onAnioChange={setSelectedAnio}
+              onCentroAcopioChange={setSelectedCentroAcopio}
+              onVacunaChange={setSelectedVacuna}
+              isLoading={isPageLoading}
+              isLoadingAnios={isLoadingAnios}
+              isUpdating={isUpdating}
+              isImporting={isImporting}
+              isExporting={isExporting}
+              pendingChangesCount={pendingChangesCount}
+              onRefresh={loadPlanificacionesPorVacuna}
+              onImportar={() => setShowModalImportar(true)}
+              onExportar={handleExportar}
+              onGuardarPendientes={handleSaveAllPendingChanges}
+            />
+          </div>
 
-      {/* Contenido */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Tabla */}
-        <PlanificacionTabla
-          readOnly={isReadOnlyMode}
-          establecimientos={datosVacuna?.establecimientos || []}
-          selectedCentroAcopio={selectedCentroAcopio}
-          isLoading={isLoading}
-          isUpdating={isUpdating}
-          getCurrentValue={getCurrentValue}
-          hasPendingChange={hasPendingChange}
-          onTempValueChange={handleTempValueChange}
-          onFieldBlur={handleFieldBlur}
-          calcularTotalMes={calcularTotalMes}
-          calcularTotalGeneral={calcularTotalGeneral}
-        />
+          {error ? (
+            <div className="shrink-0 border-b border-slate-100 px-3 py-3 sm:px-4">
+              <div className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-rose-200 bg-white text-rose-600">
+                  <AlertTriangle className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-rose-900">Error al cargar la planificación</p>
+                  <p className="mt-0.5 text-sm text-rose-700">{error}</p>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
-        {/* Acciones */}
-        <PlanificacionAcciones
-          readOnly={isReadOnlyMode}
-          isLoading={isLoading}
-          isUpdating={isUpdating}
-          pendingChangesCount={pendingChangesCount}
-          hasData={!!datosVacuna && datosVacuna.establecimientos.length > 0}
-          onGuardarProgramacion={handleGuardarProgramacion}
-          onRecalcular={loadPlanificacionesPorVacuna}
-          onSincronizar={handleSincronizarConMovimientos}
-          onGuardarPendientes={handleSaveAllPendingChanges}
-        />
+          <div className="flex min-h-0 flex-1 flex-col gap-4 p-2.5 sm:p-4">
+            <div className="min-h-0 flex-1">
+              <PlanificacionTabla
+                readOnly={isReadOnlyMode}
+                establecimientos={datosVacuna?.establecimientos || []}
+                selectedCentroAcopio={selectedCentroAcopio}
+                isLoading={isPageLoading}
+                isUpdating={isUpdating}
+                selectedRowId={selectedRowId}
+                onRowSelect={setSelectedRowId}
+                getCurrentValue={getCurrentValue}
+                hasPendingChange={hasPendingChange}
+                onTempValueChange={handleTempValueChange}
+                onFieldBlur={handleFieldBlur}
+                calcularTotalMes={calcularTotalMes}
+                calcularTotalGeneral={calcularTotalGeneral}
+              />
+            </div>
 
-        {/* Leyenda */}
-        <PlanificacionLeyenda />
+            <div>
+              <PlanificacionAcciones
+                readOnly={isReadOnlyMode}
+                isLoading={isPageLoading}
+                isUpdating={isUpdating}
+                pendingChangesCount={pendingChangesCount}
+                hasData={!!datosVacuna && datosVacuna.establecimientos.length > 0}
+                onGuardarProgramacion={handleGuardarProgramacion}
+                onRecalcular={loadPlanificacionesPorVacuna}
+                onSincronizar={handleSincronizarConMovimientos}
+                onGuardarPendientes={handleSaveAllPendingChanges}
+              />
+            </div>
+          </div>
+        </section>
       </div>
 
       {/* Modal Importar */}
