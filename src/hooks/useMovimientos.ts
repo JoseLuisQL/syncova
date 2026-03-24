@@ -96,6 +96,28 @@ export const useMovimientos = () => {
   }, [filters, listApi]);
 
   /**
+   * Recargar movimientos en background sin activar el estado isLoading.
+   * Evita que la tabla parpadee con skeleton/loading mientras sincroniza.
+   */
+  const silentLoadMovimientos = useCallback(async (newFilters?: MovimientosFilters) => {
+    const filtersToUse = newFilters || filters;
+
+    try {
+      const result = await MovimientosService.getAll(filtersToUse);
+
+      if (result) {
+        setMovimientos(result.movimientos);
+        setTotal(result.total);
+        if (newFilters) {
+          setFilters(filtersToUse);
+        }
+      }
+    } catch (error) {
+      logger.error('❌ useMovimientos.silentLoadMovimientos - Error:', error);
+    }
+  }, [filters]);
+
+  /**
    * Obtener movimiento por ID
    */
   const getMovimiento = useCallback(async (id: string): Promise<MovimientoConRelaciones | null> => {
@@ -132,13 +154,8 @@ export const useMovimientos = () => {
 
     const result = await updateApi.execute(() => MovimientosService.update(id, data));
 
-    if (result) {
-      // Recargar la lista después de actualizar
-      await loadMovimientos();
-    }
-
     return result || null;
-  }, [updateApi, loadMovimientos]);
+  }, [updateApi]);
 
   /**
    * Eliminar movimiento
@@ -301,13 +318,8 @@ export const useMovimientos = () => {
       MovimientosService.createEntregaAdicional(data)
     );
 
-    if (result) {
-      // Recargar la lista después de crear
-      await loadMovimientos();
-    }
-
     return result || null;
-  }, [createEntregaApi, loadMovimientos]);
+  }, [createEntregaApi]);
 
   /**
    * Actualizar entrega adicional
@@ -341,13 +353,11 @@ export const useMovimientos = () => {
     );
 
     if (result !== null) {
-      // Recargar la lista después de eliminar
-      await loadMovimientos();
       return true;
     }
 
     return false;
-  }, [deleteEntregaApi, loadMovimientos]);
+  }, [deleteEntregaApi]);
 
   /**
    * 🚀 NUEVA FUNCIONALIDAD: Actualizar stock inicial del siguiente mes automáticamente
@@ -587,6 +597,7 @@ export const useMovimientos = () => {
 
     // Operaciones CRUD
     loadMovimientos,
+    silentLoadMovimientos,
     getMovimiento,
     createMovimiento,
     updateMovimiento,

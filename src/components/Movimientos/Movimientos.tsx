@@ -21,6 +21,7 @@ import ValesErrorBoundary from '../Vales/ValesErrorBoundary';
 import ImportarModal from './ImportarModal';
 import ConfirmacionModificacionModal from './ConfirmacionModificacionModal';
 import ConfirmacionSinDisponibilidadModal from './ConfirmacionSinDisponibilidadModal';
+import ConfirmacionEliminacionModal, { EntregaToDelete } from './ConfirmacionEliminacionModal';
 
 import { COMPONENT_STYLES, MESES } from './constants';
 import {
@@ -70,6 +71,7 @@ const Movimientos: React.FC = () => {
     isUpdating,
     error,
     loadMovimientos,
+    silentLoadMovimientos,
     createMovimiento,
     updateMovimiento,
     getStockDisponible,
@@ -195,6 +197,8 @@ const Movimientos: React.FC = () => {
   const [movimientoParaEntregas, setMovimientoParaEntregas] = useState<MovimientoCalculado | null>(null);
   const [showAjusteDeficitModal, setShowAjusteDeficitModal] = useState(false);
   const [ajusteDeficitDisponible, setAjusteDeficitDisponible] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [entregaToDelete, setEntregaToDelete] = useState<EntregaToDelete | null>(null);
 
   // Estado para fila seleccionada (persistente al cambiar pestañas/modales)
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
@@ -928,20 +932,19 @@ const Movimientos: React.FC = () => {
     }
 
     if (['saldoAnterior', 'transIngreso', 'salida', 'transSalida', 'entrega', 'entregaBase'].includes(campo)) {
-      setTimeout(async () => {
-        if (selectedVacuna) {
-          const filters = {
-            vacunaId: selectedVacuna,
-            mes: selectedMes,
-            anio: selectedAnio,
-            ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
-          };
-          await loadMovimientos(filters);
-          if (campo === 'entrega') {
-            await updateStockInRealTime();
-          }
+      // Sync en background sin mostrar loading (evita parpadeo)
+      if (selectedVacuna) {
+        const bgFilters = {
+          vacunaId: selectedVacuna,
+          mes: selectedMes,
+          anio: selectedAnio,
+          ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
+        };
+        silentLoadMovimientos(bgFilters);
+        if (campo === 'entrega' || campo === 'entregaBase') {
+          updateStockInRealTime();
         }
-      }, 500);
+      }
     }
   };
 
@@ -1006,6 +1009,17 @@ const Movimientos: React.FC = () => {
       const updateData = { [campo]: valor, usuarioId: user?.id || 'system-auto' };
       await updateMovimiento(movimientoExistente.id, updateData);
 
+      // Sync silenciosa después de actualizar (evita parpadeo)
+      if (selectedVacuna) {
+        const bgFilters = {
+          vacunaId: selectedVacuna,
+          mes: selectedMes,
+          anio: selectedAnio,
+          ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
+        };
+        silentLoadMovimientos(bgFilters);
+      }
+
       if (campo === 'entrega' || campo === 'entregaBase') {
         onEntregaBaseChanged(establecimientoId, selectedVacuna, selectedMes, selectedAnio);
       }
@@ -1026,6 +1040,17 @@ const Movimientos: React.FC = () => {
       };
 
       await createMovimiento(createData);
+
+      // Sync silenciosa después de crear (evita parpadeo)
+      if (selectedVacuna) {
+        const bgFilters = {
+          vacunaId: selectedVacuna,
+          mes: selectedMes,
+          anio: selectedAnio,
+          ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
+        };
+        silentLoadMovimientos(bgFilters);
+      }
 
       if (campo === 'entrega' && valor > 0) {
         onEntregaBaseChanged(establecimientoId, selectedVacuna, selectedMes, selectedAnio);
@@ -1258,7 +1283,17 @@ const Movimientos: React.FC = () => {
       }
 
       await MovimientosService.updateEntregaAdicional(entregaId, { cantidad: value });
-      await loadMovimientos();
+
+      // Sync silenciosa (evita parpadeo)
+      if (selectedVacuna) {
+        const bgFilters = {
+          vacunaId: selectedVacuna,
+          mes: selectedMes,
+          anio: selectedAnio,
+          ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
+        };
+        silentLoadMovimientos(bgFilters);
+      }
 
       if (movimientoAsociado) {
         const establecimiento = establecimientosFiltradosMap.get(movimientoAsociado.establecimientoId);
@@ -1352,13 +1387,14 @@ const Movimientos: React.FC = () => {
 
       onEntregaAdicionalChanged(establecimientoId, selectedVacuna, selectedMes, selectedAnio);
 
-      const filters = {
+      // Sync silenciosa después de crear entrega adicional (evita parpadeo)
+      const bgFilters = {
         vacunaId: selectedVacuna!,
         mes: selectedMes,
         anio: selectedAnio,
         ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
       };
-      await loadMovimientos(filters);
+      await silentLoadMovimientos(bgFilters);
 
       toast.success(`Entrega adicional creada - ${nombreEstablecimiento} - #${siguienteNumero}`);
       await updateStockInRealTime();
@@ -1369,15 +1405,32 @@ const Movimientos: React.FC = () => {
     }
   };
 
-  const handleEliminarEntregaAdicional = async (entregaId: string) => {
-    if (!window.confirm('¿Está seguro de que desea eliminar esta entrega adicional?\n\nEsta acción no se puede deshacer.')) {
-      return;
-    }
+  const handleEliminarEntregaAdicional = (entregaId: string) => {
+    // Buscar info de la entrega para mostrar en el modal
+    const movimientoAsociado = movimientoPorEntregaId.get(entregaId);
+    const entregaInfo = movimientoAsociado?.entregasAdicionales?.find(e => e.id === entregaId);
+    const establecimiento = movimientoAsociado
+      ? establecimientosFiltradosMap.get(movimientoAsociado.establecimientoId)
+      : undefined;
+
+    setEntregaToDelete({
+      id: entregaId,
+      numeroEntrega: entregaInfo?.numeroEntrega ?? 0,
+      establecimientoNombre: establecimiento?.nombre || 'Establecimiento',
+      tieneVale: Boolean(entregaInfo?.tieneValeGenerado),
+      valeNumero: entregaInfo?.valeNumero || undefined,
+    });
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleConfirmDeleteEntrega = async () => {
+    if (!entregaToDelete) return;
 
     try {
-      const movimientoAsociado = movimientoPorEntregaId.get(entregaId);
+      setIsProcessingEntrega(true);
+      const movimientoAsociado = movimientoPorEntregaId.get(entregaToDelete.id);
 
-      await deleteEntregaAdicional(entregaId);
+      await deleteEntregaAdicional(entregaToDelete.id);
 
       if (movimientoAsociado) {
         onEntregaAdicionalChanged(
@@ -1387,14 +1440,34 @@ const Movimientos: React.FC = () => {
           movimientoAsociado.anio
         );
 
-        const establecimiento = establecimientosFiltradosMap.get(movimientoAsociado.establecimientoId);
-        toast.success(`Entrega adicional eliminada - ${establecimiento?.nombre || 'Establecimiento'}`);
+        toast.success(`Entrega adicional eliminada - ${entregaToDelete.establecimientoNombre}`);
       }
 
+      // Cerrar modal inmediatamente para fluidez
+      setShowDeleteConfirmModal(false);
+      setEntregaToDelete(null);
+
+      // Sync silenciosa y stock en background
+      if (selectedVacuna) {
+        const bgFilters = {
+          vacunaId: selectedVacuna,
+          mes: selectedMes,
+          anio: selectedAnio,
+          ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
+        };
+        await silentLoadMovimientos(bgFilters);
+      }
       await updateStockInRealTime();
     } catch (err) {
       toast.error('Error al eliminar entrega adicional');
+    } finally {
+      setIsProcessingEntrega(false);
     }
+  };
+
+  const handleCancelDeleteEntrega = () => {
+    setShowDeleteConfirmModal(false);
+    setEntregaToDelete(null);
   };
 
   // ============================================================================
@@ -1893,6 +1966,16 @@ const Movimientos: React.FC = () => {
             await loadMovimientos(filters);
             await updateStockInRealTime(false);
           }}
+        />
+      )}
+
+      {showDeleteConfirmModal && (
+        <ConfirmacionEliminacionModal
+          isOpen={showDeleteConfirmModal}
+          onClose={handleCancelDeleteEntrega}
+          onConfirm={handleConfirmDeleteEntrega}
+          entrega={entregaToDelete}
+          isProcessing={isProcessingEntrega}
         />
       )}
     </>
