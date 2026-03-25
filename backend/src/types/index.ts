@@ -156,6 +156,36 @@ export interface IPlanificacionAnual {
   updatedAt: Date;
 }
 
+export interface IIciDemidRegistro {
+  id: string;
+  establecimientoId: string;
+  vacunaId: string;
+  anio: number;
+  microRed: string;
+  codigoMed: string;
+  medicamentoOriginal: string;
+  medff?: string | null;
+  medtip?: string | null;
+  medpet?: string | null;
+  medest?: string | null;
+  distribucionMensual: number[];
+  mesesDisponibles: number[];
+  stockFin: number;
+  totalDistribu: number;
+  mesRotacion?: number | null;
+  cpma?: number | null;
+  mesAbastec?: number | null;
+  disponibilidad?: string | null;
+  situacion?: string | null;
+  fecExp?: Date | null;
+  requerimiento?: number | null;
+  ajuste?: number | null;
+  archivoNombre?: string | null;
+  usuarioId?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IMovimientoVacuna {
   id: string;
   establecimientoId: string;
@@ -256,6 +286,45 @@ export interface UpdateMicroredDto {
   descripcion?: string;
   redId?: string;
   estado?: EstadoGeneral;
+}
+
+export interface IciDemidFilters {
+  anio?: number;
+  establecimientoId?: string;
+  vacunaId?: string;
+  centroAcopioId?: string;
+  centroAcopioIds?: string[];
+  page?: number;
+  limit?: number;
+}
+
+export interface IciDemidImportPreview {
+  totalFilasExcel: number;
+  filasValidas: number;
+  vacunasMapeadas: Array<{
+    excel: string;
+    sistema: string;
+  }>;
+  vacunasNoMapeadas: string[];
+  establecimientosMapeados: Array<{
+    excel: string;
+    sistema: string;
+  }>;
+  establecimientosNoMapeados: string[];
+  aniosDetectados: number[];
+  mesesDetectadosPorAnio: Record<string, number[]>;
+  erroresDetalle?: Array<{
+    fila: number;
+    tipo: 'establecimiento' | 'vacuna' | 'fila';
+    valor: string;
+    mensaje: string;
+  }>;
+}
+
+export interface IciDemidImportResult extends IciDemidImportPreview {
+  creados: number;
+  actualizados: number;
+  omitidos: number;
 }
 
 export interface CreateCentroAcopioDto {

@@ -68,6 +68,8 @@ export async function seedRolesAndPermissionsV2() {
       { nombre: 'Ver Planificación', codigo: 'planificacion:read', recurso: 'planificacion', accion: 'read', categoria: 'Planificación', descripcion: 'Ver planificaciones anuales' },
       { nombre: 'Gestionar Planificación', codigo: 'planificacion:write', recurso: 'planificacion', accion: 'write', categoria: 'Planificación', descripcion: 'Crear y editar planificaciones' },
       { nombre: 'Aprobar Planificación', codigo: 'planificacion:aprobar', recurso: 'planificacion', accion: 'aprobar', categoria: 'Planificación', descripcion: 'Aprobar planificaciones para ejecución' },
+      { nombre: 'Ver ICI DEMID', codigo: 'ici_demid:read', recurso: 'ici_demid', accion: 'read', categoria: 'Planificación', descripcion: 'Ver módulo de importación y consulta ICI DEMID' },
+      { nombre: 'Gestionar ICI DEMID', codigo: 'ici_demid:write', recurso: 'ici_demid', accion: 'write', categoria: 'Planificación', descripcion: 'Importar y actualizar registros ICI DEMID' },
 
       // =====================================================
       // KARDEX

@@ -8,6 +8,7 @@ import EstablecimientosModule from '../Establecimientos/EstablecimientosModule';
 import Inventario from '../Inventario/Inventario';
 import Movimientos from '../Movimientos/Movimientos';
 import Planificacion from '../Planificacion/Planificacion';
+import IciDemid from '../IciDemid/IciDemid';
 import Kardex from '../Kardex/Kardex';
 import Reportes from '../Reportes/Reportes';
 import AlertasModule from '../Alertas/AlertasModule';
@@ -71,6 +72,15 @@ const AppRoutes: React.FC = () => {
             <Planificacion />
           </ProtectedRoute>
         } 
+      />
+
+      <Route
+        path="/ici-demid/*"
+        element={
+          <ProtectedRoute>
+            <IciDemid />
+          </ProtectedRoute>
+        }
       />
       
       {/* Kardex */}

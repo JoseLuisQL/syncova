@@ -205,6 +205,7 @@ const getSegmentLabel = (segment: string): string => {
     'inventario': 'Inventario',
     'movimientos': 'Movimientos',
     'planificacion': 'Planificación',
+    'ici-demid': 'ICI DEMID',
     'kardex': 'Kardex',
     'reportes': 'Reportes',
     'alertas': 'Alertas',

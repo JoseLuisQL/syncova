@@ -12,6 +12,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'planificacion:read',
     'planificacion:write',
     'planificacion:aprobar',
+    'ici_demid:read',
+    'ici_demid:write',
     'reportes_inventario:read',
     'reportes_inventario:export',
     'reportes_movimientos:read',
@@ -28,6 +30,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'vacunas:read',
     'movimientos:read',
     'planificacion:read',
+    'ici_demid:read',
   ],
   operador: [
     'dashboard:read',
@@ -35,6 +38,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'vacunas:read',
     'movimientos:read',
     'planificacion:read',
+    'ici_demid:read',
   ],
 };
 

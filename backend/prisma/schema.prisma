@@ -173,6 +173,7 @@ model Establecimiento {
   valesDetalle      ValeDetalle[]
   kardexOrigen      Kardex[]              @relation("KardexOrigen")
   kardexDestino     Kardex[]              @relation("KardexDestino")
+  iciDemidRegistros IciDemidRegistro[]
 
   @@map("establecimientos")
 }
@@ -198,6 +199,7 @@ model Vacuna {
   configuracionesCentro     ConfiguracionJeringaVacunaCentro[]
   programacionesCenares     ProgramacionAnualCenares[] @relation("ProgramacionCenaresVacuna")
   stocksInicialesMensuales  StockInicialMensual[]
+  iciDemidRegistros         IciDemidRegistro[]
 
   @@map("vacunas")
 }
@@ -290,6 +292,7 @@ model Usuario {
   vales             ValeEntrega[]
   kardex            Kardex[]
   alertas           Alerta[]
+  iciDemidRegistros IciDemidRegistro[]
 
   @@index([roleId], name: "idx_usuario_role")
   @@index([centroAcopioId], name: "idx_usuario_centro_acopio")
@@ -309,6 +312,46 @@ model UsuarioCentroAcopio {
   @@index([usuarioId], name: "idx_usuario_centro_usuario")
   @@index([centroAcopioId], name: "idx_usuario_centro_centro")
   @@map("usuarios_centros_acopio")
+}
+
+model IciDemidRegistro {
+  id                   String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  establecimientoId    String          @map("establecimiento_id") @db.Uuid
+  vacunaId             String          @map("vacuna_id") @db.Uuid
+  anio                 Int
+  microRed             String          @map("micro_red") @db.VarChar(255)
+  codigoMed            String          @map("codigo_med") @db.VarChar(50)
+  medicamentoOriginal  String          @map("medicamento_original") @db.VarChar(255)
+  medff                String?         @db.VarChar(50)
+  medtip               String?         @db.VarChar(50)
+  medpet               String?         @db.VarChar(50)
+  medest               String?         @db.VarChar(50)
+  distribucionMensual  Int[]           @default([]) @map("distribucion_mensual")
+  mesesDisponibles     Int[]           @default([]) @map("meses_disponibles")
+  stockFin             Int             @default(0) @map("stock_fin")
+  totalDistribu        Int             @default(0) @map("total_distribu")
+  mesRotacion          Int?            @map("mes_rotacion")
+  cpma                 Decimal?        @db.Decimal(12, 4)
+  mesAbastec           Decimal?        @map("mes_abastec") @db.Decimal(12, 4)
+  disponibilidad       String?         @db.VarChar(100)
+  situacion            String?         @db.VarChar(100)
+  fecExp               DateTime?       @map("fec_exp") @db.Date
+  requerimiento        Decimal?        @db.Decimal(12, 4)
+  ajuste               Decimal?        @db.Decimal(12, 4)
+  archivoNombre        String?         @map("archivo_nombre") @db.VarChar(255)
+  usuarioId            String?         @map("usuario_id") @db.Uuid
+  createdAt            DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  establecimiento      Establecimiento @relation(fields: [establecimientoId], references: [id], onDelete: Cascade)
+  vacuna               Vacuna          @relation(fields: [vacunaId], references: [id], onDelete: Restrict)
+  usuario              Usuario?        @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+
+  @@unique([establecimientoId, vacunaId, anio], name: "uk_ici_demid_establecimiento_vacuna_anio")
+  @@index([anio], name: "idx_ici_demid_anio")
+  @@index([establecimientoId], name: "idx_ici_demid_establecimiento")
+  @@index([vacunaId], name: "idx_ici_demid_vacuna")
+  @@map("ici_demid_registros")
 }
 
 model PlanificacionAnual {

@@ -23,6 +23,7 @@ export const MODULE_PERMISSIONS: Record<string, string[]> = {
   ],
   movimientos: ['movimientos:read', 'movimientos:write', 'movimientos:anular'],
   planificacion: ['planificacion:read', 'planificacion:write', 'planificacion:aprobar'],
+  'ici-demid': ['ici_demid:read', 'ici_demid:write', 'planificacion:read', 'planificacion:write'],
   kardex: ['kardex:read', 'kardex:export'],
   reportes: [
     'reportes_inventario:read', 'reportes_inventario:export',
@@ -55,7 +56,7 @@ export const MODULE_PERMISSIONS: Record<string, string[]> = {
 };
 
 const ROLE_MODULE_OVERRIDES: Partial<Record<'administrador' | 'coordinador' | 'responsable_acopio' | 'operador', string[]>> = {
-  responsable_acopio: ['dashboard', 'movimientos', 'planificacion'],
+  responsable_acopio: ['dashboard', 'movimientos', 'planificacion', 'ici-demid'],
 };
 
 /**

@@ -28,6 +28,7 @@ import rolesRoutes from '@/routes/roles';
 import permissionsRoutes from '@/routes/permissions';
 import alertasRoutes from '@/routes/alertas';
 import dashboardRoutes from '@/routes/dashboard';
+import iciDemidRoutes from '@/routes/ici-demid';
 
 /**
  * Función principal para inicializar el servidor
@@ -75,6 +76,7 @@ async function startServer(): Promise<void> {
             'programacion-anual-cenares': '/api/programacion-anual-cenares',
             alertas: '/api/alertas',
             dashboard: '/api/dashboard',
+            'ici-demid': '/api/ici-demid',
           },
         },
         timestamp: new Date().toISOString(),
@@ -110,6 +112,7 @@ async function startServer(): Promise<void> {
     app.use('/api/programacion-anual-cenares', programacionAnualCenaresRoutes);
     app.use('/api/alertas', alertasRoutes);
     app.use('/api/dashboard', dashboardRoutes);
+    app.use('/api/ici-demid', iciDemidRoutes);
 
     // Configurar manejo de errores (debe ir al final)
     setupErrorHandling(app);
