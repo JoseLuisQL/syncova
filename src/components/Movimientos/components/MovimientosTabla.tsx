@@ -834,7 +834,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
   };
 
   return (
-    <section className={`${COMPONENT_STYLES.panel} relative flex h-full flex-col`} aria-label="Tabla de movimientos">
+    <section className="relative flex h-full flex-1 flex-col bg-transparent" aria-label="Tabla de movimientos">
       <button
         type="button"
         onClick={onOpenColumnSettings}

@@ -267,7 +267,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
   const totalGeneral = calcularTotalGeneral();
 
   return (
-    <section className={`${COMPONENT_STYLES.panel} relative flex h-full flex-col`} aria-label="Tabla de planificación">
+    <section className="relative flex h-full flex-1 flex-col bg-transparent" aria-label="Tabla de planificación">
       <DataTable
         isLoading={isLoading}
         loadingMessage="Cargando planificación anual..."

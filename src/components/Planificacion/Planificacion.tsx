@@ -955,9 +955,9 @@ const Planificacion: React.FC = () => {
   const isPageLoading = isLoading || isContextLoading;
 
   return (
-    <main className="flex h-[calc(100vh-4rem)] flex-col bg-gradient-to-br from-slate-50 via-white to-teal-50/30">
-      <div className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col gap-1.5 overflow-hidden px-2 py-2 sm:gap-2 sm:px-4 sm:py-3 lg:px-8">
-        <section className="flex flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl">
+    <main className="flex h-[calc(100vh-4rem)] flex-col bg-white">
+      <div className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3 lg:px-8">
+        <section className="flex flex-1 flex-col overflow-hidden bg-white">
           <div className="shrink-0">
             <PlanificacionHeader
               isReadOnly={isReadOnlyMode}
