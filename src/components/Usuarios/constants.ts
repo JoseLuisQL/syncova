@@ -168,7 +168,7 @@ export const COMPONENT_STYLES = {
   },
 
   table: {
-    container: 'bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden',
+    container: 'bg-white rounded-none border border-gray-100 shadow-sm overflow-hidden',
     header: 'bg-gradient-to-r from-gray-50 to-gray-100',
     headerCell: 'px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider',
     row: 'hover:bg-teal-50/30 transition-colors duration-150 border-b border-gray-100',

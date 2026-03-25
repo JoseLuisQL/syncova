@@ -12,7 +12,6 @@ import {
   CountBadge,
   EmptyState,
   ErrorAlert,
-  StatsGrid,
   StatusBadge,
 } from '../Establecimientos/components';
 import {
@@ -331,8 +330,6 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
 
       <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
         <div className="space-y-4">
-          <StatsGrid stats={stats} isLoading={loading} />
-
           <FilterBar
             searchValue={searchTerm}
             onSearchChange={setSearchTerm}

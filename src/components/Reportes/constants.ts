@@ -202,7 +202,7 @@ export const COMPONENT_STYLES = {
   },
 
   table: {
-    container: 'overflow-hidden rounded-[24px] border border-slate-200/90 bg-white shadow-sm',
+    container: 'overflow-hidden rounded-none border border-slate-200/90 bg-white shadow-sm',
     header: 'bg-slate-50/95',
     headerCell: 'px-4 py-3 text-left text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate-500',
     row: 'transition hover:bg-teal-50/45',

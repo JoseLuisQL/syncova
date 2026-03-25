@@ -5,7 +5,6 @@ import { KardexExportConfig, KardexExportService } from '../../services/KardexEx
 import { KardexFilters } from '../../services/KardexService';
 import { COMPONENT_STYLES, KARDEX_FILTER_DEBOUNCE } from './constants';
 import {
-  KardexEstadisticas,
   KardexFiltros,
   KardexHeader,
   KardexPaginacion,
@@ -346,8 +345,6 @@ const Kardex: React.FC = () => {
             }))}
           onLimpiarFiltros={handleClearFilters}
         />
-
-        <KardexEstadisticas estadisticas={estadisticas} loading={loadingEstadisticas} />
 
         <KardexTabla
           movimientos={movimientos}

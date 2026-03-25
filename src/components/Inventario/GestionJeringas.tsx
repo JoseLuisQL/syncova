@@ -8,7 +8,6 @@ import {
   ActionButtons,
   EmptyState,
   ErrorAlert,
-  KeyValueGrid,
   StatsGrid,
   StatusBadge,
 } from './components/SharedComponents';
@@ -295,8 +294,6 @@ const GestionJeringas: React.FC = () => {
 
       <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
         <div className="space-y-4">
-          <StatsGrid stats={stats} isLoading={isLoading} />
-
           <FilterBar
             searchValue={searchValue}
             onSearchChange={setSearchValue}

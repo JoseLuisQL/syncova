@@ -8,7 +8,6 @@ import {
   ActionButtons,
   EmptyState,
   ErrorAlert,
-  StatsGrid,
   StatusBadge,
   TipoBadge,
 } from './components';
@@ -277,8 +276,6 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
 
       <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
         <div className="space-y-4">
-          <StatsGrid stats={stats} isLoading={isLoading} />
-
           <FilterBar
             searchValue={searchTerm}
             onSearchChange={setSearchTerm}

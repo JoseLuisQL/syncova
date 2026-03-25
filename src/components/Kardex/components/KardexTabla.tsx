@@ -241,7 +241,7 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
       <div className="border-b border-slate-200/90 px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+          <div className="flex h-11 w-11 items-center justify-center rounded-none bg-teal-50 text-teal-700">
               <FileText className="h-5 w-5" />
             </div>
             <div>
@@ -251,7 +251,7 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
               </p>
             </div>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
+          <div className="inline-flex items-center gap-2 rounded-none bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
             <Clock className="h-4 w-4 text-slate-400" />
             <span>Vista compacta con entrada, salida y saldo.</span>
           </div>
@@ -314,19 +314,19 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
                 </div>
 
                 <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+                  <div className="rounded-none border border-slate-200 bg-slate-50/70 p-3">
                     <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Entrada</p>
                     <p className="mt-2 font-mono text-base font-semibold text-emerald-700">
                       {entrada ? entrada.toLocaleString() : '—'}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+                  <div className="rounded-none border border-slate-200 bg-slate-50/70 p-3">
                     <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Salida</p>
                     <p className="mt-2 font-mono text-base font-semibold text-rose-700">
                       {salida ? salida.toLocaleString() : '—'}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+                  <div className="rounded-none border border-slate-200 bg-slate-50/70 p-3">
                     <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Saldo</p>
                     <p className="mt-2 font-mono text-base font-semibold text-slate-900">
                       {movimiento.saldoActual.toLocaleString()}

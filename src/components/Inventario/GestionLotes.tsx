@@ -5,7 +5,6 @@ import {
   ActionButtons,
   EmptyState,
   ExpiryBadge,
-  StatsGrid,
   StatusBadge,
   StockProgress,
 } from './components/SharedComponents';
@@ -190,8 +189,6 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
 
   return (
     <div className="space-y-4">
-      <StatsGrid stats={statsData} isLoading={isLoadingStats} />
-
       <FilterBar
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
