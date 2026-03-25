@@ -77,7 +77,7 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/ici-demid/*"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRoles={['administrador']}>
             <IciDemid />
           </ProtectedRoute>
         }

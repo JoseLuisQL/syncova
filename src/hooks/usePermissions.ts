@@ -23,7 +23,7 @@ export const MODULE_PERMISSIONS: Record<string, string[]> = {
   ],
   movimientos: ['movimientos:read', 'movimientos:write', 'movimientos:anular'],
   planificacion: ['planificacion:read', 'planificacion:write', 'planificacion:aprobar'],
-  'ici-demid': ['ici_demid:read', 'ici_demid:write', 'planificacion:read', 'planificacion:write'],
+  'ici-demid': ['ici_demid:read', 'ici_demid:write'],
   kardex: ['kardex:read', 'kardex:export'],
   reportes: [
     'reportes_inventario:read', 'reportes_inventario:export',
@@ -56,7 +56,7 @@ export const MODULE_PERMISSIONS: Record<string, string[]> = {
 };
 
 const ROLE_MODULE_OVERRIDES: Partial<Record<'administrador' | 'coordinador' | 'responsable_acopio' | 'operador', string[]>> = {
-  responsable_acopio: ['dashboard', 'movimientos', 'planificacion', 'ici-demid'],
+  responsable_acopio: ['dashboard', 'movimientos', 'planificacion'],
 };
 
 /**
@@ -144,6 +144,10 @@ export const usePermissions = () => {
    * Verifica si el usuario puede acceder a un módulo del menú
    */
   const canAccessModule = useCallback((moduleId: string): boolean => {
+    if (user?.rol === 'administrador') {
+      return true;
+    }
+
     const requiredPermissions = MODULE_PERMISSIONS[moduleId];
     const roleOverride = user?.rol ? ROLE_MODULE_OVERRIDES[user.rol] : undefined;
     if (roleOverride) {

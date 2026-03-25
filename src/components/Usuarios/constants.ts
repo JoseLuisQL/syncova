@@ -291,6 +291,8 @@ export const DEFAULT_ROLE_ASSIGNABLE_PERMISSION_CODES: Record<string, string[] |
     'planificacion:read',
     'planificacion:write',
     'planificacion:aprobar',
+    'ici_demid:read',
+    'ici_demid:write',
     'reportes_inventario:read',
     'reportes_inventario:export',
     'reportes_movimientos:read',
