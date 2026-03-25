@@ -530,6 +530,7 @@ export interface MovimientoConRelaciones extends MovimientoVacuna {
 export interface MovimientoCalculado extends MovimientoConRelaciones {
   totalSaldo: number;
   saldo: number;
+  ici?: number;
   stock: number;
   promedioConsumo: number;
   disponibilidad: number;

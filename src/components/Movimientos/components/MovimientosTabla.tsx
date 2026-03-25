@@ -26,6 +26,7 @@ interface MovimientosTablaProps {
     salida: number;
     transSalida: number;
     saldo: number;
+    ici?: number;
     entrega: number;
     stock: number;
   };
@@ -175,6 +176,14 @@ const AvailabilityBadge: React.FC<{ value: number }> = memo(({ value }) => {
 
 AvailabilityBadge.displayName = 'AvailabilityBadge';
 
+const IciPill: React.FC<{ value: number }> = memo(({ value }) => (
+  <span className="inline-flex min-w-[4.8rem] justify-center rounded-xl border border-amber-200 bg-amber-50 px-2.5 py-2 text-sm font-semibold text-amber-800 tabular-nums">
+    {value.toLocaleString()}
+  </span>
+));
+
+IciPill.displayName = 'IciPill';
+
 // ============================================================================
 // MOBILE METRIC ROW
 // ============================================================================
@@ -274,6 +283,11 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
     visibleColumns.saldo ? (
       <MobileMetricRow key="saldo" label="Saldo">
         <MetricPill value={movimiento.saldo} tone="emerald" />
+      </MobileMetricRow>
+    ) : null,
+    visibleColumns.ici ? (
+      <MobileMetricRow key="ici" label="ICI">
+        <IciPill value={movimiento.ici ?? 0} />
       </MobileMetricRow>
     ) : null,
     visibleColumns.stock ? (
@@ -541,6 +555,11 @@ const MobileTotalesSummary: React.FC<{
             Saldo: {totalesGenerales.saldo.toLocaleString()}
           </span>
         ) : null}
+        {visibleColumns.ici ? (
+          <span className="rounded-lg bg-amber-50 px-2 py-1 text-[0.65rem] font-semibold text-amber-700">
+            ICI: {(totalesGenerales.ici ?? 0).toLocaleString()}
+          </span>
+        ) : null}
         {visibleColumns.stock ? (
           <span className="rounded-lg bg-cyan-50 px-2 py-1 text-[0.65rem] font-semibold text-cyan-700">
             Stock: {totalesGenerales.stock.toLocaleString()}
@@ -767,6 +786,8 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         return renderEditableInput(movimiento, 'transSalida', movimiento.transSalida);
       case 'saldo':
         return <MetricPill value={movimiento.saldo} tone="emerald" />;
+      case 'ici':
+        return <IciPill value={movimiento.ici ?? 0} />;
       case 'entrega':
         return renderEntregaInput(movimiento);
       case 'stock':
@@ -798,6 +819,8 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         return <MetricPill value={totalesGenerales.transSalida} tone="neutral" />;
       case 'saldo':
         return <MetricPill value={totalesGenerales.saldo} tone="emerald" />;
+      case 'ici':
+        return <IciPill value={totalesGenerales.ici ?? 0} />;
       case 'entrega':
         return <MetricPill value={totalesGenerales.entrega} tone="teal" />;
       case 'stock':

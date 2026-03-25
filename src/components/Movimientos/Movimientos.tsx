@@ -41,6 +41,7 @@ import {
   MovimientosColumnSettingsModal,
 } from './components';
 import { AjusteEntregasService } from '../../services/ajusteEntregasService';
+import IciDemidService from '../../services/iciDemidService';
 
 interface StockInfo {
   stockInicialHistorico: number | null;
@@ -232,6 +233,7 @@ const Movimientos: React.FC = () => {
   const [entregaToDelete, setEntregaToDelete] = useState<EntregaToDelete | null>(null);
   const [showColumnSettingsModal, setShowColumnSettingsModal] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<VisibleColumnsState>(() => getStoredVisibleColumns());
+  const [iciValuesByEstablecimiento, setIciValuesByEstablecimiento] = useState<Record<string, number>>({});
 
   // Estado para fila seleccionada (persistente al cambiar pestañas/modales)
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
@@ -362,6 +364,31 @@ const Movimientos: React.FC = () => {
     return map;
   }, [movimientos]);
 
+  const cargarValoresIci = useCallback(async () => {
+    if (!selectedVacuna || !selectedAnio) {
+      setIciValuesByEstablecimiento({});
+      return;
+    }
+
+    try {
+      const response = await IciDemidService.getAll({
+        vacunaId: selectedVacuna,
+        anio: selectedAnio,
+        limit: 5000,
+      });
+
+      const values = response.registros.reduce<Record<string, number>>((acc, registro) => {
+        acc[registro.establecimientoId] = registro.distribucionMensual[selectedMes - 1] ?? 0;
+        return acc;
+      }, {});
+
+      setIciValuesByEstablecimiento(values);
+    } catch (error) {
+      console.error('Error al cargar valores ICI para movimientos:', error);
+      setIciValuesByEstablecimiento({});
+    }
+  }, [selectedAnio, selectedMes, selectedVacuna]);
+
   const datosTabla = useMemo(() => {
     return establecimientosFiltrados.map(establecimiento => {
       const movimientoExistente = movimientosCalculadosMap.get(establecimiento.id);
@@ -384,6 +411,7 @@ const Movimientos: React.FC = () => {
           entrega,
           totalSaldo,
           saldo,
+          ici: iciValuesByEstablecimiento[establecimiento.id] ?? 0,
           stock,
           establecimiento,
           tieneMovimiento: true
@@ -411,6 +439,7 @@ const Movimientos: React.FC = () => {
           entrega,
           totalSaldo,
           saldo,
+          ici: iciValuesByEstablecimiento[establecimiento.id] ?? 0,
           stock,
           promedioConsumo: 0,
           disponibilidad: 0,
@@ -427,7 +456,7 @@ const Movimientos: React.FC = () => {
         } as MovimientoCalculado & { tieneMovimiento: boolean };
       }
     });
-  }, [establecimientosFiltrados, movimientosCalculadosMap, selectedVacuna, selectedMes, selectedAnio, vacunaSeleccionada, getCurrentValue]);
+  }, [establecimientosFiltrados, movimientosCalculadosMap, selectedVacuna, selectedMes, selectedAnio, vacunaSeleccionada, getCurrentValue, iciValuesByEstablecimiento]);
 
   const datosTablaMap = useMemo(
     () => new Map(datosTabla.map((movimiento) => [movimiento.establecimientoId, movimiento])),
@@ -444,6 +473,7 @@ const Movimientos: React.FC = () => {
         salida: totales.salida + movimiento.salida,
         transSalida: totales.transSalida + movimiento.transSalida,
         saldo: totales.saldo + movimiento.saldo,
+        ici: (totales.ici ?? 0) + (movimiento.ici ?? 0),
         entrega: totales.entrega + entregaTotal,
         stock: totales.stock + movimiento.stock,
       };
@@ -454,6 +484,7 @@ const Movimientos: React.FC = () => {
       salida: 0,
       transSalida: 0,
       saldo: 0,
+      ici: 0,
       entrega: 0,
       stock: 0,
     });
@@ -551,6 +582,10 @@ const Movimientos: React.FC = () => {
       loadMovimientos(filters);
     }
   }, [selectedVacuna, selectedMes, selectedAnio, selectedCentroAcopio]);
+
+  useEffect(() => {
+    cargarValoresIci();
+  }, [cargarValoresIci]);
 
   useEffect(() => {
     if (isReadOnlyMode) {

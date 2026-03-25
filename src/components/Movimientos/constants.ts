@@ -228,6 +228,7 @@ export const TABLA_COLUMNAS = [
   { key: 'salida', label: 'Salida', align: 'center' as const, width: 'w-[120px] min-w-[120px]', editable: true },
   { key: 'transSalida', label: 'Trans. Sal.', align: 'center' as const, width: 'w-[120px] min-w-[120px]', editable: true },
   { key: 'saldo', label: 'Saldo', align: 'center' as const, width: 'w-[96px] min-w-[96px]' },
+  { key: 'ici', label: 'ICI', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
   { key: 'entrega', label: 'Entrega', align: 'center' as const, width: 'w-[220px] min-w-[220px]', editable: true },
   { key: 'stock', label: 'Stock', align: 'center' as const, width: 'w-[96px] min-w-[96px]' },
   { key: 'promedioConsumo', label: 'Promedio', align: 'center' as const, width: 'w-[96px] min-w-[96px]' },
@@ -244,7 +245,7 @@ export type VisibleColumnsState = Record<ColumnaConfigurableKey, boolean>;
 
 export const DEFAULT_VISIBLE_COLUMNS: VisibleColumnsState = COLUMNAS_CONFIGURABLES.reduce(
   (acc, column) => {
-    acc[column.key] = true;
+    acc[column.key] = column.key === 'ici' ? false : true;
     return acc;
   },
   {} as VisibleColumnsState,
