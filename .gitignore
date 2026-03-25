@@ -23,4 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
-.factory/skills/*
+.factory/*
+.agents/*
+.claude
+skills/
