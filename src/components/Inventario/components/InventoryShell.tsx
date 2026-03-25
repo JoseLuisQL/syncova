@@ -35,9 +35,9 @@ const InventoryShell: React.FC<InventoryShellProps> = ({ activeSection, children
   );
 
   return (
-    <main className={COMPONENT_STYLES.pageBackground}>
+    <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
-        <section className={`${COMPONENT_STYLES.nav.shell} overflow-hidden`}>
+        <section className="overflow-hidden bg-transparent">
           <div className="border-b border-slate-200/90 px-4 py-5 sm:px-6 lg:px-8">
             <div className="flex items-start gap-4">
               <div className="flex items-start gap-4">

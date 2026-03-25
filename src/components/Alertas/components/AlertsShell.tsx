@@ -19,9 +19,9 @@ const AlertsShell: React.FC<AlertsShellProps> = ({
   const { navigateToModule } = useAppNavigation();
 
   return (
-    <main className={COMPONENT_STYLES.pageBackground}>
+    <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1500px] flex-col gap-3">
-        <section className={`${COMPONENT_STYLES.nav.shell} overflow-hidden`}>
+        <section className="overflow-hidden bg-transparent">
           <div className="border-b border-slate-200/90 px-4 py-4 sm:px-5 lg:px-6">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="flex min-w-0 items-start gap-3 sm:gap-4">

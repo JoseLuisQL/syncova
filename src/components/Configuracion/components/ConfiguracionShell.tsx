@@ -22,9 +22,9 @@ const ConfiguracionShell: React.FC<ConfiguracionShellProps> = ({
   children,
 }) => {
   return (
-    <main className="min-h-full bg-slate-50">
+    <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1120px] flex-col gap-3">
-        <section className="overflow-hidden rounded-[20px] border border-slate-200 bg-white">
+        <section className="overflow-hidden bg-transparent">
           <div className="border-b border-slate-200 px-4 py-4 sm:px-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
@@ -75,7 +75,7 @@ const ConfiguracionShell: React.FC<ConfiguracionShellProps> = ({
           </nav>
         </section>
 
-        <section className="rounded-[20px] border border-slate-200 bg-white p-4 sm:p-5">
+        <section className="bg-transparent p-4 sm:p-5">
           <div className="space-y-3">
             {children}
           </div>

@@ -401,7 +401,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
   ]);
 
   return (
-    <section aria-label="Filtros del kardex" className={COMPONENT_STYLES.panel}>
+    <section aria-label="Filtros del kardex" className="bg-transparent">
       <div className="space-y-4 p-4">
         <div className="grid gap-3 xl:grid-cols-12">
           <div className="xl:col-span-5">

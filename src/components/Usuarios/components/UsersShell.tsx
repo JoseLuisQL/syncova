@@ -29,9 +29,9 @@ const UsersShell: React.FC<UsersShellProps> = ({ activeSection, children }) => {
   const { navigateToModule } = useAppNavigation();
 
   return (
-    <main className={COMPONENT_STYLES.pageBackground}>
+    <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
-        <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm">
+        <section className="overflow-hidden bg-transparent">
           <div className="border-b border-slate-200/90 px-4 py-5 sm:px-6 lg:px-8">
             <div className="flex items-start gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-600 shadow-lg shadow-teal-500/20">

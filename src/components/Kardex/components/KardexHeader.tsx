@@ -24,7 +24,7 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
   const isRefreshing = loading || loadingEstadisticas || loadingFiltros;
 
   return (
-    <section className={`${COMPONENT_STYLES.surface} overflow-hidden`}>
+    <section className="overflow-hidden bg-transparent">
       <div className="border-b border-slate-200/90 px-4 py-5 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-start gap-4">

@@ -221,9 +221,9 @@ const IciDemid: React.FC = () => {
   };
 
   return (
-    <div className={`${COMPONENT_STYLES.pageBackground} h-[calc(100vh-4rem)] overflow-hidden p-4 md:h-[calc(100vh-5rem)] md:p-6`}>
+    <div className="h-[calc(100vh-4rem)] overflow-hidden bg-white p-4 md:h-[calc(100vh-5rem)] md:p-6">
       <div className="mx-auto flex h-full max-w-[1800px] flex-col gap-4 overflow-hidden">
-        <section className={COMPONENT_STYLES.panel}>
+        <section className="bg-transparent">
           <div className="border-b border-slate-100 px-4 py-4">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
               <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -308,7 +308,7 @@ const IciDemid: React.FC = () => {
           </div>
         </section>
 
-        <section className={`${COMPONENT_STYLES.panel} relative flex min-h-0 flex-1 flex-col overflow-hidden`}>
+        <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent">
           <DataTable isLoading={isLoading} loadingMessage="Cargando registros ICI DEMID..." skeletonRows={8} skeletonColumns={16} loadingVariant="table">
             <div className="hidden min-h-0 flex-1 overflow-auto md:block">
               <table className="w-max min-w-full table-auto divide-y divide-slate-200">

@@ -259,7 +259,7 @@ const Kardex: React.FC = () => {
   const isExportEnabled = Boolean(uiFilters.fechaInicio && uiFilters.fechaFin) && !exportando;
 
   return (
-    <main className={COMPONENT_STYLES.pageBackground}>
+    <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
         <div aria-live="polite" className="sr-only">
           {liveRegionMessage}
@@ -359,7 +359,7 @@ const Kardex: React.FC = () => {
           onVerDetalle={handleVerDetalle}
         />
 
-        <section className={COMPONENT_STYLES.panel}>
+        <section className="bg-transparent">
           <KardexPaginacion
             currentPage={currentPage}
             totalPages={totalPages}

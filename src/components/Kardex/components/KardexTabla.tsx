@@ -237,7 +237,7 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
   );
 
   return (
-    <section className={`${COMPONENT_STYLES.surface} overflow-hidden`}>
+    <section className="overflow-hidden bg-transparent">
       <div className="border-b border-slate-200/90 px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
