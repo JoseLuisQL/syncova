@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { Archive, Syringe } from 'lucide-react';
+import { Archive, Syringe } from '@phosphor-icons/react';
 import { Jeringa, Lote, LoteJeringa, LoteJeringaStats, LoteVacunaStats, Vacuna } from '../../types';
 import {
   ActionButtons,
@@ -18,7 +18,7 @@ import {
   SelectInput,
   TextArea,
   TextInput,
-} from './components/ModalComponents';
+} from '../ui/ModalElements';
 import { COMPONENT_STYLES, FILTER_OPTIONS } from './constants';
 
 interface GestionLotesProps {
@@ -90,36 +90,7 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
     });
   }, [filterEstado, filterProducto, filterVencimiento, lotes, searchTerm, tipo]);
 
-  const statsData = useMemo(() => {
-    const base = externalStats || {
-      total: lotes.length,
-      disponibles: lotes.filter((item) => item.estado === 'disponible').length,
-      agotados: lotes.filter((item) => item.estado === 'agotado').length,
-      vencidos: lotes.filter((item) => item.estado === 'vencido').length,
-      porVencer: lotes.filter((item) => {
-        if (!('fechaVencimiento' in item) || !item.fechaVencimiento) return false;
-        const days = Math.ceil((item.fechaVencimiento.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-        return days > 0 && days <= 30;
-      }).length,
-      stockTotal: lotes.reduce((total, item) => total + item.cantidadActual, 0),
-    };
 
-    const Icon = tipo === 'vacuna' ? Archive : Syringe;
-
-    return tipo === 'vacuna'
-      ? [
-          { key: 'total', label: 'Total lotes', value: base.total, icon: Icon, color: 'primary' as const },
-          { key: 'disponibles', label: 'Disponibles', value: base.disponibles, icon: Icon, color: 'success' as const },
-          { key: 'porVencer', label: 'Por vencer', value: (base as LoteVacunaStats).porVencer || 0, icon: Icon, color: 'warning' as const },
-          { key: 'vencidos', label: 'Vencidos', value: (base as LoteVacunaStats).vencidos || 0, icon: Icon, color: 'danger' as const },
-        ]
-      : [
-          { key: 'total', label: 'Total lotes', value: base.total, icon: Icon, color: 'primary' as const },
-          { key: 'disponibles', label: 'Disponibles', value: base.disponibles, icon: Icon, color: 'success' as const },
-          { key: 'agotados', label: 'Agotados', value: base.agotados, icon: Icon, color: 'neutral' as const },
-          { key: 'stockTotal', label: 'Stock total', value: base.stockTotal, icon: Icon, color: 'secondary' as const },
-        ];
-  }, [externalStats, lotes, tipo]);
 
   const filters = useMemo(() => {
     const filterList = [
@@ -127,7 +98,7 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
         id: `${tipo}-estado`,
         label: 'Estado',
         value: filterEstado,
-        options: FILTER_OPTIONS.estadoLote,
+        options: [...FILTER_OPTIONS.estadoLote],
         onChange: setFilterEstado,
       },
       {
@@ -147,7 +118,7 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
         id: `${tipo}-vencimiento`,
         label: 'Vencimiento',
         value: filterVencimiento,
-        options: FILTER_OPTIONS.vencimiento,
+        options: [...FILTER_OPTIONS.vencimiento],
         onChange: setFilterVencimiento,
       });
     }
@@ -283,7 +254,7 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
             loadingMessage={`Cargando lotes de ${tipo === 'vacuna' ? 'vacunas' : 'jeringas'}...`}
             skeletonRows={4}
             loadingVariant="cards"
-          />
+          ><></></DataTable>
         ) : filteredLotes.length === 0 ? (
           <div className={COMPONENT_STYLES.panel}>
             <EmptyState

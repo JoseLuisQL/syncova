@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { Warning, ArrowsClockwise, House } from '@phosphor-icons/react';
 
 interface Props {
   children: ReactNode;
@@ -65,7 +65,7 @@ class ValesErrorBoundary extends Component<Props, State> {
           <div className="max-w-md w-full bg-white rounded-xl border border-red-200 shadow-lg p-6 text-center">
             {/* Icono de error */}
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <Warning weight="duotone" className="h-8 w-8 text-red-600" />
             </div>
 
             {/* Título */}
@@ -104,7 +104,7 @@ class ValesErrorBoundary extends Component<Props, State> {
                 onClick={this.handleRetry}
                 className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <ArrowsClockwise className="h-4 w-4 mr-2" />
                 Intentar Nuevamente
               </button>
               
@@ -112,7 +112,7 @@ class ValesErrorBoundary extends Component<Props, State> {
                 onClick={this.handleGoHome}
                 className="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
-                <Home className="h-4 w-4 mr-2" />
+                <House className="h-4 w-4 mr-2" />
                 Recargar Página
               </button>
             </div>
@@ -163,7 +163,7 @@ export const ValesErrorFallback: React.FC<{
   message?: string;
 }> = ({ error, onRetry, message = "Ha ocurrido un error" }) => (
   <div className="p-6 text-center">
-    <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+    <Warning weight="duotone" className="h-12 w-12 text-red-500 mx-auto mb-4" />
     <h3 className="text-lg font-medium text-gray-900 mb-2">{message}</h3>
     {error && (
       <p className="text-sm text-gray-600 mb-4">{error.message}</p>
@@ -173,7 +173,7 @@ export const ValesErrorFallback: React.FC<{
         onClick={onRetry}
         className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
       >
-        <RefreshCw className="h-4 w-4 mr-2" />
+        <ArrowsClockwise className="h-4 w-4 mr-2" />
         Reintentar
       </button>
     )}

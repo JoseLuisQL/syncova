@@ -1,20 +1,20 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  AlertCircle,
-  CheckCircle2,
-  FileSpreadsheet,
+  WarningCircle,
+  CheckCircle,
+  FileXls,
   Info,
-  Loader2,
+  SpinnerGap,
   Package,
-  RefreshCw,
-  Save,
+  ArrowsClockwise,
+  FloppyDisk,
   Syringe,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { toast } from 'react-hot-toast';
 import { ProgramacionAnualCenaresService } from '../../../../services/programacionAnualCenaresService';
 import { ProgramacionSeguimientoAnualExportService } from '../../../../services/programacionSeguimientoAnualExportService';
 import { COLORS, COMPONENT_STYLES } from '../../constants';
-import { ActionConfirmationDialog } from '..';
+import ActionConfirmationDialog from '../ActionConfirmationDialog';
 
 interface TableItem {
   id: string;
@@ -63,10 +63,10 @@ const TRIMESTRE_LABELS = {
 };
 
 const quarterTone = {
-  q1: 'bg-teal-600',
-  q2: 'bg-cyan-600',
-  q3: 'bg-emerald-600',
-  q4: 'bg-sky-600',
+  q1: 'bg-zinc-50 text-zinc-900',
+  q2: 'bg-zinc-50 text-zinc-900',
+  q3: 'bg-zinc-50 text-zinc-900',
+  q4: 'bg-zinc-50 text-zinc-900',
 } as const;
 
 const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todos' }) => {
@@ -217,7 +217,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
     if (tempValues[key] !== undefined) return tempValues[key];
 
     const item = filteredItems[itemIndex];
-    return item?.programacion?.[trimestre as keyof typeof item.programacion] || 0;
+    return (item?.programacion?.[trimestre as 'q1'|'q2'|'q3'|'q4'] as number) || 0;
   };
 
   const isPending = (itemIndex: number, trimestre: string) => pendingChanges[getFieldKey(itemIndex, trimestre)] || false;
@@ -263,10 +263,10 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
       <div className={COMPONENT_STYLES.card}>
         <div className="flex flex-col items-center justify-center py-16">
           <div className={`mb-4 rounded-full bg-gradient-to-br ${COLORS.primary.gradient} p-4`}>
-            <Loader2 className="h-6 w-6 animate-spin text-white" />
+            <SpinnerGap weight="bold" className="h-6 w-6 animate-spin text-white" />
           </div>
-          <p className="font-medium text-slate-900">Cargando programación {anio}...</p>
-          <p className="mt-2 text-sm text-slate-500">Preparando el tablero trimestral y los saldos.</p>
+          <p className="font-medium text-zinc-900">Cargando programación {anio}...</p>
+          <p className="mt-2 text-sm text-zinc-500">Preparando el tablero trimestral y los saldos.</p>
         </div>
       </div>
     );
@@ -277,12 +277,12 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
       <div className={COMPONENT_STYLES.card}>
         <div className="flex flex-col items-center justify-center py-16">
           <div className="mb-4 rounded-full bg-rose-100 p-4">
-            <AlertCircle className="h-6 w-6 text-rose-600" />
+            <WarningCircle weight="duotone" className="h-6 w-6 text-rose-600" />
           </div>
-          <p className="mb-2 font-medium text-slate-900">Error al cargar datos</p>
-          <p className="mb-4 text-sm text-slate-500">{error}</p>
+          <p className="mb-2 font-medium text-zinc-900">Error al cargar datos</p>
+          <p className="mb-4 text-sm text-zinc-500">{error}</p>
           <button type="button" onClick={() => void loadData()} className={COMPONENT_STYLES.button.primary}>
-            <RefreshCw className="h-4 w-4" />
+            <ArrowsClockwise className="h-4 w-4" />
             Reintentar
           </button>
         </div>
@@ -292,27 +292,27 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
 
   return (
     <div className={COMPONENT_STYLES.card}>
-      <div className="border-b border-slate-100 bg-gradient-to-r from-teal-50/80 via-cyan-50/60 to-white px-5 py-4 sm:px-6">
+      <div className="border-b border-zinc-100 bg-gradient-to-r from-zinc-50/80 via-zinc-50/60 to-white px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className={`rounded-xl bg-gradient-to-br ${COLORS.primary.gradient} p-2.5 shadow-sm ${COLORS.primary.shadow}`}>
               <Package className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-slate-950">Programación CENARES {anio}</h3>
-              <p className="text-xs text-slate-500">{stats.vacunas} vacunas, {stats.jeringas} jeringas</p>
+              <h3 className="font-semibold text-zinc-950">Programación CENARES {anio}</h3>
+              <p className="text-xs text-zinc-500">{stats.vacunas} vacunas, {stats.jeringas} jeringas</p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             {isUpdating ? (
               <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-600" />
+                <SpinnerGap weight="bold" className="h-3.5 w-3.5 animate-spin text-amber-600" />
                 <span className="text-xs font-medium text-amber-700">Guardando...</span>
               </div>
             ) : Object.keys(pendingChanges).length === 0 ? (
               <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
                 <span className="text-xs font-medium text-emerald-700">Guardado</span>
               </div>
             ) : null}
@@ -323,7 +323,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
               disabled={isSyncing}
               className={COMPONENT_STYLES.button.secondary}
             >
-              {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              {isSyncing ? <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" /> : <ArrowsClockwise className="h-4 w-4" />}
               <span className="hidden sm:inline">Sincronizar saldos</span>
               <span className="sm:hidden">Sincronizar</span>
             </button>
@@ -334,7 +334,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
               disabled={isExporting || filteredItems.length === 0}
               className={COMPONENT_STYLES.button.primary}
             >
-              {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
+              {isExporting ? <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" /> : <FileXls weight="duotone" className="h-4 w-4" />}
               <span className="hidden sm:inline">Exportar Excel</span>
               <span className="sm:hidden">Exportar</span>
             </button>
@@ -346,65 +346,65 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
         <div className="max-h-[620px] overflow-x-auto overflow-y-auto">
           <table className="w-full min-w-[1600px] border-collapse">
             <thead className="sticky top-0 z-20">
-              <tr className="bg-gradient-to-r from-slate-700 to-slate-800 text-white">
-                <th className="sticky left-0 z-30 min-w-[220px] border-r border-slate-600 bg-slate-700 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider shadow-[2px_0_5px_-2px_rgba(0,0,0,0.3)]">
+              <tr className="bg-zinc-50 border-y border-zinc-200 text-zinc-600">
+                <th className="sticky left-0 z-30 min-w-[220px] border-r border-zinc-200 bg-zinc-50 px-4 py-3 text-left text-[0.7rem] font-semibold uppercase tracking-widest">
                   Item
                 </th>
-                <th className="sticky left-[220px] z-30 min-w-[90px] border-r border-slate-600 bg-slate-700 px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider shadow-[2px_0_5px_-2px_rgba(0,0,0,0.3)]">
+                <th className="sticky left-[220px] z-30 min-w-[90px] border-r border-zinc-200 bg-zinc-50 px-3 py-3 text-center text-[0.7rem] font-semibold uppercase tracking-widest">
                   Saldo {anio - 1}
                 </th>
                 {TRIMESTRES.map((quarter) => (
                   <th
                     key={quarter}
                     colSpan={5}
-                    className={`${quarterTone[quarter]} border-r border-slate-500 px-2 py-3 text-center text-xs font-semibold uppercase tracking-wider`}
+                    className={`${quarterTone[quarter]} border-y border-r border-zinc-200 px-2 py-3 text-center text-[0.7rem] font-semibold uppercase tracking-widest`}
                   >
                     {TRIMESTRE_LABELS[quarter]}
                   </th>
                 ))}
-                <th colSpan={3} className="bg-slate-600 px-2 py-3 text-center text-xs font-semibold uppercase tracking-wider">
+                <th colSpan={3} className="bg-zinc-50 px-2 py-3 text-center text-[0.7rem] font-semibold uppercase tracking-widest border-y border-zinc-200">
                   Totales
                 </th>
               </tr>
 
-              <tr className="bg-slate-600 text-[10px] text-white">
-                <th className="sticky left-0 z-30 border-r border-slate-500 bg-slate-600 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.3)]" />
-                <th className="sticky left-[220px] z-30 border-r border-slate-500 bg-slate-600 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.3)]" />
+              <tr className="bg-white border-b border-zinc-200 text-zinc-500 font-medium">
+                <th className="sticky left-0 z-30 border-r border-zinc-200 bg-white" />
+                <th className="sticky left-[220px] z-30 border-r border-zinc-200 bg-white" />
                 {TRIMESTRES.map((quarter) => (
                   <React.Fragment key={`sub-${quarter}`}>
-                    <th className="px-2 py-2 font-medium whitespace-nowrap">Prog.</th>
-                    <th className="px-2 py-2 font-medium whitespace-nowrap">Entreg.</th>
-                    <th className="px-2 py-2 font-medium whitespace-nowrap">Dif.</th>
-                    <th className="px-2 py-2 font-medium whitespace-nowrap">Cons.</th>
-                    <th className="border-r border-slate-500 px-2 py-2 font-medium whitespace-nowrap">Saldo</th>
+                    <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Prog.</th>
+                    <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Entreg.</th>
+                    <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Dif.</th>
+                    <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Cons.</th>
+                    <th className="border-r border-zinc-200 px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Saldo</th>
                   </React.Fragment>
                 ))}
-                <th className="px-2 py-2 font-medium whitespace-nowrap">Prog.</th>
-                <th className="px-2 py-2 font-medium whitespace-nowrap">Entreg.</th>
-                <th className="px-2 py-2 font-medium whitespace-nowrap">Dif.</th>
+                <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Prog.</th>
+                <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Entreg.</th>
+                <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Dif.</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-100 bg-white">
+            <tbody className="divide-y divide-zinc-100 bg-white">
               {filteredItems.map((item, index) => {
                 const totalProg = item.programacion.q1 + item.programacion.q2 + item.programacion.q3 + item.programacion.q4;
                 const totalEntr = item.entregas.q1 + item.entregas.q2 + item.entregas.q3 + item.entregas.q4;
                 const totalDif = totalProg - totalEntr;
 
                 return (
-                  <tr key={item.id} className="group transition-colors hover:bg-teal-50/30">
-                    <td className="sticky left-0 z-10 border-r border-slate-200 bg-white px-4 py-3 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors group-hover:bg-teal-50/30">
+                  <tr key={item.id} className="group transition-colors hover:bg-zinc-50/30">
+                    <td className="sticky left-0 z-10 border-r border-zinc-200 bg-white px-4 py-3 shadow-sm transition-colors group-hover:bg-zinc-50/30">
                       <div className="flex items-center gap-2">
-                        <span className={`flex-shrink-0 rounded p-1.5 ${item.tipo === 'vacuna' ? 'bg-teal-100 text-teal-700' : 'bg-cyan-100 text-cyan-700'}`}>
-                          {item.tipo === 'vacuna' ? <Package className="h-3.5 w-3.5" /> : <Syringe className="h-3.5 w-3.5" />}
+                        <span className={`flex-shrink-0 rounded p-1.5 ${item.tipo === 'vacuna' ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-100 text-zinc-700'}`}>
+                          {item.tipo === 'vacuna' ? <Package className="h-3.5 w-3.5" /> : <Syringe weight="duotone" className="h-3.5 w-3.5" />}
                         </span>
-                        <span className="max-w-[160px] truncate text-sm font-medium text-slate-900" title={item.descripcion}>
+                        <span className="max-w-[160px] truncate text-sm font-medium text-zinc-900" title={item.descripcion}>
                           {item.descripcion}
                         </span>
                       </div>
                     </td>
 
-                    <td className="sticky left-[220px] z-10 border-r border-slate-200 bg-slate-50 px-3 py-3 text-center text-sm font-semibold text-slate-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors group-hover:bg-teal-50/50">
+                    <td className="sticky left-[220px] z-10 border-r border-zinc-200 bg-zinc-50 px-3 py-3 text-center text-sm font-semibold text-zinc-700 shadow-sm transition-colors group-hover:bg-zinc-50/50">
                       {item.saldoAnterior.toLocaleString()}
                     </td>
 
@@ -427,30 +427,30 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
                                 onChange={(event) => handleValueChange(index, quarter, parseInt(event.target.value, 10) || 0)}
                                 onBlur={() => handleBlur(index, quarter)}
                                 disabled={isUpdating}
-                                className={`w-16 rounded-md border px-2 py-1.5 text-center text-xs font-medium focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:cursor-not-allowed disabled:bg-slate-100 ${
-                                  pending ? 'border-amber-400 bg-amber-50' : 'border-slate-200 hover:border-teal-300'
+                                className={`w-16 rounded-md border px-2 py-1.5 text-center text-xs font-medium focus:outline-none focus:ring-1 focus:ring-zinc-500 disabled:cursor-not-allowed disabled:bg-zinc-100 ${
+                                  pending ? 'border-amber-400 bg-amber-50' : 'border-zinc-200 hover:border-zinc-300'
                                 }`}
                               />
                               {pending ? <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-amber-400 animate-pulse" /> : null}
                             </div>
                           </td>
-                          <td className="px-1 py-2 text-center text-xs font-medium whitespace-nowrap text-slate-700">{entr.toLocaleString()}</td>
+                          <td className="px-1 py-2 text-center text-xs font-medium whitespace-nowrap text-zinc-700">{entr.toLocaleString()}</td>
                           <td className={`px-1 py-2 text-center text-xs font-semibold whitespace-nowrap ${dif >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
                             <span className={`rounded px-1.5 py-0.5 ${dif >= 0 ? 'bg-emerald-50' : 'bg-rose-50'}`}>
                               {dif >= 0 ? '+' : ''}{dif.toLocaleString()}
                             </span>
                           </td>
-                          <td className="px-1 py-2 text-center text-xs whitespace-nowrap text-slate-600">{cons.toLocaleString()}</td>
-                          <td className={`border-r border-slate-200 px-1 py-2 text-center text-xs font-semibold whitespace-nowrap ${saldo >= 0 ? 'text-teal-700' : 'text-rose-700'}`}>
+                          <td className="px-1 py-2 text-center text-xs whitespace-nowrap text-zinc-600">{cons.toLocaleString()}</td>
+                          <td className={`border-r border-zinc-200 px-1 py-2 text-center text-xs font-semibold whitespace-nowrap ${saldo >= 0 ? 'text-zinc-700' : 'text-rose-700'}`}>
                             {saldo.toLocaleString()}
                           </td>
                         </React.Fragment>
                       );
                     })}
 
-                    <td className="bg-slate-50/80 px-2 py-2 text-center text-xs font-bold whitespace-nowrap text-slate-900">{totalProg.toLocaleString()}</td>
-                    <td className="bg-slate-50/80 px-2 py-2 text-center text-xs font-bold whitespace-nowrap text-slate-900">{totalEntr.toLocaleString()}</td>
-                    <td className={`bg-slate-50/80 px-2 py-2 text-center text-xs font-bold whitespace-nowrap ${totalDif >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                    <td className="bg-zinc-50 px-2 py-2 text-center text-xs font-bold whitespace-nowrap text-zinc-900">{totalProg.toLocaleString()}</td>
+                    <td className="bg-zinc-50 px-2 py-2 text-center text-xs font-bold whitespace-nowrap text-zinc-900">{totalEntr.toLocaleString()}</td>
+                    <td className={`bg-zinc-50 px-2 py-2 text-center text-xs font-bold whitespace-nowrap ${totalDif >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
                       <span className={`rounded px-1.5 py-0.5 ${totalDif >= 0 ? 'bg-emerald-50' : 'bg-rose-50'}`}>
                         {totalDif >= 0 ? '+' : ''}{totalDif.toLocaleString()}
                       </span>
@@ -462,26 +462,26 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
           </table>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-200 via-cyan-200 to-teal-200 opacity-50" />
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-zinc-200 via-zinc-200 to-zinc-200 opacity-50" />
       </div>
 
-      <div className="border-t border-slate-100 bg-gradient-to-r from-slate-50 to-teal-50/30 px-5 py-4 sm:px-6">
+      <div className="border-t border-zinc-200 bg-zinc-50 px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
-            <span className="flex items-center gap-1.5">
-              <Package className="h-4 w-4 text-teal-600" />
-              <strong className="text-slate-900">{filteredItems.length}</strong> items
+          <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-600">
+            <span className="flex items-center gap-1.5 font-medium">
+              <Package className="h-4 w-4 text-zinc-600" />
+              <strong className="text-zinc-900">{filteredItems.length}</strong> items
             </span>
-            <span className="text-slate-300">|</span>
-            <span>Total programado: <strong className="text-teal-700">{stats.totalProgramado.toLocaleString()}</strong></span>
-            <span className="text-slate-300">|</span>
-            <span>Total entregado: <strong className="text-cyan-700">{stats.totalEntregado.toLocaleString()}</strong></span>
+            <span className="text-zinc-300">|</span>
+            <span>Total programado: <strong className="text-zinc-700">{stats.totalProgramado.toLocaleString()}</strong></span>
+            <span className="text-zinc-300">|</span>
+            <span>Total entregado: <strong className="text-zinc-700">{stats.totalEntregado.toLocaleString()}</strong></span>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <Info className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-2 rounded-md bg-white border border-zinc-200 px-2 py-1 shadow-sm text-xs text-zinc-500 font-medium">
+            <Info className="h-4 w-4 text-zinc-400" />
             <span>Auto-guardado activo</span>
-            <Save className="h-3.5 w-3.5 text-emerald-600" />
+            <FloppyDisk className="h-4 w-4 text-zinc-500" />
           </div>
         </div>
       </div>

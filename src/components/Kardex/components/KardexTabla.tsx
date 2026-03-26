@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { BookOpen, Clock, FileText, Package2 } from 'lucide-react';
+import { BookOpenText, Clock, FileText, Package } from '@phosphor-icons/react';
 import {
   ActionButtons,
   EmptyState,
@@ -131,14 +131,14 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full divide-y divide-slate-200">
+      <table className="min-w-full divide-y divide-zinc-200">
         <TableHeader columns={TABLE_COLUMNS as unknown as Array<{ key: string; label: string; align?: 'left' | 'center' | 'right' }>} />
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-zinc-100">
           {movimientos.length === 0 ? (
             <tr>
               <td colSpan={TABLE_COLUMNS.length}>
                 <EmptyState
-                  icon={BookOpen}
+                  icon={BookOpenText}
                   title="No se encontraron movimientos"
                   description="Pruebe otro rango de fechas o ajuste los filtros avanzados para ubicar un movimiento específico."
                 />
@@ -163,8 +163,8 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
                 <TableRow key={movimiento.id}>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="text-sm font-semibold text-slate-900">{date.date}</p>
-                      <p className="text-xs text-slate-500">{date.time}</p>
+                      <p className="text-sm font-semibold text-zinc-900">{date.date}</p>
+                      <p className="text-xs text-zinc-500">{date.time}</p>
                     </div>
                   </TableCell>
 
@@ -174,19 +174,19 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
                         <Icon className="h-3.5 w-3.5" />
                         <span>{movementConfig.label}</span>
                       </span>
-                      <p className="text-xs uppercase tracking-[0.08em] text-slate-400">{movimiento.tipo}</p>
+                      <p className="text-xs uppercase tracking-[0.08em] text-zinc-400">{movimiento.tipo}</p>
                     </div>
                   </TableCell>
 
                   <TableCell>
                     <div className="max-w-[300px] space-y-1">
-                      <p className="truncate text-sm font-semibold text-slate-900">{itemNombre}</p>
-                      <p className="truncate text-xs text-slate-500">
-                        Lote: <span className="font-medium text-slate-700">{loteNumero}</span>
+                      <p className="truncate text-sm font-semibold text-zinc-900">{itemNombre}</p>
+                      <p className="truncate text-xs text-zinc-500">
+                        Lote: <span className="font-medium text-zinc-700">{loteNumero}</span>
                         {vencimiento ? ` · Vence ${vencimiento}` : ''}
                       </p>
                       {origen || destino ? (
-                        <p className="truncate text-xs text-slate-400">
+                        <p className="truncate text-xs text-zinc-400">
                           {origen ? `Origen: ${origen}` : 'Origen: sin referencia'}
                           {destino ? ` · Destino: ${destino}` : ''}
                         </p>
@@ -196,29 +196,29 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
 
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="text-sm font-semibold text-slate-900">{movimiento.documento}</p>
-                      <p className="font-mono text-xs text-slate-500">{movimiento.numeroDocumento}</p>
+                      <p className="text-sm font-semibold text-zinc-900">{movimiento.documento}</p>
+                      <p className="font-medium tabular-nums tracking-tight text-xs text-zinc-500">{movimiento.numeroDocumento}</p>
                     </div>
                   </TableCell>
 
                   <TableCell align="right">
-                    <span className="font-mono text-sm font-semibold text-emerald-700">
+                    <span className="font-medium tabular-nums tracking-tight text-sm font-semibold text-emerald-700">
                       {entrada ? entrada.toLocaleString() : '—'}
                     </span>
                   </TableCell>
 
                   <TableCell align="right">
-                    <span className="font-mono text-sm font-semibold text-rose-700">
+                    <span className="font-medium tabular-nums tracking-tight text-sm font-semibold text-rose-700">
                       {salida ? salida.toLocaleString() : '—'}
                     </span>
                   </TableCell>
 
                   <TableCell align="right">
                     <div className="space-y-1">
-                      <p className="font-mono text-base font-semibold text-slate-900">
+                      <p className="font-medium tabular-nums tracking-tight text-base font-semibold text-zinc-900">
                         {movimiento.saldoActual.toLocaleString()}
                       </p>
-                      <p className="font-mono text-xs text-slate-500">
+                      <p className="font-medium tabular-nums tracking-tight text-xs text-zinc-500">
                         antes {movimiento.saldoAnterior.toLocaleString()}
                       </p>
                     </div>
@@ -238,21 +238,21 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
 
   return (
     <section className="overflow-hidden bg-transparent">
-      <div className="border-b border-slate-200/90 px-4 py-4 sm:px-6">
+      <div className="border-b border-zinc-200/90 px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-none bg-teal-50 text-teal-700">
+          <div className="flex h-11 w-11 items-center justify-center rounded-none bg-zinc-50 text-zinc-700">
               <FileText className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-950">Movimientos del kardex</h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <h2 className="text-lg font-semibold text-zinc-950">Movimientos del kardex</h2>
+              <p className="mt-1 text-sm text-zinc-500">
                 {total.toLocaleString()} registros listos para auditoría y seguimiento por lote.
               </p>
             </div>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-none bg-slate-50 px-3 py-1.5 text-sm text-slate-600">
-            <Clock className="h-4 w-4 text-slate-400" />
+          <div className="inline-flex items-center gap-2 rounded-none bg-zinc-50 px-3 py-1.5 text-sm text-zinc-600">
+            <Clock className="h-4 w-4 text-zinc-400" />
             <span>Vista compacta con entrada, salida y saldo.</span>
           </div>
         </div>
@@ -266,7 +266,7 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
         ) : movimientos.length === 0 ? (
           <div className={COMPONENT_STYLES.panel}>
             <EmptyState
-              icon={BookOpen}
+              icon={BookOpenText}
               title="No se encontraron movimientos"
               description="Pruebe otro rango de fechas o ajuste los filtros avanzados para ubicar un movimiento específico."
             />
@@ -286,8 +286,8 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
               <article key={movimiento.id} className={`${COMPONENT_STYLES.panel} p-4`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">{itemNombre}</p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="text-sm font-semibold text-zinc-900">{itemNombre}</p>
+                    <p className="mt-1 text-xs text-zinc-500">
                       {date.date} · {date.time}
                     </p>
                   </div>
@@ -297,16 +297,16 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
                   </span>
                 </div>
 
-                <div className="mt-3 space-y-1 text-sm text-slate-600">
+                <div className="mt-3 space-y-1 text-sm text-zinc-600">
                   <p>
-                    Documento: <span className="font-medium text-slate-900">{movimiento.documento}</span>
+                    Documento: <span className="font-medium text-zinc-900">{movimiento.documento}</span>
                   </p>
-                  <p className="font-mono text-xs text-slate-500">{movimiento.numeroDocumento}</p>
+                  <p className="font-medium tabular-nums tracking-tight text-xs text-zinc-500">{movimiento.numeroDocumento}</p>
                   <p>
-                    Lote: <span className="font-medium text-slate-900">{movimiento.lote?.numero || 'Sin lote'}</span>
+                    Lote: <span className="font-medium text-zinc-900">{movimiento.lote?.numero || 'Sin lote'}</span>
                   </p>
                   {origen || destino ? (
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-zinc-500">
                       {origen ? `Origen ${origen}` : 'Origen sin referencia'}
                       {destino ? ` · Destino ${destino}` : ''}
                     </p>
@@ -314,21 +314,21 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
                 </div>
 
                 <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
-                  <div className="rounded-none border border-slate-200 bg-slate-50/70 p-3">
-                    <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Entrada</p>
-                    <p className="mt-2 font-mono text-base font-semibold text-emerald-700">
+                  <div className="rounded-none border border-zinc-200 bg-zinc-50/70 p-3">
+                    <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Entrada</p>
+                    <p className="mt-2 font-medium tabular-nums tracking-tight text-base font-semibold text-emerald-700">
                       {entrada ? entrada.toLocaleString() : '—'}
                     </p>
                   </div>
-                  <div className="rounded-none border border-slate-200 bg-slate-50/70 p-3">
-                    <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Salida</p>
-                    <p className="mt-2 font-mono text-base font-semibold text-rose-700">
+                  <div className="rounded-none border border-zinc-200 bg-zinc-50/70 p-3">
+                    <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Salida</p>
+                    <p className="mt-2 font-medium tabular-nums tracking-tight text-base font-semibold text-rose-700">
                       {salida ? salida.toLocaleString() : '—'}
                     </p>
                   </div>
-                  <div className="rounded-none border border-slate-200 bg-slate-50/70 p-3">
-                    <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Saldo</p>
-                    <p className="mt-2 font-mono text-base font-semibold text-slate-900">
+                  <div className="rounded-none border border-zinc-200 bg-zinc-50/70 p-3">
+                    <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Saldo</p>
+                    <p className="mt-2 font-medium tabular-nums tracking-tight text-base font-semibold text-zinc-900">
                       {movimiento.saldoActual.toLocaleString()}
                     </p>
                   </div>
@@ -348,3 +348,4 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
 
 export const KardexTabla = memo(KardexTablaComponent);
 KardexTabla.displayName = 'KardexTabla';
+ 

@@ -1,11 +1,11 @@
 import React, { memo } from 'react';
-import { Search, Building2, Calendar, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { MagnifyingGlass, Buildings, CalendarBlank, ArrowsClockwise, CaretDown, CaretUp } from '@phosphor-icons/react';
 import { COMPONENT_STYLES, MESES, ANIOS_DISPONIBLES, FILTER_OPTIONS } from '../constants';
 
 interface CentroAcopio {
   id: string;
   nombre: string;
-  codigo: string;
+  codigo?: string;
 }
 
 interface ValesFiltersProps {
@@ -49,7 +49,7 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
           {/* Centro de Acopio */}
           <div className="md:col-span-2">
             <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
-              <Building2 className="h-4 w-4 text-gray-500" />
+              <Buildings weight="duotone" className="h-4 w-4 text-zinc-500" />
               Centro de Acopio
               <span className="text-rose-500">*</span>
             </label>
@@ -75,7 +75,7 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
           {/* Mes */}
           <div>
             <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
-              <Calendar className="h-4 w-4 text-gray-500" />
+              <CalendarBlank weight="duotone" className="h-4 w-4 text-zinc-500" />
               Mes
             </label>
             <select
@@ -94,7 +94,7 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
           {/* Ano */}
           <div>
             <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
-              <Calendar className="h-4 w-4 text-gray-500" />
+              <CalendarBlank weight="duotone" className="h-4 w-4 text-zinc-500" />
               Ano
             </label>
             <select
@@ -112,16 +112,16 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
         {/* Toggle filtros avanzados */}
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mt-3 transition-colors"
+          className="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-700 mt-3 transition-colors outline-none focus:ring-2 focus:ring-zinc-900/10 rounded-md px-2 py-1"
         >
           {showAdvanced ? (
             <>
-              <ChevronUp className="h-4 w-4" />
+              <CaretUp weight="bold" className="h-4 w-4" />
               Ocultar filtros avanzados
             </>
           ) : (
             <>
-              <ChevronDown className="h-4 w-4" />
+              <CaretDown weight="bold" className="h-4 w-4" />
               Mostrar filtros avanzados
             </>
           )}
@@ -136,7 +136,7 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
                 Buscar
               </label>
               <div className="relative">
-                <Search className={COMPONENT_STYLES.filter.searchIcon} />
+                <MagnifyingGlass weight="bold" className={COMPONENT_STYLES.filter.searchIcon} />
                 <input
                   type="text"
                   value={searchTerm}
@@ -178,7 +178,7 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
           disabled={isLoading}
           className={COMPONENT_STYLES.button.secondary}
         >
-          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <ArrowsClockwise weight="bold" className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           <span>Actualizar</span>
         </button>
       </div>

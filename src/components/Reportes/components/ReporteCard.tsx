@@ -1,10 +1,10 @@
 import React from 'react';
-import { Loader2, LucideIcon } from 'lucide-react';
+import { SpinnerGap, IconProps } from '@phosphor-icons/react';
 import { ColorScheme, COLORS, COMPONENT_STYLES } from '../constants';
 
 interface ReportCardAction {
   label: string;
-  icon: LucideIcon;
+  icon: IconProps;
   onClick: () => void;
   variant?: 'primary' | 'secondary' | 'ghost';
   disabled?: boolean;
@@ -14,7 +14,7 @@ interface ReportCardAction {
 interface ReporteCardProps {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: IconProps;
   tone?: ColorScheme;
   statusLabel?: string;
   helperText?: string;
@@ -24,53 +24,53 @@ interface ReporteCardProps {
 
 const TONE_CLASSES: Record<ColorScheme, { icon: string; border: string; bg: string; text: string; shadow: string }> = {
   primary: {
-    icon: 'text-teal-700',
-    border: 'border-teal-200',
-    bg: 'bg-teal-50',
-    text: 'text-teal-700',
-    shadow: 'shadow-teal-500/10',
+    icon: 'text-zinc-700',
+    border: 'border-zinc-200',
+    bg: 'bg-zinc-50',
+    text: 'text-zinc-700',
+    shadow: 'shadow-sm',
   },
   secondary: {
-    icon: 'text-cyan-700',
-    border: 'border-cyan-200',
-    bg: 'bg-cyan-50',
-    text: 'text-cyan-700',
-    shadow: 'shadow-cyan-500/10',
+    icon: 'text-zinc-700',
+    border: 'border-zinc-200',
+    bg: 'bg-zinc-50',
+    text: 'text-zinc-700',
+    shadow: 'shadow-sm',
   },
   success: {
     icon: 'text-emerald-700',
     border: 'border-emerald-200',
     bg: 'bg-emerald-50',
     text: 'text-emerald-700',
-    shadow: 'shadow-emerald-500/10',
+    shadow: 'shadow-sm',
   },
   warning: {
     icon: 'text-amber-700',
     border: 'border-amber-200',
     bg: 'bg-amber-50',
     text: 'text-amber-700',
-    shadow: 'shadow-amber-500/10',
+    shadow: 'shadow-sm',
   },
   danger: {
     icon: 'text-rose-700',
     border: 'border-rose-200',
     bg: 'bg-rose-50',
     text: 'text-rose-700',
-    shadow: 'shadow-rose-500/10',
+    shadow: 'shadow-sm',
   },
   neutral: {
-    icon: 'text-slate-700',
-    border: 'border-slate-200',
-    bg: 'bg-slate-50',
-    text: 'text-slate-700',
-    shadow: 'shadow-slate-500/10',
+    icon: 'text-zinc-700',
+    border: 'border-zinc-200',
+    bg: 'bg-zinc-50',
+    text: 'text-zinc-700',
+    shadow: 'shadow-sm',
   },
   info: {
-    icon: 'text-sky-700',
-    border: 'border-sky-200',
-    bg: 'bg-sky-50',
-    text: 'text-sky-700',
-    shadow: 'shadow-sky-500/10',
+    icon: 'text-zinc-700',
+    border: 'border-zinc-200',
+    bg: 'bg-zinc-50',
+    text: 'text-zinc-700',
+    shadow: 'shadow-sm',
   },
 };
 
@@ -79,7 +79,7 @@ const buttonClasses = (variant: 'primary' | 'secondary' | 'ghost', tone: ColorSc
   if (variant === 'ghost') return COMPONENT_STYLES.button.ghost;
 
   const accent = COLORS[tone];
-  return `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r ${accent.gradient} px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-[0.97] focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`;
+  return `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r ${accent.gradient} px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-[0.97] focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`;
 };
 
 const ReporteCard: React.FC<ReporteCardProps> = ({
@@ -102,7 +102,7 @@ const ReporteCard: React.FC<ReporteCardProps> = ({
             <Icon className={`h-4 w-4 ${accent.icon}`} aria-hidden="true" />
           </div>
           {statusLabel ? (
-            <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+            <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700">
               {statusLabel}
             </span>
           ) : null}
@@ -116,19 +116,19 @@ const ReporteCard: React.FC<ReporteCardProps> = ({
         {facts.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {facts.map((fact) => (
-              <span key={fact} className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[0.68rem] font-medium text-slate-600">
+              <span key={fact} className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[0.68rem] font-medium text-zinc-600">
                 {fact}
               </span>
             ))}
           </div>
         ) : null}
 
-        {helperText ? <p className="mt-3 text-[0.72rem] font-medium text-slate-500">{helperText}</p> : null}
+        {helperText ? <p className="mt-3 text-[0.72rem] font-medium text-zinc-500">{helperText}</p> : null}
       </div>
 
       <div className={COMPONENT_STYLES.reportCard.actionRow}>
         {actions.map((action) => {
-          const ActionIcon = action.isLoading ? Loader2 : action.icon;
+          const ActionIcon = action.isLoading ? SpinnerGap : action.icon;
 
           return (
             <button

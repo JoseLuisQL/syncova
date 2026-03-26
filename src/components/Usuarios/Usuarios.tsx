@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { Warning } from '@phosphor-icons/react';
 import { Usuario, CreateUsuarioDto, UpdateUsuarioDto, ChangePasswordDto, Role } from '../../types';
 import { useUsuarios } from '../../hooks/useUsuarios';
 import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
@@ -330,12 +330,12 @@ const Usuarios: React.FC = () => {
     <div className="space-y-4">
       {error ? (
         <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <Warning className="mt-0.5 h-4 w-4 flex-shrink-0" />
           <span>{error}</span>
         </div>
       ) : null}
 
-      <section className="rounded-[26px] border border-slate-200 bg-white shadow-sm">
+      <section className="rounded-[26px] border border-zinc-200 bg-white shadow-sm">
         <div className="space-y-4 p-4 sm:p-6">
           <UsuariosFiltros
             searchTerm={searchTerm}
@@ -433,3 +433,4 @@ const Usuarios: React.FC = () => {
 };
 
 export default Usuarios;
+   

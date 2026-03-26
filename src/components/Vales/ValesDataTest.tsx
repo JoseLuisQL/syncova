@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, AlertTriangle, Info } from 'lucide-react';
+import { CheckCircle, Warning, Info } from '@phosphor-icons/react';
 
 interface ValesDataTestProps {
   vale: any;
@@ -13,7 +13,7 @@ const ValesDataTest: React.FC<ValesDataTestProps> = ({ vale }) => {
     return (
       <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
         <div className="flex items-center">
-          <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
+          <Warning weight="duotone" className="h-5 w-5 text-red-600 mr-2" />
           <span className="text-red-800 font-medium">No hay vale para analizar</span>
         </div>
       </div>
@@ -134,7 +134,7 @@ const ValesDataTest: React.FC<ValesDataTestProps> = ({ vale }) => {
       {/* Resumen de Problemas */}
       <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
         <div className="flex items-center mb-2">
-          <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
+          <Warning weight="duotone" className="h-5 w-5 text-yellow-600 mr-2" />
           <span className="text-yellow-800 font-medium">Diagnóstico de Problemas</span>
         </div>
         

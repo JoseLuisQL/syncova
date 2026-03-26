@@ -25,3 +25,4 @@ const UsuariosModule: React.FC = () => {
 };
 
 export default UsuariosModule;
+   

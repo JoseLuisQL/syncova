@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useRef, useState } from 'react';
-import { BellRing, Database, Image as ImageIcon, Loader2, ShieldCheck, Trash2, Upload } from 'lucide-react';
+import { BellRinging, Database, Image, SpinnerGap, ShieldCheck, Trash, UploadSimple } from '@phosphor-icons/react';
 import { useAlertasGlobal } from '../../../contexts/AlertasContext';
 import { useToastContext } from '../../../contexts/ToastContext';
 import { Modal } from '../../Establecimientos/components';
@@ -36,13 +36,13 @@ interface ConfiguracionGroupViewProps {
   onCleanupResolvedAlerts: (days: number) => Promise<{ eliminadas: number }>;
 }
 
-const subtleBadgeClassName = 'inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-slate-600';
+const subtleBadgeClassName = 'inline-flex items-center rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-zinc-600';
 const inputClassName =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200';
+  'w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 transition placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200';
 const secondaryButtonClassName =
-  'inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60';
+  'inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60';
 const primaryButtonClassName =
-  'inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-slate-900 px-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60';
+  'inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60';
 
 const formatFieldValue = (field: ConfiguracionFieldDefinition, value: ConfiguracionFieldValue): string => {
   if (field.formatValue) {
@@ -71,7 +71,7 @@ const FieldControl: React.FC<{
 
   return (
     <div className="space-y-1.5">
-      <label htmlFor={field.id} className="block text-xs font-medium uppercase tracking-[0.08em] text-slate-500">
+      <label htmlFor={field.id} className="block text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
         {field.label}
       </label>
 
@@ -122,17 +122,17 @@ const ReadonlyRows: React.FC<{
   fields: ConfiguracionFieldDefinition[];
   values: Record<string, ConfiguracionFieldValue>;
 }> = ({ fields, values }) => (
-  <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+  <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
     {fields.map((field, index) => (
       <div
         key={field.id}
-        className={`grid gap-2 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start ${index > 0 ? 'border-t border-slate-100' : ''}`}
+        className={`grid gap-2 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start ${index > 0 ? 'border-t border-zinc-100' : ''}`}
       >
         <div className="min-w-0">
-          <p className="text-sm font-medium text-slate-900">{field.label}</p>
+          <p className="text-sm font-medium text-zinc-900">{field.label}</p>
         </div>
         <div className="min-w-0 text-left sm:text-right">
-          <p className="text-sm font-medium text-slate-900">{formatFieldValue(field, values[field.id] ?? field.defaultValue)}</p>
+          <p className="text-sm font-medium text-zinc-900">{formatFieldValue(field, values[field.id] ?? field.defaultValue)}</p>
         </div>
       </div>
     ))}
@@ -146,12 +146,12 @@ const SectionShell: React.FC<{
   const Icon = category.icon;
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white">
-      <div className="flex flex-col gap-2 border-b border-slate-100 px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
+    <section className="rounded-2xl border border-zinc-200 bg-white">
+      <div className="flex flex-col gap-2 border-b border-zinc-100 px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <Icon className="h-4 w-4 text-slate-400" aria-hidden="true" />
-            <h2 className="text-sm font-semibold text-slate-950">{category.label}</h2>
+            <Icon className="h-4 w-4 text-zinc-400" aria-hidden="true" />
+            <h2 className="text-sm font-semibold text-zinc-950">{category.label}</h2>
           </div>
         </div>
         {category.source !== 'database' ? <span className={subtleBadgeClassName}>{formatSourceLabel(category.source)}</span> : null}
@@ -169,14 +169,14 @@ const MinimalActionRow: React.FC<{
   isLoading: boolean;
   footer?: React.ReactNode;
 }> = ({ title, description, buttonLabel, onAction, isLoading, footer }) => (
-  <div className="rounded-lg border border-slate-200 bg-white p-4">
+  <div className="rounded-lg border border-zinc-200 bg-white p-4">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <p className="text-sm font-medium text-slate-900">{title}</p>
-        {description ? <p className="mt-1 text-sm text-slate-500">{description}</p> : null}
+        <p className="text-sm font-medium text-zinc-900">{title}</p>
+        {description ? <p className="mt-1 text-sm text-zinc-500">{description}</p> : null}
       </div>
       <button type="button" className={secondaryButtonClassName} onClick={onAction} disabled={isLoading}>
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+        {isLoading ? <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
         <span>{buttonLabel}</span>
       </button>
     </div>
@@ -330,22 +330,22 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
     <div className="space-y-3">
       {renderEditableCategory('general')}
 
-      <section className="rounded-2xl border border-slate-200 bg-white">
-        <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
-          <ImageIcon className="h-4 w-4 text-slate-400" aria-hidden="true" />
-          <h2 className="text-sm font-semibold text-slate-950">Logo institucional</h2>
+      <section className="rounded-2xl border border-zinc-200 bg-white">
+        <div className="flex items-center gap-2 border-b border-zinc-100 px-4 py-3">
+          <Image className="h-4 w-4 text-zinc-400" aria-hidden="true" />
+          <h2 className="text-sm font-semibold text-zinc-950">Logo institucional</h2>
         </div>
 
         <div className="grid gap-4 px-4 py-4 md:grid-cols-[140px_minmax(0,1fr)]">
-          <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
             <div className="flex aspect-square items-center justify-center bg-white">
               {logo.isLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-slate-400" aria-hidden="true" />
+                <SpinnerGap className="h-6 w-6 animate-spin text-zinc-400" aria-hidden="true" />
               ) : logo.exists && logo.url ? (
                 <img src={logo.url} alt="Logo institucional" className="h-full w-full object-contain p-3" />
               ) : (
-                <div className="text-center text-slate-400">
-                  <ImageIcon className="mx-auto h-6 w-6" aria-hidden="true" />
+                <div className="text-center text-zinc-400">
+                  <Image className="mx-auto h-6 w-6" aria-hidden="true" />
                   <p className="mt-2 text-xs">Sin logo</p>
                 </div>
               )}
@@ -362,19 +362,19 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
                 onChange={handleSelectLogo}
               />
               <button type="button" className={secondaryButtonClassName} disabled={logo.isUploading} onClick={() => fileInputRef.current?.click()}>
-                {logo.isUploading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Upload className="h-4 w-4" aria-hidden="true" />}
+                {logo.isUploading ? <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" /> : <UploadSimple className="h-4 w-4" aria-hidden="true" />}
                 <span>{logo.exists ? 'Reemplazar' : 'Subir logo'}</span>
               </button>
               <button type="button" className={secondaryButtonClassName} disabled={!logo.exists || logo.isUploading} onClick={handleDeleteLogo}>
-                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                <Trash className="h-4 w-4" aria-hidden="true" />
                 <span>Eliminar</span>
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-              <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1">PNG o JPG</span>
-              <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1">Max 2 MB</span>
-              <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1">200x200 px</span>
+            <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
+              <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1">PNG o JPG</span>
+              <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1">Max 2 MB</span>
+              <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1">200x200 px</span>
             </div>
           </div>
         </div>
@@ -387,12 +387,12 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
       {renderEditableCategory('alertas')}
       {renderReadonlyCategory('notificaciones')}
 
-      <section className="rounded-2xl border border-slate-200 bg-white">
-        <div className="flex flex-col gap-2 border-b border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <section className="rounded-2xl border border-zinc-200 bg-white">
+        <div className="flex flex-col gap-2 border-b border-zinc-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <BellRing className="h-4 w-4 text-slate-400" aria-hidden="true" />
-              <h2 className="text-sm font-semibold text-slate-950">Acciones operativas</h2>
+              <BellRinging className="h-4 w-4 text-zinc-400" aria-hidden="true" />
+              <h2 className="text-sm font-semibold text-zinc-950">Acciones operativas</h2>
             </div>
           </div>
           {count > 0 ? <span className={subtleBadgeClassName}>{count} sin leer</span> : null}
@@ -407,10 +407,10 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
             isLoading={isGeneratingAlerts}
             footer={
               lastGenerationResult ? (
-                <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                  <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1">Total {lastGenerationResult.alertasGeneradas}</span>
-                  <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1">Vencimiento {lastGenerationResult.alertasVencimiento}</span>
-                  <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1">Stock bajo {lastGenerationResult.alertasStockBajo}</span>
+                <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
+                  <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1">Total {lastGenerationResult.alertasGeneradas}</span>
+                  <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1">Vencimiento {lastGenerationResult.alertasVencimiento}</span>
+                  <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1">Stock bajo {lastGenerationResult.alertasStockBajo}</span>
                 </div>
               ) : null
             }
@@ -424,7 +424,7 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
             isLoading={isCleaningAlerts}
             footer={
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <label htmlFor="cleanup-days" className="text-xs font-medium uppercase tracking-[0.08em] text-slate-500">
+                <label htmlFor="cleanup-days" className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
                   Dias
                 </label>
                 <input
@@ -445,11 +445,11 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
   );
 
   const renderOperationDiagnostics = () => (
-    <section className="rounded-2xl border border-slate-200 bg-white">
-      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+    <section className="rounded-2xl border border-zinc-200 bg-white">
+      <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
         <div className="flex items-center gap-2">
-          <Database className="h-4 w-4 text-slate-400" aria-hidden="true" />
-          <h2 className="text-sm font-semibold text-slate-950">Diagnostico</h2>
+          <Database className="h-4 w-4 text-zinc-400" aria-hidden="true" />
+          <h2 className="text-sm font-semibold text-zinc-950">Diagnostico</h2>
         </div>
         <span className={subtleBadgeClassName}>Sistema</span>
       </div>
@@ -470,8 +470,8 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col gap-1 border-b border-slate-200 pb-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-        <span className="font-medium text-slate-900">{group.contextLabel}</span>
+      <div className="flex flex-col gap-1 border-b border-zinc-200 pb-3 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+        <span className="font-medium text-zinc-900">{group.contextLabel}</span>
         <span>{syncLabel}</span>
       </div>
 
@@ -479,13 +479,13 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
       {group.id === 'alertas' ? renderAlertsGroup() : null}
       {group.id === 'seguridad' ? renderReadonlyCategory('seguridad') : null}
       {group.id === 'seguridad' ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+        <section className="rounded-2xl border border-zinc-200 bg-white p-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-700">
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-slate-950">Lectura operativa segura</h2>
+              <h2 className="text-sm font-semibold text-zinc-950">Lectura operativa segura</h2>
             </div>
           </div>
         </section>
@@ -496,10 +496,10 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
       {group.id === 'operacion' ? renderOperationDiagnostics() : null}
 
       {hasEditableFields ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-4">
+        <section className="rounded-2xl border border-zinc-200 bg-white p-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             {dirtyCount > 0 ? (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-zinc-500">
                 {dirtyCount} cambio{dirtyCount === 1 ? '' : 's'} pendiente{dirtyCount === 1 ? '' : 's'}
               </p>
             ) : (
@@ -510,7 +510,7 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
                 Restablecer
               </button>
               <button type="button" className={primaryButtonClassName} onClick={() => void onSaveGroup()} disabled={isSaving || dirtyCount === 0}>
-                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+                {isSaving ? <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                 <span>{isSaving ? 'Guardando...' : 'Guardar cambios'}</span>
               </button>
             </div>
@@ -527,7 +527,7 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
         }}
         title="Limpiar alertas leidas"
         subtitle="Confirma la depuracion para mantener una bandeja mas clara."
-        icon={Trash2}
+        icon={Trash}
         size="md"
         footer={
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -535,15 +535,15 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
               Cancelar
             </button>
             <button type="button" className={primaryButtonClassName} disabled={isCleaningAlerts} onClick={() => void handleConfirmCleanup()}>
-              {isCleaningAlerts ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
+              {isCleaningAlerts ? <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
               <span>{isCleaningAlerts ? 'Limpiando...' : 'Confirmar'}</span>
             </button>
           </div>
         }
       >
-        <div className="space-y-3 text-sm text-slate-600">
+        <div className="space-y-3 text-sm text-zinc-600">
           <p>
-            Se eliminaran alertas leidas con mas de <span className="font-medium text-slate-950">{cleanupDays} dias</span> de antiguedad.
+            Se eliminaran alertas leidas con mas de <span className="font-medium text-zinc-950">{cleanupDays} dias</span> de antiguedad.
           </p>
           <p>La depuracion no afecta alertas activas ni no leidas.</p>
         </div>
@@ -553,3 +553,4 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
 };
 
 export default memo(ConfiguracionGroupView);
+ 

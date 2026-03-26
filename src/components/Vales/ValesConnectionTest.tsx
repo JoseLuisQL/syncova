@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, AlertTriangle, Loader2, RefreshCw, Server, Database } from 'lucide-react';
+import { CheckCircle, Warning, SpinnerGap, ArrowsClockwise, HardDrives, Database } from '@phosphor-icons/react';
 import { apiClient } from '../../config/api';
 
 /**
@@ -83,9 +83,9 @@ const ValesConnectionTest: React.FC = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'success': return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'error': return <AlertTriangle className="h-5 w-5 text-red-600" />;
-      case 'running': return <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />;
-      default: return <Server className="h-5 w-5 text-gray-400" />;
+      case 'error': return <Warning weight="duotone" className="h-5 w-5 text-red-600" />;
+      case 'running': return <SpinnerGap weight="bold" className="h-5 w-5 text-blue-600 animate-spin" />;
+      default: return <HardDrives className="h-5 w-5 text-gray-400" />;
     }
   };
 
@@ -128,7 +128,7 @@ const ValesConnectionTest: React.FC = () => {
             disabled={isRunning}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRunning ? 'animate-spin' : ''}`} />
+            <ArrowsClockwise className={`h-4 w-4 mr-2 ${isRunning ? 'animate-spin' : ''}`} />
             {isRunning ? 'Probando...' : 'Probar Conexiones'}
           </button>
         </div>

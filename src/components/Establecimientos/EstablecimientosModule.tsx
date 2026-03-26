@@ -112,3 +112,4 @@ const EstablecimientosModule: React.FC = () => {
 };
 
 export default EstablecimientosModule;
+ 

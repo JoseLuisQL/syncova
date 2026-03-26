@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useToast } from '../hooks/useToast';
-import ToastContainer from '../components/ui/ToastContainer';
+import { Toaster } from 'sileo';
 import { ToastData, ToastType } from '../components/ui/Toast';
 
 interface ToastContextType {
@@ -39,9 +39,20 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   return (
     <ToastContext.Provider value={toastHook}>
       {children}
-      <ToastContainer 
-        toasts={toastHook.toasts} 
-        onRemoveToast={toastHook.removeToast} 
+      <Toaster 
+        position="bottom-center" 
+        offset={24}
+        theme="light"
+        options={{
+          fill: "#18181b",
+          roundness: 16,
+          styles: {
+            title: "text-zinc-50 font-medium tracking-tight!",
+            description: "text-zinc-400! text-[0.82rem]!",
+            badge: "bg-zinc-800/80! border border-zinc-700/50!",
+            button: "bg-zinc-800 text-zinc-100 hover:bg-zinc-700! ring-1 ring-inset ring-zinc-700/50!",
+          }
+        }}
       />
     </ToastContext.Provider>
   );

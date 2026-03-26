@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Loader2, Save, AlertCircle, Package, Syringe, FileSpreadsheet, Download } from 'lucide-react';
+import { SpinnerGap, FloppyDisk, WarningCircle, Package, Syringe, FileXls, DownloadSimple } from '@phosphor-icons/react';
 import { ProgramacionAnualCenaresService } from '../../services/programacionAnualCenaresService';
 import { ProgramacionSeguimientoAnualExportService } from '../../services/programacionSeguimientoAnualExportService';
 import { toast } from 'react-hot-toast';
@@ -107,7 +107,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
     }, 2000);
   };
 
-  // Save individual field value
+  // FloppyDisk individual field value
   const handleSaveFieldValue = async (itemIndex: number, trimestre: string, value: number) => {
     const key = getFieldKey(itemIndex, trimestre);
     const item = items[itemIndex];
@@ -220,7 +220,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
     }
     
     const item = items[itemIndex];
-    return item?.programacion?.[trimestre as keyof typeof item.programacion] || 0;
+    return (item?.programacion?.[trimestre as 'q1'|'q2'|'q3'|'q4'] as number) || 0;
   };
 
   // Check if field has pending changes
@@ -277,10 +277,10 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
     const saldo = item.saldos[quarter as keyof typeof item.saldos];
 
     return (
-      <>
+      <React.Fragment>
         {/* Programado (Editable) */}
-        <td className="px-3 py-4 text-center border-r border-gray-100 relative">
-          <div className="relative">
+        <td className="px-3 py-3 text-right align-middle font-medium tabular-nums text-zinc-900 border-x border-zinc-200 bg-white">
+          <div className="flex justify-end relative">
             <input
               type="number"
               min="0"
@@ -288,55 +288,43 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
               onChange={(e) => handleTempValueChange(itemIndex, quarter, parseInt(e.target.value) || 0)}
               onBlur={() => handleFieldBlur(itemIndex, quarter)}
               disabled={isUpdating}
-              className={`w-24 px-3 py-2 text-center text-sm font-semibold border rounded-lg focus:outline-none focus:ring-2 focus:ring-${color}-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-all shadow-sm ${
+              className={`w-20 px-2 py-1 text-right text-[0.85rem] tabular-nums tracking-tight border rounded-md focus:outline-none focus:ring-1 focus:border-transparent transition-all disabled:opacity-50 ${
                 isPendingChange
-                  ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-200'
-                  : 'border-gray-300 hover:border-blue-400 bg-white'
+                  ? 'border-amber-400 bg-amber-50 focus:ring-amber-500'
+                  : 'border-zinc-300 hover:border-zinc-400 focus:ring-zinc-900 bg-white'
               }`}
               title={isPendingChange ? 'Cambios pendientes - Se guardará automáticamente' : ''}
             />
             {isPendingChange && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse shadow-sm"></div>
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full animate-pulse shadow-sm"></div>
             )}
           </div>
         </td>
 
         {/* Entregado (CENARES) - Read Only */}
-        <td className="px-3 py-4 text-sm text-center text-gray-800 border-r border-gray-100 font-semibold">
-          <div className="bg-gray-50 rounded-lg px-2 py-1">
+        <td className="px-3 py-3 text-[0.85rem] text-right text-zinc-600 font-medium tabular-nums tracking-tight align-middle border-r border-zinc-100">
             {entregado.toLocaleString()}
-          </div>
         </td>
 
         {/* Diferencia - Calculated */}
-        <td className={`px-3 py-4 text-sm text-center font-bold border-r border-gray-100 ${
-          diferencia >= 0 ? 'text-green-700' : 'text-red-700'
+        <td className={`px-3 py-3 text-[0.85rem] text-right tabular-nums tracking-tight font-semibold align-middle border-r border-zinc-200 ${
+          diferencia >= 0 ? 'text-zinc-900' : 'text-rose-600'
         }`}>
-          <div className={`rounded-lg px-2 py-1 ${
-            diferencia >= 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-          }`}>
-            {diferencia.toLocaleString()}
-          </div>
+            {diferencia > 0 ? `+${diferencia.toLocaleString()}` : diferencia.toLocaleString()}
         </td>
 
         {/* Consumido - Read Only */}
-        <td className="px-3 py-4 text-sm text-center text-gray-800 border-r border-gray-100 font-semibold">
-          <div className="bg-gray-50 rounded-lg px-2 py-1">
+        <td className="px-3 py-3 text-[0.85rem] text-right text-zinc-600 font-medium tabular-nums tracking-tight align-middle border-r border-zinc-100">
             {consumido.toLocaleString()}
-          </div>
         </td>
 
         {/* Saldo - Calculated */}
-        <td className={`px-3 py-4 text-sm text-center font-bold border-r border-gray-200 ${
-          saldo >= 0 ? 'text-blue-700' : 'text-red-700'
+        <td className={`px-3 py-3 text-[0.85rem] text-right tabular-nums tracking-tight font-bold align-middle border-r border-zinc-200 ${
+          saldo >= 0 ? 'text-zinc-900' : 'text-rose-600'
         }`}>
-          <div className={`rounded-lg px-2 py-1 shadow-sm ${
-            saldo >= 0 ? 'bg-blue-50 border border-blue-200' : 'bg-red-50 border border-red-200'
-          }`}>
             {saldo.toLocaleString()}
-          </div>
         </td>
-      </>
+      </React.Fragment>
     );
   };
 
@@ -345,7 +333,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl">
         <div className="flex flex-col justify-center items-center py-16">
           <div className="bg-blue-100 p-4 rounded-full mb-4">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <SpinnerGap weight="bold" className="h-8 w-8 animate-spin text-blue-600" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Cargando Programación Anual</h3>
           <p className="text-gray-600">Obteniendo datos de programación y seguimiento...</p>
@@ -359,7 +347,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl">
         <div className="flex flex-col items-center py-16">
           <div className="bg-red-100 p-4 rounded-full mb-4">
-            <AlertCircle className="h-8 w-8 text-red-600" />
+            <WarningCircle weight="duotone" className="h-8 w-8 text-red-600" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Error al cargar datos</h3>
           <p className="text-gray-600 mb-6 text-center max-w-md">{error}</p>
@@ -377,19 +365,19 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl">
-      {/* Header Premium */}
-      <div className="px-6 py-6 border-b border-gray-200 bg-gradient-to-r from-slate-50 to-blue-50">
-        <div className="flex items-center justify-between">
+      {/* Header Minimal */}
+      <div className="px-5 py-4 border-b border-zinc-200 bg-white">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
-            <div className="bg-blue-600 p-2 rounded-lg shadow-sm">
-              <Package className="h-5 w-5 text-white" />
+            <div className="bg-zinc-100 p-2 rounded-xl flex items-center justify-center">
+              <Package className="h-5 w-5 text-zinc-900" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900">
-                Programación y Seguimiento Anual CENARES {anio}
+              <h3 className="text-lg font-semibold tracking-tight text-zinc-900 leading-none">
+                CENARES {anio}
               </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Los valores de programación se guardan automáticamente al modificarlos
+              <p className="text-[0.8rem] text-zinc-500 mt-1">
+                Matriz de programación y seguimiento trimestral con autoguardado.
               </p>
             </div>
           </div>
@@ -398,25 +386,25 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
             <button
               onClick={handleExportarExcel}
               disabled={isExporting || loading || items.length === 0}
-              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="flex items-center px-4 py-2 border border-zinc-200 bg-white text-zinc-700 text-sm font-medium rounded-xl hover:bg-zinc-50 focus:ring-2 focus:ring-zinc-900/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             >
               {isExporting ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <SpinnerGap weight="bold" className="h-4 w-4 mr-2 animate-spin" />
                   Exportando...
                 </>
               ) : (
                 <>
-                  <FileSpreadsheet className="h-4 w-4 mr-2" />
-                  Exportar Excel
+                  <FileXls weight="duotone" className="h-4 w-4 mr-2 text-zinc-600" />
+                  Descargar MS Excel
                 </>
               )}
             </button>
 
             {isUpdating && (
-              <div className="flex items-center text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                <span className="text-sm font-medium">Guardando...</span>
+              <div className="flex items-center text-zinc-600 bg-zinc-50 px-3 py-1.5 rounded-lg border border-zinc-200 shadow-sm">
+                <SpinnerGap weight="bold" className="h-[14px] w-[14px] animate-spin mr-1.5" />
+                <span className="text-[0.75rem] font-medium tracking-tight">Guardando datos...</span>
               </div>
             )}
           </div>
@@ -426,83 +414,57 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       {/* Table Container with Horizontal Scroll */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1400px]">
-          <thead className="bg-gradient-to-r from-slate-800 to-slate-900 text-white">
+          <thead className="bg-zinc-50 border-b border-zinc-200">
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-bold uppercase tracking-wider sticky left-0 bg-gradient-to-r from-slate-800 to-slate-900 z-10 border-r border-slate-700">
+              <th className="px-4 py-3 text-left text-[0.7rem] font-semibold text-zinc-500 uppercase tracking-widest sticky left-0 bg-zinc-50 border-y border-zinc-200 z-10 border-r">
                 <div className="flex items-center">
                   <Package className="h-4 w-4 mr-2" />
                   Descripción del Ítem
                 </div>
               </th>
-              <th className="px-4 py-4 text-center text-sm font-bold uppercase tracking-wider border-r border-slate-700">
+              <th className="px-3 py-3 text-right text-[0.7rem] font-semibold text-zinc-500 uppercase tracking-widest border-y border-zinc-200 border-r bg-zinc-50">
                 Saldo {anio - 1}
               </th>
-
               {/* Q1 Columns */}
-              <th colSpan={5} className="px-3 py-3 text-center text-sm font-bold text-blue-100 uppercase tracking-wider border-r border-slate-600 bg-gradient-to-r from-blue-600 to-blue-700">
+              <th colSpan={5} className="px-3 py-2 text-center text-[0.7rem] font-semibold text-zinc-700 uppercase tracking-widest border-zinc-200 border-y border-r bg-zinc-50">
                 1° Trimestre
               </th>
-              
               {/* Q2 Columns */}
-              <th colSpan={5} className="px-3 py-3 text-center text-sm font-bold text-green-100 uppercase tracking-wider border-r border-slate-600 bg-gradient-to-r from-green-600 to-green-700">
+              <th colSpan={5} className="px-3 py-2 text-center text-[0.7rem] font-semibold text-zinc-700 uppercase tracking-widest border-zinc-200 border-y border-r bg-zinc-50">
                 2° Trimestre
               </th>
-
               {/* Q3 Columns */}
-              <th colSpan={5} className="px-3 py-3 text-center text-sm font-bold text-orange-100 uppercase tracking-wider border-r border-slate-600 bg-gradient-to-r from-orange-600 to-orange-700">
+              <th colSpan={5} className="px-3 py-2 text-center text-[0.7rem] font-semibold text-zinc-700 uppercase tracking-widest border-zinc-200 border-y border-r bg-zinc-50">
                 3° Trimestre
               </th>
-
               {/* Q4 Columns */}
-              <th colSpan={5} className="px-3 py-3 text-center text-sm font-bold text-purple-100 uppercase tracking-wider border-r border-slate-600 bg-gradient-to-r from-purple-600 to-purple-700">
+              <th colSpan={5} className="px-3 py-2 text-center text-[0.7rem] font-semibold text-zinc-700 uppercase tracking-widest border-zinc-200 border-y border-r bg-zinc-50">
                 4° Trimestre
               </th>
-
               {/* Annual Totals */}
-              <th colSpan={3} className="px-3 py-3 text-center text-sm font-bold text-slate-100 uppercase tracking-wider bg-gradient-to-r from-slate-700 to-slate-800">
+              <th colSpan={3} className="px-3 py-2 text-center text-[0.7rem] font-semibold text-zinc-700 uppercase tracking-widest border-y border-zinc-200 bg-zinc-50">
                 Total Anual
               </th>
             </tr>
 
             {/* Sub-headers */}
-            <tr className="bg-gradient-to-r from-slate-700 to-slate-800 text-white">
-              <th className="px-6 py-3 sticky left-0 bg-gradient-to-r from-slate-700 to-slate-800 z-10 border-r border-slate-600"></th>
-              <th className="px-4 py-3 border-r border-slate-600"></th>
+            <tr className="bg-white border-b border-zinc-200 text-zinc-500">
+              <th className="px-4 py-2 sticky left-0 bg-white z-10 border-r border-zinc-200"></th>
+              <th className="px-3 py-2 border-r border-zinc-200"></th>
 
-              {/* Q1 Sub-headers */}
-              {['Programado', 'Entregado (CENARES)', 'Diferencia', 'Consumido', 'Saldo'].map((header, idx) => (
-                <th key={`q1-${idx}`} className="px-3 py-3 text-xs font-semibold text-blue-100 border-r border-slate-600">
-                  {header}
-                </th>
+              {['Q1', 'Q2', 'Q3', 'Q4'].map((q) => (
+                <React.Fragment key={q}>
+                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-200">Prog.</th>
+                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-100">CENARES</th>
+                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-200">Dif.</th>
+                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-100">Cons.</th>
+                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-200 text-zinc-700">Saldo</th>
+                </React.Fragment>
               ))}
-
-              {/* Q2 Sub-headers */}
-              {['Programado', 'Entregado (CENARES)', 'Diferencia', 'Consumido', 'Saldo'].map((header, idx) => (
-                <th key={`q2-${idx}`} className="px-3 py-3 text-xs font-semibold text-green-100 border-r border-slate-600">
-                  {header}
-                </th>
-              ))}
-
-              {/* Q3 Sub-headers */}
-              {['Programado', 'Entregado (CENARES)', 'Diferencia', 'Consumido', 'Saldo'].map((header, idx) => (
-                <th key={`q3-${idx}`} className="px-3 py-3 text-xs font-semibold text-orange-100 border-r border-slate-600">
-                  {header}
-                </th>
-              ))}
-
-              {/* Q4 Sub-headers */}
-              {['Programado', 'Entregado (CENARES)', 'Diferencia', 'Consumido', 'Saldo'].map((header, idx) => (
-                <th key={`q4-${idx}`} className="px-3 py-3 text-xs font-semibold text-purple-100 border-r border-slate-600">
-                  {header}
-                </th>
-              ))}
-
-              {/* Annual Totals Sub-headers */}
-              {['Total Prog.', 'Total Entr.', 'Dif. Total'].map((header, idx) => (
-                <th key={`total-${idx}`} className="px-3 py-3 text-xs font-semibold text-slate-100 border-r border-slate-600">
-                  {header}
-                </th>
-              ))}
+              
+              <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-100">Prog.</th>
+              <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-100">Entr.</th>
+              <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider text-zinc-700">Dif.</th>
             </tr>
           </thead>
           
@@ -513,7 +475,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
               const diferenciaTotal = totalProgramado - totalEntregado;
 
               return (
-                <tr key={item.id} className="hover:bg-slate-50 transition-colors duration-200 border-b border-gray-100">
+                <tr key={item.id} className="hover:bg-zinc-50 transition-colors duration-200 border-b border-gray-100">
                   {/* Item Description */}
                   <td className="px-6 py-4 text-sm font-semibold text-gray-900 sticky left-0 bg-white z-10 border-r border-gray-100">
                     <div className="flex items-center space-x-3">
@@ -522,7 +484,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
                           ? 'bg-blue-50 border-blue-200 text-blue-600'
                           : 'bg-green-50 border-green-200 text-green-600'
                       }`}>
-                        {item.tipo === 'vacuna' ? <Package className="h-4 w-4" /> : <Syringe className="h-4 w-4" />}
+                        {item.tipo === 'vacuna' ? <Package className="h-4 w-4" /> : <Syringe weight="duotone" className="h-4 w-4" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-semibold text-gray-900 truncate">
@@ -542,43 +504,33 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
                   </td>
 
                   {/* Previous Year Balance */}
-                  <td className="px-4 py-4 text-sm text-center text-gray-800 border-r border-gray-100 font-bold bg-slate-50">
-                    <div className="bg-white rounded-lg px-2 py-1 shadow-sm">
-                      {item.saldoAnterior.toLocaleString()}
-                    </div>
+                  <td className="px-3 py-3 text-[0.85rem] font-semibold text-right text-zinc-600 border-r border-zinc-200 bg-zinc-50 align-middle tabular-nums">
+                    {item.saldoAnterior.toLocaleString()}
                   </td>
                   
                   {/* Q1 Columns */}
-                  {renderQuarterColumns(item, itemIndex, 'q1', 'blue')}
+                  {renderQuarterColumns(item, itemIndex, 'q1', 'zinc')}
 
                   {/* Q2 Columns */}
-                  {renderQuarterColumns(item, itemIndex, 'q2', 'green')}
+                  {renderQuarterColumns(item, itemIndex, 'q2', 'zinc')}
 
                   {/* Q3 Columns */}
-                  {renderQuarterColumns(item, itemIndex, 'q3', 'orange')}
+                  {renderQuarterColumns(item, itemIndex, 'q3', 'zinc')}
 
                   {/* Q4 Columns */}
-                  {renderQuarterColumns(item, itemIndex, 'q4', 'purple')}
+                  {renderQuarterColumns(item, itemIndex, 'q4', 'zinc')}
                   
                   {/* Annual Totals */}
-                  <td className="px-4 py-4 text-sm text-center font-bold text-slate-900 border-r border-gray-100 bg-slate-50">
-                    <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
-                      {totalProgramado.toLocaleString()}
-                    </div>
+                  <td className="px-3 py-3 text-[0.85rem] text-right text-zinc-800 font-semibold border-r border-zinc-100 bg-zinc-50 align-middle tabular-nums">
+                    {totalProgramado.toLocaleString()}
                   </td>
-                  <td className="px-4 py-4 text-sm text-center font-bold text-slate-900 border-r border-gray-100 bg-slate-50">
-                    <div className="bg-white rounded-lg px-3 py-2 shadow-sm">
-                      {totalEntregado.toLocaleString()}
-                    </div>
+                  <td className="px-3 py-3 text-[0.85rem] text-right text-zinc-800 font-semibold border-r border-zinc-100 bg-zinc-50 align-middle tabular-nums">
+                    {totalEntregado.toLocaleString()}
                   </td>
-                  <td className={`px-4 py-4 text-sm text-center font-bold border-r border-gray-100 bg-slate-50 ${
-                    diferenciaTotal >= 0 ? 'text-green-700' : 'text-red-700'
+                  <td className={`px-3 py-3 text-[0.85rem] text-right font-bold bg-zinc-50 align-middle tracking-tight tabular-nums ${
+                    diferenciaTotal >= 0 ? 'text-zinc-900 border-zinc-100' : 'text-rose-600 border-rose-200'
                   }`}>
-                    <div className={`rounded-lg px-3 py-2 shadow-sm ${
-                      diferenciaTotal >= 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-                    }`}>
-                      {diferenciaTotal.toLocaleString()}
-                    </div>
+                    {diferenciaTotal > 0 ? `+${diferenciaTotal.toLocaleString()}` : diferenciaTotal.toLocaleString()}
                   </td>
                 </tr>
               );
@@ -587,33 +539,30 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
         </table>
       </div>
       
-      {/* Footer Premium */}
-      <div className="px-6 py-6 border-t border-gray-200 bg-gradient-to-r from-slate-50 to-blue-50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
-              <Package className="h-4 w-4 text-blue-600" />
-              <span>Total de ítems: <span className="text-blue-600">{items.length}</span></span>
-            </div>
-            <div className="text-sm text-gray-600">
-              (<span className="font-medium text-blue-600">{items.filter(i => i.tipo === 'vacuna').length}</span> vacunas,
-              <span className="font-medium text-green-600 ml-1">{items.filter(i => i.tipo === 'jeringa').length}</span> jeringas)
-            </div>
+      {/* Footer Minimal */}
+      <div className="px-5 py-4 border-t border-zinc-200 bg-zinc-50 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 text-[0.8rem] font-medium text-zinc-600">
+            <Package className="h-4 w-4" />
+            <span>Total de ítems: <span className="font-semibold text-zinc-900">{items.length}</span></span>
           </div>
-          <div className="flex items-center space-x-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
-            <Save className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium text-green-700">Auto-guardado activado</span>
+          <div className="text-[0.8rem] text-zinc-500">
+            (<span className="font-medium text-zinc-700">{items.filter(i => i.tipo === 'vacuna').length}</span> vacunas, <span className="font-medium text-zinc-700 ml-1">{items.filter(i => i.tipo === 'jeringa').length}</span> jeringas)
           </div>
+        </div>
+        <div className="flex items-center space-x-2 bg-zinc-100/80 px-2.5 py-1.5 rounded-lg border border-zinc-200/60">
+          <FloppyDisk className="h-3.5 w-3.5 text-zinc-500" />
+          <span className="text-[0.7rem] font-medium text-zinc-600 uppercase tracking-wider">Guardado Automático</span>
         </div>
       </div>
 
       {/* Export Section - Professional Design */}
       <div className="border-t border-gray-200 bg-white p-6">
         <div className="flex items-center justify-center">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 shadow-sm max-w-2xl w-full">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 border border-blue-200 shadow-sm max-w-2xl w-full">
             <div className="flex items-center mb-4">
               <div className="bg-blue-100 p-3 rounded-lg mr-4">
-                <Download className="h-6 w-6 text-blue-600" />
+                <DownloadSimple className="h-6 w-6 text-blue-600" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">📊 Exportar Programación y Seguimiento Anual</h3>
@@ -630,12 +579,12 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
               >
                 {isExporting ? (
                   <>
-                    <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                    <SpinnerGap weight="bold" className="h-5 w-5 mr-3 animate-spin" />
                     Exportando...
                   </>
                 ) : (
                   <>
-                    <FileSpreadsheet className="h-5 w-5 mr-3" />
+                    <FileXls weight="duotone" className="h-5 w-5 mr-3" />
                     Exportar Programación y Seguimiento Anual CENARES {anio}
                   </>
                 )}

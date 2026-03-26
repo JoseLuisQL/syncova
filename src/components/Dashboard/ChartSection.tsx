@@ -1,18 +1,9 @@
 import React, { memo, useMemo } from 'react';
 import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell,
 } from 'recharts';
-import { TrendingUp, Package } from 'lucide-react';
-import { CHART_COLORS, CHART_GRADIENT_COLORS } from './constants';
+import { TrendUp, Package } from '@phosphor-icons/react';
 import type { MovimientosMensuales, StockPorVacuna } from '../../services/dashboardService';
 
 interface ChartSectionProps {
@@ -21,41 +12,44 @@ interface ChartSectionProps {
   isLoading?: boolean;
 }
 
-/* ─── Area chart color pair (teal & cyan — system brand) ─── */
+/* ─── Paletas SEMÁNTICAS (Tufte/Data-Viz 2025) ─── */
+const PALETA_ZINC = ['#0f172a', '#334155', '#64748b', '#94a3b8', '#cbd5e1'];
 const AREA = {
-  entregas:   { stroke: '#0D9488', grad: 'rgba(13,148,136,' },   // teal-600
-  recepciones:{ stroke: '#0891B2', grad: 'rgba(8,145,178,' },    // cyan-600
+  entregas:   { stroke: '#09090b', grad: 'rgba(9,9,11,' },    // zinc-950
+  recepciones:{ stroke: '#71717a', grad: 'rgba(113,113,122,' }, // zinc-500
 };
 
-/* ─── Skeletons ─── */
+/* ─── Esqueletos ─── */
 const ChartSkeleton: React.FC = () => (
   <div className="animate-pulse space-y-4">
     <div className="flex items-center gap-3">
-      <div className="w-10 h-10 rounded-xl bg-teal-50" />
-      <div className="h-4 w-40 bg-gray-100 rounded-lg" />
+      <div className="w-10 h-10 rounded-xl bg-zinc-100" />
+      <div className="h-4 w-40 bg-zinc-100 rounded-lg" />
     </div>
-    <div className="h-[280px] bg-gray-50 rounded-2xl" />
+    <div className="h-[280px] bg-zinc-50 rounded-2xl border border-zinc-100/50" />
   </div>
 );
 
-/* ─── Dark Tooltip ─── */
-const CustomTooltip: React.FC<{
+interface CustomTooltipProps {
   active?: boolean;
-  payload?: Array<{ name: string; value: number; color: string }>;
+  payload?: Array<{ name: string; value: number; color?: string; fill?: string; payload?: { fill?: string } }>;
   label?: string;
-}> = ({ active, payload, label }) => {
+}
+
+/* ─── Tooltip NYT Style (Sobrio, Tabular, Data-Ink Ratio 1:1) ─── */
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-gray-900/90 backdrop-blur-xl rounded-xl shadow-2xl px-4 py-3 border border-white/10">
-      <p className="text-[11px] font-medium text-gray-400 uppercase tracking-widest mb-2">{label}</p>
+    <div className="bg-white/95 backdrop-blur-md rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] px-4 py-3 border border-zinc-200/50">
+      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 border-b border-zinc-100 pb-1.5">{label}</p>
       <div className="space-y-1.5">
-        {payload.map((entry, i) => (
-          <div key={i} className="flex items-center justify-between gap-6">
+        {payload.map((entry, i: number) => (
+          <div key={i} className="flex items-center justify-between gap-8">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-              <span className="text-[13px] text-gray-300">{entry.name}</span>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: entry.color }} />
+              <span className="text-[12px] font-semibold text-zinc-600">{entry.name}</span>
             </div>
-            <span className="text-[13px] font-semibold text-white tabular-nums">
+            <span className="text-[13px] font-bold text-zinc-900 tabular-nums">
               {entry.value.toLocaleString()}
             </span>
           </div>
@@ -66,27 +60,24 @@ const CustomTooltip: React.FC<{
 };
 
 /* ─── Pie Tooltip ─── */
-const PieTooltip: React.FC<{
-  active?: boolean;
-  payload?: Array<{ name: string; value: number; payload: { color: string } }>;
-}> = ({ active, payload }) => {
+const PieTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
   const e = payload[0];
   return (
-    <div className="bg-gray-900/90 backdrop-blur-xl rounded-xl shadow-2xl px-4 py-3 border border-white/10">
-      <div className="flex items-center gap-2 mb-1">
-        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: e.payload.color }} />
-        <span className="text-[13px] font-medium text-gray-200">{e.name}</span>
+    <div className="bg-zinc-900/95 backdrop-blur-md rounded-xl shadow-xl px-4 py-3 border border-zinc-800">
+      <div className="flex items-center gap-2 mb-1.5">
+        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: e.payload?.fill || '#fff' }} />
+        <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-300">{e.name}</span>
       </div>
-      <p className="text-lg font-bold text-white tabular-nums">
-        {e.value.toLocaleString()} <span className="text-xs font-normal text-gray-400">uds</span>
+      <p className="text-[15px] font-extrabold text-white tabular-nums">
+        {e.value.toLocaleString()} <span className="text-[10px] font-medium text-zinc-500 Normal ml-0.5">UDS</span>
       </p>
     </div>
   );
 };
 
 /* ════════════════════════════════════════════
-   Area Chart — Movimientos Mensuales
+   Area Chart — Movimientos Mensuales (Tufte)
    ════════════════════════════════════════════ */
 const AreaChartSection: React.FC<{ data: MovimientosMensuales[]; isLoading?: boolean }> = memo(
   ({ data, isLoading }) => {
@@ -104,66 +95,74 @@ const AreaChartSection: React.FC<{ data: MovimientosMensuales[]; isLoading?: boo
     if (isLoading) return <ChartSkeleton />;
 
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-lg hover:shadow-teal-50 transition-all duration-500">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white rounded-[20px] border border-zinc-200/60 p-6 shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-shadow duration-300">
+        {/* Header Analítico */}
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-500/25">
-              <TrendingUp className="h-5 w-5 text-white" aria-hidden="true" />
+            <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center border border-zinc-200">
+              <TrendUp className="h-4 w-4 text-zinc-900" weight="bold" />
             </div>
             <div>
-              <h3 className="text-[15px] font-semibold text-gray-900">Movimientos Mensuales</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Últimos meses</p>
+              <h3 className="text-[15px] font-bold text-zinc-900 tracking-tight">Movimientos de red</h3>
+              <p className="text-[12px] font-medium text-zinc-500 mt-0.5">Último semestre</p>
             </div>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <span className="w-3 h-1.5 rounded-full bg-teal-600" />
               <div className="text-right">
-                <span className="text-xs text-gray-400 block leading-none">Entregas</span>
-                <span className="text-sm font-semibold text-gray-700 tabular-nums">{totals.entregas.toLocaleString()}</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block leading-none mb-1">Entregas</span>
+                <span className="text-[15px] font-extrabold text-zinc-900 tabular-nums">{totals.entregas.toLocaleString()}</span>
               </div>
+              <span className="w-1 h-8 rounded-full bg-zinc-900" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-3 h-1.5 rounded-full bg-cyan-600" />
               <div className="text-right">
-                <span className="text-xs text-gray-400 block leading-none">Recepciones</span>
-                <span className="text-sm font-semibold text-gray-700 tabular-nums">{totals.recepciones.toLocaleString()}</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block leading-none mb-1">Recepciones</span>
+                <span className="text-[15px] font-bold text-zinc-500 tabular-nums">{totals.recepciones.toLocaleString()}</span>
               </div>
+              <span className="w-1 h-8 rounded-full bg-zinc-400" />
             </div>
           </div>
         </div>
 
-        {/* Chart */}
-        <div className="h-[280px]">
+        {/* Chart Lineal Puro (Sin Gridlines superfluas, ratio 1:1) */}
+        <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="gEnt" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={AREA.entregas.stroke} stopOpacity={0.18} />
-                  <stop offset="95%" stopColor={AREA.entregas.stroke} stopOpacity={0} />
+                  <stop offset="0%" stopColor={AREA.entregas.stroke} stopOpacity={0.08} />
+                  <stop offset="100%" stopColor={AREA.entregas.stroke} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gRec" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={AREA.recepciones.stroke} stopOpacity={0.14} />
-                  <stop offset="95%" stopColor={AREA.recepciones.stroke} stopOpacity={0} />
+                  <stop offset="0%" stopColor={AREA.recepciones.stroke} stopOpacity={0.04} />
+                  <stop offset="100%" stopColor={AREA.recepciones.stroke} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="mes" tick={{ fontSize: 12, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
+              <XAxis 
+                dataKey="mes" 
+                tick={{ fontSize: 11, fill: '#71717a', fontWeight: 600 }} 
+                tickLine={false} 
+                axisLine={{ stroke: '#e4e4e7', strokeWidth: 1 }} 
+                dy={10}
+              />
               <YAxis
-                tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} width={45}
+                tick={{ fontSize: 11, fill: '#a1a1aa', fontWeight: 500 }} 
+                tickLine={false} 
+                axisLine={false} 
+                width={50}
                 tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d8', strokeWidth: 1, strokeDasharray: '4 4' }} />
               <Area
                 type="monotone" dataKey="entregas" name="Entregas"
                 stroke={AREA.entregas.stroke} strokeWidth={2.5} fill="url(#gEnt)"
-                dot={false} activeDot={{ r: 5, fill: AREA.entregas.stroke, stroke: '#fff', strokeWidth: 2.5 }}
+                activeDot={{ r: 4, fill: '#fff', stroke: AREA.entregas.stroke, strokeWidth: 2 }}
               />
               <Area
                 type="monotone" dataKey="recepciones" name="Recepciones"
-                stroke={AREA.recepciones.stroke} strokeWidth={2.5} fill="url(#gRec)"
-                dot={false} activeDot={{ r: 5, fill: AREA.recepciones.stroke, stroke: '#fff', strokeWidth: 2.5 }}
+                stroke={AREA.recepciones.stroke} strokeWidth={2} fill="url(#gRec)" strokeDasharray="4 4"
+                activeDot={{ r: 4, fill: '#fff', stroke: AREA.recepciones.stroke, strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -174,20 +173,17 @@ const AreaChartSection: React.FC<{ data: MovimientosMensuales[]; isLoading?: boo
 );
 AreaChartSection.displayName = 'AreaChartSection';
 
-
 /* ════════════════════════════════════════════
    Donut Chart — Stock por Vacuna (ALL vaccines)
    ════════════════════════════════════════════ */
 const DonutChartSection: React.FC<{ data: StockPorVacuna[]; isLoading?: boolean }> = memo(
   ({ data, isLoading }) => {
-    // Show ALL vaccines with stock > 0 (no arbitrary limit)
     const chartData = useMemo(() => {
-      return data
-        .filter(item => item.stockTotal > 0)
-        .map((item, index) => ({
-          ...item,
-          color: CHART_GRADIENT_COLORS[index % CHART_GRADIENT_COLORS.length].main,
-        }));
+      const sorted = [...data].sort((a,b) => b.stockTotal - a.stockTotal).filter(item => item.stockTotal > 0);
+      return sorted.map((item, index) => ({
+        ...item,
+        fill: PALETA_ZINC[index % PALETA_ZINC.length], // Palette allocation
+      }));
     }, [data]);
 
     const totalStock = useMemo(
@@ -199,92 +195,94 @@ const DonutChartSection: React.FC<{ data: StockPorVacuna[]; isLoading?: boolean 
 
     if (chartData.length === 0) {
       return (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="bg-white rounded-[20px] border border-zinc-200/60 p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-teal-500/25">
-              <Package className="h-5 w-5 text-white" aria-hidden="true" />
+            <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center">
+              <Package className="h-4 w-4 text-zinc-900" weight="bold" />
             </div>
-            <h3 className="text-[15px] font-semibold text-gray-900">Stock por Vacuna</h3>
+            <h3 className="text-[15px] font-bold text-zinc-900">Stock por Biológico</h3>
           </div>
-          <div className="h-[280px] flex items-center justify-center">
-            <p className="text-gray-400 text-sm">Sin datos de stock disponibles</p>
+          <div className="h-[260px] flex items-center justify-center">
+            <p className="text-zinc-400 text-sm font-medium">Data no disponible</p>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-lg hover:shadow-teal-50 transition-all duration-500">
+      <div className="bg-white rounded-[20px] border border-zinc-200/60 p-6 shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-shadow duration-300">
         {/* Header */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-teal-500/25">
-              <Package className="h-5 w-5 text-white" aria-hidden="true" />
+            <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center border border-zinc-200">
+              <Package className="h-4 w-4 text-zinc-900" weight="bold" />
             </div>
             <div>
-              <h3 className="text-[15px] font-semibold text-gray-900">Stock por Vacuna</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Distribución actual</p>
+              <h3 className="text-[15px] font-bold text-zinc-900 tracking-tight">Segmentación</h3>
+              <p className="text-[12px] font-medium text-zinc-500 mt-0.5">Tipos de biológico</p>
             </div>
           </div>
           <div className="text-right">
-            <span className="text-2xl font-bold text-gray-900 tabular-nums">
+            <span className="text-[22px] font-extrabold text-zinc-900 tabular-nums leading-none block">
               {totalStock >= 1000 ? `${(totalStock / 1000).toFixed(1)}k` : totalStock.toLocaleString()}
             </span>
-            <span className="text-xs text-gray-400 block">unidades totales</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mt-1 block">Existencias</span>
           </div>
         </div>
 
-        {/* Chart + Legend */}
-        <div className="flex items-start gap-5">
-          {/* Donut */}
+        {/* Layout Visual: Data Tufte Style */}
+        <div className="flex items-center gap-8 h-[260px]">
+          {/* Donut Abstracto */}
           <div className="w-[180px] h-[180px] flex-shrink-0 relative">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={chartData}
                   cx="50%" cy="50%"
-                  innerRadius={52} outerRadius={82}
-                  paddingAngle={3}
+                  innerRadius={65} outerRadius={88}
+                  paddingAngle={2}
                   dataKey="stockTotal" nameKey="vacunaNombre"
-                  cornerRadius={4} stroke="none"
+                  stroke="none"
                 >
                   {chartData.map((entry, i) => (
-                    <Cell key={`c-${i}`} fill={entry.color} />
+                    <Cell key={`c-${i}`} fill={entry.fill} />
                   ))}
                 </Pie>
                 <Tooltip content={<PieTooltip />} />
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-xl font-bold text-gray-900 leading-none tabular-nums">{chartData.length}</span>
-              <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mt-0.5">vacunas</span>
+              <span className="text-[22px] font-extrabold text-zinc-900 leading-none tabular-nums">{chartData.length}</span>
             </div>
           </div>
 
-          {/* Legend — progress bars */}
-          <div className="flex-1 space-y-2.5 overflow-y-auto max-h-[240px] pr-1">
+          {/* Leyenda Tabular Discreta */}
+          <div className="flex-1 h-full space-y-3 overflow-y-auto pr-3 custom-scrollbar py-2">
             {chartData.map((item, i) => {
               const pct = totalStock > 0 ? (item.stockTotal / totalStock) * 100 : 0;
               return (
-                <div key={i} className="group">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <span className="text-[12px] font-medium text-gray-600 truncate max-w-[150px]">
-                      {item.vacunaNombre}
-                    </span>
-                    <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
-                      <span className="text-[11px] text-gray-400 tabular-nums">{pct.toFixed(0)}%</span>
-                      <span className="text-[12px] font-semibold text-gray-700 tabular-nums">
+                <div key={i} className="group relative">
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.fill }} />
+                      <span className="text-[12px] font-semibold text-zinc-700 truncate group-hover:text-zinc-900 transition-colors">
+                        {item.vacunaNombre}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0 pl-2">
+                      <span className="text-[12px] font-bold text-zinc-900 tabular-nums">
                         {item.stockTotal.toLocaleString()}
+                      </span>
+                      <span className="text-[10px] font-semibold text-zinc-400 tabular-nums w-8 text-right">
+                        {pct.toFixed(0)}%
                       </span>
                     </div>
                   </div>
-                  <div className="w-full h-[5px] rounded-full bg-gray-100 overflow-hidden">
+                  {/* Subtle bar visual in the background or below */}
+                  <div className="w-full h-[2px] rounded-full bg-zinc-100 mt-1.5 overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all duration-700 group-hover:brightness-110"
-                      style={{
-                        width: `${Math.max(pct, 2)}%`,
-                        backgroundColor: CHART_GRADIENT_COLORS[i % CHART_GRADIENT_COLORS.length].main,
-                      }}
+                      className="h-full rounded-full transition-all duration-700 opacity-80"
+                      style={{ width: `${Math.max(pct, 1)}%`, backgroundColor: item.fill }}
                     />
                   </div>
                 </div>
@@ -298,7 +296,6 @@ const DonutChartSection: React.FC<{ data: StockPorVacuna[]; isLoading?: boolean 
 );
 DonutChartSection.displayName = 'DonutChartSection';
 
-/* ─── Wrapper ─── */
 const ChartSection: React.FC<ChartSectionProps> = memo(({
   movimientosMensuales,
   stockPorVacuna,

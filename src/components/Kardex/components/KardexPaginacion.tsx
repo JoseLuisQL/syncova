@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { CaretLeft, CaretRight, CaretDoubleLeft, CaretDoubleRight } from '@phosphor-icons/react';
 import { COMPONENT_STYLES, ITEMS_PER_PAGE_OPTIONS } from '../constants';
 
 interface KardexPaginacionProps {
@@ -62,7 +62,7 @@ const KardexPaginacionComponent: React.FC<KardexPaginacionProps> = ({
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
-            <label htmlFor="kardex-page-size" className="text-sm text-slate-600">
+            <label htmlFor="kardex-page-size" className="text-sm text-zinc-600">
               Mostrar
             </label>
             <select
@@ -78,13 +78,13 @@ const KardexPaginacionComponent: React.FC<KardexPaginacionProps> = ({
                 </option>
               ))}
             </select>
-            <span className="text-sm text-slate-600">filas</span>
+            <span className="text-sm text-zinc-600">filas</span>
           </div>
 
           <p className={COMPONENT_STYLES.pagination.info}>
-            Mostrando <span className="font-semibold text-slate-900">{startItem}</span> a{' '}
-            <span className="font-semibold text-slate-900">{endItem}</span> de{' '}
-            <span className="font-semibold text-slate-900">{total}</span>
+            Mostrando <span className="font-semibold text-zinc-900">{startItem}</span> a{' '}
+            <span className="font-semibold text-zinc-900">{endItem}</span> de{' '}
+            <span className="font-semibold text-zinc-900">{total}</span>
           </p>
         </div>
 
@@ -96,7 +96,7 @@ const KardexPaginacionComponent: React.FC<KardexPaginacionProps> = ({
             className={`${COMPONENT_STYLES.pagination.button} ${COMPONENT_STYLES.pagination.buttonInactive}`}
             title="Primera página"
           >
-            <ChevronsLeft className="h-4 w-4" />
+            <CaretDoubleLeft className="h-4 w-4" />
           </button>
 
           <button
@@ -106,12 +106,12 @@ const KardexPaginacionComponent: React.FC<KardexPaginacionProps> = ({
             className={`${COMPONENT_STYLES.pagination.button} ${COMPONENT_STYLES.pagination.buttonInactive}`}
             title="Página anterior"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <CaretLeft className="h-4 w-4" />
           </button>
 
           {pageNumbers.map((pageNumber, index) =>
             pageNumber === '...' ? (
-              <span key={`ellipsis-${index + 1}`} className="px-2 text-sm text-slate-400">
+              <span key={`ellipsis-${index + 1}`} className="px-2 text-sm text-zinc-400">
                 …
               </span>
             ) : (
@@ -139,7 +139,7 @@ const KardexPaginacionComponent: React.FC<KardexPaginacionProps> = ({
             className={`${COMPONENT_STYLES.pagination.button} ${COMPONENT_STYLES.pagination.buttonInactive}`}
             title="Página siguiente"
           >
-            <ChevronRight className="h-4 w-4" />
+            <CaretRight className="h-4 w-4" />
           </button>
 
           <button
@@ -149,7 +149,7 @@ const KardexPaginacionComponent: React.FC<KardexPaginacionProps> = ({
             className={`${COMPONENT_STYLES.pagination.button} ${COMPONENT_STYLES.pagination.buttonInactive}`}
             title="Última página"
           >
-            <ChevronsRight className="h-4 w-4" />
+            <CaretDoubleRight className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -159,3 +159,4 @@ const KardexPaginacionComponent: React.FC<KardexPaginacionProps> = ({
 
 export const KardexPaginacion = memo(KardexPaginacionComponent);
 KardexPaginacion.displayName = 'KardexPaginacion';
+ 

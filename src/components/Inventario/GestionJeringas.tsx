@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, RefreshCw, ShieldAlert, Syringe } from 'lucide-react';
+import { Plus, ArrowsClockwise, Syringe } from '@phosphor-icons/react';
 import { CreateJeringaDto, Jeringa, UpdateJeringaDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useInventorySearch } from '../../hooks/useInventorySearch';
@@ -8,8 +8,8 @@ import {
   ActionButtons,
   EmptyState,
   ErrorAlert,
-  StatsGrid,
   StatusBadge,
+  KeyValueGrid,
 } from './components/SharedComponents';
 import { DataTable, FilterBar, Pagination, TableHeader } from './components/FilterAndTable';
 import {
@@ -19,7 +19,7 @@ import {
   ModalFooter,
   SelectInput,
   SideSheet,
-} from './components/ModalComponents';
+} from '../ui/ModalElements';
 import { COMPONENT_STYLES, FILTER_OPTIONS } from './constants';
 
 const TABLE_COLUMNS = [
@@ -115,19 +115,7 @@ const GestionJeringas: React.FC = () => {
     });
   }, [filterEstado]);
 
-  const stats = useMemo(() => {
-    const total = jeringas.length;
-    const activas = jeringas.filter((item) => item.estado === 'activo').length;
-    const conStock = jeringas.filter((item) => getStockInfo(item).stockTotal > 0).length;
-    const sinStock = total - conStock;
 
-    return [
-      { key: 'total', label: 'Total jeringas', value: total, icon: Syringe, color: 'primary' as const },
-      { key: 'activas', label: 'Activas', value: activas, icon: Syringe, color: 'success' as const },
-      { key: 'conStock', label: 'Con stock', value: conStock, icon: Syringe, color: 'secondary' as const },
-      { key: 'sinStock', label: 'Sin stock', value: sinStock, icon: ShieldAlert, color: 'warning' as const },
-    ];
-  }, [jeringas]);
 
   const filters = useMemo(
     () => [
@@ -135,7 +123,7 @@ const GestionJeringas: React.FC = () => {
         id: 'estado-jeringa',
         label: 'Estado',
         value: filterEstado,
-        options: FILTER_OPTIONS.estado,
+        options: [...FILTER_OPTIONS.estado],
         onChange: setFilterEstado,
       },
     ],
@@ -228,8 +216,8 @@ const GestionJeringas: React.FC = () => {
                 <tr key={jeringa.id} className={COMPONENT_STYLES.table.row}>
                   <td className={COMPONENT_STYLES.table.cell}>
                     <button type="button" onClick={() => setSelectedJeringa(jeringa)} className="flex items-center gap-3 text-left">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
-                        <Syringe className="h-5 w-5" />
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900 border border-zinc-200/80">
+                        <Syringe className="h-5 w-5" weight="duotone" />
                       </div>
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-slate-900">{jeringa.tipo}</p>
@@ -303,11 +291,11 @@ const GestionJeringas: React.FC = () => {
             actions={
               <>
                 <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={refresh} disabled={isLoading}>
-                  <RefreshCw className="h-4 w-4" />
+                  <ArrowsClockwise className="h-4 w-4" weight="bold" />
                   <span>Actualizar</span>
                 </button>
                 <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleCreate} disabled={isCreating}>
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4" weight="bold" />
                   <span>Nueva jeringa</span>
                 </button>
               </>
@@ -318,7 +306,7 @@ const GestionJeringas: React.FC = () => {
 
           <div className="space-y-3 lg:hidden">
             {isLoading ? (
-              <DataTable isLoading={isLoading} loadingMessage="Cargando jeringas..." skeletonRows={4} loadingVariant="cards" />
+              <DataTable isLoading={isLoading} loadingMessage="Cargando jeringas..." skeletonRows={4} loadingVariant="cards"><></></DataTable>
             ) : jeringas.length === 0 ? (
               <div className={COMPONENT_STYLES.panel}>
                 <EmptyState

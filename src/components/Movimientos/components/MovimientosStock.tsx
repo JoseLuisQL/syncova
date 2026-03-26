@@ -2,11 +2,11 @@ import React, { memo } from 'react';
 import {
   Package,
   Truck,
-  AlertTriangle,
-  RefreshCw,
-  Loader2
-} from 'lucide-react';
-import { COMPONENT_STYLES, STOCK_ESTADOS, MESES } from '../constants';
+  Warning,
+  ArrowsClockwise,
+  CircleNotch
+} from '@phosphor-icons/react';
+import { STOCK_ESTADOS, MESES } from '../constants';
 
 interface StockInfo {
   stockInicialHistorico: number | null;
@@ -56,79 +56,78 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
   };
 
   return (
-    <section className={COMPONENT_STYLES.section.container} aria-label="Stock Disponible">
+    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm" aria-label="Stock Disponible">
       {/* Header */}
-      <div className={COMPONENT_STYLES.section.header}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-emerald-600 to-teal-600 p-2.5 rounded-xl shadow-lg">
-              <Package className="h-5 w-5 text-white" aria-hidden="true" />
-            </div>
-            <div>
-              <h3 className={COMPONENT_STYLES.section.headerTitle}>Stock Disponible</h3>
-              <p className={COMPONENT_STYLES.section.headerSubtitle}>Resumen de disponibilidad actual</p>
-            </div>
+      <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-100 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-900 shadow-sm">
+            <Package className="h-5 w-5 text-white" weight="duotone" aria-hidden="true" />
           </div>
-          {(isLoadingStock || isUpdatingStock) && (
-            <div className="flex items-center text-teal-600">
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              <span className="text-sm font-medium">Actualizando...</span>
-            </div>
-          )}
+          <div>
+            <h3 className="text-[0.95rem] font-black tracking-tight text-zinc-900">Stock Disponible</h3>
+            <p className="text-[0.7rem] font-bold uppercase tracking-widest text-zinc-500 mt-0.5">Resumen de disponibilidad actual</p>
+          </div>
         </div>
+        {(isLoadingStock || isUpdatingStock) && (
+          <div className="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-1.5 border border-zinc-200">
+            <CircleNotch className="h-4 w-4 animate-spin text-zinc-900" weight="bold" />
+            <span className="text-[0.7rem] font-bold uppercase tracking-widest text-zinc-900">Actualizando...</span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
-      <div className={COMPONENT_STYLES.section.body}>
+      <div className="">
         {stockInfo ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Stock Inicial */}
-            <div className={`${COMPONENT_STYLES.stats.card} bg-gradient-to-br from-teal-50 to-teal-100 border-teal-200`}>
-              <div className="flex items-center justify-between">
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 transition hover:border-zinc-300">
+              <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className={`${COMPONENT_STYLES.stats.value} text-teal-800`}>
+                  <div className="text-2xl font-black tracking-tight text-zinc-900">
                     {stockInfo.tieneHistorialInicial 
                       ? stockInfo.stockInicialHistorico?.toLocaleString() 
                       : 'N/A'}
                   </div>
-                  <div className={`${COMPONENT_STYLES.stats.label} text-teal-600`}>
-                    Stock Inicial {stockInfo.tieneHistorialInicial ? '(Histórico)' : '(Sin historial)'}
+                  <div className="mt-1 text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">
+                    Inflow Base {stockInfo.tieneHistorialInicial ? '(Histórico)' : ''}
                   </div>
                   {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial && (
-                    <div className={`${COMPONENT_STYLES.stats.sublabel} text-teal-500`}>
-                      Capturado: {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString()}
+                    <div className="mt-1 text-[0.65rem] font-semibold text-zinc-400">
+                      SYS_DATE: {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString('en-CA')}
                     </div>
                   )}
                   {stockInfo.tieneHistorialInicial && stockInfo.ingresosLotesDelMes > 0 && (
-                    <div className="mt-2 pt-2 border-t border-teal-300/50">
-                      <div className="text-xs text-teal-600 font-medium">
+                    <div className="mt-3 pt-3 border-t border-zinc-200">
+                      <div className="text-[0.7rem] font-black text-zinc-600">
                         Base: {stockInfo.stockInicialOriginal?.toLocaleString()}
                       </div>
-                      <div className="text-xs text-emerald-600 font-medium">
-                        + Ingresos: {stockInfo.ingresosLotesDelMes.toLocaleString()}
+                      <div className="text-[0.7rem] font-black text-zinc-900 mt-0.5 flex items-center gap-1">
+                        <span>+ Ingresos:</span>
+                        <span className="bg-zinc-200 px-1 py-0.5 rounded-sm line-clamp-1 truncate">{stockInfo.ingresosLotesDelMes.toLocaleString()}</span>
                       </div>
                     </div>
                   )}
                 </div>
-                <div className={`${COMPONENT_STYLES.stats.iconWrapper} bg-teal-600`}>
-                  <Package className="h-5 w-5 text-white" />
+                <div className="p-2 bg-white border border-zinc-200 rounded-lg shadow-sm">
+                  <Package className="h-4 w-4 text-zinc-600" weight="duotone" />
                 </div>
               </div>
             </div>
 
             {/* Total Entregas */}
-            <div className={`${COMPONENT_STYLES.stats.card} bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200`}>
-              <div className="flex items-center justify-between">
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition hover:border-zinc-300">
+              <div className="flex items-start justify-between">
                 <div>
-                  <div className={`${COMPONENT_STYLES.stats.value} text-cyan-800`}>
+                  <div className="text-2xl font-black tracking-tight text-zinc-900">
                     {stockInfo.totalEntregas.toLocaleString()}
                   </div>
-                  <div className={`${COMPONENT_STYLES.stats.label} text-cyan-600`}>
-                    Total Entregas
+                  <div className="mt-1 text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">
+                    Outflow Segmentado
                   </div>
                 </div>
-                <div className={`${COMPONENT_STYLES.stats.iconWrapper} bg-cyan-600`}>
-                  <Truck className="h-5 w-5 text-white" />
+                <div className="p-2 bg-zinc-50 border border-zinc-200 rounded-lg">
+                  <Truck className="h-4 w-4 text-zinc-600" weight="duotone" />
                 </div>
               </div>
             </div>
@@ -136,20 +135,20 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
             {/* Stock Disponible */}
             {(() => {
               const config = getEstadoConfig(stockInfo.stockDisponible, stockInfo.estado);
-              const IconComponent = config.icon;
+              const IconComponent = config.icon as React.ElementType;
               return (
-                <div className={`${COMPONENT_STYLES.stats.card} ${config.bg} ${config.border}`}>
-                  <div className="flex items-center justify-between">
+                <div className={`rounded-xl border p-4 shadow-sm transition hover:shadow-md ${config.bg} ${config.border}`}>
+                  <div className="flex items-start justify-between">
                     <div>
-                      <div className={`${COMPONENT_STYLES.stats.value} ${config.text}`}>
+                      <div className={`text-2xl font-black tracking-tight ${config.text}`}>
                         {stockInfo.stockDisponible.toLocaleString()}
                       </div>
-                      <div className={`${COMPONENT_STYLES.stats.label} ${config.textLight}`}>
-                        {stockInfo.stockDisponible < 0 ? 'Déficit' : 'Disponible'}
+                      <div className={`mt-1 text-[0.65rem] font-bold uppercase tracking-widest ${config.textLight || config.text}`}>
+                        {stockInfo.stockDisponible < 0 ? 'Déficit Flotante' : 'Disponible Real'}
                       </div>
                     </div>
-                    <div className={`${COMPONENT_STYLES.stats.iconWrapper} ${config.iconBg}`}>
-                      <IconComponent className="h-5 w-5 text-white" />
+                    <div className={`p-2 rounded-lg ${config.iconBg || 'bg-white/10'}`}>
+                      <IconComponent className={`h-4 w-4 ${config.text}`} weight={stockInfo.stockDisponible < 0 ? "bold" : "duotone"} />
                     </div>
                   </div>
                 </div>
@@ -157,32 +156,32 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
             })()}
 
             {/* Stock Actual con Lotes */}
-            <div className={`${COMPONENT_STYLES.stats.card} bg-gradient-to-br from-teal-50 to-cyan-100 border-teal-200`}>
+            <div className="rounded-xl border border-zinc-900 bg-zinc-900 p-4 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center justify-between flex-1 min-w-0">
                   <div>
-                    <div className={`${COMPONENT_STYLES.stats.value} text-teal-800`}>
+                    <div className="text-2xl font-black tracking-tight text-white">
                       {stockInfo.stockActual.toLocaleString()}
                     </div>
-                    <div className={`${COMPONENT_STYLES.stats.label} text-teal-600`}>
-                      Stock Actual
+                    <div className="mt-1 text-[0.65rem] font-bold uppercase tracking-widest text-zinc-400">
+                      Balance Local
                     </div>
-                    <div className={`${COMPONENT_STYLES.stats.sublabel} text-teal-500`}>
-                      {stockInfo.lotes.filter(l => l.cantidadActual > 0).length} lote(s) disponible(s)
+                    <div className="mt-1 text-[0.65rem] font-semibold text-zinc-500">
+                      {stockInfo.lotes.filter(l => l.cantidadActual > 0).length} traces
                     </div>
                   </div>
-                  <div className={`${COMPONENT_STYLES.stats.iconWrapper} bg-teal-600`}>
-                    <Package className="h-5 w-5 text-white" />
+                  <div className="p-2 bg-white/10 border border-white/20 rounded-lg">
+                    <Package className="h-4 w-4 text-white" weight="duotone" />
                   </div>
                 </div>
 
                 {/* Lista de Lotes */}
                 {stockInfo.lotes.filter(l => l.cantidadActual > 0).length > 0 && (
-                  <div className="flex-1 min-w-0 pl-4 border-l border-teal-300/50">
-                    <div className="text-[10px] font-bold text-teal-600/70 mb-2 uppercase tracking-wider">
-                      Lotes (FEFO)
+                  <div className="flex-1 min-w-0 pl-4 border-l border-zinc-800">
+                    <div className="text-[0.6rem] font-bold text-zinc-500 mb-2 uppercase tracking-widest">
+                      Lotes Activos (FEFO)
                     </div>
-                    <div className="space-y-1.5 max-h-20 overflow-y-auto pr-2">
+                    <div className="space-y-1.5 max-h-20 overflow-y-auto pr-2 custom-scrollbar">
                       {stockInfo.lotes
                         .filter(lote => lote.cantidadActual > 0)
                         .sort((a, b) => new Date(a.fechaVencimiento).getTime() - new Date(b.fechaVencimiento).getTime())
@@ -193,14 +192,14 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
                           return (
                             <div
                               key={lote.id}
-                              className={`flex items-center justify-between gap-2 px-2 py-1 rounded-lg text-xs ${
-                                esPrimero ? 'bg-teal-600 text-white' : 'bg-white/80'
+                              className={`flex items-center justify-between gap-2 px-2 py-1 rounded border text-xs ${
+                                esPrimero ? 'bg-white text-zinc-900 border-white' : 'bg-transparent text-zinc-400 border-zinc-700'
                               }`}
                             >
-                              <span className={`font-bold truncate ${esPrimero ? 'text-white' : 'text-teal-900'}`} title={lote.numero}>
+                              <span className={`font-bold truncate`} title={lote.numero}>
                                 {lote.numero.slice(0, 10)}...
                               </span>
-                              <span className={`font-semibold ${esPrimero ? 'text-teal-100' : 'text-teal-700'}`}>
+                              <span className="font-black tabular-nums">
                                 {lote.cantidadActual.toLocaleString()}
                               </span>
                             </div>
@@ -213,17 +212,13 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
             </div>
 
             {/* Botón Actualizar Stock Siguiente Mes */}
-            {/* NOTA: Debido al desplazamiento de +1 mes en el filtro, el mes REAL visualizado es selectedMes+1 */}
-            {/* Por lo tanto, el "siguiente mes" para actualizar es selectedMes+2 desde el filtro original */}
             {stockInfo.tieneHistorialInicial && (() => {
-              // Calcular el mes REAL visualizado (filtro + 1 por desplazamiento)
               let mesRealVisualizado = selectedMes + 1;
               let anioRealVisualizado = selectedAnio;
               if (mesRealVisualizado > 12) {
                 mesRealVisualizado = 1;
                 anioRealVisualizado++;
               }
-              // Calcular el mes SIGUIENTE al real visualizado
               let mesSiguiente = mesRealVisualizado + 1;
               let anioSiguiente = anioRealVisualizado;
               if (mesSiguiente > 12) {
@@ -231,51 +226,52 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
                 anioSiguiente++;
               }
               return (
-              <div className="col-span-full mt-4 pt-4 border-t border-gray-200">
+              <div className="col-span-full mt-2 pt-4 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-[0.7rem] font-bold text-zinc-500 max-w-lg">
+                  El nodo registrará <span className="text-zinc-900 font-black">{stockInfo.stockDisponible.toLocaleString()}</span> unidades
+                  como memoria fragmentaria del slot <span className="bg-zinc-100 px-1.5 py-0.5 rounded-sm border border-zinc-200">{MESES[mesSiguiente - 1]} {anioSiguiente}</span>
+                </p>
                 <button
                   onClick={onActualizarStockSiguienteMes}
                   disabled={isUpdatingStockSiguienteMes}
-                  className={`w-full ${COMPONENT_STYLES.button.primary} justify-center py-3`}
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 text-xs font-bold text-white shadow-sm transition-all hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isUpdatingStockSiguienteMes ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <span>Actualizando Stock...</span>
+                      <CircleNotch className="h-3.5 w-3.5 animate-spin" weight="bold" />
+                      <span>Transfiriendo...</span>
                     </>
                   ) : (
                     <>
-                      <RefreshCw className="h-5 w-5" />
-                      <span>Actualizar Stock Siguiente Mes</span>
+                      <ArrowsClockwise className="h-3.5 w-3.5" weight="bold" />
+                      <span>Migrar al Próximo Trace</span>
                     </>
                   )}
                 </button>
-                <p className="mt-2 text-center text-xs text-gray-600">
-                  Registra el disponible actual ({stockInfo.stockDisponible.toLocaleString()} unidades) 
-                  como stock inicial del mes {MESES[mesSiguiente - 1]} {anioSiguiente}
-                </p>
               </div>
             );
             })()}
           </div>
         ) : stockError ? (
-          <div className="text-center py-8">
-            <div className="bg-rose-100 p-4 rounded-xl inline-block mb-4">
-              <AlertTriangle className="h-8 w-8 text-rose-500 mx-auto" />
+          <div className="flex flex-col items-center justify-center py-10">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50 border border-rose-200 mb-4 shadow-sm">
+              <Warning className="h-6 w-6 text-rose-600" weight="duotone" />
             </div>
-            <div className="text-rose-700 text-sm font-semibold mb-3">Error al cargar stock</div>
+            <div className="text-[0.95rem] font-black text-rose-900 tracking-tight">Fallo en la sincronización de slot</div>
+            <div className="text-[0.7rem] font-medium text-rose-800/80 mt-1 max-w-md text-center">No se pudo acceder a la matriz del sistema principal.</div>
             <button
               onClick={onRetry}
-              className={COMPONENT_STYLES.button.danger}
+              className="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-xl border border-rose-200 bg-white text-rose-700 font-bold text-xs hover:bg-rose-50 transition-colors shadow-sm"
             >
-              Reintentar
+              Forzar Reintento
             </button>
           </div>
         ) : (
-          <div className="text-center py-8">
-            <div className="bg-gray-100 p-4 rounded-xl inline-block mb-4">
-              <Package className="h-8 w-8 text-gray-400 mx-auto" />
+          <div className="flex flex-col items-center justify-center py-10">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-50 border border-zinc-200 mb-4 shadow-sm">
+              <Package className="h-6 w-6 text-zinc-400" weight="duotone" />
             </div>
-            <div className="text-gray-600 text-sm font-medium">Cargando información de stock...</div>
+            <div className="text-[0.85rem] font-bold text-zinc-600">Procesando vectores locales...</div>
           </div>
         )}
       </div>

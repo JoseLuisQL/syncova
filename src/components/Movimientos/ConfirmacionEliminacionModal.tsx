@@ -1,6 +1,7 @@
 import React from 'react';
-import { AlertTriangle, Loader2, Trash2 } from 'lucide-react';
+import { Warning, CircleNotch, Trash } from '@phosphor-icons/react';
 import { Modal } from '../Establecimientos/components';
+import { COMPONENT_STYLES } from './constants';
 
 export interface EntregaToDelete {
   id: string;
@@ -33,9 +34,9 @@ const ConfirmacionEliminacionModal: React.FC<ConfirmacionEliminacionModalProps> 
       onClose={() => {
         if (!isProcessing) onClose();
       }}
-      title="Eliminar entrega adicional"
-      subtitle="Esta acción no se puede deshacer."
-      icon={AlertTriangle}
+      title="Borrado de Transacción"
+      subtitle="La purga lógica es permanente e irreparable. Ejecute con absoluta precaución."
+      icon={Warning}
       size="md"
       footer={
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -43,60 +44,59 @@ const ConfirmacionEliminacionModal: React.FC<ConfirmacionEliminacionModalProps> 
             type="button"
             onClick={onClose}
             disabled={isProcessing}
-            className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className={COMPONENT_STYLES.button.secondary}
           >
-            Cancelar
+            Abortar
           </button>
           <button
             type="button"
             onClick={onConfirm}
             disabled={isProcessing}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-rose-700 hover:to-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className={COMPONENT_STYLES.button.danger}
           >
-            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-            <span>{isProcessing ? 'Eliminando...' : 'Eliminar'}</span>
+            {isProcessing ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <Trash className="h-4 w-4" weight="bold" />}
+            <span>{isProcessing ? 'Purgando sistema...' : 'Confirmar Purga'}</span>
           </button>
         </div>
       }
     >
-      <div className="space-y-4">
-        {/* Warning banner */}
-        <div className="rounded-[22px] border border-rose-200 bg-rose-50/70 p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-rose-200 bg-white text-rose-600">
-              <Trash2 className="h-4 w-4" />
+      <div className="space-y-5">
+        <div className="rounded-[16px] border border-rose-200 bg-rose-50 p-5 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white border border-rose-200 text-rose-600 shadow-sm">
+              <Trash className="h-5 w-5" weight="duotone" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">
-                ¿Estás seguro de eliminar la entrega adicional #{entrega.numeroEntrega}?
+              <p className="text-[0.95rem] font-black text-rose-900 tracking-tight">
+                Anulación Transaccional #{entrega.numeroEntrega}
               </p>
-              <p className="mt-1 text-sm text-slate-600">
-                Establecimiento: <span className="font-medium text-slate-800">{entrega.establecimientoNombre}</span>
-              </p>
+              <div className="mt-2 text-[0.85rem] font-medium text-rose-800/80">
+                Hub Operativo: <span className="font-bold text-rose-900 border-b border-rose-200">{entrega.establecimientoNombre}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Vale warning */}
         {entrega.tieneVale ? (
-          <div className="flex items-start gap-3 rounded-[18px] border border-amber-200 bg-amber-50/70 px-4 py-3">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+          <div className="flex items-start gap-3 rounded-[16px] border border-zinc-900 bg-zinc-900 px-5 py-4 shadow-md">
+            <Warning className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" weight="fill" />
             <div>
-              <p className="text-sm font-semibold text-amber-800">Esta entrega tiene un vale generado</p>
+              <p className="text-[0.9rem] font-bold text-white tracking-tight">Vinculación Financiera Detectada</p>
               {entrega.valeNumero ? (
-                <p className="mt-0.5 text-xs text-amber-700">Vale: {entrega.valeNumero}</p>
+                <p className="mt-1 text-[0.7rem] font-bold uppercase tracking-widest text-zinc-400">
+                  Target TICKET: <span className="text-white bg-zinc-800 px-1 py-0.5 rounded ml-1">{entrega.valeNumero}</span>
+                </p>
               ) : null}
-              <p className="mt-1 text-xs text-amber-700">
-                Al eliminar esta entrega, el vale asociado y los movimientos de stock serán revertidos automáticamente.
+              <p className="mt-2 text-[0.8rem] text-zinc-300 leading-relaxed">
+                La anulación purgará esta traza provocando el rollback en cascada del Ticket en el libro contable de stock.
               </p>
             </div>
           </div>
         ) : null}
 
-        {/* Info */}
-        <div className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-4 py-3">
-          <p className="text-xs text-slate-500">
-            Se eliminarán los datos de esta entrega adicional y se recalcularán los totales del movimiento.
+        <div className="rounded-[16px] border border-zinc-200 bg-white px-5 py-4 shadow-sm border-l-[3px] border-l-zinc-900">
+          <p className="text-[0.8rem] font-bold text-zinc-700 leading-relaxed tracking-tight">
+            Los punteros de memoria sumarios recalcularán la matriz general perdiendo el historial de esta capa de inyección especial.
           </p>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, Warning } from '@phosphor-icons/react';
 
 /**
  * Componente de prueba para verificar que la sintaxis de Vales esté correcta

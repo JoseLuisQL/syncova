@@ -1,6 +1,7 @@
 import React from 'react';
-import { AlertCircle, Calendar, CheckCircle } from 'lucide-react';
+import { WarningCircle, CalendarBlank, CheckCircle } from '@phosphor-icons/react';
 import { Modal } from '../Establecimientos/components';
+import { COMPONENT_STYLES } from './constants';
 
 interface ConfirmacionSinDisponibilidadModalProps {
   isOpen: boolean;
@@ -32,9 +33,9 @@ const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidad
     onClose={() => {
       if (!isProcessing) onClose();
     }}
-    title="Sin disponibilidad programada"
-    subtitle="La entrega puede registrarse en el mes actual con actualización automática."
-    icon={AlertCircle}
+    title="Sin Disponibilidad Programada"
+    subtitle="La entrega puede registrarse excepcionalmente con actualización automática al plan."
+    icon={WarningCircle}
     size="md"
     footer={
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -42,7 +43,7 @@ const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidad
           type="button"
           onClick={onClose}
           disabled={isProcessing}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          className={COMPONENT_STYLES.button.secondary}
         >
           Cancelar
         </button>
@@ -50,64 +51,72 @@ const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidad
           type="button"
           onClick={onConfirm}
           disabled={isProcessing}
-          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-emerald-700 hover:to-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className={COMPONENT_STYLES.button.primary}
         >
-          {isProcessing ? <AlertCircle className="h-4 w-4 animate-pulse" /> : <CheckCircle className="h-4 w-4" />}
+          {isProcessing ? <WarningCircle className="h-4 w-4 animate-pulse" weight="bold" /> : <CheckCircle className="h-4 w-4" weight="bold" />}
           <span>{isProcessing ? 'Procesando...' : 'Confirmar registro'}</span>
         </button>
       </div>
     }
   >
     <div className="space-y-4">
-      <section className="rounded-[20px] border border-amber-200 bg-amber-50/70 p-4">
-        <p className="text-sm font-medium text-amber-900">
-          <span className="font-semibold">{establecimientoNombre}</span> no tiene disponibilidad programada para esta
-          entrega en {anio}.
-        </p>
+      <section className="rounded-[16px] border border-amber-200 bg-amber-50 p-4 shadow-sm">
+        <div className="flex items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white border border-amber-200 text-amber-600 shadow-sm">
+            <WarningCircle className="h-4 w-4" weight="fill" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-amber-900 tracking-tight">Advertencia de flujo</p>
+            <p className="mt-1 text-sm text-amber-800 leading-relaxed">
+              <span className="font-bold">{establecimientoNombre}</span> carece de disponibilidad validada para esta
+              entrega en {anio}.
+            </p>
+          </div>
+        </div>
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Vacuna</p>
-          <p className="mt-1 text-base font-semibold text-slate-900">{vacunaNombre}</p>
+        <div className="rounded-[16px] border border-zinc-200 bg-white p-4 shadow-sm">
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Biológico</p>
+          <p className="mt-1 text-[0.95rem] font-bold tracking-tight text-zinc-900">{vacunaNombre}</p>
         </div>
 
-        <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Tipo</p>
+        <div className="rounded-[16px] border border-zinc-200 bg-white p-4 shadow-sm">
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Categoría</p>
           <span
-            className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-              tipoEntrega === 'base' ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'
+            className={`mt-2 inline-flex rounded-md px-2.5 py-1 text-xs font-bold tracking-widest uppercase ${
+              tipoEntrega === 'base' ? 'bg-zinc-100 text-zinc-800 border border-zinc-200' : 'bg-zinc-900 text-white'
             }`}
           >
-            {tipoEntrega === 'base' ? 'Entrega base' : 'Entrega adicional'}
+            {tipoEntrega === 'base' ? 'Regular' : 'Excedente'}
           </span>
         </div>
 
-        <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Cantidad</p>
-          <p className="mt-1 text-base font-semibold text-slate-900">{cantidad.toLocaleString()} unidades</p>
+        <div className="rounded-[16px] border border-zinc-200 bg-white p-4 shadow-sm">
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Volumen</p>
+          <p className="mt-1 text-[0.95rem] font-bold tracking-tight text-zinc-900">{cantidad.toLocaleString()} U</p>
         </div>
 
-        <div className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-3">
+        <div className="rounded-[16px] border border-zinc-200 bg-white p-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-slate-500" />
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">Período</p>
+            <CalendarBlank className="h-4 w-4 text-zinc-500" weight="duotone" />
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Target</p>
           </div>
-          <p className="mt-1 text-base font-semibold text-slate-900">
+          <p className="mt-1 text-[0.95rem] font-bold tracking-tight text-zinc-900">
             {mesActual} {anio}
           </p>
         </div>
       </section>
 
-      <section className="rounded-[20px] border border-emerald-200 bg-emerald-50/70 p-4">
+      <section className="rounded-[16px] border border-zinc-200 bg-zinc-50 p-4">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-emerald-200 bg-white text-emerald-600">
-            <CheckCircle className="h-4 w-4" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-zinc-300 text-zinc-900 shadow-sm">
+            <CheckCircle className="h-4 w-4" weight="fill" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-emerald-900">Qué sucederá</p>
-            <p className="mt-1 text-sm text-emerald-700">
-              Se registrará la entrega en el mes actual y se sincronizará automáticamente la planificación.
+            <p className="text-[0.9rem] font-bold text-zinc-900 tracking-tight">Resolución Automática</p>
+            <p className="mt-1 text-sm text-zinc-600 leading-relaxed">
+              Registraremos la transacción y se adaptará la bitácora logística silenciosamente sin quebrar el balance general.
             </p>
           </div>
         </div>

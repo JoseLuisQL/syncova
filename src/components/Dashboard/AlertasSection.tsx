@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useRef, useEffect } from 'react';
-import { AlertTriangle, AlertCircle, Info, Bell } from 'lucide-react';
+import { Warning, WarningCircle, Info, Bell } from '@phosphor-icons/react';
 import { usePaginatedAlertas } from '../../hooks/usePaginatedDashboard';
 import Pagination from './Pagination';
 import { EmptyState, SectionSkeleton } from './LoadingStates';
@@ -10,17 +10,17 @@ const getAlertIcon = (tipo: string, nivel: string) => {
   const iconClass = "h-4 w-4";
   
   if (nivel === 'critico') {
-    return <AlertCircle className={`${iconClass} text-rose-500`} />;
+    return <WarningCircle className={`${iconClass} text-rose-600`} weight="fill" />;
   }
   
   switch (tipo) {
     case 'stock_bajo':
     case 'vencimiento_proximo':
-      return <AlertTriangle className={`${iconClass} text-amber-500`} />;
+      return <Warning className={`${iconClass} text-amber-600`} weight="fill" />;
     case 'sistema':
-      return <Info className={`${iconClass} text-sky-500`} />;
+      return <Info className={`${iconClass} text-blue-600`} weight="fill" />;
     default:
-      return <Bell className={`${iconClass} text-gray-400`} />;
+      return <Bell className={`${iconClass} text-zinc-400`} weight="fill" />;
   }
 };
 
@@ -40,29 +40,29 @@ const AlertaCard: React.FC<{ alerta: AlertaReciente }> = memo(({ alerta }) => {
 
   return (
     <div
-      className="flex items-start gap-3 p-3.5 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+      className="flex items-start gap-3.5 p-4 rounded-xl border border-transparent hover:border-zinc-200 hover:bg-zinc-50/80 hover:shadow-sm transition-all duration-200"
       role="listitem"
     >
-      <div className={`flex-shrink-0 mt-0.5 p-1.5 rounded-lg ${config.bg}`}>
+      <div className={`flex-shrink-0 mt-0.5 p-2 rounded-xl bg-white border border-zinc-100 shadow-sm ${config.bg.replace('bg-', 'text-')}`}>
         {getAlertIcon(alerta.tipo, alerta.nivel)}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-medium text-gray-900 line-clamp-2">
+          <p className="text-[13px] font-bold text-zinc-900 line-clamp-2 leading-relaxed tracking-tight">
             {alerta.mensaje}
           </p>
-          <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize flex-shrink-0 ${config.badge}`}>
+          <span className={`px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-widest flex-shrink-0 ${config.badge}`}>
             {alerta.nivel}
           </span>
         </div>
-        <div className="mt-1.5 flex items-center gap-2 text-xs text-gray-400">
+        <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold text-zinc-400 uppercase tracking-widest">
           <time dateTime={new Date(alerta.fechaCreacion).toISOString()}>
             {formatDate(alerta.fechaCreacion)}
           </time>
           {alerta.establecimiento && (
             <>
-              <span aria-hidden="true">·</span>
-              <span className="truncate">{alerta.establecimiento}</span>
+              <span aria-hidden="true" className="text-zinc-300">•</span>
+              <span className="truncate max-w-[150px] font-bold text-zinc-500">{alerta.establecimiento}</span>
             </>
           )}
         </div>
@@ -89,17 +89,17 @@ const AlertasSection: React.FC = memo(() => {
 
   return (
     <section 
-      className="bg-white rounded-2xl border border-gray-100/80 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300"
+      className="bg-white rounded-2xl border border-zinc-200/60 shadow-sm overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300"
       aria-label={`Alertas recientes (${alertCount} total)`}
     >
-      <header className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-amber-50">
-            <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden="true" />
+      <header className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+        <h3 className="text-[14px] font-bold text-zinc-900 flex items-center gap-2.5 tracking-tight">
+          <div className="p-1.5 rounded-lg bg-white border border-zinc-200 shadow-sm">
+            <Warning className="h-4 w-4 text-zinc-900" weight="bold" aria-hidden="true" />
           </div>
-          Alertas Recientes
+          Centro de Alertas
           {alertCount > 0 && (
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-zinc-900 text-white shadow-sm ml-1">
               {alertCount}
             </span>
           )}
@@ -107,34 +107,34 @@ const AlertasSection: React.FC = memo(() => {
         <button
           onClick={handleRefresh}
           disabled={loading}
-          className="text-xs font-medium text-gray-400 hover:text-teal-600 disabled:opacity-50 
+          className="text-[12px] font-bold text-zinc-400 hover:text-zinc-900 disabled:opacity-50 
             disabled:cursor-not-allowed transition-colors"
           aria-label={loading ? 'Actualizando alertas' : 'Actualizar alertas'}
         >
-          {loading ? 'Cargando...' : 'Actualizar'}
+          {loading ? 'Cargando...' : 'Recargar'}
         </button>
       </header>
 
-      <div className="p-4">
+      <div className="p-3">
         {loading && data.length === 0 ? (
           <SectionSkeleton rows={4} />
         ) : error ? (
           <div className="text-center py-8">
-            <AlertTriangle className="mx-auto h-8 w-8 text-gray-300 mb-2" aria-hidden="true" />
-            <p className="text-sm font-medium text-gray-700 mb-1">Error al cargar</p>
-            <p className="text-xs text-gray-400 mb-4">{error}</p>
+            <Warning className="mx-auto h-8 w-8 text-zinc-300 mb-2" weight="duotone" aria-hidden="true" />
+            <p className="text-sm font-bold text-zinc-700 mb-1">Fallo de lectura</p>
+            <p className="text-xs font-medium text-zinc-400 mb-4">{error}</p>
             <button
               onClick={handleRefresh}
-              className="text-xs font-medium text-teal-600 hover:text-teal-700"
+              className="text-xs font-bold text-zinc-900 hover:underline"
             >
-              Reintentar
+              Reconectar
             </button>
           </div>
         ) : data.length === 0 ? (
           <EmptyState
-            icon={<Bell className="h-full w-full" />}
-            title="Sin alertas"
-            description="No hay alertas en los últimos 7 días"
+            icon={<Bell className="h-full w-full" weight="duotone" />}
+            title="Sistemas operativos nominales"
+            description="Cero incidencias reportadas en el periodo."
           />
         ) : (
           <div className="space-y-1" role="list" aria-label="Lista de alertas">
@@ -146,13 +146,15 @@ const AlertasSection: React.FC = memo(() => {
       </div>
 
       {pagination.totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={pagination.totalPages}
-          onPageChange={setPage}
-          totalItems={pagination.total}
-          itemsPerPage={pagination.limit}
-        />
+        <div className="border-t border-zinc-100 px-4 py-3 bg-zinc-50/30">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={setPage}
+            totalItems={pagination.total}
+            itemsPerPage={pagination.limit}
+          />
+        </div>
       )}
     </section>
   );

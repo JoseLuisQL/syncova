@@ -1,21 +1,14 @@
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import {
-  X,
-  FileText,
-  Plus,
-  CheckCircle,
-  AlertCircle,
-  Building2,
-  Calendar,
-  Loader2,
-  RefreshCw,
-  AlertTriangle,
-  Package
-} from 'lucide-react';
+  FileText, Plus, CheckCircle, WarningCircle,
+  SpinnerGap, ArrowsClockwise, Warning, Package
+} from '@phosphor-icons/react';
 import { ValesService, EntregaAdicionalInfo, ValeTypeSelectionConfig, GrupoEntregaAdicional } from '../../services/valesService';
 import { StockValidationService, StockValidationRequest, StockValidationResult } from '../../services/stockValidationService';
 import { useToastContext } from '../../contexts/ToastContext';
 import { MESES } from './constants';
+import { Modal, FormSection } from '../ui/ModalElements';
+import { MODAL_STYLES } from '../ui/ModalConstants';
 
 interface ValeTypeSelectionModalProps {
   isOpen: boolean;
@@ -45,15 +38,15 @@ const TipoValeOption = memo<{
       isDisabled
         ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
         : isSelected
-          ? 'border-teal-500 bg-teal-50 cursor-pointer shadow-md'
-          : 'border-gray-200 hover:border-teal-300 hover:bg-teal-50/30 cursor-pointer'
+          ? 'border-zinc-500 bg-zinc-50 cursor-pointer shadow-md'
+          : 'border-gray-200 hover:border-teal-300 hover:bg-zinc-50/30 cursor-pointer'
     }`}
   >
     <div className="flex items-start gap-4">
       {/* Radio button */}
       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
         isSelected && !isDisabled
-          ? 'border-teal-600 bg-teal-600'
+          ? 'border-teal-600 bg-zinc-900'
           : 'border-gray-300'
       }`}>
         {isSelected && !isDisabled && (
@@ -64,7 +57,7 @@ const TipoValeOption = memo<{
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <Icon className={`h-5 w-5 ${isDisabled ? 'text-gray-400' : 'text-teal-600'}`} />
+          <Icon className={`h-5 w-5 ${isDisabled ? 'text-gray-400' : 'text-zinc-600'}`} />
           <h4 className={`font-semibold ${isDisabled ? 'text-gray-500' : 'text-gray-900'}`}>
             {titulo}
           </h4>
@@ -103,7 +96,7 @@ const GrupoEntregaCard = memo<{
         type="checkbox"
         checked={isSelected}
         onChange={onToggle}
-        className="mt-1 h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+        className="mt-1 h-4 w-4 text-zinc-600 focus:ring-amber-500 border-gray-300 rounded"
         onClick={e => e.stopPropagation()}
       />
       <div className="flex-1 min-w-0">
@@ -396,140 +389,19 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-cyan-50 flex-shrink-0">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-gradient-to-br from-teal-600 to-cyan-600 rounded-xl shadow-lg">
-              <FileText className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">Generar Nuevo Vale</h2>
-              <div className="flex items-center gap-3 mt-0.5 text-sm text-gray-600">
-                <span className="flex items-center gap-1">
-                  <Building2 className="h-3.5 w-3.5" />
-                  {centroAcopioNombre}
-                </span>
-                <span className="text-gray-400">•</span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {MESES[mes - 1]} {anio}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="p-2 hover:bg-white/80 rounded-lg transition-colors disabled:opacity-50"
-              title="Actualizar"
-            >
-              <RefreshCw className={`h-4 w-4 text-gray-500 ${isLoading ? 'animate-spin' : ''}`} />
-            </button>
-            <button onClick={onClose} className="p-2 hover:bg-white/80 rounded-lg transition-colors">
-              <X className="h-5 w-5 text-gray-500" />
-            </button>
-          </div>
-        </header>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-              <Loader2 className="h-8 w-8 animate-spin text-teal-600 mb-3" />
-              <p>Cargando datos...</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {/* Info */}
-              <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
-                <div className="flex gap-3">
-                  <AlertCircle className="h-5 w-5 text-teal-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold text-teal-900">Seleccione el tipo de vale</h3>
-                    <p className="text-sm text-teal-700 mt-1">
-                      Puede generar un vale con entregas base programadas o entregas adicionales.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Opciones de tipo */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-700">Tipo de Vale</h3>
-
-                <TipoValeOption
-                  tipo="solo_base"
-                  titulo="Entregas Base"
-                  descripcion="Incluye las entregas programadas en la planificación anual"
-                  icon={CheckCircle}
-                  isSelected={config.tipoVale === 'solo_base'}
-                  isDisabled={!isBaseDisponible}
-                  disabledReason="Ya fue generado para este período"
-                  badge={!isBaseDisponible ? 'Generado' : undefined}
-                  badgeColor="bg-gray-200 text-gray-600"
-                  onClick={() => handleTipoChange('solo_base')}
-                />
-
-                <TipoValeOption
-                  tipo="solo_adicionales"
-                  titulo="Entregas Adicionales"
-                  descripcion="Incluye entregas adicionales no programadas"
-                  icon={Plus}
-                  isSelected={config.tipoVale === 'solo_adicionales'}
-                  isDisabled={!isAdicionalesDisponible}
-                  disabledReason={
-                    gruposEntregasAdicionales.length === 0
-                      ? 'No hay entregas adicionales para este período'
-                      : 'Todos los grupos ya fueron generados'
-                  }
-                  badge={isAdicionalesDisponible ? `${gruposDisponibles.length} disponibles` : undefined}
-                  badgeColor="bg-cyan-100 text-cyan-700"
-                  onClick={() => handleTipoChange('solo_adicionales')}
-                />
-              </div>
-
-              {/* Sin opciones disponibles */}
-              {!hayOpcionesDisponibles && (
-                <div className="text-center py-8 bg-amber-50 border border-amber-200 rounded-xl">
-                  <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto mb-3" />
-                  <h3 className="font-semibold text-amber-900 mb-1">Sin opciones disponibles</h3>
-                  <p className="text-sm text-amber-700">
-                    Todos los tipos de vales ya fueron generados para este período.
-                  </p>
-                </div>
-              )}
-
-              {/* Grupos de entregas adicionales */}
-              {config.tipoVale === 'solo_adicionales' && gruposDisponibles.length > 0 && (
-                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-gray-700">
-                    Grupos de Entregas Adicionales
-                  </h3>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {gruposDisponibles.map(grupo => (
-                      <GrupoEntregaCard
-                        key={grupo.numeroEntrega}
-                        grupo={grupo}
-                        isSelected={config.gruposEntregasSeleccionados.includes(grupo.numeroEntrega)}
-                        onToggle={() => handleGrupoToggle(grupo.numeroEntrega)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <footer className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between flex-shrink-0">
-          <div className="text-sm text-gray-600">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Generar Nuevo Vale"
+      subtitle={`${centroAcopioNombre} • ${MESES[mes - 1]} ${anio}`}
+      icon={FileText}
+      size="lg"
+      footer={
+        <div className="flex w-full items-center justify-between">
+          <div className="text-sm text-zinc-600">
             {totalesSeleccionados && totalesSeleccionados.grupos > 0 && (
               <span className="flex items-center gap-2">
-                <Package className="h-4 w-4 text-amber-600" />
+                <Package className="h-4 w-4 text-zinc-600" />
                 <span>
                   {totalesSeleccionados.grupos} grupo(s) • {totalesSeleccionados.vacunas.toLocaleString()} vacunas
                 </span>
@@ -538,8 +410,16 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
           </div>
           <div className="flex items-center gap-3">
             <button
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="px-3 py-2 text-zinc-500 hover:text-zinc-800 disabled:opacity-50"
+              title="Actualizar"
+            >
+              <ArrowsClockwise className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
+            <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className={MODAL_STYLES.button.secondary}
             >
               Cancelar
             </button>
@@ -552,24 +432,102 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
                 (config.tipoVale === 'solo_adicionales' && config.gruposEntregasSeleccionados.length === 0) ||
                 (config.tipoVale === 'solo_base' && !isBaseDisponible)
               }
-              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 rounded-lg shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className={MODAL_STYLES.button.primary}
             >
               {isValidatingStock ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" />
                   Validando...
                 </>
               ) : (
                 <>
-                  <CheckCircle className="h-4 w-4" />
+                  <CheckCircle weight="bold" className="h-4 w-4" />
                   Generar Vale
                 </>
               )}
             </button>
           </div>
-        </footer>
-      </div>
-    </div>
+        </div>
+      }
+    >
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
+          <SpinnerGap weight="bold" className="h-8 w-8 animate-spin text-zinc-600 mb-3" />
+          <p>Cargando datos...</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4">
+            <div className="flex gap-3">
+              <WarningCircle className="h-5 w-5 text-zinc-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-zinc-900">Seleccione el tipo de vale</h3>
+                <p className="text-sm text-zinc-700 mt-1">
+                  Puede generar un vale con entregas base programadas o entregas adicionales.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <FormSection title="Tipo de Vale">
+            <div className="space-y-3">
+              <TipoValeOption
+                titulo="Entregas Base"
+                descripcion="Incluye las entregas programadas en la planificación anual"
+                icon={CheckCircle}
+                isSelected={config.tipoVale === 'solo_base'}
+                isDisabled={!isBaseDisponible}
+                disabledReason="Ya fue generado para este período"
+                badge={!isBaseDisponible ? 'Generado' : undefined}
+                badgeColor="bg-zinc-200 text-zinc-600"
+                onClick={() => handleTipoChange('solo_base')}
+              />
+
+              <TipoValeOption
+                titulo="Entregas Adicionales"
+                descripcion="Incluye entregas adicionales no programadas"
+                icon={Plus}
+                isSelected={config.tipoVale === 'solo_adicionales'}
+                isDisabled={!isAdicionalesDisponible}
+                disabledReason={
+                  gruposEntregasAdicionales.length === 0
+                    ? 'No hay entregas adicionales para este período'
+                    : 'Todos los grupos ya fueron generados'
+                }
+                badge={isAdicionalesDisponible ? `${gruposDisponibles.length} disponibles` : undefined}
+                badgeColor="bg-zinc-100 text-zinc-700"
+                onClick={() => handleTipoChange('solo_adicionales')}
+              />
+            </div>
+          </FormSection>
+
+          {!hayOpcionesDisponibles && (
+            <div className="text-center py-8 bg-amber-50 border border-amber-200 rounded-xl">
+              <Warning weight="duotone" className="h-8 w-8 text-amber-500 mx-auto mb-3" />
+              <h3 className="font-semibold text-amber-900 mb-1">Sin opciones disponibles</h3>
+              <p className="text-sm text-amber-700">
+                Todos los tipos de vales ya fueron generados para este período.
+              </p>
+            </div>
+          )}
+
+          {config.tipoVale === 'solo_adicionales' && gruposDisponibles.length > 0 && (
+            <FormSection title="Grupos de Entregas Adicionales">
+              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                {gruposDisponibles.map(grupo => (
+                  <GrupoEntregaCard
+                    key={grupo.numeroEntrega}
+                    grupo={grupo}
+                    isSelected={config.gruposEntregasSeleccionados.includes(grupo.numeroEntrega)}
+                    onToggle={() => handleGrupoToggle(grupo.numeroEntrega)}
+                  />
+                ))}
+              </div>
+            </FormSection>
+          )}
+        </div>
+      )}
+    </Modal>
   );
 };
 

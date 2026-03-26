@@ -11,14 +11,14 @@ import { User, LockKey, Eye, EyeClosed, SpinnerGap, Clock as ClockIcon, WarningC
 // ============================================================================
 
 const INPUT_BASE_CLASSES = 
-  'block w-full pl-11 pr-4 py-3.5 border rounded-xl text-zinc-900 placeholder-zinc-400 ' +
-  'focus:outline-none focus:ring-1 focus:border-zinc-900 transition-all duration-200 bg-white ' +
+  'block w-full pl-11 pr-4 py-3.5 border rounded-xl text-gray-900 placeholder-gray-400 ' +
+  'focus:outline-none focus:ring-1 focus:border-gray-900 transition-all duration-200 bg-white ' +
   'text-sm font-medium';
 
-const INPUT_NORMAL_CLASSES = 'border-zinc-200 hover:border-zinc-300';
+const INPUT_NORMAL_CLASSES = 'border-gray-200 hover:border-gray-300';
 const INPUT_ERROR_CLASSES = 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30';
 
-const LABEL_CLASSES = 'block text-sm font-semibold text-zinc-900 mb-2 tracking-tight';
+const LABEL_CLASSES = 'block text-sm font-semibold text-gray-900 mb-2 tracking-tight';
 const ERROR_TEXT_CLASSES = 'mt-1.5 text-xs font-medium text-rose-600 flex items-center gap-1.5';
 
 // ============================================================================
@@ -95,11 +95,11 @@ const InputField: React.FC<InputFieldProps> = ({
   return (
     <div>
       <label htmlFor={id} className={LABEL_CLASSES}>
-        {label} <span className="text-zinc-400">*</span>
+        {label} <span className="text-gray-400">*</span>
       </label>
       <div className="relative group">
         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none transition-colors duration-200">
-          <span className={`${error ? 'text-rose-400' : 'text-zinc-400 group-focus-within:text-zinc-900'}`}>
+          <span className={`${error ? 'text-rose-400' : 'text-gray-400 group-focus-within:text-gray-900'}`}>
             {icon}
           </span>
         </div>
@@ -183,12 +183,12 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading, canRetry, remain
     const base = 
       'w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm ' +
       'font-bold text-white transition-all duration-200 focus:outline-none focus:ring-2 ' +
-      'focus:ring-offset-2 focus:ring-zinc-900 shadow-sm';
+      'focus:ring-offset-2 focus:ring-gray-900 shadow-sm';
     
     if (isDisabled) {
-      return `${base} bg-zinc-300 text-zinc-500 cursor-not-allowed shadow-none`;
+      return `${base} bg-gray-300 text-gray-500 cursor-not-allowed shadow-none`;
     }
-    return `${base} bg-zinc-900 hover:bg-zinc-800 active:scale-[0.98]`;
+    return `${base} bg-gray-900 hover:bg-gray-800 active:scale-[0.98]`;
   }, [isDisabled]);
 
   const renderContent = () => {
@@ -297,7 +297,7 @@ const LoginForm: React.FC = () => {
     <button
       type="button"
       onClick={togglePasswordVisibility}
-      className="p-1 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-900"
+      className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
       aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
     >
       {showPassword ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
@@ -312,13 +312,13 @@ const LoginForm: React.FC = () => {
         <div className="w-full max-w-[400px] mx-auto animate-fade-in-up">
           
           <header className="mb-10 text-left">
-            <div className="mb-8 w-14 h-14 bg-zinc-900 text-white rounded-2xl flex items-center justify-center shadow-md">
+            <div className="mb-8 w-14 h-14 bg-gray-900 text-white rounded-2xl flex items-center justify-center shadow-md">
               <SivacLogo size={32} />
             </div>
-            <h1 className="text-[2rem] leading-tight font-extrabold text-zinc-900 tracking-tighter">
+            <h1 className="text-[2rem] leading-tight font-extrabold text-gray-900 tracking-tighter">
               Bienvenido a SIVAC
             </h1>
-            <p className="text-[15px] font-medium text-zinc-500 mt-2">
+            <p className="text-[15px] font-medium text-gray-500 mt-2">
               Ingresa tus credenciales para administrar la cadena de suministros médicos.
             </p>
           </header>
@@ -374,7 +374,7 @@ const LoginForm: React.FC = () => {
           </form>
 
           <footer className="mt-12 text-left">
-            <p className="text-xs font-semibold tracking-wide text-zinc-400 uppercase">
+            <p className="text-xs font-semibold tracking-wide text-gray-400 uppercase">
               SEDE • DISA Apurímac II
             </p>
           </footer>
@@ -382,13 +382,13 @@ const LoginForm: React.FC = () => {
       </div>
 
       {/* Right Axis: Contextual Graphic Layer */}
-      <div className="hidden lg:flex lg:w-[55%] relative flex-col justify-end p-12 bg-zinc-950">
+      <div className="hidden lg:flex lg:w-[55%] relative flex-col justify-end p-12 bg-gray-950">
         <img 
           src="https://picsum.photos/seed/sivac-auth-v3/1000/1400" 
           alt="Instalaciones Médicas Institucionales" 
           className="absolute inset-0 w-full h-full object-cover opacity-[0.35] mix-blend-overlay"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/40 to-transparent" />
         
         <div className="relative z-10 max-w-lg mb-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
           <div className="inline-block px-3 py-1.5 mb-6 text-xs font-bold tracking-widest text-emerald-400 uppercase border border-emerald-400/30 rounded-full bg-emerald-400/10 backdrop-blur-sm">
@@ -397,7 +397,7 @@ const LoginForm: React.FC = () => {
           <h2 className="text-3xl font-extrabold text-white tracking-tight leading-tight">
             Control de inventarios y red de frío en tiempo real.
           </h2>
-          <p className="text-zinc-400 mt-4 text-[15px] max-w-md font-medium leading-relaxed">
+          <p className="text-gray-400 mt-4 text-[15px] max-w-md font-medium leading-relaxed">
             Plataforma especializada en la monitorización de biológicos y material descartable en toda la red micro-regional, asegurando el abastecimiento ininterrumpido.
           </p>
         </div>

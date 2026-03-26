@@ -1,15 +1,4 @@
-import {
-  BellRing,
-  Blocks,
-  Building2,
-  Globe2,
-  Layers3,
-  Mail,
-  Server,
-  Settings2,
-  ShieldCheck,
-  Siren,
-} from 'lucide-react';
+import { BellRinging, Cube, Buildings, Globe, Stack, Envelope, HardDrives, Faders, ShieldCheck, Siren } from '@phosphor-icons/react';
 import type {
   ConfiguracionCategoryDefinition,
   ConfiguracionFieldDefinition,
@@ -23,7 +12,7 @@ export const CONFIG_GROUPS: ConfiguracionGroupDefinition[] = [
     label: 'Identidad',
     contextLabel: 'Identidad y experiencia',
     description: 'Marca institucional, metadatos publicos y preferencias visibles.',
-    icon: Building2,
+    icon: Buildings,
     category: 'experiencia',
     path: '/configuracion/identidad',
   },
@@ -32,7 +21,7 @@ export const CONFIG_GROUPS: ConfiguracionGroupDefinition[] = [
     label: 'Alertas',
     contextLabel: 'Alertas y notificaciones',
     description: 'Umbrales operativos y comunicacion del sistema.',
-    icon: BellRing,
+    icon: BellRinging,
     category: 'experiencia',
     path: '/configuracion/alertas',
   },
@@ -50,7 +39,7 @@ export const CONFIG_GROUPS: ConfiguracionGroupDefinition[] = [
     label: 'Operacion',
     contextLabel: 'Operacion y sistema',
     description: 'Respaldos, reportes, API y diagnostico del sistema.',
-    icon: Server,
+    icon: HardDrives,
     category: 'plataforma',
     path: '/configuracion/operacion',
   },
@@ -61,13 +50,13 @@ export const CONFIG_NAV_GROUPS: ConfiguracionNavGroup[] = [
     key: 'experiencia',
     label: 'Experiencia',
     description: 'Lo que el equipo ve y ajusta dia a dia.',
-    icon: Layers3,
+    icon: Stack,
   },
   {
     key: 'plataforma',
     label: 'Plataforma',
     description: 'Controles avanzados, seguridad y operacion tecnica.',
-    icon: Settings2,
+    icon: Faders,
   },
 ];
 
@@ -77,7 +66,7 @@ export const CONFIG_CATEGORIES: ConfiguracionCategoryDefinition[] = [
     groupId: 'identidad',
     label: 'Identidad institucional',
     description: 'Datos usados en documentos, cabeceras y metadatos publicos.',
-    icon: Building2,
+    icon: Buildings,
     editable: true,
     source: 'database',
   },
@@ -95,7 +84,7 @@ export const CONFIG_CATEGORIES: ConfiguracionCategoryDefinition[] = [
     groupId: 'alertas',
     label: 'Canales y envio',
     description: 'Configuracion registrada; el runtime actual no consume estos flags desde la base.',
-    icon: Mail,
+    icon: Envelope,
     editable: false,
     source: 'database',
     runtimeNote: 'El envio real sigue gobernado por la configuracion tecnica del servidor.',
@@ -115,7 +104,7 @@ export const CONFIG_CATEGORIES: ConfiguracionCategoryDefinition[] = [
     groupId: 'operacion',
     label: 'Respaldos',
     description: 'El runtime del backend usa variables de entorno para estos controles.',
-    icon: Blocks,
+    icon: Cube,
     editable: false,
     source: 'env',
     runtimeNote: 'Se muestra la configuracion registrada, pero la ejecucion real depende del servidor.',
@@ -125,7 +114,7 @@ export const CONFIG_CATEGORIES: ConfiguracionCategoryDefinition[] = [
     groupId: 'operacion',
     label: 'Limites de reportes',
     description: 'Parametros almacenados para operacion avanzada y observabilidad.',
-    icon: Globe2,
+    icon: Globe,
     editable: false,
     source: 'database',
     runtimeNote: 'Todavia no existe un consumidor global uniforme en frontend o backend.',
@@ -135,7 +124,7 @@ export const CONFIG_CATEGORIES: ConfiguracionCategoryDefinition[] = [
     groupId: 'operacion',
     label: 'API y rate limiting',
     description: 'El rate limiting productivo sigue viniendo de variables de entorno.',
-    icon: Settings2,
+    icon: Faders,
     editable: false,
     source: 'env',
     runtimeNote: 'Los limites reales del servidor no leen estos registros desde la base.',
@@ -145,7 +134,7 @@ export const CONFIG_CATEGORIES: ConfiguracionCategoryDefinition[] = [
     groupId: 'operacion',
     label: 'Diagnostico del sistema',
     description: 'Lectura operativa del estado visible del modulo.',
-    icon: Server,
+    icon: HardDrives,
     editable: false,
     source: 'derived',
   },
@@ -559,3 +548,4 @@ export const getFieldsByGroup = (groupId: string) => CONFIG_FIELDS.filter((field
 export const getFieldsByCategory = (categoryId: string) => CONFIG_FIELDS.filter((field) => field.categoryId === categoryId);
 export const getEditableFieldsByGroup = (groupId: string) =>
   CONFIG_FIELDS.filter((field) => field.groupId === groupId && field.editable);
+ 

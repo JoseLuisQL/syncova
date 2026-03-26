@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { FileSpreadsheet, Loader2 } from 'lucide-react';
+import { FileXls, CircleNotch } from '@phosphor-icons/react';
 import ExcelJS from 'exceljs';
 import { Alerta } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
@@ -127,16 +127,16 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
       <div className="space-y-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-950">Reportes y análisis</h2>
-            <p className="mt-1 text-sm text-slate-500">Filtra el período y exporta sin salir del módulo.</p>
+            <h2 className="text-lg font-semibold text-zinc-950">Reportes y análisis</h2>
+            <p className="mt-1 text-sm text-zinc-500">Filtra el período y exporta sin salir del módulo.</p>
           </div>
           <button
             type="button"
             onClick={handleExportExcel}
             disabled={isExporting}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-emerald-700 hover:to-teal-700 disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-emerald-700 hover:to-zinc-900 disabled:opacity-60"
           >
-            {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
+            {isExporting ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <FileXls className="h-4 w-4" weight="bold" />}
             Exportar Excel
           </button>
         </div>
@@ -175,29 +175,29 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
+            <CircleNotch className="h-6 w-6 animate-spin text-zinc-600" weight="bold" />
           </div>
         ) : (
           <>
             <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-              <section className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
-                <h3 className="text-base font-semibold text-slate-950">Distribución por tipo</h3>
+              <section className="rounded-[22px] border border-zinc-200 bg-white p-5 shadow-sm">
+                <h3 className="text-base font-semibold text-zinc-950">Distribución por tipo</h3>
                 <div className="mt-4 space-y-3">
                   {distribucionTipo.map((tipo) => {
                     const Icon = tipo.icon;
                     return (
-                      <div key={tipo.id} className="rounded-[16px] border border-slate-200 bg-slate-50/70 p-3">
+                      <div key={tipo.id} className="rounded-[16px] border border-zinc-200 bg-zinc-50/70 p-3">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2">
                             <div className={`rounded-lg p-2 ${tipo.bgColor}`}>
-                              <Icon className={`h-4 w-4 ${tipo.color}`} />
+                              <Icon className={`h-4 w-4 ${tipo.color}`} weight="fill" />
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-slate-900">{tipo.label}</p>
-                              <p className="text-xs text-slate-500">{tipo.cantidad} alerta(s)</p>
+                              <p className="text-sm font-medium text-zinc-900">{tipo.label}</p>
+                              <p className="text-xs text-zinc-500">{tipo.cantidad} alerta(s)</p>
                             </div>
                           </div>
-                          <p className="text-sm font-semibold text-slate-900">{tipo.porcentaje.toFixed(0)}%</p>
+                          <p className="text-sm font-semibold text-zinc-900">{tipo.porcentaje.toFixed(0)}%</p>
                         </div>
                       </div>
                     );
@@ -205,21 +205,21 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
                 </div>
               </section>
 
-              <section className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
-                <h3 className="text-base font-semibold text-slate-950">Resumen del período</h3>
+              <section className="rounded-[22px] border border-zinc-200 bg-white p-5 shadow-sm">
+                <h3 className="text-base font-semibold text-zinc-950">Resumen del período</h3>
                 <div className="mt-4 space-y-3">
-                  <div className="rounded-[16px] border border-slate-200 bg-slate-50/70 p-4">
-                    <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-500">Total del período</p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-950">{estadisticas.totalPeriodo}</p>
+                  <div className="rounded-[16px] border border-zinc-200 bg-zinc-50/70 p-4">
+                    <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">Total del período</p>
+                    <p className="mt-2 text-2xl font-semibold text-zinc-950">{estadisticas.totalPeriodo}</p>
                   </div>
-                  <div className="rounded-[16px] border border-slate-200 bg-slate-50/70 p-4">
-                    <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-500">Promedio diario</p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-950">{estadisticas.promedioDiario}</p>
+                  <div className="rounded-[16px] border border-zinc-200 bg-zinc-50/70 p-4">
+                    <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">Promedio diario</p>
+                    <p className="mt-2 text-2xl font-semibold text-zinc-950">{estadisticas.promedioDiario}</p>
                   </div>
-                  <div className="rounded-[16px] border border-slate-200 bg-slate-50/70 p-4">
-                    <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-500">Tipo dominante</p>
-                    <p className="mt-2 text-lg font-semibold text-slate-950">{estadisticas.tipoMasFrecuente.tipo}</p>
-                    <p className="mt-1 text-sm text-slate-500">{estadisticas.tipoMasFrecuente.cantidad} alerta(s)</p>
+                  <div className="rounded-[16px] border border-zinc-200 bg-zinc-50/70 p-4">
+                    <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">Tipo dominante</p>
+                    <p className="mt-2 text-lg font-semibold text-zinc-950">{estadisticas.tipoMasFrecuente.tipo}</p>
+                    <p className="mt-1 text-sm text-zinc-500">{estadisticas.tipoMasFrecuente.cantidad} alerta(s)</p>
                   </div>
                 </div>
               </section>
@@ -234,3 +234,4 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
 ReportesAlertas.displayName = 'ReportesAlertas';
 
 export default ReportesAlertas;
+ 

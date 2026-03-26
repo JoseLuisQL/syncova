@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import { ArrowRightLeft, Download, Eye, FileSpreadsheet } from 'lucide-react';
+import { ArrowsLeftRight, DownloadSimple, Eye, FileXls } from '@phosphor-icons/react';
 import { Establecimiento } from '../../../../types';
 import { useReportes } from '../../../../hooks/useReportes';
 import { useToastContext } from '../../../../contexts/ToastContext';
 import { ItemMovimientoMensual } from '../../../../types/reportes';
 import { COMPONENT_STYLES } from '../../constants';
-import { ReporteCard, ReportInlineStatus, ReportSectionCard, ReportTableColumn } from '..';
+import ReporteCard from '../ReporteCard';
+import { ReportInlineStatus, ReportSectionCard, ReportTableColumn } from '../ReportPrimitives';
 import MovimientosPorEESSModal, { MovimientosPorEESSFiltros } from '../../MovimientosPorEESSModal';
 import VisualizarReporteModal from '../../modals/VisualizarReporteModal';
 import { formatCompactDate } from '../../utils';
@@ -106,39 +107,39 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
       label: 'Establecimiento',
       render: (row) => (
         <div>
-          <p className="font-medium text-slate-900">{row.establecimientoNombre}</p>
-          <p className="text-xs text-slate-500">{row.vacunaNombre}</p>
+          <p className="font-medium text-zinc-900">{row.establecimientoNombre}</p>
+          <p className="text-xs text-zinc-500">{row.vacunaNombre}</p>
         </div>
       ),
     },
     {
       key: 'periodo',
       label: 'Periodo',
-      render: (row) => <span className="text-sm text-slate-600">{`${row.mes}/${row.anio}`}</span>,
+      render: (row) => <span className="text-sm text-zinc-600">{`${row.mes}/${row.anio}`}</span>,
       align: 'center',
     },
     {
       key: 'ingresos',
       label: 'Ingresos',
-      render: (row) => <span className="text-sm text-slate-700">{(row.transIngreso || 0).toLocaleString()}</span>,
+      render: (row) => <span className="text-sm text-zinc-700">{(row.transIngreso || 0).toLocaleString()}</span>,
       align: 'right',
     },
     {
       key: 'entregas',
       label: 'Entregas',
-      render: (row) => <span className="text-sm text-slate-700">{(row.entrega || 0).toLocaleString()}</span>,
+      render: (row) => <span className="text-sm text-zinc-700">{(row.entrega || 0).toLocaleString()}</span>,
       align: 'right',
     },
     {
       key: 'salidas',
       label: 'Salidas',
-      render: (row) => <span className="text-sm text-slate-700">{(row.salida || 0).toLocaleString()}</span>,
+      render: (row) => <span className="text-sm text-zinc-700">{(row.salida || 0).toLocaleString()}</span>,
       align: 'right',
     },
     {
       key: 'saldoFinal',
       label: 'Saldo final',
-      render: (row) => <span className="font-semibold text-slate-900">{row.saldoFinal.toLocaleString()}</span>,
+      render: (row) => <span className="font-semibold text-zinc-900">{row.saldoFinal.toLocaleString()}</span>,
       align: 'right',
     },
   ];
@@ -154,7 +155,7 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
         <section className={COMPONENT_STYLES.filter.container}>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-700">Rango operativo</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Rango operativo</h3>
             </div>
             <span className={COMPONENT_STYLES.badge.neutral}>Filtros sincronizados</span>
           </div>
@@ -206,7 +207,7 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
           <ReporteCard
             title="Movimientos mensuales"
             description="Ingresos, entregas, salidas y saldo final por EESS."
-            icon={ArrowRightLeft}
+            icon={ArrowsLeftRight}
             tone="success"
             statusLabel={reportes.movimientosMensuales.length > 0 ? `${reportes.movimientosMensuales.length} filas` : 'Pendiente'}
             facts={['Rango superior', 'Vista inline']}
@@ -220,7 +221,7 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
               },
               {
                 label: 'Excel',
-                icon: Download,
+                icon: DownloadSimple,
                   onClick: handleExportarReporte,
                   disabled: reportes.movimientosMensuales.length === 0,
               },
@@ -230,14 +231,14 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
             <ReporteCard
               title="Movimientos por EESS"
             description="Excel por establecimientos con filtros de rango y centro."
-            icon={FileSpreadsheet}
+            icon={FileXls}
             tone="secondary"
             statusLabel="Especializado"
             facts={['Exportación avanzada', 'Salida Excel']}
             actions={[
                 {
                 label: 'Configurar',
-                  icon: FileSpreadsheet,
+                  icon: FileXls,
                   onClick: () => setShowMovimientosPorEESSModal(true),
                   variant: 'primary',
               },

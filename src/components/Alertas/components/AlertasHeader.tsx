@@ -1,12 +1,12 @@
 import React, { memo } from 'react';
-import { Bell, RefreshCw, Loader2, LucideIcon } from 'lucide-react';
+import { Bell, ArrowsClockwise, CircleNotch, Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { COMPONENT_STYLES, ALERTS_SECTIONS } from '../constants';
 import { useAppNavigation, useCurrentRoute } from '../../../hooks/useRouting';
 
 interface SectionItem {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: PhosphorIcon;
 }
 
 interface AlertasHeaderProps {
@@ -29,13 +29,11 @@ export const AlertasHeader: React.FC<AlertasHeaderProps> = memo(({
 
   return (
     <>
-      <header className={COMPONENT_STYLES.header.container}>
+      <header className="bg-white border-b border-zinc-200/60">
         <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className={COMPONENT_STYLES.header.iconWrapper}>
-                <Bell className="h-7 w-7 text-white" aria-hidden="true" />
-              </div>
+                <Bell className="h-7 w-7 text-white" aria-hidden="true" weight="fill" />
               <div>
                 <h1 className={COMPONENT_STYLES.header.title}>
                   Sistema de Alertas
@@ -62,9 +60,9 @@ export const AlertasHeader: React.FC<AlertasHeaderProps> = memo(({
                   className={COMPONENT_STYLES.button.secondary}
                 >
                   {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
                   ) : (
-                    <RefreshCw className="h-4 w-4" />
+                    <ArrowsClockwise className="h-4 w-4" weight="bold" />
                   )}
                   <span className="hidden sm:inline">Actualizar</span>
                 </button>
@@ -90,7 +88,7 @@ export const AlertasHeader: React.FC<AlertasHeaderProps> = memo(({
                   } flex-shrink-0`}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  <Icon className="h-4 w-4" aria-hidden="true" weight={isActive ? "fill" : "bold"} />
                   <span className="whitespace-nowrap">{section.label}</span>
                   {section.id === 'alertas' && noLeidas > 0 && (
                     <span className="ml-1 bg-rose-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
@@ -108,3 +106,4 @@ export const AlertasHeader: React.FC<AlertasHeaderProps> = memo(({
 });
 
 AlertasHeader.displayName = 'AlertasHeader';
+ 

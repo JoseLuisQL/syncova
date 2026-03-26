@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Users, UserPlus, RefreshCw, Download, Loader2, LucideIcon } from 'lucide-react';
+import { Users, UserPlus, ArrowsClockwise, DownloadSimple, CircleNotch, Icon } from '@phosphor-icons/react';
 import { COMPONENT_STYLES, USER_SECTIONS, SectionId } from '../constants';
 
 interface SectionItem {
@@ -63,9 +63,9 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
                 title="Actualizar datos"
               >
                 {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <CircleNotch className="h-4 w-4 animate-spin" />
                 ) : (
-                  <RefreshCw className="h-4 w-4" />
+                  <ArrowsClockwise className="h-4 w-4" />
                 )}
                 <span className="hidden sm:inline">Actualizar</span>
               </button>
@@ -76,7 +76,7 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
                   className={COMPONENT_STYLES.button.secondary}
                   title="Exportar usuarios"
                 >
-                  <Download className="h-4 w-4" />
+                  <DownloadSimple className="h-4 w-4" />
                   <span className="hidden sm:inline">Exportar</span>
                 </button>
               )}
@@ -88,7 +88,7 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
                   className={COMPONENT_STYLES.button.primary}
                 >
                   {isCreating ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <CircleNotch className="h-5 w-5 animate-spin" />
                   ) : (
                     <UserPlus className="h-5 w-5" />
                   )}
@@ -103,7 +103,7 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
       {/* Navigation Tabs */}
       <nav className={COMPONENT_STYLES.nav.container} aria-label="Secciones">
         <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
+          <div className="flex gap-1 overflow-X-auto py-3 scrollbar-hide">
             {displaySections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.id;
@@ -132,3 +132,4 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
 UsuariosHeader.displayName = 'UsuariosHeader';
 
 export default UsuariosHeader;
+   

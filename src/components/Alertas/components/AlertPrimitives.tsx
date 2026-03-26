@@ -1,12 +1,12 @@
 import React from 'react';
-import { AlertCircle, CheckCircle2, LucideIcon } from 'lucide-react';
+import { WarningCircle, CheckCircle, Icon } from '@phosphor-icons/react';
 import { ColorScheme, COLORS, COMPONENT_STYLES } from '../constants';
 
 export interface AlertMetricItem {
   id: string;
   label: string;
   value: React.ReactNode;
-  icon: LucideIcon;
+  icon: Icon;
   tone?: ColorScheme;
   description?: string;
 }
@@ -31,7 +31,7 @@ export const AlertMetricsGrid: React.FC<{ items: AlertMetricItem[] }> = ({ items
             <div className="min-w-0">
               <p className={`${COMPONENT_STYLES.stats.label} ${tone.text}`}>{item.label}</p>
               <p className={`${COMPONENT_STYLES.stats.value} ${tone.textStrong}`}>{item.value}</p>
-              {item.description ? <p className="mt-1.5 text-[0.74rem] leading-5 text-slate-500">{item.description}</p> : null}
+              {item.description ? <p className="mt-1.5 text-[0.74rem] leading-5 text-zinc-500">{item.description}</p> : null}
             </div>
             <div className={`${COMPONENT_STYLES.stats.iconWrapper} ${tone.border} ${tone.surface}`}>
               <Icon className={`h-4 w-4 ${tone.icon}`} aria-hidden="true" />
@@ -55,12 +55,12 @@ export const AlertInlineStatus: React.FC<{
     info: COMPONENT_STYLES.alert.info,
   }[tone];
 
-  const Icon = tone === 'success' ? CheckCircle2 : AlertCircle;
+  const IconComponent = tone === 'success' ? CheckCircle : WarningCircle;
 
   return (
     <div className={classes}>
       <div className="flex items-start gap-3">
-        <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+        <IconComponent className="mt-0.5 h-4 w-4 shrink-0" weight="fill" />
         <div>
           <p className="text-sm font-semibold">{title}</p>
           <p className="mt-1 text-sm leading-6">{description}</p>
@@ -69,3 +69,4 @@ export const AlertInlineStatus: React.FC<{
     </div>
   );
 };
+ 

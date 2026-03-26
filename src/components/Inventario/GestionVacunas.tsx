@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Package2, Plus, RefreshCw, ShieldAlert, TestTube2, ThermometerSnowflake } from 'lucide-react';
+import { Package, Plus, ArrowsClockwise, ThermometerCold } from '@phosphor-icons/react';
 import { CreateVacunaDto, UpdateVacunaDto, Vacuna } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useVacunas } from '../../hooks/useVacunas';
@@ -8,8 +8,8 @@ import {
   ActionButtons,
   EmptyState,
   ErrorAlert,
-  StatsGrid,
   StatusBadge,
+  KeyValueGrid,
 } from './components/SharedComponents';
 import { DataTable, FilterBar, Pagination, TableHeader } from './components/FilterAndTable';
 import {
@@ -20,7 +20,7 @@ import {
   SelectInput,
   SideSheet,
   TextInput,
-} from './components/ModalComponents';
+} from '../ui/ModalElements';
 import { COMPONENT_STYLES, FILTER_OPTIONS } from './constants';
 
 const TABLE_COLUMNS = [
@@ -109,19 +109,7 @@ const GestionVacunas: React.FC = () => {
     });
   }, [filterEstado]);
 
-  const stats = useMemo(() => {
-    const total = vacunas.length;
-    const activas = vacunas.filter((vacuna) => vacuna.estado === 'activo').length;
-    const conStock = vacunas.filter((vacuna) => getStockInfo(vacuna).stockTotal > 0).length;
-    const sinStock = total - conStock;
 
-    return [
-      { key: 'total', label: 'Total vacunas', value: total, icon: Package2, color: 'primary' as const },
-      { key: 'activas', label: 'Activas', value: activas, icon: Package2, color: 'success' as const },
-      { key: 'conStock', label: 'Con stock', value: conStock, icon: TestTube2, color: 'secondary' as const },
-      { key: 'sinStock', label: 'Sin stock', value: sinStock, icon: ShieldAlert, color: 'warning' as const },
-    ];
-  }, [vacunas]);
 
   const filters = useMemo(
     () => [
@@ -129,7 +117,7 @@ const GestionVacunas: React.FC = () => {
         id: 'estado-vacuna',
         label: 'Estado',
         value: filterEstado,
-        options: FILTER_OPTIONS.estado,
+        options: [...FILTER_OPTIONS.estado],
         onChange: setFilterEstado,
       },
     ],
@@ -211,7 +199,7 @@ const GestionVacunas: React.FC = () => {
             <tr>
               <td colSpan={6}>
                 <EmptyState
-                  icon={Package2}
+                  icon={Package}
                   title="No se encontraron vacunas"
                   description="Ajuste los filtros o registre una nueva vacuna."
                   action={{ label: 'Nueva vacuna', onClick: handleCreate }}
@@ -229,8 +217,8 @@ const GestionVacunas: React.FC = () => {
                       onClick={() => setSelectedVacuna(vacuna)}
                       className="flex items-center gap-3 text-left"
                     >
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
-                        <Package2 className="h-5 w-5" />
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900 border border-zinc-200/80">
+                        <Package className="h-5 w-5" weight="duotone" />
                       </div>
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-slate-900">{vacuna.nombre}</p>
@@ -302,11 +290,11 @@ const GestionVacunas: React.FC = () => {
             actions={
               <>
                 <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={refresh} disabled={isLoading}>
-                  <RefreshCw className="h-4 w-4" />
+                  <ArrowsClockwise className="h-4 w-4" weight="bold" />
                   <span>Actualizar</span>
                 </button>
                 <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleCreate} disabled={isCreating}>
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4" weight="bold" />
                   <span>Nueva vacuna</span>
                 </button>
               </>
@@ -317,11 +305,11 @@ const GestionVacunas: React.FC = () => {
 
           <div className="space-y-3 lg:hidden">
             {isLoading ? (
-              <DataTable isLoading={isLoading} loadingMessage="Cargando vacunas..." skeletonRows={4} loadingVariant="cards" />
+              <DataTable isLoading={isLoading} loadingMessage="Cargando vacunas..." skeletonRows={4} loadingVariant="cards"><></></DataTable>
             ) : vacunas.length === 0 ? (
               <div className={COMPONENT_STYLES.panel}>
                 <EmptyState
-                  icon={Package2}
+                  icon={Package}
                   title="No se encontraron vacunas"
                   description="Ajuste los filtros o registre una nueva vacuna."
                   action={{ label: 'Nueva vacuna', onClick: handleCreate }}
@@ -378,7 +366,7 @@ const GestionVacunas: React.FC = () => {
         onClose={() => setSelectedVacuna(null)}
         title={selectedVacuna?.nombre || 'Detalle de vacuna'}
         subtitle={selectedVacuna ? `${selectedVacuna.tipo} · ${selectedVacuna.presentacion}` : undefined}
-        icon={Package2}
+        icon={Package}
       >
         {selectedVacuna ? (
           <div className="space-y-5">
@@ -519,7 +507,7 @@ const VacunaModal: React.FC<VacunaModalProps> = ({ vacuna, onClose, onSubmit, is
       onClose={onClose}
       title={vacuna ? 'Editar vacuna' : 'Nueva vacuna'}
       subtitle={vacuna ? 'Corrige datos sin perder el contexto del inventario.' : 'Registra una nueva vacuna en el catálogo.'}
-      icon={Package2}
+      icon={Package}
       footer={
         <ModalFooter
           onCancel={onClose}
@@ -606,7 +594,7 @@ const VacunaModal: React.FC<VacunaModalProps> = ({ vacuna, onClose, onSubmit, is
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
             <div className="flex items-center gap-2 text-slate-900">
-              <ThermometerSnowflake className="h-4 w-4 text-teal-600" />
+              <ThermometerCold className="h-4 w-4 text-zinc-600" weight="duotone" />
               <span className="font-medium">{formData.temperaturaAlmacenamiento}</span>
             </div>
             <p className="mt-2">Vida útil configurada: {Math.round(Number(formData.tiempoVidaUtil) / 365)} años.</p>

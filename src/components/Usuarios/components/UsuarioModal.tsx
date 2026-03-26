@@ -1,14 +1,5 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import {
-  Building2,
-  Clock3,
-  Eye,
-  EyeOff,
-  KeyRound,
-  Mail,
-  Shield,
-  User,
-} from 'lucide-react';
+import { Buildings, Clock, Eye, EyeSlash, Key, EnvelopeSimple, Shield, User } from '@phosphor-icons/react';
 import { CentroAcopio, Role, Usuario } from '../../../types';
 import {
   FormField,
@@ -17,7 +8,7 @@ import {
   ModalFooter,
   SelectInput,
   TextInput,
-} from './ModalComponents';
+} from '../../ui/ModalElements';
 import { COMPONENT_STYLES } from '../constants';
 
 interface UsuarioFormData {
@@ -186,20 +177,20 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
         {usuario ? (
           <div className="grid gap-3 md:grid-cols-3">
             {[
-              { label: 'Último acceso', value: formatDateTime(usuario.ultimoAcceso), icon: Clock3 },
+              { label: 'Último acceso', value: formatDateTime(usuario.ultimoAcceso), icon: Clock },
               { label: 'Creado', value: formatDateTime(usuario.createdAt), icon: User },
               { label: 'Actualizado', value: formatDateTime(usuario.updatedAt), icon: Shield },
             ].map((item) => {
               const Icon = item.icon;
 
               return (
-                <div key={item.label} className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm">
+                <div key={item.label} className="rounded-[20px] border border-zinc-200 bg-white p-4 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">{item.label}</p>
-                      <p className="mt-2 text-sm font-semibold leading-6 text-slate-900">{item.value}</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">{item.label}</p>
+                      <p className="mt-2 text-sm font-semibold leading-6 text-zinc-900">{item.value}</p>
                     </div>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-600">
                       <Icon className="h-4 w-4" aria-hidden="true" />
                     </div>
                   </div>
@@ -272,7 +263,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                    className="absolute right-3 top-1/2 -tranzinc-y-1/2 text-zinc-400 transition-colors hover:text-zinc-600"
                     aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -280,14 +271,14 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
                 </div>
               </FormField>
             ) : (
-              <div className="rounded-[20px] border border-cyan-200 bg-cyan-50/80 p-4 md:col-span-2">
+              <div className="rounded-[20px] border border-zinc-200 bg-zinc-50/80 p-4 md:col-span-2">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-cyan-700 shadow-sm">
-                    <KeyRound className="h-4 w-4" aria-hidden="true" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-700 shadow-sm">
+                    <Key className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-cyan-900">Contraseña gestionada por separado</p>
-                    <p className="mt-1 text-sm text-cyan-800">
+                    <p className="text-sm font-semibold text-zinc-900">Contraseña gestionada por separado</p>
+                    <p className="mt-1 text-sm text-zinc-800">
                       Para mantener el control y la trazabilidad, el cambio de contraseña se realiza desde el modal específico
                       de seguridad.
                     </p>
@@ -322,14 +313,14 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
                 ]}
               />
             ) : (
-              <div className="rounded-[20px] border border-slate-200 bg-white p-4">
+              <div className="rounded-[20px] border border-zinc-200 bg-white p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
-                    <Mail className="h-4 w-4" aria-hidden="true" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
+                    <EnvelopeSimple className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">Alta inicial en estado activo</p>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <p className="text-sm font-semibold text-zinc-900">Alta inicial en estado activo</p>
+                    <p className="mt-1 text-sm text-zinc-600">
                       Las nuevas cuentas se crean activas para facilitar el primer acceso. Luego podrás ajustar el estado si lo necesitas.
                     </p>
                   </div>
@@ -339,14 +330,14 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
           </div>
 
           <div className="grid gap-3 lg:grid-cols-[1.35fr_0.95fr]">
-            <div className="rounded-[20px] border border-slate-200 bg-white p-4">
+            <div className="rounded-[20px] border border-zinc-200 bg-white p-4">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
-                  <Building2 className="h-4 w-4" aria-hidden="true" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-50 text-zinc-700">
+                  <Buildings className="h-4 w-4" aria-hidden="true" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Centro principal operativo</p>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="text-sm font-semibold text-zinc-900">Centro principal operativo</p>
+                  <p className="mt-1 text-sm text-zinc-600">
                     {primaryCentro
                       ? `${primaryCentro.nombre} (${primaryCentro.codigo || 'sin código'})`
                       : 'Aún no se ha definido un centro principal.'}
@@ -368,27 +359,27 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
           title="Centros de acopio asignados"
           description="Selecciona uno o varios centros. Para responsables de acopio esta asignación es obligatoria."
         >
-          <div className="flex flex-col gap-3 rounded-[20px] border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 rounded-[20px] border border-zinc-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Cobertura configurada</p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="text-sm font-semibold text-zinc-900">Cobertura configurada</p>
+              <p className="mt-1 text-sm text-zinc-500">
                 {selectedCentros.length > 0
                   ? `${selectedCentros.length} centro${selectedCentros.length === 1 ? '' : 's'} seleccionado${selectedCentros.length === 1 ? '' : 's'}.`
                   : 'No hay centros seleccionados todavía.'}
               </p>
             </div>
-            <span className="inline-flex items-center rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+            <span className="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-semibold text-zinc-700">
               {primaryCentro ? `Principal: ${primaryCentro.nombre}` : 'Sin centro principal'}
             </span>
           </div>
 
           {centrosActivos.length === 0 ? (
-            <div className="rounded-[20px] border border-slate-200 bg-white p-5 text-sm text-slate-600">
+            <div className="rounded-[20px] border border-zinc-200 bg-white p-5 text-sm text-zinc-600">
               No hay centros de acopio activos disponibles para asignar.
             </div>
           ) : (
             <div>
-              <div className="grid max-h-72 gap-2 overflow-y-auto rounded-[22px] border border-slate-200 bg-white p-3 md:grid-cols-2">
+              <div className="grid max-h-72 gap-2 overflow-y-auto rounded-[22px] border border-zinc-200 bg-white p-3 md:grid-cols-2">
                 {centrosActivos.map((centro) => {
                   const isSelected = formData.centroAcopioIds.includes(centro.id);
 
@@ -399,19 +390,19 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
                       onClick={() => handleToggleCentro(centro.id)}
                       className={`rounded-[18px] border px-4 py-3 text-left transition-all ${
                         isSelected
-                          ? 'border-teal-300 bg-teal-50 text-teal-900 shadow-sm'
-                          : 'border-slate-200 bg-slate-50/60 text-slate-700 hover:border-slate-300 hover:bg-white'
+                          ? 'border-zinc-300 bg-zinc-50 text-zinc-900 shadow-sm'
+                          : 'border-zinc-200 bg-zinc-50/60 text-zinc-700 hover:border-zinc-300 hover:bg-white'
                       }`}
                       aria-pressed={isSelected}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="truncate text-sm font-semibold">{centro.nombre}</p>
-                          <p className="mt-1 text-xs text-slate-500">{centro.codigo || 'Sin código'}</p>
+                          <p className="mt-1 text-xs text-zinc-500">{centro.codigo || 'Sin código'}</p>
                         </div>
                         <span
                           className={`inline-flex rounded-full px-2 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.08em] ${
-                            isSelected ? 'bg-teal-100 text-teal-700' : 'bg-slate-200 text-slate-600'
+                            isSelected ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-200 text-zinc-600'
                           }`}
                         >
                           {isSelected ? 'Asignado' : 'Disponible'}
@@ -433,3 +424,4 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
 UsuarioModal.displayName = 'UsuarioModal';
 
 export default UsuarioModal;
+   

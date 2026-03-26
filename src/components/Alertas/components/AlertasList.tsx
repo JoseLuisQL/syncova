@@ -67,11 +67,11 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
 
   return (
     <section className={COMPONENT_STYLES.table.container}>
-      <div className="border-b border-slate-100 bg-slate-50/70 px-4 py-3.5 sm:px-5">
+      <div className="border-b border-zinc-100 bg-zinc-50/70 px-4 py-3.5 sm:px-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h3 className="text-base font-semibold text-slate-950">Alertas filtradas</h3>
-            <p className="mt-1 text-sm text-slate-500">{alertas.length} resultado(s) listos para revisión.</p>
+            <h3 className="text-base font-semibold text-zinc-950">Alertas filtradas</h3>
+            <p className="mt-1 text-sm text-zinc-500">{alertas.length} resultado(s) listos para revisión.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -86,7 +86,7 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
       </div>
 
       {selectedAlertas.length > 0 ? (
-        <div className="border-b border-teal-200 bg-teal-50/80 px-4 py-3.5 sm:px-5">
+        <div className="border-b border-zinc-200 bg-zinc-100/80 px-4 py-3.5 sm:px-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <span className="text-sm font-medium text-teal-900">
               {selectedAlertas.length} alerta{selectedAlertas.length === 1 ? '' : 's'} seleccionada{selectedAlertas.length === 1 ? '' : 's'}
@@ -131,7 +131,7 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                 { key: 'acciones', label: 'Acciones', align: 'right' },
               ]}
             />
-            <tbody className="divide-y divide-slate-100 bg-white">
+            <tbody className="divide-y divide-zinc-100 bg-white">
               {alertasPaginadas.map((alerta) => {
                 const tipoInfo = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo);
                 const nivelInfo = NIVELES_ALERTA.find((nivel) => nivel.id === alerta.nivel);
@@ -143,31 +143,31 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                         type="checkbox"
                         checked={selectedAlertas.includes(alerta.id)}
                         onChange={() => onToggleSelect(alerta.id)}
-                        className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                        className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-800"
                         aria-label={`Seleccionar alerta: ${alerta.titulo}`}
                       />
                     </TableCell>
                     <TableCell>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-slate-900">{alerta.titulo}</p>
-                          {!alerta.leida ? <span className="h-2 w-2 rounded-full bg-teal-500" /> : null}
+                          <p className="font-medium text-zinc-900">{alerta.titulo}</p>
+                          {!alerta.leida ? <span className="h-2 w-2 rounded-full bg-zinc-800" /> : null}
                         </div>
-                        <p className="mt-1 text-sm text-slate-600">{alerta.descripcion}</p>
+                        <p className="mt-1 text-sm text-zinc-600">{alerta.descripcion}</p>
                       </div>
                     </TableCell>
                     <TableCell align="center">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${tipoInfo?.bgColor || 'bg-slate-100'} ${tipoInfo?.color || 'text-slate-700'}`}>
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${tipoInfo?.bgColor || 'bg-zinc-100'} ${tipoInfo?.color || 'text-zinc-700'}`}>
                         {tipoInfo?.label || alerta.tipo}
                       </span>
                     </TableCell>
                     <TableCell align="center">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${nivelInfo?.bgColor || 'bg-slate-100'} ${nivelInfo?.color || 'text-slate-700'}`}>
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${nivelInfo?.bgColor || 'bg-zinc-100'} ${nivelInfo?.color || 'text-zinc-700'}`}>
                         {nivelInfo?.label || alerta.nivel}
                       </span>
                     </TableCell>
                     <TableCell align="center">
-                      <span className="text-sm text-slate-600">{formatearFecha(alerta.fechaCreacion)}</span>
+                      <span className="text-sm text-zinc-600">{formatearFecha(alerta.fechaCreacion)}</span>
                     </TableCell>
                     <TableCell align="center">
                       <span className={alerta.leida ? COMPONENT_STYLES.badge.neutral : COMPONENT_STYLES.badge.count}>
@@ -210,3 +210,4 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
 });
 
 AlertasList.displayName = 'AlertasList';
+ 

@@ -4,192 +4,162 @@ import {
   Clock,
   Package,
   Plus,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 
 // Paleta de colores unificada con Inventario y Movimientos (teal/cyan)
 export const COLORS = {
   primary: {
-    gradient: 'from-teal-600 to-cyan-600',
-    gradientHover: 'from-teal-700 to-cyan-700',
-    bg: 'bg-teal-50',
-    bgHover: 'hover:bg-teal-100',
-    text: 'text-teal-700',
-    textDark: 'text-teal-800',
-    border: 'border-teal-200',
-    icon: 'text-teal-600',
-    ring: 'ring-teal-500',
-    focus: 'focus:ring-teal-500 focus:border-teal-500',
+    gradient: 'from-zinc-800 to-zinc-900',
+    gradientHover: 'from-zinc-900 to-black',
+    bg: 'bg-zinc-50',
+    bgHover: 'hover:bg-zinc-100',
+    text: 'text-zinc-800',
+    textDark: 'text-zinc-900',
+    border: 'border-zinc-200',
+    icon: 'text-zinc-700',
+    ring: 'ring-zinc-900/10',
+    focus: 'focus:ring-zinc-900 focus:border-zinc-900',
   },
   secondary: {
-    gradient: 'from-cyan-500 to-teal-500',
-    bg: 'bg-cyan-50',
-    text: 'text-cyan-700',
-    textDark: 'text-cyan-800',
-    border: 'border-cyan-200',
-    icon: 'text-cyan-600',
+    gradient: 'from-zinc-700 to-zinc-800',
+    bg: 'bg-zinc-50',
+    text: 'text-zinc-700',
+    textDark: 'text-zinc-900',
+    border: 'border-zinc-200',
+    icon: 'text-zinc-600',
   },
   success: {
-    gradient: 'from-emerald-500 to-teal-500',
-    bg: 'bg-emerald-50',
-    bgGradient: 'from-emerald-50 to-emerald-100',
+    gradient: 'from-emerald-500 to-emerald-600',
+    bg: 'bg-emerald-50/50',
+    bgGradient: 'from-emerald-50 to-emerald-50',
     text: 'text-emerald-700',
     textDark: 'text-emerald-800',
     border: 'border-emerald-200',
     icon: 'text-emerald-600',
-    badge: 'bg-emerald-100 text-emerald-800',
+    badge: 'bg-emerald-50 text-emerald-800 border border-emerald-200/60',
   },
   warning: {
-    gradient: 'from-amber-500 to-orange-500',
-    bg: 'bg-amber-50',
-    bgGradient: 'from-amber-50 to-amber-100',
+    gradient: 'from-amber-500 to-amber-600',
+    bg: 'bg-amber-50/50',
+    bgGradient: 'from-amber-50 to-amber-50',
     text: 'text-amber-700',
     textDark: 'text-amber-800',
     border: 'border-amber-200',
     icon: 'text-amber-600',
-    badge: 'bg-amber-100 text-amber-800',
+    badge: 'bg-amber-50 text-amber-800 border border-amber-200/60',
   },
   danger: {
-    gradient: 'from-rose-500 to-red-500',
-    bg: 'bg-rose-50',
-    bgGradient: 'from-rose-50 to-rose-100',
+    gradient: 'from-rose-500 to-rose-600',
+    bg: 'bg-rose-50/50',
+    bgGradient: 'from-rose-50 to-rose-50',
     text: 'text-rose-700',
     textDark: 'text-rose-800',
     border: 'border-rose-200',
     icon: 'text-rose-600',
-    badge: 'bg-rose-100 text-rose-800',
+    badge: 'bg-rose-50 text-rose-800 border border-rose-200/60',
   },
   neutral: {
-    bg: 'bg-gray-50',
-    bgGradient: 'from-gray-50 to-gray-100',
-    text: 'text-gray-700',
-    textDark: 'text-gray-800',
-    textLight: 'text-gray-500',
-    border: 'border-gray-200',
-    icon: 'text-gray-600',
+    bg: 'bg-zinc-50',
+    bgGradient: 'from-zinc-50 to-zinc-50',
+    text: 'text-zinc-700',
+    textDark: 'text-zinc-900',
+    textLight: 'text-zinc-500',
+    border: 'border-zinc-200',
+    icon: 'text-zinc-600',
+    badge: 'bg-zinc-100 text-zinc-700 border border-zinc-200/60',
   },
 } as const;
 
 // Estilos de componentes reutilizables
 export const COMPONENT_STYLES = {
-  pageBackground: 'min-h-screen bg-gradient-to-br from-teal-50/30 via-cyan-50/30 to-blue-50/30',
+  pageBackground: 'min-h-screen bg-zinc-50/30',
 
-  card: 'bg-white rounded-2xl border border-gray-100 shadow-sm',
-  cardHover: 'hover:shadow-md transition-all duration-200',
+  card: 'bg-white rounded-2xl border border-zinc-200/80 shadow-sm',
+  cardHover: 'hover:shadow-md transition-all duration-200 hover:border-zinc-300',
 
   header: {
-    container: 'bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-20',
-    title: 'text-xl sm:text-2xl font-bold text-gray-900',
-    subtitle: 'text-sm text-gray-600 mt-0.5',
-    iconWrapper: 'p-3 rounded-xl bg-gradient-to-br from-teal-600 to-cyan-600 shadow-lg',
+    container: 'bg-white/80 backdrop-blur-sm border-b border-zinc-200/80 sticky top-0 z-20',
+    title: 'text-[1.42rem] font-semibold tracking-tight text-zinc-900 sm:text-[1.54rem]',
+    subtitle: 'text-[0.92rem] text-zinc-500 mt-0.5',
+    iconWrapper: 'flex h-12 w-12 items-center justify-center rounded-[18px] bg-zinc-900 text-white shadow-sm',
   },
 
   button: {
-    primary: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white 
-              bg-gradient-to-r from-teal-600 to-cyan-600 
-              hover:from-teal-700 hover:to-cyan-700 
-              shadow-md hover:shadow-lg 
-              transition-all duration-200 
-              focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
-              disabled:opacity-50 disabled:cursor-not-allowed`,
-    secondary: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium 
-                text-gray-700 bg-white border border-gray-200 
-                hover:bg-gray-50 hover:border-gray-300
-                transition-all duration-200
-                focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
-                disabled:opacity-50 disabled:cursor-not-allowed`,
-    success: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white 
-              bg-gradient-to-r from-emerald-600 to-emerald-700 
-              hover:from-emerald-700 hover:to-emerald-800 
-              shadow-md hover:shadow-lg transition-all duration-200
-              disabled:opacity-50 disabled:cursor-not-allowed`,
-    warning: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white 
-              bg-gradient-to-r from-amber-500 to-amber-600 
-              hover:from-amber-600 hover:to-amber-700 
-              shadow-md hover:shadow-lg transition-all duration-200
-              disabled:opacity-50 disabled:cursor-not-allowed`,
-    danger: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white 
-             bg-gradient-to-r from-rose-600 to-rose-700 
-             hover:from-rose-700 hover:to-rose-800 
-             shadow-md hover:shadow-lg transition-all duration-200
-             disabled:opacity-50 disabled:cursor-not-allowed`,
-    icon: `p-2 rounded-lg transition-all duration-200 
-           focus:outline-none focus:ring-2 focus:ring-offset-1`,
-    iconEdit: 'text-teal-600 bg-teal-50 hover:bg-teal-100 focus:ring-teal-500',
-    iconDelete: 'text-rose-600 bg-rose-50 hover:bg-rose-100 focus:ring-rose-500',
-    iconView: 'text-cyan-600 bg-cyan-50 hover:bg-cyan-100 focus:ring-cyan-500',
+    primary: `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
+    secondary: `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
+    success: `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
+    warning: `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
+    danger: `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
+    icon: `inline-flex h-9 w-9 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50`,
+    iconEdit: 'border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:ring-zinc-900',
+    iconDelete: 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 focus:ring-rose-500',
+    iconView: 'border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:ring-zinc-900',
   },
 
   input: {
-    base: `w-full px-4 py-2.5 rounded-xl border text-sm
-           transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-offset-0`,
-    normal: 'border-gray-200 focus:ring-teal-500 focus:border-teal-500 hover:border-gray-300',
+    base: `w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10`,
+    normal: 'border-zinc-200 focus:border-zinc-900 hover:border-zinc-300',
     error: 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30',
-    label: 'block text-sm font-semibold text-gray-700 mb-1.5',
+    label: 'block text-[0.84rem] font-medium text-zinc-700 mb-1.5',
     errorText: 'mt-1 text-xs text-rose-600',
   },
 
   select: {
-    base: `w-full px-4 py-2.5 rounded-xl border-2 text-sm font-medium
-           bg-white transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-offset-0
-           disabled:bg-gray-50 disabled:cursor-not-allowed`,
-    teal: 'border-gray-200 focus:ring-teal-500 focus:border-teal-500 hover:border-teal-300',
-    cyan: 'border-gray-200 focus:ring-cyan-500 focus:border-cyan-500 hover:border-cyan-300',
-    emerald: 'border-gray-200 focus:ring-emerald-500 focus:border-emerald-500 hover:border-emerald-300',
+    base: `w-full appearance-none rounded-xl border bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-zinc-900/10 disabled:bg-zinc-50 disabled:cursor-not-allowed`,
+    teal: 'border-zinc-200 hover:border-zinc-300 focus:border-zinc-900',
+    cyan: 'border-zinc-200 hover:border-zinc-300 focus:border-zinc-900',
+    emerald: 'border-zinc-200 hover:border-zinc-300 focus:border-zinc-900',
   },
 
   table: {
-    container: 'bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden',
-    header: 'bg-gradient-to-r from-gray-50 to-gray-100',
-    headerCell: 'px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider',
-    row: 'hover:bg-teal-50/30 transition-colors duration-150 border-b border-gray-100',
+    container: 'bg-white rounded-2xl border border-zinc-200/80 shadow-sm overflow-hidden',
+    header: 'bg-white',
+    headerCell: 'px-4 py-3 border-b-[3px] border-zinc-900 text-left text-[0.65rem] font-black uppercase tracking-[0.15em] text-zinc-500',
+    row: 'transition-colors duration-150 border-b border-zinc-100 hover:bg-zinc-50/50',
     cell: 'px-4 py-4',
-    emptyIcon: 'h-12 w-12 mx-auto text-gray-300 mb-4',
+    emptyIcon: 'h-12 w-12 mx-auto text-zinc-300 mb-4',
   },
 
   badge: {
-    active: 'inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700',
-    inactive: 'inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600',
-    count: 'inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-teal-100 text-teal-700',
-    warning: 'inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700',
-    danger: 'inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-rose-100 text-rose-700',
-    info: 'inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-cyan-100 text-cyan-700',
+    active: 'inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 text-xs font-medium text-emerald-800',
+    inactive: 'inline-flex items-center rounded-full bg-zinc-100 border border-zinc-200/60 px-2.5 py-1 text-xs font-medium text-zinc-600',
+    count: 'inline-flex items-center rounded-full bg-zinc-900 border border-zinc-900 px-2.5 py-1 text-xs font-medium text-white',
+    warning: 'inline-flex items-center rounded-full bg-amber-50 border border-amber-200/60 px-2.5 py-1 text-xs font-medium text-amber-800',
+    danger: 'inline-flex items-center rounded-full bg-rose-50 border border-rose-200/60 px-2.5 py-1 text-xs font-medium text-rose-800',
+    info: 'inline-flex items-center rounded-full bg-cyan-50 border border-cyan-200/60 px-2.5 py-1 text-xs font-medium text-cyan-800',
   },
 
   modal: {
-    overlay: 'fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4',
-    container: 'bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl',
-    containerLarge: 'bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl',
-    containerXL: 'bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl',
-    header: 'px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100',
-    body: 'px-6 py-5 overflow-y-auto max-h-[calc(90vh-180px)]',
-    footer: 'px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/50',
+    overlay: 'fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm',
+    container: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6 max-w-2xl',
+    containerLarge: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6 max-w-4xl',
+    containerXL: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6 max-w-5xl',
+    header: 'border-b border-zinc-100 px-5 py-4 sm:px-6',
+    body: 'max-h-[calc(100vh-170px)] overflow-y-auto px-5 py-5 sm:max-h-[calc(90vh-156px)] sm:px-6',
+    footer: 'border-t border-zinc-100 bg-zinc-50/50 px-5 py-4 sm:px-6',
   },
 
   stats: {
-    card: 'rounded-2xl p-5 border-2 transition-all duration-200 hover:shadow-md',
-    value: 'text-2xl font-bold',
-    label: 'text-sm font-semibold mt-1',
-    sublabel: 'text-xs mt-1',
-    iconWrapper: 'p-3 rounded-xl shadow-lg',
+    card: 'min-h-[88px] rounded-2xl border border-zinc-200 px-4 py-4 transition hover:border-zinc-300 hover:shadow-sm bg-white',
+    value: 'mt-2 text-[1.5rem] font-bold leading-none tracking-tight text-zinc-900',
+    label: 'text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-zinc-500',
+    sublabel: 'mt-1.5 text-[0.72rem] text-zinc-400',
+    iconWrapper: 'flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-600 shadow-sm',
   },
 
   filter: {
-    container: 'bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden',
-    header: 'bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200',
-    body: 'px-6 py-6',
-    searchIcon: 'absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400',
-    searchInput: `w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-gray-200 text-sm 
-                  focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 
-                  transition-all duration-200 hover:border-teal-300`,
+    container: 'rounded-[16px] border border-zinc-200 bg-white p-3 shadow-sm sm:p-4',
+    header: 'border-b border-zinc-100 px-5 py-4 sm:px-6',
+    body: 'px-5 py-4 sm:px-6',
+    searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400',
+    searchInput: 'w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-10 pr-4 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 hover:border-zinc-300 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10',
   },
 
   section: {
-    container: 'bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden',
-    header: 'bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200',
-    headerTitle: 'text-lg font-bold text-gray-900',
-    headerSubtitle: 'text-sm text-gray-600',
+    container: 'bg-white rounded-[16px] border border-zinc-200/90 shadow-sm overflow-hidden',
+    header: 'px-6 py-4 border-b border-zinc-100',
+    headerTitle: 'text-base font-semibold text-zinc-900',
+    headerSubtitle: 'text-sm text-zinc-500 mt-1',
     body: 'px-6 py-6',
   },
 } as const;
@@ -207,23 +177,23 @@ export const ANIOS_DISPONIBLES = [2024, 2025, 2026] as const;
 export const ESTADOS_VALE = {
   generado: {
     label: 'Generado',
-    bg: 'bg-cyan-100',
+    bg: 'bg-cyan-50',
     text: 'text-cyan-800',
-    border: 'border-cyan-200',
+    border: 'border-cyan-200/60',
     icon: Clock,
   },
   impreso: {
     label: 'Impreso',
-    bg: 'bg-amber-100',
+    bg: 'bg-amber-50',
     text: 'text-amber-800',
-    border: 'border-amber-200',
+    border: 'border-amber-200/60',
     icon: FileText,
   },
   entregado: {
     label: 'Entregado',
-    bg: 'bg-emerald-100',
+    bg: 'bg-emerald-50',
     text: 'text-emerald-800',
-    border: 'border-emerald-200',
+    border: 'border-emerald-200/60',
     icon: CheckCircle,
   },
 } as const;
@@ -233,27 +203,27 @@ export const TIPOS_VALE = {
   solo_base: {
     label: 'Base',
     shortLabel: 'B',
-    bg: 'bg-emerald-100',
+    bg: 'bg-emerald-50',
     text: 'text-emerald-800',
-    border: 'border-emerald-200',
+    border: 'border-emerald-200/60',
     icon: CheckCircle,
     description: 'Entregas programadas en planificacion',
   },
   solo_adicionales: {
     label: 'Adicional',
     shortLabel: 'A',
-    bg: 'bg-amber-100',
+    bg: 'bg-amber-50',
     text: 'text-amber-800',
-    border: 'border-amber-200',
+    border: 'border-amber-200/60',
     icon: Plus,
     description: 'Entregas adicionales no programadas',
   },
   completo: {
     label: 'Completo',
     shortLabel: 'C',
-    bg: 'bg-teal-100',
-    text: 'text-teal-800',
-    border: 'border-teal-200',
+    bg: 'bg-zinc-100',
+    text: 'text-zinc-800',
+    border: 'border-zinc-200/60',
     icon: Package,
     description: 'Base + Adicionales',
   },

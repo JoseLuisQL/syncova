@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { Bell, Clock3, Edit, FileCog, Mail, ShieldCheck, Trash2 } from 'lucide-react';
+import { Bell, Clock, PencilSimple, Gear, EnvelopeSimple, ShieldCheck, Trash } from '@phosphor-icons/react';
 import { useToastContext } from '../../../../contexts/ToastContext';
 import { COMPONENT_STYLES, ReporteProgramado } from '../../constants';
-import { ActionConfirmationDialog, ReportMetricsGrid, ReportResultsTable, ReportSectionCard, ReportTableColumn } from '..';
+import ActionConfirmationDialog from '../ActionConfirmationDialog';
+import { ReportMetricsGrid, ReportResultsTable, ReportSectionCard, ReportTableColumn } from '../ReportPrimitives';
 import { formatCompactDate, formatDateTime } from '../../utils';
 
 interface ConfiguracionTabProps {
@@ -62,7 +63,7 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
       id: 'total',
       label: 'Programados',
       value: reportesProgramados.length,
-      icon: Clock3,
+      icon: Clock,
       tone: 'primary' as const,
       description: 'Flujos disponibles en el módulo.',
     },
@@ -86,7 +87,7 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
       id: 'destinatarios',
       label: 'Destinatarios',
       value: destinatariosConfigurados,
-      icon: Mail,
+      icon: EnvelopeSimple,
       tone: 'secondary' as const,
       description: `${formatosConfigurados} formato(s) configurado(s)`,
     },
@@ -98,8 +99,8 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
       label: 'Reporte',
       render: (row) => (
         <div>
-          <p className="font-medium text-slate-900">{row.nombre}</p>
-          <p className="text-xs text-slate-500">{row.tipo} · {row.formato.toUpperCase()}</p>
+          <p className="font-medium text-zinc-900">{row.nombre}</p>
+          <p className="text-xs text-zinc-500">{row.tipo} · {row.formato.toUpperCase()}</p>
         </div>
       ),
     },
@@ -112,12 +113,12 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
     {
       key: 'proxima',
       label: 'Próxima ejecución',
-      render: (row) => <span className="text-sm text-slate-700">{formatDateTime(row.proximaEjecucion)}</span>,
+      render: (row) => <span className="text-sm text-zinc-700">{formatDateTime(row.proximaEjecucion)}</span>,
     },
     {
       key: 'destinatarios',
       label: 'Destinatarios',
-      render: (row) => <span className="text-sm text-slate-700">{row.destinatarios.length} contacto(s)</span>,
+      render: (row) => <span className="text-sm text-zinc-700">{row.destinatarios.length} contacto(s)</span>,
       align: 'center',
     },
     {
@@ -146,7 +147,7 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
             className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconEdit}`}
             aria-label={`Editar ${row.nombre}`}
           >
-            <Edit className="h-4 w-4" />
+            <PencilSimple className="h-4 w-4" />
           </button>
           <button
             type="button"
@@ -154,7 +155,7 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
             className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconDelete}`}
             aria-label={`Eliminar ${row.nombre}`}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash className="h-4 w-4" />
           </button>
         </div>
       ),
@@ -178,7 +179,7 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
         subtitle="Administra reportes programados y preferencias de salida sin perder el contexto operativo."
         aside={(
           <button type="button" onClick={onOpenCreate} className={COMPONENT_STYLES.button.primary}>
-            <Clock3 className="h-4 w-4" />
+            <Clock className="h-4 w-4" />
             Nuevo programado
           </button>
         )}
@@ -192,7 +193,7 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
                 activeSubTab === 'programados' ? COMPONENT_STYLES.segmented.itemActive : COMPONENT_STYLES.segmented.itemInactive
               }`}
             >
-              <Clock3 className="h-4 w-4" />
+              <Clock className="h-4 w-4" />
               Reportes programados
             </button>
             <button
@@ -202,7 +203,7 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
                 activeSubTab === 'configuracion' ? COMPONENT_STYLES.segmented.itemActive : COMPONENT_STYLES.segmented.itemInactive
               }`}
             >
-              <FileCog className="h-4 w-4" />
+              <Gear className="h-4 w-4" />
               Preferencias de salida
             </button>
           </div>
@@ -224,9 +225,9 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
             <div className="space-y-5">
               <section className="grid gap-5 xl:grid-cols-2">
                 <article className={COMPONENT_STYLES.panel}>
-                  <div className="border-b border-slate-100 px-5 py-4">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-700">Salida predeterminada</h3>
-                    <p className="mt-1 text-sm text-slate-500">Controla el formato visual y la retención de archivos exportados.</p>
+                  <div className="border-b border-zinc-100 px-5 py-4">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Salida predeterminada</h3>
+                    <p className="mt-1 text-sm text-zinc-500">Controla el formato visual y la retención de archivos exportados.</p>
                   </div>
                   <div className="grid gap-4 px-5 py-5 sm:grid-cols-2">
                     <div>
@@ -281,9 +282,9 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
                 </article>
 
                 <article className={COMPONENT_STYLES.panel}>
-                  <div className="border-b border-slate-100 px-5 py-4">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-700">Seguridad y notificaciones</h3>
-                    <p className="mt-1 text-sm text-slate-500">Preferencias locales del módulo para salida y seguimiento.</p>
+                  <div className="border-b border-zinc-100 px-5 py-4">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Seguridad y notificaciones</h3>
+                    <p className="mt-1 text-sm text-zinc-500">Preferencias locales del módulo para salida y seguimiento.</p>
                   </div>
                   <div className="space-y-3 px-5 py-5">
                     {[
@@ -293,21 +294,21 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
                       ['notificacionesEmail', 'Notificaciones email', 'Avisar cuando una ejecución termine'],
                       ['backupAutomatico', 'Backup automático', 'Guardar respaldo local del archivo exportado'],
                     ].map(([key, label, description]) => (
-                      <div key={key} className="flex items-center justify-between gap-4 rounded-[18px] border border-slate-200 bg-slate-50/80 px-4 py-3">
+                      <div key={key} className="flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
                         <div>
-                          <p className="text-sm font-medium text-slate-900">{label}</p>
-                          <p className="mt-1 text-xs text-slate-500">{description}</p>
+                          <p className="text-sm font-medium text-zinc-900">{label}</p>
+                          <p className="mt-1 text-xs text-zinc-500">{description}</p>
                         </div>
                         <button
                           type="button"
                           onClick={() => toggleBooleanSetting(key as 'incluirFirmaDigital' | 'marcaAgua' | 'encriptacionReportes' | 'notificacionesEmail' | 'backupAutomatico')}
                           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            configuracion[key as 'incluirFirmaDigital' | 'marcaAgua' | 'encriptacionReportes' | 'notificacionesEmail' | 'backupAutomatico'] ? 'bg-teal-600' : 'bg-slate-300'
+                            configuracion[key as 'incluirFirmaDigital' | 'marcaAgua' | 'encriptacionReportes' | 'notificacionesEmail' | 'backupAutomatico'] ? 'bg-zinc-600' : 'bg-zinc-300'
                           }`}
                         >
                           <span
                             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              configuracion[key as 'incluirFirmaDigital' | 'marcaAgua' | 'encriptacionReportes' | 'notificacionesEmail' | 'backupAutomatico'] ? 'translate-x-6' : 'translate-x-1'
+                              configuracion[key as 'incluirFirmaDigital' | 'marcaAgua' | 'encriptacionReportes' | 'notificacionesEmail' | 'backupAutomatico'] ? 'tranzinc-x-6' : 'tranzinc-x-1'
                             }`}
                           />
                         </button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { Warning } from '@phosphor-icons/react';
 import {
   Establecimiento,
   PlanificacionConRelaciones,
@@ -161,7 +161,7 @@ const Planificacion: React.FC = () => {
     let filtrados: Establecimiento[];
 
     if (selectedCentroAcopio === 'todos') {
-      filtrados = establecimientos.filter(e => e.tipo !== 'centro_acopio');
+      filtrados = establecimientos.filter(e => (e.tipo as any) !== 'centro_acopio');
     } else {
       filtrados = establecimientos.filter(e => e.centroAcopioId === selectedCentroAcopio);
     }
@@ -955,9 +955,9 @@ const Planificacion: React.FC = () => {
   const isPageLoading = isLoading || isContextLoading;
 
   return (
-    <main className="flex h-[calc(100vh-4rem)] flex-col bg-white">
-      <div className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3 lg:px-8">
-        <section className="flex flex-1 flex-col overflow-hidden bg-white">
+    <main className="flex h-[calc(100vh-4rem)] flex-col bg-zinc-50">
+      <div className="mx-auto flex w-full max-w-full flex-1 flex-col overflow-hidden p-2 sm:p-4 lg:p-6">
+        <section className="flex flex-1 flex-col overflow-hidden rounded-[20px] border border-zinc-200 bg-white shadow-sm ring-1 ring-zinc-200/40">
           <div className="shrink-0">
             <PlanificacionHeader
               isReadOnly={isReadOnlyMode}
@@ -967,7 +967,7 @@ const Planificacion: React.FC = () => {
               selectedAnio={selectedAnio}
               selectedCentroAcopio={selectedCentroAcopio}
               selectedVacuna={selectedVacuna}
-              centrosAcopio={centrosAcopioFiltro}
+              centrosAcopio={centrosAcopioFiltro as any}
               vacunas={vacunas}
               aniosDisponibles={aniosDisponibles}
               establecimientosCount={datosVacuna?.establecimientos.length || 0}
@@ -989,20 +989,20 @@ const Planificacion: React.FC = () => {
           </div>
 
           {error ? (
-            <div className="shrink-0 border-b border-slate-100 px-3 py-3 sm:px-4">
-              <div className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-rose-200 bg-white text-rose-600">
-                  <AlertTriangle className="h-4 w-4" />
+            <div className="shrink-0 border-b border-zinc-100 px-4 py-3">
+              <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 shadow-sm">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white border border-rose-100 shadow-sm text-rose-600">
+                  <Warning className="h-4 w-4" weight="bold" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-rose-900">Error al cargar la planificación</p>
-                  <p className="mt-0.5 text-sm text-rose-700">{error}</p>
+                  <p className="text-sm font-black tracking-tight text-rose-900">Error en resolución de Sandbox</p>
+                  <p className="mt-0.5 text-xs font-semibold text-rose-700">{error}</p>
                 </div>
               </div>
             </div>
           ) : null}
 
-          <div className="flex min-h-0 flex-1 flex-col gap-4 p-2.5 sm:p-4">
+          <div className="flex min-h-0 flex-1 flex-col gap-0 p-0">
             <div className="min-h-0 flex-1">
               <PlanificacionTabla
                 readOnly={isReadOnlyMode}

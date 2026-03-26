@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, FileWarning, X } from 'lucide-react';
+import { Warning, WarningCircle, X } from '@phosphor-icons/react';
 import { IciDemidImportPreview } from '../../types';
 import { COMPONENT_STYLES } from '../Planificacion/constants';
 
@@ -20,11 +20,11 @@ const IciDemidErroresModal: React.FC<IciDemidErroresModalProps> = ({ isOpen, onC
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
-                  <FileWarning className="h-5 w-5" />
+                  <WarningCircle className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900">Errores encontrados en la importación</h3>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <h3 className="text-lg font-semibold text-zinc-900">Errores encontrados en la importación</h3>
+                  <p className="mt-1 text-sm text-zinc-500">
                     Se detectaron inconsistencias en el Excel. Revisa la fila, el valor y el motivo exacto antes de volver a importar.
                   </p>
                 </div>
@@ -45,28 +45,28 @@ const IciDemidErroresModal: React.FC<IciDemidErroresModalProps> = ({ isOpen, onC
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-600">Establecimientos no mapeados</p>
                 <p className="mt-2 text-2xl font-bold text-amber-700">{errores.establecimientosNoMapeados.length}</p>
               </div>
-              <div className="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-cyan-600">Vacunas no mapeadas</p>
-                <p className="mt-2 text-2xl font-bold text-cyan-700">{errores.vacunasNoMapeadas.length}</p>
+              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-600">Vacunas no mapeadas</p>
+                <p className="mt-2 text-2xl font-bold text-zinc-700">{errores.vacunasNoMapeadas.length}</p>
               </div>
               {'omitidos' in errores ? (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Filas omitidas</p>
-                  <p className="mt-2 text-2xl font-bold text-slate-700">{errores.omitidos}</p>
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-600">Filas omitidas</p>
+                  <p className="mt-2 text-2xl font-bold text-zinc-700">{errores.omitidos}</p>
                 </div>
               ) : null}
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white">
-              <div className="border-b border-slate-100 px-4 py-3">
+            <div className="rounded-2xl border border-zinc-200 bg-white">
+              <div className="border-b border-zinc-100 px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-rose-500" />
-                  <h4 className="text-sm font-semibold text-slate-800">Detalle por fila</h4>
+                  <Warning className="h-4 w-4 text-rose-500" />
+                  <h4 className="text-sm font-semibold text-zinc-800">Detalle por fila</h4>
                 </div>
               </div>
               <div className="max-h-[420px] overflow-auto">
-                <table className="min-w-full divide-y divide-slate-200">
-                  <thead className="sticky top-0 bg-slate-50">
+                <table className="min-w-full divide-y divide-zinc-200">
+                  <thead className="sticky top-0 bg-zinc-50">
                     <tr>
                       <th className={COMPONENT_STYLES.table.headerCell}>Fila</th>
                       <th className={COMPONENT_STYLES.table.headerCell}>Tipo</th>
@@ -74,11 +74,11 @@ const IciDemidErroresModal: React.FC<IciDemidErroresModalProps> = ({ isOpen, onC
                       <th className={COMPONENT_STYLES.table.headerCell}>Descripción del error</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-zinc-100">
                     {(errores.erroresDetalle || []).map((error, index) => (
-                      <tr key={`${error.fila}-${index}`} className="hover:bg-slate-50/60">
+                      <tr key={`${error.fila}-${index}`} className="hover:bg-zinc-50/60">
                         <td className={COMPONENT_STYLES.table.cell}>
-                          <span className="font-semibold text-slate-700">{error.fila}</span>
+                          <span className="font-semibold text-zinc-700">{error.fila}</span>
                         </td>
                         <td className={COMPONENT_STYLES.table.cell}>
                           <span className="inline-flex rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-rose-700">
@@ -86,10 +86,10 @@ const IciDemidErroresModal: React.FC<IciDemidErroresModalProps> = ({ isOpen, onC
                           </span>
                         </td>
                         <td className={COMPONENT_STYLES.table.cell}>
-                          <span className="text-sm font-medium text-slate-700">{error.valor}</span>
+                          <span className="text-sm font-medium text-zinc-700">{error.valor}</span>
                         </td>
                         <td className={COMPONENT_STYLES.table.cell}>
-                          <span className="text-sm text-slate-600">{error.mensaje}</span>
+                          <span className="text-sm text-zinc-600">{error.mensaje}</span>
                         </td>
                       </tr>
                     ))}
@@ -113,3 +113,4 @@ const IciDemidErroresModal: React.FC<IciDemidErroresModalProps> = ({ isOpen, onC
 };
 
 export default IciDemidErroresModal;
+ 

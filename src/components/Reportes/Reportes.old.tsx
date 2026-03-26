@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import {
   FileText,
-  Download,
-  Calendar,
-  BarChart3,
-  TrendingUp,
+  DownloadSimple,
+  CalendarBlank,
+  ChartBar,
+  TrendUp,
   Package,
   Users,
   CheckCircle,
@@ -15,18 +15,18 @@ import {
   Settings,
   Eye,
   Plus,
-  Edit,
-  Trash2,
-  Mail,
+  PencilSimple,
+  Trash,
+  EnvelopeSimple,
   Archive,
   Star,
   X,
   Search,
-  ArrowRightLeft,
-  Loader2,
-  AlertTriangle,
+  ArrowsLeftRight,
+  SpinnerGap,
+  Warning,
   Truck
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { mockEstablecimientos, mockVacunas } from '../../data/mockData';
 import { Establecimiento, Vacuna } from '../../types';
 import { usePlanificacionReportes } from '../../hooks/usePlanificacionReportes';
@@ -68,7 +68,7 @@ const REPORTS_SECTIONS: SectionConfig[] = [
   {
     id: 'movimientos',
     label: 'Movimientos',
-    icon: TrendingUp,
+    icon: TrendUp,
     path: '/reportes/movimientos',
     category: 'generacion',
     description: 'Análisis de distribución'
@@ -114,7 +114,7 @@ const REPORTS_SECTIONS: SectionConfig[] = [
   {
     id: 'programacion-seguimiento-anual',
     label: 'Programación y Seguimiento Anual',
-    icon: Calendar,
+    icon: CalendarBlank,
     path: '/reportes/programacion-seguimiento-anual',
     category: 'entrega-cenares',
     description: 'Programación y seguimiento anual de entregas'
@@ -211,14 +211,14 @@ const Reportes: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-zinc-900 border border-zinc-800">
       {/* Header Premium */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-full px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-3 rounded-xl shadow-lg">
-                <FileText className="h-8 w-8 text-white" />
+              <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-xl shadow-lg">
+                <FileText weight="duotone" className="h-8 w-8 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Sistema de Reportes</h1>
@@ -421,7 +421,7 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
       id: 'vencimientos',
       nombre: 'Próximos Vencimientos',
       descripcion: 'Lotes próximos a vencer en 30 días',
-      icon: Calendar,
+      icon: CalendarBlank,
       color: 'amber',
       datos: reportes.vencimientos,
       generar: () => handleGenerarReporte('vencimientos')
@@ -430,7 +430,7 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
       id: 'lotes_vencidos',
       nombre: 'Lotes Vencidos',
       descripcion: 'Lotes que ya han vencido y requieren acción',
-      icon: AlertTriangle,
+      icon: Warning,
       color: 'red',
       datos: reportes.lotesVencidos,
       generar: () => handleGenerarReporte('lotes_vencidos')
@@ -601,7 +601,7 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
           </div>
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
             <div className="flex items-center">
-              <Calendar className="h-8 w-8 text-amber-600" />
+              <CalendarBlank className="h-8 w-8 text-amber-600" />
               <div className="ml-3">
                 <p className="text-sm font-medium text-amber-600">Por Vencer</p>
                 <p className="text-2xl font-bold text-amber-900">{estadisticas.lotesProximosVencer}</p>
@@ -610,7 +610,7 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
           </div>
           <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
             <div className="flex items-center">
-              <AlertTriangle className="h-8 w-8 text-orange-600" />
+              <Warning weight="duotone" className="h-8 w-8 text-orange-600" />
               <div className="ml-3">
                 <p className="text-sm font-medium text-orange-600">Vencidos</p>
                 <p className="text-2xl font-bold text-orange-900">{estadisticas.lotesVencidos}</p>
@@ -770,7 +770,7 @@ const InventarioReportesTab: React.FC<InventarioReportesTabProps> = ({
                       onClick={() => handleExportarExcel(reporte.id)}
                       className={`flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium`}
                     >
-                      <Download className="h-4 w-4 mr-2 inline" />
+                      <DownloadSimple className="h-4 w-4 mr-2 inline" />
                       Exportar Excel
                     </button>
                   </>
@@ -934,7 +934,7 @@ const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
           {/* Fechas */}
           <div className="bg-gray-50 rounded-xl p-4">
             <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-              <Calendar className="h-4 w-4 mr-2" />
+              <CalendarBlank className="h-4 w-4 mr-2" />
               Rango de Fechas *
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1042,7 +1042,7 @@ const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
           {/* Filtros de Movimiento y Establecimiento */}
           <div className="bg-gray-50 rounded-xl p-4">
             <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-              <ArrowRightLeft className="h-4 w-4 mr-2" />
+              <ArrowsLeftRight className="h-4 w-4 mr-2" />
               Filtros de Movimiento
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1132,12 +1132,12 @@ const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
             >
               {exportando ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <SpinnerGap weight="bold" className="h-4 w-4 mr-2 animate-spin" />
                   Exportando...
                 </>
               ) : (
                 <>
-                  <Download className="h-4 w-4 mr-2" />
+                  <DownloadSimple className="h-4 w-4 mr-2" />
                   Exportar Excel
                 </>
               )}
@@ -1238,7 +1238,7 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
       id: 'movimientos_mensuales',
       nombre: 'Movimientos Mensuales',
       descripcion: 'Resumen mensual de movimientos por establecimiento',
-      icon: TrendingUp,
+      icon: TrendUp,
       color: 'emerald',
       datos: reportes.movimientosMensuales,
       generar: () => handleGenerarReporte('movimientos_mensuales'),
@@ -1258,7 +1258,7 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
       id: 'consumo_historico',
       nombre: 'Consumo Histórico',
       descripcion: 'Tendencias de consumo y proyecciones',
-      icon: BarChart3,
+      icon: ChartBar,
       color: 'purple',
       datos: reportes.consumoHistorico,
       generar: () => handleGenerarReporte('consumo_historico'),
@@ -1479,7 +1479,7 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
                     </div>
                   ) : (
                     <>
-                      <Download className="h-4 w-4 mr-2 inline" />
+                      <DownloadSimple className="h-4 w-4 mr-2 inline" />
                       Generar
                     </>
                   )}
@@ -1489,7 +1489,7 @@ const MovimientosReportesTab: React.FC<MovimientosReportesTabProps> = ({
                     onClick={reporte.exportar}
                     className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                   >
-                    <Download className="h-4 w-4 mr-2 inline" />
+                    <DownloadSimple className="h-4 w-4 mr-2 inline" />
                     Exportar Excel
                   </button>
                 )}
@@ -1580,7 +1580,7 @@ const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
       id: 'proyeccion_demanda',
       nombre: 'Proyección de Demanda',
       descripcion: 'Estimación de necesidades',
-      icon: TrendingUp,
+      icon: TrendUp,
       color: 'yellow',
       datos: reportes.proyeccionDemanda,
       generar: () => handleGenerarReporte('proyeccion_demanda'),
@@ -1590,7 +1590,7 @@ const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
       id: 'distribucion_geografica',
       nombre: 'Distribución Geográfica',
       descripcion: 'Análisis por zonas',
-      icon: BarChart3,
+      icon: ChartBar,
       color: 'red',
       datos: reportes.distribucionGeografica,
       generar: () => handleGenerarReporte('distribucion_geografica'),
@@ -1825,7 +1825,7 @@ const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
                     </div>
                   ) : (
                     <>
-                      <Download className="h-4 w-4 mr-2 inline" />
+                      <DownloadSimple className="h-4 w-4 mr-2 inline" />
                       Generar
                     </>
                   )}
@@ -1835,7 +1835,7 @@ const PlanificacionReportesTab: React.FC<PlanificacionReportesTabProps> = ({
                     onClick={reporte.exportar}
                     className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                   >
-                    <Download className="h-4 w-4 mr-2 inline" />
+                    <DownloadSimple className="h-4 w-4 mr-2 inline" />
                     Exportar Excel
                   </button>
                 )}
@@ -1861,7 +1861,7 @@ const EjecutivoReportesTab: React.FC<EjecutivoReportesTabProps> = ({
 }) => {
   const reportesEjecutivo = [
     { id: 'dashboard_ejecutivo', nombre: 'Dashboard Ejecutivo', descripcion: 'Métricas clave consolidadas', icon: Star },
-    { id: 'analisis_costo', nombre: 'Análisis de Costos', descripcion: 'Análisis económico del programa', icon: BarChart3 },
+    { id: 'analisis_costo', nombre: 'Análisis de Costos', descripcion: 'Análisis económico del programa', icon: ChartBar },
     { id: 'indicadores_kpi', nombre: 'Indicadores KPI', descripcion: 'Indicadores clave de rendimiento', icon: Target },
     { id: 'reporte_ministerial', nombre: 'Reporte Ministerial', descripcion: 'Formato oficial para MINSA', icon: FileText }
   ];
@@ -1924,7 +1924,7 @@ const EjecutivoReportesTab: React.FC<EjecutivoReportesTabProps> = ({
                   onClick={() => onGenerarReporte(filtros.formato)}
                   className="flex-1 bg-amber-600 text-white py-2 px-4 rounded-lg hover:bg-amber-700 transition-colors text-sm font-medium"
                 >
-                  <Download className="h-4 w-4 mr-2 inline" />
+                  <DownloadSimple className="h-4 w-4 mr-2 inline" />
                   Generar
                 </button>
               </div>
@@ -1993,7 +1993,7 @@ const ReportesProgramadosTab: React.FC<ReportesProgramadosTabProps> = ({
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-orange-100 rounded-lg">
-              <Calendar className="h-6 w-6 text-orange-600" />
+              <CalendarBlank className="h-6 w-6 text-orange-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Próxima Ejecución</p>
@@ -2005,7 +2005,7 @@ const ReportesProgramadosTab: React.FC<ReportesProgramadosTabProps> = ({
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-purple-100 rounded-lg">
-              <Mail className="h-6 w-6 text-purple-600" />
+              <EnvelopeSimple className="h-6 w-6 text-purple-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Enviados Hoy</p>
@@ -2049,7 +2049,7 @@ const ReportesProgramadosTab: React.FC<ReportesProgramadosTabProps> = ({
                 <tr key={reporte.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <FileText className="h-5 w-5 text-gray-400 mr-3" />
+                      <FileText weight="duotone" className="h-5 w-5 text-gray-400 mr-3" />
                       <div>
                         <div className="text-sm font-medium text-gray-900">{reporte.nombre}</div>
                         <div className="text-sm text-gray-500">{reporte.formato.toUpperCase()}</div>
@@ -2081,13 +2081,13 @@ const ReportesProgramadosTab: React.FC<ReportesProgramadosTabProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
                       <button className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded">
-                        <Edit className="h-4 w-4" />
+                        <PencilSimple className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleEliminarReporte(reporte.id)}
                         className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash className="h-4 w-4" />
                       </button>
                     </div>
                   </td>
@@ -2200,7 +2200,7 @@ const ConfiguracionReportesTab: React.FC = () => {
                 }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.incluirFirmaDigital ? 'translate-x-6' : 'translate-x-1'
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.incluirFirmaDigital ? 'tranzinc-x-6' : 'tranzinc-x-1'
                   }`}
               />
             </button>
@@ -2217,7 +2217,7 @@ const ConfiguracionReportesTab: React.FC = () => {
                 }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.marcaAgua ? 'translate-x-6' : 'translate-x-1'
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.marcaAgua ? 'tranzinc-x-6' : 'tranzinc-x-1'
                   }`}
               />
             </button>
@@ -2234,7 +2234,7 @@ const ConfiguracionReportesTab: React.FC = () => {
                 }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.encriptacionReportes ? 'translate-x-6' : 'translate-x-1'
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.encriptacionReportes ? 'tranzinc-x-6' : 'tranzinc-x-1'
                   }`}
               />
             </button>
@@ -2257,7 +2257,7 @@ const ConfiguracionReportesTab: React.FC = () => {
                 }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.notificacionesEmail ? 'translate-x-6' : 'translate-x-1'
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.notificacionesEmail ? 'tranzinc-x-6' : 'tranzinc-x-1'
                   }`}
               />
             </button>
@@ -2274,7 +2274,7 @@ const ConfiguracionReportesTab: React.FC = () => {
                 }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.backupAutomatico ? 'translate-x-6' : 'translate-x-1'
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${configuracion.backupAutomatico ? 'tranzinc-x-6' : 'tranzinc-x-1'
                   }`}
               />
             </button>
@@ -2776,7 +2776,7 @@ const VisualizarReporteModal: React.FC<VisualizarReporteModalProps> = ({
     if (!datos.vencimientos || datos.vencimientos.length === 0) {
       return (
         <div className="text-center py-8">
-          <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <CalendarBlank className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-500">No hay lotes próximos a vencer</p>
         </div>
       );
@@ -2852,7 +2852,7 @@ const VisualizarReporteModal: React.FC<VisualizarReporteModalProps> = ({
     if (!datos.lotesVencidos || datos.lotesVencidos.length === 0) {
       return (
         <div className="text-center py-8">
-          <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <Warning weight="duotone" className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-500">No hay lotes vencidos</p>
         </div>
       );

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { CheckSquare, FileSpreadsheet, Square } from 'lucide-react';
+import { CheckSquare, FileXls, Square } from '@phosphor-icons/react';
 import { Vacuna, Establecimiento } from '../../../types';
 import {
   DateInput,
@@ -7,7 +7,7 @@ import {
   Modal,
   ModalFooter,
   SelectInput,
-} from '../../Inventario/components/ModalComponents';
+} from '../../ui/ModalElements';
 import { getFechaPeruActual, getFechaPeruMesAnterior } from '../utils';
 
 interface StockVacunasEESSModalProps {
@@ -106,7 +106,7 @@ const StockVacunasEESSModal: React.FC<StockVacunasEESSModalProps> = ({
       onClose={onClose}
       title="Stock de vacunas por EESS"
       subtitle="Define el periodo, el alcance territorial y las vacunas incluidas en el Excel."
-      icon={FileSpreadsheet}
+      icon={FileXls}
       size="xl"
       footer={(
         <ModalFooter
@@ -123,7 +123,7 @@ const StockVacunasEESSModal: React.FC<StockVacunasEESSModalProps> = ({
           title="Resumen del reporte"
           description="El Excel agrupa stock por establecimiento y permite seleccionar múltiples vacunas."
         >
-          <div className="rounded-[18px] border border-sky-200 bg-sky-50/80 p-4 text-sm leading-6 text-sky-900">
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-900">
             Esta exportación es ideal para revisar cobertura territorial y disponibilidad por establecimiento.
           </div>
         </FormSection>
@@ -170,16 +170,16 @@ const StockVacunasEESSModal: React.FC<StockVacunasEESSModalProps> = ({
           <button
             type="button"
             onClick={handleToggleTodasVacunas}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+            className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
           >
             {todasSeleccionadas ? (
-              <CheckSquare className="h-4 w-4 text-teal-600" />
+              <CheckSquare className="h-4 w-4 text-zinc-600" />
             ) : algunasSeleccionadas ? (
-              <span className="flex h-4 w-4 items-center justify-center rounded border-2 border-teal-600 bg-teal-100">
-                <span className="h-1.5 w-1.5 rounded-sm bg-teal-600" />
+              <span className="flex h-4 w-4 items-center justify-center rounded border-2 border-zinc-600 bg-zinc-100">
+                <span className="h-1.5 w-1.5 rounded-sm bg-zinc-600" />
               </span>
             ) : (
-              <Square className="h-4 w-4 text-slate-400" />
+              <Square className="h-4 w-4 text-zinc-400" />
             )}
             Seleccionar todas
           </button>
@@ -193,14 +193,14 @@ const StockVacunasEESSModal: React.FC<StockVacunasEESSModalProps> = ({
                   key={vacuna.id}
                   type="button"
                   onClick={() => handleToggleVacuna(vacuna.id)}
-                  className={`flex items-center gap-3 rounded-[16px] border px-3 py-3 text-left transition ${
-                    selected ? 'border-teal-200 bg-teal-50/80 text-teal-900' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                  className={`flex items-center gap-3 rounded-xl border px-3 py-3 text-left transition ${
+                    selected ? 'border-zinc-200 bg-zinc-50 text-zinc-900' : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
                   }`}
                 >
                   {selected ? (
-                    <CheckSquare className="h-4 w-4 shrink-0 text-teal-600" />
+                    <CheckSquare className="h-4 w-4 shrink-0 text-zinc-600" />
                   ) : (
-                    <Square className="h-4 w-4 shrink-0 text-slate-400" />
+                    <Square className="h-4 w-4 shrink-0 text-zinc-400" />
                   )}
                   <span className="text-sm font-medium">{vacuna.nombre}</span>
                 </button>

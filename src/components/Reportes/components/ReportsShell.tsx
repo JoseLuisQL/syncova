@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { FileCog } from 'lucide-react';
+import { Gear } from '@phosphor-icons/react';
 import { useAppNavigation } from '../../../hooks/useRouting';
 import { COMPONENT_STYLES, REPORTS_SECTIONS, ReportSectionConfig, SECTION_GROUPS, SectionId } from '../constants';
 
@@ -33,10 +33,10 @@ const ReportsShell: React.FC<ReportsShellProps> = ({
     <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1500px] flex-col gap-3">
         <section className="overflow-hidden bg-transparent">
-          <div className="border-b border-slate-200/90 px-4 py-4 sm:px-5 lg:px-6">
+          <div className="border-b border-zinc-200/90 px-4 py-4 sm:px-5 lg:px-6">
             <div className="flex min-w-0 items-start gap-3 sm:gap-4">
               <div className={COMPONENT_STYLES.header.iconWrapper}>
-                <FileCog className="h-5 w-5" aria-hidden="true" />
+                <Gear className="h-5 w-5" aria-hidden="true" />
               </div>
               <div className="min-w-0 max-w-3xl">
                 <h1 className={`${COMPONENT_STYLES.header.title} text-[1.35rem] sm:text-[1.52rem]`}>Reportes</h1>
@@ -59,14 +59,14 @@ const ReportsShell: React.FC<ReportsShellProps> = ({
                       : 'grid-cols-1';
 
                 return (
-                  <section key={group.key} className="rounded-[16px] border border-slate-200 bg-slate-50/70 p-2.5">
+                  <section key={group.key} className="rounded-xl border border-zinc-200 bg-zinc-50 p-2.5">
                     <div className="mb-2 flex items-center gap-2 px-1.5">
-                      <GroupIcon className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
+                      <GroupIcon className="h-3.5 w-3.5 text-zinc-500" aria-hidden="true" />
                       <div>
-                        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-zinc-500">
                           {group.label}
                         </p>
-                        <p className="hidden text-[0.72rem] text-slate-500 sm:block">
+                        <p className="hidden text-[0.72rem] text-zinc-500 sm:block">
                           {group.description}
                         </p>
                       </div>
@@ -90,8 +90,8 @@ const ReportsShell: React.FC<ReportsShellProps> = ({
                           >
                             <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                             <span className="flex min-w-0 flex-col items-start text-left">
-                              <span className="text-[0.98rem] leading-tight text-slate-900">{section.label}</span>
-                              <span className="mt-1 hidden text-[0.72rem] font-normal leading-snug text-slate-500 md:block">
+                              <span className="text-[0.98rem] leading-tight text-zinc-900">{section.label}</span>
+                              <span className="mt-1 hidden text-[0.72rem] font-normal leading-snug text-zinc-500 md:block">
                                 {section.description}
                               </span>
                             </span>

@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { RefreshCw, Clock, AlertCircle } from 'lucide-react';
+import { ArrowsClockwise, Clock, WarningCircle } from '@phosphor-icons/react';
 
 interface DashboardHeaderProps {
   lastUpdated: Date | null;
@@ -32,32 +32,32 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   }, []);
 
   return (
-    <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+    <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5 border-b border-zinc-200/60 pb-5">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+        <h1 className="text-[26px] font-extrabold text-zinc-900 tracking-tight leading-none">
           Panel de Control
         </h1>
-        <p className="text-sm text-gray-500 mt-1 capitalize">
+        <p className="text-[13px] font-medium text-zinc-500 tracking-wide mt-1.5 capitalize">
           {today}
         </p>
       </div>
 
       <div className="flex items-center gap-3">
         {formattedTime && (
-          <div className="flex items-center gap-1.5 text-sm text-gray-400">
-            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="hidden sm:inline">Última actualización</span>
-            <span>{formattedTime}</span>
+          <div className="flex items-center gap-1.5 text-[12px] font-medium text-zinc-400">
+            <Clock className="h-3.5 w-3.5" weight="bold" aria-hidden="true" />
+            <span className="hidden sm:inline">Última actualización:</span>
+            <span className="text-zinc-600 font-bold tracking-wider">{formattedTime}</span>
           </div>
         )}
 
         {isStale && (
           <div 
-            className="flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full"
+            className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-amber-700 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md uppercase"
             role="status"
             aria-live="polite"
           >
-            <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+            <WarningCircle className="h-3.5 w-3.5" weight="fill" aria-hidden="true" />
             <span className="hidden sm:inline">Desactualizado</span>
           </div>
         )}
@@ -65,17 +65,18 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
         <button
           onClick={onRefresh}
           disabled={isLoading}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium 
-            transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:ring-offset-1
+          className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold 
+            transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 shadow-sm
             ${isLoading 
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-              : 'bg-white text-gray-700 border border-gray-200 hover:border-teal-300 hover:text-teal-700 hover:shadow-sm'
+              ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed shadow-none border border-transparent' 
+              : 'bg-white text-zinc-700 border border-zinc-200 hover:border-zinc-300 hover:text-zinc-900 hover:shadow-md'
             }`}
-          aria-label={isLoading ? 'Actualizando datos' : 'Actualizar datos del dashboard'}
+          aria-label={isLoading ? 'Actualizando datos' : 'Actualizar datos'}
           aria-busy={isLoading}
         >
-          <RefreshCw 
+          <ArrowsClockwise 
             className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} 
+            weight="bold"
             aria-hidden="true" 
           />
           <span className="hidden sm:inline">

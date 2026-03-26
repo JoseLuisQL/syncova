@@ -34,7 +34,7 @@ interface CascadingSelectorProps {
   };
 }
 
-const selectorCardBase = 'rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm transition';
+const selectorCardBase = 'rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition';
 
 const CascadingSelector: React.FC<CascadingSelectorProps> = ({
   selectedRedId = '',
@@ -152,7 +152,7 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
 
   const getSelectClassName = (hasError?: string, isDisabled?: boolean) =>
     `${COMPONENT_STYLES.input.base} ${hasError ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal} ${
-      isDisabled ? 'cursor-not-allowed bg-slate-100 text-slate-500' : ''
+      isDisabled ? 'cursor-not-allowed bg-gray-50 text-gray-500' : ''
     }`;
 
   const summaryItems = [
@@ -167,7 +167,7 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
         {showRed ? (
           <section className={selectorCardBase}>
             <div className="mb-3 flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-teal-200 bg-teal-50 text-teal-700">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-teal-200 bg-teal-50 text-teal-700">
                 <Network className="h-4 w-4" aria-hidden="true" />
               </div>
               <div>
@@ -175,7 +175,7 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
                   Red de Salud
                   {required.red ? <span className="ml-0.5 text-rose-500">*</span> : null}
                 </label>
-                <p className="text-xs text-slate-500">Primer nivel de la estructura territorial.</p>
+                <p className="text-xs text-gray-500">Primer nivel de la estructura territorial.</p>
               </div>
             </div>
 
@@ -201,7 +201,7 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
         {showMicrored ? (
           <section className={selectorCardBase}>
             <div className="mb-3 flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-200 bg-cyan-50 text-cyan-700">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-200 bg-cyan-50 text-cyan-700">
                 <GitBranch className="h-4 w-4" aria-hidden="true" />
               </div>
               <div>
@@ -209,7 +209,7 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
                   Microred
                   {required.microred ? <span className="ml-0.5 text-rose-500">*</span> : null}
                 </label>
-                <p className="text-xs text-slate-500">Se habilita después de escoger la red.</p>
+                <p className="text-xs text-gray-500">Se habilita después de escoger la red.</p>
               </div>
             </div>
 
@@ -241,7 +241,7 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
         {showCentroAcopio ? (
           <section className={selectorCardBase}>
             <div className="mb-3 flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-200 bg-amber-50 text-amber-700">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700">
                 <Warehouse className="h-4 w-4" aria-hidden="true" />
               </div>
               <div>
@@ -249,7 +249,7 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
                   Centro de Acopio
                   {required.centroAcopio ? <span className="ml-0.5 text-rose-500">*</span> : null}
                 </label>
-                <p className="text-xs text-slate-500">Último nivel antes del establecimiento de salud.</p>
+                <p className="text-xs text-gray-500">Último nivel antes del establecimiento de salud.</p>
               </div>
             </div>
 
@@ -284,10 +284,10 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
           const Icon = item.icon;
 
           return (
-            <div key={item.key} className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3">
-              <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-500">{item.label}</p>
-              <div className="mt-2 flex items-center gap-2 text-sm text-slate-900">
-                <Icon className="h-4 w-4 text-slate-400" aria-hidden="true" />
+            <div key={item.key} className="rounded-lg border border-gray-200 bg-white px-4 py-3">
+              <p className="text-xs font-medium uppercase tracking-[0.08em] text-gray-500">{item.label}</p>
+              <div className="mt-2 flex items-center gap-2 text-sm text-gray-900">
+                <Icon className="h-4 w-4 text-gray-400" aria-hidden="true" />
                 <span className="truncate">{item.value}</span>
               </div>
             </div>
@@ -296,25 +296,25 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-teal-200 bg-teal-50 text-teal-700">
+        <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-teal-200 bg-teal-50 text-teal-700">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           </div>
           <div>
-            <p className="font-medium text-slate-900">Actualizando opciones jerárquicas</p>
-            <p className="text-xs text-slate-500">Cargando las dependencias de la estructura territorial.</p>
+            <p className="font-medium text-gray-900">Actualizando opciones jerárquicas</p>
+            <p className="text-xs text-gray-500">Cargando las dependencias de la estructura territorial.</p>
           </div>
         </div>
       ) : null}
 
       {showCentroAcopio ? (
-        <div className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600">
+        <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600">
             <MapPin className="h-4 w-4" aria-hidden="true" />
           </div>
           <div>
-            <p className="font-medium text-slate-900">La ubicación determina el centro logístico del establecimiento</p>
-            <p className="text-xs text-slate-500">
+            <p className="font-medium text-gray-900">La ubicación determina el centro logístico del establecimiento</p>
+            <p className="text-xs text-gray-500">
               Si cambia la red o la microred, se limpiarán automáticamente las selecciones dependientes para evitar inconsistencias.
             </p>
           </div>

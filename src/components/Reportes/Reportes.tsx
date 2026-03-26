@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { SpinnerGap } from '@phosphor-icons/react';
 import { useKardexFiltros } from '../../hooks/useKardexData';
 import { useCurrentRoute } from '../../hooks/useRouting';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -105,13 +105,13 @@ const Reportes: React.FC = () => {
     return (
       <main className={COMPONENT_STYLES.pageBackground}>
         <div className="flex min-h-screen items-center justify-center">
-          <div className="flex flex-col items-center gap-4 rounded-[24px] border border-slate-200 bg-white px-8 py-10 shadow-sm">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-600">
-              <Loader2 className="h-6 w-6 animate-spin" />
+          <div className="flex flex-col items-center gap-4 rounded-xl border border-zinc-200 bg-white px-8 py-10 shadow-sm">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-50 text-zinc-600">
+              <SpinnerGap weight="bold" className="h-6 w-6 animate-spin" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-semibold text-slate-900">Cargando entorno de reportes</p>
-              <p className="mt-1 text-sm text-slate-500">Preparando filtros y catálogos operativos.</p>
+              <p className="text-sm font-semibold text-zinc-900">Cargando entorno de reportes</p>
+              <p className="mt-1 text-sm text-zinc-500">Preparando filtros y catálogos operativos.</p>
             </div>
           </div>
         </div>

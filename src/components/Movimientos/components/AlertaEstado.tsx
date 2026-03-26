@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { AlertTriangle, Loader2, Clock } from 'lucide-react';
+import { Warning, CircleNotch, Clock } from '@phosphor-icons/react';
 
 interface AlertaEstadoProps {
   tipo: 'error' | 'loading' | 'pending' | 'success';
@@ -22,23 +22,23 @@ export const AlertaEstado: React.FC<AlertaEstadoProps> = memo(({
   const estilos = {
     error: {
       container: 'bg-rose-50 border border-rose-200',
-      icon: <AlertTriangle className="h-5 w-5 text-rose-600" />,
+      icon: <Warning className="h-5 w-5 text-rose-600" weight="duotone" />,
       text: 'text-rose-800',
     },
     loading: {
-      container: 'bg-teal-50 border border-teal-200',
-      icon: <Loader2 className="h-5 w-5 text-teal-600 animate-spin" />,
-      text: 'text-teal-800',
+      container: 'bg-zinc-50 border border-zinc-200',
+      icon: <CircleNotch className="h-5 w-5 text-zinc-900 animate-spin" weight="bold" />,
+      text: 'text-zinc-800',
     },
     pending: {
       container: 'bg-amber-50 border border-amber-200',
-      icon: <Clock className="h-5 w-5 text-amber-600" />,
+      icon: <Clock className="h-5 w-5 text-amber-600" weight="duotone" />,
       text: 'text-amber-800',
     },
     success: {
-      container: 'bg-emerald-50 border border-emerald-200',
+      container: 'bg-zinc-900 border border-zinc-900 shadow-md',
       icon: null,
-      text: 'text-emerald-800',
+      text: 'text-white',
     },
   };
 
@@ -50,7 +50,7 @@ export const AlertaEstado: React.FC<AlertaEstadoProps> = memo(({
         <div className="flex items-center gap-3">
           {estilo.icon}
           <div>
-            <span className={`font-medium ${estilo.text}`}>
+            <span className={`font-medium tracking-tight ${estilo.text}`}>
               {mensaje}
               {count !== undefined && count > 0 && (
                 <span className="ml-1">({count})</span>
@@ -66,7 +66,7 @@ export const AlertaEstado: React.FC<AlertaEstadoProps> = memo(({
         {accion && (
           <button
             onClick={accion.onClick}
-            className={`text-sm font-medium ${estilo.text} hover:underline transition-all`}
+            className={`text-sm font-bold ${estilo.text} hover:underline transition-all`}
           >
             {accion.label}
           </button>

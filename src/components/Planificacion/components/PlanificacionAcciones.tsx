@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Save, RefreshCw, Loader2, Link2 } from 'lucide-react';
+import { FloppyDisk, ArrowsClockwise, CircleNotch, Link as LinkIcon } from '@phosphor-icons/react';
 import { COMPONENT_STYLES } from '../constants';
 
 interface PlanificacionAccionesProps {
@@ -29,28 +29,27 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
 
   if (readOnly) {
     return (
-      <div className={`${COMPONENT_STYLES.mutedPanel} p-5 text-sm text-slate-600`}>
-        Esta planificación se muestra en modo de solo lectura para el responsable de acopio. Las acciones de importación,
-        guardado, sincronización y recalculo quedan bloqueadas por política de acceso.
+      <div className={`${COMPONENT_STYLES.mutedPanel} p-4 sm:p-5 text-sm font-semibold tracking-tight text-zinc-500`}>
+        Matriz de planificación estática. El rol de operador de acopio desactiva permisiones de edición directas en esta capa.
       </div>
     );
   }
 
   return (
-    <div className={`${COMPONENT_STYLES.panel} p-4 sm:p-5`}>
+    <div className="rounded-[16px] border border-zinc-200/90 bg-white shadow-sm p-4 sm:p-5">
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={onGuardarProgramacion}
           disabled={isUpdating || isLoading}
-          className={COMPONENT_STYLES.button.success}
+          className={COMPONENT_STYLES.button.primary}
         >
           {isUpdating ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
           ) : (
-            <Save className="h-4 w-4" />
+            <FloppyDisk className="h-4 w-4" weight="bold" />
           )}
-          {isUpdating ? 'Guardando...' : 'Guardar programación'}
+          {isUpdating ? 'Fijando...' : 'Fijar programación'}
         </button>
 
         <button
@@ -60,11 +59,11 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
           className={COMPONENT_STYLES.button.secondary}
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
           ) : (
-            <RefreshCw className="h-4 w-4" />
+            <ArrowsClockwise className="h-4 w-4" weight="bold" />
           )}
-          {isLoading ? 'Cargando...' : 'Recalcular'}
+          {isLoading ? 'Cargando...' : 'Recalcular Matriz'}
         </button>
 
         <button
@@ -75,9 +74,9 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
           title="Sincronizar entregas con módulo de movimientos"
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
           ) : (
-            <Link2 className="h-4 w-4" />
+            <LinkIcon className="h-4 w-4" weight="bold" />
           )}
           Sincronizar
         </button>
@@ -87,14 +86,14 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
             type="button"
             onClick={onGuardarPendientes}
             disabled={isUpdating}
-            className={COMPONENT_STYLES.button.warning}
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-sm font-bold text-amber-950 shadow-sm transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isUpdating ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
             ) : (
-              <Save className="h-4 w-4" />
+              <FloppyDisk className="h-4 w-4" weight="bold" />
             )}
-            Guardar pendientes ({pendingChangesCount})
+            Guardar mutaciones ({pendingChangesCount})
           </button>
         ) : null}
       </div>

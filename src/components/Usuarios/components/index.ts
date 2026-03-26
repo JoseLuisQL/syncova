@@ -12,4 +12,5 @@ export {
   ModalFooter,
   SelectInput,
   TextInput,
-} from './ModalComponents';
+} from '../../ui/ModalElements';
+   

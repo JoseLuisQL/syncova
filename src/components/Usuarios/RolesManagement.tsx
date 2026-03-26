@@ -1,20 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Edit,
-  Key,
-  Loader2,
-  Plus,
-  RefreshCw,
-  Search,
-  Settings2,
-  Shield,
-  Trash2,
-  Users,
-  XCircle,
-} from 'lucide-react';
+import { Warning, CheckCircle, Clock, PencilSimple, Key, CircleNotch, Plus, ArrowsClockwise, MagnifyingGlass, Faders, Shield, Trash, Users, XCircle } from '@phosphor-icons/react';
 import { CreateRoleDto, Permission, Role, UpdateRoleDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { PermissionService } from '../../services/permissionService';
@@ -238,19 +223,19 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
 
   const getTipoColor = (esDefault: boolean) =>
     esDefault
-      ? 'border-cyan-200 bg-cyan-50 text-cyan-700'
-      : 'border-indigo-200 bg-indigo-50 text-indigo-700';
+      ? 'border-zinc-200 bg-zinc-50 text-zinc-700'
+      : 'border-zinc-200 bg-zinc-50 text-zinc-700';
 
   if (loading) {
     return (
-      <div className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center gap-3 text-slate-700">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 text-teal-700">
-            <Loader2 className="h-5 w-5 animate-spin" />
+      <div className="rounded-[24px] border border-zinc-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-3 text-zinc-700">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-700">
+            <CircleNotch className="h-5 w-5 animate-spin" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-900">Cargando roles</p>
-            <p className="text-xs text-slate-500">Preparando métricas, filtros y listado de roles.</p>
+            <p className="text-sm font-semibold text-zinc-900">Cargando roles</p>
+            <p className="text-xs text-zinc-500">Preparando métricas, filtros y listado de roles.</p>
           </div>
         </div>
       </div>
@@ -261,7 +246,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     return (
       <div className="rounded-[24px] border border-rose-200 bg-rose-50/80 p-6">
         <div className="flex items-center gap-2 text-rose-800">
-          <AlertTriangle className="h-5 w-5" />
+          <Warning className="h-5 w-5" />
           <span className="font-medium">Error al cargar roles</span>
         </div>
         <p className="mt-2 text-rose-700">{error}</p>
@@ -269,7 +254,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
           onClick={() => void loadRoles()}
           className={`${COMPONENT_STYLES.button.secondary} mt-4`}
         >
-          <RefreshCw className="h-4 w-4" />
+          <ArrowsClockwise className="h-4 w-4" />
           <span>Reintentar</span>
         </button>
       </div>
@@ -278,10 +263,10 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[24px] border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+      <section className="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-4 sm:p-5">
         <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <Settings2 className="h-4 w-4 text-slate-500" aria-hidden="true" />
+          <div className="flex items-center gap-2 text-sm font-semibold text-zinc-700">
+            <Faders className="h-4 w-4 text-zinc-500" aria-hidden="true" />
             <span>Filtros y acciones</span>
           </div>
 
@@ -292,7 +277,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
               }}
               className={COMPONENT_STYLES.button.secondary}
             >
-              <RefreshCw className="h-4 w-4" />
+              <ArrowsClockwise className="h-4 w-4" />
               <span>Actualizar</span>
             </button>
             {onNavigateToPermissions ? (
@@ -316,10 +301,10 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
 
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_240px_auto]">
           <div className="relative">
-            <label htmlFor="roles-search" className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label htmlFor="roles-search" className="mb-1.5 block text-sm font-medium text-zinc-700">
               Buscar rol
             </label>
-            <Search className="pointer-events-none absolute left-3.5 top-[calc(50%+0.875rem)] h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <MagnifyingGlass className="pointer-events-none absolute left-3.5 top-[calc(50%+0.875rem)] h-4 w-4 -tranzinc-y-1/2 text-zinc-400" />
             <input
               id="roles-search"
               type="text"
@@ -331,7 +316,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
           </div>
 
           <div>
-            <label htmlFor="roles-estado" className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label htmlFor="roles-estado" className="mb-1.5 block text-sm font-medium text-zinc-700">
               Estado
             </label>
             <select
@@ -356,11 +341,11 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                 }}
                 className={COMPONENT_STYLES.button.secondary}
               >
-                <RefreshCw className="h-4 w-4" />
+                <ArrowsClockwise className="h-4 w-4" />
                 <span>Limpiar filtros</span>
               </button>
             ) : (
-              <div className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600">
+              <div className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-600">
                 {filteredRoles.length} roles visibles
               </div>
             )}
@@ -368,31 +353,31 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50/90">
+      <section className="overflow-hidden rounded-[24px] border border-zinc-200 bg-white shadow-sm">
+        <div className="overflow-X-auto">
+          <table className="min-w-full divide-y divide-zinc-200">
+            <thead className="bg-zinc-50/90">
               <tr>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Rol</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Código</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Tipo</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Estado</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Usuarios</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Permisos</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Creado</th>
-                <th className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Acciones</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Rol</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Código</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Tipo</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Estado</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Usuarios</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Permisos</th>
+                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Creado</th>
+                <th className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
+            <tbody className="divide-y divide-zinc-200 bg-white">
               {filteredRoles.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-14 text-center">
                     <div className="flex flex-col items-center space-y-2">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-                        <Shield className="h-8 w-8 text-slate-400" />
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100">
+                        <Shield className="h-8 w-8 text-zinc-400" />
                       </div>
-                      <p className="text-base font-medium text-slate-900">No se encontraron roles</p>
-                      <p className="max-w-md text-sm text-slate-500">
+                      <p className="text-base font-medium text-zinc-900">No se encontraron roles</p>
+                      <p className="max-w-md text-sm text-zinc-500">
                         {hasActiveFilters
                           ? 'Intenta ajustar los filtros para encontrar el rol que buscas.'
                           : 'Todavía no hay roles personalizados registrados en el sistema.'}
@@ -402,24 +387,24 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                 </tr>
               ) : (
                 filteredRoles.map((role) => (
-                  <tr key={role.id} className="transition-colors duration-150 hover:bg-slate-50/70">
+                  <tr key={role.id} className="transition-colors duration-150 hover:bg-zinc-50/70">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${
                           role.esDefault
-                            ? 'border-cyan-200 bg-cyan-50 text-cyan-700'
-                            : 'border-violet-200 bg-violet-50 text-violet-700'
+                            ? 'border-zinc-200 bg-zinc-50 text-zinc-700'
+                            : 'border-zinc-200 bg-zinc-50 text-zinc-700'
                         }`}>
                           <Shield className="h-5 w-5" />
                         </div>
                         <div className="min-w-0">
-                          <div className="text-sm font-semibold text-slate-900">{role.nombre}</div>
-                          <div className="text-sm text-slate-500">{role.descripcion || 'Sin descripción registrada.'}</div>
+                          <div className="text-sm font-semibold text-zinc-900">{role.nombre}</div>
+                          <div className="text-sm text-zinc-500">{role.descripcion || 'Sin descripción registrada.'}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-sm text-slate-800">
+                      <span className="inline-flex rounded-lg bg-zinc-100 px-2.5 py-1 font-mono text-sm text-zinc-800">
                         {role.codigo}
                       </span>
                     </td>
@@ -433,21 +418,21 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                         {role.estado === 'activo' ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-700">
+                    <td className="px-6 py-4 text-sm text-zinc-700">
                       <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-slate-400" />
+                        <Users className="h-4 w-4 text-zinc-400" />
                         <span>{role._count?.usuarios || 0}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-700">
+                    <td className="px-6 py-4 text-sm text-zinc-700">
                       <div className="flex items-center gap-2">
-                        <Key className="h-4 w-4 text-slate-400" />
+                        <Key className="h-4 w-4 text-zinc-400" />
                         <span>{role._count?.rolePermissions || 0}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-500">
+                    <td className="px-6 py-4 text-sm text-zinc-500">
                       <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-slate-400" />
+                        <Clock className="h-4 w-4 text-zinc-400" />
                         <span>{new Date(role.createdAt).toLocaleDateString('es-PE')}</span>
                       </div>
                     </td>
@@ -455,7 +440,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => void handleManagePermissions(role)}
-                          className={`${COMPONENT_STYLES.button.icon} text-indigo-600 bg-indigo-50 hover:bg-indigo-100 focus:ring-indigo-500`}
+                          className={`${COMPONENT_STYLES.button.icon} text-zinc-600 bg-zinc-50 hover:bg-zinc-100 focus:ring-zinc-500`}
                           title="Gestionar permisos"
                         >
                           <Key className="h-4 w-4" />
@@ -467,7 +452,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                           title={role.esDefault ? 'Rol protegido del sistema' : 'Editar rol'}
                           disabled={role.esDefault}
                         >
-                          <Edit className="h-4 w-4" />
+                          <PencilSimple className="h-4 w-4" />
                         </button>
 
                         <button
@@ -491,9 +476,9 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                             disabled={isDeleting}
                           >
                             {isDeleting && deleteRoleState.role?.id === role.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <CircleNotch className="h-4 w-4 animate-spin" />
                             ) : (
-                              <Trash2 className="h-4 w-4" />
+                              <Trash className="h-4 w-4" />
                             )}
                           </button>
                         ) : null}
@@ -561,3 +546,4 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
 };
 
 export default RolesManagement;
+   

@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import {
   CheckCircle,
-  AlertTriangle,
+  Warning,
   Clock,
   Play,
   FileText,
   Package,
-  Settings,
+  Gear,
   Trash2,
-  RotateCcw,
+  ArrowCounterClockwise,
   Eye
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 
 /**
  * Suite de pruebas para el Módulo 11: VALES DE ENTREGA
@@ -123,7 +123,7 @@ const ValesTestSuite: React.FC = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'passed': return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case 'failed': return <AlertTriangle className="h-5 w-5 text-red-600" />;
+      case 'failed': return <Warning weight="duotone" className="h-5 w-5 text-red-600" />;
       case 'running': return <Clock className="h-5 w-5 text-blue-600 animate-spin" />;
       default: return <Clock className="h-5 w-5 text-gray-400" />;
     }
@@ -236,7 +236,7 @@ const ValesTestSuite: React.FC = () => {
             <span className="text-sm font-medium text-green-900">Servicio de Vales</span>
           </div>
           <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-            <Settings className="h-5 w-5 text-green-600" />
+            <Gear className="h-5 w-5 text-green-600" />
             <span className="text-sm font-medium text-green-900">Hook useVales</span>
           </div>
           <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
@@ -248,11 +248,11 @@ const ValesTestSuite: React.FC = () => {
             <span className="text-sm font-medium text-green-900">Modal de Detalle</span>
           </div>
           <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-            <Settings className="h-5 w-5 text-green-600" />
+            <Gear className="h-5 w-5 text-green-600" />
             <span className="text-sm font-medium text-green-900">Multiplicadores</span>
           </div>
           <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-            <RotateCcw className="h-5 w-5 text-green-600" />
+            <ArrowCounterClockwise className="h-5 w-5 text-green-600" />
             <span className="text-sm font-medium text-green-900">Reversión Segura</span>
           </div>
         </div>

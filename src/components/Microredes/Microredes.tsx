@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Building2, GitBranch, Network, Plus, RefreshCw } from 'lucide-react';
+import { Buildings, GitBranch, TreeStructure, Plus, ArrowsClockwise } from '@phosphor-icons/react';
 import { CreateMicroredDto, Microred, Red, UpdateMicroredDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useMicroredes } from '../../hooks/useMicroredes';
@@ -228,9 +228,9 @@ const Microredes: React.FC<MicroredesProps> = ({
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full divide-y divide-slate-200">
+      <table className="min-w-full divide-y divide-zinc-200">
         <TableHeader columns={TABLE_COLUMNS} />
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-zinc-100">
           {microredes.length === 0 ? (
             <tr>
               <td colSpan={TABLE_COLUMNS.length}>
@@ -282,7 +282,7 @@ const Microredes: React.FC<MicroredesProps> = ({
             actions={
               <>
                 <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={() => void fetchMicroredes()} disabled={loading}>
-                  <RefreshCw className="h-4 w-4" />
+                  <ArrowsClockwise className="h-4 w-4" />
                   <span>Actualizar</span>
                 </button>
                 <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={loading}>
@@ -367,29 +367,29 @@ const MicroredDesktopRow: React.FC<MicroredRowProps> = memo(({
     <TableRow>
       <TableCell>
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-700">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900">
             <GitBranch className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">{microred.nombre}</p>
-            <p className="text-xs text-slate-500">{microred.codigo || 'Sin código registrado'}</p>
+            <p className="truncate text-sm font-semibold text-zinc-900">{microred.nombre}</p>
+            <p className="text-xs text-zinc-500">{microred.codigo || 'Sin código registrado'}</p>
           </div>
         </div>
       </TableCell>
       <TableCell>
-        <span className="text-sm font-medium text-slate-900">{microred.codigo || '-'}</span>
+        <span className="text-sm font-medium text-zinc-900">{microred.codigo || '-'}</span>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-2 text-sm text-slate-700">
-          <Network className="h-4 w-4 text-slate-400" aria-hidden="true" />
+        <div className="flex items-center gap-2 text-sm text-zinc-700">
+          <TreeStructure className="h-4 w-4 text-zinc-400" aria-hidden="true" />
           <span>{microred.red?.nombre || 'Sin red asociada'}</span>
         </div>
       </TableCell>
       <TableCell>
-        <p className="max-w-sm text-sm text-slate-600">{microred.descripcion || 'Sin descripción registrada.'}</p>
+        <p className="max-w-sm text-sm text-zinc-600">{microred.descripcion || 'Sin descripción registrada.'}</p>
       </TableCell>
       <TableCell align="center">
-        <CountBadge count={centrosCount} icon={Building2} />
+        <CountBadge count={centrosCount} icon={Buildings} />
       </TableCell>
       <TableCell align="center">
         <StatusBadge status={microred.estado} />
@@ -404,7 +404,7 @@ const MicroredDesktopRow: React.FC<MicroredRowProps> = memo(({
               title="Ver centros de acopio"
               aria-label={`Ver centros de acopio de ${microred.nombre}`}
             >
-              <Building2 className="h-4 w-4" aria-hidden="true" />
+              <Buildings className="h-4 w-4" aria-hidden="true" />
             </button>
           ) : null}
           <ActionButtons
@@ -435,24 +435,24 @@ const MicroredMobileCard: React.FC<MicroredRowProps> = memo(({
     <article className={`${COMPONENT_STYLES.panel} p-4`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-base font-semibold text-slate-950">{microred.nombre}</p>
-          <p className="mt-1 text-sm text-slate-500">{microred.red?.nombre || 'Sin red asociada'}</p>
+          <p className="truncate text-base font-semibold text-zinc-950">{microred.nombre}</p>
+          <p className="mt-1 text-sm text-zinc-500">{microred.red?.nombre || 'Sin red asociada'}</p>
         </div>
         <StatusBadge status={microred.estado} />
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
-        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Centros</p>
-          <p className="mt-2 text-lg font-semibold text-slate-900">{centrosCount}</p>
+        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Centros</p>
+          <p className="mt-2 text-lg font-semibold text-zinc-900">{centrosCount}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Código</p>
-          <p className="mt-2 text-sm font-medium text-slate-900">{microred.codigo || '-'}</p>
+        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Código</p>
+          <p className="mt-2 text-sm font-medium text-zinc-900">{microred.codigo || '-'}</p>
         </div>
       </div>
 
-      <p className="mt-3 text-sm text-slate-600">{microred.descripcion || 'Sin descripción registrada.'}</p>
+      <p className="mt-3 text-sm text-zinc-600">{microred.descripcion || 'Sin descripción registrada.'}</p>
 
       <div className="mt-4 flex items-center justify-between gap-3">
         {onNavigate && centrosCount > 0 ? (
@@ -461,7 +461,7 @@ const MicroredMobileCard: React.FC<MicroredRowProps> = memo(({
             className={COMPONENT_STYLES.button.secondary}
             onClick={() => onNavigate(microred.id, microred.nombre)}
           >
-            <Building2 className="h-4 w-4" />
+            <Buildings className="h-4 w-4" />
             <span>Ver centros</span>
           </button>
         ) : (
@@ -619,3 +619,4 @@ const MicroredModal: React.FC<MicroredModalProps> = ({
 };
 
 export default memo(Microredes);
+ 

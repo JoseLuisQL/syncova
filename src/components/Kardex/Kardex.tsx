@@ -382,3 +382,4 @@ const Kardex: React.FC = () => {
 };
 
 export default Kardex;
+ 

@@ -1,16 +1,5 @@
 import React, { memo } from 'react';
-import {
-  User,
-  Edit,
-  Trash2,
-  Key,
-  CheckCircle,
-  XCircle,
-  Loader2,
-  Users,
-  Building2,
-  Clock3,
-} from 'lucide-react';
+import { User, PencilSimple, Trash, Key, CheckCircle, XCircle, CircleNotch, Users, Buildings, Clock } from '@phosphor-icons/react';
 import { Usuario, Role, CentroAcopio } from '../../../types';
 import { COMPONENT_STYLES, ROLE_COLORS } from '../constants';
 
@@ -90,8 +79,8 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
 
   return (
     <div className={COMPONENT_STYLES.table.container}>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="overflow-X-auto">
+        <table className="min-w-full divide-y divide-zinc-200">
           <thead className={COMPONENT_STYLES.table.header}>
             <tr>
               <th className="px-4 py-3 text-left w-12">
@@ -99,7 +88,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                   type="checkbox"
                   checked={selectedUsers.length === usuarios.length && usuarios.length > 0}
                   onChange={onSelectAll}
-                  className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  className="rounded border-zinc-300 text-zinc-600 focus:ring-zinc-500"
                 />
               </th>
               <th className={COMPONENT_STYLES.table.headerCell}>Usuario</th>
@@ -109,13 +98,13 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
               <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Acciones</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
+          <tbody className="bg-white divide-y divide-zinc-100">
             {isLoading ? (
               <tr>
                 <td colSpan={6} className="px-6 py-12 text-center">
                   <div className="flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-teal-600 mr-3" />
-                    <span className="text-gray-500">Cargando usuarios...</span>
+                    <CircleNotch className="h-8 w-8 animate-spin text-zinc-600 mr-3" />
+                    <span className="text-zinc-500">Cargando usuarios...</span>
                   </div>
                 </td>
               </tr>
@@ -123,8 +112,8 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
               <tr>
                 <td colSpan={6} className="px-6 py-12 text-center">
                   <Users className={COMPONENT_STYLES.table.emptyIcon} />
-                  <p className="text-lg font-medium text-gray-900 mb-1">No se encontraron usuarios</p>
-                  <p className="text-sm text-gray-500">Intenta ajustar los filtros o crear un nuevo usuario</p>
+                  <p className="text-lg font-medium text-zinc-900 mb-1">No se encontraron usuarios</p>
+                  <p className="text-sm text-zinc-500">Intenta ajustar los filtros o crear un nuevo usuario</p>
                 </td>
               </tr>
             ) : (
@@ -140,22 +129,22 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                       type="checkbox"
                       checked={selectedUsers.includes(usuario.id)}
                       onChange={() => onSelectUser(usuario.id)}
-                      className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                      className="rounded border-zinc-300 text-zinc-600 focus:ring-zinc-500"
                     />
                   </td>
                   <td className={COMPONENT_STYLES.table.cell}>
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-zinc-500 to-zinc-500 flex items-center justify-center">
                           <User className="h-5 w-5 text-white" />
                         </div>
                       </div>
                       <div className="ml-3">
-                        <div className="text-sm font-semibold text-gray-900">
+                        <div className="text-sm font-semibold text-zinc-900">
                           {usuario.nombres} {usuario.apellidos}
                         </div>
-                        <div className="text-sm text-gray-500">{usuario.email}</div>
-                        <div className="text-xs text-gray-400 font-mono">@{usuario.usuario}</div>
+                        <div className="text-sm text-zinc-500">{usuario.email}</div>
+                        <div className="text-xs text-zinc-400 font-mono">@{usuario.usuario}</div>
                       </div>
                     </div>
                   </td>
@@ -165,8 +154,8 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                         {getRolLabel(usuario.rol)}
                       </span>
                       {getCentrosAsignados(usuario).length > 0 ? (
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Building2 className="h-3 w-3 mr-1" />
+                        <div className="flex items-center text-xs text-zinc-500">
+                          <Buildings className="h-3 w-3 mr-1" />
                           <span className="truncate max-w-[180px]">
                             {getCentrosAsignados(usuario)[0]}
                             {getCentrosAsignados(usuario).length > 1 ? ` +${getCentrosAsignados(usuario).length - 1}` : ''}
@@ -176,9 +165,9 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                     </div>
                   </td>
                   <td className={COMPONENT_STYLES.table.cell}>
-                    <div className="space-y-1 text-sm text-gray-600">
+                    <div className="space-y-1 text-sm text-zinc-600">
                       <div className="flex items-center gap-2">
-                        <Clock3 className="h-4 w-4 text-gray-400" />
+                        <Clock className="h-4 w-4 text-zinc-400" />
                         <span>
                           {usuario.ultimoAcceso
                             ? new Date(usuario.ultimoAcceso).toLocaleString('es-PE', {
@@ -191,7 +180,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                             : 'Sin registro'}
                         </span>
                       </div>
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-zinc-400">
                         Creado: {new Date(usuario.createdAt).toLocaleDateString('es-PE')}
                       </div>
                     </div>
@@ -224,7 +213,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                         className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconEdit}`}
                         title="Editar usuario"
                       >
-                        <Edit className="h-4 w-4" />
+                        <PencilSimple className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => onChangePassword(usuario)}
@@ -238,7 +227,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                         className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconDelete}`}
                         title="Eliminar usuario"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash className="h-4 w-4" />
                       </button>
                     </div>
                   </td>
@@ -304,3 +293,4 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
 UsuariosTabla.displayName = 'UsuariosTabla';
 
 export default UsuariosTabla;
+   

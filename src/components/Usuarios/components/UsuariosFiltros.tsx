@@ -1,13 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import {
-  Building2,
-  Download,
-  Loader2,
-  RefreshCw,
-  Search,
-  Settings2,
-  UserPlus,
-} from 'lucide-react';
+import { Buildings, DownloadSimple, CircleNotch, ArrowsClockwise, MagnifyingGlass, Faders, UserPlus } from '@phosphor-icons/react';
 import { CentroAcopio, Role } from '../../../types';
 import { COMPONENT_STYLES } from '../constants';
 
@@ -58,10 +50,10 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[24px] border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+      <section className="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-4 sm:p-5">
         <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <Settings2 className="h-4 w-4 text-slate-500" aria-hidden="true" />
+          <div className="flex items-center gap-2 text-sm font-semibold text-zinc-700">
+            <Faders className="h-4 w-4 text-zinc-500" aria-hidden="true" />
             <span>Filtros y búsqueda</span>
           </div>
 
@@ -72,7 +64,7 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
               className={COMPONENT_STYLES.button.secondary}
               disabled={isRefreshing}
             >
-              {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              {isRefreshing ? <CircleNotch className="h-4 w-4 animate-spin" /> : <ArrowsClockwise className="h-4 w-4" />}
               <span>Actualizar</span>
             </button>
             <button
@@ -80,7 +72,7 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
               onClick={onExportar}
               className={COMPONENT_STYLES.button.secondary}
             >
-              <Download className="h-4 w-4" />
+              <DownloadSimple className="h-4 w-4" />
               <span>Exportar CSV</span>
             </button>
             <button
@@ -89,7 +81,7 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
               className={COMPONENT_STYLES.button.primary}
               disabled={isCreating}
             >
-              {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+              {isCreating ? <CircleNotch className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
               <span>Nuevo usuario</span>
             </button>
           </div>
@@ -97,10 +89,10 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
 
         <div className="grid gap-3 xl:grid-cols-[minmax(0,1.55fr)_repeat(3,minmax(0,0.85fr))]">
           <div className="relative">
-            <label htmlFor="usuarios-search" className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label htmlFor="usuarios-search" className="mb-1.5 block text-sm font-medium text-zinc-700">
               Buscar usuario
             </label>
-            <Search className="pointer-events-none absolute left-3.5 top-[calc(50%+0.875rem)] h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <MagnifyingGlass className="pointer-events-none absolute left-3.5 top-[calc(50%+0.875rem)] h-4 w-4 -tranzinc-y-1/2 text-zinc-400" />
             <input
               id="usuarios-search"
               type="text"
@@ -112,7 +104,7 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
           </div>
 
           <div>
-            <label htmlFor="usuarios-filter-rol" className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label htmlFor="usuarios-filter-rol" className="mb-1.5 block text-sm font-medium text-zinc-700">
               Rol
             </label>
             <select
@@ -129,7 +121,7 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
           </div>
 
           <div>
-            <label htmlFor="usuarios-filter-estado" className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label htmlFor="usuarios-filter-estado" className="mb-1.5 block text-sm font-medium text-zinc-700">
               Estado
             </label>
             <select
@@ -145,10 +137,10 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
           </div>
 
           <div className="relative">
-            <label htmlFor="usuarios-filter-centro" className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label htmlFor="usuarios-filter-centro" className="mb-1.5 block text-sm font-medium text-zinc-700">
               Centro de acopio
             </label>
-            <Building2 className="pointer-events-none absolute left-3 top-[calc(50%+0.875rem)] h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Buildings className="pointer-events-none absolute left-3 top-[calc(50%+0.875rem)] h-4 w-4 -tranzinc-y-1/2 text-zinc-400" />
             <select
               id="usuarios-filter-centro"
               value={filterCentroAcopio}
@@ -170,3 +162,4 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
 UsuariosFiltros.displayName = 'UsuariosFiltros';
 
 export default UsuariosFiltros;
+   

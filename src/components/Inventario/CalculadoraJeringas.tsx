@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Calculator, Package, Syringe, Building2, AlertCircle, Loader, Info } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calculator, Package, Syringe, Buildings, CircleNotch, Info } from '@phosphor-icons/react';
 import { apiClient } from '../../config/api';
+import { COMPONENT_STYLES } from './constants';
 
 interface Vacuna {
   id: string;
@@ -82,15 +83,15 @@ const CalculadoraJeringas: React.FC<CalculadoraJeringasProps> = ({
   const totalDosis = vacunaSeleccionada ? cantidadVacunas * vacunaSeleccionada.dosisPorFrasco : 0;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="p-4 border-b border-gray-200">
+    <div className={COMPONENT_STYLES.panel}>
+      <div className="p-4 border-b border-zinc-200">
         <button
           onClick={() => setShowCalculator(!showCalculator)}
-          className="flex items-center gap-2 text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors"
+          className="flex items-center gap-2 text-lg font-semibold text-zinc-900 transition-colors hover:text-zinc-600"
         >
-          <Calculator className="h-5 w-5" />
+          <Calculator className="h-5 w-5" weight="duotone" />
           Calculadora de Jeringas
-          <span className="text-sm font-normal text-gray-500">
+          <span className="text-sm font-normal text-zinc-500">
             (Simular cálculos)
           </span>
         </button>
@@ -98,17 +99,16 @@ const CalculadoraJeringas: React.FC<CalculadoraJeringasProps> = ({
 
       {showCalculator && (
         <div className="p-6 space-y-6">
-          {/* Formulario de cálculo */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={COMPONENT_STYLES.input.label}>
                 <Package className="inline h-4 w-4 mr-1" />
                 Vacuna *
               </label>
               <select
                 value={selectedVacuna}
                 onChange={(e) => setSelectedVacuna(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={COMPONENT_STYLES.input.base}
               >
                 <option value="">Seleccione una vacuna</option>
                 {vacunas.map(vacuna => (
@@ -120,14 +120,14 @@ const CalculadoraJeringas: React.FC<CalculadoraJeringasProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Building2 className="inline h-4 w-4 mr-1" />
+              <label className={COMPONENT_STYLES.input.label}>
+                <Buildings className="inline h-4 w-4 mr-1" />
                 Centro de Acopio (Opcional)
               </label>
               <select
                 value={selectedCentro}
                 onChange={(e) => setSelectedCentro(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={COMPONENT_STYLES.input.base}
               >
                 <option value="">Usar configuración por defecto</option>
                 {centrosAcopio.map(centro => (
@@ -139,7 +139,7 @@ const CalculadoraJeringas: React.FC<CalculadoraJeringasProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={COMPONENT_STYLES.input.label}>
                 Cantidad de Frascos *
               </label>
               <input
@@ -147,26 +147,25 @@ const CalculadoraJeringas: React.FC<CalculadoraJeringasProps> = ({
                 min="1"
                 value={cantidadVacunas}
                 onChange={(e) => setCantidadVacunas(parseInt(e.target.value) || 1)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={COMPONENT_STYLES.input.base}
                 placeholder="1"
               />
             </div>
           </div>
 
-          {/* Información de la vacuna seleccionada */}
           {vacunaSeleccionada && (
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-200/80">
               <div className="flex items-start gap-3">
-                <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+                <Info className="h-5 w-5 text-zinc-600 mt-0.5" weight="fill" />
                 <div>
-                  <h4 className="font-medium text-blue-900">Información del Cálculo</h4>
-                  <div className="mt-2 text-sm text-blue-800 space-y-1">
-                    <p><strong>Vacuna:</strong> {vacunaSeleccionada.nombre} - {vacunaSeleccionada.tipo}</p>
-                    <p><strong>Dosis por frasco:</strong> {vacunaSeleccionada.dosisPorFrasco}</p>
-                    <p><strong>Cantidad de frascos:</strong> {cantidadVacunas}</p>
-                    <p><strong>Total de dosis:</strong> {totalDosis}</p>
+                  <h4 className="font-medium text-zinc-900">Información del Cálculo</h4>
+                  <div className="mt-2 text-sm text-zinc-700 space-y-1">
+                    <p><strong className="text-zinc-900">Vacuna:</strong> {vacunaSeleccionada.nombre} - {vacunaSeleccionada.tipo}</p>
+                    <p><strong className="text-zinc-900">Dosis por frasco:</strong> {vacunaSeleccionada.dosisPorFrasco}</p>
+                    <p><strong className="text-zinc-900">Cantidad de frascos:</strong> {cantidadVacunas}</p>
+                    <p><strong className="text-zinc-900">Total de dosis:</strong> {totalDosis}</p>
                     {centroSeleccionado && (
-                      <p><strong>Centro específico:</strong> {centroSeleccionado.nombre}</p>
+                      <p><strong className="text-zinc-900">Centro específico:</strong> {centroSeleccionado.nombre}</p>
                     )}
                   </div>
                 </div>
@@ -174,50 +173,50 @@ const CalculadoraJeringas: React.FC<CalculadoraJeringasProps> = ({
             </div>
           )}
 
-          {/* Botón de cálculo */}
-          <div className="flex justify-center">
+          <div className="flex justify-start">
             <button
               onClick={calcularJeringas}
               disabled={!selectedVacuna || cantidadVacunas <= 0 || isCalculating}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className={COMPONENT_STYLES.button.primary}
             >
               {isCalculating ? (
-                <Loader className="h-5 w-5 animate-spin" />
+                <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
               ) : (
-                <Calculator className="h-5 w-5" />
+                <Calculator className="h-4 w-4" weight="bold" />
               )}
-              {isCalculating ? 'Calculando...' : 'Calcular Jeringas Necesarias'}
+              <span>{isCalculating ? 'Calculando...' : 'Calcular Jeringas Necesarias'}</span>
             </button>
           </div>
 
-          {/* Resultados */}
           {resultado.length > 0 && (
-            <div className="border-t pt-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Syringe className="h-5 w-5 text-blue-600" />
+            <div className="border-t border-zinc-200/80 pt-6">
+              <h4 className="text-lg font-semibold text-zinc-900 mb-4 flex items-center gap-2">
+                <Syringe className="h-5 w-5" weight="duotone" />
                 Resultado del Cálculo
               </h4>
               
               <div className="space-y-3">
                 {resultado.map((jeringa, index) => (
-                  <div key={index} className="bg-gray-50 p-4 rounded-lg border">
+                  <div key={index} className="bg-zinc-50 p-4 rounded-2xl border border-zinc-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Syringe className="h-5 w-5 text-blue-500" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-200/50 text-zinc-700">
+                          <Syringe className="h-5 w-5" weight="duotone" />
+                        </div>
                         <div>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-zinc-900">
                             Jeringa ID: {jeringa.jeringaId}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-zinc-500">
                             Prioridad: {jeringa.prioridad} | Origen: {jeringa.origen}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-blue-600">
-                          {jeringa.cantidad}
+                        <p className="text-2xl font-bold text-zinc-900">
+                          {jeringa.cantidad.toLocaleString()}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-zinc-500">
                           jeringas (x{jeringa.multiplicador})
                         </p>
                       </div>
@@ -226,20 +225,19 @@ const CalculadoraJeringas: React.FC<CalculadoraJeringasProps> = ({
                 ))}
               </div>
 
-              {/* Resumen total */}
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="mt-4 p-4 bg-zinc-900 border border-zinc-900 rounded-2xl text-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-green-900">Total de Jeringas Necesarias</p>
-                    <p className="text-sm text-green-700">
+                    <p className="font-medium text-zinc-100">Total de Jeringas Necesarias</p>
+                    <p className="text-sm text-zinc-400">
                       Para {cantidadVacunas} frasco(s) de {vacunaSeleccionada?.nombre}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-green-600">
-                      {resultado.reduce((total, jeringa) => total + jeringa.cantidad, 0)}
+                    <p className="text-3xl font-bold text-white">
+                      {resultado.reduce((total, jeringa) => total + jeringa.cantidad, 0).toLocaleString()}
                     </p>
-                    <p className="text-sm text-green-600">jeringas</p>
+                    <p className="text-sm text-zinc-400 uppercase tracking-widest">jeringas</p>
                   </div>
                 </div>
               </div>

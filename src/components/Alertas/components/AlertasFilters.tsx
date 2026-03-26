@@ -71,3 +71,4 @@ export const AlertasFilters: React.FC<AlertasFiltersProps> = memo(({
 ));
 
 AlertasFilters.displayName = 'AlertasFilters';
+ 

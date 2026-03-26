@@ -1,4 +1,5 @@
 export * from './SharedComponents';
 export * from './FilterAndTable';
-export * from './ModalComponents';
+export * from '../../ui/ModalElements';
 export { default as EstablishmentsShell } from './EstablishmentsShell';
+ 

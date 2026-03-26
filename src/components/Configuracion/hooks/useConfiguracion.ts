@@ -406,3 +406,4 @@ export const useConfiguracion = (): UseConfiguracionReturn => {
 };
 
 export default useConfiguracion;
+ 

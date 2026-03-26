@@ -1,11 +1,11 @@
 import React from 'react';
 import { REPORTS_SECTIONS, COMPONENT_STYLES } from '../constants';
-import { LucideIcon } from 'lucide-react';
+import { IconProps } from '@phosphor-icons/react';
 
 interface SectionItem {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: IconProps;
   path: string;
   description: string;
 }

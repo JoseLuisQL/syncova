@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText } from 'lucide-react';
+import { FileText } from '@phosphor-icons/react';
 import { COMPONENT_STYLES } from '../constants';
 
 interface ReportesHeaderProps {
@@ -13,7 +13,7 @@ const ReportesHeader: React.FC<ReportesHeaderProps> = ({ children }) => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className={COMPONENT_STYLES.header.iconWrapper}>
-              <FileText className="h-7 w-7 text-white" aria-hidden="true" />
+              <FileText weight="duotone" className="h-7 w-7 text-white" aria-hidden="true" />
             </div>
             <div>
               <h1 className={COMPONENT_STYLES.header.title}>

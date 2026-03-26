@@ -1,17 +1,17 @@
 import React, { memo } from 'react';
 import {
   ArrowRight,
-  Building2,
-  Calendar,
-  CheckCircle2,
-  ChevronDown,
-  Download,
-  Loader2,
+  Buildings,
+  CalendarBlank,
+  CheckCircle,
+  CaretDown,
+  DownloadSimple,
+  CircleNotch,
   Package,
-  RefreshCw,
-  Save,
-  Upload,
-} from 'lucide-react';
+  ArrowsClockwise,
+  FloppyDisk,
+  UploadSimple,
+} from '@phosphor-icons/react';
 import { Vacuna, CentroAcopio } from '../../../types';
 import { COMPONENT_STYLES } from '../constants';
 
@@ -110,20 +110,20 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
 
   return (
     <section className="flex h-full flex-col bg-transparent">
-      <div className="border-b border-slate-100 px-3 py-2.5 sm:px-4 sm:py-3">
+      <div className="border-b border-zinc-200 px-3 py-2.5 sm:px-4 sm:py-3 bg-white">
         <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end lg:gap-4">
           <div className="min-w-0 flex-1">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
               {shouldRenderCentroSelect ? (
                 <label className="block">
-                  <span className={COMPONENT_STYLES.input.label}>Centro de acopio</span>
+                  <span className={COMPONENT_STYLES.input.label}>Operador Base</span>
                   <div className="relative">
-                    <Building2 className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-teal-500 sm:left-3 sm:h-4 sm:w-4" />
+                    <Buildings className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400 sm:left-3 sm:h-4 sm:w-4" weight="duotone" />
                     <select
                       value={selectedCentroAcopio}
                       onChange={(event) => onCentroAcopioChange(event.target.value)}
                       disabled={isLoading}
-                      className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm`}
+                      className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm font-medium focus:ring-zinc-900`}
                     >
                       <option value="todos">{allCentrosLabel}</option>
                       {centrosAcopio.map((centro) => (
@@ -132,51 +132,51 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 sm:right-3 sm:h-4 sm:w-4" />
+                    <CaretDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400 sm:right-3 sm:h-4 sm:w-4" weight="bold" />
                   </div>
                 </label>
               ) : (
                 <div>
-                  <span className={COMPONENT_STYLES.input.label}>Centro asignado</span>
-                  <div className="flex min-h-[40px] items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-700 sm:min-h-[44px] sm:px-4 sm:py-2.5 sm:text-sm">
-                    <Building2 className="h-3.5 w-3.5 shrink-0 text-teal-600 sm:h-4 sm:w-4" />
+                  <span className={COMPONENT_STYLES.input.label}>Nodo Fijo Asignado</span>
+                  <div className="flex min-h-[40px] items-center gap-2 rounded-xl border border-zinc-300 bg-white px-3 py-2 text-xs font-bold text-zinc-900 sm:min-h-[44px] sm:px-4 sm:py-2.5 sm:text-sm shadow-sm">
+                    <Buildings className="h-3.5 w-3.5 shrink-0 text-zinc-500 sm:h-4 sm:w-4" weight="duotone" />
                     <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
                   </div>
                 </div>
               )}
 
               <label className="block">
-                <span className={COMPONENT_STYLES.input.label}>Vacuna</span>
+                <span className={COMPONENT_STYLES.input.label}>Biológico</span>
                 <div className="relative">
-                  <Package className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-cyan-500 sm:left-3 sm:h-4 sm:w-4" />
+                  <Package className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400 sm:left-3 sm:h-4 sm:w-4" weight="duotone" />
                   <select
                     value={selectedVacuna}
                     onChange={(event) => onVacunaChange(event.target.value)}
                     disabled={isLoading}
-                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm`}
+                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm font-medium focus:ring-zinc-900`}
                   >
-                    {vacunas.length === 0 ? <option value="">Seleccione...</option> : null}
+                    {vacunas.length === 0 ? <option value="">Inicializando...</option> : null}
                     {vacunas.map((vacuna) => (
                       <option key={vacuna.id} value={vacuna.id}>
                         {vacuna.nombre}
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 sm:right-3 sm:h-4 sm:w-4" />
+                  <CaretDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400 sm:right-3 sm:h-4 sm:w-4" weight="bold" />
                 </div>
               </label>
 
               <label className="block">
-                <span className={COMPONENT_STYLES.input.label}>Año</span>
+                <span className={COMPONENT_STYLES.input.label}>Fiscal (Año)</span>
                 <div className="relative">
-                  <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-cyan-600 sm:left-3 sm:text-[10px]">
-                    AÑO
+                  <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[9px] font-black text-zinc-400 sm:left-3 sm:text-[10px] uppercase tracking-wider">
+                    YR
                   </span>
                   <select
                     value={selectedAnio}
                     onChange={(event) => onAnioChange(Number(event.target.value))}
                     disabled={isLoadingAnios}
-                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-10 pr-8 text-xs sm:pl-12 sm:pr-10 sm:text-sm`}
+                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-10 pr-8 text-xs sm:pl-12 sm:pr-10 sm:text-sm font-bold focus:ring-zinc-900`}
                   >
                     {aniosDisponibles.map((anio) => (
                       <option key={anio} value={anio}>
@@ -184,17 +184,17 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 sm:right-3 sm:h-4 sm:w-4" />
+                  <CaretDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400 sm:right-3 sm:h-4 sm:w-4" weight="bold" />
                 </div>
               </label>
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+          <div className="flex shrink-0 flex-wrap items-center gap-1.5 pt-4 lg:pt-0">
             {!isReadOnly && pendingChangesCount > 0 ? (
               <ActionButton
-                label={isUpdating ? 'Guardando' : 'Guardar cambios'}
-                icon={isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                label={isUpdating ? 'Guardando' : 'Fijar Matriz'}
+                icon={isUpdating ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <FloppyDisk className="h-4 w-4" weight="bold" />}
                 onClick={onGuardarPendientes}
                 disabled={isUpdating}
                 isPrimary
@@ -203,29 +203,29 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
             ) : null}
 
             <ActionButton
-              label="Actualizar"
-              icon={<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />}
+              label="Sync"
+              icon={<ArrowsClockwise className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} weight="bold" />}
               onClick={onRefresh}
               disabled={isLoading || !selectedVacuna}
             />
 
             {!isReadOnly ? (
               <ActionButton
-                label="Importar"
-                icon={isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                label="I/O Excel"
+                icon={isImporting ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <UploadSimple className="h-4 w-4" weight="bold" />}
                 onClick={onImportar}
                 disabled={isImporting}
               />
             ) : (
-              <span className="inline-flex min-h-[38px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 sm:text-sm">
-                Solo lectura
+              <span className="inline-flex min-h-[38px] items-center rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-500 sm:text-sm sm:min-h-[44px]">
+                Read Only
               </span>
             )}
 
             {!isReadOnly ? (
               <ActionButton
-                label={isExporting ? 'Exportando' : 'Exportar'}
-                icon={isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                label={isExporting ? 'Procesando' : 'Extraer'}
+                icon={isExporting ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <DownloadSimple className="h-4 w-4" weight="bold" />}
                 onClick={onExportar}
                 disabled={isExporting || !selectedVacuna}
                 isPrimary
@@ -235,74 +235,74 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
         </div>
       </div>
 
-      <div className="border-t border-slate-100 px-3 py-2.5 sm:px-4 sm:py-3">
+      <div className="border-t border-zinc-100 px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-50/50">
         {!selectedVacuna ? (
-          <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 px-3 py-2.5 sm:px-4 sm:py-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20">
-              <Package className="h-4 w-4 text-white" />
+          <div className="flex items-center gap-2.5 rounded-[14px] bg-zinc-900 border border-zinc-900 px-3 py-2.5 sm:px-4 sm:py-3 shadow-sm">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10">
+              <Package className="h-4 w-4 text-white" weight="duotone" />
             </div>
-            <p className="text-sm font-medium text-white/90">Selecciona una vacuna para ver el resumen anual de programación</p>
+            <p className="text-sm font-semibold tracking-tight text-white">Selecciona una vacuna para visualizar el marco operativo.</p>
           </div>
         ) : (
-          <div className="rounded-2xl bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-1 py-1">
+          <div className="relative rounded-[16px] bg-zinc-900 border border-zinc-900 px-[5px] py-[5px] shadow-sm">
             <div className="flex flex-wrap items-center gap-y-1">
               <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
-                  <Package className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 sm:h-8 sm:w-8">
+                  <Package className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">Vacuna</p>
-                  <p className="text-xs font-bold text-white sm:text-sm">{vacunaSeleccionada?.nombre || 'Sin seleccionar'}</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-zinc-400 sm:text-[0.6rem]">Target</p>
+                  <p className="text-xs font-black tracking-tight text-white sm:text-sm">{vacunaSeleccionada?.nombre || 'Indefinido'}</p>
                 </div>
               </div>
 
-              <ArrowRight className="mx-0.5 h-3 w-3 shrink-0 text-white/40 sm:mx-1 sm:h-3.5 sm:w-3.5" />
+              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-zinc-500 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
 
               <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
-                  <Calendar className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 sm:h-8 sm:w-8">
+                  <CalendarBlank className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">Período</p>
-                  <p className="text-xs font-bold text-white sm:text-sm">{selectedAnio}</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-zinc-400 sm:text-[0.6rem]">Period</p>
+                  <p className="text-xs font-black tracking-tight text-white sm:text-sm">{selectedAnio}</p>
                 </div>
               </div>
 
-              <ArrowRight className="mx-0.5 h-3 w-3 shrink-0 text-white/40 sm:mx-1 sm:h-3.5 sm:w-3.5" />
+              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-zinc-500 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
 
               <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
-                  <Building2 className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 sm:h-8 sm:w-8">
+                  <Buildings className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">Cobertura</p>
-                  <p className="text-xs font-bold text-white sm:text-sm">{centroNombre}</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-zinc-400 sm:text-[0.6rem]">Scope</p>
+                  <p className="text-xs font-black tracking-tight text-white sm:text-sm">{centroNombre}</p>
                 </div>
               </div>
 
-              <ArrowRight className="mx-0.5 h-3 w-3 shrink-0 text-white/40 sm:mx-1 sm:h-3.5 sm:w-3.5" />
+              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-zinc-500 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
 
               <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 sm:h-8 sm:w-8">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 sm:h-8 sm:w-8">
+                  <CheckCircle className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="fill" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-white/70 sm:text-[0.6rem]">Establecimientos</p>
-                  <p className="text-xs font-bold text-white sm:text-sm">{establecimientosCount.toLocaleString()}</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-zinc-400 sm:text-[0.6rem]">Units</p>
+                  <p className="text-xs font-black tracking-tight text-white sm:text-sm">{establecimientosCount.toLocaleString()}</p>
                 </div>
               </div>
 
               <div className="ml-auto flex flex-wrap items-center gap-2 px-1 py-1">
-                <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white">
-                  Total anual: {totalGeneral.toLocaleString()}
+                <span className="inline-flex items-center rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-wider text-white shadow-sm">
+                  Total Anual: {totalGeneral.toLocaleString()}
                 </span>
                 {pendingChangesCount > 0 ? (
-                  <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white">
-                    {pendingChangesCount} cambios pendientes
+                  <span className="inline-flex items-center rounded-lg bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-wider text-amber-300">
+                    Mutado: {pendingChangesCount}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white/90">
-                    Todo sincronizado
+                  <span className="inline-flex items-center rounded-lg bg-zinc-800/50 border border-zinc-700/50 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-wider text-zinc-400">
+                    Sync Completa
                   </span>
                 )}
               </div>

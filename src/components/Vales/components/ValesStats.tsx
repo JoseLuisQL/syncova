@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
-import { Receipt, Package, CheckCircle } from 'lucide-react';
-import { COMPONENT_STYLES, COLORS } from '../constants';
+import { Receipt, Package, CheckCircle } from '@phosphor-icons/react';
+import { COMPONENT_STYLES } from '../constants';
 
 interface Estadisticas {
   totalVales: number;
@@ -21,34 +21,22 @@ export const ValesStats: React.FC<ValesStatsProps> = memo(({
   const stats = [
     {
       key: 'vales',
-      label: 'Total Vales',
+      label: 'TOTAL VALES',
       value: estadisticas.totalVales,
       icon: Receipt,
-      bg: `bg-gradient-to-br ${COLORS.primary.bg}`,
-      border: COLORS.primary.border,
-      text: COLORS.primary.textDark,
-      iconBg: 'bg-gradient-to-br from-teal-600 to-cyan-600',
     },
     {
       key: 'vacunas',
-      label: 'Total Vacunas',
+      label: 'TOTAL VACUNAS',
       value: estadisticas.totalVacunas,
       icon: Package,
-      bg: `bg-gradient-to-br ${COLORS.secondary.bg}`,
-      border: COLORS.secondary.border,
-      text: COLORS.secondary.textDark,
-      iconBg: 'bg-gradient-to-br from-cyan-500 to-teal-500',
     },
     {
       key: 'entregados',
-      label: 'Entregados',
+      label: 'ENTREGADOS',
       value: `${estadisticas.porcentajeEntregados}%`,
       sublabel: `${estadisticas.valesEntregados} de ${estadisticas.totalVales}`,
       icon: CheckCircle,
-      bg: `bg-gradient-to-br ${COLORS.success.bg}`,
-      border: COLORS.success.border,
-      text: COLORS.success.textDark,
-      iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-500',
     },
   ];
 
@@ -58,14 +46,12 @@ export const ValesStats: React.FC<ValesStatsProps> = memo(({
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className={`${COMPONENT_STYLES.stats.card} bg-gray-50 border-gray-200 animate-pulse`}
+            className={`${COMPONENT_STYLES.stats.card} flex animate-pulse items-center gap-4`}
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gray-200 rounded-xl" />
-              <div className="flex-1">
-                <div className="h-7 bg-gray-200 rounded w-16 mb-2" />
-                <div className="h-4 bg-gray-200 rounded w-24" />
-              </div>
+            <div className="h-10 w-10 bg-zinc-100 rounded-xl" />
+            <div className="flex-1">
+              <div className="h-6 bg-zinc-100 rounded w-16 mb-2" />
+              <div className="h-3 bg-zinc-100 rounded w-24" />
             </div>
           </div>
         ))}
@@ -80,21 +66,21 @@ export const ValesStats: React.FC<ValesStatsProps> = memo(({
         return (
           <div
             key={stat.key}
-            className={`${COMPONENT_STYLES.stats.card} ${stat.bg} ${stat.border}`}
+            className={COMPONENT_STYLES.stats.card}
           >
             <div className="flex items-center gap-4">
-              <div className={`${COMPONENT_STYLES.stats.iconWrapper} ${stat.iconBg}`}>
-                <Icon className="h-6 w-6 text-white" />
+              <div className={COMPONENT_STYLES.stats.iconWrapper}>
+                <Icon weight="duotone" className="h-5 w-5" />
               </div>
-              <div>
-                <div className={`${COMPONENT_STYLES.stats.value} ${stat.text}`}>
-                  {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
+              <div className="flex flex-col">
+                <div className={COMPONENT_STYLES.stats.value}>
+                  {typeof stat.value === 'number' ? stat.value.toLocaleString('en-US') : stat.value}
                 </div>
-                <div className={`${COMPONENT_STYLES.stats.label} ${stat.text} opacity-80`}>
+                <div className={COMPONENT_STYLES.stats.label}>
                   {stat.label}
                 </div>
                 {stat.sublabel && (
-                  <div className={`${COMPONENT_STYLES.stats.sublabel} ${stat.text} opacity-60`}>
+                  <div className={COMPONENT_STYLES.stats.sublabel}>
                     {stat.sublabel}
                   </div>
                 )}

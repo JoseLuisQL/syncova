@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Package2, Settings2, Syringe, Warehouse } from 'lucide-react';
+import { Package, SlidersHorizontal, Syringe, Warehouse } from '@phosphor-icons/react';
 import { apiClient } from '../../config/api';
 import {
   FormSection,
@@ -7,7 +7,7 @@ import {
   ModalFooter,
   SelectInput,
   TextInput,
-} from './components/ModalComponents';
+} from '../ui/ModalElements';
 
 interface Vacuna {
   id: string;
@@ -197,7 +197,7 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
       onClose={onClose}
       title={editingConfig ? 'Editar configuración' : 'Nueva configuración'}
       subtitle={tipo === 'centro' ? 'Relación específica para un centro de acopio.' : 'Relación por defecto entre vacuna y jeringa.'}
-      icon={Settings2}
+      icon={SlidersHorizontal}
       footer={
         <ModalFooter
           onCancel={onClose}
@@ -209,8 +209,8 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
       }
     >
       <div className="space-y-4">
-        <div className="rounded-[18px] border border-teal-100 bg-teal-50/60 p-4">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-teal-700">Vista previa</p>
+        <div className="rounded-[18px] border border-zinc-200 bg-zinc-50/60 p-4">
+          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-zinc-700">Vista previa</p>
           <p className="mt-2 text-sm leading-6 text-slate-800">
             {selectedVacuna ? (
               <>
@@ -278,7 +278,7 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
             {tipo === 'centro' ? (
               <ResumeCard icon={Warehouse} label="Centro" value={selectedCentro?.nombre || 'Pendiente'} />
             ) : null}
-            <ResumeCard icon={Package2} label="Vacuna" value={selectedVacuna?.nombre || 'Pendiente'} />
+            <ResumeCard icon={Package} label="Vacuna" value={selectedVacuna?.nombre || 'Pendiente'} />
             <ResumeCard icon={Syringe} label="Jeringa" value={selectedJeringa ? `${selectedJeringa.tipo} ${selectedJeringa.capacidad}` : 'Pendiente'} />
           </div>
         </FormSection>

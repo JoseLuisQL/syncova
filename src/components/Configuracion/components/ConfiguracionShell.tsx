@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { ArrowsClockwise } from '@phosphor-icons/react';
 import type { ConfiguracionGroupDefinition, ConfiguracionGroupId } from '../types';
 
 interface ConfiguracionShellProps {
@@ -25,10 +25,10 @@ const ConfiguracionShell: React.FC<ConfiguracionShellProps> = ({
     <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1120px] flex-col gap-3">
         <section className="overflow-hidden bg-transparent">
-          <div className="border-b border-slate-200 px-4 py-4 sm:px-5">
+          <div className="border-b border-zinc-200 px-4 py-4 sm:px-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
-                <h1 className="text-xl font-semibold tracking-tight text-slate-950">Configuracion</h1>
+                <h1 className="text-xl font-semibold tracking-tight text-zinc-950">Configuracion</h1>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
@@ -40,10 +40,10 @@ const ConfiguracionShell: React.FC<ConfiguracionShellProps> = ({
                 <button
                   type="button"
                   onClick={onRefresh}
-                  className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
                   disabled={isRefreshing}
                 >
-                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
+                  <ArrowsClockwise className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
                   <span>{isRefreshing ? 'Actualizando...' : 'Actualizar'}</span>
                 </button>
               </div>
@@ -62,8 +62,8 @@ const ConfiguracionShell: React.FC<ConfiguracionShellProps> = ({
                     onClick={() => onNavigate(section.id)}
                     className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition ${
                       isActive
-                        ? 'border-slate-300 bg-slate-900 text-white'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'border-zinc-300 bg-zinc-900 text-white'
+                        : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                     }`}
                     aria-current={isActive ? 'page' : undefined}
                   >
@@ -86,3 +86,4 @@ const ConfiguracionShell: React.FC<ConfiguracionShellProps> = ({
 };
 
 export default memo(ConfiguracionShell);
+ 

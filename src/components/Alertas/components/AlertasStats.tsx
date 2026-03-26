@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Bell, AlertCircle, AlertOctagon, Calendar, Loader2 } from 'lucide-react';
+import { Bell, WarningCircle, WarningOctagon, CalendarBlank, CircleNotch } from '@phosphor-icons/react';
 
 interface StatsData {
   total: number;
@@ -18,18 +18,18 @@ const statsConfig = [
     key: 'total',
     label: 'Total Alertas',
     icon: Bell,
-    bgGradient: 'from-teal-50 to-teal-100',
-    borderColor: 'border-teal-200',
-    textColor: 'text-teal-900',
-    labelColor: 'text-teal-700',
-    iconBg: 'bg-teal-600',
+    bgGradient: 'from-zinc-50 to-white',
+    borderColor: 'border-zinc-200/60',
+    textColor: 'text-zinc-900',
+    labelColor: 'text-zinc-600',
+    iconBg: 'bg-zinc-800',
   },
   {
     key: 'noLeidas',
     label: 'Sin Leer',
-    icon: AlertCircle,
-    bgGradient: 'from-rose-50 to-rose-100',
-    borderColor: 'border-rose-200',
+    icon: WarningCircle,
+    bgGradient: 'from-rose-50/50 to-white',
+    borderColor: 'border-rose-200/60',
     textColor: 'text-rose-900',
     labelColor: 'text-rose-700',
     iconBg: 'bg-rose-600',
@@ -37,9 +37,9 @@ const statsConfig = [
   {
     key: 'criticas',
     label: 'Criticas',
-    icon: AlertOctagon,
-    bgGradient: 'from-amber-50 to-amber-100',
-    borderColor: 'border-amber-200',
+    icon: WarningOctagon,
+    bgGradient: 'from-amber-50/50 to-white',
+    borderColor: 'border-amber-200/60',
     textColor: 'text-amber-900',
     labelColor: 'text-amber-700',
     iconBg: 'bg-amber-600',
@@ -47,12 +47,12 @@ const statsConfig = [
   {
     key: 'hoy',
     label: 'Hoy',
-    icon: Calendar,
-    bgGradient: 'from-emerald-50 to-emerald-100',
-    borderColor: 'border-emerald-200',
-    textColor: 'text-emerald-900',
-    labelColor: 'text-emerald-700',
-    iconBg: 'bg-emerald-600',
+    icon: CalendarBlank,
+    bgGradient: 'from-blue-50/50 to-white',
+    borderColor: 'border-blue-200/60',
+    textColor: 'text-blue-900',
+    labelColor: 'text-blue-700',
+    iconBg: 'bg-blue-600',
   },
 ] as const;
 
@@ -75,7 +75,7 @@ export const AlertasStats: React.FC<AlertasStatsProps> = memo(({ stats, isLoadin
                 {config.label}
               </p>
               {isLoading ? (
-                <Loader2 className={`h-6 w-6 ${config.labelColor} animate-spin mt-1`} />
+                <CircleNotch className={`h-6 w-6 ${config.labelColor} animate-spin mt-1`} weight="bold" />
               ) : (
                 <p className={`text-2xl font-bold ${config.textColor}`}>
                   {(value ?? 0).toLocaleString()}
@@ -83,7 +83,7 @@ export const AlertasStats: React.FC<AlertasStatsProps> = memo(({ stats, isLoadin
               )}
             </div>
             <div className={`p-2.5 rounded-xl ${config.iconBg} shadow-lg`}>
-              <Icon className="h-5 w-5 text-white" aria-hidden="true" />
+              <Icon className="h-5 w-5 text-white" aria-hidden="true" weight="bold" />
             </div>
           </div>
         </div>
@@ -93,3 +93,4 @@ export const AlertasStats: React.FC<AlertasStatsProps> = memo(({ stats, isLoadin
 ));
 
 AlertasStats.displayName = 'AlertasStats';
+ 

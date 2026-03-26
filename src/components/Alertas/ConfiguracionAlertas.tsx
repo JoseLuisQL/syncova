@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { RefreshCw, Settings, Trash2, Zap } from 'lucide-react';
+import { ArrowsClockwise, GearSix, Trash, Lightning } from '@phosphor-icons/react';
 import { AlertasService } from '../../services/alertasService';
 import { useAlertasGlobal } from '../../contexts/AlertasContext';
 import { useToastContext } from '../../contexts/ToastContext';
@@ -102,40 +102,40 @@ const ConfiguracionAlertas: React.FC = memo(() => {
       <div className="space-y-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-950">Configuración de alertas</h2>
-            <p className="mt-1 text-sm text-slate-500">Umbrales, generación y limpieza del módulo.</p>
+            <h2 className="text-lg font-semibold text-zinc-950">Configuración de alertas</h2>
+            <p className="mt-1 text-sm text-zinc-500">Umbrales, generación y limpieza del módulo.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {count > 0 ? <span className="inline-flex items-center rounded-full bg-rose-50 px-3 py-1 text-sm font-medium text-rose-700">{count} sin leer</span> : null}
-            <button type="button" onClick={() => setShowResetConfirm(true)} className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
-              <RefreshCw className="h-4 w-4" />
+            <button type="button" onClick={() => setShowResetConfirm(true)} className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">
+              <ArrowsClockwise className="h-4 w-4" weight="bold" />
               Restablecer
             </button>
           </div>
         </div>
 
-        <section className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-[22px] border border-zinc-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2">
-            <Settings className="h-4 w-4 text-teal-600" />
-            <h3 className="text-base font-semibold text-slate-950">Umbrales activos</h3>
+            <GearSix className="h-4 w-4 text-zinc-900" weight="fill" />
+            <h3 className="text-base font-semibold text-zinc-950">Umbrales activos</h3>
           </div>
 
           <div className="mt-5 grid gap-4 md:grid-cols-3">
-            <div className="rounded-[18px] border border-slate-200 bg-slate-50/70 p-4">
-              <label className="block text-sm font-medium text-slate-700">Días de anticipación</label>
+            <div className="rounded-[18px] border border-zinc-200 bg-zinc-50/70 p-4">
+              <label className="block text-sm font-medium text-zinc-700">Días de anticipación</label>
               <input
                 type="number"
                 min="7"
                 max="90"
                 value={config.diasAnticipacion}
                 onChange={(event) => handleUpdate('diasAnticipacion', parseInt(event.target.value, 10) || defaultConfig.diasAnticipacion)}
-                className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18"
+                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-800/18"
               />
-              <p className="mt-2 text-xs text-slate-500">Controla cuándo se dispara una alerta de vencimiento.</p>
+              <p className="mt-2 text-xs text-zinc-500">Controla cuándo se dispara una alerta de vencimiento.</p>
             </div>
 
-            <div className="rounded-[18px] border border-slate-200 bg-slate-50/70 p-4">
-              <label className="block text-sm font-medium text-slate-700">Stock mínimo</label>
+            <div className="rounded-[18px] border border-zinc-200 bg-zinc-50/70 p-4">
+              <label className="block text-sm font-medium text-zinc-700">Stock mínimo</label>
               <input
                 type="number"
                 min="10"
@@ -143,77 +143,77 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 step="10"
                 value={config.stockMinimo}
                 onChange={(event) => handleUpdate('stockMinimo', parseInt(event.target.value, 10) || defaultConfig.stockMinimo)}
-                className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18"
+                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-800/18"
               />
-              <p className="mt-2 text-xs text-slate-500">Se usa para generar alertas automáticas de stock bajo.</p>
+              <p className="mt-2 text-xs text-zinc-500">Se usa para generar alertas automáticas de stock bajo.</p>
             </div>
 
-            <div className="rounded-[18px] border border-slate-200 bg-slate-50/70 p-4">
-              <label className="block text-sm font-medium text-slate-700">Retención de resueltas</label>
+            <div className="rounded-[18px] border border-zinc-200 bg-zinc-50/70 p-4">
+              <label className="block text-sm font-medium text-zinc-700">Retención de resueltas</label>
               <input
                 type="number"
                 min="7"
                 max="365"
                 value={config.diasRetencion}
                 onChange={(event) => handleUpdate('diasRetencion', parseInt(event.target.value, 10) || defaultConfig.diasRetencion)}
-                className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18"
+                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-800/18"
               />
-              <p className="mt-2 text-xs text-slate-500">Define cuántos días conservar alertas resueltas antes de limpiar.</p>
+              <p className="mt-2 text-xs text-zinc-500">Define cuántos días conservar alertas resueltas antes de limpiar.</p>
             </div>
           </div>
         </section>
 
         <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
-          <section className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-[22px] border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-teal-600" />
-              <h3 className="text-base font-semibold text-slate-950">Generación manual</h3>
+              <Lightning className="h-4 w-4 text-zinc-900" weight="fill" />
+              <h3 className="text-base font-semibold text-zinc-950">Generación manual</h3>
             </div>
-            <p className="mt-2 text-sm text-slate-500">Analiza inventario y genera alertas usando los umbrales actuales.</p>
+            <p className="mt-2 text-sm text-zinc-500">Analiza inventario y genera alertas usando los umbrales actuales.</p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={handleGenerarAlertas}
                 disabled={isGenerating}
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-teal-700 hover:to-cyan-700 disabled:opacity-60"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-zinc-900 to-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-zinc-900 hover:to-zinc-900 disabled:opacity-60"
               >
-                <Zap className="h-4 w-4" />
+                <Lightning className="h-4 w-4" weight="fill" />
                 {isGenerating ? 'Analizando...' : 'Generar alertas'}
               </button>
             </div>
 
             {lastResult ? (
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[16px] border border-teal-200 bg-teal-50/70 p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-teal-700">Vencimiento</p>
+                <div className="rounded-[16px] border border-zinc-200 bg-zinc-100/70 p-4">
+                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-900">Vencimiento</p>
                   <p className="mt-2 text-xl font-semibold text-teal-900">{lastResult.alertasVencimiento || 0}</p>
                 </div>
                 <div className="rounded-[16px] border border-rose-200 bg-rose-50/70 p-4">
                   <p className="text-xs font-medium uppercase tracking-[0.08em] text-rose-700">Stock bajo</p>
                   <p className="mt-2 text-xl font-semibold text-rose-900">{lastResult.alertasStockBajo || 0}</p>
                 </div>
-                <div className="rounded-[16px] border border-cyan-200 bg-cyan-50/70 p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-cyan-700">Total</p>
+                <div className="rounded-[16px] border border-cyan-200 bg-zinc-100/70 p-4">
+                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-900">Total</p>
                   <p className="mt-2 text-xl font-semibold text-cyan-900">{lastResult.alertasGeneradas || 0}</p>
                 </div>
               </div>
             ) : null}
           </section>
 
-          <section className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-[22px] border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2">
-              <Trash2 className="h-4 w-4 text-slate-600" />
-              <h3 className="text-base font-semibold text-slate-950">Limpieza y mantenimiento</h3>
+              <Trash className="h-4 w-4 text-zinc-600" weight="fill" />
+              <h3 className="text-base font-semibold text-zinc-950">Limpieza y mantenimiento</h3>
             </div>
-            <p className="mt-2 text-sm text-slate-500">Elimina alertas resueltas antiguas para mantener el módulo útil y legible.</p>
+            <p className="mt-2 text-sm text-zinc-500">Elimina alertas resueltas antiguas para mantener el módulo útil y legible.</p>
             <div className="mt-5 flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() => setShowCleanConfirm(true)}
                 disabled={isCleaning}
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash className="h-4 w-4" weight="bold" />
                 {isCleaning ? 'Limpiando...' : 'Limpiar antiguas'}
               </button>
             </div>
@@ -251,3 +251,4 @@ const ConfiguracionAlertas: React.FC = memo(() => {
 ConfiguracionAlertas.displayName = 'ConfiguracionAlertas';
 
 export default ConfiguracionAlertas;
+ 

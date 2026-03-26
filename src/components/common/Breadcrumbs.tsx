@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { ChevronRight, Home } from 'lucide-react';
+import { CaretRight, House } from '@phosphor-icons/react';
 import { useCurrentRoute, useAppNavigation } from '../../hooks/useRouting';
 import { BREADCRUMBS_STYLES } from '../Layout/constants';
 
@@ -18,12 +18,12 @@ const Breadcrumbs: React.FC = memo(() => {
         className={BREADCRUMBS_STYLES.homeButton}
         aria-label="Ir al Dashboard"
       >
-        <Home className={BREADCRUMBS_STYLES.homeIcon} />
+        <House className={BREADCRUMBS_STYLES.homeIcon} weight="duotone" />
       </button>
 
       {breadcrumbs.map((crumb) => (
         <React.Fragment key={crumb.path}>
-          <ChevronRight className={BREADCRUMBS_STYLES.separator} aria-hidden="true" />
+          <CaretRight className={BREADCRUMBS_STYLES.separator} weight="bold" aria-hidden="true" />
           <span
             className={crumb.isLast ? BREADCRUMBS_STYLES.itemLast : BREADCRUMBS_STYLES.item}
             aria-current={crumb.isLast ? 'page' : undefined}

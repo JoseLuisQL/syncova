@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Eye, Loader2, LucideIcon, Pencil, Trash2 } from 'lucide-react';
+import { Eye, SpinnerGap, Pencil, Trash } from '@phosphor-icons/react';
 import { ColorScheme, COMPONENT_STYLES } from '../constants';
 
 const SkeletonBlock: React.FC<{ className?: string }> = ({ className = '' }) => (
@@ -9,17 +9,17 @@ const SkeletonBlock: React.FC<{ className?: string }> = ({ className = '' }) => 
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
   action?: {
     label: string;
     onClick: () => void;
-    icon?: LucideIcon;
+    icon?: React.ElementType;
     isLoading?: boolean;
   };
   secondaryAction?: {
     label: string;
     onClick: () => void;
-    icon?: LucideIcon;
+    icon?: React.ElementType;
     isLoading?: boolean;
   };
 }
@@ -56,7 +56,7 @@ export const PageHeader: React.FC<PageHeaderProps> = memo(({
             aria-busy={secondaryAction.isLoading}
           >
             {secondaryAction.isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" />
             ) : SecondaryIcon ? (
               <SecondaryIcon className="h-4 w-4" aria-hidden="true" />
             ) : null}
@@ -72,7 +72,7 @@ export const PageHeader: React.FC<PageHeaderProps> = memo(({
             aria-busy={action.isLoading}
           >
             {action.isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" />
             ) : ActionIcon ? (
               <ActionIcon className="h-4 w-4" aria-hidden="true" />
             ) : null}
@@ -89,7 +89,7 @@ PageHeader.displayName = 'PageHeader';
 interface StatsCardProps {
   label: string;
   value: number;
-  icon: LucideIcon;
+  icon: React.ElementType;
   colorScheme?: ColorScheme;
   isLoading?: boolean;
 }
@@ -100,17 +100,17 @@ const colorClasses: Record<
 > = {
   primary: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
+    border: 'border-zinc-200',
+    text: 'text-zinc-600',
     textStrong: 'text-teal-900',
-    iconBg: 'bg-teal-100',
-    iconText: 'text-teal-800',
-    iconBorder: 'border-teal-200',
+    iconBg: 'bg-zinc-100',
+    iconText: 'text-zinc-900',
+    iconBorder: 'border-zinc-200',
   },
   secondary: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
+    border: 'border-zinc-200',
+    text: 'text-zinc-600',
     textStrong: 'text-cyan-900',
     iconBg: 'bg-cyan-100',
     iconText: 'text-cyan-800',
@@ -118,8 +118,8 @@ const colorClasses: Record<
   },
   success: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
+    border: 'border-zinc-200',
+    text: 'text-zinc-600',
     textStrong: 'text-emerald-900',
     iconBg: 'bg-emerald-100',
     iconText: 'text-emerald-800',
@@ -127,8 +127,8 @@ const colorClasses: Record<
   },
   warning: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
+    border: 'border-zinc-200',
+    text: 'text-zinc-600',
     textStrong: 'text-amber-900',
     iconBg: 'bg-amber-100',
     iconText: 'text-amber-800',
@@ -136,8 +136,8 @@ const colorClasses: Record<
   },
   danger: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
+    border: 'border-zinc-200',
+    text: 'text-zinc-600',
     textStrong: 'text-rose-900',
     iconBg: 'bg-rose-100',
     iconText: 'text-rose-800',
@@ -145,12 +145,12 @@ const colorClasses: Record<
   },
   neutral: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
-    textStrong: 'text-slate-900',
-    iconBg: 'bg-slate-200',
-    iconText: 'text-slate-700',
-    iconBorder: 'border-slate-200',
+    border: 'border-zinc-200',
+    text: 'text-zinc-600',
+    textStrong: 'text-zinc-900',
+    iconBg: 'bg-zinc-200',
+    iconText: 'text-zinc-700',
+    iconBorder: 'border-zinc-200',
   },
 };
 
@@ -198,7 +198,7 @@ interface StatsGridProps {
     key: string;
     label: string;
     value: number;
-    icon: LucideIcon;
+    icon: React.ElementType;
     color?: ColorScheme;
   }>;
   isLoading?: boolean;
@@ -239,7 +239,7 @@ StatusBadge.displayName = 'StatusBadge';
 
 interface CountBadgeProps {
   count: number;
-  icon?: LucideIcon;
+  icon?: React.ElementType;
   variant?: 'default' | 'warning' | 'danger' | 'neutral';
 }
 
@@ -282,17 +282,17 @@ interface LoadingSpinnerProps {
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = memo(({ message = 'Cargando...' }) => (
   <div
-    className="inventory-loading-shell rounded-[24px] border border-slate-200/90 bg-white p-5 shadow-[0_10px_26px_-22px_rgba(15,23,42,0.22)]"
+    className="inventory-loading-shell rounded-[24px] border border-zinc-200/90 bg-white p-5 shadow-[0_10px_26px_-22px_rgba(15,23,42,0.22)]"
     role="status"
     aria-live="polite"
   >
-    <div className="flex items-center gap-3 text-slate-700">
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 text-teal-700 inventory-breathe">
-        <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+    <div className="flex items-center gap-3 text-zinc-700">
+      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 inventory-breathe">
+        <SpinnerGap className="h-5 w-5 animate-spin" aria-hidden="true" />
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-slate-900">{message}</p>
-        <p className="text-xs text-slate-500">Preparando la información para mostrarla de forma clara.</p>
+        <p className="text-sm font-semibold text-zinc-900">{message}</p>
+        <p className="text-xs text-zinc-500">Preparando la información para mostrarla de forma clara.</p>
       </div>
     </div>
   </div>
@@ -301,7 +301,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = memo(({ message = '
 LoadingSpinner.displayName = 'LoadingSpinner';
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  icon: React.ElementType;
   title: string;
   description?: string;
   action?: {
@@ -317,11 +317,11 @@ export const EmptyState: React.FC<EmptyStateProps> = memo(({
   action,
 }) => (
   <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
-    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-      <Icon className="h-8 w-8 text-slate-400" aria-hidden="true" />
+    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100">
+      <Icon className="h-8 w-8 text-zinc-400" aria-hidden="true" />
     </div>
-    <p className="text-lg font-medium text-slate-900">{title}</p>
-    {description ? <p className="mt-1 max-w-md text-sm text-slate-500">{description}</p> : null}
+    <p className="text-lg font-medium text-zinc-900">{title}</p>
+    {description ? <p className="mt-1 max-w-md text-sm text-zinc-500">{description}</p> : null}
     {action ? (
       <button type="button" onClick={action.onClick} className={`${COMPONENT_STYLES.button.primary} mt-5`}>
         {action.label}
@@ -399,7 +399,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
         className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconEdit}`}
         aria-label="Editar"
       >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Pencil className="h-4 w-4" aria-hidden="true" />}
+        {isLoading ? <SpinnerGap className="h-4 w-4 animate-spin" /> : <Pencil className="h-4 w-4" aria-hidden="true" />}
       </button>
     ) : null}
     {onDelete ? (
@@ -411,10 +411,11 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
         aria-label="Eliminar"
         title={!canDelete ? deleteTooltip : 'Eliminar'}
       >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" aria-hidden="true" />}
+        {isLoading ? <SpinnerGap className="h-4 w-4 animate-spin" /> : <Trash className="h-4 w-4" aria-hidden="true" />}
       </button>
     ) : null}
   </div>
 ));
 
 ActionButtons.displayName = 'ActionButtons';
+ 

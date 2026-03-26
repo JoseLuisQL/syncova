@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, Building2, Calculator, FileSpreadsheet, Loader2, Package, RefreshCw, ShieldCheck, Upload } from 'lucide-react';
+import { Warning, Buildings, Calculator, MicrosoftExcelLogo, SpinnerGap, Package, ArrowsClockwise, ShieldCheck, UploadSimple } from '@phosphor-icons/react';
 import { DataTable } from '../Establecimientos/components/FilterAndTable';
 import { COMPONENT_STYLES, MESES_CORTOS } from '../Planificacion/constants';
 import { ordenarEstablecimientos, getEstiloEstablecimiento } from '../../utils/centroAcopioUtils';
@@ -18,7 +18,7 @@ const TotalPill: React.FC<{
 }> = ({ value, tone = 'neutral' }) => {
   const className = tone === 'amber'
     ? 'border-amber-200 bg-amber-50 text-amber-800'
-    : 'border-slate-200 bg-slate-50 text-slate-700';
+    : 'border-zinc-200 bg-zinc-50 text-zinc-700';
 
   return (
     <span className={`inline-flex min-w-[4.6rem] justify-center rounded-xl border px-2.5 py-2 text-sm font-semibold tabular-nums ${className}`}>
@@ -31,14 +31,14 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
   const estilo = getEstiloEstablecimiento(registro.establecimiento);
 
   return (
-    <div className={`rounded-xl border border-slate-200 p-3 shadow-sm transition-all hover:border-slate-300 hover:shadow-md ${estilo.colores.bg}`}>
+    <div className={`rounded-xl border border-zinc-200 p-3 shadow-sm transition-all hover:border-zinc-300 hover:shadow-md ${estilo.colores.bg}`}>
       <div className="flex items-start gap-3">
-        <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-500 ring-2 ring-white/80" />
+        <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-zinc-500 ring-2 ring-white/80" />
         <div className="min-w-0 flex-1">
           <p className={`truncate text-sm font-semibold ${estilo.colores.text}`}>{registro.establecimiento.nombre}</p>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-slate-500">
+          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-zinc-500">
             {registro.establecimiento.codigo ? <span>{registro.establecimiento.codigo}</span> : null}
-            {registro.establecimiento.codigo ? <span className="text-slate-300">•</span> : null}
+            {registro.establecimiento.codigo ? <span className="text-zinc-300">•</span> : null}
             <span>{registro.vacuna.nombre}</span>
           </div>
         </div>
@@ -46,20 +46,20 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-xl border border-white/70 bg-white/80 p-2.5">
-          <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-slate-500">Total distribuido</p>
-          <p className="mt-1 text-sm font-semibold text-teal-800 tabular-nums">{registro.totalDistribu.toLocaleString()}</p>
+          <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-zinc-500">Total distribuido</p>
+          <p className="mt-1 text-sm font-semibold text-zinc-800 tabular-nums">{registro.totalDistribu.toLocaleString()}</p>
         </div>
         <div className="rounded-xl border border-white/70 bg-white/80 p-2.5">
-          <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-slate-500">Situación</p>
-          <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-700">{registro.situacion || '-'}</p>
+          <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-zinc-500">Situación</p>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-zinc-700">{registro.situacion || '-'}</p>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-3 gap-2">
         {mesesDelAnio.map((month) => (
           <div key={`${registro.id}-${month}`} className="rounded-xl border border-white/70 bg-white/80 p-2 text-center">
-            <p className="text-[0.6rem] font-semibold uppercase tracking-wide text-slate-500">{MESES_CORTOS[month - 1]}</p>
-            <p className="mt-1 text-sm font-semibold text-slate-800 tabular-nums">
+            <p className="text-[0.6rem] font-semibold uppercase tracking-wide text-zinc-500">{MESES_CORTOS[month - 1]}</p>
+            <p className="mt-1 text-sm font-semibold text-zinc-800 tabular-nums">
               {(registro.distribucionMensual[month - 1] || 0).toLocaleString()}
             </p>
           </div>
@@ -224,7 +224,7 @@ const IciDemid: React.FC = () => {
     <div className="h-[calc(100vh-4rem)] overflow-hidden bg-white p-4 md:h-[calc(100vh-5rem)] md:p-6">
       <div className="mx-auto flex h-full max-w-[1800px] flex-col gap-4 overflow-hidden">
         <section className="bg-transparent">
-          <div className="border-b border-slate-100 px-4 py-4">
+          <div className="border-b border-zinc-100 px-4 py-4">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
               <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
                 <label>
@@ -268,12 +268,12 @@ const IciDemid: React.FC = () => {
 
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" onClick={() => loadData(true)} className={COMPONENT_STYLES.button.secondary} disabled={isLoading || isRefreshing}>
-                  {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                  {isRefreshing ? <SpinnerGap className="h-4 w-4 animate-spin" /> : <ArrowsClockwise className="h-4 w-4" />}
                   Actualizar
                 </button>
                 {!isReadOnlyMode ? (
                   <button type="button" onClick={handleImportClick} className={COMPONENT_STYLES.button.primary} disabled={isImporting}>
-                    {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {isImporting ? <SpinnerGap className="h-4 w-4 animate-spin" /> : <UploadSimple className="h-4 w-4" />}
                     Importar Excel
                   </button>
                 ) : null}
@@ -283,11 +283,11 @@ const IciDemid: React.FC = () => {
           </div>
 
           <div className="px-4 py-3">
-            <div className="rounded-2xl bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 p-1">
+            <div className="rounded-2xl bg-gradient-to-r bg-zinc-800 p-1">
               <div className="flex flex-wrap items-center gap-3 rounded-[18px] bg-white/10 px-4 py-3 text-white">
                 <div className="flex items-center gap-2">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
-                    <FileSpreadsheet className="h-4 w-4" />
+                    <MicrosoftExcelLogo className="h-4 w-4" />
                   </div>
                   <div>
                     <p className="text-[11px] uppercase tracking-[0.14em] text-white/70">ICI DEMID</p>
@@ -311,12 +311,12 @@ const IciDemid: React.FC = () => {
         <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent">
           <DataTable isLoading={isLoading} loadingMessage="Cargando registros ICI DEMID..." skeletonRows={8} skeletonColumns={16} loadingVariant="table">
             <div className="hidden min-h-0 flex-1 overflow-auto md:block">
-              <table className="w-max min-w-full table-auto divide-y divide-slate-200">
+              <table className="w-max min-w-full table-auto divide-y divide-zinc-200">
                 <thead className="sticky top-0 z-20 bg-white">
-                  <tr className="border-b border-slate-200 bg-slate-50/95">
-                    <th className={`${COMPONENT_STYLES.table.headerCell} sticky left-0 z-30 w-[280px] min-w-[280px] bg-slate-50/95 text-left shadow-[8px_0_14px_-12px_rgba(15,23,42,0.16)]`}>
+                  <tr className="border-b border-zinc-200 bg-zinc-50/95">
+                    <th className={`${COMPONENT_STYLES.table.headerCell} sticky left-0 z-30 w-[280px] min-w-[280px] bg-zinc-50/95 text-left shadow-[8px_0_14px_-12px_rgba(15,23,42,0.16)]`}>
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-slate-500" />
+                        <Buildings className="h-4 w-4 text-zinc-500" />
                         Establecimiento
                       </div>
                     </th>
@@ -326,35 +326,35 @@ const IciDemid: React.FC = () => {
                     ))}
                     <th className={`${COMPONENT_STYLES.table.headerCell} w-[110px] min-w-[110px] text-center`}>
                       <div className="flex items-center justify-center gap-2">
-                        <Package className="h-4 w-4 text-slate-500" />
+                        <Package className="h-4 w-4 text-zinc-500" />
                         Stock fin
                       </div>
                     </th>
                     <th className={`${COMPONENT_STYLES.table.headerCell} w-[128px] min-w-[128px] text-center`}>
                       <div className="flex items-center justify-center gap-2">
-                        <Calculator className="h-4 w-4 text-slate-500" />
+                        <Calculator className="h-4 w-4 text-zinc-500" />
                         Total
                       </div>
                     </th>
                     <th className={`${COMPONENT_STYLES.table.headerCell} w-[140px] min-w-[140px] text-center`}>Situación</th>
                     <th className={`${COMPONENT_STYLES.table.headerCell} w-[140px] min-w-[140px] text-center`}>
                       <div className="flex items-center justify-center gap-2">
-                        <ShieldCheck className="h-4 w-4 text-slate-500" />
+                        <ShieldCheck className="h-4 w-4 text-zinc-500" />
                         Disponibilidad
                       </div>
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-zinc-100">
                   {registrosFiltrados.length === 0 ? (
                     <tr>
                       <td colSpan={mesesDelAnio.length + 6} className="px-6 py-16 text-center">
                         <div className="mx-auto flex max-w-md flex-col items-center">
-                          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-300">
-                            <AlertTriangle className="h-6 w-6" />
+                          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-300">
+                            <Warning className="h-6 w-6" />
                           </div>
-                          <p className="text-sm font-semibold text-slate-700">No hay datos ICI DEMID para los filtros seleccionados</p>
-                          <p className="mt-1 text-sm text-slate-500">Ajusta los filtros para visualizar la importación en una vista optimizada.</p>
+                          <p className="text-sm font-semibold text-zinc-700">No hay datos ICI DEMID para los filtros seleccionados</p>
+                          <p className="mt-1 text-sm text-zinc-500">Ajusta los filtros para visualizar la importación en una vista optimizada.</p>
                         </div>
                       </td>
                     </tr>
@@ -362,26 +362,26 @@ const IciDemid: React.FC = () => {
                     registrosFiltrados.map((registro) => {
                       const estilo = getEstiloEstablecimiento(registro.establecimiento);
                       return (
-                        <tr key={registro.id} className={`transition-colors ${estilo.colores.bg} hover:bg-slate-50/50`}>
+                        <tr key={registro.id} className={`transition-colors ${estilo.colores.bg} hover:bg-zinc-50/50`}>
                           <td className={`sticky left-0 z-10 border-r border-white/60 px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)] ${estilo.colores.bg}`}>
                             <div className="flex items-start gap-3">
-                              <span className="mt-2 h-2.5 w-2.5 rounded-full bg-cyan-500 ring-2 ring-white/80" />
+                              <span className="mt-2 h-2.5 w-2.5 rounded-full bg-zinc-500 ring-2 ring-white/80" />
                               <div className="min-w-0">
                                 <p className={`truncate text-sm font-semibold ${estilo.colores.text}`}>{registro.establecimiento.nombre}</p>
-                                <p className="mt-1 text-xs text-slate-500">{registro.establecimiento.codigo}</p>
+                                <p className="mt-1 text-xs text-zinc-500">{registro.establecimiento.codigo}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm font-medium text-slate-700">{registro.vacuna.nombre}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-zinc-700">{registro.vacuna.nombre}</td>
                           {mesesDelAnio.map((month) => (
-                            <td key={`${registro.id}-${month}`} className="px-3 py-3 text-center text-sm font-semibold text-slate-700 tabular-nums">
+                            <td key={`${registro.id}-${month}`} className="px-3 py-3 text-center text-sm font-semibold text-zinc-700 tabular-nums">
                               {(registro.distribucionMensual[month - 1] || 0).toLocaleString()}
                             </td>
                           ))}
                           <td className="px-3 py-3 text-center text-sm font-semibold text-cyan-800">{registro.stockFin.toLocaleString()}</td>
-                          <td className="px-3 py-3 text-center text-sm font-semibold text-teal-800">{registro.totalDistribu.toLocaleString()}</td>
-                          <td className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-600">{registro.situacion || '-'}</td>
-                          <td className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-600">{registro.disponibilidad || '-'}</td>
+                          <td className="px-3 py-3 text-center text-sm font-semibold text-zinc-800">{registro.totalDistribu.toLocaleString()}</td>
+                          <td className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wide text-zinc-600">{registro.situacion || '-'}</td>
+                          <td className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wide text-zinc-600">{registro.disponibilidad || '-'}</td>
                         </tr>
                       );
                     })
@@ -393,11 +393,11 @@ const IciDemid: React.FC = () => {
             <div className="min-h-0 flex-1 overflow-auto p-2.5 md:hidden">
               {registrosFiltrados.length === 0 && !isLoading ? (
                 <div className="flex flex-col items-center py-10">
-                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-300">
-                    <AlertTriangle className="h-5 w-5" />
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-300">
+                    <Warning className="h-5 w-5" />
                   </div>
-                  <p className="text-sm font-semibold text-slate-800">No hay registros ICI DEMID</p>
-                  <p className="mt-1 text-xs text-slate-500">Ajusta los filtros para ver la tabla autoajustada.</p>
+                  <p className="text-sm font-semibold text-zinc-800">No hay registros ICI DEMID</p>
+                  <p className="mt-1 text-xs text-zinc-500">Ajusta los filtros para ver la tabla autoajustada.</p>
                 </div>
               ) : (
                 <div className="mt-2.5 space-y-2">
@@ -429,3 +429,4 @@ const IciDemid: React.FC = () => {
 };
 
 export default IciDemid;
+ 

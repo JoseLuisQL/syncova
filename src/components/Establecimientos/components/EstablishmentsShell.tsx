@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { Building2 } from 'lucide-react';
+import { Buildings } from '@phosphor-icons/react';
 import { COMPONENT_STYLES, SECTION_GROUPS, SectionConfig, SectionId } from '../constants';
 import { useAppNavigation } from '../../../hooks/useRouting';
 
@@ -28,11 +28,11 @@ const EstablishmentsShell: React.FC<EstablishmentsShellProps> = ({
     <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
         <section className="overflow-hidden bg-transparent">
-          <div className="border-b border-slate-200/90 px-4 py-5 sm:px-6 lg:px-8">
+          <div className="border-b border-zinc-200/90 px-4 py-5 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-4">
               <div className="flex items-start gap-4">
                 <div className={COMPONENT_STYLES.header.iconWrapper}>
-                  <Building2 className="h-6 w-6" aria-hidden="true" />
+                  <Buildings className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <div className="min-w-0">
                   <h1 className={COMPONENT_STYLES.header.title}>Establecimientos</h1>
@@ -50,14 +50,14 @@ const EstablishmentsShell: React.FC<EstablishmentsShellProps> = ({
                 const GroupIcon = group.icon;
 
                 return (
-                  <section key={group.key} className="rounded-[18px] border border-slate-200 bg-slate-50/70 p-2.5">
+                  <section key={group.key} className="rounded-[18px] border border-zinc-200 bg-zinc-50/70 p-2.5">
                     <div className="mb-2 flex items-center gap-2 px-1.5">
-                      <GroupIcon className="h-3.5 w-3.5 text-slate-500" aria-hidden="true" />
+                      <GroupIcon className="h-3.5 w-3.5 text-zinc-500" aria-hidden="true" />
                       <div>
-                        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-zinc-500">
                           {group.label}
                         </p>
-                        <p className="text-xs text-slate-500">{group.description}</p>
+                        <p className="text-xs text-zinc-500">{group.description}</p>
                       </div>
                     </div>
 
@@ -80,7 +80,7 @@ const EstablishmentsShell: React.FC<EstablishmentsShellProps> = ({
                             <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                             <span className="flex min-w-0 flex-col items-start text-left leading-tight">
                               <span className="break-words">{section.label}</span>
-                              <span className="text-[0.72rem] font-normal leading-snug text-slate-500 min-[520px]:truncate">
+                              <span className="text-[0.72rem] font-normal leading-snug text-zinc-500 min-[520px]:truncate">
                                 {section.description}
                               </span>
                             </span>
@@ -102,3 +102,4 @@ const EstablishmentsShell: React.FC<EstablishmentsShellProps> = ({
 };
 
 export default memo(EstablishmentsShell);
+ 

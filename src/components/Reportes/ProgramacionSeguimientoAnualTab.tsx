@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {
   Filter,
-  BarChart3
-} from 'lucide-react';
+  ChartBar
+} from '@phosphor-icons/react';
 import { Establecimiento, Vacuna } from '../../types';
 import { FiltrosReporteBase } from '../../types/reportes';
 import ProgramacionSeguimientoAnualTable from './ProgramacionSeguimientoAnualTable';
@@ -31,10 +31,10 @@ const ProgramacionSeguimientoAnualTab: React.FC<ProgramacionSeguimientoAnualTabP
   return (
     <div className="space-y-6 p-6">
       {/* Header Premium */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 shadow-sm">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 border border-blue-200 shadow-sm">
         <div className="flex items-center mb-4">
           <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
-            <BarChart3 className="h-8 w-8 text-white" />
+            <ChartBar weight="duotone" className="h-8 w-8 text-white" />
           </div>
           <div className="ml-4">
             <h2 className="text-2xl font-bold text-gray-900">Programación y Seguimiento Anual</h2>
@@ -44,7 +44,7 @@ const ProgramacionSeguimientoAnualTab: React.FC<ProgramacionSeguimientoAnualTabP
       </div>
 
       {/* Filters Premium */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 shadow-sm">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl border border-blue-200 p-6 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
           <Filter className="h-5 w-5 mr-2 text-blue-600" />
           Filtros de Programación

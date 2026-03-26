@@ -36,6 +36,6 @@ export {
   DateInput,
   DeleteConfirmModal,
   SideSheet,
-} from './ModalComponents';
+} from '../../ui/ModalElements';
 
 export { default as InventoryShell } from './InventoryShell';

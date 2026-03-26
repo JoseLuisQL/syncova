@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Building, Building2, GitBranch, MapPin, Network, Plus, RefreshCw, User } from 'lucide-react';
+import { Building, Buildings, GitBranch, MapPin, TreeStructure, Plus, ArrowsClockwise, User } from '@phosphor-icons/react';
 import { CentroAcopio, CreateCentroAcopioDto, Microred, UpdateCentroAcopioDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
@@ -285,14 +285,14 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full divide-y divide-slate-200">
+      <table className="min-w-full divide-y divide-zinc-200">
         <TableHeader columns={TABLE_COLUMNS} />
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-zinc-100">
           {centrosAcopio.length === 0 ? (
             <tr>
               <td colSpan={TABLE_COLUMNS.length}>
                 <EmptyState
-                  icon={Building2}
+                  icon={Buildings}
                   title="No se encontraron centros de acopio"
                   description="Ajuste los filtros o registre un nuevo centro."
                   action={{ label: 'Nuevo centro', onClick: () => handleOpenModal() }}
@@ -344,7 +344,7 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
                   onClick={() => void fetchCentrosAcopio()}
                   disabled={loading}
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <ArrowsClockwise className="h-4 w-4" />
                   <span>Actualizar</span>
                 </button>
                 <button
@@ -368,7 +368,7 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
             ) : centrosAcopio.length === 0 ? (
               <div className={COMPONENT_STYLES.panel}>
                 <EmptyState
-                  icon={Building2}
+                  icon={Buildings}
                   title="No se encontraron centros de acopio"
                   description="Ajuste los filtros o registre un nuevo centro."
                   action={{ label: 'Nuevo centro', onClick: () => handleOpenModal() }}
@@ -439,42 +439,42 @@ const CentroDesktopRow: React.FC<CentroRowProps> = memo(({
             <Building className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">{centro.nombre}</p>
-            <p className="text-xs text-slate-500">{centro.codigo || 'Sin código registrado'}</p>
+            <p className="truncate text-sm font-semibold text-zinc-900">{centro.nombre}</p>
+            <p className="text-xs text-zinc-500">{centro.codigo || 'Sin código registrado'}</p>
           </div>
         </div>
       </TableCell>
       <TableCell>
-        <span className="text-sm font-medium text-slate-900">{centro.codigo || '-'}</span>
+        <span className="text-sm font-medium text-zinc-900">{centro.codigo || '-'}</span>
       </TableCell>
       <TableCell>
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-sm text-slate-700">
-            <GitBranch className="h-4 w-4 text-slate-400" aria-hidden="true" />
+          <div className="flex items-center gap-2 text-sm text-zinc-700">
+            <GitBranch className="h-4 w-4 text-zinc-400" aria-hidden="true" />
             <span>{centro.microred?.nombre || 'Sin microred asignada'}</span>
           </div>
           {centro.microred?.red ? (
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <Network className="h-3.5 w-3.5 text-slate-300" aria-hidden="true" />
+            <div className="flex items-center gap-2 text-xs text-zinc-500">
+              <TreeStructure className="h-3.5 w-3.5 text-zinc-300" aria-hidden="true" />
               <span>{centro.microred.red.nombre}</span>
             </div>
           ) : null}
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-2 text-sm text-slate-700">
-          <User className="h-4 w-4 text-slate-400" aria-hidden="true" />
+        <div className="flex items-center gap-2 text-sm text-zinc-700">
+          <User className="h-4 w-4 text-zinc-400" aria-hidden="true" />
           <span>{centro.responsable || 'Sin responsable'}</span>
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-2 text-sm text-slate-600">
-          <MapPin className="h-4 w-4 text-slate-400" aria-hidden="true" />
+        <div className="flex items-center gap-2 text-sm text-zinc-600">
+          <MapPin className="h-4 w-4 text-zinc-400" aria-hidden="true" />
           <span className="max-w-[220px] truncate">{centro.direccion || 'Sin dirección registrada'}</span>
         </div>
       </TableCell>
       <TableCell align="center">
-        <CountBadge count={establecimientosCount} icon={Building2} />
+        <CountBadge count={establecimientosCount} icon={Buildings} />
       </TableCell>
       <TableCell align="center">
         <StatusBadge status={centro.estado} />
@@ -489,7 +489,7 @@ const CentroDesktopRow: React.FC<CentroRowProps> = memo(({
               title="Ver establecimientos"
               aria-label={`Ver establecimientos de ${centro.nombre}`}
             >
-              <Building2 className="h-4 w-4" aria-hidden="true" />
+              <Buildings className="h-4 w-4" aria-hidden="true" />
             </button>
           ) : null}
           <ActionButtons
@@ -520,24 +520,24 @@ const CentroMobileCard: React.FC<CentroRowProps> = memo(({
     <article className={`${COMPONENT_STYLES.panel} p-4`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-base font-semibold text-slate-950">{centro.nombre}</p>
-          <p className="mt-1 text-sm text-slate-500">{centro.microred?.nombre || 'Sin microred asignada'}</p>
+          <p className="truncate text-base font-semibold text-zinc-950">{centro.nombre}</p>
+          <p className="mt-1 text-sm text-zinc-500">{centro.microred?.nombre || 'Sin microred asignada'}</p>
         </div>
         <StatusBadge status={centro.estado} />
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
-        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Establecimientos</p>
-          <p className="mt-2 text-lg font-semibold text-slate-900">{establecimientosCount}</p>
+        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Establecimientos</p>
+          <p className="mt-2 text-lg font-semibold text-zinc-900">{establecimientosCount}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Responsable</p>
-          <p className="mt-2 text-sm font-medium text-slate-900">{centro.responsable || '-'}</p>
+        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Responsable</p>
+          <p className="mt-2 text-sm font-medium text-zinc-900">{centro.responsable || '-'}</p>
         </div>
       </div>
 
-      <p className="mt-3 text-sm text-slate-600">{centro.direccion || 'Sin dirección registrada.'}</p>
+      <p className="mt-3 text-sm text-zinc-600">{centro.direccion || 'Sin dirección registrada.'}</p>
 
       <div className="mt-4 flex items-center justify-between gap-3">
         {onNavigate && establecimientosCount > 0 ? (
@@ -546,7 +546,7 @@ const CentroMobileCard: React.FC<CentroRowProps> = memo(({
             className={COMPONENT_STYLES.button.secondary}
             onClick={() => onNavigate(centro.id, centro.nombre)}
           >
-            <Building2 className="h-4 w-4" />
+            <Buildings className="h-4 w-4" />
             <span>Ver establecimientos</span>
           </button>
         ) : (
@@ -638,7 +638,7 @@ const CentroModal: React.FC<CentroModalProps> = ({
           ? 'Mantén actualizado el punto logístico sin perder la relación territorial.'
           : 'Registra un nuevo centro logístico dentro de la microred correspondiente.'
       }
-      icon={Building2}
+      icon={Buildings}
       size="xl"
       footer={
         <ModalFooter
@@ -738,3 +738,4 @@ const CentroModal: React.FC<CentroModalProps> = ({
 };
 
 export default memo(CentrosAcopio);
+ 

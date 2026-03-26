@@ -29,3 +29,7 @@ export default defineConfig({
     // El proxy solo funciona en localhost, no desde la red
   },
 });
+//
+sileo
+cache
+flush

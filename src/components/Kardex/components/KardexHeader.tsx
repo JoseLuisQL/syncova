@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { BookOpen, Download, Loader2, RefreshCw } from 'lucide-react';
+import { BookOpenText, DownloadSimple, SpinnerGap, ArrowsClockwise } from '@phosphor-icons/react';
 import { COMPONENT_STYLES } from '../constants';
 
 interface KardexHeaderProps {
@@ -25,11 +25,11 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
 
   return (
     <section className="overflow-hidden bg-transparent">
-      <div className="border-b border-slate-200/90 px-4 py-5 sm:px-6">
+      <div className="border-b border-zinc-200/90 px-4 py-5 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-start gap-4">
             <div className={COMPONENT_STYLES.header.iconWrapper}>
-              <BookOpen className="h-6 w-6" aria-hidden="true" />
+              <BookOpenText className="h-6 w-6" aria-hidden="true" />
             </div>
             <div className="min-w-0">
               <h1 className={COMPONENT_STYLES.header.title}>Kardex</h1>
@@ -48,9 +48,9 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
               aria-busy={isRefreshing}
             >
               {isRefreshing ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
-                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                <ArrowsClockwise className="h-4 w-4" aria-hidden="true" />
               )}
               <span>Actualizar</span>
             </button>
@@ -63,9 +63,9 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
               aria-busy={exportando}
             >
               {exportando ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
-                <Download className="h-4 w-4" aria-hidden="true" />
+                <DownloadSimple className="h-4 w-4" aria-hidden="true" />
               )}
               <span>{exportando ? 'Exportando...' : 'Exportar Excel'}</span>
             </button>
@@ -78,3 +78,4 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
 
 export const KardexHeader = memo(KardexHeaderComponent);
 KardexHeader.displayName = 'KardexHeader';
+ 

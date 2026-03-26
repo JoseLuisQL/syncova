@@ -1,12 +1,12 @@
 import React, { memo, useCallback, useState } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell } from '@phosphor-icons/react';
 import {
   Modal,
   ModalFooter,
   SelectInput,
   TextArea,
   TextInput,
-} from '../../Inventario/components/ModalComponents';
+} from '../../ui/ModalElements';
 import { NIVELES_ALERTA, TIPOS_ALERTA } from '../constants';
 
 interface NuevaAlertaModalProps {
@@ -117,3 +117,4 @@ export const NuevaAlertaModal: React.FC<NuevaAlertaModalProps> = memo(({
 });
 
 NuevaAlertaModal.displayName = 'NuevaAlertaModal';
+ 

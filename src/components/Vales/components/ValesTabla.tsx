@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Eye, Download, RotateCcw, Package, Loader2, Receipt, CheckCircle, Plus, Layers } from 'lucide-react';
+import { Eye, Download, ArrowCounterClockwise, Package, SpinnerGap, Receipt, CheckCircle, Plus, Stack } from '@phosphor-icons/react';
 import { COMPONENT_STYLES, ESTADOS_VALE, MESES } from '../constants';
 import { ValeEntrega } from '../../../services/valesService';
 
@@ -33,8 +33,8 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
 
   if (hasBase && additionalCount > 0) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-teal-100 text-teal-800 border border-teal-200">
-        <Layers className="h-3 w-3" />
+      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[0.65rem] font-bold uppercase tracking-wider bg-zinc-900 text-white border border-zinc-900">
+        <Stack weight="bold" className="h-3 w-3" />
         <span className="hidden sm:inline">Completo</span>
         <span className="sm:hidden">C</span>
       </span>
@@ -43,8 +43,8 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
 
   if (hasBase) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-        <CheckCircle className="h-3 w-3" />
+      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[0.65rem] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-700 border border-zinc-200">
+        <CheckCircle weight="bold" className="h-3 w-3" />
         <span className="hidden sm:inline">Base</span>
         <span className="sm:hidden">B</span>
       </span>
@@ -53,17 +53,17 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
 
   if (additionalCount > 0) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-        <Plus className="h-3 w-3" />
-        <span className="hidden sm:inline">Adicional #{additionalCount}</span>
+      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[0.65rem] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-700 border border-zinc-200">
+        <Plus weight="bold" className="h-3 w-3" />
+        <span className="hidden sm:inline">Adic. #{additionalCount}</span>
         <span className="sm:hidden">A{additionalCount}</span>
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
-      <CheckCircle className="h-3 w-3" />
+    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[0.65rem] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-600 border border-zinc-200">
+      <CheckCircle weight="bold" className="h-3 w-3" />
       <span>Base</span>
     </span>
   );
@@ -77,8 +77,8 @@ const EstadoBadge: React.FC<{ estado: string }> = memo(({ estado }) => {
   const Icon = config.icon;
 
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
-      <Icon className="h-3 w-3" />
+    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[0.7rem] font-semibold tracking-tight ${config.bg} ${config.text} border ${config.border}`}>
+      <Icon weight="bold" className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">{config.label}</span>
     </span>
   );
@@ -111,23 +111,23 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
               <th className={`${COMPONENT_STYLES.table.headerCell} text-center w-32`}>Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="bg-white">
             {isLoading ? (
               <tr>
                 <td colSpan={7} className="px-6 py-12 text-center">
                   <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-                    <span className="text-gray-500">Cargando vales...</span>
+                    <SpinnerGap weight="bold" className="h-8 w-8 animate-spin text-zinc-400" />
+                    <span className="text-sm font-medium text-zinc-500">Renderizando matriz Tufte-Style...</span>
                   </div>
                 </td>
               </tr>
             ) : vales.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-12 text-center">
-                  <Receipt className={COMPONENT_STYLES.table.emptyIcon} />
-                  <p className="font-medium text-gray-900">No hay vales para mostrar</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Seleccione filtros o genere un nuevo vale
+                <td colSpan={7} className="px-6 py-16 text-center">
+                  <Receipt weight="duotone" className="mx-auto h-12 w-12 text-zinc-200 mb-4" />
+                  <p className="text-base font-black tracking-tight text-zinc-900">Cuadrícula vacía</p>
+                  <p className="mt-1 text-sm text-zinc-500">
+                    Seleccione filtros o inyecte un nuevo vale
                   </p>
                 </td>
               </tr>
@@ -139,16 +139,16 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
                 >
                   {/* Numero */}
                   <td className={COMPONENT_STYLES.table.cell}>
-                    <span className="font-semibold text-gray-900">{vale.numero}</span>
+                    <span className="font-black tracking-tight text-zinc-900">{vale.numero}</span>
                   </td>
 
                   {/* Centro de Acopio */}
                   <td className={COMPONENT_STYLES.table.cell}>
                     <div>
-                      <div className="font-medium text-gray-900 truncate max-w-[200px]">
+                      <div className="font-bold text-zinc-900 truncate max-w-[200px] text-xs">
                         {vale.centroAcopio.nombre}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-[0.65rem] font-semibold text-zinc-400 uppercase tracking-wider mt-0.5">
                         {MESES[vale.mes - 1]} {vale.anio}
                       </div>
                     </div>
@@ -162,12 +162,12 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
                   {/* Totales */}
                   <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
                     <div className="flex flex-col items-center gap-1">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-100 text-teal-800 rounded text-xs font-medium">
-                        <Package className="h-3 w-3" />
-                        {vale.totalVacunas.toLocaleString()}
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-900 text-white rounded-[4px] text-[0.7rem] font-bold tabular-nums tracking-tight">
+                        <Package weight="bold" className="h-3 w-3" />
+                        {vale.totalVacunas.toLocaleString('en-US')}
                       </span>
-                      <span className="text-xs text-gray-500">
-                        {vale.totalEstablecimientos} centros
+                      <span className="text-[0.65rem] font-semibold text-zinc-500 uppercase tracking-widest">
+                        {vale.totalEstablecimientos} CENTROS
                       </span>
                     </div>
                   </td>
@@ -179,41 +179,41 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
 
                   {/* Fecha */}
                   <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                    <span className="text-sm text-gray-700">
+                    <span className="text-[0.75rem] font-semibold text-zinc-600 tabular-nums">
                       {new Date(vale.fechaGeneracion).toLocaleDateString('es-PE', {
                         day: '2-digit',
                         month: '2-digit',
-                        year: '2-digit',
+                        year: 'numeric',
                       })}
                     </span>
                   </td>
 
                   {/* Acciones */}
                   <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                    <div className="flex items-center justify-center gap-1">
+                    <div className="flex items-center justify-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => onVerDetalle(vale)}
-                        className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconView}`}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
                         title="Ver detalle"
                         disabled={isProcessing}
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye weight="bold" className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => onExportar(vale)}
-                        className={`${COMPONENT_STYLES.button.icon} text-emerald-600 bg-emerald-50 hover:bg-emerald-100`}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
                         title="Exportar"
                         disabled={isProcessing}
                       >
-                        <Download className="h-4 w-4" />
+                        <Download weight="bold" className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => onRevertir(vale)}
-                        className={`${COMPONENT_STYLES.button.icon} text-amber-600 bg-amber-50 hover:bg-amber-100`}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-zinc-500 hover:bg-rose-50 hover:text-rose-600 transition-colors"
                         title="Revertir"
                         disabled={isProcessing}
                       >
-                        <RotateCcw className="h-4 w-4" />
+                        <ArrowCounterClockwise weight="bold" className="h-4 w-4" />
                       </button>
                     </div>
                   </td>

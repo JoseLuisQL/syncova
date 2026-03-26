@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Loader2, LucideIcon, Pencil, Eye, Trash2 } from 'lucide-react';
+import { CircleNotch, Icon, PencilSimple, Eye, Trash } from '@phosphor-icons/react';
 import { ColorScheme, COMPONENT_STYLES } from '../constants';
 
 const SkeletonBlock: React.FC<{ className?: string }> = ({ className = '' }) => (
@@ -9,18 +9,18 @@ const SkeletonBlock: React.FC<{ className?: string }> = ({ className = '' }) => 
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
-  icon: LucideIcon;
+  icon: Icon;
   count?: number;
   action?: {
     label: string;
     onClick: () => void;
-    icon?: LucideIcon;
+    icon?: Icon;
     isLoading?: boolean;
   };
   secondaryAction?: {
     label: string;
     onClick: () => void;
-    icon?: LucideIcon;
+    icon?: Icon;
     isLoading?: boolean;
   };
 }
@@ -63,9 +63,9 @@ export const PageHeader: React.FC<PageHeaderProps> = memo(({
             aria-busy={secondaryAction.isLoading}
           >
             {secondaryAction.isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <CircleNotch className="h-4 w-4 animate-spin" aria-hidden="true" weight="bold" />
             ) : SecondaryIcon ? (
-              <SecondaryIcon className="h-4 w-4" aria-hidden="true" />
+              <SecondaryIcon className="h-4 w-4" aria-hidden="true" weight="bold" />
             ) : null}
             <span>{secondaryAction.label}</span>
           </button>
@@ -79,9 +79,9 @@ export const PageHeader: React.FC<PageHeaderProps> = memo(({
             aria-busy={action.isLoading}
           >
             {action.isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <CircleNotch className="h-4 w-4 animate-spin" aria-hidden="true" weight="bold" />
             ) : ActionIcon ? (
-              <ActionIcon className="h-4 w-4" aria-hidden="true" />
+              <ActionIcon className="h-4 w-4" aria-hidden="true" weight="bold" />
             ) : null}
             <span>{action.label}</span>
           </button>
@@ -96,7 +96,7 @@ PageHeader.displayName = 'PageHeader';
 interface StatsCardProps {
   label: string;
   value: number;
-  icon: LucideIcon;
+  icon: Icon;
   colorScheme?: ColorScheme;
   isLoading?: boolean;
 }
@@ -107,57 +107,57 @@ const colorClasses: Record<
 > = {
   primary: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
-    textStrong: 'text-teal-900',
-    iconBg: 'bg-teal-100',
-    iconText: 'text-teal-800',
-    iconBorder: 'border-teal-200',
+    border: 'border-zinc-200/80',
+    text: 'text-zinc-500',
+    textStrong: 'text-zinc-900',
+    iconBg: 'bg-zinc-900',
+    iconText: 'text-white',
+    iconBorder: 'border-zinc-800',
   },
   secondary: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
-    textStrong: 'text-cyan-900',
-    iconBg: 'bg-cyan-100',
-    iconText: 'text-cyan-800',
-    iconBorder: 'border-cyan-200',
+    border: 'border-zinc-200/80',
+    text: 'text-zinc-500',
+    textStrong: 'text-zinc-900',
+    iconBg: 'bg-zinc-100',
+    iconText: 'text-zinc-700',
+    iconBorder: 'border-zinc-200',
   },
   success: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
-    textStrong: 'text-emerald-900',
-    iconBg: 'bg-emerald-100',
-    iconText: 'text-emerald-800',
+    border: 'border-zinc-200/80',
+    text: 'text-zinc-500',
+    textStrong: 'text-emerald-700',
+    iconBg: 'bg-emerald-50',
+    iconText: 'text-emerald-600',
     iconBorder: 'border-emerald-200',
   },
   warning: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
-    textStrong: 'text-amber-900',
-    iconBg: 'bg-amber-100',
-    iconText: 'text-amber-800',
+    border: 'border-zinc-200/80',
+    text: 'text-zinc-500',
+    textStrong: 'text-amber-700',
+    iconBg: 'bg-amber-50',
+    iconText: 'text-amber-600',
     iconBorder: 'border-amber-200',
   },
   danger: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
-    textStrong: 'text-rose-900',
-    iconBg: 'bg-rose-100',
-    iconText: 'text-rose-800',
+    border: 'border-zinc-200/80',
+    text: 'text-zinc-500',
+    textStrong: 'text-rose-700',
+    iconBg: 'bg-rose-50',
+    iconText: 'text-rose-600',
     iconBorder: 'border-rose-200',
   },
   neutral: {
     surface: 'bg-white',
-    border: 'border-slate-200',
-    text: 'text-slate-600',
-    textStrong: 'text-slate-900',
-    iconBg: 'bg-slate-200',
-    iconText: 'text-slate-700',
-    iconBorder: 'border-slate-200',
+    border: 'border-zinc-200/80',
+    text: 'text-zinc-500',
+    textStrong: 'text-zinc-900',
+    iconBg: 'bg-zinc-100',
+    iconText: 'text-zinc-600',
+    iconBorder: 'border-zinc-200',
   },
 };
 
@@ -187,7 +187,7 @@ export const StatsCard: React.FC<StatsCardProps> = memo(({
           )}
         </div>
         <div className={`${COMPONENT_STYLES.stats.iconWrapper} ${colors.iconBg} ${colors.iconText} ${colors.iconBorder} transition-transform duration-300 ${isLoading ? 'inventory-breathe' : ''}`}>
-          {isLoading ? <SkeletonBlock className="h-4 w-4 rounded-full" /> : <Icon className="h-4 w-4" aria-hidden="true" />}
+          {isLoading ? <SkeletonBlock className="h-4 w-4 rounded-full" /> : <Icon className="h-5 w-5" aria-hidden="true" weight="fill" />}
         </div>
       </div>
     </div>
@@ -201,7 +201,7 @@ interface StatsGridProps {
     key: string;
     label: string;
     value: number;
-    icon: LucideIcon;
+    icon: Icon | any;
     color?: ColorScheme;
   }>;
   isLoading?: boolean;
@@ -245,7 +245,7 @@ StatusBadge.displayName = 'StatusBadge';
 
 interface CountBadgeProps {
   count: number;
-  icon?: LucideIcon;
+  icon?: Icon | any;
   variant?: 'default' | 'warning' | 'danger';
 }
 
@@ -259,7 +259,7 @@ export const CountBadge: React.FC<CountBadgeProps> = memo(({ count, icon: Icon, 
 
   return (
     <span className={className}>
-      {Icon ? <Icon className="mr-1 h-3 w-3" aria-hidden="true" /> : null}
+      {Icon ? <Icon className="mr-1 h-3 w-3" aria-hidden="true" weight="fill" /> : null}
       {count}
     </span>
   );
@@ -278,8 +278,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = memo(({ message = '
     aria-live="polite"
   >
     <div className="flex items-center gap-3 text-slate-700">
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 text-teal-700 inventory-breathe">
-        <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-700 inventory-breathe">
+        <CircleNotch className="h-5 w-5 animate-spin" aria-hidden="true" weight="bold" />
       </div>
       <div className="min-w-0">
         <p className="text-sm font-semibold text-slate-900">{message}</p>
@@ -308,7 +308,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = memo(({ message = '
 LoadingSpinner.displayName = 'LoadingSpinner';
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  icon: Icon | any;
   title: string;
   description?: string;
   action?: {
@@ -325,7 +325,7 @@ export const EmptyState: React.FC<EmptyStateProps> = memo(({
 }) => (
   <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
     <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-      <Icon className="h-8 w-8 text-slate-400" aria-hidden="true" />
+      <Icon className="h-8 w-8 text-zinc-400" aria-hidden="true" weight="duotone" />
     </div>
     <p className="text-lg font-medium text-slate-900">{title}</p>
     {description ? <p className="mt-1 max-w-md text-sm text-slate-500">{description}</p> : null}
@@ -390,7 +390,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
         className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconView}`}
         aria-label="Ver detalles"
       >
-        <Eye className="h-4 w-4" aria-hidden="true" />
+        <Eye className="h-4 w-4" aria-hidden="true" weight="bold" />
       </button>
     ) : null}
     {onEdit ? (
@@ -401,7 +401,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
         className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconEdit}`}
         aria-label="Editar"
       >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Pencil className="h-4 w-4" aria-hidden="true" />}
+        {isLoading ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <PencilSimple className="h-4 w-4" aria-hidden="true" weight="bold" />}
       </button>
     ) : null}
     {onDelete ? (
@@ -413,7 +413,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
         aria-label="Eliminar"
         title={!canDelete ? deleteTooltip : 'Eliminar'}
       >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" aria-hidden="true" />}
+        {isLoading ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <Trash className="h-4 w-4" aria-hidden="true" weight="bold" />}
       </button>
     ) : null}
   </div>
@@ -477,14 +477,14 @@ interface KeyValueGridProps {
 }
 
 export const KeyValueGrid: React.FC<KeyValueGridProps> = memo(({ items, columns = 2 }) => (
-  <div className={`grid gap-4 ${columns === 1 ? 'grid-cols-1' : columns === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
+  <dl className={`grid gap-x-4 gap-y-6 ${columns === 1 ? 'grid-cols-1' : columns === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
     {items.map((item) => (
-      <div key={item.label} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-        <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-500">{item.label}</p>
-        <div className="mt-2 text-sm text-slate-900">{item.value}</div>
+      <div key={item.label} className="sm:col-span-1">
+        <dt className="text-xs font-medium text-gray-500">{item.label}</dt>
+        <dd className="mt-1 text-sm text-gray-900">{item.value}</dd>
       </div>
     ))}
-  </div>
+  </dl>
 ));
 
 KeyValueGrid.displayName = 'KeyValueGrid';

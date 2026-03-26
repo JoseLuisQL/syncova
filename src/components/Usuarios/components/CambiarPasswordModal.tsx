@@ -1,8 +1,8 @@
 import React, { memo, useEffect, useState } from 'react';
-import { Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-react';
+import { Eye, EyeSlash, Key, ShieldCheck } from '@phosphor-icons/react';
 import { Usuario } from '../../../types';
 import { COMPONENT_STYLES } from '../constants';
-import { FormField, FormSection, Modal, ModalFooter } from './ModalComponents';
+import { FormField, FormSection, Modal, ModalFooter } from '../../ui/ModalElements';
 
 interface CambiarPasswordModalProps {
   usuario: Usuario;
@@ -68,7 +68,7 @@ const CambiarPasswordModal: React.FC<CambiarPasswordModalProps> = memo(({
       onClose={onClose}
       title="Actualizar contraseña"
       subtitle={`${usuario.nombres} ${usuario.apellidos} · @${usuario.usuario}`}
-      icon={KeyRound}
+      icon={Key}
       size="md"
       footer={(
         <ModalFooter
@@ -82,14 +82,14 @@ const CambiarPasswordModal: React.FC<CambiarPasswordModalProps> = memo(({
       )}
     >
       <div className="space-y-4">
-        <div className="rounded-[22px] border border-cyan-200 bg-cyan-50/80 p-4">
+        <div className="rounded-[22px] border border-zinc-200 bg-zinc-50/80 p-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-cyan-700 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-700 shadow-sm">
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-cyan-900">Actualización controlada</p>
-              <p className="mt-1 text-sm text-cyan-800">
+              <p className="text-sm font-semibold text-zinc-900">Actualización controlada</p>
+              <p className="mt-1 text-sm text-zinc-800">
                 Este cambio impacta el acceso inmediato del usuario. Usa una contraseña temporal segura si el restablecimiento
                 será comunicado por otro canal.
               </p>
@@ -126,7 +126,7 @@ const CambiarPasswordModal: React.FC<CambiarPasswordModalProps> = memo(({
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -tranzinc-y-1/2 text-zinc-400 transition-colors hover:text-zinc-600"
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -160,7 +160,7 @@ const CambiarPasswordModal: React.FC<CambiarPasswordModalProps> = memo(({
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -tranzinc-y-1/2 text-zinc-400 transition-colors hover:text-zinc-600"
                   aria-label={showConfirmPassword ? 'Ocultar confirmación' : 'Mostrar confirmación'}
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -177,3 +177,4 @@ const CambiarPasswordModal: React.FC<CambiarPasswordModalProps> = memo(({
 CambiarPasswordModal.displayName = 'CambiarPasswordModal';
 
 export default CambiarPasswordModal;
+   

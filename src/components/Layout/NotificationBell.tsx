@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { Bell, Check, AlertTriangle, Info, AlertOctagon, CheckCircle } from 'lucide-react';
+import { Bell, Check, Warning as AlertTriangle, Info, WarningCircle as AlertOctagon, CheckCircle } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { useAlertasGlobal } from '../../contexts/AlertasContext';
 import { NivelAlerta } from '../../types';

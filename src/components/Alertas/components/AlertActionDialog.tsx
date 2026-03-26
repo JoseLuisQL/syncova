@@ -1,6 +1,6 @@
 import React from 'react';
-import { AlertTriangle, LucideIcon } from 'lucide-react';
-import { Modal, ModalFooter } from '../../Inventario/components/ModalComponents';
+import { Warning, Icon } from '@phosphor-icons/react';
+import { Modal, ModalFooter } from '../../ui/ModalElements';
 
 interface AlertActionDialogProps {
   isOpen: boolean;
@@ -11,7 +11,7 @@ interface AlertActionDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   isLoading?: boolean;
-  icon?: LucideIcon;
+  icon?: Icon;
 }
 
 const AlertActionDialog: React.FC<AlertActionDialogProps> = ({
@@ -23,7 +23,7 @@ const AlertActionDialog: React.FC<AlertActionDialogProps> = ({
   confirmLabel = 'Confirmar',
   cancelLabel = 'Cancelar',
   isLoading = false,
-  icon = AlertTriangle,
+  icon = Warning,
 }) => (
   <Modal
     isOpen={isOpen}
@@ -43,10 +43,11 @@ const AlertActionDialog: React.FC<AlertActionDialogProps> = ({
       />
     )}
   >
-    <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
-      <p className="text-sm leading-6 text-slate-700">{description}</p>
+    <div className="rounded-[22px] border border-zinc-200 bg-zinc-50/80 p-4">
+      <p className="text-sm leading-6 text-zinc-700">{description}</p>
     </div>
   </Modal>
 );
 
 export default AlertActionDialog;
+ 

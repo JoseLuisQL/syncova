@@ -1,10 +1,4 @@
-import {
-  ArrowDownCircle,
-  ArrowRightLeft,
-  ArrowUpCircle,
-  Package2,
-  Settings2,
-} from 'lucide-react';
+import { ArrowCircleDown, ArrowsLeftRight, ArrowCircleUp, Package, Faders } from '@phosphor-icons/react';
 import {
   COLORS,
   COMPONENT_STYLES as INVENTORY_COMPONENT_STYLES,
@@ -37,7 +31,7 @@ export const MOVIMIENTO_CONFIG = {
     key: 'ingreso',
     label: 'Ingreso',
     tone: 'success' as ColorScheme,
-    icon: ArrowUpCircle,
+    icon: ArrowCircleUp,
     badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700',
     chipClassName: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   },
@@ -45,7 +39,7 @@ export const MOVIMIENTO_CONFIG = {
     key: 'salida',
     label: 'Salida',
     tone: 'danger' as ColorScheme,
-    icon: ArrowDownCircle,
+    icon: ArrowCircleDown,
     badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700',
     chipClassName: 'border-rose-200 bg-rose-50 text-rose-700',
   },
@@ -53,15 +47,15 @@ export const MOVIMIENTO_CONFIG = {
     key: 'transferencia',
     label: 'Transferencia',
     tone: 'secondary' as ColorScheme,
-    icon: ArrowRightLeft,
-    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-medium text-cyan-700',
-    chipClassName: 'border-cyan-200 bg-cyan-50 text-cyan-700',
+    icon: ArrowsLeftRight,
+    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700',
+    chipClassName: 'border-blue-200 bg-blue-50 text-blue-700',
   },
   ajuste: {
     key: 'ajuste',
     label: 'Ajuste',
     tone: 'warning' as ColorScheme,
-    icon: Settings2,
+    icon: Faders,
     badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700',
     chipClassName: 'border-amber-200 bg-amber-50 text-amber-700',
   },
@@ -69,11 +63,12 @@ export const MOVIMIENTO_CONFIG = {
     key: 'default',
     label: 'Movimiento',
     tone: 'neutral' as ColorScheme,
-    icon: Package2,
-    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700',
-    chipClassName: 'border-slate-200 bg-slate-50 text-slate-700',
+    icon: Package,
+    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700',
+    chipClassName: 'border-zinc-200 bg-zinc-50 text-zinc-700',
   },
 } as const;
 
 export const getMovimientoConfig = (tipoMovimiento?: string) =>
   MOVIMIENTO_CONFIG[tipoMovimiento as keyof typeof MOVIMIENTO_CONFIG] || MOVIMIENTO_CONFIG.default;
+ 

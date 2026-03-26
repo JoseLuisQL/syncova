@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Archive } from 'lucide-react';
+import { Archive } from '@phosphor-icons/react';
 import { Vacuna, Establecimiento } from '../../../types';
 import { FiltrosKardexDetallado } from '../../../types/reportes';
 import { KardexService } from '../../../services/KardexService';
@@ -10,7 +10,7 @@ import {
   ModalFooter,
   SelectInput,
   TextInput,
-} from '../../Inventario/components/ModalComponents';
+} from '../../ui/ModalElements';
 import { getFechaPeruActual, getFechaPeruMesAnterior } from '../utils';
 
 interface KardexDetalladoModalProps {
@@ -225,14 +225,14 @@ const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
             placeholder="Documento, número, observaciones..."
           />
 
-          <label className="flex items-center gap-3 rounded-[18px] border border-slate-200 bg-slate-50/80 px-4 py-3">
+          <label className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
             <input
               type="checkbox"
               checked={filtros.incluirTrazabilidad || false}
               onChange={(event) => setFiltros((prev) => ({ ...prev, incluirTrazabilidad: event.target.checked }))}
-              className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+              className="h-4 w-4 rounded border-zinc-300 text-zinc-600 focus:ring-zinc-500"
             />
-            <span className="text-sm text-slate-700">Incluir información de trazabilidad completa</span>
+            <span className="text-sm text-zinc-700">Incluir información de trazabilidad completa</span>
           </label>
         </FormSection>
       </div>

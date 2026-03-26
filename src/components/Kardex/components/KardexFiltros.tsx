@@ -1,11 +1,5 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  Search,
-  X,
-} from 'lucide-react';
+import { CalendarBlank, CaretDown, CaretUp, MagnifyingGlass, X } from '@phosphor-icons/react';
 import { Establecimiento, Jeringa, Vacuna } from '../../../types';
 import {
   COMPONENT_STYLES,
@@ -143,7 +137,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         disabled={disabled}
         onClick={() => setIsOpen((current) => !current)}
         className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} flex items-center justify-between gap-3 text-left ${
-          disabled ? 'cursor-not-allowed bg-slate-50 text-slate-400' : ''
+          disabled ? 'cursor-not-allowed bg-zinc-50 text-zinc-400' : ''
         }`}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
@@ -151,22 +145,22 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         <span className="min-w-0">
           {selectedOption ? (
             <span className="flex min-w-0 flex-col">
-              <span className="truncate text-sm text-slate-900">{selectedOption.label}</span>
+              <span className="truncate text-sm text-zinc-900">{selectedOption.label}</span>
               {selectedOption.description ? (
-                <span className="truncate text-xs text-slate-500">{selectedOption.description}</span>
+                <span className="truncate text-xs text-zinc-500">{selectedOption.description}</span>
               ) : null}
             </span>
           ) : (
-            <span className="text-sm text-slate-400">{placeholder}</span>
+            <span className="text-sm text-zinc-400">{placeholder}</span>
           )}
         </span>
-        <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition ${isOpen ? 'rotate-180' : ''}`} />
+        <CaretDown className={`h-4 w-4 shrink-0 text-zinc-400 transition ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen ? (
-        <div className="absolute left-0 z-30 mt-2 w-full rounded-[22px] border border-slate-200 bg-white p-3 shadow-[0_20px_45px_-28px_rgba(15,23,42,0.35)]">
+        <div className="absolute left-0 z-30 mt-2 w-full rounded-[22px] border border-zinc-200 bg-white p-3 shadow-[0_20px_45px_-28px_rgba(15,23,42,0.35)]">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <MagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <input
               type="search"
               value={query}
@@ -177,21 +171,21 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
             />
           </div>
 
-          <div className="mt-3 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50/60 p-1">
+          <div className="mt-3 max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50/60 p-1">
             <button
               type="button"
               onClick={() => {
                 onChange('');
                 setIsOpen(false);
               }}
-              className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-slate-600 transition hover:bg-white hover:text-slate-900"
+              className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-zinc-600 transition hover:bg-white hover:text-zinc-900"
             >
               <span>{placeholder}</span>
-              {!value ? <span className="text-xs font-medium text-teal-700">Activo</span> : null}
+              {!value ? <span className="text-xs font-medium text-zinc-700">Activo</span> : null}
             </button>
 
             {filteredOptions.length === 0 ? (
-              <div className="px-3 py-4 text-sm text-slate-500">No se encontraron coincidencias.</div>
+              <div className="px-3 py-4 text-sm text-zinc-500">No se encontraron coincidencias.</div>
             ) : (
               filteredOptions.map((option) => (
                 <button
@@ -203,20 +197,20 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                   }}
                   className={`flex w-full items-start justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition ${
                     option.value === value
-                      ? 'bg-white shadow-sm ring-1 ring-teal-200'
+                      ? 'bg-white shadow-sm ring-1 ring-zinc-200'
                       : 'hover:bg-white hover:shadow-sm'
                   }`}
                   role="option"
                   aria-selected={option.value === value}
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium text-slate-900">{option.label}</span>
+                    <span className="block truncate text-sm font-medium text-zinc-900">{option.label}</span>
                     {option.description ? (
-                      <span className="mt-0.5 block truncate text-xs text-slate-500">{option.description}</span>
+                      <span className="mt-0.5 block truncate text-xs text-zinc-500">{option.description}</span>
                     ) : null}
                   </span>
                   {option.value === value ? (
-                    <span className="text-xs font-semibold uppercase tracking-[0.08em] text-teal-700">Actual</span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-700">Actual</span>
                   ) : null}
                 </button>
               ))
@@ -409,7 +403,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
               Buscar
             </label>
             <div className="relative">
-              <Search className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
+              <MagnifyingGlass className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
               <input
                 id="kardex-search"
                 type="search"
@@ -426,7 +420,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
               Desde
             </label>
             <div className="relative">
-              <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
               <input
                 id="kardex-fecha-inicio"
                 type="date"
@@ -442,7 +436,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
               Hasta
             </label>
             <div className="relative">
-              <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
               <input
                 id="kardex-fecha-fin"
                 type="date"
@@ -460,7 +454,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
                 const isSelected = tipoMovimiento === option.value;
                 const selectedClass =
                   option.value === 'todos'
-                    ? 'border-slate-900 bg-slate-900 text-white'
+                    ? 'border-zinc-900 bg-zinc-900 text-white'
                     : getMovimientoConfig(option.value).chipClassName;
 
                 return (
@@ -471,7 +465,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
                     className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
                       isSelected
                         ? selectedClass
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                        : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
                     }`}
                   >
                     {option.label}
@@ -527,7 +521,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
         </div>
 
         {showAdvanced ? (
-          <div className="grid gap-3 border-t border-slate-100 pt-3 md:grid-cols-2">
+          <div className="grid gap-3 border-t border-zinc-100 pt-3 md:grid-cols-2">
             <SearchableSelect
               id="kardex-origen"
               label="Establecimiento origen"
@@ -548,7 +542,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-3 border-t border-slate-100 pt-3">
+        <div className="flex flex-col gap-3 border-t border-zinc-100 pt-3">
           {activeFilters.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {activeFilters.map((filter) => (
@@ -556,7 +550,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
                   key={filter.key}
                   type="button"
                   onClick={filter.clear}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-white"
+                  className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-white"
                 >
                   <span>{filter.label}</span>
                   <X className="h-3.5 w-3.5" />
@@ -584,7 +578,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
                 className={COMPONENT_STYLES.button.ghost}
                 aria-expanded={showAdvanced}
               >
-                {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                {showAdvanced ? <CaretUp className="h-4 w-4" /> : <CaretDown className="h-4 w-4" />}
                 <span>{showAdvanced ? 'Ocultar filtros' : 'Más filtros'}</span>
               </button>
             </div>
@@ -597,3 +591,4 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
 
 export const KardexFiltros = memo(KardexFiltrosComponent);
 KardexFiltros.displayName = 'KardexFiltros';
+ 

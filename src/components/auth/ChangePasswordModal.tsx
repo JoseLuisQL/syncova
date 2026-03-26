@@ -131,30 +131,30 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
 
   const modalContent = (
     <div 
-      className="fixed inset-0 bg-zinc-950/40 backdrop-blur-sm flex items-center justify-center p-4 z-[100]"
+      className="fixed inset-0 bg-gray-950/40 backdrop-blur-sm flex items-center justify-center p-4 z-[100]"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div className="bg-white rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-zinc-200/60">
+      <div className="bg-white rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-gray-200/60">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-zinc-100 bg-zinc-50/50">
+        <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-950 flex items-center justify-center shadow-sm">
-                <Shield className="w-5 h-5 text-zinc-50" weight="duotone" />
+              <div className="w-10 h-10 rounded-xl bg-gray-900 border border-gray-950 flex items-center justify-center shadow-sm">
+                <Shield className="w-5 h-5 text-gray-50" weight="duotone" />
               </div>
               <div>
-                <h3 id="modal-title" className="text-[17px] font-bold text-zinc-900 tracking-tight leading-tight">
+                <h3 id="modal-title" className="text-[17px] font-bold text-gray-900 tracking-tight leading-tight">
                   Cambiar Contraseña
                 </h3>
-                <p className="text-[13px] font-medium text-zinc-500 mt-0.5">Actualiza tu acceso permanentemente</p>
+                <p className="text-[13px] font-medium text-gray-500 mt-0.5">Actualiza tu acceso permanentemente</p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent transition-all focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
+              className="p-2 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-100 border border-transparent transition-all focus:outline-none focus:ring-2 focus:ring-gray-900/10"
               aria-label="Cerrar"
             >
               <X className="w-5 h-5" weight="bold" />
@@ -166,7 +166,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Current Password */}
           <div>
-            <label htmlFor="currentPassword" className="block text-sm font-semibold text-zinc-900 mb-2">
+            <label htmlFor="currentPassword" className="block text-sm font-semibold text-gray-900 mb-2">
               Contraseña Actual
             </label>
             <div className="relative group/input">
@@ -182,7 +182,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                   focus:outline-none focus:ring-1 focus:ring-offset-0 bg-white
                   ${errors.currentPassword 
                     ? 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/20' 
-                    : 'border-zinc-200 focus:ring-zinc-900 focus:border-zinc-900 group-hover/input:border-zinc-300'
+                    : 'border-gray-200 focus:ring-gray-900 focus:border-gray-900 group-hover/input:border-gray-300'
                   }
                 `}
                 placeholder="Ingresa tu contraseña actual"
@@ -191,7 +191,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               <button
                 type="button"
                 onClick={() => togglePassword('current')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 transition-colors focus:outline-none rounded-md p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors focus:outline-none rounded-md p-1"
                 aria-label={showPasswords.current ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
                 {showPasswords.current ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
@@ -207,7 +207,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
 
           {/* New Password */}
           <div>
-            <label htmlFor="newPassword" className="block text-sm font-semibold text-zinc-900 mb-2">
+            <label htmlFor="newPassword" className="block text-sm font-semibold text-gray-900 mb-2">
               Nueva Contraseña
             </label>
             <div className="relative group/input">
@@ -223,7 +223,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                   focus:outline-none focus:ring-1 focus:ring-offset-0 bg-white
                   ${errors.newPassword 
                     ? 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/20' 
-                    : 'border-zinc-200 focus:ring-zinc-900 focus:border-zinc-900 group-hover/input:border-zinc-300'
+                    : 'border-gray-200 focus:ring-gray-900 focus:border-gray-900 group-hover/input:border-gray-300'
                   }
                 `}
                 placeholder="Ingresa tu nueva contraseña"
@@ -232,7 +232,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               <button
                 type="button"
                 onClick={() => togglePassword('new')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 transition-colors focus:outline-none rounded-md p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors focus:outline-none rounded-md p-1"
               >
                 {showPasswords.new ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
               </button>
@@ -242,7 +242,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
             {formData.newPassword && (
               <div className="mt-3 space-y-2">
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-1 bg-zinc-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
                     <div 
                       className={`h-full transition-all duration-300 ${getStrengthColor(passwordStrength.score)}`}
                       style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
@@ -267,7 +267,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
 
           {/* Confirm Password */}
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-zinc-900 mb-2">
+            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-900 mb-2">
               Confirmar Nueva Contraseña
             </label>
             <div className="relative group/input">
@@ -285,7 +285,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                     ? 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/20' 
                     : confirmPassword && confirmPassword === formData.newPassword
                       ? 'border-emerald-300 focus:ring-emerald-500 focus:border-emerald-500 bg-emerald-50/10'
-                      : 'border-zinc-200 focus:ring-zinc-900 focus:border-zinc-900 group-hover/input:border-zinc-300'
+                      : 'border-gray-200 focus:ring-gray-900 focus:border-gray-900 group-hover/input:border-gray-300'
                   }
                 `}
                 placeholder="Confirma tu nueva contraseña"
@@ -294,7 +294,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               <button
                 type="button"
                 onClick={() => togglePassword('confirm')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 transition-colors focus:outline-none rounded-md p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors focus:outline-none rounded-md p-1"
               >
                 {showPasswords.confirm ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
               </button>
@@ -313,8 +313,8 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
           </div>
 
           {/* Password Requirements */}
-          <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-4">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-3">Requisitos obligatorios</p>
+          <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-3">Requisitos obligatorios</p>
             <div className="grid grid-cols-2 gap-y-2 gap-x-2">
               {[
                 { key: 'length', label: '8+ caracteres' },
@@ -327,13 +327,13 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                   className={`flex items-center gap-2 text-[13px] font-medium transition-colors duration-300 ${
                     passwordStrength.checks[key as keyof typeof passwordStrength.checks]
                       ? 'text-emerald-700'
-                      : 'text-zinc-500'
+                      : 'text-gray-500'
                   }`}
                 >
                   <div className={`w-4 h-4 rounded-[4px] flex items-center justify-center transition-colors duration-300 ${
                     passwordStrength.checks[key as keyof typeof passwordStrength.checks]
                       ? 'bg-emerald-100/80 text-emerald-600'
-                      : 'bg-zinc-200/50 text-zinc-400'
+                      : 'bg-gray-200/50 text-gray-400'
                   }`}>
                     <Check className="w-3 h-3" weight="bold" />
                   </div>
@@ -350,11 +350,11 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               onClick={handleClose}
               className="
                 flex-none px-5 py-3 rounded-xl
-                text-sm font-bold text-zinc-700
-                bg-white border border-zinc-200
-                hover:bg-zinc-50 hover:text-zinc-900
+                text-sm font-bold text-gray-700
+                bg-white border border-gray-200
+                hover:bg-gray-50 hover:text-gray-900
                 transition-all duration-200
-                focus:outline-none focus:ring-2 focus:ring-zinc-900/10
+                focus:outline-none focus:ring-2 focus:ring-gray-900/10
               "
             >
               Cancelar
@@ -365,10 +365,10 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               className="
                 flex-1 px-5 py-3 rounded-xl
                 text-sm font-bold text-white
-                bg-zinc-900 hover:bg-zinc-800
+                bg-gray-900 hover:bg-gray-800
                 shadow-sm
                 transition-all duration-200
-                focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2
+                focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2
                 disabled:opacity-50 disabled:cursor-not-allowed
                 flex items-center justify-center gap-2
               "

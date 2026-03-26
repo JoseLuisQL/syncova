@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Building2, MapPin, Phone, Plus, RefreshCw, User } from 'lucide-react';
+import { Buildings, MapPin, Phone, Plus, ArrowsClockwise, User } from '@phosphor-icons/react';
 import CascadingSelector from '../common/CascadingSelector';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
@@ -232,14 +232,14 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full divide-y divide-slate-200">
+      <table className="min-w-full divide-y divide-zinc-200">
         <TableHeader columns={TABLE_COLUMNS} />
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-zinc-100">
           {establecimientos.length === 0 ? (
             <tr>
               <td colSpan={TABLE_COLUMNS.length}>
                 <EmptyState
-                  icon={Building2}
+                  icon={Buildings}
                   title="No se encontraron establecimientos"
                   description="Ajuste los filtros o registre un nuevo establecimiento."
                   action={{ label: 'Nuevo establecimiento', onClick: () => handleOpenModal() }}
@@ -285,7 +285,7 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
             actions={
               <>
                 <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={refresh} disabled={isLoading}>
-                  <RefreshCw className="h-4 w-4" />
+                  <ArrowsClockwise className="h-4 w-4" />
                   <span>Actualizar</span>
                 </button>
                 <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={isCreating}>
@@ -304,7 +304,7 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
             ) : establecimientos.length === 0 ? (
               <div className={COMPONENT_STYLES.panel}>
                 <EmptyState
-                  icon={Building2}
+                  icon={Buildings}
                   title="No se encontraron establecimientos"
                   description="Ajuste los filtros o registre un nuevo establecimiento."
                   action={{ label: 'Nuevo establecimiento', onClick: () => handleOpenModal() }}
@@ -370,11 +370,11 @@ const EstablecimientoDesktopRow: React.FC<EstablecimientoRowProps> = memo(({
       <TableCell>
         <div className="flex items-center gap-3">
           <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${tipoConfig.iconWrapper}`}>
-            <Building2 className="h-5 w-5" aria-hidden="true" />
+            <Buildings className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">{establecimiento.nombre}</p>
-            <p className="text-xs text-slate-500">{establecimiento.codigo}</p>
+            <p className="truncate text-sm font-semibold text-zinc-900">{establecimiento.nombre}</p>
+            <p className="text-xs text-zinc-500">{establecimiento.codigo}</p>
           </div>
         </div>
       </TableCell>
@@ -382,21 +382,21 @@ const EstablecimientoDesktopRow: React.FC<EstablecimientoRowProps> = memo(({
         <TipoBadge config={tipoConfig} />
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-2 text-sm text-slate-700">
-          <User className="h-4 w-4 text-slate-400" aria-hidden="true" />
+        <div className="flex items-center gap-2 text-sm text-zinc-700">
+          <User className="h-4 w-4 text-zinc-400" aria-hidden="true" />
           <span>{establecimiento.responsable}</span>
         </div>
       </TableCell>
       <TableCell>
-        <div className="space-y-1 text-sm text-slate-600">
+        <div className="space-y-1 text-sm text-zinc-600">
           {establecimiento.telefono ? (
             <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-slate-400" aria-hidden="true" />
+              <Phone className="h-4 w-4 text-zinc-400" aria-hidden="true" />
               <span>{establecimiento.telefono}</span>
             </div>
           ) : null}
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-slate-400" aria-hidden="true" />
+            <MapPin className="h-4 w-4 text-zinc-400" aria-hidden="true" />
             <span className="max-w-[220px] truncate">{establecimiento.direccion}</span>
           </div>
         </div>
@@ -426,8 +426,8 @@ const EstablecimientoMobileCard: React.FC<EstablecimientoRowProps> = memo(({
     <article className={`${COMPONENT_STYLES.panel} p-4`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-base font-semibold text-slate-950">{establecimiento.nombre}</p>
-          <p className="mt-1 text-sm text-slate-500">{establecimiento.codigo}</p>
+          <p className="truncate text-base font-semibold text-zinc-950">{establecimiento.nombre}</p>
+          <p className="mt-1 text-sm text-zinc-500">{establecimiento.codigo}</p>
         </div>
         <StatusBadge status={establecimiento.estado} />
       </div>
@@ -436,19 +436,19 @@ const EstablecimientoMobileCard: React.FC<EstablecimientoRowProps> = memo(({
         <TipoBadge config={tipoConfig} />
       </div>
 
-      <div className="mt-3 space-y-2 text-sm text-slate-600">
+      <div className="mt-3 space-y-2 text-sm text-zinc-600">
         <div className="flex items-center gap-2">
-          <User className="h-4 w-4 text-slate-400" aria-hidden="true" />
+          <User className="h-4 w-4 text-zinc-400" aria-hidden="true" />
           <span>{establecimiento.responsable}</span>
         </div>
         {establecimiento.telefono ? (
           <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-slate-400" aria-hidden="true" />
+            <Phone className="h-4 w-4 text-zinc-400" aria-hidden="true" />
             <span>{establecimiento.telefono}</span>
           </div>
         ) : null}
         <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-slate-400" aria-hidden="true" />
+          <MapPin className="h-4 w-4 text-zinc-400" aria-hidden="true" />
           <span>{establecimiento.direccion}</span>
         </div>
       </div>
@@ -538,7 +538,7 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
           ? 'Ajusta el punto de atención sin romper su ubicación territorial.'
           : 'Registra un nuevo establecimiento y asígnalo a su centro de acopio.'
       }
-      icon={Building2}
+      icon={Buildings}
       size="xl"
       footer={
         <ModalFooter
@@ -652,3 +652,4 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
 };
 
 export default memo(Establecimientos);
+ 

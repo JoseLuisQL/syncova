@@ -1,21 +1,12 @@
 import React, { useState, useMemo, useEffect, useCallback, memo } from 'react';
 import {
-  X,
-  FileText,
-  Download,
-  FileSpreadsheet,
-  User,
-  Package,
-  CheckCircle,
-  ArrowRight,
-  ArrowLeft,
-  Eye,
-  Settings,
-  Loader2
-} from 'lucide-react';
+  X, FileText, DownloadSimple, FileXls, User, Package, CheckCircle, ArrowRight, ArrowLeft, Eye, Gear, SpinnerGap
+} from '@phosphor-icons/react';
 import { ValeEntrega } from '../../services/valesService';
 import { useToastContext } from '../../contexts/ToastContext';
 import ValeExportService, { ValeExportConfig } from '../../services/valeExportService';
+import { Modal, FormSection } from '../ui/ModalElements';
+import { MODAL_STYLES } from '../ui/ModalConstants';
 
 interface ValeExportModalProps {
   vale: ValeEntrega;
@@ -41,17 +32,17 @@ const StepIndicator = memo<{
   <div className="flex items-center">
     <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
       currentStep >= step
-        ? 'bg-teal-600 border-teal-600 text-white'
+        ? 'bg-zinc-900 border-teal-600 text-white'
         : 'bg-white border-gray-300 text-gray-400'
     }`}>
       {currentStep > step ? (
-        <CheckCircle className="h-5 w-5" />
+        <CheckCircle weight="bold" className="h-5 w-5" />
       ) : (
         <Icon className="h-4 w-4" />
       )}
     </div>
     <span className={`ml-2 text-sm font-medium ${
-      currentStep >= step ? 'text-teal-600' : 'text-gray-400'
+      currentStep >= step ? 'text-zinc-600' : 'text-gray-400'
     }`}>
       {title}
     </span>
@@ -71,8 +62,8 @@ const CheckboxOption = memo<{
   color?: 'teal' | 'amber';
 }>(({ checked, onChange, label, description, badge, color = 'teal' }) => {
   const colorClasses = color === 'teal'
-    ? { border: 'border-teal-600', icon: 'text-teal-600', bg: 'hover:bg-teal-50' }
-    : { border: 'border-amber-600', icon: 'text-amber-600', bg: 'hover:bg-amber-50' };
+    ? { border: 'border-teal-600', icon: 'text-zinc-600', bg: 'hover:bg-zinc-50' }
+    : { border: 'border-amber-600', icon: 'text-zinc-600', bg: 'hover:bg-amber-50' };
 
   return (
     <label className={`flex items-start space-x-3 cursor-pointer p-3 rounded-lg ${colorClasses.bg} transition-colors`}>
@@ -81,7 +72,7 @@ const CheckboxOption = memo<{
         onClick={onChange}
         className={`flex items-center justify-center w-5 h-5 rounded border-2 ${colorClasses.border} focus:outline-none focus:ring-2 focus:ring-offset-2`}
       >
-        {checked && <CheckCircle className={`h-4 w-4 ${colorClasses.icon}`} />}
+        {checked && <CheckCircle weight="bold" className={`h-4 w-4 ${colorClasses.icon}`} />}
       </button>
       <div className="flex-1">
         <div className="flex items-center space-x-2">
@@ -111,7 +102,7 @@ const FormatOption = memo<{
   const isExcel = format === 'excel';
   const config = isExcel
     ? {
-        icon: FileSpreadsheet,
+        icon: FileXls,
         title: 'Excel',
         description: 'Formato editable con tablas y cálculos',
         badge: 'Recomendado',
@@ -306,70 +297,85 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
   const displayStep = isFromTable ? currentStep - 1 : currentStep;
 
   return (
-    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-cyan-50 flex-shrink-0">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-gradient-to-br from-teal-600 to-cyan-600 rounded-xl shadow-lg">
-              <Download className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">
-                {esExportacionGlobal ? 'Exportar Vales Combinados' : `Exportar Vale "${vale.numero}"`}
-              </h2>
-              <p className="text-sm text-gray-600">
-                {esExportacionGlobal
-                  ? `${valesOriginales.length} vales - ${vale.centroAcopio.nombre}`
-                  : `Vale ${vale.numero} - ${vale.centroAcopio.nombre}`}
-              </p>
-            </div>
-          </div>
-          <button onClick={handleClose} className="p-2 hover:bg-white/80 rounded-lg transition-colors">
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
-        </header>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={esExportacionGlobal ? 'Exportar Vales Combinados' : `Exportar Vale "${vale.numero}"`}
+      subtitle={esExportacionGlobal
+        ? `${valesOriginales.length} vales - ${vale.centroAcopio.nombre}`
+        : `Vale ${vale.numero} - ${vale.centroAcopio.nombre}`}
+      icon={DownloadSimple}
+      size="lg"
+      footer={
+        <div className="flex w-full items-center justify-between">
+          <span className="text-sm font-medium text-zinc-600">Paso {displayStep} de {totalSteps}</span>
 
-        {/* Progress Steps */}
-        <div className="px-6 py-3 bg-gray-50 border-b border-gray-100 flex-shrink-0">
-          <div className="flex items-center justify-center">
-            {!isFromTable && (
-              <StepIndicator step={1} currentStep={currentStep} title="Contenido" icon={Package} />
+          <div className="flex items-center gap-3">
+            {currentStep > 1 && !(isFromTable && currentStep === 2) && (
+              <button
+                onClick={handleBack}
+                disabled={isExporting}
+                className={MODAL_STYLES.button.secondary}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Anterior
+              </button>
             )}
-            <StepIndicator step={2} currentStep={currentStep} title="Responsable" icon={User} isLast={isFromTable && currentStep < 3} />
-            <StepIndicator step={3} currentStep={currentStep} title="Formato" icon={FileText} isLast />
+
+            {currentStep < 3 && (
+              <button
+                onClick={handleNext}
+                className={MODAL_STYLES.button.primary}
+              >
+                Siguiente
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </button>
+            )}
+
+            <button
+              onClick={handleClose}
+              disabled={isExporting}
+              className={MODAL_STYLES.button.secondary}
+            >
+              Cancelar
+            </button>
           </div>
         </div>
+      }
+    >
+      {/* Progress Steps */}
+      <div className="mb-6 flex items-center justify-center border-b border-zinc-100 pb-4">
+        {!isFromTable && (
+          <StepIndicator step={1} currentStep={currentStep} title="Contenido" icon={Package} />
+        )}
+        <StepIndicator step={2} currentStep={currentStep} title="Responsable" icon={User} isLast={isFromTable && currentStep < 3} />
+        <StepIndicator step={3} currentStep={currentStep} title="Formato" icon={FileText} isLast />
+      </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* Paso 1: Contenido */}
-          {currentStep === 1 && !isFromTable && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Seleccione el contenido</h3>
-                <p className="text-sm text-gray-600">Elija qué entregas desea incluir en la exportación</p>
-              </div>
-
+      <div className="space-y-6">
+        {/* Paso 1: Contenido */}
+        {currentStep === 1 && !isFromTable && (
+          <div className="space-y-6">
+            <FormSection title="Contenido de Exportación" description="Elija qué entregas desea incluir en la exportación">
               <div className="space-y-3">
                 {/* Entregas Base */}
-                <div className="border border-gray-200 rounded-xl p-4">
+                <div className="border border-zinc-200 rounded-xl p-4">
                   <CheckboxOption
                     checked={config.incluirEntregasBase}
                     onChange={() => setConfig(prev => ({ ...prev, incluirEntregasBase: !prev.incluirEntregasBase }))}
                     label="Entregas Base (Programadas)"
                     description="Entregas programadas según la planificación mensual"
-                    badge={{ text: 'Recomendado', color: 'bg-teal-100 text-teal-800' }}
+                    badge={{ text: 'Recomendado', color: 'bg-zinc-100 text-teal-800' }}
                     color="teal"
                   />
                 </div>
 
                 {/* Entregas Adicionales */}
                 {entregasAdicionalesDisponibles.length > 0 && (
-                  <div className="border border-gray-200 rounded-xl p-4 space-y-3">
+                  <div className="border border-zinc-200 rounded-xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-gray-900">Entregas Adicionales</span>
+                        <span className="text-sm font-medium text-zinc-900">Entregas Adicionales</span>
                         <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded-full">
                           {entregasAdicionalesDisponibles.length} disponibles
                         </span>
@@ -377,7 +383,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
                       {entregasAdicionalesDisponibles.length > 1 && (
                         <button
                           onClick={handleToggleTodas}
-                          className="text-xs text-amber-600 hover:text-amber-700 font-medium"
+                          className="text-xs text-zinc-600 hover:text-amber-700 font-medium"
                         >
                           {entregasAdicionalesDisponibles.every(e => config.entregasAdicionalesSeleccionadas.includes(e.numero))
                             ? 'Deseleccionar todas'
@@ -386,11 +392,11 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
                       )}
                     </div>
 
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                       {entregasAdicionalesDisponibles.map(entrega => (
                         <div
                           key={entrega.numero}
-                          className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200"
+                          className="flex items-center justify-between p-3 bg-zinc-50 rounded-lg border border-zinc-200"
                         >
                           <CheckboxOption
                             checked={config.entregasAdicionalesSeleccionadas.includes(entrega.numero)}
@@ -412,80 +418,77 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
                 )}
 
                 {entregasAdicionalesDisponibles.length === 0 && (
-                  <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
-                    <span className="text-sm text-gray-500">No hay entregas adicionales para este vale</span>
+                  <div className="border border-zinc-200 rounded-xl p-4 bg-zinc-50">
+                    <span className="text-sm text-zinc-500">No hay entregas adicionales para este vale</span>
                   </div>
                 )}
               </div>
+            </FormSection>
 
-              {/* Vista Previa */}
-              <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Eye className="h-5 w-5 text-teal-600" />
-                  <span className="font-medium text-teal-900">Vista Previa</span>
+            {/* Vista Previa */}
+            <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Eye className="h-5 w-5 text-zinc-600" />
+                <span className="font-medium text-teal-900">Vista Previa</span>
+              </div>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-zinc-900">{estadisticas.totalVacunas.toLocaleString()}</div>
+                  <div className="text-sm text-zinc-600">Vacunas</div>
                 </div>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-teal-600">{estadisticas.totalVacunas.toLocaleString()}</div>
-                    <div className="text-sm text-teal-800">Vacunas</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-teal-600">{estadisticas.totalEstablecimientos}</div>
-                    <div className="text-sm text-teal-800">Establecimientos</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-teal-600">{estadisticas.totalEntregas}</div>
-                    <div className="text-sm text-teal-800">Entregas</div>
-                  </div>
+                <div>
+                  <div className="text-2xl font-bold text-zinc-900">{estadisticas.totalEstablecimientos}</div>
+                  <div className="text-sm text-zinc-600">Establecimientos</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-zinc-900">{estadisticas.totalEntregas}</div>
+                  <div className="text-sm text-zinc-600">Entregas</div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Paso 2: Responsable */}
-          {currentStep === 2 && (
-            <div className="space-y-6">
-              {isFromTable && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-semibold text-green-900">Contenido seleccionado</h4>
-                      <p className="text-sm text-green-800 mt-1">
-                        {esExportacionGlobal
-                          ? `Se exportarán ${valesOriginales.length} vales con todas las entregas.`
-                          : `Se exportará el vale "${vale.numero}" con todas las entregas.`}
-                      </p>
-                    </div>
+        {/* Paso 2: Responsable */}
+        {currentStep === 2 && (
+          <div className="space-y-6">
+            {isFromTable && (
+              <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle weight="bold" className="h-5 w-5 text-zinc-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-semibold text-zinc-900">Contenido seleccionado</h4>
+                    <p className="text-sm text-zinc-700 mt-1">
+                      {esExportacionGlobal
+                        ? `Se exportarán ${valesOriginales.length} vales con todas las entregas.`
+                        : `Se exportará el vale "${vale.numero}" con todas las entregas.`}
+                    </p>
                   </div>
                 </div>
-              )}
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Responsable de Recojo</h3>
-                <p className="text-sm text-gray-600">Configure el responsable del documento</p>
               </div>
+            )}
 
+            <FormSection title="Responsable de Recojo" description="Configure el responsable del documento impreso">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 mb-2">
                     Nombre del Responsable
                   </label>
                   <input
                     type="text"
                     value={config.responsableRecojo}
                     onChange={e => setConfig(prev => ({ ...prev, responsableRecojo: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className={MODAL_STYLES.input.base}
                     placeholder="Ingrese el nombre del responsable"
                   />
                 </div>
 
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4">
                   <div className="flex items-start gap-2">
-                    <Settings className="h-5 w-5 text-amber-600 mt-0.5" />
+                    <Gear className="h-5 w-5 text-zinc-600 mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-medium text-amber-900">Configuración Temporal</h4>
-                      <p className="text-sm text-amber-800 mt-1">
+                      <h4 className="text-sm font-medium text-zinc-900">Configuración Temporal</h4>
+                      <p className="text-sm text-zinc-600 mt-1">
                         Esta modificación solo afecta al documento exportado.
                       </p>
                     </div>
@@ -495,84 +498,45 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
                 <div className="flex gap-3">
                   <button
                     onClick={() => setConfig(prev => ({ ...prev, responsableRecojo: '' }))}
-                    className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="px-4 py-2 text-sm bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 transition-colors"
                   >
                     Limpiar
                   </button>
                   <button
                     onClick={() => setConfig(prev => ({ ...prev, responsableRecojo: `${vale.usuario.nombres} ${vale.usuario.apellidos}` }))}
-                    className="px-4 py-2 text-sm bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors"
+                    className="px-4 py-2 text-sm bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 transition-colors"
                   >
                     Restaurar Original
                   </button>
                 </div>
               </div>
-            </div>
-          )}
+            </FormSection>
+          </div>
+        )}
 
-          {/* Paso 3: Formato */}
-          {currentStep === 3 && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Formato de Exportación</h3>
-                <p className="text-sm text-gray-600">Seleccione el formato del archivo</p>
-              </div>
-
+        {/* Paso 3: Formato */}
+        {currentStep === 3 && (
+          <div className="space-y-6">
+            <FormSection title="Formato de Exportación" description="Seleccione la extensión final de los Vales solicitados">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormatOption format="excel" isExporting={isExporting} onExport={handleExport} />
                 <FormatOption format="pdf" isExporting={isExporting} onExport={handleExport} />
               </div>
+            </FormSection>
 
-              {isExporting && (
-                <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
-                  <div className="flex items-center gap-3">
-                    <Loader2 className="h-5 w-5 text-teal-600 animate-spin" />
-                    <span className="text-teal-900 font-medium">Generando exportación...</span>
-                  </div>
-                  <p className="text-sm text-teal-700 mt-2">Por favor espere mientras se procesa el documento</p>
+            {isExporting && (
+              <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <SpinnerGap weight="bold" className="h-5 w-5 text-zinc-600 animate-spin" />
+                  <span className="text-zinc-900 font-medium">Generando exportación...</span>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <footer className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50 flex-shrink-0">
-          <span className="text-sm text-gray-600">Paso {displayStep} de {totalSteps}</span>
-
-          <div className="flex items-center gap-3">
-            {currentStep > 1 && !(isFromTable && currentStep === 2) && (
-              <button
-                onClick={handleBack}
-                disabled={isExporting}
-                className="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Anterior
-              </button>
+                <p className="text-sm text-zinc-700 mt-2">Por favor espere mientras se procesan los lotes y establecimientos</p>
+              </div>
             )}
-
-            {currentStep < 3 && (
-              <button
-                onClick={handleNext}
-                className="flex items-center px-4 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-lg hover:from-teal-700 hover:to-cyan-700 transition-colors"
-              >
-                Siguiente
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </button>
-            )}
-
-            <button
-              onClick={handleClose}
-              disabled={isExporting}
-              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              Cancelar
-            </button>
           </div>
-        </footer>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 };
 

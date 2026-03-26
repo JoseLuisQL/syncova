@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, ArrowsClockwise } from '@phosphor-icons/react';
 import GestionLotes from './GestionLotes';
 import NuevoIngreso, { NuevoIngresoPayload, NuevoIngresoSubmitResult } from './NuevoIngreso';
 import { useLotesVacunas } from '../../hooks/useLotesVacunas';
@@ -163,11 +163,11 @@ const LotesVacunasPage: React.FC = () => {
           toolbarActions={
             <>
               <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={refresh} disabled={isLoading}>
-                <RefreshCw className="h-4 w-4" />
+                <ArrowsClockwise className="h-4 w-4" weight="bold" />
                 <span>Actualizar</span>
               </button>
               <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleOpenNuevoIngreso} disabled={isCreating}>
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4" weight="bold" />
                 <span>Nuevo lote</span>
               </button>
             </>

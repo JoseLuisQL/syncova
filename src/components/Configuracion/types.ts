@@ -1,4 +1,4 @@
-import type { LucideIcon } from 'lucide-react';
+// import removed: React.ElementType
 import type { ConfiguracionSistema } from '../../services/configuracionService';
 
 export type ConfiguracionGroupId = 'identidad' | 'alertas' | 'seguridad' | 'operacion';
@@ -29,7 +29,7 @@ export interface ConfiguracionGroupDefinition {
   label: string;
   contextLabel: string;
   description: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
   category: ConfiguracionGroupCategory;
   path: string;
 }
@@ -38,7 +38,7 @@ export interface ConfiguracionNavGroup {
   key: ConfiguracionGroupCategory;
   label: string;
   description: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
 }
 
 export interface ConfiguracionCategoryDefinition {
@@ -46,7 +46,7 @@ export interface ConfiguracionCategoryDefinition {
   groupId: ConfiguracionGroupId;
   label: string;
   description: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
   editable: boolean;
   source: ConfiguracionFieldSource;
   runtimeNote?: string;
@@ -100,3 +100,4 @@ export interface ConfiguracionViewModel {
   recordsByKey: Record<string, ConfiguracionSistema>;
   resolvedKeysByField: Record<string, string | null>;
 }
+ 

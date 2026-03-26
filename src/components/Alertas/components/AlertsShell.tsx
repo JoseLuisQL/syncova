@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell } from '@phosphor-icons/react';
 import { useAppNavigation } from '../../../hooks/useRouting';
 import { AlertSectionConfig, ALERTS_SECTIONS, COMPONENT_STYLES, SectionId } from '../constants';
 
@@ -22,11 +22,11 @@ const AlertsShell: React.FC<AlertsShellProps> = ({
     <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1500px] flex-col gap-3">
         <section className="overflow-hidden bg-transparent">
-          <div className="border-b border-slate-200/90 px-4 py-4 sm:px-5 lg:px-6">
+          <div className="border-b border-zinc-200/90 px-4 py-4 sm:px-5 lg:px-6">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="flex min-w-0 items-start gap-3 sm:gap-4">
                 <div className={COMPONENT_STYLES.header.iconWrapper}>
-                  <Bell className="h-5 w-5" aria-hidden="true" />
+                  <Bell className="h-5 w-5" aria-hidden="true" weight="bold" />
                 </div>
                 <div className="min-w-0 max-w-3xl">
                   <h1 className={`${COMPONENT_STYLES.header.title} text-[1.35rem] sm:text-[1.52rem]`}>Alertas</h1>
@@ -57,7 +57,7 @@ const AlertsShell: React.FC<AlertsShellProps> = ({
                     aria-current={isActive ? 'page' : undefined}
                     title={section.contextLabel}
                   >
-                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" weight={isActive ? "fill" : "bold"} />
                     <span className="whitespace-nowrap">{section.label}</span>
                   </button>
                 );
@@ -73,3 +73,4 @@ const AlertsShell: React.FC<AlertsShellProps> = ({
 };
 
 export default memo(AlertsShell);
+ 

@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { GitBranch, Network, Plus, RefreshCw } from 'lucide-react';
+import { GitBranch, TreeStructure, Plus, ArrowsClockwise } from '@phosphor-icons/react';
 import { CreateRedDto, Red, UpdateRedDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useRedes } from '../../hooks/useRedes';
@@ -198,14 +198,14 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full divide-y divide-slate-200">
+      <table className="min-w-full divide-y divide-zinc-200">
         <TableHeader columns={TABLE_COLUMNS} />
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-zinc-100">
           {redes.length === 0 ? (
             <tr>
               <td colSpan={TABLE_COLUMNS.length}>
                 <EmptyState
-                  icon={Network}
+                  icon={TreeStructure}
                   title="No se encontraron redes"
                   description="Ajuste los filtros o registre una nueva red."
                   action={{ label: 'Nueva red', onClick: () => handleOpenModal() }}
@@ -252,7 +252,7 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
             actions={
               <>
                 <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={() => void fetchRedes()} disabled={loading}>
-                  <RefreshCw className="h-4 w-4" />
+                  <ArrowsClockwise className="h-4 w-4" />
                   <span>Actualizar</span>
                 </button>
                 <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={loading}>
@@ -271,7 +271,7 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
             ) : redes.length === 0 ? (
               <div className={COMPONENT_STYLES.panel}>
                 <EmptyState
-                  icon={Network}
+                  icon={TreeStructure}
                   title="No se encontraron redes"
                   description="Ajuste los filtros o registre una nueva red."
                   action={{ label: 'Nueva red', onClick: () => handleOpenModal() }}
@@ -336,20 +336,20 @@ const RedDesktopRow: React.FC<RedRowProps> = memo(({
     <TableRow>
       <TableCell>
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
-            <Network className="h-5 w-5" aria-hidden="true" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900">
+            <TreeStructure className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">{red.nombre}</p>
-            <p className="text-xs text-slate-500">{red.codigo || 'Sin código registrado'}</p>
+            <p className="truncate text-sm font-semibold text-zinc-900">{red.nombre}</p>
+            <p className="text-xs text-zinc-500">{red.codigo || 'Sin código registrado'}</p>
           </div>
         </div>
       </TableCell>
       <TableCell>
-        <span className="text-sm font-medium text-slate-900">{red.codigo || '-'}</span>
+        <span className="text-sm font-medium text-zinc-900">{red.codigo || '-'}</span>
       </TableCell>
       <TableCell>
-        <p className="max-w-sm text-sm text-slate-600">{red.descripcion || 'Sin descripción registrada.'}</p>
+        <p className="max-w-sm text-sm text-zinc-600">{red.descripcion || 'Sin descripción registrada.'}</p>
       </TableCell>
       <TableCell align="center">
         <CountBadge count={microredesCount} icon={GitBranch} />
@@ -398,24 +398,24 @@ const RedMobileCard: React.FC<RedRowProps> = memo(({
     <article className={`${COMPONENT_STYLES.panel} p-4`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-base font-semibold text-slate-950">{red.nombre}</p>
-          <p className="mt-1 text-sm text-slate-500">{red.codigo || 'Sin código'}</p>
+          <p className="truncate text-base font-semibold text-zinc-950">{red.nombre}</p>
+          <p className="mt-1 text-sm text-zinc-500">{red.codigo || 'Sin código'}</p>
         </div>
         <StatusBadge status={red.estado} />
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
-        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Microredes</p>
-          <p className="mt-2 text-lg font-semibold text-slate-900">{microredesCount}</p>
+        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Microredes</p>
+          <p className="mt-2 text-lg font-semibold text-zinc-900">{microredesCount}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-          <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Código</p>
-          <p className="mt-2 text-sm font-medium text-slate-900">{red.codigo || '-'}</p>
+        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+          <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Código</p>
+          <p className="mt-2 text-sm font-medium text-zinc-900">{red.codigo || '-'}</p>
         </div>
       </div>
 
-      <p className="mt-3 text-sm text-slate-600">{red.descripcion || 'Sin descripción registrada.'}</p>
+      <p className="mt-3 text-sm text-zinc-600">{red.descripcion || 'Sin descripción registrada.'}</p>
 
       <div className="mt-4 flex items-center justify-between gap-3">
         {onNavigate && microredesCount > 0 ? (
@@ -488,7 +488,7 @@ const RedModal: React.FC<RedModalProps> = ({ red, onClose, onSubmit, isLoading =
       onClose={onClose}
       title={red ? 'Editar red' : 'Nueva red'}
       subtitle={red ? 'Ajusta la información base de la red sin perder contexto.' : 'Registra una nueva red dentro de la estructura territorial.'}
-      icon={Network}
+      icon={TreeStructure}
       footer={
         <ModalFooter
           onCancel={onClose}
@@ -550,3 +550,4 @@ const RedModal: React.FC<RedModalProps> = ({ red, onClose, onSubmit, isLoading =
 };
 
 export default memo(Redes);
+ 

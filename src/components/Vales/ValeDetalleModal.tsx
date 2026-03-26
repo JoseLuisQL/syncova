@@ -1,25 +1,15 @@
 import React, { useState, useEffect, useMemo, memo } from 'react';
 import {
-  X,
-  FileText,
-  Building2,
-  Package,
-  Calendar,
-  User,
-  RotateCcw,
-  CheckCircle,
-  Clock,
-  Loader2,
-  FileSpreadsheet,
-  Syringe,
-  AlertTriangle
-} from 'lucide-react';
+  FileText, Buildings, Package, CalendarBlank, User,
+  ArrowCounterClockwise, CheckCircle, Clock, SpinnerGap, FileXls, Syringe, Warning
+} from '@phosphor-icons/react';
 import { ValeEntrega, ValeDetalle } from '../../services/valesService';
 import { useVales } from '../../hooks/useVales';
 import { useToastContext } from '../../contexts/ToastContext';
 import { ConfiguracionJeringasService, JeringaCalculada } from '../../services/configuracionJeringasService';
 import ValeExportModal from './ValeExportModal';
 import { MESES } from './constants';
+import { Modal } from '../ui/ModalElements';
 
 interface ValeDetalleModalProps {
   vale: ValeEntrega;
@@ -132,7 +122,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
           vale.centroAcopioId
         );
 
-        if (result.success) {
+        if (result.success && result.data) {
           setConfiguracionJeringas(result.data);
         }
       } catch {
@@ -244,242 +234,211 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
   if (!isOpen || !vale) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[85vh] flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-cyan-50">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-gradient-to-br from-teal-600 to-cyan-600 rounded-xl shadow-lg">
-              <FileText className="h-5 w-5 text-white" />
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={`Vale de Entrega N° ${vale.numero}`}
+        subtitle={`Generado el ${new Date(vale.fechaGeneracion).toLocaleDateString('es-PE')}`}
+        icon={FileText}
+        size="xl"
+        footer={
+          <div className="flex w-full items-center justify-between">
+            <div className="text-sm text-zinc-500">
+              Generado: {new Date(vale.fechaGeneracion).toLocaleString('es-PE')}
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">Vale de Entrega</h2>
-              <div className="flex items-center gap-3 mt-0.5">
-                <span className="text-sm text-gray-600">N° <strong>{vale.numero}</strong></span>
-                <EstadoBadge estado={vale.estado} />
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
-        </header>
-
-        {/* Info Cards */}
-        <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <InfoCard
-              icon={Building2}
-              label="Centro de Acopio"
-              value={vale.centroAcopio.nombre}
-              subvalue={`Código: ${vale.centroAcopio.codigo}`}
-            />
-            <InfoCard
-              icon={User}
-              label="Responsable"
-              value={`${vale.usuario.nombres} ${vale.usuario.apellidos}`}
-            />
-            <InfoCard
-              icon={Calendar}
-              label="Período"
-              value={`${MESES[vale.mes - 1]} ${vale.anio}`}
-              subvalue={new Date(vale.fechaGeneracion).toLocaleDateString('es-PE')}
-            />
-            <InfoCard
-              icon={Package}
-              label="Total Vacunas"
-              value={formatNumber(vale.totalVacunas)}
-              subvalue={`${vale.totalEstablecimientos} establecimientos`}
-            />
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="px-6 pt-4 border-b border-gray-100">
-          <div className="flex gap-1">
-            {[
-              { id: 'consolidado', label: 'Consolidado', icon: Package },
-              { id: 'detalle', label: 'Por Establecimiento', icon: Building2 },
-            ].map(tab => (
+            <div className="flex items-center gap-2">
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as 'consolidado' | 'detalle')}
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
-                  activeTab === tab.id
-                    ? 'bg-white text-teal-700 border-t-2 border-x border-teal-500 border-b-white -mb-px'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                }`}
+                onClick={handleRevertir}
+                disabled={isReverting}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors disabled:opacity-50"
               >
-                <tab.icon className="h-4 w-4" />
-                {tab.label}
+                {isReverting ? <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" /> : <ArrowCounterClockwise weight="bold" className="h-4 w-4" />}
+                Revertir
               </button>
-            ))}
+              <button
+                onClick={() => setShowExportModal(true)}
+                className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 rounded-lg shadow-md transition-all"
+              >
+                <FileXls className="h-4 w-4" />
+                Exportar
+              </button>
+            </div>
           </div>
-        </div>
+        }
+      >
+        <div className="space-y-6">
+          <div className="flex items-center gap-2 px-1">
+            <EstadoBadge estado={vale.estado} />
+          </div>
+          {/* Info Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <InfoCard icon={Buildings} label="Centro de Acopio" value={vale.centroAcopio.nombre} subvalue={`Código: ${vale.centroAcopio.codigo}`} />
+            <InfoCard icon={User} label="Responsable" value={`${vale.usuario.nombres} ${vale.usuario.apellidos}`} />
+            <InfoCard icon={CalendarBlank} label="Período" value={`${MESES[vale.mes - 1]} ${vale.anio}`} subvalue={new Date(vale.fechaGeneracion).toLocaleDateString('es-PE')} />
+            <InfoCard icon={Package} label="Total Vacunas" value={formatNumber(vale.totalVacunas)} subvalue={`${vale.totalEstablecimientos} organiz.`} />
+          </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {!vale.detalles?.length ? (
-            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-              <Loader2 className="h-8 w-8 animate-spin mb-3" />
-              <p>Cargando detalles...</p>
-            </div>
-          ) : activeTab === 'consolidado' ? (
-            <div className="space-y-6">
-              {/* Tabla Vacunas */}
-              <div>
-                <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
-                  <Package className="h-4 w-4 text-teal-600" />
-                  Biológicos
-                </h3>
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600 w-12">#</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Vacuna</th>
-                        <th className="px-4 py-3 text-center font-semibold text-gray-600 w-28">Cantidad</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Presentación</th>
-                        <th className="px-4 py-3 text-center font-semibold text-gray-600 w-24">Dosis/Fr</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {consolidadoVacunas.map((item, idx) => (
-                        <tr key={item.vacuna.id} className="hover:bg-teal-50/30">
-                          <td className="px-4 py-3 text-gray-500">{idx + 1}</td>
-                          <td className="px-4 py-3 font-medium text-gray-900">{item.vacuna.nombre}</td>
-                          <td className="px-4 py-3 text-center font-bold text-teal-700">{formatNumber(item.cantidadTotal)}</td>
-                          <td className="px-4 py-3 text-gray-600">{item.vacuna.presentacion}</td>
-                          <td className="px-4 py-3 text-center text-gray-600">{item.vacuna.dosisPorFrasco}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+          <div className="bg-zinc-50 border border-zinc-200 rounded-xl overflow-hidden p-1">
+             {/* Tabs */}
+             <div className="flex gap-1 border-b border-zinc-200 p-1">
+               {[
+                 { id: 'consolidado', label: 'Consolidado', icon: Package },
+                 { id: 'detalle', label: 'Por Establecimiento', icon: Buildings },
+               ].map(tab => (
+                 <button
+                   key={tab.id}
+                   onClick={() => setActiveTab(tab.id as 'consolidado' | 'detalle')}
+                   className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                     activeTab === tab.id
+                       ? 'bg-white text-zinc-900 shadow border border-zinc-200'
+                       : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100'
+                   }`}
+                 >
+                   <tab.icon className="h-4 w-4" />
+                   {tab.label}
+                 </button>
+               ))}
+             </div>
 
-              {/* Tabla Jeringas */}
-              <div>
-                <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
-                  <Syringe className="h-4 w-4 text-cyan-600" />
-                  Jeringas
-                  {isLoadingJeringas && <Loader2 className="h-4 w-4 animate-spin text-cyan-600" />}
-                </h3>
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-600">Tipo</th>
-                        <th className="px-4 py-3 text-center font-semibold text-gray-600 w-28">Capacidad</th>
-                        <th className="px-4 py-3 text-center font-semibold text-gray-600 w-28">Cantidad</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {consolidadoJeringas.length > 0 ? (
-                        consolidadoJeringas.map((item, idx) => (
-                          <tr key={idx} className="hover:bg-cyan-50/30">
-                            <td className="px-4 py-3 font-medium text-gray-900">{item.tipo}</td>
-                            <td className="px-4 py-3 text-center text-gray-600">{item.capacidad}</td>
-                            <td className="px-4 py-3 text-center font-bold text-cyan-700">{formatNumber(item.cantidad)}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
-                            {isLoadingJeringas ? (
-                              <span className="flex items-center justify-center gap-2">
-                                <Loader2 className="h-4 w-4 animate-spin" /> Cargando...
-                              </span>
-                            ) : (
-                              <span className="flex flex-col items-center gap-1">
-                                <AlertTriangle className="h-5 w-5 text-amber-500" />
-                                Sin configuración de jeringas
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {establecimientosDetalle.map(est => (
-                <div key={est.establecimiento.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                  <div className="px-4 py-3 bg-gradient-to-r from-teal-50 to-cyan-50 border-b border-gray-100">
-                    <h4 className="font-semibold text-gray-900">{est.establecimiento.nombre}</h4>
-                    <p className="text-xs text-gray-500">Código: {est.establecimiento.codigo}</p>
+             {/* Content view */}
+             <div className="p-4 bg-white">
+                {!vale.detalles?.length ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
+                    <SpinnerGap weight="bold" className="h-8 w-8 animate-spin mb-3" />
+                    <p>Cargando detalles...</p>
                   </div>
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-2 text-left font-medium text-gray-600 w-12">#</th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-600">Vacuna</th>
-                        <th className="px-4 py-2 text-center font-medium text-gray-600 w-28">Cantidad</th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-600">Presentación</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {Object.values(est.vacunas).map((vac, idx) => (
-                        <tr key={vac.vacuna.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-2 text-gray-500">{idx + 1}</td>
-                          <td className="px-4 py-2">
-                            <span className="font-medium text-gray-900">{vac.vacuna.nombre}</span>
-                          </td>
-                          <td className="px-4 py-2 text-center">
-                            <span className="font-bold text-teal-700">{formatNumber(vac.cantidadTotal)}</span>
-                            {vac.cantidadAdicional > 0 && (
-                              <span className="block text-xs text-amber-600">+{formatNumber(vac.cantidadAdicional)} adic.</span>
+                ) : activeTab === 'consolidado' ? (
+                  <div className="space-y-6">
+                    {/* Tabla Vacunas */}
+                    <div>
+                      <h3 className="flex items-center gap-2 text-sm font-semibold text-zinc-700 mb-3">
+                        <Package className="h-4 w-4 text-zinc-600" />
+                        Biológicos
+                      </h3>
+                      <div className="rounded-xl border border-zinc-200 overflow-hidden">
+                        <table className="w-full text-sm">
+                          <thead className="bg-zinc-50">
+                            <tr>
+                              <th className="px-4 py-3 text-left font-semibold text-zinc-600 w-12">#</th>
+                              <th className="px-4 py-3 text-left font-semibold text-zinc-600">Vacuna</th>
+                              <th className="px-4 py-3 text-center font-semibold text-zinc-600 w-28">Cantidad</th>
+                              <th className="px-4 py-3 text-left font-semibold text-zinc-600">Presentación</th>
+                              <th className="px-4 py-3 text-center font-semibold text-zinc-600 w-24">Dosis/Fr</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-zinc-100">
+                            {consolidadoVacunas.map((item, idx) => (
+                              <tr key={item.vacuna.id} className="hover:bg-zinc-50/50">
+                                <td className="px-4 py-3 text-zinc-500">{idx + 1}</td>
+                                <td className="px-4 py-3 font-medium text-zinc-900">{item.vacuna.nombre}</td>
+                                <td className="px-4 py-3 text-center font-bold text-zinc-700">{formatNumber(item.cantidadTotal)}</td>
+                                <td className="px-4 py-3 text-zinc-600">{item.vacuna.presentacion}</td>
+                                <td className="px-4 py-3 text-center text-zinc-600">{item.vacuna.dosisPorFrasco}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Tabla Jeringas */}
+                    <div>
+                      <h3 className="flex items-center gap-2 text-sm font-semibold text-zinc-700 mb-3">
+                        <Syringe className="h-4 w-4 text-teal-600" />
+                        Jeringas
+                        {isLoadingJeringas && <SpinnerGap weight="bold" className="h-4 w-4 animate-spin text-teal-600" />}
+                      </h3>
+                      <div className="rounded-xl border border-zinc-200 overflow-hidden">
+                        <table className="w-full text-sm">
+                          <thead className="bg-zinc-50">
+                            <tr>
+                              <th className="px-4 py-3 text-left font-semibold text-zinc-600">Tipo</th>
+                              <th className="px-4 py-3 text-center font-semibold text-zinc-600 w-28">Capacidad</th>
+                              <th className="px-4 py-3 text-center font-semibold text-zinc-600 w-28">Cantidad</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-zinc-100">
+                            {consolidadoJeringas.length > 0 ? (
+                              consolidadoJeringas.map((item, idx) => (
+                                <tr key={idx} className="hover:bg-teal-50/30">
+                                  <td className="px-4 py-3 font-medium text-zinc-900">{item.tipo}</td>
+                                  <td className="px-4 py-3 text-center text-zinc-600">{item.capacidad}</td>
+                                  <td className="px-4 py-3 text-center font-bold text-teal-700">{formatNumber(item.cantidad)}</td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan={3} className="px-4 py-8 text-center text-zinc-500">
+                                  {isLoadingJeringas ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                      <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" /> Cargando...
+                                    </span>
+                                  ) : (
+                                    <span className="flex flex-col items-center gap-1">
+                                      <Warning weight="duotone" className="h-5 w-5 text-amber-500" />
+                                      Sin configuración de jeringas
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
                             )}
-                          </td>
-                          <td className="px-4 py-2 text-gray-600">{vac.vacuna.presentacion}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ))}
-            </div>
-          )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {establecimientosDetalle.map(est => (
+                      <div key={est.establecimiento.id} className="rounded-xl border border-zinc-200 overflow-hidden">
+                        <div className="px-4 py-3 bg-zinc-50 border-b border-zinc-200">
+                          <h4 className="font-semibold text-zinc-900">{est.establecimiento.nombre}</h4>
+                          <p className="text-xs text-zinc-500">Código: {est.establecimiento.codigo}</p>
+                        </div>
+                        <table className="w-full text-sm">
+                          <thead className="bg-zinc-50">
+                            <tr>
+                              <th className="px-4 py-2 text-left font-medium text-zinc-600 w-12">#</th>
+                              <th className="px-4 py-2 text-left font-medium text-zinc-600">Vacuna</th>
+                              <th className="px-4 py-2 text-center font-medium text-zinc-600 w-28">Cantidad</th>
+                              <th className="px-4 py-2 text-left font-medium text-zinc-600">Presentación</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-zinc-100">
+                            {Object.values(est.vacunas).map((vac, idx) => (
+                              <tr key={vac.vacuna.id} className="hover:bg-zinc-50/50">
+                                <td className="px-4 py-2 text-zinc-500">{idx + 1}</td>
+                                <td className="px-4 py-2">
+                                  <span className="font-medium text-zinc-900">{vac.vacuna.nombre}</span>
+                                </td>
+                                <td className="px-4 py-2 text-center">
+                                  <span className="font-bold text-zinc-700">{formatNumber(vac.cantidadTotal)}</span>
+                                  {vac.cantidadAdicional > 0 && (
+                                    <span className="block text-xs text-zinc-500">+{formatNumber(vac.cantidadAdicional)} adic.</span>
+                                  )}
+                                </td>
+                                <td className="px-4 py-2 text-zinc-600">{vac.vacuna.presentacion}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ))}
+                  </div>
+                )}
+             </div>
+          </div>
 
           {/* Observaciones */}
           {vale.observaciones && (
-            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
               <p className="text-sm font-medium text-amber-800">Observaciones:</p>
               <p className="text-sm text-amber-700 mt-1">{vale.observaciones}</p>
             </div>
           )}
         </div>
-
-        {/* Footer */}
-        <footer className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
-          <div className="text-sm text-gray-500">
-            Generado: {new Date(vale.fechaGeneracion).toLocaleString('es-PE')}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleRevertir}
-              disabled={isReverting}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors disabled:opacity-50"
-            >
-              {isReverting ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-              Revertir
-            </button>
-            <button
-              onClick={() => setShowExportModal(true)}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 rounded-lg shadow-md transition-all"
-            >
-              <FileSpreadsheet className="h-4 w-4" />
-              Exportar
-            </button>
-          </div>
-        </footer>
-      </div>
+      </Modal>
 
       {/* Modal Exportación */}
       <ValeExportModal
@@ -487,7 +446,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
       />
-    </div>
+    </>
   );
 };
 

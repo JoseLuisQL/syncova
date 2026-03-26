@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Download, Eye, Target } from 'lucide-react';
+import { DownloadSimple, Eye, Target } from '@phosphor-icons/react';
 import { Establecimiento, Vacuna } from '../../../../types';
 import { usePlanificacionReportes } from '../../../../hooks/usePlanificacionReportes';
 import { useToastContext } from '../../../../contexts/ToastContext';
 import { ProgramacionAnualData } from '../../../../services/planificacionReportesService';
 import { COMPONENT_STYLES } from '../../constants';
-import { ReporteCard, ReportInlineStatus, ReportSectionCard, ReportTableColumn } from '..';
+import ReporteCard from '../ReporteCard';
+import { ReportInlineStatus, ReportSectionCard, ReportTableColumn } from '../ReportPrimitives';
 import VisualizarReporteModal from '../../modals/VisualizarReporteModal';
 import { formatCompactDate } from '../../utils';
 
@@ -90,8 +91,8 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({ centrosAcopio, vacu
       label: 'Establecimiento',
       render: (row) => (
         <div>
-          <p className="font-medium text-slate-900">{row.establecimiento.nombre}</p>
-          <p className="text-xs text-slate-500">{row.establecimiento.codigo} · {row.establecimiento.tipo}</p>
+          <p className="font-medium text-zinc-900">{row.establecimiento.nombre}</p>
+          <p className="text-xs text-zinc-500">{row.establecimiento.codigo} · {row.establecimiento.tipo}</p>
         </div>
       ),
     },
@@ -100,8 +101,8 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({ centrosAcopio, vacu
       label: 'Vacuna',
       render: (row) => (
         <div>
-          <p className="font-medium text-slate-900">{row.vacuna.nombre}</p>
-          <p className="text-xs text-slate-500">{row.vacuna.presentacion}</p>
+          <p className="font-medium text-zinc-900">{row.vacuna.nombre}</p>
+          <p className="text-xs text-zinc-500">{row.vacuna.presentacion}</p>
         </div>
       ),
     },
@@ -109,7 +110,7 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({ centrosAcopio, vacu
       key: 'meta',
       label: 'Meta anual',
       align: 'right',
-      render: (row) => <span className="font-semibold text-slate-900">{row.metaAnual.toLocaleString()}</span>,
+      render: (row) => <span className="font-semibold text-zinc-900">{row.metaAnual.toLocaleString()}</span>,
     },
     {
       key: 'estado',
@@ -120,7 +121,7 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({ centrosAcopio, vacu
     {
       key: 'actualizacion',
       label: 'Actualización',
-      render: (row) => <span className="text-sm text-slate-600">{formatCompactDate(row.fechaActualizacion)}</span>,
+      render: (row) => <span className="text-sm text-zinc-600">{formatCompactDate(row.fechaActualizacion)}</span>,
     },
   ];
 
@@ -135,7 +136,7 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({ centrosAcopio, vacu
         <section className={COMPONENT_STYLES.filter.container}>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-700">Contexto de planificación</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Contexto de planificación</h3>
             </div>
             <span className={COMPONENT_STYLES.badge.neutral}>Filtro operativo</span>
           </div>
@@ -208,16 +209,16 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({ centrosAcopio, vacu
               },
               {
                 label: 'Excel',
-                icon: Download,
+                icon: DownloadSimple,
                 onClick: handleExportarReporte,
                 disabled: reportes.programacionAnual.length === 0,
               },
             ]}
           />
 
-          <div className="rounded-[22px] border border-teal-200 bg-teal-50/70 p-5">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-teal-800">Flujo</h3>
-            <div className="mt-3 space-y-2 text-sm leading-6 text-teal-900">
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-800">Flujo</h3>
+            <div className="mt-3 space-y-2 text-sm leading-6 text-zinc-900">
               <p>1. Ajusta filtros.</p>
               <p>2. Genera.</p>
               <p>3. Revisa y exporta.</p>

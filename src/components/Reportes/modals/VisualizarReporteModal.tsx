@@ -1,6 +1,6 @@
 import React from 'react';
-import { AlertCircle, BarChart3 } from 'lucide-react';
-import { Modal } from '../../Inventario/components/ModalComponents';
+import { WarningCircle, ChartBar } from '@phosphor-icons/react';
+import { Modal } from '../../ui/ModalElements';
 import { DataTable, TableCell, TableHeader, TableRow } from '../../Inventario/components/FilterAndTable';
 import { COMPONENT_STYLES } from '../constants';
 import { ReportTableColumn } from '../components/ReportPrimitives';
@@ -36,7 +36,7 @@ function VisualizarReporteModal<T>({
       onClose={onClose}
       title={title}
       subtitle={subtitle}
-      icon={BarChart3}
+      icon={ChartBar}
       size="xl"
       footer={(
         <div className="flex justify-end">
@@ -67,7 +67,7 @@ function VisualizarReporteModal<T>({
                 align: column.align,
                 className: column.className,
               }))} />
-              <tbody className="divide-y divide-slate-100 bg-white">
+              <tbody className="divide-y divide-zinc-100 bg-white">
                 {rows.map((row, index) => (
                   <TableRow key={`${title}-${index + 1}`}>
                     {columns.map((column) => (
@@ -84,12 +84,12 @@ function VisualizarReporteModal<T>({
               </tbody>
             </table>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-[22px] border border-dashed border-slate-200 bg-slate-50/70 px-6 py-14 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-                <AlertCircle className="h-5 w-5" />
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-zinc-50 px-6 py-14 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-400">
+                <WarningCircle weight="duotone" className="h-5 w-5" />
               </div>
-              <h4 className="mt-4 text-sm font-semibold text-slate-900">{emptyTitle}</h4>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">{emptyDescription}</p>
+              <h4 className="mt-4 text-sm font-semibold text-zinc-900">{emptyTitle}</h4>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-500">{emptyDescription}</p>
             </div>
           )}
         </DataTable>

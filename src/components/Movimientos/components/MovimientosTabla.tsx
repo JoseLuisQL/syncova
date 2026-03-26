@@ -1,17 +1,16 @@
 import React, { memo, useMemo } from 'react';
-import { Package, Plus, Settings2, X } from 'lucide-react';
+import { Package, Plus, Faders, X } from '@phosphor-icons/react';
 import { DataTable } from '../../Establecimientos/components';
 import {
   COLUMNAS_CONFIGURABLES,
   COMPONENT_STYLES,
-  DEFAULT_VISIBLE_COLUMNS,
   INPUT_FIELD_STYLES,
   MESES,
   TABLA_COLUMNAS,
   type ColumnaConfigurableKey,
   type VisibleColumnsState,
 } from '../constants';
-import { MovimientoCalculado } from '../../../types';
+import { MovimientoCalculado, Establecimiento } from '../../../types';
 import { getEstiloEstablecimiento } from '../../../utils/centroAcopioUtils';
 
 type TablaMovimiento = MovimientoCalculado & { tieneMovimiento: boolean };
@@ -93,42 +92,43 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = memo(({
   onBlur,
 }) => {
   const resolvedClassName = hasVale
-    ? 'border-teal-300 bg-teal-50 text-teal-800 focus:border-teal-500 focus:ring-teal-500/20'
+    ? 'border border-zinc-300 bg-zinc-100 text-zinc-900 shadow-inner rounded-md'
     : pending
     ? styles.pending
     : `${styles.normal} ${styles.focus}`;
 
   const indicatorClassName = typing
-    ? 'bg-teal-400 animate-pulse'
+    ? 'bg-zinc-900 animate-pulse'
     : pending
-    ? 'bg-amber-400 animate-pulse'
+    ? 'bg-zinc-400 animate-pulse'
     : hasVale
-    ? 'bg-emerald-500'
+    ? 'bg-zinc-800'
     : '';
 
   if (readOnly) {
     return (
-      <span className="inline-flex min-w-[4.75rem] justify-center rounded-xl border border-slate-200 bg-white/80 px-2.5 py-2 text-sm font-semibold text-slate-700 tabular-nums">
-        {value.toLocaleString()}
+      <span className={`inline-flex flex-1 items-center justify-center text-[0.85rem] font-bold tabular-nums text-zinc-900 ${widthClass}`}>
+        {value === 0 ? <span className="text-zinc-300">-</span> : value.toLocaleString()}
       </span>
     );
   }
 
   return (
-    <div className="relative" onClick={(event) => { event.stopPropagation(); onRowFocus(); }}>
+    <div className="relative h-full w-full" onClick={(event) => { event.stopPropagation(); onRowFocus(); }}>
       <input
         type="number"
         min="0"
-        value={value}
+        value={value === 0 ? '' : value}
+        placeholder="0"
         onChange={(event) => onChange?.(parseInt(event.target.value, 10) || 0)}
         onBlur={onBlur}
         disabled={disabled}
         title={title}
         aria-label={ariaLabel}
-        className={`${widthClass} rounded-xl border px-2.5 py-2 text-center text-sm font-semibold tabular-nums transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-100 ${resolvedClassName}`}
+        className={`${widthClass} bg-transparent min-h-[44px] px-2.5 py-2.5 text-center text-[0.85rem] font-bold tabular-nums transition-colors focus:outline-none disabled:cursor-not-allowed disabled:bg-zinc-100 ${resolvedClassName}`}
       />
       {indicatorClassName ? (
-        <span className={`absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border border-white ${indicatorClassName}`} />
+        <span className={`absolute right-1 top-1 h-2 w-2 rounded-full border border-white ${indicatorClassName}`} />
       ) : null}
     </div>
   );
@@ -142,16 +142,16 @@ const MetricPill: React.FC<{
 }> = memo(({ value, tone }) => {
   const className =
     tone === 'emerald'
-      ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+      ? 'bg-transparent text-zinc-900 font-bold'
       : tone === 'cyan'
-      ? 'border-cyan-200 bg-cyan-50 text-cyan-800'
+      ? 'bg-transparent text-zinc-900 font-bold'
       : tone === 'teal'
-      ? 'border-teal-200 bg-teal-50 text-teal-800'
-      : 'border-slate-200 bg-slate-50 text-slate-700';
+      ? 'bg-zinc-900 text-white shadow-sm font-black'
+      : 'bg-transparent text-zinc-600 font-semibold';
 
   return (
-    <span className={`inline-flex min-w-[4.5rem] justify-center rounded-xl border px-2.5 py-2 text-sm font-semibold tabular-nums ${className}`}>
-      {value.toLocaleString()}
+    <span className={`inline-flex min-w-[3.5rem] items-center justify-center rounded-[6px] px-2 py-1 text-[0.75rem] tabular-nums tracking-tight ${className}`}>
+      {value === 0 && tone !== 'teal' ? <span className="text-zinc-300">-</span> : value.toLocaleString()}
     </span>
   );
 });
@@ -161,10 +161,10 @@ MetricPill.displayName = 'MetricPill';
 const AvailabilityBadge: React.FC<{ value: number }> = memo(({ value }) => {
   const className =
     value >= 2
-      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+      ? 'border-zinc-200 bg-white text-zinc-900'
       : value >= 1
-      ? 'border-amber-200 bg-amber-50 text-amber-700'
-      : 'border-rose-200 bg-rose-50 text-rose-700';
+      ? 'border-amber-200 bg-amber-50 text-amber-900 shadow-sm'
+      : 'border-rose-300 bg-rose-50 text-rose-900 shadow-sm shadow-rose-100';
 
   return (
     <span className={`inline-flex min-w-[4.8rem] flex-col items-center rounded-xl border px-2 py-1.5 text-xs font-semibold ${className}`}>
@@ -177,8 +177,8 @@ const AvailabilityBadge: React.FC<{ value: number }> = memo(({ value }) => {
 AvailabilityBadge.displayName = 'AvailabilityBadge';
 
 const IciPill: React.FC<{ value: number }> = memo(({ value }) => (
-  <span className="inline-flex min-w-[4.8rem] justify-center rounded-xl border border-amber-200 bg-amber-50 px-2.5 py-2 text-sm font-semibold text-amber-800 tabular-nums">
-    {value.toLocaleString()}
+  <span className="inline-flex min-w-[3.5rem] items-center justify-center rounded-[6px] bg-indigo-50/80 px-2 py-1 text-[0.75rem] font-black tabular-nums tracking-tight text-indigo-700 ring-1 ring-inset ring-indigo-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)]">
+    {value === 0 ? <span className="text-indigo-300 opacity-60">-</span> : value.toLocaleString()}
   </span>
 ));
 
@@ -250,7 +250,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
   onRowSelect,
   visibleColumns,
 }) => {
-  const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento);
+  const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento as Establecimiento);
   const { colores, centro } = estiloEstablecimiento;
 
   const tieneEntregasAdicionales = Boolean(
@@ -794,8 +794,8 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         return <MetricPill value={movimiento.stock} tone="cyan" />;
       case 'promedioConsumo':
         return (
-          <span className="inline-flex min-w-[4.5rem] justify-center rounded-xl border border-slate-200 bg-white/80 px-2.5 py-2 text-sm font-semibold text-slate-700 tabular-nums">
-            {movimiento.promedioConsumo.toLocaleString()}
+          <span className="inline-flex min-w-[3.5rem] justify-center rounded-[6px] px-2 py-1 text-[0.75rem] font-bold tabular-nums text-zinc-700">
+            {movimiento.promedioConsumo === 0 ? <span className="text-zinc-300">-</span> : movimiento.promedioConsumo.toLocaleString()}
           </span>
         );
       case 'disponibilidad':
@@ -838,11 +838,11 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
       <button
         type="button"
         onClick={onOpenColumnSettings}
-        className="absolute right-2 top-2 z-30 inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-600 shadow-md shadow-slate-200/70 backdrop-blur transition hover:border-teal-200 hover:text-teal-700 sm:right-3 sm:top-3"
+        className="absolute right-2 top-2 z-30 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 bg-white/95 text-zinc-900 shadow-sm backdrop-blur transition hover:bg-zinc-900 hover:text-white sm:right-3 sm:top-3"
         title={`Configurar columnas (${visibleCount}/${COLUMNAS_CONFIGURABLES.length})`}
         aria-label="Configurar columnas visibles"
       >
-        <Settings2 className="h-4 w-4" />
+        <Faders className="h-4 w-4" weight="bold" />
       </button>
       <DataTable
         isLoading={isLoading}
@@ -854,10 +854,10 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         {/* ============================================================== */}
         {/* DESKTOP TABLE (hidden on mobile) */}
         {/* ============================================================== */}
-        <div className="hidden min-h-0 flex-1 overflow-auto md:block">
-          <table className="w-max min-w-full table-auto divide-y divide-slate-200">
-            <thead className="sticky top-0 z-20 bg-white">
-              <tr className="border-b border-slate-200 bg-slate-50/95">
+        <div className="hidden min-h-0 flex-1 overflow-auto md:block selection:bg-zinc-200">
+          <table className="w-max min-w-full table-fixed border-collapse" role="table" aria-label="Matriz de datos">
+            <thead className="sticky top-0 z-20">
+              <tr className="border-b-[3px] border-zinc-900 bg-white">
                 {columnasVisibles.map((column, index) => {
                   const isFirst = index === 0;
 
@@ -866,8 +866,8 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                       key={column.key}
                       className={`${COMPONENT_STYLES.table.headerCell} ${column.width} ${
                         isFirst
-                          ? 'sticky left-0 z-30 bg-slate-50/95 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.16)]'
-                          : ''
+                          ? 'sticky left-0 z-30 bg-white border-r border-zinc-200/60'
+                          : 'border-r border-zinc-100'
                       } ${
                         column.align === 'center'
                           ? 'text-center'
@@ -877,7 +877,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                       {column.key === 'entrega' ? (
                         <div className="flex flex-col items-center gap-0.5">
                           <span>{column.label}</span>
-                          <span className="text-[10px] font-semibold normal-case tracking-normal text-teal-600">{periodoEntrega}</span>
+                          <span className="text-[10px] font-semibold normal-case tracking-normal text-emerald-600">{periodoEntrega}</span>
                         </div>
                       ) : (
                         column.label
@@ -886,24 +886,25 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                   );
                 })}
               </tr>
-            </thead>
-
-            <tbody className="divide-y divide-slate-100">
-              <tr className="sticky top-[52px] z-[15] bg-slate-50 shadow-[0_1px_3px_-1px_rgba(0,0,0,0.1)]">
-                <td className="sticky left-0 z-20 border-r border-slate-200 bg-slate-50 px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)]">
-                  <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-600">Totales</p>
-                    <p className="mt-1 text-xs text-slate-500">{datosTabla.length} establecimientos</p>
+              {/* Totales Macro movidos aquí al thead para sticky automático sin gaps */}
+              <tr className="border-b border-zinc-300 bg-zinc-50/95 shadow-sm backdrop-blur-sm">
+                <th className="sticky left-0 z-30 border-r border-zinc-200 bg-zinc-50/95 px-3 py-2 text-left font-normal">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[0.65rem] font-black uppercase tracking-widest text-zinc-600">Total Macro</span>
+                    <span className="text-xs font-bold text-zinc-400">{datosTabla.length} un.</span>
                   </div>
-                </td>
+                </th>
                 {columnasVisibles
                   .filter((column) => column.key !== 'establecimiento')
                   .map((column) => (
-                    <td key={column.key} className={`bg-slate-50 px-3 py-3 ${column.key === 'entrega' ? 'align-top text-center' : 'text-center'}`}>
+                    <th key={column.key} className={`border-r border-zinc-100 bg-zinc-50/95 px-1 py-1 font-normal ${column.key === 'entrega' ? 'align-top text-center' : 'text-center align-middle'}`}>
                       {renderTotalCell(column.key)}
-                    </td>
+                    </th>
                   ))}
               </tr>
+            </thead>
+
+            <tbody className="text-[0.85rem]">
 
               {datosTabla.length === 0 && !isLoading ? (
                 <tr>
@@ -922,53 +923,63 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
               ) : null}
 
               {datosTabla.map((movimiento) => {
-                const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento);
+                const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento as Establecimiento);
                 const { colores, centro } = estiloEstablecimiento;
                 const isSelected = selectedRowId === movimiento.establecimientoId;
-                const rowBg = isSelected ? 'bg-teal-50' : colores.bg;
-                const stickyCellBg = isSelected ? 'bg-teal-50' : colores.bg;
+                const rowBg = isSelected ? 'bg-zinc-100/60' : colores.bg;
 
                 return (
                   <tr
                     key={`${movimiento.establecimientoId}-${selectedMes}-${selectedAnio}`}
                     onClick={() => onRowSelect(movimiento.establecimientoId)}
-                    className={`${rowBg} ${COMPONENT_STYLES.table.row} cursor-pointer ${isSelected ? 'relative z-[1] shadow-[inset_0_0_0_2px_rgba(13,148,136,0.6)]' : 'hover:bg-slate-50/50'}`}
+                    className={`${rowBg} cursor-pointer transition-colors border-b border-zinc-100 ${!isSelected && 'hover:brightness-[0.97]'}`}
                   >
-                    <td className={`sticky left-0 z-10 border-r border-white/60 px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)] ${stickyCellBg} ${isSelected ? 'shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12),inset_0_0_0_2px_rgba(13,148,136,0.6)]' : ''}`}>
-                      <div className={`flex items-start gap-3`}>
-                        <span
-                          className={`mt-2 h-2.5 w-2.5 rounded-full ${
-                            movimiento.tieneMovimiento ? 'bg-emerald-500' : 'bg-slate-300'
-                          } ${isSelected ? 'ring-4 ring-teal-300' : 'ring-2 ring-white/80'}`}
-                        />
-                        <div className="min-w-0">
-                          <p className={`truncate text-sm font-semibold ${isSelected ? 'text-teal-800' : colores.text}`}>{movimiento.establecimiento.nombre}</p>
-                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                            <span>{movimiento.establecimiento.codigo}</span>
-                            <span className="text-slate-300">•</span>
-                            <span>{movimiento.tieneMovimiento ? 'Con movimiento' : 'Pendiente'}</span>
-                          </div>
-                          {selectedCentroAcopio === 'todos' ? (
-                            <span className={`mt-2 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${colores.border} ${colores.text}`}>
-                              {centro !== 'DEFAULT' ? centro : 'Regional'}
-                            </span>
-                          ) : null}
+                    <td className={`sticky left-0 z-10 box-border border-r border-zinc-200 px-3 py-2.5 ${isSelected ? 'bg-zinc-100/60 ring-inset ring-[1.5px] ring-zinc-900' : colores.bg}`}>
+                      <div className="min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className={`truncate text-xs font-black tracking-tight ${isSelected ? 'text-zinc-900' : 'text-zinc-700'}`}>
+                            {movimiento.establecimiento.nombre}
+                          </p>
+                          {!movimiento.tieneMovimiento && <span className="ml-2 h-1.5 w-1.5 rounded-full bg-amber-400"></span>}
+                        </div>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                           {movimiento.establecimiento.codigo && (
+                             <span className="font-mono text-[0.6rem] font-bold text-zinc-400">{movimiento.establecimiento.codigo}</span>
+                           )}
+                           <span
+                             className={`inline-flex items-center rounded-sm px-1.5 py-[2px] text-[0.55rem] font-black uppercase tracking-[0.1em] ${
+                               movimiento.tieneMovimiento
+                                 ? 'border border-zinc-300 bg-white text-zinc-800'
+                                 : 'border border-zinc-200 bg-zinc-100 text-zinc-400'
+                             }`}
+                           >
+                             {movimiento.tieneMovimiento ? 'Con mov' : 'Pendiente'}
+                           </span>
+                           {selectedCentroAcopio === 'todos' ? (
+                             <span className={`inline-flex rounded-sm border px-1.5 py-[2px] text-[0.55rem] font-black uppercase tracking-[0.1em] ${colores.border} text-zinc-500`}>
+                               {centro !== 'DEFAULT' ? centro : 'Base'}
+                             </span>
+                           ) : null}
                         </div>
                       </div>
                     </td>
 
                     {columnasVisibles
                       .filter((column) => column.key !== 'establecimiento')
-                      .map((column) => (
-                        <td
-                          key={column.key}
-                          className={`px-3 py-3 ${
-                            column.key === 'entrega' ? 'align-top' : 'text-center'
-                          }`}
-                        >
-                          {renderCellContent(movimiento, column.key)}
-                        </td>
-                      ))}
+                      .map((column) => {
+                        const isEditable = column.key === 'transIngreso' || column.key === 'salida' || column.key === 'transSalida' || column.key === 'entrega';
+                        
+                        return (
+                          <td
+                            key={column.key}
+                            className={`border-r border-zinc-100 align-middle ${isEditable ? 'p-0' : 'px-2 py-1'} ${isSelected ? 'border-y border-y-zinc-900 border-r-zinc-300' : ''} ${
+                              column.key === 'entrega' ? 'align-top' : 'text-center'
+                            } ${column.key === 'totalSaldo' || column.key === 'saldo' ? 'bg-zinc-50/50' : ''}`}
+                          >
+                            {renderCellContent(movimiento, column.key)}
+                          </td>
+                        );
+                      })}
                   </tr>
                 );
               })}

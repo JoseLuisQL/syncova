@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Clock3 } from 'lucide-react';
+import { Clock } from '@phosphor-icons/react';
 import {
   FormSection,
   Modal,
@@ -7,7 +7,7 @@ import {
   SelectInput,
   TextArea,
   TextInput,
-} from '../../Inventario/components/ModalComponents';
+} from '../../ui/ModalElements';
 import { ReporteProgramado } from '../constants';
 
 interface ReportScheduleModalProps {
@@ -93,7 +93,7 @@ const ReportScheduleModal: React.FC<ReportScheduleModalProps> = ({
       onClose={onClose}
       title={reporte ? 'Editar reporte programado' : 'Programar reporte'}
       subtitle="Configura el tipo de salida, frecuencia y destinatarios del módulo."
-      icon={Clock3}
+      icon={Clock}
       size="lg"
       footer={(
         <ModalFooter

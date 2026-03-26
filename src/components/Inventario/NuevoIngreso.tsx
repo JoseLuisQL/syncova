@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { ChevronRight, Package2, Syringe, Wand2 } from 'lucide-react';
+import { CaretRight, Package, Syringe, MagicWand } from '@phosphor-icons/react';
 import { Jeringa, Vacuna } from '../../types';
 import { COMPONENT_STYLES, FILTER_OPTIONS } from './constants';
 import {
@@ -10,7 +10,7 @@ import {
   TextArea,
   TextInput,
   DateInput,
-} from './components/ModalComponents';
+} from '../ui/ModalElements';
 
 export type NuevoIngresoPayload =
   | {
@@ -188,7 +188,7 @@ const NuevoIngreso: React.FC<NuevoIngresoProps> = ({
       onClose={onClose}
       title="Nuevo Ingreso de Inventario"
       subtitle={tipoFijo ? `Registro directo de lote de ${tipoFijo}.` : 'Registre un nuevo lote con la menor cantidad de pasos posible.'}
-      icon={tipo === 'jeringa' ? Syringe : Package2}
+      icon={tipo === 'jeringa' ? Syringe : Package}
       footer={
         step === 2 ? (
           <ModalFooter
@@ -215,7 +215,7 @@ const NuevoIngreso: React.FC<NuevoIngresoProps> = ({
                 title="Vacunas"
                 description="Registrar nuevo lote de vacunas"
                 selected={tipo === 'vacuna'}
-                icon={Package2}
+                icon={Package}
                 onClick={() => setTipo('vacuna')}
               />
               <TipoCard
@@ -242,7 +242,7 @@ const NuevoIngreso: React.FC<NuevoIngresoProps> = ({
                 className={COMPONENT_STYLES.button.primary}
               >
                 <span>Siguiente</span>
-                <ChevronRight className="h-4 w-4" />
+                <CaretRight className="h-4 w-4" weight="bold" />
               </button>
             </div>
           </section>
@@ -322,7 +322,7 @@ const NuevoIngreso: React.FC<NuevoIngresoProps> = ({
                     error={errors.numero}
                   />
                   <button type="button" onClick={generateLoteNumber} className={`${COMPONENT_STYLES.button.ghost} mt-2`}>
-                    <Wand2 className="h-4 w-4" />
+                    <MagicWand className="h-4 w-4" weight="bold" />
                     <span>Auto</span>
                   </button>
                 </div>
@@ -403,7 +403,7 @@ interface TipoCardProps {
   title: string;
   description: string;
   selected: boolean;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; weight?: string }>;
   onClick: () => void;
 }
 
@@ -412,11 +412,11 @@ const TipoCard: React.FC<TipoCardProps> = ({ title, description, selected, icon:
     type="button"
     onClick={onClick}
     className={`rounded-[24px] border p-5 text-left transition ${
-      selected ? 'border-teal-300 bg-teal-50/80 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+      selected ? 'border-zinc-900 bg-zinc-50 shadow-sm ring-1 ring-zinc-900' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
     }`}
   >
-    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
-      <Icon className="h-5 w-5" />
+    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900">
+      <Icon className="h-6 w-6" weight="duotone" />
     </div>
     <h4 className="text-lg font-semibold text-slate-950">{title}</h4>
     <p className="mt-1 text-sm text-slate-500">{description}</p>

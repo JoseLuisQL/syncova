@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { CircleNotch, ArrowsClockwise } from '@phosphor-icons/react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAlertas } from '../../hooks/useAlertas';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -84,13 +84,13 @@ const AlertasModule: React.FC = () => {
     return (
       <main className={COMPONENT_STYLES.pageBackground}>
         <div className="flex min-h-screen items-center justify-center">
-          <div className="flex flex-col items-center gap-4 rounded-[24px] border border-slate-200 bg-white px-8 py-10 shadow-sm">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-600">
-              <Loader2 className="h-6 w-6 animate-spin" />
+          <div className="flex flex-col items-center gap-4 rounded-[24px] border border-zinc-200 bg-white px-8 py-10 shadow-sm">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900">
+              <CircleNotch className="h-6 w-6 animate-spin" weight="bold" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-semibold text-slate-900">Cargando módulo de alertas</p>
-              <p className="mt-1 text-sm text-slate-500">Preparando estadísticas y alertas activas.</p>
+              <p className="text-sm font-semibold text-zinc-900">Cargando módulo de alertas</p>
+              <p className="mt-1 text-sm text-zinc-500">Preparando estadísticas y alertas activas.</p>
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@ const AlertasModule: React.FC = () => {
             </span>
           ) : null}
           <button type="button" onClick={handleRefresh} disabled={isLoading} className={COMPONENT_STYLES.button.secondary}>
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {isLoading ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <ArrowsClockwise className="h-4 w-4" weight="bold" />}
             <span>Actualizar</span>
           </button>
         </>
@@ -150,3 +150,4 @@ const AlertasModule: React.FC = () => {
 };
 
 export default AlertasModule;
+ 

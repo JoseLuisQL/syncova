@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Receipt, Plus, RefreshCw, X, Loader2 } from 'lucide-react';
+import { Receipt, Plus, ArrowsClockwise, X, SpinnerGap } from '@phosphor-icons/react';
 import { COMPONENT_STYLES } from '../constants';
 
 interface ValesHeaderProps {
@@ -26,7 +26,7 @@ export const ValesHeader: React.FC<ValesHeaderProps> = memo(({
           {/* Titulo */}
           <div className="flex items-center gap-4">
             <div className={COMPONENT_STYLES.header.iconWrapper}>
-              <Receipt className="h-6 w-6 text-white" aria-hidden="true" />
+              <Receipt weight="duotone" className="h-6 w-6 text-white" aria-hidden="true" />
             </div>
             <div>
               <h1 className={COMPONENT_STYLES.header.title}>
@@ -48,9 +48,9 @@ export const ValesHeader: React.FC<ValesHeaderProps> = memo(({
               title={!centroAcopioSeleccionado ? 'Seleccione un centro de acopio' : 'Generar nuevo vale'}
             >
               {isGenerating ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <SpinnerGap weight="bold" className="h-5 w-5 animate-spin" />
               ) : (
-                <Plus className="h-5 w-5" />
+                <Plus weight="bold" className="h-5 w-5" />
               )}
               <span className="hidden sm:inline">
                 {isGenerating ? 'Generando...' : 'Generar Vale'}
@@ -64,7 +64,7 @@ export const ValesHeader: React.FC<ValesHeaderProps> = memo(({
               className={COMPONENT_STYLES.button.secondary}
               title="Sincronizar vales"
             >
-              <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+              <ArrowsClockwise weight="bold" className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">
                 {isSyncing ? 'Sincronizando...' : 'Sincronizar'}
               </span>
@@ -77,7 +77,7 @@ export const ValesHeader: React.FC<ValesHeaderProps> = memo(({
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                 title="Cerrar"
               >
-                <X className="h-5 w-5" />
+                <X weight="bold" className="h-5 w-5" />
               </button>
             )}
           </div>

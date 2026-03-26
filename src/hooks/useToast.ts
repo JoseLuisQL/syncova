@@ -1,15 +1,12 @@
-import { useState, useCallback } from 'react';
-import { ToastData, ToastType } from '../components/ui/Toast';
+import { useCallback } from 'react';
+import { sileo } from 'sileo';
+import { ToastType, ToastData } from '../components/ui/Toast';
 
 /**
  * Hook personalizado para gestión de toast notifications
+ * Refactorizado a Sileo Physics Engine ("Cockpit Mode")
  */
 export function useToast() {
-  const [toasts, setToasts] = useState<ToastData[]>([]);
-
-  /**
-   * Agregar un nuevo toast
-   */
   const addToast = useCallback((
     type: ToastType,
     title: string,
@@ -22,55 +19,53 @@ export function useToast() {
       };
     }
   ) => {
-    const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    const newToast: ToastData = {
-      id,
-      type,
+    const config: any = {
       title,
-      message,
-      duration: options?.duration ?? (type === 'error' ? 8000 : 5000), // Errores duran más
-      action: options?.action,
+      description: message,
+      type: type === 'error' ? 'error' : type === 'warning' ? 'warning' : type === 'info' ? 'info' : 'success',
+      duration: options?.duration ?? (type === 'error' ? 8000 : 5000),
     };
 
-    setToasts(prev => [...prev, newToast]);
+    if (options?.action) {
+      config.button = {
+        title: options.action.label,
+        onClick: options.action.onClick,
+      };
+      return sileo.action(config);
+    }
 
-    return id;
+    if (type === 'success') return sileo.success(config);
+    if (type === 'error') return sileo.error(config);
+    if (type === 'warning') return sileo.warning(config);
+    if (type === 'info') return sileo.info(config);
+    
+    return sileo.show(config);
   }, []);
 
-  /**
-   * Remover un toast específico
-   */
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    sileo.dismiss(id);
   }, []);
 
-  /**
-   * Limpiar todos los toasts
-   */
   const clearToasts = useCallback(() => {
-    setToasts([]);
+    sileo.clear();
   }, []);
 
-  /**
-   * Métodos de conveniencia para diferentes tipos de toast
-   */
   const toast = {
-    success: (title: string, message?: string, options?: { duration?: number; action?: { label: string; onClick: () => void; } }) => 
+    success: (title: string, message?: string, options?: any) => 
       addToast('success', title, message, options),
     
-    error: (title: string, message?: string, options?: { duration?: number; action?: { label: string; onClick: () => void; } }) => 
+    error: (title: string, message?: string, options?: any) => 
       addToast('error', title, message, options),
     
-    warning: (title: string, message?: string, options?: { duration?: number; action?: { label: string; onClick: () => void; } }) => 
+    warning: (title: string, message?: string, options?: any) => 
       addToast('warning', title, message, options),
     
-    info: (title: string, message?: string, options?: { duration?: number; action?: { label: string; onClick: () => void; } }) => 
+    info: (title: string, message?: string, options?: any) => 
       addToast('info', title, message, options),
   };
 
   return {
-    toasts,
+    toasts: [] as ToastData[], // Mantener dummy para evitar brechar tipados del Provider dependiente
     addToast,
     removeToast,
     clearToasts,

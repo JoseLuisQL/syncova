@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  AlertTriangle,
+  Warning,
   Archive,
-  Calendar,
-  Download,
+  CalendarBlank,
+  DownloadSimple,
   Eye,
-  FileSpreadsheet,
+  FileXls,
   Package,
-  ShieldAlert,
-} from 'lucide-react';
+  ShieldWarning,
+} from '@phosphor-icons/react';
 import { Establecimiento, Vacuna } from '../../../../types';
 import { useReportes } from '../../../../hooks/useReportes';
 import { useToastContext } from '../../../../contexts/ToastContext';
@@ -24,7 +24,8 @@ import {
   ItemVencimiento,
 } from '../../../../types/reportes';
 import { COMPONENT_STYLES } from '../../constants';
-import { ReporteCard, ReportInlineStatus, ReportSectionCard, ReportTableColumn } from '..';
+import ReporteCard from '../ReporteCard';
+import { ReportInlineStatus, ReportSectionCard, ReportTableColumn } from '../ReportPrimitives';
 import KardexDetalladoModal from '../../modals/KardexDetalladoModal';
 import StockVacunasEESSModal, { StockVacunasEESSFiltros } from '../../modals/StockVacunasEESSModal';
 import VisualizarReporteModal from '../../modals/VisualizarReporteModal';
@@ -208,8 +209,8 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
                 const typedRow = row as ItemStockActual;
                 return (
                 <div>
-                  <p className="font-medium text-slate-900">{typedRow.vacunaNombre}</p>
-                  <p className="text-xs text-slate-500">{typedRow.vacunaTipo} · {typedRow.presentacion}</p>
+                  <p className="font-medium text-zinc-900">{typedRow.vacunaNombre}</p>
+                  <p className="text-xs text-zinc-500">{typedRow.vacunaTipo} · {typedRow.presentacion}</p>
                 </div>
                 );
               },
@@ -218,7 +219,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
               key: 'stockTotal',
               label: 'Stock total',
               align: 'right' as const,
-              render: (row: PreviewRow) => <span className="font-semibold text-slate-900">{(row as ItemStockActual).stockTotal.toLocaleString()}</span>,
+              render: (row: PreviewRow) => <span className="font-semibold text-zinc-900">{(row as ItemStockActual).stockTotal.toLocaleString()}</span>,
             },
             {
               key: 'lotes',
@@ -238,7 +239,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
             {
               key: 'actualizacion',
               label: 'Actualización',
-              render: (row: PreviewRow) => <span className="text-sm text-slate-600">{formatCompactDate((row as ItemStockActual).ultimaActualizacion)}</span>,
+              render: (row: PreviewRow) => <span className="text-sm text-zinc-600">{formatCompactDate((row as ItemStockActual).ultimaActualizacion)}</span>,
             },
           ] as ReportTableColumn<PreviewRow>[],
         };
@@ -257,8 +258,8 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
                 const typedRow = row as ItemStockCritico;
                 return (
                 <div>
-                  <p className="font-medium text-slate-900">{typedRow.vacunaNombre}</p>
-                  <p className="text-xs text-slate-500">{typedRow.vacunaTipo}</p>
+                  <p className="font-medium text-zinc-900">{typedRow.vacunaNombre}</p>
+                  <p className="text-xs text-zinc-500">{typedRow.vacunaTipo}</p>
                 </div>
                 );
               },
@@ -267,13 +268,13 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
               key: 'stockTotal',
               label: 'Actual',
               align: 'right' as const,
-              render: (row: PreviewRow) => <span className="font-semibold text-slate-900">{(row as ItemStockCritico).stockTotal.toLocaleString()}</span>,
+              render: (row: PreviewRow) => <span className="font-semibold text-zinc-900">{(row as ItemStockCritico).stockTotal.toLocaleString()}</span>,
             },
             {
               key: 'stockMinimo',
               label: 'Mínimo',
               align: 'right' as const,
-              render: (row: PreviewRow) => <span className="text-slate-700">{(row as ItemStockCritico).stockMinimo.toLocaleString()}</span>,
+              render: (row: PreviewRow) => <span className="text-zinc-700">{(row as ItemStockCritico).stockMinimo.toLocaleString()}</span>,
             },
             {
               key: 'criticidad',
@@ -291,7 +292,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
             {
               key: 'accion',
               label: 'Acción recomendada',
-              render: (row: PreviewRow) => <span className="text-sm text-slate-600">{(row as ItemStockCritico).recomendacionAccion}</span>,
+              render: (row: PreviewRow) => <span className="text-sm text-zinc-600">{(row as ItemStockCritico).recomendacionAccion}</span>,
             },
           ] as ReportTableColumn<PreviewRow>[],
         };
@@ -310,8 +311,8 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
                 const typedRow = row as ItemVencimiento;
                 return (
                 <div>
-                  <p className="font-medium text-slate-900">{typedRow.numeroLote}</p>
-                  <p className="text-xs text-slate-500">{typedRow.vacunaNombre}</p>
+                  <p className="font-medium text-zinc-900">{typedRow.numeroLote}</p>
+                  <p className="text-xs text-zinc-500">{typedRow.vacunaNombre}</p>
                 </div>
                 );
               },
@@ -320,18 +321,18 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
               key: 'cantidad',
               label: 'Cantidad',
               align: 'right' as const,
-              render: (row: PreviewRow) => <span className="font-semibold text-slate-900">{(row as ItemVencimiento).cantidadActual.toLocaleString()}</span>,
+              render: (row: PreviewRow) => <span className="font-semibold text-zinc-900">{(row as ItemVencimiento).cantidadActual.toLocaleString()}</span>,
             },
             {
               key: 'fecha',
               label: 'Vence',
-              render: (row: PreviewRow) => <span className="text-sm text-slate-700">{formatCompactDate((row as ItemVencimiento).fechaVencimiento)}</span>,
+              render: (row: PreviewRow) => <span className="text-sm text-zinc-700">{formatCompactDate((row as ItemVencimiento).fechaVencimiento)}</span>,
             },
             {
               key: 'dias',
               label: 'Días',
               align: 'center' as const,
-              render: (row: PreviewRow) => <span className="text-sm text-slate-700">{(row as ItemVencimiento).diasParaVencer}</span>,
+              render: (row: PreviewRow) => <span className="text-sm text-zinc-700">{(row as ItemVencimiento).diasParaVencer}</span>,
             },
             {
               key: 'urgencia',
@@ -363,8 +364,8 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
                 const typedRow = row as ItemLoteVencido;
                 return (
                 <div>
-                  <p className="font-medium text-slate-900">{typedRow.numeroLote}</p>
-                  <p className="text-xs text-slate-500">{typedRow.vacunaNombre}</p>
+                  <p className="font-medium text-zinc-900">{typedRow.numeroLote}</p>
+                  <p className="text-xs text-zinc-500">{typedRow.vacunaNombre}</p>
                 </div>
                 );
               },
@@ -373,12 +374,12 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
               key: 'cantidad',
               label: 'Cantidad',
               align: 'right' as const,
-              render: (row: PreviewRow) => <span className="font-semibold text-slate-900">{(row as ItemLoteVencido).cantidadActual.toLocaleString()}</span>,
+              render: (row: PreviewRow) => <span className="font-semibold text-zinc-900">{(row as ItemLoteVencido).cantidadActual.toLocaleString()}</span>,
             },
             {
               key: 'fecha',
               label: 'Vencimiento',
-              render: (row: PreviewRow) => <span className="text-sm text-slate-700">{formatCompactDate((row as ItemLoteVencido).fechaVencimiento)}</span>,
+              render: (row: PreviewRow) => <span className="text-sm text-zinc-700">{formatCompactDate((row as ItemLoteVencido).fechaVencimiento)}</span>,
             },
             {
               key: 'dias',
@@ -421,7 +422,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
         <section className={COMPONENT_STYLES.filter.container}>
           <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-700">Filtros comunes</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Filtros comunes</h3>
             </div>
             <span className={COMPONENT_STYLES.badge.neutral}>Contexto operativo</span>
           </div>
@@ -478,7 +479,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
         <section className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-700">Análisis rápidos</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Análisis rápidos</h3>
             </div>
             <span className={COMPONENT_STYLES.badge.count}>
               {(['stock_actual', 'stock_critico', 'vencimientos', 'lotes_vencidos'] as PreviewReportId[]).filter((id) => {
@@ -514,7 +515,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
                 },
                 {
                   label: 'Excel',
-                  icon: Download,
+                  icon: DownloadSimple,
                   onClick: () => handleExportarExcel('stock_actual'),
                   disabled: reportes.stockActual.length === 0,
                 },
@@ -524,7 +525,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
             <ReporteCard
               title="Stock crítico"
               description="Vacunas con reposición urgente y prioridad operativa."
-              icon={ShieldAlert}
+              icon={ShieldWarning}
               tone="danger"
               statusLabel={reportes.stockCritico.length > 0 ? `${reportes.stockCritico.length} alertas` : 'Pendiente'}
               facts={commonFacts}
@@ -538,7 +539,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
                 },
                 {
                   label: 'Excel',
-                  icon: Download,
+                  icon: DownloadSimple,
                   onClick: () => handleExportarExcel('stock_critico'),
                   disabled: reportes.stockCritico.length === 0,
                 },
@@ -548,7 +549,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
             <ReporteCard
               title="Por vencer"
               description="Lotes a redistribuir antes de afectar el abastecimiento."
-              icon={Calendar}
+              icon={CalendarBlank}
               tone="warning"
               statusLabel={reportes.vencimientos.length > 0 ? `${reportes.vencimientos.length} lotes` : 'Pendiente'}
               facts={commonFacts}
@@ -562,7 +563,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
                 },
                 {
                   label: 'Excel',
-                  icon: Download,
+                  icon: DownloadSimple,
                   onClick: () => handleExportarExcel('vencimientos'),
                   disabled: reportes.vencimientos.length === 0,
                 },
@@ -572,7 +573,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
             <ReporteCard
               title="Vencidos"
               description="Lotes fuera de vigencia para descarte y control."
-              icon={AlertTriangle}
+              icon={Warning}
               tone="danger"
               statusLabel={reportes.lotesVencidos.length > 0 ? `${reportes.lotesVencidos.length} lotes` : 'Pendiente'}
               facts={commonFacts}
@@ -586,7 +587,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
                 },
                 {
                   label: 'Excel',
-                  icon: Download,
+                  icon: DownloadSimple,
                   onClick: () => handleExportarExcel('lotes_vencidos'),
                   disabled: reportes.lotesVencidos.length === 0,
                 },
@@ -597,7 +598,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
 
         <section className="space-y-4">
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-700">Exportaciones especializadas</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Exportaciones especializadas</h3>
           </div>
 
           <div className="grid gap-4 xl:grid-cols-2">
@@ -614,7 +615,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
               actions={[
                 {
                   label: 'Configurar',
-                  icon: FileSpreadsheet,
+                  icon: FileXls,
                   onClick: () => setShowKardexModal(true),
                   variant: 'primary',
                 },
@@ -624,7 +625,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
             <ReporteCard
               title="Stock por EESS"
               description="Stock por establecimiento con selección de vacunas."
-              icon={FileSpreadsheet}
+              icon={FileXls}
               tone="secondary"
               statusLabel="Especializado"
               facts={[
@@ -634,7 +635,7 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
               actions={[
                 {
                   label: 'Configurar',
-                  icon: FileSpreadsheet,
+                  icon: FileXls,
                   onClick: () => setShowStockVacunasEESSModal(true),
                   variant: 'primary',
                 },

@@ -1,12 +1,12 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Package2, RefreshCw, Settings2, Syringe, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react';
+import { ArrowRight, Package, ArrowsClockwise, SlidersHorizontal, Syringe, ToggleLeft, ToggleRight, Trash } from '@phosphor-icons/react';
 import { apiClient } from '../../config/api';
 import { useToastContext } from '../../contexts/ToastContext';
 import { COMPONENT_STYLES } from './constants';
 import ConfiguracionModal from './ConfiguracionModal';
 import {
   DeleteConfirmModal,
-} from './components/ModalComponents';
+} from '../ui/ModalElements';
 import {
   EmptyState,
   ErrorAlert,
@@ -264,8 +264,8 @@ const ConfiguracionJeringas: React.FC = () => {
         config.jeringa?.tipo,
         config.jeringa?.capacidad,
         config.jeringa?.color,
-        'centroAcopio' in config ? config.centroAcopio?.nombre : undefined,
-        'centroAcopio' in config ? config.centroAcopio?.codigo : undefined,
+        'centroAcopio' in config ? (config as ConfiguracionCentro).centroAcopio?.nombre : undefined,
+        'centroAcopio' in config ? (config as ConfiguracionCentro).centroAcopio?.codigo : undefined,
       ]
         .map((value) => normalizeText(value))
         .filter(Boolean);
@@ -359,7 +359,7 @@ const ConfiguracionJeringas: React.FC = () => {
 
             <div className="flex flex-wrap items-center justify-end gap-2">
               <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={handleRefresh} disabled={isLoading}>
-                <RefreshCw className="h-4 w-4" />
+                <ArrowsClockwise className="h-4 w-4" weight="bold" />
                 <span>Actualizar</span>
               </button>
               <button
@@ -370,7 +370,7 @@ const ConfiguracionJeringas: React.FC = () => {
                   setShowModal(true);
                 }}
               >
-                <Settings2 className="h-4 w-4" />
+                <SlidersHorizontal className="h-4 w-4" weight="bold" />
                 <span>Nueva configuración</span>
               </button>
             </div>
@@ -398,7 +398,7 @@ const ConfiguracionJeringas: React.FC = () => {
           ) : filteredConfiguraciones.length === 0 ? (
             <div className={COMPONENT_STYLES.panel}>
               <EmptyState
-                icon={Settings2}
+                icon={SlidersHorizontal}
                 title="Sin configuraciones"
                 description={
                   hasActiveCriteria
@@ -512,14 +512,14 @@ const ConfigCard: React.FC<ConfigCardProps> = memo(({ config, activeTab, onEdit,
 
       <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_32px_minmax(0,1fr)] xl:items-center">
         <RuleNode
-          icon={Package2}
+          icon={Package}
           title="Si seleccionas esta vacuna"
           value={config.vacuna?.nombre || 'Sin vacuna'}
           meta={config.vacuna?.presentacion || 'Sin presentación'}
         />
 
         <div className="hidden items-center justify-center text-slate-300 xl:flex">
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight className="h-4 w-4" weight="bold" />
         </div>
 
         <RuleNode
@@ -540,14 +540,14 @@ const ConfigCard: React.FC<ConfigCardProps> = memo(({ config, activeTab, onEdit,
 
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => onToggleActive(config)} className={COMPONENT_STYLES.button.ghost}>
-            {config.activo ? <ToggleRight className="h-4 w-4 text-emerald-600" /> : <ToggleLeft className="h-4 w-4 text-slate-400" />}
+            {config.activo ? <ToggleRight className="h-5 w-5 text-emerald-600" weight="fill" /> : <ToggleLeft className="h-5 w-5 text-slate-400" />}
             <span>{config.activo ? 'Desactivar' : 'Activar'}</span>
           </button>
           <button type="button" onClick={() => onEdit(config)} className={COMPONENT_STYLES.button.ghost}>
             Editar
           </button>
           <button type="button" onClick={() => onDelete(config)} className={`${COMPONENT_STYLES.button.ghost} text-rose-700 hover:text-rose-800`}>
-            <Trash2 className="h-4 w-4" />
+            <Trash className="h-4 w-4" weight="bold" />
             <span>Eliminar</span>
           </button>
         </div>

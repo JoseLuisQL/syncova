@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, CheckCircle2, LucideIcon } from 'lucide-react';
+import { WarningCircle, CheckCircle, Icon } from '@phosphor-icons/react';
 import { DataTable, TableCell, TableHeader, TableRow } from '../../Inventario/components/FilterAndTable';
 import { ColorScheme, COLORS, COMPONENT_STYLES } from '../constants';
 
@@ -7,7 +7,7 @@ export interface ReportMetricItem {
   id: string;
   label: string;
   value: React.ReactNode;
-  icon: LucideIcon;
+  icon: Icon;
   tone?: ColorScheme;
   description?: string;
 }
@@ -47,7 +47,7 @@ export const ReportMetricsGrid: React.FC<{ items: ReportMetricItem[] }> = ({ ite
             <div className="min-w-0">
               <p className={`${COMPONENT_STYLES.stats.label} ${tone.text}`}>{item.label}</p>
               <p className={`${COMPONENT_STYLES.stats.value} ${tone.textStrong}`}>{item.value}</p>
-              {item.description ? <p className="mt-1.5 text-[0.74rem] leading-5 text-slate-500">{item.description}</p> : null}
+              {item.description ? <p className="mt-1.5 text-[0.74rem] leading-5 text-zinc-500">{item.description}</p> : null}
             </div>
             <div className={`${COMPONENT_STYLES.stats.iconWrapper} ${tone.border} ${tone.surface}`}>
               <Icon className={`h-4 w-4 ${tone.icon}`} aria-hidden="true" />
@@ -68,11 +68,11 @@ export const ReportSectionCard: React.FC<{
 }> = ({ title, subtitle, aside, children, showHeader = true }) => (
   <section className={COMPONENT_STYLES.surface}>
     {showHeader ? (
-      <header className="border-b border-slate-100 px-4 py-3.5 sm:px-5">
+      <header className="border-b border-zinc-100 px-4 py-3.5 sm:px-5">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <h2 className="text-[1.08rem] font-semibold text-slate-950">{title}</h2>
-            <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>
+            <h2 className="text-[1.08rem] font-semibold text-zinc-950">{title}</h2>
+            <p className="mt-0.5 text-sm text-zinc-500">{subtitle}</p>
           </div>
           {aside ? <div className="flex flex-wrap items-center gap-2">{aside}</div> : null}
         </div>
@@ -98,8 +98,8 @@ export function ReportResultsTable<T>({
       <header className={COMPONENT_STYLES.results.header}>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h3 className="text-[0.98rem] font-semibold text-slate-950">{title}</h3>
-            <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>
+            <h3 className="text-[0.98rem] font-semibold text-zinc-950">{title}</h3>
+            <p className="mt-0.5 text-sm text-zinc-500">{subtitle}</p>
           </div>
           <span className={rows.length > 0 ? COMPONENT_STYLES.badge.count : COMPONENT_STYLES.badge.neutral}>
             {rows.length} registro{rows.length === 1 ? '' : 's'}
@@ -122,7 +122,7 @@ export function ReportResultsTable<T>({
                 align: column.align,
                 className: column.className,
               }))} />
-              <tbody className="divide-y divide-slate-100 bg-white">
+              <tbody className="divide-y divide-zinc-100 bg-white">
                 {rows.map((row, index) => (
                   <TableRow key={`${title}-${index + 1}`}>
                     {columns.map((column) => (
@@ -139,18 +139,18 @@ export function ReportResultsTable<T>({
               </tbody>
             </table>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-[22px] border border-dashed border-slate-200 bg-slate-50/70 px-6 py-14 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-                <AlertCircle className="h-5 w-5" />
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-zinc-50 px-6 py-14 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-400">
+                <WarningCircle weight="duotone" className="h-5 w-5" />
               </div>
-              <h4 className="mt-4 text-sm font-semibold text-slate-900">{emptyTitle}</h4>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">{emptyDescription}</p>
+              <h4 className="mt-4 text-sm font-semibold text-zinc-900">{emptyTitle}</h4>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-zinc-500">{emptyDescription}</p>
             </div>
           )}
         </DataTable>
       </div>
 
-      {footer ? <div className="border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6">{footer}</div> : null}
+      {footer ? <div className="border-t border-zinc-100 bg-zinc-50 px-5 py-4 sm:px-6">{footer}</div> : null}
     </section>
   );
 }
@@ -161,13 +161,13 @@ export const ReportInlineStatus: React.FC<{
   description: string;
 }> = ({ tone = 'info', title, description }) => {
   const classes = {
-    success: 'rounded-[18px] border border-emerald-200 bg-emerald-50/80 p-4 text-emerald-800',
+    success: 'rounded-xl border border-emerald-200 bg-emerald-50/80 p-4 text-emerald-800',
     warning: COMPONENT_STYLES.alert.warning,
     danger: COMPONENT_STYLES.alert.error,
     info: COMPONENT_STYLES.alert.info,
   }[tone];
 
-  const Icon = tone === 'success' ? CheckCircle2 : AlertCircle;
+  const Icon = tone === 'success' ? CheckCircle : WarningCircle;
 
   return (
     <div className={classes}>

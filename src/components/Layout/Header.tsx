@@ -13,14 +13,14 @@ const Header: React.FC<HeaderProps> = memo(({ title: _title }) => {
   const { toggleMobileMenu } = useApp();
 
   return (
-    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-zinc-200/80 transition-all duration-300">
+    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/80 transition-all duration-300">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8 w-full">
         {/* Left section - Menu button (mobile) + Breadcrumbs */}
         <div className="flex-1 flex items-center min-w-0 gap-3 sm:gap-4">
           {/* Mobile menu button */}
           <button
             onClick={toggleMobileMenu}
-            className="lg:hidden p-2 -ml-2 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500/40 transition-all duration-200"
+            className="lg:hidden p-2 -ml-2 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500/40 transition-all duration-200"
             aria-label="Abrir menú"
           >
             <List className="h-5 w-5" weight="bold" />
@@ -36,7 +36,7 @@ const Header: React.FC<HeaderProps> = memo(({ title: _title }) => {
           <NotificationBell />
 
           {/* Divider */}
-          <div className="hidden sm:block w-px h-8 bg-zinc-200" aria-hidden="true" />
+          <div className="hidden sm:block w-px h-8 bg-gray-200" aria-hidden="true" />
 
           {/* User Menu */}
           <UserMenu />

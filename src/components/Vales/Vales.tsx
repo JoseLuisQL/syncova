@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useStockEvents } from '../../utils/stockEventEmitter';
-import { RefreshCw, Settings, X, Loader2 } from 'lucide-react';
+import { ArrowsClockwise, Gear, X, SpinnerGap } from '@phosphor-icons/react';
 import { ValeEntrega, ValesService, ValeTypeSelectionConfig } from '../../services/valesService';
 import { useVales } from '../../hooks/useVales';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
@@ -11,7 +11,7 @@ import ValesConnectionTest from './ValesConnectionTest';
 import ValeExportModal from './ValeExportModal';
 import ConfirmacionModal from './ConfirmacionModal';
 import ValeTypeSelectionModal from './ValeTypeSelectionModal';
-import { ValesHeader, ValesFilters, ValesStats, ValesTabla } from './components';
+import { ValesHeader, ValesFilters, ValesTabla } from './components';
 import { MESES, COMPONENT_STYLES } from './constants';
 
 interface ValesProps {
@@ -108,7 +108,7 @@ const Vales: React.FC<ValesProps> = ({
         ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio }),
         mes: selectedMes,
         anio: selectedAnio,
-        ...(selectedEstado !== 'todos' && { estado: selectedEstado }),
+        ...(selectedEstado !== 'todos' && { estado: selectedEstado as any }),
         ...(searchTerm && { search: searchTerm }),
         limit: 100
       };
@@ -149,19 +149,7 @@ const Vales: React.FC<ValesProps> = ({
     });
   }, [vales, searchTerm]);
 
-  // Estadísticas calculadas
-  const estadisticas = useMemo(() => {
-    const totalVales = valesFiltrados.length;
-    const valesEntregados = valesFiltrados.filter(v => v.estado === 'entregado').length;
-    const totalVacunas = valesFiltrados.reduce((sum, vale) => sum + vale.totalVacunas, 0);
-
-    return {
-      totalVales,
-      valesEntregados,
-      totalVacunas,
-      porcentajeEntregados: totalVales > 0 ? Math.round((valesEntregados / totalVales) * 100) : 0
-    };
-  }, [valesFiltrados]);
+  // Estadísticas eliminadas por requerimiento
 
   // Funciones de manejo
   const handleGenerarVale = useCallback(() => {
@@ -223,7 +211,7 @@ const Vales: React.FC<ValesProps> = ({
       ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio }),
       mes: selectedMes,
       anio: selectedAnio,
-      ...(selectedEstado !== 'todos' && { estado: selectedEstado }),
+      ...(selectedEstado !== 'todos' && { estado: selectedEstado as any }),
       ...(searchTerm && { search: searchTerm }),
       limit: 100
     };
@@ -339,7 +327,7 @@ const Vales: React.FC<ValesProps> = ({
       ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio }),
       mes: selectedMes,
       anio: selectedAnio,
-      ...(selectedEstado !== 'todos' && { estado: selectedEstado }),
+      ...(selectedEstado !== 'todos' && { estado: selectedEstado as any }),
       ...(searchTerm && { search: searchTerm }),
       limit: 100
     });
@@ -357,7 +345,7 @@ const Vales: React.FC<ValesProps> = ({
   }, []);
 
   return (
-    <main className={COMPONENT_STYLES.pageBackground} role="main">
+    <main className={onClose ? 'w-full bg-zinc-50 flex-1 overflow-y-auto h-full rounded-[24px]' : COMPONENT_STYLES.pageBackground} role="main">
       {/* Header */}
       <ValesHeader
         onGenerarVale={handleGenerarVale}
@@ -370,8 +358,6 @@ const Vales: React.FC<ValesProps> = ({
 
       {/* Contenido principal */}
       <section className={`${onClose ? 'w-full px-4 sm:px-6' : 'max-w-7xl mx-auto px-4 sm:px-6'} py-6 space-y-6`}>
-        {/* Estadísticas */}
-        <ValesStats estadisticas={estadisticas} isLoading={isLoading} />
 
         {/* Filtros */}
         <ValesFilters
@@ -439,7 +425,7 @@ const Vales: React.FC<ValesProps> = ({
             <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
               <div className="flex items-center space-x-3">
                 <div className="flex items-center justify-center w-10 h-10 bg-amber-100 rounded-lg">
-                  <Settings className="h-5 w-5 text-amber-600" />
+                  <Gear weight="bold" className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Diagnóstico de Conectividad</h3>
@@ -450,7 +436,7 @@ const Vales: React.FC<ValesProps> = ({
                 onClick={() => setShowDiagnostico(false)}
                 className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
               >
-                <X className="h-5 w-5 text-gray-500" />
+                <X weight="bold" className="h-5 w-5 text-zinc-500" />
               </button>
             </div>
             <div className="overflow-y-auto max-h-[calc(95vh-120px)] p-6">
@@ -461,8 +447,8 @@ const Vales: React.FC<ValesProps> = ({
       )}
 
       {generandoVale && (
-        <div className="fixed top-4 right-4 z-50 bg-teal-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-3 animate-pulse">
-          <Loader2 className="h-5 w-5 animate-spin" />
+        <div className="fixed top-4 right-4 z-50 bg-zinc-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center space-x-3 animate-pulse">
+          <SpinnerGap weight="bold" className="h-5 w-5 animate-spin" />
           <div>
             <p className="font-medium">Generando Vale de Entrega</p>
             <p className="text-sm opacity-90">Procesando datos y actualizando stocks...</p>
@@ -491,8 +477,8 @@ const Vales: React.FC<ValesProps> = ({
           <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-teal-600 rounded-lg flex items-center justify-center">
-                  <RefreshCw className="h-5 w-5 text-white" />
+                <div className="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center">
+                  <ArrowsClockwise weight="bold" className="h-5 w-5 text-white" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
@@ -510,7 +496,7 @@ const Vales: React.FC<ValesProps> = ({
                 }}
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <X className="h-5 w-5" />
+                <X weight="bold" className="h-5 w-5" />
               </button>
             </div>
 
@@ -544,12 +530,12 @@ const Vales: React.FC<ValesProps> = ({
                 >
                   {isSyncing ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <SpinnerGap weight="bold" className="h-5 w-5 animate-spin" />
                       <span>Sincronizando vale...</span>
                     </>
                   ) : (
                     <>
-                      <RefreshCw className="h-5 w-5" />
+                      <ArrowsClockwise weight="bold" className="h-5 w-5" />
                       <span>Sincronizar con datos actualizados</span>
                     </>
                   )}
@@ -601,8 +587,8 @@ const Vales: React.FC<ValesProps> = ({
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <RefreshCw className="h-6 w-6 text-emerald-600" />
+                  <div className="w-12 h-12 bg-emerald-50 border border-emerald-200/60 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ArrowsClockwise weight="bold" className="h-6 w-6 text-emerald-600" />
                   </div>
                   <h4 className="text-lg font-medium text-gray-900 mb-2">Vale Sincronizado</h4>
                   <p className="text-gray-600">

@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { Search, X } from 'lucide-react';
+import { MagnifyingGlass as Search, X } from '@phosphor-icons/react';
 import { COMPONENT_STYLES } from '../constants';
 
 const SkeletonBlock: React.FC<{ className?: string }> = ({ className = '' }) => (
@@ -88,7 +88,7 @@ export const FilterBar: React.FC<FilterBarProps> = memo(({
             <div className={`flex flex-wrap items-end gap-2 ${filters.length > 0 ? 'sm:col-span-2' : ''} xl:justify-end`}>
               {hasActiveFilters && onClear ? (
                 <button type="button" onClick={onClear} className={COMPONENT_STYLES.button.ghost}>
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4" weight="bold" />
                   <span>Limpiar</span>
                 </button>
               ) : null}
@@ -315,8 +315,8 @@ export const DataTable: React.FC<DataTableProps> = memo(({
     {isLoading ? (
       <div className="inventory-loading-shell p-4 sm:p-5">
         <div className="flex items-center gap-3 pb-4 text-slate-700">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 inventory-breathe">
-            <div className="h-4 w-4 rounded-full border-2 border-teal-600 border-t-transparent animate-spin" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 inventory-breathe">
+            <div className="h-4 w-4 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-slate-900">{loadingMessage}</p>
@@ -415,7 +415,7 @@ interface TableRowProps {
 }
 
 export const TableRow: React.FC<TableRowProps> = memo(({ children, onClick, isSelected = false }) => (
-  <tr className={`${COMPONENT_STYLES.table.row} ${isSelected ? 'bg-teal-50/60' : ''} ${onClick ? 'cursor-pointer' : ''}`} onClick={onClick}>
+  <tr className={`${COMPONENT_STYLES.table.row} ${isSelected ? 'bg-zinc-100' : ''} ${onClick ? 'cursor-pointer' : ''}`} onClick={onClick}>
     {children}
   </tr>
 ));

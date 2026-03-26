@@ -1,17 +1,9 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import {
-  ArrowRightLeft,
-  Clipboard,
-  Clock,
-  MapPin,
-  Package2,
-  Shield,
-  User,
-} from 'lucide-react';
+import { ArrowsLeftRight, Clipboard, MapPin, Package, Shield, User } from '@phosphor-icons/react';
 import {
   KeyValueGrid,
 } from '../../Inventario/components/SharedComponents';
-import { SideSheet } from '../../Inventario/components/ModalComponents';
+import { SideSheet } from '../../ui/ModalElements';
 import { DeliveryBreakdown, KardexService } from '../../../services/KardexService';
 import { Establecimiento } from '../../../types';
 import { COMPONENT_STYLES, getMovimientoConfig } from '../constants';
@@ -81,14 +73,10 @@ const SectionCard: React.FC<{
   icon: React.ElementType;
   children: React.ReactNode;
 }> = ({ title, icon: Icon, children }) => (
-  <section className="space-y-4 rounded-[22px] border border-slate-200 bg-slate-50/60 p-4">
-    <header className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-teal-700 shadow-sm ring-1 ring-slate-200">
-        <Icon className="h-4 w-4" />
-      </div>
-      <div>
-        <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-700">{title}</h3>
-      </div>
+  <section className="mt-8 border-t border-gray-100 pt-6 last:mb-0">
+    <header className="mb-4 flex items-center gap-2">
+      <Icon className="h-5 w-5 text-gray-400" />
+      <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
     </header>
     {children}
   </section>
@@ -183,32 +171,32 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
       icon={movementConfig.icon}
       footer={
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
-          <span className="font-mono text-xs text-slate-400">ID {movimiento.id.slice(0, 8)}...</span>
+          <span className="font-medium tabular-nums tracking-tight text-xs text-zinc-400">ID {movimiento.id.slice(0, 8)}...</span>
           <button type="button" onClick={onClose} className={COMPONENT_STYLES.button.primary}>
             Cerrar
           </button>
         </div>
       }
     >
-      <div className="space-y-5">
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-[22px] border border-slate-200 bg-white p-4">
-            <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Cantidad</p>
-            <p className={`mt-2 text-2xl font-semibold ${delta >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <div className="px-5 py-4 sm:p-5">
+            <dt className="text-sm font-medium text-gray-500">Cantidad</dt>
+            <dd className={`mt-1 text-2xl font-semibold tracking-tight ${delta >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
               {delta >= 0 ? '+' : '-'}
               {Math.abs(delta).toLocaleString()}
-            </p>
+            </dd>
           </div>
-          <div className="rounded-[22px] border border-slate-200 bg-white p-4">
-            <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Saldo final</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">
+          <div className="px-5 py-4 sm:p-5">
+            <dt className="text-sm font-medium text-gray-500">Saldo final</dt>
+            <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
               {movimiento.saldoActual.toLocaleString()}
-            </p>
+            </dd>
           </div>
-          <div className="rounded-[22px] border border-slate-200 bg-white p-4">
-            <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Fecha / hora</p>
-            <p className="mt-2 text-lg font-semibold text-slate-900">{fechaMovimiento.time}</p>
-            <p className="mt-1 text-xs text-slate-500">{fechaMovimiento.full}</p>
+          <div className="px-5 py-4 sm:p-5">
+            <dt className="text-sm font-medium text-gray-500">Fecha / hora</dt>
+            <dd className="mt-1 text-lg font-semibold tracking-tight text-gray-900">{fechaMovimiento.time}</dd>
+            <dd className="mt-0.5 text-xs text-gray-500">{fechaMovimiento.full}</dd>
           </div>
         </div>
 
@@ -219,19 +207,19 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
               { label: 'Tipo de movimiento', value: <span className={movementConfig.badgeClassName}>{movementConfig.label}</span> },
               { label: 'Producto', value: <span className="font-medium">{movimiento.item?.nombre || 'Sin referencia'}</span> },
               { label: 'Naturaleza', value: <span className="capitalize">{movimiento.tipo}</span> },
-              { label: 'Cantidad registrada', value: <span className="font-mono">{movimiento.cantidad.toLocaleString()}</span> },
+              { label: 'Cantidad registrada', value: <span className="font-medium tabular-nums tracking-tight">{movimiento.cantidad.toLocaleString()}</span> },
             ]}
           />
         </SectionCard>
 
-        <SectionCard title="Producto y lote" icon={Package2}>
+        <SectionCard title="Producto y lote" icon={Package}>
           <KeyValueGrid
             columns={2}
             items={[
               { label: 'Producto', value: <span className="font-medium">{movimiento.item?.nombre || 'Sin referencia'}</span> },
-              { label: 'Lote', value: <span className="font-mono">{movimiento.lote?.numero || 'Sin lote'}</span> },
+              { label: 'Lote', value: <span className="font-medium tabular-nums tracking-tight">{movimiento.lote?.numero || 'Sin lote'}</span> },
               { label: 'Vencimiento', value: <span>{formatDate(movimiento.lote?.fechaVencimiento)}</span> },
-              { label: 'Saldo anterior', value: <span className="font-mono">{movimiento.saldoAnterior.toLocaleString()}</span> },
+              { label: 'Saldo anterior', value: <span className="font-medium tabular-nums tracking-tight">{movimiento.saldoAnterior.toLocaleString()}</span> },
             ]}
           />
         </SectionCard>
@@ -241,7 +229,7 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
             columns={2}
             items={[
               { label: 'Documento', value: <span className="font-medium">{movimiento.documento}</span> },
-              { label: 'Número', value: <span className="font-mono">{movimiento.numeroDocumento}</span> },
+              { label: 'Número', value: <span className="font-medium tabular-nums tracking-tight">{movimiento.numeroDocumento}</span> },
               { label: 'Fecha', value: <span>{fechaMovimiento.full}</span> },
               { label: 'Hora', value: <span>{fechaMovimiento.time}</span> },
             ]}
@@ -261,9 +249,9 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
         ) : null}
 
         {movimiento.tipoMovimiento === 'salida' ? (
-          <SectionCard title="Distribución de entrega" icon={ArrowRightLeft}>
+          <SectionCard title="Distribución de entrega" icon={ArrowsLeftRight}>
             {loadingDelivery ? (
-              <div className="rounded-[22px] border border-slate-200 bg-white px-4 py-5 text-sm text-slate-600">
+              <div className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-5 text-sm text-gray-500">
                 Cargando distribución del vale...
               </div>
             ) : deliveryBreakdown ? (
@@ -271,16 +259,16 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
                 <KeyValueGrid
                   columns={3}
                   items={[
-                    { label: 'Vale', value: <span className="font-mono">{deliveryBreakdown.numeroVale}</span> },
+                    { label: 'Vale', value: <span className="font-medium tabular-nums tracking-tight">{deliveryBreakdown.numeroVale}</span> },
                     { label: 'Destinos', value: <span className="font-medium">{deliveryBreakdown.totalEstablecimientos}</span> },
                     { label: 'Total entregado', value: <span className="font-medium">{deliveryBreakdown.totalVacunas.toLocaleString()}</span> },
                   ]}
                 />
 
-                <div className="overflow-hidden rounded-[22px] border border-slate-200 bg-white">
+                <div className="overflow-hidden rounded-lg border border-gray-200 bg-white mt-4">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200">
-                      <thead className={COMPONENT_STYLES.table.header}>
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
                         <tr>
                           <th className={COMPONENT_STYLES.table.headerCell}>Establecimiento</th>
                           <th className={COMPONENT_STYLES.table.headerCell}>Código</th>
@@ -288,17 +276,17 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
                           <th className={COMPONENT_STYLES.table.headerCell}>Tipo</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-zinc-100">
                         {deliveryBreakdown.detalles.map((detalle) => (
                           <tr key={`${detalle.establecimientoId}-${detalle.vacunaId}-${detalle.cantidadEntregada}`}>
                             <td className={COMPONENT_STYLES.table.cell}>
-                              <p className="text-sm font-medium text-slate-900">{detalle.establecimientoNombre}</p>
+                              <p className="text-sm font-medium text-zinc-900">{detalle.establecimientoNombre}</p>
                             </td>
                             <td className={COMPONENT_STYLES.table.cell}>
-                              <p className="font-mono text-xs text-slate-500">{detalle.establecimientoCodigo}</p>
+                              <p className="font-medium tabular-nums tracking-tight text-xs text-zinc-500">{detalle.establecimientoCodigo}</p>
                             </td>
                             <td className={`${COMPONENT_STYLES.table.cell} text-right`}>
-                              <span className="font-mono text-sm font-semibold text-slate-900">
+                              <span className="font-medium tabular-nums tracking-tight text-sm font-semibold text-zinc-900">
                                 {detalle.cantidadEntregada.toLocaleString()}
                               </span>
                             </td>
@@ -321,7 +309,7 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
                 </div>
               </div>
             ) : (
-              <div className="rounded-[22px] border border-slate-200 bg-white px-4 py-5 text-sm text-slate-600">
+              <div className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-5 text-sm text-gray-500">
                 No se encontró un desglose adicional para este movimiento.
               </div>
             )}
@@ -340,12 +328,11 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
             ]}
           />
 
-          <div className="rounded-[22px] border border-slate-200 bg-white p-4">
-            <div className="mb-2 flex items-center gap-2 text-slate-600">
-              <Clock className="h-4 w-4" />
+          <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div className="mb-2 flex items-center gap-2 text-gray-500">
               <span className="text-sm font-medium">Observaciones</span>
             </div>
-            <p className="text-sm text-slate-700">
+            <p className="text-sm text-gray-700">
               {movimiento.observaciones || 'Sin observaciones registradas para este movimiento.'}
             </p>
           </div>
@@ -357,3 +344,4 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
 
 export const MovimientoDetalleModal = memo(MovimientoDetalleModalComponent);
 MovimientoDetalleModal.displayName = 'MovimientoDetalleModal';
+ 

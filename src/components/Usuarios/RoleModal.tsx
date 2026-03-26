@@ -1,18 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { 
-  X, 
-  Shield, 
-  Loader2, 
-  AlertCircle, 
-  Check,
-  Code,
-  FileText,
-  ToggleLeft,
-  ToggleRight,
-  Sparkles,
-  Info
-} from 'lucide-react';
+import { X, Shield, CircleNotch, WarningCircle, Check, Code, FileText, ToggleLeft, ToggleRight, Sparkle, Info } from '@phosphor-icons/react';
 import { Role, CreateRoleDto, UpdateRoleDto } from '../../types';
 import { COMPONENT_STYLES } from './constants';
 
@@ -240,17 +228,17 @@ const RoleModal: React.FC<RoleModalProps> = ({
         className={`${COMPONENT_STYLES.modal.containerShell} max-w-lg max-h-[92vh] flex flex-col sm:rounded-[28px]`}
       >
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-100/80">
+        <div className="px-6 py-5 border-b border-zinc-200 bg-gradient-to-r from-zinc-50 via-white to-zinc-100/80">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-600 shadow-[0_16px_30px_-18px_rgba(13,148,136,0.75)]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-600 to-zinc-600 shadow-[0_16px_30px_-18px_rgba(13,148,136,0.75)]">
                 <Shield className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
               <div>
-                <h2 id="role-modal-title" className="text-xl font-bold text-gray-900">
+                <h2 id="role-modal-title" className="text-xl font-bold text-zinc-900">
                   {isEditing ? 'Editar Rol' : 'Crear Nuevo Rol'}
                 </h2>
-                <p className="text-sm text-gray-600 mt-0.5">
+                <p className="text-sm text-zinc-600 mt-0.5">
                   {isEditing 
                     ? `Modificando: ${editingRole.nombre}` 
                     : 'Define un nuevo rol para el sistema'}
@@ -287,8 +275,8 @@ const RoleModal: React.FC<RoleModalProps> = ({
           <div className="space-y-5">
             {/* Nombre */}
             <div>
-              <label htmlFor="nombre" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <FileText className="h-4 w-4 text-gray-400" />
+              <label htmlFor="nombre" className="flex items-center gap-2 text-sm font-medium text-zinc-700 mb-2">
+                <FileText className="h-4 w-4 text-zinc-400" />
                 Nombre del Rol
                 <span className="text-rose-500">*</span>
               </label>
@@ -311,11 +299,11 @@ const RoleModal: React.FC<RoleModalProps> = ({
               />
               {errors.nombre && touched.nombre ? (
                 <p id="nombre-error" className="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
-                  <AlertCircle className="h-3.5 w-3.5" />
+                  <WarningCircle className="h-3.5 w-3.5" />
                   {errors.nombre}
                 </p>
               ) : (
-                <p className="mt-1.5 text-xs text-gray-500">
+                <p className="mt-1.5 text-xs text-zinc-500">
                   Nombre descriptivo para identificar el rol
                 </p>
               )}
@@ -323,13 +311,13 @@ const RoleModal: React.FC<RoleModalProps> = ({
 
             {/* Código */}
             <div>
-              <label htmlFor="codigo" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <Code className="h-4 w-4 text-gray-400" />
+              <label htmlFor="codigo" className="flex items-center gap-2 text-sm font-medium text-zinc-700 mb-2">
+                <Code className="h-4 w-4 text-zinc-400" />
                 Código del Rol
                 <span className="text-rose-500">*</span>
                 {!isEditing && formData.codigo && (
-                  <span className="ml-auto flex items-center gap-1 text-xs text-teal-600">
-                    <Sparkles className="h-3 w-3" />
+                  <span className="ml-auto flex items-center gap-1 text-xs text-zinc-600">
+                    <Sparkle className="h-3 w-3" />
                     Generado automáticamente
                   </span>
                 )}
@@ -344,7 +332,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
                   errors.codigo && touched.codigo 
                     ? COMPONENT_STYLES.input.error 
                     : COMPONENT_STYLES.input.normal
-                } ${isSystemRole ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                } ${isSystemRole ? 'bg-zinc-50 cursor-not-allowed' : ''}`}
                 placeholder="supervisor_inventario"
                 disabled={isLoading || isSubmitting || isSystemRole}
                 aria-invalid={!!errors.codigo}
@@ -352,11 +340,11 @@ const RoleModal: React.FC<RoleModalProps> = ({
               />
               {errors.codigo && touched.codigo ? (
                 <p id="codigo-error" className="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
-                  <AlertCircle className="h-3.5 w-3.5" />
+                  <WarningCircle className="h-3.5 w-3.5" />
                   {errors.codigo}
                 </p>
               ) : (
-                <p id="codigo-hint" className="mt-1.5 text-xs text-gray-500">
+                <p id="codigo-hint" className="mt-1.5 text-xs text-zinc-500">
                   Identificador único. Solo letras minúsculas, números y guiones bajos.
                 </p>
               )}
@@ -364,10 +352,10 @@ const RoleModal: React.FC<RoleModalProps> = ({
 
             {/* Descripción */}
             <div>
-              <label htmlFor="descripcion" className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <FileText className="h-4 w-4 text-gray-400" />
+              <label htmlFor="descripcion" className="flex items-center gap-2 text-sm font-medium text-zinc-700 mb-2">
+                <FileText className="h-4 w-4 text-zinc-400" />
                 Descripción
-                <span className="ml-auto text-xs text-gray-400">
+                <span className="ml-auto text-xs text-zinc-400">
                   {formData.descripcion.length}/500
                 </span>
               </label>
@@ -389,7 +377,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
               />
               {errors.descripcion && touched.descripcion && (
                 <p id="descripcion-error" className="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
-                  <AlertCircle className="h-3.5 w-3.5" />
+                  <WarningCircle className="h-3.5 w-3.5" />
                   {errors.descripcion}
                 </p>
               )}
@@ -397,7 +385,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
 
             {/* Estado */}
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+              <label className="flex items-center gap-2 text-sm font-medium text-zinc-700 mb-3">
                 Estado del Rol
               </label>
               <div className="flex gap-3">
@@ -408,10 +396,10 @@ const RoleModal: React.FC<RoleModalProps> = ({
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
                     formData.estado === 'activo'
                       ? 'border-emerald-300 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 shadow-sm'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
                   }`}
                 >
-                  <ToggleRight className={`h-5 w-5 ${formData.estado === 'activo' ? 'text-emerald-600' : 'text-gray-400'}`} />
+                  <ToggleRight className={`h-5 w-5 ${formData.estado === 'activo' ? 'text-emerald-600' : 'text-zinc-400'}`} />
                   <span className="font-medium">Activo</span>
                   {formData.estado === 'activo' && (
                     <Check className="h-4 w-4 text-emerald-600" />
@@ -423,18 +411,18 @@ const RoleModal: React.FC<RoleModalProps> = ({
                   disabled={isLoading || isSubmitting}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
                     formData.estado === 'inactivo'
-                      ? 'border-slate-300 bg-slate-100 text-slate-700 ring-1 ring-slate-200 shadow-sm'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'border-zinc-300 bg-zinc-100 text-zinc-700 ring-1 ring-zinc-200 shadow-sm'
+                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
                   }`}
                 >
-                  <ToggleLeft className={`h-5 w-5 ${formData.estado === 'inactivo' ? 'text-gray-600' : 'text-gray-400'}`} />
+                  <ToggleLeft className={`h-5 w-5 ${formData.estado === 'inactivo' ? 'text-zinc-600' : 'text-zinc-400'}`} />
                   <span className="font-medium">Inactivo</span>
                   {formData.estado === 'inactivo' && (
-                    <Check className="h-4 w-4 text-gray-600" />
+                    <Check className="h-4 w-4 text-zinc-600" />
                   )}
                 </button>
               </div>
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-zinc-500">
                 {formData.estado === 'activo' 
                   ? 'Los usuarios con este rol podrán acceder al sistema' 
                   : 'Los usuarios con este rol no podrán iniciar sesión'}
@@ -444,7 +432,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/70">
+        <div className="px-6 py-4 border-t border-zinc-200 bg-zinc-50/70">
           <div className="flex items-center justify-end gap-3">
             <button
               type="button"
@@ -460,7 +448,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
               disabled={!canSubmit}
               className={COMPONENT_STYLES.button.primary}
             >
-              {(isLoading || isSubmitting) && <Loader2 className="h-4 w-4 animate-spin" />}
+              {(isLoading || isSubmitting) && <CircleNotch className="h-4 w-4 animate-spin" />}
               <Check className="h-4 w-4" />
               <span>{isEditing ? 'Actualizar Rol' : 'Crear Rol'}</span>
             </button>
@@ -474,3 +462,4 @@ const RoleModal: React.FC<RoleModalProps> = ({
 };
 
 export default React.memo(RoleModal);
+   

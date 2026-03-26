@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Check } from 'lucide-react';
+import { Check } from '@phosphor-icons/react';
 
 interface ValeIndicatorProps {
   tieneVale: boolean;
@@ -10,7 +10,7 @@ interface ValeIndicatorProps {
 
 /**
  * Indicador visual minimalista para mostrar que una entrega tiene vale generado.
- * ISO 25010: Usabilidad, Accesibilidad, Consistencia
+ * Tufte Principles / Zinc Aesthetics
  */
 export const ValeIndicator: React.FC<ValeIndicatorProps> = memo(({
   tieneVale,
@@ -39,17 +39,17 @@ export const ValeIndicator: React.FC<ValeIndicatorProps> = memo(({
       className={`
         ${sizeClasses[size]}
         inline-flex items-center justify-center
-        bg-teal-500 text-white
-        rounded-full
+        bg-zinc-900 text-white
+        rounded-md
         transition-transform duration-200
-        hover:scale-110
-        cursor-default
+        hover:scale-105
+        cursor-default shadow-sm border border-zinc-900
       `}
       title={showTooltip ? tooltipText : undefined}
       aria-label={tooltipText}
       role="status"
     >
-      <Check className={iconClasses[size]} strokeWidth={3} />
+      <Check className={iconClasses[size]} weight="bold" />
     </div>
   );
 });

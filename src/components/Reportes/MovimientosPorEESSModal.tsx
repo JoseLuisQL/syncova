@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileSpreadsheet } from 'lucide-react';
+import { FileXls } from '@phosphor-icons/react';
 import { useToastContext } from '../../contexts/ToastContext';
 import {
   DateInput,
@@ -7,7 +7,7 @@ import {
   Modal,
   ModalFooter,
   SelectInput,
-} from '../Inventario/components/ModalComponents';
+} from '../ui/ModalElements';
 import { getFechaPeruActual, getFechaPeruMesAnterior } from './utils';
 
 interface Establecimiento {
@@ -86,7 +86,7 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
       onClose={onClose}
       title="Movimientos por EESS"
       subtitle="Configura el periodo y el centro de acopio antes de generar el archivo Excel."
-      icon={FileSpreadsheet}
+      icon={FileXls}
       size="lg"
       footer={(
         <ModalFooter
@@ -103,7 +103,7 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
           title="Resumen del reporte"
           description="El archivo agrupa movimientos por establecimiento de salud y vacuna dentro del periodo seleccionado."
         >
-          <div className="rounded-[18px] border border-sky-200 bg-sky-50/80 p-4 text-sm leading-6 text-sky-900">
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-900">
             Úsalo cuando necesites revisar distribución, entregas y saldos por EESS en una sola exportación.
           </div>
         </FormSection>

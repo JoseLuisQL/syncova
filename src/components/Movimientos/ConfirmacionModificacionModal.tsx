@@ -1,18 +1,20 @@
 import React from 'react';
 import {
-  AlertCircle,
-  AlertTriangle,
+  WarningCircle,
+  Warning,
   ArrowRight,
   CheckCircle,
   FileText,
-  Loader2,
+  CircleNotch,
   Package,
   Syringe,
-  TrendingDown,
-  TrendingUp,
-} from 'lucide-react';
+  TrendDown,
+  TrendUp,
+  Receipt,
+} from '@phosphor-icons/react';
 import { Modal } from '../Establecimientos/components';
 import { ImpactoModificacion } from '../../services/valesService';
+import { COMPONENT_STYLES } from './constants';
 
 interface ConfirmacionModificacionModalProps {
   isOpen: boolean;
@@ -28,32 +30,32 @@ const ImpactSummaryCard: React.FC<{
   label: string;
   current: number;
   next: number;
-  tone: 'teal' | 'cyan';
+  tone: 'base' | 'alt';
 }> = ({ label, current, next, tone }) => {
   const diff = next - current;
-  const className =
-    tone === 'cyan'
-      ? 'border-cyan-200 bg-cyan-50/70 text-cyan-900'
-      : 'border-teal-200 bg-teal-50/70 text-teal-900';
 
   return (
-    <div className={`rounded-[20px] border p-4 ${className}`}>
-      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</p>
-      <div className="mt-3 flex items-center justify-between gap-3">
+    <div className={`rounded-[16px] border p-5 ${tone === 'alt' ? 'bg-zinc-50 border-zinc-200' : 'bg-white border-zinc-200 shadow-sm'}`}>
+      <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-400">{label}</p>
+      <div className="mt-4 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs text-slate-500">Actual</p>
-          <p className="text-lg font-semibold">{current.toLocaleString()}</p>
+          <p className="text-[0.65rem] font-bold tracking-widest uppercase text-zinc-500 mb-1">Base</p>
+          <p className="text-xl font-black tracking-tight text-zinc-900">{current.toLocaleString()}</p>
         </div>
-        <ArrowRight className="h-4 w-4 text-slate-400" />
+        <ArrowRight className="h-5 w-5 text-zinc-300" weight="bold" />
         <div className="text-right">
-          <p className="text-xs text-slate-500">Después</p>
-          <p className="text-lg font-semibold">{next.toLocaleString()}</p>
+          <p className="text-[0.65rem] font-bold tracking-widest uppercase text-zinc-900 mb-1">Target</p>
+          <p className="text-xl font-black tracking-tight text-zinc-900">{next.toLocaleString()}</p>
         </div>
       </div>
-      <p className={`mt-3 text-sm font-semibold ${diff >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-        {diff >= 0 ? '+' : ''}
-        {diff.toLocaleString()} unidades
-      </p>
+      <div className="mt-4 border-t border-zinc-100 pt-3 flex justify-between items-center">
+        <span className="text-xs font-semibold text-zinc-500">Delta</span>
+        <span className={`text-[0.9rem] font-bold px-2 py-0.5 rounded-md border ${
+          diff > 0 ? 'bg-zinc-900 text-white border-zinc-900' : diff < 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-zinc-100 text-zinc-600 border-zinc-200'
+        }`}>
+          {diff > 0 ? '+' : ''}{diff.toLocaleString()} U
+        </span>
+      </div>
     </div>
   );
 };
@@ -75,9 +77,9 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
       onClose={() => {
         if (!isLoading && !isProcessing) onClose();
       }}
-      title="Confirmar modificación"
-      subtitle="La actualización afectará stock, kardex y vales ya generados."
-      icon={AlertTriangle}
+      title="Validación de Alteración"
+      subtitle="La modificación impactará directamente en balance, kardex y facturas emitidas."
+      icon={Warning}
       size="xl"
       footer={
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -85,216 +87,205 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
             type="button"
             onClick={onCancel}
             disabled={isProcessing || isLoading}
-            className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className={COMPONENT_STYLES.button.secondary}
           >
-            Cancelar
+            Abortar
           </button>
           <button
             type="button"
             onClick={onConfirm}
             disabled={isProcessing || isLoading || !impacto}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-teal-700 hover:to-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className={COMPONENT_STYLES.button.primary}
           >
-            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-            <span>{isProcessing ? 'Procesando...' : 'Confirmar modificación'}</span>
+            {isProcessing ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <CheckCircle className="h-4 w-4" weight="bold" />}
+            <span>{isProcessing ? 'Firmando Operación...' : 'Confirmar Alteración'}</span>
           </button>
         </div>
       }
     >
       {isLoading ? (
-        <div className="inventory-loading-shell rounded-[22px] border border-slate-200 bg-slate-50/70 p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-teal-200 bg-white text-teal-600 inventory-breathe">
-              <Loader2 className="h-4 w-4 animate-spin" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Calculando impacto de la modificación</p>
-              <p className="text-xs text-slate-500">Preparando el resumen de stock, vales y kardex.</p>
-            </div>
-          </div>
+        <div className="rounded-[16px] border border-zinc-200 bg-white p-6 shadow-sm flex flex-col items-center justify-center min-h-[200px]">
+          <CircleNotch className="h-8 w-8 text-zinc-900 animate-spin mb-4" weight="bold" />
+          <p className="text-[0.95rem] font-bold text-zinc-900 tracking-tight">Simulando el impacto matricial...</p>
+          <p className="mt-1 text-sm text-zinc-500">El motor de proyecciones está resolviendo el delta.</p>
         </div>
       ) : impacto ? (
-        <div className="space-y-5">
-          <section
-            className={`rounded-[22px] border p-4 ${
-              esRestauracion ? 'border-emerald-200 bg-emerald-50/70' : 'border-rose-200 bg-rose-50/70'
-            }`}
-          >
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-6">
+          <section className={`rounded-[16px] border p-5 ${esRestauracion ? 'border-zinc-300 bg-zinc-50 shadow-sm' : 'border-zinc-900 bg-zinc-900 shadow-md'}`}>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-900">{impacto.resumen.establecimientoNombre}</p>
-                <p className="mt-1 text-sm text-slate-500">{impacto.resumen.vacunaNombre}</p>
+                <p className={`text-[0.95rem] font-black tracking-tight ${esRestauracion ? 'text-zinc-900' : 'text-white'}`}>{impacto.resumen.establecimientoNombre}</p>
+                <p className={`mt-1 text-sm font-medium ${esRestauracion ? 'text-zinc-500' : 'text-zinc-400'}`}>{impacto.resumen.vacunaNombre}</p>
               </div>
-              <div className="flex items-center gap-3 rounded-[18px] border border-white/70 bg-white/80 px-4 py-3">
+              <div className={`flex items-center gap-3 rounded-xl border px-4 py-3 shadow-sm ${esRestauracion ? 'bg-white border-zinc-200' : 'bg-black/30 border-white/10'}`}>
                 <div>
-                  <p className="text-xs text-slate-500">Actual</p>
-                  <p className="text-lg font-semibold text-slate-900">{impacto.resumen.cantidadActual.toLocaleString()}</p>
+                  <p className={`text-[0.65rem] font-bold uppercase tracking-widest ${esRestauracion ? 'text-zinc-400' : 'text-zinc-500'}`}>Estático</p>
+                  <p className={`text-xl font-black tracking-tight ${esRestauracion ? 'text-zinc-900' : 'text-white'}`}>{impacto.resumen.cantidadActual.toLocaleString()}</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-slate-400" />
+                <ArrowRight className={`h-4 w-4 ${esRestauracion ? 'text-zinc-300' : 'text-zinc-600'}`} weight="bold" />
                 <div>
-                  <p className="text-xs text-slate-500">Nuevo</p>
-                  <p className="text-lg font-semibold text-slate-900">{impacto.resumen.cantidadNueva.toLocaleString()}</p>
+                  <p className={`text-[0.65rem] font-bold uppercase tracking-widest ${esRestauracion ? 'text-zinc-900' : 'text-zinc-300'}`}>Shift</p>
+                  <p className={`text-xl font-black tracking-tight ${esRestauracion ? 'text-zinc-900' : 'text-white'}`}>{impacto.resumen.cantidadNueva.toLocaleString()}</p>
                 </div>
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                    impacto.resumen.diferencia >= 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'
-                  }`}
-                >
-                  {impacto.resumen.diferencia >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                  {impacto.resumen.diferencia > 0 ? '+' : ''}
-                  {impacto.resumen.diferencia.toLocaleString()}
-                </span>
+                <div className="pl-3 ml-2 border-l border-white/10 flex items-center h-full">
+                  <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-black tracking-widest ${
+                    impacto.resumen.diferencia > 0 ? 'bg-zinc-800 text-white border-zinc-700' : impacto.resumen.diferencia < 0 ? 'bg-white text-zinc-900 border-zinc-200' : 'bg-transparent text-zinc-500 border-zinc-600'
+                  }`}>
+                    {impacto.resumen.diferencia > 0 ? <TrendUp className="h-3 w-3" weight="bold" /> : impacto.resumen.diferencia < 0 ? <TrendDown className="h-3 w-3" weight="bold" /> : null}
+                    {impacto.resumen.diferencia > 0 ? '+' : ''}{impacto.resumen.diferencia.toLocaleString()}
+                  </span>
+                </div>
               </div>
             </div>
           </section>
 
-          <section className="grid gap-4 lg:grid-cols-2">
+          <section className="grid gap-4 sm:grid-cols-2">
             <ImpactSummaryCard
-              label="Stock de vacunas"
+              label="Impacto en Biológicos"
               current={impacto.impactoVacunas.stockTotalActual}
               next={impacto.impactoVacunas.stockTotalDespues}
-              tone="teal"
+              tone="base"
             />
             <ImpactSummaryCard
-              label="Stock de jeringas"
+              label="Impacto en Insumos (Jeringas)"
               current={impacto.impactoJeringas.stockTotalActual}
               next={impacto.impactoJeringas.stockTotalDespues}
-              tone="cyan"
+              tone="alt"
             />
           </section>
 
           <section className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-[22px] border border-slate-200 bg-white p-4">
-              <div className="flex items-center gap-2">
-                <Package className="h-4 w-4 text-teal-600" />
-                <h3 className="text-sm font-semibold text-slate-900">Lotes de vacunas</h3>
+            <div className="rounded-[16px] border border-zinc-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-5 border-b border-zinc-100 pb-3">
+                <div className="p-2 bg-zinc-50 border border-zinc-200 rounded-lg">
+                  <Package className="h-4 w-4 text-zinc-900" weight="duotone" />
+                </div>
+                <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Map de Lotes Affected</h3>
               </div>
-              <div className="mt-4 space-y-2">
+              <div className="space-y-2">
                 {impacto.impactoVacunas.lotesAfectados.length ? (
                   impacto.impactoVacunas.lotesAfectados.slice(0, 4).map((lote) => {
                     const diferencia = lote.cantidadDespues - lote.cantidadActual;
                     return (
-                      <div key={lote.id} className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-3 py-2.5">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-slate-800">{lote.numero}</p>
-                            <p className="text-xs text-slate-500">
-                              {lote.cantidadActual.toLocaleString()} → {lote.cantidadDespues.toLocaleString()}
-                            </p>
-                          </div>
-                          <span className={`text-sm font-semibold ${diferencia >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                            {diferencia > 0 ? '+' : ''}
-                            {diferencia.toLocaleString()}
-                          </span>
+                      <div key={lote.id} className="rounded-xl border border-zinc-100 bg-zinc-50 px-3 py-2.5 flex items-center justify-between">
+                        <div className="min-w-0 pr-2">
+                          <p className="truncate text-[0.85rem] font-bold tracking-tight text-zinc-900">{lote.numero}</p>
+                          <p className="text-[0.7rem] font-medium text-zinc-500 mt-0.5 whitespace-nowrap">
+                            <span className="line-through opacity-70">{lote.cantidadActual.toLocaleString()}</span> &rarr; <span className="font-bold text-zinc-800">{lote.cantidadDespues.toLocaleString()}</span>
+                          </p>
                         </div>
+                        <span className={`shrink-0 text-[0.8rem] font-black px-2 py-0.5 rounded-md border ${
+                          diferencia > 0 ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-700 border-zinc-200'
+                        }`}>
+                          {diferencia > 0 ? '+' : ''}{diferencia.toLocaleString()}
+                        </span>
                       </div>
                     );
                   })
                 ) : (
-                  <p className="text-sm text-slate-500">No se reportaron lotes afectados.</p>
+                  <p className="text-[0.8rem] font-medium text-zinc-400 py-2">Matriz vacía. Ningún lote será alterado.</p>
                 )}
               </div>
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-white p-4">
-              <div className="flex items-center gap-2">
-                <Syringe className="h-4 w-4 text-cyan-600" />
-                <h3 className="text-sm font-semibold text-slate-900">Lotes de jeringas</h3>
+            <div className="rounded-[16px] border border-zinc-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-5 border-b border-zinc-100 pb-3">
+                <div className="p-2 bg-zinc-50 border border-zinc-200 rounded-lg">
+                  <Syringe className="h-4 w-4 text-zinc-900" weight="duotone" />
+                </div>
+                <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Insumos Secundarios</h3>
               </div>
-              <div className="mt-4 space-y-2">
+              <div className="space-y-2">
                 {impacto.impactoJeringas.lotesAfectados.length ? (
                   impacto.impactoJeringas.lotesAfectados.slice(0, 4).map((lote) => {
                     const diferencia = lote.cantidadDespues - lote.cantidadActual;
                     return (
-                      <div key={lote.id} className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-3 py-2.5">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-slate-800">
-                              {lote.tipo} {lote.capacidad}
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              {lote.numero} · {lote.cantidadActual.toLocaleString()} → {lote.cantidadDespues.toLocaleString()}
-                            </p>
-                          </div>
-                          <span className={`text-sm font-semibold ${diferencia >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                            {diferencia > 0 ? '+' : ''}
-                            {diferencia.toLocaleString()}
-                          </span>
+                      <div key={lote.id} className="rounded-xl border border-zinc-100 bg-zinc-50 px-3 py-2.5 flex items-center justify-between">
+                        <div className="min-w-0 pr-2">
+                          <p className="truncate text-[0.85rem] font-bold tracking-tight text-zinc-900">
+                            {lote.tipo} {lote.capacidad} | <span className="font-normal text-zinc-500">{lote.numero}</span>
+                          </p>
+                          <p className="text-[0.7rem] font-medium text-zinc-500 mt-0.5 whitespace-nowrap">
+                            <span className="line-through opacity-70">{lote.cantidadActual.toLocaleString()}</span> &rarr; <span className="font-bold text-zinc-800">{lote.cantidadDespues.toLocaleString()}</span>
+                          </p>
                         </div>
+                        <span className={`shrink-0 text-[0.8rem] font-black px-2 py-0.5 rounded-md border ${
+                          diferencia > 0 ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-white text-zinc-700 border-zinc-200'
+                        }`}>
+                          {diferencia > 0 ? '+' : ''}{diferencia.toLocaleString()}
+                        </span>
                       </div>
                     );
                   })
                 ) : (
-                  <p className="text-sm text-slate-500">No se reportaron lotes afectados.</p>
+                  <p className="text-[0.8rem] font-medium text-zinc-400 py-2">No requerirá auto-balance en insumos.</p>
                 )}
               </div>
             </div>
           </section>
 
-          <section className="grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-            <div className="rounded-[22px] border border-slate-200 bg-white p-4">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-slate-600" />
-                <h3 className="text-sm font-semibold text-slate-900">Kardex</h3>
+          <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="rounded-[16px] border border-zinc-200 bg-zinc-50 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <FileText className="h-4 w-4 text-zinc-500" weight="duotone" />
+                <h3 className="text-[0.75rem] font-bold uppercase tracking-widest text-zinc-900">Log de Kardex</h3>
               </div>
-              <div className="mt-4 rounded-[18px] border border-slate-200 bg-slate-50/70 p-4">
-                <p className="text-sm font-semibold text-slate-900">
-                  {impacto.kardex.registrosNuevos} registro(s) de{' '}
-                  <span className={impacto.kardex.tipoMovimiento === 'ingreso' ? 'text-emerald-700' : 'text-amber-700'}>
-                    {impacto.kardex.tipoMovimiento === 'ingreso' ? 'ingreso' : 'salida'}
+              <div className="rounded-xl bg-white border border-zinc-200 p-4">
+                <p className="text-[0.95rem] font-bold tracking-tight text-zinc-900">
+                  {impacto.kardex.registrosNuevos} traza(s) de tipo{' '}
+                  <span className={`px-2 py-0.5 rounded-md border uppercase text-[0.65rem] tracking-wider ${impacto.kardex.tipoMovimiento === 'ingreso' ? 'bg-zinc-900 text-white border-zinc-900' : 'bg-zinc-100 text-zinc-600 border-zinc-300'}`}>
+                    {impacto.kardex.tipoMovimiento === 'ingreso' ? 'In' : 'Out'}
                   </span>
                 </p>
-                <p className="mt-1 text-xs text-slate-500">Documento asociado: VALE_ENTREGA_AJUSTE</p>
+                <p className="mt-2 text-xs font-mono text-zinc-400 bg-zinc-50 p-2 rounded-lg border border-zinc-100">REF: VALE_ENTREGA_AJUSTE</p>
               </div>
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-white p-4">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-slate-600" />
-                <h3 className="text-sm font-semibold text-slate-900">Vales afectados</h3>
+            <div className="rounded-[16px] border border-zinc-200 bg-zinc-50 p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <Receipt className="h-4 w-4 text-zinc-500" weight="duotone" />
+                <h3 className="text-[0.75rem] font-bold uppercase tracking-widest text-zinc-900">Tickets Ligados</h3>
               </div>
-              <div className="mt-4 space-y-2">
+              <div className="space-y-2">
                 {impacto.valesAfectados.length ? (
                   impacto.valesAfectados.map((vale) => (
-                    <div key={vale.id} className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-3 py-2.5">
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-800">{vale.numero}</p>
-                          <p className="text-xs text-slate-500">
-                            {new Date(vale.fechaGeneracion).toLocaleDateString('es-PE')}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold text-slate-900">
-                            {vale.cantidadAnterior.toLocaleString()} → {vale.cantidadNueva.toLocaleString()}
-                          </p>
-                        </div>
+                    <div key={vale.id} className="rounded-xl bg-white border border-zinc-200 p-3 flex justify-between items-center">
+                      <div>
+                        <p className="text-[0.85rem] font-black tracking-tight text-zinc-900">{vale.numero}</p>
+                        <p className="text-[0.65rem] font-bold uppercase tracking-wider text-zinc-400 mt-0.5">
+                          {new Date(vale.fechaGeneracion).toLocaleDateString('es-PE')}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[0.85rem] font-bold text-zinc-900">
+                          {vale.cantidadAnterior.toLocaleString()} <ArrowRight className="inline mx-1 h-3 w-3 text-zinc-400" /> {vale.cantidadNueva.toLocaleString()}
+                        </p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-slate-500">No hay vales afectados para esta modificación.</p>
+                  <p className="text-[0.8rem] font-medium text-zinc-400 py-3 bg-white rounded-xl border border-zinc-100 text-center">Desacoplado de vales.</p>
                 )}
               </div>
             </div>
           </section>
 
           {impacto.advertencias.length ? (
-            <section className="space-y-2">
+            <section className="space-y-2 pt-2 border-t border-zinc-100">
               {impacto.advertencias.map((advertencia, index) => (
-                <div key={`${advertencia}-${index}`} className="flex items-start gap-3 rounded-[18px] border border-amber-200 bg-amber-50/70 px-4 py-3">
-                  <AlertCircle className="mt-0.5 h-4 w-4 text-amber-600" />
-                  <p className="text-sm text-amber-800">{advertencia}</p>
+                <div key={`${advertencia}-${index}`} className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+                  <WarningCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" weight="fill" />
+                  <p className="text-[0.85rem] font-bold text-rose-900 tracking-tight">{advertencia}</p>
                 </div>
               ))}
             </section>
           ) : null}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-[22px] border border-slate-200 bg-slate-50/70 px-4 py-10 text-center">
-          <AlertTriangle className="mb-3 h-8 w-8 text-slate-400" />
-          <p className="text-sm font-semibold text-slate-800">No se pudo calcular el impacto</p>
-          <p className="mt-1 text-sm text-slate-500">Intenta nuevamente antes de confirmar la modificación.</p>
+        <div className="flex flex-col items-center justify-center rounded-[16px] border border-zinc-200 bg-zinc-50 px-4 py-16 text-center">
+          <Warning className="mb-4 h-10 w-10 text-zinc-300" weight="duotone" />
+          <p className="text-[0.95rem] font-bold text-zinc-900 tracking-tight">Cálculo abortado</p>
+          <p className="mt-1 text-sm text-zinc-500">Un error fatal privó a la UI de renderizar el impacto prospectivo.</p>
         </div>
       )}
     </Modal>
