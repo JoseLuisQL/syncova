@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { ChangePasswordDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
-import { X, Shield, Eye, EyeOff, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Shield, Eye, EyeClosed, Check, WarningCircle, SpinnerGap } from '@phosphor-icons/react';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -64,8 +64,8 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
   const getStrengthColor = (score: number): string => {
     if (score <= 1) return 'bg-rose-500';
     if (score <= 2) return 'bg-amber-500';
-    if (score <= 3) return 'bg-teal-400';
-    return 'bg-teal-500';
+    if (score <= 3) return 'bg-emerald-400';
+    return 'bg-emerald-500';
   };
 
   const getStrengthLabel = (score: number): string => {
@@ -131,45 +131,45 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
 
   const modalContent = (
     <div 
-      className="fixed inset-0 bg-gray-900/40 backdrop-blur-[2px] flex items-center justify-center p-4 z-[100]"
+      className="fixed inset-0 bg-zinc-950/40 backdrop-blur-sm flex items-center justify-center p-4 z-[100]"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-zinc-200/60">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-br from-gray-50 to-white">
+        <div className="px-6 py-5 border-b border-zinc-100 bg-zinc-50/50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-md">
-                <Shield className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-950 flex items-center justify-center shadow-sm">
+                <Shield className="w-5 h-5 text-zinc-50" weight="duotone" />
               </div>
               <div>
-                <h3 id="modal-title" className="text-lg font-semibold text-gray-800">
+                <h3 id="modal-title" className="text-[17px] font-bold text-zinc-900 tracking-tight leading-tight">
                   Cambiar Contraseña
                 </h3>
-                <p className="text-xs text-gray-500">Actualiza tu contraseña de acceso</p>
+                <p className="text-[13px] font-medium text-zinc-500 mt-0.5">Actualiza tu acceso permanentemente</p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 border border-transparent transition-all focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
               aria-label="Cerrar"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" weight="bold" />
             </button>
           </div>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Current Password */}
           <div>
-            <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label htmlFor="currentPassword" className="block text-sm font-semibold text-zinc-900 mb-2">
               Contraseña Actual
             </label>
-            <div className="relative">
+            <div className="relative group/input">
               <input
                 id="currentPassword"
                 name="currentPassword"
@@ -177,12 +177,12 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                 value={formData.currentPassword}
                 onChange={handleInputChange}
                 className={`
-                  w-full px-4 py-2.5 pr-10 rounded-xl border text-sm
+                  w-full px-4 py-3 pr-10 rounded-xl border text-sm font-medium
                   transition-all duration-200
-                  focus:outline-none focus:ring-2 focus:ring-offset-0
+                  focus:outline-none focus:ring-1 focus:ring-offset-0 bg-white
                   ${errors.currentPassword 
-                    ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500' 
-                    : 'border-gray-200 focus:ring-teal-500/20 focus:border-teal-500 hover:border-gray-300'
+                    ? 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/20' 
+                    : 'border-zinc-200 focus:ring-zinc-900 focus:border-zinc-900 group-hover/input:border-zinc-300'
                   }
                 `}
                 placeholder="Ingresa tu contraseña actual"
@@ -191,15 +191,15 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               <button
                 type="button"
                 onClick={() => togglePassword('current')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 transition-colors focus:outline-none rounded-md p-1"
                 aria-label={showPasswords.current ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
-                {showPasswords.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPasswords.current ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
               </button>
             </div>
             {errors.currentPassword && (
-              <p className="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" />
+              <p className="mt-1.5 text-[13px] font-medium text-rose-600 flex items-center gap-1.5">
+                <WarningCircle className="w-4 h-4" weight="fill" />
                 {errors.currentPassword}
               </p>
             )}
@@ -207,10 +207,10 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
 
           {/* New Password */}
           <div>
-            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label htmlFor="newPassword" className="block text-sm font-semibold text-zinc-900 mb-2">
               Nueva Contraseña
             </label>
-            <div className="relative">
+            <div className="relative group/input">
               <input
                 id="newPassword"
                 name="newPassword"
@@ -218,12 +218,12 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                 value={formData.newPassword}
                 onChange={handleInputChange}
                 className={`
-                  w-full px-4 py-2.5 pr-10 rounded-xl border text-sm
+                  w-full px-4 py-3 pr-10 rounded-xl border text-sm font-medium
                   transition-all duration-200
-                  focus:outline-none focus:ring-2 focus:ring-offset-0
+                  focus:outline-none focus:ring-1 focus:ring-offset-0 bg-white
                   ${errors.newPassword 
-                    ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500' 
-                    : 'border-gray-200 focus:ring-teal-500/20 focus:border-teal-500 hover:border-gray-300'
+                    ? 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/20' 
+                    : 'border-zinc-200 focus:ring-zinc-900 focus:border-zinc-900 group-hover/input:border-zinc-300'
                   }
                 `}
                 placeholder="Ingresa tu nueva contraseña"
@@ -232,24 +232,24 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               <button
                 type="button"
                 onClick={() => togglePassword('new')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 transition-colors focus:outline-none rounded-md p-1"
               >
-                {showPasswords.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPasswords.new ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
               </button>
             </div>
             
             {/* Password Strength Indicator */}
             {formData.newPassword && (
-              <div className="mt-2 space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-1 bg-zinc-100 rounded-full overflow-hidden">
                     <div 
                       className={`h-full transition-all duration-300 ${getStrengthColor(passwordStrength.score)}`}
                       style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
                     />
                   </div>
-                  <span className={`text-xs font-medium ${
-                    passwordStrength.score <= 2 ? 'text-amber-600' : 'text-teal-600'
+                  <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                    passwordStrength.score <= 2 ? 'text-amber-600' : 'text-emerald-600'
                   }`}>
                     {getStrengthLabel(passwordStrength.score)}
                   </span>
@@ -258,8 +258,8 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
             )}
             
             {errors.newPassword && (
-              <p className="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" />
+              <p className="mt-1.5 text-[13px] font-medium text-rose-600 flex items-center gap-1.5">
+                <WarningCircle className="w-4 h-4" weight="fill" />
                 {errors.newPassword}
               </p>
             )}
@@ -267,10 +267,10 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
 
           {/* Confirm Password */}
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-zinc-900 mb-2">
               Confirmar Nueva Contraseña
             </label>
-            <div className="relative">
+            <div className="relative group/input">
               <input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -278,14 +278,14 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                 value={confirmPassword}
                 onChange={handleInputChange}
                 className={`
-                  w-full px-4 py-2.5 pr-10 rounded-xl border text-sm
+                  w-full px-4 py-3 pr-10 rounded-xl border text-sm font-medium
                   transition-all duration-200
-                  focus:outline-none focus:ring-2 focus:ring-offset-0
+                  focus:outline-none focus:ring-1 focus:ring-offset-0 bg-white
                   ${errors.confirmPassword 
-                    ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500' 
+                    ? 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/20' 
                     : confirmPassword && confirmPassword === formData.newPassword
-                      ? 'border-teal-300 focus:ring-teal-500/20 focus:border-teal-500'
-                      : 'border-gray-200 focus:ring-teal-500/20 focus:border-teal-500 hover:border-gray-300'
+                      ? 'border-emerald-300 focus:ring-emerald-500 focus:border-emerald-500 bg-emerald-50/10'
+                      : 'border-zinc-200 focus:ring-zinc-900 focus:border-zinc-900 group-hover/input:border-zinc-300'
                   }
                 `}
                 placeholder="Confirma tu nueva contraseña"
@@ -294,48 +294,48 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               <button
                 type="button"
                 onClick={() => togglePassword('confirm')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 transition-colors focus:outline-none rounded-md p-1"
               >
-                {showPasswords.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPasswords.confirm ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
               </button>
               {confirmPassword && confirmPassword === formData.newPassword && (
                 <div className="absolute right-10 top-1/2 -translate-y-1/2">
-                  <Check className="w-4 h-4 text-teal-500" />
+                  <Check className="w-5 h-5 text-emerald-500" weight="bold" />
                 </div>
               )}
             </div>
             {errors.confirmPassword && (
-              <p className="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" />
+              <p className="mt-1.5 text-[13px] font-medium text-rose-600 flex items-center gap-1.5">
+                <WarningCircle className="w-4 h-4" weight="fill" />
                 {errors.confirmPassword}
               </p>
             )}
           </div>
 
           {/* Password Requirements */}
-          <div className="bg-gray-50 rounded-xl p-4">
-            <p className="text-xs font-medium text-gray-600 mb-2">Requisitos de contraseña:</p>
-            <div className="grid grid-cols-2 gap-2">
+          <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-4">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-3">Requisitos obligatorios</p>
+            <div className="grid grid-cols-2 gap-y-2 gap-x-2">
               {[
-                { key: 'length', label: 'Mínimo 8 caracteres' },
-                { key: 'uppercase', label: 'Una mayúscula' },
-                { key: 'lowercase', label: 'Una minúscula' },
-                { key: 'number', label: 'Un número' },
+                { key: 'length', label: '8+ caracteres' },
+                { key: 'uppercase', label: '1 Mayúscula' },
+                { key: 'lowercase', label: '1 Minúscula' },
+                { key: 'number', label: '1 Número' },
               ].map(({ key, label }) => (
                 <div 
                   key={key}
-                  className={`flex items-center gap-1.5 text-xs ${
+                  className={`flex items-center gap-2 text-[13px] font-medium transition-colors duration-300 ${
                     passwordStrength.checks[key as keyof typeof passwordStrength.checks]
-                      ? 'text-teal-600'
-                      : 'text-gray-400'
+                      ? 'text-emerald-700'
+                      : 'text-zinc-500'
                   }`}
                 >
-                  <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${
+                  <div className={`w-4 h-4 rounded-[4px] flex items-center justify-center transition-colors duration-300 ${
                     passwordStrength.checks[key as keyof typeof passwordStrength.checks]
-                      ? 'bg-teal-100'
-                      : 'bg-gray-100'
+                      ? 'bg-emerald-100/80 text-emerald-600'
+                      : 'bg-zinc-200/50 text-zinc-400'
                   }`}>
-                    <Check className="w-2 h-2" />
+                    <Check className="w-3 h-3" weight="bold" />
                   </div>
                   {label}
                 </div>
@@ -349,12 +349,12 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               type="button"
               onClick={handleClose}
               className="
-                flex-1 px-4 py-2.5 rounded-xl
-                text-sm font-medium text-gray-700
-                bg-white border border-gray-200
-                hover:bg-gray-50 hover:border-gray-300
+                flex-none px-5 py-3 rounded-xl
+                text-sm font-bold text-zinc-700
+                bg-white border border-zinc-200
+                hover:bg-zinc-50 hover:text-zinc-900
                 transition-all duration-200
-                focus:outline-none focus:ring-2 focus:ring-gray-500/20
+                focus:outline-none focus:ring-2 focus:ring-zinc-900/10
               "
             >
               Cancelar
@@ -363,24 +363,23 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               type="submit"
               disabled={isLoading}
               className="
-                flex-1 px-4 py-2.5 rounded-xl
-                text-sm font-medium text-white
-                bg-gradient-to-r from-teal-500 to-cyan-600
-                hover:from-teal-600 hover:to-cyan-700
-                shadow-md shadow-teal-500/20
+                flex-1 px-5 py-3 rounded-xl
+                text-sm font-bold text-white
+                bg-zinc-900 hover:bg-zinc-800
+                shadow-sm
                 transition-all duration-200
-                focus:outline-none focus:ring-2 focus:ring-teal-500/50
+                focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2
                 disabled:opacity-50 disabled:cursor-not-allowed
                 flex items-center justify-center gap-2
               "
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <SpinnerGap className="w-5 h-5 animate-spin" weight="bold" />
                   Cambiando...
                 </>
               ) : (
-                'Cambiar Contraseña'
+                'Guardar nueva contraseña'
               )}
             </button>
           </div>

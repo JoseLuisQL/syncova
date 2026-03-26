@@ -3,22 +3,23 @@ import { useAuth } from '../../contexts/AuthContext';
 import { LoginDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useRateLimitHandler } from '../../hooks/useRateLimitHandler';
-import SivacLogo from '../common/SivacLogo';
+import { SivacLogo } from '../common/SivacLogo';
+import { User, LockKey, Eye, EyeClosed, SpinnerGap, Clock as ClockIcon, WarningCircle, XCircle } from '@phosphor-icons/react';
 
 // ============================================================================
 // CONSTANTS
 // ============================================================================
 
 const INPUT_BASE_CLASSES = 
-  'block w-full pl-11 pr-4 py-3.5 border rounded-xl text-gray-900 placeholder-gray-400 ' +
-  'focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ' +
-  'text-sm sm:text-base';
+  'block w-full pl-11 pr-4 py-3.5 border rounded-xl text-zinc-900 placeholder-zinc-400 ' +
+  'focus:outline-none focus:ring-1 focus:border-zinc-900 transition-all duration-200 bg-white ' +
+  'text-sm font-medium';
 
-const INPUT_NORMAL_CLASSES = 'border-gray-200 focus:ring-teal-500 hover:border-gray-300';
-const INPUT_ERROR_CLASSES = 'border-red-300 focus:ring-red-500 bg-red-50/30';
+const INPUT_NORMAL_CLASSES = 'border-zinc-200 hover:border-zinc-300';
+const INPUT_ERROR_CLASSES = 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30';
 
-const LABEL_CLASSES = 'block text-sm font-medium text-gray-700 mb-2';
-const ERROR_TEXT_CLASSES = 'mt-1.5 text-sm text-red-600 flex items-center gap-1.5';
+const LABEL_CLASSES = 'block text-sm font-semibold text-zinc-900 mb-2 tracking-tight';
+const ERROR_TEXT_CLASSES = 'mt-1.5 text-xs font-medium text-rose-600 flex items-center gap-1.5';
 
 // ============================================================================
 // VALIDATION HELPERS
@@ -54,100 +55,6 @@ const validateLoginForm = (data: LoginDto): ValidationErrors => {
 
   return errors;
 };
-
-// ============================================================================
-// ICON COMPONENTS
-// ============================================================================
-
-
-
-const UserIcon: React.FC<{ className?: string }> = ({ className = 'h-5 w-5' }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-    />
-  </svg>
-);
-
-const LockIcon: React.FC<{ className?: string }> = ({ className = 'h-5 w-5' }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-    />
-  </svg>
-);
-
-const EyeIcon: React.FC<{ className?: string }> = ({ className = 'h-5 w-5' }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-    />
-  </svg>
-);
-
-const EyeOffIcon: React.FC<{ className?: string }> = ({ className = 'h-5 w-5' }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-    />
-  </svg>
-);
-
-const SpinnerIcon: React.FC<{ className?: string }> = ({ className = 'h-5 w-5' }) => (
-  <svg className={`animate-spin ${className}`} fill="none" viewBox="0 0 24 24">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-    />
-  </svg>
-);
-
-const ClockIcon: React.FC<{ className?: string }> = ({ className = 'h-5 w-5' }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-);
-
-const WarningIcon: React.FC<{ className?: string }> = ({ className = 'h-5 w-5' }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-    />
-  </svg>
-);
-
-const ErrorIcon: React.FC<{ className?: string }> = ({ className = 'h-4 w-4' }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path
-      fillRule="evenodd"
-      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-      clipRule="evenodd"
-    />
-  </svg>
-);
 
 // ============================================================================
 // FORM INPUT COMPONENTS
@@ -188,11 +95,13 @@ const InputField: React.FC<InputFieldProps> = ({
   return (
     <div>
       <label htmlFor={id} className={LABEL_CLASSES}>
-        {label} <span className="text-red-500">*</span>
+        {label} <span className="text-zinc-400">*</span>
       </label>
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-          <span className="text-gray-400">{icon}</span>
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none transition-colors duration-200">
+          <span className={`${error ? 'text-rose-400' : 'text-zinc-400 group-focus-within:text-zinc-900'}`}>
+            {icon}
+          </span>
         </div>
         <input
           id={id}
@@ -215,7 +124,7 @@ const InputField: React.FC<InputFieldProps> = ({
       </div>
       {error && (
         <p id={`${id}-error`} className={ERROR_TEXT_CLASSES} role="alert">
-          <ErrorIcon />
+          <WarningCircle className="w-4 h-4" weight="fill" />
           {error}
         </p>
       )}
@@ -242,14 +151,14 @@ const RateLimitAlert: React.FC<RateLimitAlertProps> = ({ remainingTime }) => {
       role="alert"
     >
       <div className="flex items-start gap-3">
-        <WarningIcon className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+        <WarningCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" weight="fill" />
         <div>
-          <p className="text-sm font-medium text-amber-800">
+          <p className="text-sm font-semibold text-amber-900 tracking-tight">
             Demasiados intentos de login
           </p>
-          <p className="text-sm text-amber-700 mt-1">
+          <p className="text-sm text-amber-800 mt-0.5 font-medium">
             Podrá intentar nuevamente en{' '}
-            <span className="font-mono font-semibold">{timeDisplay}</span>
+            <span className="font-mono font-bold bg-amber-100 px-1.5 py-0.5 rounded ml-1">{timeDisplay}</span>
           </p>
         </div>
       </div>
@@ -272,21 +181,21 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading, canRetry, remain
   
   const buttonClasses = useMemo(() => {
     const base = 
-      'w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm sm:text-base ' +
-      'font-semibold text-white transition-all duration-200 focus:outline-none focus:ring-2 ' +
-      'focus:ring-offset-2 focus:ring-teal-500 shadow-lg';
+      'w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm ' +
+      'font-bold text-white transition-all duration-200 focus:outline-none focus:ring-2 ' +
+      'focus:ring-offset-2 focus:ring-zinc-900 shadow-sm';
     
     if (isDisabled) {
-      return `${base} bg-gray-400 cursor-not-allowed shadow-none`;
+      return `${base} bg-zinc-300 text-zinc-500 cursor-not-allowed shadow-none`;
     }
-    return `${base} bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 hover:shadow-xl active:scale-[0.98]`;
+    return `${base} bg-zinc-900 hover:bg-zinc-800 active:scale-[0.98]`;
   }, [isDisabled]);
 
   const renderContent = () => {
     if (isLoading) {
       return (
         <>
-          <SpinnerIcon className="h-5 w-5" />
+          <SpinnerGap className="h-5 w-5 animate-spin" weight="bold" />
           <span>Iniciando sesión...</span>
         </>
       );
@@ -296,13 +205,13 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading, canRetry, remain
       const minutes = Math.ceil(remainingTime / 60);
       return (
         <>
-          <ClockIcon className="h-5 w-5" />
+          <ClockIcon className="h-5 w-5" weight="bold" />
           <span>Espere {minutes} min</span>
         </>
       );
     }
     
-    return <span>Iniciar Sesión</span>;
+    return <span>Iniciar sesión</span>;
   };
 
   return (
@@ -388,75 +297,69 @@ const LoginForm: React.FC = () => {
     <button
       type="button"
       onClick={togglePasswordVisibility}
-      className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none focus:text-teal-600"
+      className="p-1 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-900"
       aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
     >
-      {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+      {showPassword ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
     </button>
   ), [showPassword, togglePasswordVisibility]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
-        {/* Header */}
-        <header className="text-center mb-8">
-          <div className="mx-auto h-20 w-20 flex items-center justify-center mb-4 transform hover:scale-105 transition-transform duration-300">
-            <SivacLogo size={80} />
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
-            SIVAC
-          </h1>
-          <p className="text-base text-gray-600 mt-2">
-            Sistema de Gestión de Vacunas
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            Inicia sesión para acceder al sistema
-          </p>
-        </header>
+    <div className="min-h-[100dvh] w-full flex bg-white font-sans overflow-hidden">
+      
+      {/* Left Axis: Functional Form Layer */}
+      <div className="w-full lg:w-[45%] flex flex-col justify-center px-6 sm:px-12 md:px-24">
+        <div className="w-full max-w-[400px] mx-auto animate-fade-in-up">
+          
+          <header className="mb-10 text-left">
+            <div className="mb-8 w-14 h-14 bg-zinc-900 text-white rounded-2xl flex items-center justify-center shadow-md">
+              <SivacLogo size={32} />
+            </div>
+            <h1 className="text-[2rem] leading-tight font-extrabold text-zinc-900 tracking-tighter">
+              Bienvenido a SIVAC
+            </h1>
+            <p className="text-[15px] font-medium text-zinc-500 mt-2">
+              Ingresa tus credenciales para administrar la cadena de suministros médicos.
+            </p>
+          </header>
 
-        {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 p-6 sm:p-8 border border-gray-100">
-          <form onSubmit={handleSubmit} noValidate className="space-y-5">
-            {/* Username Field */}
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
             <InputField
               id="usuario"
               name="usuario"
               type="text"
-              label="Usuario o Email"
+              label="Usuario o correo"
               value={formData.usuario}
-              placeholder="Ingresa tu usuario o email"
+              placeholder="ejemplo@minsa.gob.pe"
               error={errors.usuario}
               autoComplete="username"
-              icon={<UserIcon />}
+              icon={<User className="w-5 h-5" weight="duotone" />}
               onChange={handleInputChange}
             />
 
-            {/* Password Field */}
             <InputField
               id="password"
               name="password"
               type={showPassword ? 'text' : 'password'}
               label="Contraseña"
               value={formData.password}
-              placeholder="Ingresa tu contraseña"
+              placeholder="••••••••"
               error={errors.password}
               autoComplete="current-password"
-              icon={<LockIcon />}
+              icon={<LockKey className="w-5 h-5" weight="duotone" />}
               onChange={handleInputChange}
               rightElement={passwordToggleButton}
             />
 
-            {/* Auth Error Message */}
             {authError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl" role="alert">
-                <p className="text-sm text-red-600 flex items-center gap-2">
-                  <ErrorIcon />
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl" role="alert">
+                <p className="text-sm font-medium text-rose-700 flex items-center gap-2">
+                  <XCircle className="w-5 h-5 flex-shrink-0" weight="fill" />
                   {authError}
                 </p>
               </div>
             )}
 
-            {/* Submit Button */}
             <div className="pt-2">
               <SubmitButton
                 isLoading={isLoading}
@@ -465,20 +368,41 @@ const LoginForm: React.FC = () => {
               />
             </div>
 
-            {/* Rate Limit Alert */}
             {rateLimitState.isBlocked && (
               <RateLimitAlert remainingTime={rateLimitState.remainingTime} />
             )}
           </form>
-        </div>
 
-        {/* Footer */}
-        <footer className="text-center mt-6">
-          <p className="text-xs text-gray-500">
-            DISA Apurímac II - Sistema SIVAC v1.0
-          </p>
-        </footer>
+          <footer className="mt-12 text-left">
+            <p className="text-xs font-semibold tracking-wide text-zinc-400 uppercase">
+              SEDE • DISA Apurímac II
+            </p>
+          </footer>
+        </div>
       </div>
+
+      {/* Right Axis: Contextual Graphic Layer */}
+      <div className="hidden lg:flex lg:w-[55%] relative flex-col justify-end p-12 bg-zinc-950">
+        <img 
+          src="https://picsum.photos/seed/sivac-auth-v3/1000/1400" 
+          alt="Instalaciones Médicas Institucionales" 
+          className="absolute inset-0 w-full h-full object-cover opacity-[0.35] mix-blend-overlay"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+        
+        <div className="relative z-10 max-w-lg mb-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          <div className="inline-block px-3 py-1.5 mb-6 text-xs font-bold tracking-widest text-emerald-400 uppercase border border-emerald-400/30 rounded-full bg-emerald-400/10 backdrop-blur-sm">
+            Sistema Oficial
+          </div>
+          <h2 className="text-3xl font-extrabold text-white tracking-tight leading-tight">
+            Control de inventarios y red de frío en tiempo real.
+          </h2>
+          <p className="text-zinc-400 mt-4 text-[15px] max-w-md font-medium leading-relaxed">
+            Plataforma especializada en la monitorización de biológicos y material descartable en toda la red micro-regional, asegurando el abastecimiento ininterrumpido.
+          </p>
+        </div>
+      </div>
+      
     </div>
   );
 };
