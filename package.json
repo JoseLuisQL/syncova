@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/geist-sans": "^5.2.5",
+    "@phosphor-icons/react": "^2.1.10",
     "axios": "^1.11.0",
     "date-fns": "^2.30.0",
     "exceljs": "^4.4.0",

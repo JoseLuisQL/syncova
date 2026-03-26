@@ -52,14 +52,14 @@ const AppContent: React.FC = () => {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-[100dvh] bg-zinc-50/40">
         {/* Sidebar */}
         <Sidebar />
         
         {/* Main content area with dynamic margin - no margin on mobile */}
         <div 
           className={`
-            min-h-screen
+            min-h-[100dvh]
             transition-all duration-300 ease-out
             ${sidebarCollapsed ? 'lg:ml-[68px]' : 'lg:ml-60'}
           `}

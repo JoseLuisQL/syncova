@@ -1,23 +1,24 @@
 import {
-  LayoutDashboard,
-  Building2,
+  SquaresFour,
+  Buildings,
   Package,
-  ArrowRightLeft,
-  Calendar,
-  FileSpreadsheet,
+  ArrowsLeftRight,
+  CalendarBlank,
+  FileXls,
   FileText,
   Bell,
   Users,
-  Settings,
+  Gear,
   BookOpen,
-  LucideIcon,
-} from 'lucide-react';
+  IconProps
+} from '@phosphor-icons/react';
+import React from 'react';
 
 // Configuración de secciones del menú con agrupación jerárquica
 export interface MenuItem {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: React.ElementType<IconProps>;
   path: string;
 }
 
@@ -30,17 +31,17 @@ export const MENU_SECTIONS: MenuSection[] = [
   {
     title: 'Principal',
     items: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+      { id: 'dashboard', label: 'Dashboard', icon: SquaresFour, path: '/dashboard' },
     ],
   },
   {
     title: 'Gestión',
     items: [
-      { id: 'establecimientos', label: 'Establecimientos', icon: Building2, path: '/establecimientos' },
+      { id: 'establecimientos', label: 'Establecimientos', icon: Buildings, path: '/establecimientos' },
       { id: 'inventario', label: 'Inventario', icon: Package, path: '/inventario' },
-      { id: 'movimientos', label: 'Movimientos', icon: ArrowRightLeft, path: '/movimientos' },
-      { id: 'planificacion', label: 'Planificación', icon: Calendar, path: '/planificacion' },
-      { id: 'ici-demid', label: 'ICI DEMID', icon: FileSpreadsheet, path: '/ici-demid' },
+      { id: 'movimientos', label: 'Movimientos', icon: ArrowsLeftRight, path: '/movimientos' },
+      { id: 'planificacion', label: 'Planificación', icon: CalendarBlank, path: '/planificacion' },
+      { id: 'ici-demid', label: 'ICI DEMID', icon: FileXls, path: '/ici-demid' },
       { id: 'kardex', label: 'Kardex', icon: BookOpen, path: '/kardex' },
     ],
   },
@@ -55,7 +56,7 @@ export const MENU_SECTIONS: MenuSection[] = [
     title: 'Sistema',
     items: [
       { id: 'usuarios', label: 'Usuarios', icon: Users, path: '/usuarios' },
-      { id: 'configuracion', label: 'Configuración', icon: Settings, path: '/configuracion' },
+      { id: 'configuracion', label: 'Configuración', icon: Gear, path: '/configuracion' },
     ],
   },
 ];
@@ -63,9 +64,9 @@ export const MENU_SECTIONS: MenuSection[] = [
 // Estilos de Breadcrumbs
 export const BREADCRUMBS_STYLES = {
   nav: 'flex items-center flex-wrap gap-1.5 text-sm sm:text-base',
-  homeButton: 'flex items-center p-1.5 rounded-lg text-slate-500 hover:text-teal-600 hover:bg-teal-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500/50',
+  homeButton: 'flex items-center p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-zinc-500/50',
   homeIcon: 'w-4 h-4 sm:w-4.5 sm:h-4.5',
-  separator: 'w-4 h-4 text-slate-300 flex-shrink-0',
-  item: 'text-slate-500 hover:text-teal-600 cursor-pointer transition-colors duration-200',
-  itemLast: 'text-slate-800 font-semibold drop-shadow-sm',
+  separator: 'w-4 h-4 text-zinc-300 flex-shrink-0',
+  item: 'text-zinc-500 hover:text-zinc-900 cursor-pointer transition-colors duration-200',
+  itemLast: 'text-zinc-900 font-semibold drop-shadow-sm',
 } as const;
