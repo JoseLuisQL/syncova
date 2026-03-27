@@ -186,12 +186,6 @@ export async function seedRolesAndPermissionsV2() {
         descripcion: 'Gestión de inventario, movimientos y entregas',
         esDefault: true,
       },
-      {
-        nombre: 'Operador',
-        codigo: 'operador',
-        descripcion: 'Consultas y operaciones básicas del sistema',
-        esDefault: true,
-      },
     ];
 
     console.log('👥 Creando/actualizando roles...');
@@ -244,7 +238,7 @@ export async function seedRolesAndPermissionsV2() {
     await assignPermissionsToRole('administrador', resolvedDefaults.administrador);
     await assignPermissionsToRole('coordinador', resolvedDefaults.coordinador || []);
     await assignPermissionsToRole('responsable_acopio', resolvedDefaults.responsable_acopio || []);
-    await assignPermissionsToRole('operador', resolvedDefaults.operador || []);
+
 
     // 4. Actualizar usuarios existentes con roleId
     console.log('🔄 Actualizando usuarios existentes con roles...');

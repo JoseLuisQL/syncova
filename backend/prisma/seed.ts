@@ -1306,138 +1306,27 @@ async function main() {
 
     console.log(`✅ ${lotesJeringas.length} lotes de jeringas reales insertados`);
 
-    // Insertar usuarios del sistema
-    console.log('👥 Insertando usuarios del sistema...');
+    // Insertar usuario administrador del sistema
+    console.log('👥 Insertando usuario administrador...');
 
     // Importar bcrypt para encriptar contraseñas
     const bcrypt = require('bcrypt');
     const saltRounds = 12;
 
-    const usuarios = [
-      // Administrador del sistema
-      {
+    await prisma.usuario.create({
+      data: {
         nombres: 'José Luis',
         apellidos: 'Quispe León',
         email: 'admin@saludapurimac.gob.pe',
         usuario: 'admin',
         passwordHash: await bcrypt.hash('Admin123@', saltRounds),
-        rol: 'administrador' as const,
-        establecimientoId: null,
-        estado: 'activo'
-      },
-      // Coordinador regional
-      {
-        nombres: 'María Elena',
-        apellidos: 'Rodríguez Vargas',
-        email: 'coordinadora@saludapurimac.gob.pe',
-        usuario: 'mrodriguez',
-        passwordHash: await bcrypt.hash('Coord123!', saltRounds),
-        rol: 'coordinador' as const,
-        establecimientoId: null,
-        estado: 'activo'
-      },
-      // Responsables de acopio
-      {
-        nombres: 'Carlos Alberto',
-        apellidos: 'Mendoza López',
-        email: 'cmendoza@saludapurimac.gob.pe',
-        usuario: 'cmendoza',
-        passwordHash: await bcrypt.hash('Resp123!', saltRounds),
-        rol: 'responsable_acopio',
-        establecimientoId: null, // Se asignará después de obtener el ID del centro de acopio
-        estado: 'activo'
-      },
-      {
-        nombres: 'Ana Patricia',
-        apellidos: 'García Huamán',
-        email: 'agarcia@saludapurimac.gob.pe',
-        usuario: 'agarcia',
-        passwordHash: await bcrypt.hash('Resp123!', saltRounds),
-        rol: 'responsable_acopio' as const,
-        establecimientoId: null,
-        estado: 'activo'
-      },
-      {
-        nombres: 'José Manuel',
-        apellidos: 'Huamán Quispe',
-        email: 'jhuaman@saludapurimac.gob.pe',
-        usuario: 'jhuaman',
-        passwordHash: await bcrypt.hash('Resp123!', saltRounds),
-        rol: 'responsable_acopio' as const,
-        establecimientoId: null,
-        estado: 'activo'
-      },
-      // Operadores
-      {
-        nombres: 'Rosa María',
-        apellidos: 'Condori Apaza',
-        email: 'rcondori@saludapurimac.gob.pe',
-        usuario: 'rcondori',
-        passwordHash: await bcrypt.hash('Oper123!', saltRounds),
-        rol: 'operador' as const,
-        establecimientoId: null,
-        estado: 'activo'
-      },
-      {
-        nombres: 'Pedro Luis',
-        apellidos: 'Mamani Choque',
-        email: 'pmamani@saludapurimac.gob.pe',
-        usuario: 'pmamani',
-        passwordHash: await bcrypt.hash('Oper123!', saltRounds),
-        rol: 'operador' as const,
-        establecimientoId: null,
-        estado: 'activo'
-      },
-      {
-        nombres: 'Carmen Rosa',
-        apellidos: 'Flores Quispe',
-        email: 'cflores@saludapurimac.gob.pe',
-        usuario: 'cflores',
-        passwordHash: await bcrypt.hash('Oper123!', saltRounds),
-        rol: 'operador' as const,
-        establecimientoId: null,
-        estado: 'activo'
-      },
-      {
-        nombres: 'Miguel Ángel',
-        apellidos: 'Vargas Ccahuana',
-        email: 'mvargas@saludapurimac.gob.pe',
-        usuario: 'mvargas',
-        passwordHash: await bcrypt.hash('Oper123!', saltRounds),
-        rol: 'operador' as const,
-        establecimientoId: null,
-        estado: 'activo'
-      },
-      {
-        nombres: 'Lucía Isabel',
-        apellidos: 'Choque Mamani',
-        email: 'lchoque@saludapurimac.gob.pe',
-        usuario: 'lchoque',
-        passwordHash: await bcrypt.hash('Oper123!', saltRounds),
-        rol: 'operador' as const,
+        rol: 'administrador',
         establecimientoId: null,
         estado: 'activo'
       }
-    ];
-
-    // Obtener centros de acopio para asignar a responsables
-    const centrosAcopioParaUsuarios = await prisma.centroAcopio.findMany({
-      where: { estado: 'activo' },
-      select: { id: true, nombre: true }
     });
 
-    // Asignar establecimientos a responsables de acopio
-    // Nota: Los usuarios admin y supervisor no necesitan establecimiento asignado
-    // Los responsables de centros de acopio se asignarán manualmente después
-
-    // Crear usuarios
-    for (const usuario of usuarios) {
-      await prisma.usuario.create({
-        data: usuario
-      });
-    }
-
-    console.log(`✅ ${usuarios.length} usuarios insertados`);
+    console.log('✅ Usuario administrador insertado');
 
     // Insertar planificaciones anuales para 2025
     console.log('📅 Insertando planificaciones anuales para 2025...');
