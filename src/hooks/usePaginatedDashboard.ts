@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { apiClient } from '../config/api';
 import type { CentroAcopioStatus, AlertaReciente, ActividadReciente } from '../services/dashboardService';
+import type { Establecimiento } from '../types';
 
 interface PaginationInfo {
   page: number;
@@ -188,6 +189,83 @@ export const usePaginatedActividad = (initialLimit: number = 5): UsePaginatedSec
     } catch {
       if (!mountedRef.current) return;
       setError('Error de conexion al cargar actividad');
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+      }
+    }
+  }, [initialLimit]);
+
+  const setPage = useCallback((page: number) => {
+    setCurrentPage(page);
+    fetchData(page);
+  }, [fetchData]);
+
+  const refresh = useCallback(() => {
+    fetchData(currentPage);
+  }, [fetchData, currentPage]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    fetchData(1);
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [fetchData]);
+
+  return {
+    data,
+    pagination,
+    loading,
+    error,
+    currentPage,
+    setPage,
+    refresh
+  };
+};
+
+export const usePaginatedEstablecimientosDashboard = (initialLimit: number = 5): UsePaginatedSectionResult<Establecimiento> => {
+  const [data, setData] = useState<Establecimiento[]>([]);
+  const [pagination, setPagination] = useState<PaginationInfo>(() => createInitialPagination(initialLimit));
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  const mountedRef = useRef(true);
+
+  const fetchData = useCallback(async (page: number) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await apiClient.get(`/establecimientos?page=${page}&limit=${initialLimit}`);
+      
+      if (!mountedRef.current) return;
+      
+      if (response.data.success) {
+        const payload = response.data.data;
+        if (Array.isArray(payload)) {
+          setData(payload as Establecimiento[]);
+          if (response.data.pagination) {
+            setPagination(response.data.pagination);
+          } else {
+            setPagination(createInitialPagination(payload.length));
+          }
+        } else if (payload && Array.isArray(payload.data)) {
+          setData(payload.data);
+          setPagination(payload.pagination || response.data.pagination);
+        } else if (payload && Array.isArray(payload.establecimientos)) {
+          setData(payload.establecimientos);
+          setPagination(payload.pagination || response.data.pagination);
+        } else {
+          setData([]);
+        }
+      } else {
+        setError(response.data.message || 'Error al cargar establecimientos');
+      }
+    } catch {
+      if (!mountedRef.current) return;
+      setError('Error de conexion al cargar establecimientos');
     } finally {
       if (mountedRef.current) {
         setLoading(false);
