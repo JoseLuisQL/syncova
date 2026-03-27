@@ -195,10 +195,22 @@ export class MovimientosWriteService {
           data.entrega = entregaTotal;
         }
 
+        // Only pass allowed UpdateMovimientoDto fields to Prisma — strip mes, anio, etc.
+        const safeUpdateData: Record<string, unknown> = {};
+        if (data.saldoAnterior !== undefined) safeUpdateData.saldoAnterior = data.saldoAnterior;
+        if (data.transIngreso !== undefined) safeUpdateData.transIngreso = data.transIngreso;
+        if (data.salida !== undefined) safeUpdateData.salida = data.salida;
+        if (data.transSalida !== undefined) safeUpdateData.transSalida = data.transSalida;
+        if (data.entrega !== undefined) safeUpdateData.entrega = data.entrega;
+        if (data.entregaBase !== undefined) safeUpdateData.entregaBase = data.entregaBase;
+        if (data.observaciones !== undefined) safeUpdateData.observaciones = data.observaciones;
+        if (data.fechaMovimiento !== undefined) safeUpdateData.fechaMovimiento = data.fechaMovimiento;
+        if (data.usuarioId !== undefined) safeUpdateData.usuarioId = data.usuarioId;
+
         const movimiento = await tx.movimientoVacuna.update({
           where: { id },
           data: {
-            ...data,
+            ...safeUpdateData,
             updatedAt: new Date()
           }
         });

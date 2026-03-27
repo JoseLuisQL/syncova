@@ -42,6 +42,7 @@ import {
 } from './components';
 import { AjusteEntregasService } from '../../services/ajusteEntregasService';
 import IciDemidService from '../../services/iciDemidService';
+import { PermisoOperativoService, MisPermisos } from '../../services/permisoOperativoService';
 
 interface StockInfo {
   stockInicialHistorico: number | null;
@@ -139,7 +140,13 @@ const Movimientos: React.FC = () => {
 
   const { toast } = useToastContext();
   const { user } = useAuth();
-  const isReadOnlyMode = user?.rol === 'responsable_acopio';
+  const isResponsableAcopio = user?.rol === 'responsable_acopio';
+
+  // Estado de permisos operativos para responsables de acopio
+  const [permisosOperativos, setPermisosOperativos] = useState<MisPermisos | null>(null);
+
+  // Determinar readonly: responsable sin permiso de edición = readonly
+  const isReadOnlyMode = isResponsableAcopio && !(permisosOperativos?.movimientos_edicion ?? false);
   const lockedCentroAcopioIds = user?.centroAcopioIds?.length
     ? user.centroAcopioIds
     : user?.centroAcopioId
@@ -586,6 +593,23 @@ const Movimientos: React.FC = () => {
   useEffect(() => {
     cargarValoresIci();
   }, [cargarValoresIci]);
+
+  // Cargar permisos operativos para responsables de acopio
+  useEffect(() => {
+    if (!isResponsableAcopio) {
+      setPermisosOperativos(null);
+      return;
+    }
+    const cargarPermisos = async () => {
+      try {
+        const permisos = await PermisoOperativoService.getMisPermisos(selectedMes, selectedAnio);
+        setPermisosOperativos(permisos);
+      } catch {
+        setPermisosOperativos(null);
+      }
+    };
+    cargarPermisos();
+  }, [isResponsableAcopio, selectedMes, selectedAnio]);
 
   useEffect(() => {
     if (isReadOnlyMode) {
@@ -1085,8 +1109,12 @@ const Movimientos: React.FC = () => {
         throw new Error('Campo bloqueado por entregas adicionales');
       }
 
-      const updateData = { [campo]: valor, usuarioId: user?.id || 'system-auto' };
-      await updateMovimiento(movimientoExistente.id, updateData);
+      const updateData = { [campo]: valor, usuarioId: user?.id || 'system-auto', mes: selectedMes, anio: selectedAnio };
+      const result = await updateMovimiento(movimientoExistente.id, updateData);
+
+      if (!result) {
+        throw new Error(`Error al actualizar movimiento de ${nombreEstablecimiento}`);
+      }
 
       // Sync silenciosa después de actualizar (evita parpadeo)
       if (selectedVacuna) {
@@ -1118,7 +1146,11 @@ const Movimientos: React.FC = () => {
         usuarioId: user?.id || 'system-auto'
       };
 
-      await createMovimiento(createData);
+      const result = await createMovimiento(createData);
+
+      if (!result) {
+        throw new Error(`Error al crear movimiento de ${nombreEstablecimiento}`);
+      }
 
       // Sync silenciosa después de crear (evita parpadeo)
       if (selectedVacuna) {

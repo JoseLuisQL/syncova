@@ -29,6 +29,8 @@ import permissionsRoutes from '@/routes/permissions';
 import alertasRoutes from '@/routes/alertas';
 import dashboardRoutes from '@/routes/dashboard';
 import iciDemidRoutes from '@/routes/ici-demid';
+import permisosOperativosRoutes from '@/routes/permisos-operativos';
+import { PermisoOperativoService } from '@/services/PermisoOperativoService';
 
 /**
  * Función principal para inicializar el servidor
@@ -113,6 +115,7 @@ async function startServer(): Promise<void> {
     app.use('/api/alertas', alertasRoutes);
     app.use('/api/dashboard', dashboardRoutes);
     app.use('/api/ici-demid', iciDemidRoutes);
+    app.use('/api/permisos-operativos', permisosOperativosRoutes);
 
     // Configurar manejo de errores (debe ir al final)
     setupErrorHandling(app);
@@ -139,6 +142,18 @@ async function startServer(): Promise<void> {
 ⏰ Iniciado: ${new Date().toISOString()}
 📡 Disponible en toda la red local
       `);
+
+      // Cron job: procesar permisos programados cada minuto
+      setInterval(async () => {
+        try {
+          const result = await PermisoOperativoService.procesarPermisosProgramados();
+          if (result.activados > 0 || result.desactivados > 0) {
+            console.log(`⏰ Permisos programados: ${result.activados} activados, ${result.desactivados} desactivados`);
+          }
+        } catch (error) {
+          console.error('Error procesando permisos programados:', error);
+        }
+      }, 60_000);
     });
 
     // Manejo de señales para cierre graceful

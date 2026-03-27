@@ -198,7 +198,8 @@ export class MovimientosController {
   static async update(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const data: UpdateMovimientoDto = req.body;
+      // Strip mes/anio used only for permission middleware, not for DB update
+      const { mes: _mes, anio: _anio, ...data } = req.body as UpdateMovimientoDto & { mes?: number; anio?: number };
 
       if (!validateUUID(id)) {
         ResponseUtil.error(res, 'ID de movimiento inválido', 400);

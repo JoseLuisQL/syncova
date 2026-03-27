@@ -208,6 +208,7 @@ const MobileMetricRow: React.FC<MobileMetricRowProps> = ({ label, children }) =>
 
 interface MobileMovimientoCardProps {
   readOnly: boolean;
+  entregaReadOnly: boolean;
   movimiento: TablaMovimiento;
   isSelected: boolean;
   isDisabled: boolean;
@@ -232,6 +233,7 @@ interface MobileMovimientoCardProps {
 
 const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
   readOnly,
+  entregaReadOnly,
   movimiento,
   isSelected,
   isDisabled,
@@ -419,7 +421,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
           <div className="flex flex-wrap items-center gap-2" onClick={(event) => { event.stopPropagation(); onRowSelect(movimiento.establecimientoId); }}>
             <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-emerald-600">Entrega</span>
             <EditableNumberField
-              readOnly={readOnly}
+              readOnly={entregaReadOnly}
               value={entregaCurrentValue}
               pending={entregaIsPending}
               typing={Boolean(isTypingState[entregaKey])}
@@ -446,7 +448,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
               </span>
             ) : null}
 
-            {!readOnly ? (
+            {!entregaReadOnly ? (
               <button
                 type="button"
                 onClick={(event) => { event.stopPropagation(); onAgregarEntregaAdicional(movimiento.establecimientoId); }}
@@ -471,7 +473,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
                   }`}
                 >
                   <EditableNumberField
-                    readOnly={readOnly}
+                    readOnly={entregaReadOnly}
                     value={getCurrentEntregaValue(entrega.id, entrega.cantidad)}
                     pending={hasPendingEntregaChange(entrega.id)}
                     typing={false}
@@ -488,7 +490,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
                   <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold text-slate-500">
                     #{entrega.numeroEntrega}
                   </span>
-                  {!readOnly ? (
+                  {!entregaReadOnly ? (
                     <button
                       type="button"
                       onClick={(event) => { event.stopPropagation(); onEliminarEntregaAdicional(entrega.id); }}
@@ -609,6 +611,8 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
 }) => {
   const { user } = useAuth();
   const isResponsable = user?.rol === 'responsable_acopio';
+  // Entrega column is always read-only for responsable de acopio, even with editing permissions
+  const entregaReadOnly = readOnly || isResponsable;
 
   const isDisabled = readOnly || isCreating || isUpdating || isAutoSaving;
   const columnasVisibles = useMemo(
@@ -690,7 +694,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
       >
         <div className="flex items-center justify-center gap-2">
           <EditableNumberField
-            readOnly={readOnly}
+            readOnly={entregaReadOnly}
             value={currentValue}
             pending={isPending}
             typing={Boolean(isTyping[key])}
@@ -718,7 +722,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
               </span>
             ) : null}
 
-            {!readOnly ? (
+            {!entregaReadOnly ? (
               <button
                 type="button"
                 onClick={() => onAgregarEntregaAdicional(movimiento.establecimientoId)}
@@ -744,7 +748,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 }`}
               >
                 <EditableNumberField
-                  readOnly={readOnly}
+                  readOnly={entregaReadOnly}
                   value={getCurrentEntregaValue(entrega.id, entrega.cantidad)}
                   pending={hasPendingEntregaChange(entrega.id)}
                   typing={false}
@@ -764,7 +768,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                     #{entrega.numeroEntrega}
                   </span>
 
-                  {!readOnly ? (
+                  {!entregaReadOnly ? (
                     <button
                       type="button"
                       onClick={() => onEliminarEntregaAdicional(entrega.id)}
@@ -1029,6 +1033,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 <MobileMovimientoCard
                   key={`mobile-${movimiento.establecimientoId}-${selectedMes}-${selectedAnio}`}
                   readOnly={readOnly}
+                  entregaReadOnly={entregaReadOnly}
                   movimiento={movimiento}
                   isSelected={selectedRowId === movimiento.establecimientoId}
                   isDisabled={isDisabled}

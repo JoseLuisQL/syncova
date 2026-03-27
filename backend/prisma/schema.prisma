@@ -293,6 +293,8 @@ model Usuario {
   kardex            Kardex[]
   alertas           Alerta[]
   iciDemidRegistros IciDemidRegistro[]
+  permisosOperativos       PermisoOperativo[] @relation("PermisoOperativoUsuario")
+  permisosOperativosCreados PermisoOperativo[] @relation("PermisoOperativoCreadoPor")
 
   @@index([roleId], name: "idx_usuario_role")
   @@index([centroAcopioId], name: "idx_usuario_centro_acopio")
@@ -682,4 +684,33 @@ model RolePermission {
   @@index([roleId], name: "idx_role_permission_role")
   @@index([permissionId], name: "idx_role_permission_permission")
   @@map("role_permissions")
+}
+
+// =====================================================
+// PERMISOS OPERATIVOS
+// =====================================================
+
+model PermisoOperativo {
+  id                 String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  tipo               String    @db.VarChar(50)
+  usuarioId          String?   @map("usuario_id") @db.Uuid
+  mes                Int
+  anio               Int
+  habilitado         Boolean   @default(false)
+  programado         Boolean   @default(false)
+  fechaActivacion    DateTime? @map("fecha_activacion") @db.Timestamptz(6)
+  fechaDesactivacion DateTime? @map("fecha_desactivacion") @db.Timestamptz(6)
+  creadoPorId        String    @map("creado_por_id") @db.Uuid
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relaciones
+  usuario            Usuario?  @relation("PermisoOperativoUsuario", fields: [usuarioId], references: [id], onDelete: Cascade)
+  creadoPor          Usuario   @relation("PermisoOperativoCreadoPor", fields: [creadoPorId], references: [id])
+
+  @@unique([tipo, usuarioId, mes, anio], name: "uk_permiso_operativo")
+  @@index([tipo, mes, anio], name: "idx_permiso_operativo_tipo_periodo")
+  @@index([usuarioId], name: "idx_permiso_operativo_usuario")
+  @@index([habilitado, fechaActivacion], name: "idx_permiso_operativo_programado")
+  @@map("permisos_operativos")
 }
