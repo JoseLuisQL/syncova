@@ -12,6 +12,7 @@ import {
 } from '../constants';
 import { MovimientoCalculado, Establecimiento } from '../../../types';
 import { getEstiloEstablecimiento } from '../../../utils/centroAcopioUtils';
+import { useAuth } from '../../../contexts/AuthContext';
 
 type TablaMovimiento = MovimientoCalculado & { tieneMovimiento: boolean };
 
@@ -606,19 +607,29 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
   visibleColumns,
   onOpenColumnSettings,
 }) => {
+  const { user } = useAuth();
+  const isResponsable = user?.rol === 'responsable_acopio';
+
   const isDisabled = readOnly || isCreating || isUpdating || isAutoSaving;
   const columnasVisibles = useMemo(
     () =>
       TABLA_COLUMNAS.filter(
-        (column) =>
-          column.key === 'establecimiento' ||
-          visibleColumns[column.key as ColumnaConfigurableKey],
+        (column) => {
+          if (isResponsable && column.key === 'ici') return false;
+          return column.key === 'establecimiento' || visibleColumns[column.key as ColumnaConfigurableKey];
+        }
       ),
-    [visibleColumns],
+    [visibleColumns, isResponsable],
   );
+
+  const configurableColumnsAllowed = useMemo(
+    () => COLUMNAS_CONFIGURABLES.filter(c => !(isResponsable && c.key === 'ici')),
+    [isResponsable]
+  );
+
   const visibleCount = useMemo(
-    () => COLUMNAS_CONFIGURABLES.filter((column) => visibleColumns[column.key]).length,
-    [visibleColumns],
+    () => configurableColumnsAllowed.filter((column) => visibleColumns[column.key]).length,
+    [visibleColumns, configurableColumnsAllowed],
   );
   const periodoEntrega = useMemo(() => {
     let mesEntrega = selectedMes + 1;
@@ -844,7 +855,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         type="button"
         onClick={onOpenColumnSettings}
         className="absolute right-2 top-2 z-30 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 bg-white/95 text-zinc-900 shadow-sm backdrop-blur transition hover:bg-zinc-900 hover:text-white sm:right-3 sm:top-3"
-        title={`Configurar columnas (${visibleCount}/${COLUMNAS_CONFIGURABLES.length})`}
+        title={`Configurar columnas (${visibleCount}/${configurableColumnsAllowed.length})`}
         aria-label="Configurar columnas visibles"
       >
         <Faders className="h-4 w-4" weight="bold" />

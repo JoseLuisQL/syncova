@@ -7,6 +7,7 @@ import {
   type ColumnaConfigurableKey,
   type VisibleColumnsState,
 } from '../constants';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface MovimientosColumnSettingsModalProps {
   isOpen: boolean;
@@ -27,7 +28,16 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
 }) => {
   if (!isOpen) return null;
 
-  const visibleCount = Object.values(visibleColumns).filter(Boolean).length;
+  const { user } = useAuth();
+  const isResponsable = user?.rol === 'responsable_acopio';
+
+  const columnasConfigurablesPermitidas = COLUMNAS_CONFIGURABLES.filter(
+    (c) => !(isResponsable && c.key === 'ici')
+  );
+
+  const visibleCount = columnasConfigurablesPermitidas.filter(
+    (c) => visibleColumns[c.key]
+  ).length;
 
   return (
     <Portal>
@@ -63,7 +73,7 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
                 <div>
                   <p className="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-zinc-500">Visibilidad global</p>
                   <p className="mt-1 text-[0.95rem] font-black tracking-tight text-zinc-900">
-                    {visibleCount} de {COLUMNAS_CONFIGURABLES.length} columnas activas
+                    {visibleCount} de {columnasConfigurablesPermitidas.length} columnas activas
                   </p>
                 </div>
                 <span className="rounded-md border border-zinc-300 bg-white px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest text-zinc-700 shadow-sm">
@@ -72,7 +82,7 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                {COLUMNAS_CONFIGURABLES.map((column) => {
+                {columnasConfigurablesPermitidas.map((column) => {
                   const active = visibleColumns[column.key];
 
                   return (
