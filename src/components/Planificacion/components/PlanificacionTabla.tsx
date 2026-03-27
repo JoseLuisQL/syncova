@@ -56,7 +56,7 @@ const EditablePlanningField: React.FC<EditablePlanningFieldProps> = memo(({
 
   if (readOnly) {
     return (
-      <span className={`inline-flex flex-1 items-center justify-center text-[0.85rem] font-bold tabular-nums text-zinc-900 ${compact ? 'w-full py-2' : ''}`}>
+      <span className={`inline-flex flex-1 items-center justify-center text-[0.85rem] font-bold tabular-nums text-zinc-900 ${compact ? 'w-full py-2' : 'w-full h-full min-h-[44px]'}`}>
         {value === 0 ? <span className="text-zinc-300">-</span> : value.toLocaleString()}
       </span>
     );
@@ -73,7 +73,7 @@ const EditablePlanningField: React.FC<EditablePlanningFieldProps> = memo(({
         onBlur={onBlur}
         disabled={disabled}
         aria-label={ariaLabel}
-        className={`${widthClass} bg-transparent px-2.5 py-2.5 text-center text-[0.85rem] font-bold tabular-nums text-zinc-900 transition-colors focus:bg-white focus:outline-none focus:ring-[1.5px] focus:ring-inset focus:ring-zinc-900 disabled:cursor-not-allowed hover:bg-zinc-100/50 ${pending ? 'bg-amber-50 text-amber-900 focus:bg-amber-50' : ''}`}
+        className={`${widthClass} min-w-0 bg-transparent px-2.5 py-2.5 text-center text-[0.85rem] font-bold tabular-nums text-zinc-900 transition-colors focus:bg-white focus:outline-none focus:ring-[1.5px] focus:ring-inset focus:ring-zinc-900 disabled:cursor-not-allowed hover:bg-zinc-100/50 ${pending ? 'bg-amber-50 text-amber-900 focus:bg-amber-50' : ''}`}
       />
       {pending ? (
         <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-white bg-amber-500" />
@@ -269,7 +269,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
         loadingVariant="table"
       >
         <div className="hidden min-h-0 flex-1 overflow-auto md:block selection:bg-zinc-200">
-          <table className="w-max min-w-full table-fixed border-collapse" role="table" aria-label="Matriz de datos">
+          <table className="w-full border-collapse" role="table" aria-label="Matriz de datos">
             <thead className="sticky top-0 z-20">
               <tr className="border-b-[3px] border-zinc-900 bg-white">
                 <th className={`sticky left-0 z-30 w-[260px] min-w-[260px] bg-white px-2 py-2.5 text-left text-[0.65rem] font-black uppercase tracking-[0.15em] text-zinc-600 border-r border-zinc-200/60`}>

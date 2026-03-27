@@ -251,26 +251,29 @@ const DonutChartSection: React.FC<{ data: StockPorVacuna[]; isLoading?: boolean 
         <div className="flex items-center gap-8 h-[280px]">
           {/* Donut */}
           <div className="w-[190px] h-[190px] flex-shrink-0 relative">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%" cy="50%"
-                  innerRadius={70} outerRadius={95}
-                  paddingAngle={3}
-                  dataKey="stockTotal" nameKey="vacunaNombre"
-                  stroke="none"
-                >
-                  {chartData.map((entry, i) => (
-                    <Cell key={`c-${i}`} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <Tooltip content={<PieTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
               <span className="text-[26px] font-extrabold text-zinc-950 leading-none tabular-nums tracking-tight">{chartData.length}</span>
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mt-1">Tipos</span>
+            </div>
+            
+            <div className="relative z-10 w-full h-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%" cy="50%"
+                    innerRadius={70} outerRadius={95}
+                    paddingAngle={3}
+                    dataKey="stockTotal" nameKey="vacunaNombre"
+                    stroke="none"
+                  >
+                    {chartData.map((entry, i) => (
+                      <Cell key={`c-${i}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<PieTooltip />} cursor={{ fill: 'transparent' }} />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
