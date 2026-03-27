@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { Package, Plus, Faders, X } from '@phosphor-icons/react';
+import { Package, Plus, Faders, X, CheckCircle } from '@phosphor-icons/react';
 import { DataTable } from '../../Establecimientos/components';
 import {
   COLUMNAS_CONFIGURABLES,
@@ -92,7 +92,7 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = memo(({
   onBlur,
 }) => {
   const resolvedClassName = hasVale
-    ? 'border border-zinc-300 bg-zinc-100 text-zinc-900 shadow-inner rounded-md'
+    ? 'border border-emerald-200 bg-white text-emerald-950 shadow-[0_1px_2px_rgba(0,0,0,0.04)] rounded-lg'
     : pending
     ? styles.pending
     : `${styles.normal} ${styles.focus}`;
@@ -100,9 +100,7 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = memo(({
   const indicatorClassName = typing
     ? 'bg-zinc-900 animate-pulse'
     : pending
-    ? 'bg-zinc-400 animate-pulse'
-    : hasVale
-    ? 'bg-zinc-800'
+    ? 'bg-amber-400 animate-pulse'
     : '';
 
   if (readOnly) {
@@ -125,11 +123,14 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = memo(({
         disabled={disabled}
         title={title}
         aria-label={ariaLabel}
-        className={`${widthClass} bg-transparent min-h-[44px] px-2.5 py-2.5 text-center text-[0.85rem] font-bold tabular-nums transition-colors focus:outline-none disabled:cursor-not-allowed disabled:bg-zinc-100 ${resolvedClassName}`}
+        className={`${widthClass} bg-transparent min-h-[44px] px-2.5 py-2.5 text-center text-[0.85rem] font-bold tabular-nums transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${resolvedClassName}`}
       />
       {indicatorClassName ? (
         <span className={`absolute right-1 top-1 h-2 w-2 rounded-full border border-white ${indicatorClassName}`} />
       ) : null}
+      {hasVale && !indicatorClassName && (
+        <CheckCircle weight="fill" className="absolute right-1 top-1 h-3.5 w-3.5 text-emerald-500 drop-shadow-sm" />
+      )}
     </div>
   );
 });
@@ -673,10 +674,10 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
 
     return (
       <div
-        className="flex flex-col items-center space-y-2"
+        className="flex flex-col items-center gap-2 py-1.5"
         onClick={(event) => { event.stopPropagation(); onRowSelect(movimiento.establecimientoId); }}
       >
-        <div className="flex flex-wrap items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <EditableNumberField
             readOnly={readOnly}
             value={currentValue}
@@ -693,40 +694,42 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 : 'Entrega'
             }
             hasVale={Boolean(movimiento.entregaBaseTieneVale)}
-            widthClass="w-24"
+            widthClass="w-20"
             onRowFocus={() => onRowSelect(movimiento.establecimientoId)}
             onChange={(nextValue) => onTempValueChange(movimiento.establecimientoId, fieldKey, nextValue)}
             onBlur={() => onFieldBlur(movimiento.establecimientoId, fieldKey)}
           />
 
-          {totalEntregaAdicional > 0 ? (
-            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-              +{totalEntregaAdicional.toLocaleString()} adicional
-            </span>
-          ) : null}
+          <div className="flex flex-col justify-center gap-1.5 w-[42px]">
+            {totalEntregaAdicional > 0 ? (
+              <span className="inline-flex w-full items-center justify-center rounded border border-amber-200/60 bg-amber-50 py-0.5 text-[0.55rem] font-bold text-amber-700">
+                +{totalEntregaAdicional}
+              </span>
+            ) : null}
 
-          {!readOnly ? (
-            <button
-              type="button"
-              onClick={() => onAgregarEntregaAdicional(movimiento.establecimientoId)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-dashed border-teal-300 bg-white text-teal-600 transition hover:border-teal-400 hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isDisabled}
-              title="Agregar entrega adicional"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          ) : null}
+            {!readOnly ? (
+              <button
+                type="button"
+                onClick={() => onAgregarEntregaAdicional(movimiento.establecimientoId)}
+                className={`inline-flex w-full ${totalEntregaAdicional > 0 ? 'h-5' : 'h-11'} items-center justify-center rounded-lg border border-dashed border-teal-300 bg-teal-50/50 text-teal-600 transition hover:border-teal-400 hover:bg-teal-100 focus:outline-none focus:ring-2 focus:ring-teal-500/30 disabled:cursor-not-allowed disabled:opacity-50`}
+                disabled={isDisabled}
+                title="Agregar entrega adicional"
+              >
+                <Plus className={totalEntregaAdicional > 0 ? "h-3.5 w-3.5" : "h-4 w-4"} weight="bold" />
+              </button>
+            ) : null}
+          </div>
         </div>
 
         {movimiento.entregasAdicionales?.length ? (
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="flex flex-col gap-2 items-center w-full">
             {movimiento.entregasAdicionales.map((entrega) => (
               <div
                 key={entrega.id}
-                className={`flex items-center gap-1.5 rounded-2xl border px-2 py-1.5 ${
+                className={`flex items-center gap-2 rounded-xl border pl-1 pr-1.5 py-1 transition-colors ${
                   entrega.tieneValeGenerado
-                    ? 'border-emerald-200 bg-emerald-50/80'
-                    : 'border-amber-200 bg-white/80'
+                    ? 'border-emerald-200/60 bg-emerald-50/40 shadow-sm'
+                    : 'border-amber-200/60 bg-amber-50/30 shadow-sm'
                 }`}
               >
                 <EditableNumberField
@@ -739,31 +742,33 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                   ariaLabel={`Entrega adicional ${entrega.numeroEntrega} para ${movimiento.establecimiento.nombre}`}
                   title={entrega.tieneValeGenerado ? `Vale: ${entrega.valeNumero}` : `Entrega adicional #${entrega.numeroEntrega}`}
                   hasVale={Boolean(entrega.tieneValeGenerado)}
-                  widthClass="w-16"
+                  widthClass="w-20"
                   onRowFocus={() => onRowSelect(movimiento.establecimientoId)}
                   onChange={(nextValue) => onTempEntregaValueChange(entrega.id, nextValue)}
                   onBlur={() => onEntregaFieldBlur(entrega.id)}
                 />
 
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-                  #{entrega.numeroEntrega}
-                </span>
+                <div className="flex flex-col justify-center gap-1.5 w-[42px]">
+                  <span className="inline-flex w-full items-center justify-center rounded bg-white border border-slate-200/80 py-0.5 text-[0.6rem] font-bold text-slate-500 shadow-sm">
+                    #{entrega.numeroEntrega}
+                  </span>
 
-                {!readOnly ? (
-                  <button
-                    type="button"
-                    onClick={() => onEliminarEntregaAdicional(entrega.id)}
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition ${
-                      entrega.tieneValeGenerado
-                        ? 'text-emerald-600 hover:bg-emerald-100'
-                        : 'text-rose-500 hover:bg-rose-50'
-                    } disabled:cursor-not-allowed disabled:opacity-50`}
-                    disabled={isDisabled || isProcessingEntrega}
-                    title="Eliminar entrega adicional"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                ) : null}
+                  {!readOnly ? (
+                    <button
+                      type="button"
+                      onClick={() => onEliminarEntregaAdicional(entrega.id)}
+                      className={`inline-flex h-5 w-full items-center justify-center rounded transition focus:outline-none focus:ring-2 focus:ring-rose-500/30 ${
+                        entrega.tieneValeGenerado
+                          ? 'text-emerald-600 hover:bg-emerald-100'
+                          : 'text-rose-500 hover:bg-rose-100 hover:text-rose-600'
+                      } disabled:cursor-not-allowed disabled:opacity-50`}
+                      disabled={isDisabled || isProcessingEntrega}
+                      title="Eliminar entrega adicional"
+                    >
+                      <X className="h-3.5 w-3.5" weight="bold" />
+                    </button>
+                  ) : null}
+                </div>
               </div>
             ))}
           </div>
@@ -785,13 +790,13 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
       case 'transSalida':
         return renderEditableInput(movimiento, 'transSalida', movimiento.transSalida);
       case 'saldo':
-        return <MetricPill value={movimiento.saldo} tone="emerald" />;
+        return <MetricPill value={movimiento.saldo} tone="teal" />;
       case 'ici':
         return <IciPill value={movimiento.ici ?? 0} />;
       case 'entrega':
         return renderEntregaInput(movimiento);
       case 'stock':
-        return <MetricPill value={movimiento.stock} tone="cyan" />;
+        return <MetricPill value={movimiento.stock} tone="teal" />;
       case 'promedioConsumo':
         return (
           <span className="inline-flex min-w-[3.5rem] justify-center rounded-[6px] px-2 py-1 text-[0.75rem] font-bold tabular-nums text-zinc-700">
@@ -810,7 +815,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
       case 'saldoAnterior':
         return <MetricPill value={totalesGenerales.saldoAnterior} tone="neutral" />;
       case 'transIngreso':
-        return <MetricPill value={totalesGenerales.transIngreso} tone="teal" />;
+        return <MetricPill value={totalesGenerales.transIngreso} tone="neutral" />;
       case 'totalSaldo':
         return <MetricPill value={totalesGenerales.totalSaldo} tone="teal" />;
       case 'salida':
@@ -818,13 +823,13 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
       case 'transSalida':
         return <MetricPill value={totalesGenerales.transSalida} tone="neutral" />;
       case 'saldo':
-        return <MetricPill value={totalesGenerales.saldo} tone="emerald" />;
+        return <MetricPill value={totalesGenerales.saldo} tone="teal" />;
       case 'ici':
         return <IciPill value={totalesGenerales.ici ?? 0} />;
       case 'entrega':
         return <MetricPill value={totalesGenerales.entrega} tone="teal" />;
       case 'stock':
-        return <MetricPill value={totalesGenerales.stock} tone="cyan" />;
+        return <MetricPill value={totalesGenerales.stock} tone="teal" />;
       case 'promedioConsumo':
       case 'disponibilidad':
         return <span className="text-sm text-slate-400">-</span>;

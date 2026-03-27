@@ -466,7 +466,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                       value={selectedCentroAcopio}
                       onChange={(event) => onCentroAcopioChange(event.target.value)}
                       disabled={isLoadingEstablecimientos}
-                      className={COMPONENT_STYLES.input.base + ' pl-9 pr-9 focus:ring-zinc-900'}
+                      className={COMPONENT_STYLES.select.base + ' pl-9 pr-9 focus:ring-zinc-900'}
                     >
                       <option value="todos">{allCentrosLabel}</option>
                       {centrosAcopio.map((centro) => (
@@ -496,7 +496,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                     value={selectedVacuna}
                     onChange={(event) => onVacunaChange(event.target.value)}
                     disabled={isLoadingVacunas}
-                    className={COMPONENT_STYLES.input.base + ' pl-9 pr-9 focus:ring-zinc-900 font-medium'}
+                    className={COMPONENT_STYLES.select.base + ' pl-9 pr-9 focus:ring-zinc-900 font-medium'}
                   >
                     {vacunasActivas.length === 0 ? <option value="">Incializando...</option> : null}
                     {vacunasActivas.map((vacuna) => (
@@ -516,7 +516,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                   <select
                     value={selectedMes}
                     onChange={(event) => onMesChange(Number(event.target.value))}
-                    className={COMPONENT_STYLES.input.base + ' pl-9 pr-9 focus:ring-zinc-900 font-medium'}
+                    className={COMPONENT_STYLES.select.base + ' pl-9 pr-9 focus:ring-zinc-900 font-medium'}
                   >
                     {MESES.map((mes, index) => (
                       <option key={mes} value={index + 1}>
@@ -538,7 +538,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                     value={selectedAnio}
                     onChange={(event) => onAnioChange(Number(event.target.value))}
                     disabled={isLoadingAnios}
-                    className={COMPONENT_STYLES.input.base + ' pl-10 pr-9 focus:ring-zinc-900 font-bold'}
+                    className={COMPONENT_STYLES.select.base + ' pl-10 pr-9 focus:ring-zinc-900 font-bold'}
                   >
                     {aniosDisponibles.map((anio) => (
                       <option key={anio} value={anio}>
@@ -566,12 +566,20 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
             ) : null}
 
             {!isReadOnly ? (
-              <ActionButton
-                label="Tickets (Vales)"
-                icon={<Receipt className="h-4 w-4" weight="bold" />}
+              <button
+                type="button"
                 onClick={onOpenVales}
                 disabled={!selectedVacuna || selectedCentroAcopio === 'todos'}
-              />
+                className={
+                  !selectedVacuna || selectedCentroAcopio === 'todos'
+                    ? COMPONENT_STYLES.button.secondary
+                    : 'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-transparent bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 focus:ring-offset-white'
+                }
+                title="Tickets (Vales)"
+              >
+                <Receipt className="h-4 w-4" weight="bold" />
+                <span className="hidden lg:inline">Tickets (Vales)</span>
+              </button>
             ) : (
               <span className="inline-flex min-h-[44px] items-center rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-bold text-zinc-500 uppercase tracking-wider">
                 Read Only
