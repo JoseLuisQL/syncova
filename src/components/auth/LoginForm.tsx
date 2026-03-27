@@ -382,22 +382,24 @@ const LoginForm: React.FC = () => {
       </div>
 
       {/* Right Axis: Contextual Graphic Layer */}
-      <div className="hidden lg:flex lg:w-[55%] relative flex-col justify-end p-12 bg-gray-950">
+      <div className="hidden lg:flex lg:w-[55%] relative flex-col justify-end p-12 bg-gray-950 overflow-hidden group">
         <img 
-          src="https://picsum.photos/seed/sivac-auth-v3/1000/1400" 
-          alt="Instalaciones Médicas Institucionales" 
-          className="absolute inset-0 w-full h-full object-cover opacity-[0.35] mix-blend-overlay"
+          src="/portada.png" 
+          alt="SIVAC Portada" 
+          className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-[15s] ease-out group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/40 to-transparent" />
+        {/* Gradients to ensure text readability without hiding the 3D art */}
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-transparent/10" />
+        <div className="absolute inset-0 bg-gradient-to-l from-transparent to-gray-950/40" />
         
         <div className="relative z-10 max-w-lg mb-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-          <div className="inline-block px-3 py-1.5 mb-6 text-xs font-bold tracking-widest text-emerald-400 uppercase border border-emerald-400/30 rounded-full bg-emerald-400/10 backdrop-blur-sm">
+          <div className="inline-block px-3 py-1.5 mb-6 text-xs font-bold tracking-widest text-emerald-400 uppercase border border-emerald-400/30 rounded-full bg-emerald-400/10 backdrop-blur-sm shadow-[0_0_15px_rgba(52,211,153,0.1)]">
             Sistema Oficial
           </div>
-          <h2 className="text-3xl font-extrabold text-white tracking-tight leading-tight">
+          <h2 className="text-3xl font-extrabold text-white tracking-tight leading-tight drop-shadow-md">
             Control de inventarios y red de frío en tiempo real.
           </h2>
-          <p className="text-gray-400 mt-4 text-[15px] max-w-md font-medium leading-relaxed">
+          <p className="text-gray-300 mt-4 text-[15px] max-w-md font-medium leading-relaxed drop-shadow">
             Plataforma especializada en la monitorización de biológicos y material descartable en toda la red micro-regional, asegurando el abastecimiento ininterrumpido.
           </p>
         </div>
