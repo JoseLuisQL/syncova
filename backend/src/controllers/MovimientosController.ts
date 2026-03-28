@@ -806,7 +806,7 @@ export class MovimientosController {
    * Exportar movimientos por vacuna específica a Excel
    * POST /api/movimientos/exportar/vacuna/:vacunaId
    */
-  static async exportarPorVacuna(req: Request, res: Response): Promise<void> {
+  static async exportarPorVacuna(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { vacunaId } = req.params;
       const { mes, anio, centroAcopioId, establecimientoId, incluirEstablecimientosSinMovimiento, responsableReporte, observaciones } = req.body;
@@ -834,12 +834,24 @@ export class MovimientosController {
         return;
       }
 
+      let scopedCentroAcopioId: string | undefined;
+      let scopedCentroAcopioIds: string[] | undefined;
+      try {
+        scopedCentroAcopioId = resolveScopedCentroAcopioId(req, centroAcopioId as string | undefined);
+        scopedCentroAcopioIds = resolveScopedCentroAcopioIds(req, centroAcopioId as string | undefined);
+        await ensureEstablecimientoInScope(req, establecimientoId as string | undefined);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para exportar estos datos', 403);
+        return;
+      }
+
       // Configurar exportación
       const config: MovimientosExportConfig = {
         mes: mesNum,
         anio: anioNum,
         vacunaId: vacunaId,
-        centroAcopioId: centroAcopioId && centroAcopioId !== 'todos' ? centroAcopioId : undefined,
+        centroAcopioId: scopedCentroAcopioId,
+        centroAcopioIds: scopedCentroAcopioIds,
         establecimientoId: establecimientoId && establecimientoId !== 'todos' ? establecimientoId : undefined,
         incluirEstablecimientosSinMovimiento: incluirEstablecimientosSinMovimiento === true,
         responsableReporte: responsableReporte.trim(),
@@ -874,7 +886,7 @@ export class MovimientosController {
    * Exportar todas las vacunas a Excel (hojas separadas)
    * POST /api/movimientos/exportar/todas-vacunas
    */
-  static async exportarTodasVacunas(req: Request, res: Response): Promise<void> {
+  static async exportarTodasVacunas(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { mes, anio, centroAcopioId, establecimientoId, incluirEstablecimientosSinMovimiento, responsableReporte, observaciones } = req.body;
 
@@ -896,11 +908,23 @@ export class MovimientosController {
         return;
       }
 
+      let scopedCentroAcopioId: string | undefined;
+      let scopedCentroAcopioIds: string[] | undefined;
+      try {
+        scopedCentroAcopioId = resolveScopedCentroAcopioId(req, centroAcopioId as string | undefined);
+        scopedCentroAcopioIds = resolveScopedCentroAcopioIds(req, centroAcopioId as string | undefined);
+        await ensureEstablecimientoInScope(req, establecimientoId as string | undefined);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para exportar estos datos', 403);
+        return;
+      }
+
       // Configurar exportación
       const config: MovimientosExportConfig = {
         mes: mesNum,
         anio: anioNum,
-        centroAcopioId: centroAcopioId && centroAcopioId !== 'todos' ? centroAcopioId : undefined,
+        centroAcopioId: scopedCentroAcopioId,
+        centroAcopioIds: scopedCentroAcopioIds,
         establecimientoId: establecimientoId && establecimientoId !== 'todos' ? establecimientoId : undefined,
         incluirEstablecimientosSinMovimiento: incluirEstablecimientosSinMovimiento === true,
         responsableReporte: responsableReporte.trim(),

@@ -4,7 +4,6 @@ import {
   CalendarBlank,
   CaretDown,
   Clock,
-  Export,
   Pencil,
   ShieldCheck,
   Table,
@@ -44,14 +43,6 @@ const PERMISO_CONFIG = [
     icon: Pencil,
     colorActive: 'bg-blue-500',
     colorBadge: 'bg-blue-50 text-blue-700 border-blue-200',
-  },
-  {
-    tipo: TIPOS_PERMISO.EXPORTAR_EXCEL as TipoPermisoOperativo,
-    label: 'Exportar Excel',
-    description: 'Descargar reportes en Excel',
-    icon: Export,
-    colorActive: 'bg-amber-500',
-    colorBadge: 'bg-amber-50 text-amber-700 border-amber-200',
   },
 ];
 

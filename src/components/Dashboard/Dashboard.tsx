@@ -7,6 +7,7 @@ import CentrosAcopioSection from './CentrosAcopioSection';
 import EstablecimientosSection from './EstablecimientosSection';
 import AlertasSection from './AlertasSection';
 import ActividadSection from './ActividadSection';
+import QuickPermissionsSection from './QuickPermissionsSection';
 import { ErrorState } from './LoadingStates';
 import { DashboardLoader } from './DashboardLoader';
 import { useAuth } from '../../contexts/AuthContext';
@@ -33,6 +34,7 @@ const fadeVariants: Variants = {
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const isResponsable = user?.rol === 'responsable_acopio';
+  const isAdmin = user?.rol === 'administrador';
   
   const { toast } = useToastContext();
   const toastRef = useRef(toast);
@@ -93,6 +95,9 @@ const Dashboard: React.FC = () => {
           <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-zinc-100/80 to-transparent pointer-events-none" />
           
           <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative z-10 max-w-7xl mx-auto">
+            {/* ═══ Quick Permissions — Admin only, first visible section ═══ */}
+            {isAdmin && <QuickPermissionsSection />}
+
             <Suspense fallback={<ChartSkeleton />}>
               <ChartSection
                 movimientosMensuales={movimientosMensuales}

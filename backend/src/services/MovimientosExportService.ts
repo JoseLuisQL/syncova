@@ -17,6 +17,7 @@ export interface MovimientosExportConfig {
   anio: number;
   vacunaId?: string; // Si no se especifica, exporta todas las vacunas
   centroAcopioId?: string; // Filtro por centro de acopio
+  centroAcopioIds?: string[];
   establecimientoId?: string; // Filtro por establecimiento específico
   incluirEstablecimientosSinMovimiento: boolean;
   responsableReporte: string;
@@ -113,6 +114,10 @@ export class MovimientosExportService {
         filtros.centroAcopioId = config.centroAcopioId;
       }
 
+      if (config.centroAcopioIds?.length) {
+        filtros.centroAcopioIds = config.centroAcopioIds;
+      }
+
       if (config.establecimientoId) {
         filtros.establecimientoId = config.establecimientoId;
       }
@@ -132,6 +137,9 @@ export class MovimientosExportService {
         const filtrosEstablecimientos: any = { limit: 1000 };
         if (config.centroAcopioId) {
           filtrosEstablecimientos.centroAcopioId = config.centroAcopioId;
+        }
+        if (config.centroAcopioIds?.length) {
+          filtrosEstablecimientos.centroAcopioIds = config.centroAcopioIds;
         }
 
         const establecimientosResult = await EstablecimientoService.getAll(filtrosEstablecimientos);

@@ -5,6 +5,7 @@ export { default as ChartSection } from './ChartSection';
 export { default as CentrosAcopioSection } from './CentrosAcopioSection';
 export { default as AlertasSection } from './AlertasSection';
 export { default as ActividadSection } from './ActividadSection';
+export { default as QuickPermissionsSection } from './QuickPermissionsSection';
 export { default as Pagination } from './Pagination';
 export * from './LoadingStates';
 export * from './constants';

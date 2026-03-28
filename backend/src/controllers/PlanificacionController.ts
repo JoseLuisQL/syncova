@@ -190,6 +190,13 @@ export class PlanificacionController {
         return;
       }
 
+      try {
+        await ensureEstablecimientoInScope(req, data.establecimientoId);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para crear esta planificación', 403);
+        return;
+      }
+
       const result = await PlanificacionService.create(data, req.user?.id);
 
       if (!result.success) {
@@ -228,6 +235,24 @@ export class PlanificacionController {
 
       if (data.distribucionMensual && (!Array.isArray(data.distribucionMensual) || data.distribucionMensual.length !== 12)) {
         errorResponse(res, 'La distribución mensual debe ser un array de 12 elementos', 400);
+        return;
+      }
+
+      const planificacionActual = await PlanificacionService.getById(id);
+      if (!planificacionActual.success) {
+        errorResponse(res, planificacionActual.error || 'Error al obtener planificación', 400);
+        return;
+      }
+
+      if (!planificacionActual.data) {
+        errorResponse(res, 'Planificación no encontrada', 404);
+        return;
+      }
+
+      try {
+        await ensureEstablecimientoInScope(req, planificacionActual.data.establecimiento?.id);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para actualizar esta planificación', 403);
         return;
       }
 
@@ -749,11 +774,22 @@ export class PlanificacionController {
         return;
       }
 
+      let scopedCentroAcopioId: string | undefined;
+      let scopedCentroAcopioIds: string[] | undefined;
+      try {
+        scopedCentroAcopioId = resolveScopedCentroAcopioId(req, centroAcopioId as string | undefined);
+        scopedCentroAcopioIds = resolveScopedCentroAcopioIds(req, centroAcopioId as string | undefined);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para exportar estos datos', 403);
+        return;
+      }
+
       // Configurar exportación
       const config: PlanificacionExportConfig = {
         anio: anioNum,
         vacunaId,
-        centroAcopioId: centroAcopioId && centroAcopioId !== 'todos' ? centroAcopioId : undefined,
+        centroAcopioId: scopedCentroAcopioId,
+        centroAcopioIds: scopedCentroAcopioIds,
         incluirEstablecimientosSinProgramacion: incluirEstablecimientosSinProgramacion === true,
         responsableReporte: responsableReporte.trim(),
         observaciones: observaciones?.trim()
@@ -802,10 +838,21 @@ export class PlanificacionController {
         return;
       }
 
+      let scopedCentroAcopioId: string | undefined;
+      let scopedCentroAcopioIds: string[] | undefined;
+      try {
+        scopedCentroAcopioId = resolveScopedCentroAcopioId(req, centroAcopioId as string | undefined);
+        scopedCentroAcopioIds = resolveScopedCentroAcopioIds(req, centroAcopioId as string | undefined);
+      } catch (scopeError) {
+        errorResponse(res, scopeError instanceof Error ? scopeError.message : 'No tiene permisos para exportar estos datos', 403);
+        return;
+      }
+
       // Configurar exportación
       const config: PlanificacionExportConfig = {
         anio: anioNum,
-        centroAcopioId: centroAcopioId && centroAcopioId !== 'todos' ? centroAcopioId : undefined,
+        centroAcopioId: scopedCentroAcopioId,
+        centroAcopioIds: scopedCentroAcopioIds,
         incluirEstablecimientosSinProgramacion: incluirEstablecimientosSinProgramacion === true,
         responsableReporte: responsableReporte.trim(),
         observaciones: observaciones?.trim()

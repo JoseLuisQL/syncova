@@ -17,6 +17,9 @@ import { COMPONENT_STYLES } from '../constants';
 
 interface PlanificacionHeaderProps {
   isReadOnly?: boolean;
+  hasOperativeEditPermission?: boolean;
+  hideImportAction?: boolean;
+  hideExportAction?: boolean;
   lockedCentroAcopioLabel?: string;
   showReadOnlyCentroFilter?: boolean;
   allCentrosLabel?: string;
@@ -77,6 +80,9 @@ const ActionButton: React.FC<ActionButtonProps> = ({
 
 export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
   isReadOnly = false,
+  hasOperativeEditPermission = false,
+  hideImportAction = false,
+  hideExportAction = false,
   lockedCentroAcopioLabel,
   showReadOnlyCentroFilter = false,
   allCentrosLabel = 'Todos',
@@ -209,7 +215,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
               disabled={isLoading || !selectedVacuna}
             />
 
-            {!isReadOnly ? (
+            {!isReadOnly && !hideImportAction ? (
               <ActionButton
                 label="I/O Excel"
                 icon={isImporting ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <UploadSimple className="h-4 w-4" weight="bold" />}
@@ -217,12 +223,16 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                 disabled={isImporting}
               />
             ) : (
-              <span className="inline-flex min-h-[38px] items-center rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-500 sm:text-sm sm:min-h-[44px]">
-                Read Only
+              <span className={`inline-flex min-h-[38px] items-center rounded-xl border px-3 py-1.5 text-xs font-bold uppercase tracking-wider sm:text-sm sm:min-h-[44px] ${
+                hasOperativeEditPermission
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                  : 'border-zinc-200 bg-zinc-50 text-zinc-500'
+              }`}>
+                {hasOperativeEditPermission ? 'Edición habilitada' : 'Read Only'}
               </span>
             )}
 
-            {!isReadOnly ? (
+            {!hideExportAction ? (
               <ActionButton
                 label={isExporting ? 'Procesando' : 'Extraer'}
                 icon={isExporting ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <DownloadSimple className="h-4 w-4" weight="bold" />}

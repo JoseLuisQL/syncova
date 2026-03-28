@@ -16,6 +16,7 @@ export interface PlanificacionExportConfig {
   anio: number;
   vacunaId?: string; // Si no se especifica, exporta todas las vacunas
   centroAcopioId?: string; // Filtro por centro de acopio
+  centroAcopioIds?: string[];
   incluirEstablecimientosSinProgramacion: boolean;
   responsableReporte: string;
   observaciones?: string;
@@ -86,7 +87,8 @@ export class PlanificacionExportService {
       const planificacionesResult = await PlanificacionService.getByVacunaAndYear(
         config.vacunaId,
         config.anio,
-        config.centroAcopioId
+        config.centroAcopioId,
+        config.centroAcopioIds,
       );
 
       if (!planificacionesResult.success) {
@@ -101,6 +103,7 @@ export class PlanificacionExportService {
       if (config.incluirEstablecimientosSinProgramacion) {
         const establecimientosResult = await EstablecimientoService.getAll({
           centroAcopioId: config.centroAcopioId,
+          centroAcopioIds: config.centroAcopioIds,
           limit: 1000
         });
 

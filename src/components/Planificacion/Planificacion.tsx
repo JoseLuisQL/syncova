@@ -15,6 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import { PlanificacionService } from '../../services/planificacionService';
 import { ValesService } from '../../services/valesService';
+import { PermisoOperativoService, MisPermisos } from '../../services/permisoOperativoService';
 import { MESES } from './constants';
 import {
   PlanificacionHeader,
@@ -40,7 +41,13 @@ interface CentroAcopioFilterOption {
 
 const Planificacion: React.FC = () => {
   const { user } = useAuth();
-  const isReadOnlyMode = user?.rol === 'responsable_acopio';
+  const isResponsableAcopio = user?.rol === 'responsable_acopio';
+  const [permisosOperativos, setPermisosOperativos] = useState<MisPermisos | null>(null);
+  const hasPlanificacionEdicion = permisosOperativos?.planificacion_edicion ?? false;
+  const isReadOnlyMode = isResponsableAcopio && !hasPlanificacionEdicion;
+  const canImportPlanificacion = !isResponsableAcopio;
+  const canExportPlanificacion = true;
+  const canUseAdminPlanificacionActions = !isResponsableAcopio;
   const lockedCentroAcopioIds = user?.centroAcopioIds?.length
     ? user.centroAcopioIds
     : user?.centroAcopioId
@@ -229,6 +236,24 @@ const Planificacion: React.FC = () => {
       setSelectedCentroAcopio('todos');
     }
   }, [centrosAcopioFiltro, selectedCentroAcopio]);
+
+  useEffect(() => {
+    if (!isResponsableAcopio) {
+      setPermisosOperativos(null);
+      return;
+    }
+
+    const cargarPermisos = async () => {
+      try {
+        const permisos = await PermisoOperativoService.getMisPermisosPorAnio(selectedAnio);
+        setPermisosOperativos(permisos);
+      } catch {
+        setPermisosOperativos(null);
+      }
+    };
+
+    void cargarPermisos();
+  }, [isResponsableAcopio, selectedAnio]);
 
   // Limpiar timeouts al desmontar
   useEffect(() => {
@@ -961,6 +986,9 @@ const Planificacion: React.FC = () => {
           <div className="shrink-0">
             <PlanificacionHeader
               isReadOnly={isReadOnlyMode}
+              hasOperativeEditPermission={isResponsableAcopio && hasPlanificacionEdicion}
+              hideImportAction={!canImportPlanificacion}
+              hideExportAction={!canExportPlanificacion}
               lockedCentroAcopioLabel={lockedCentroAcopioLabel}
               showReadOnlyCentroFilter={canFilterAssignedCentros}
               allCentrosLabel={allCentrosLabel}
@@ -982,7 +1010,12 @@ const Planificacion: React.FC = () => {
               isExporting={isExporting}
               pendingChangesCount={pendingChangesCount}
               onRefresh={loadPlanificacionesPorVacuna}
-              onImportar={() => setShowModalImportar(true)}
+              onImportar={() => {
+                if (!canImportPlanificacion) {
+                  return;
+                }
+                setShowModalImportar(true);
+              }}
               onExportar={handleExportar}
               onGuardarPendientes={handleSaveAllPendingChanges}
             />
@@ -1024,6 +1057,7 @@ const Planificacion: React.FC = () => {
             <div>
               <PlanificacionAcciones
                 readOnly={isReadOnlyMode}
+                hideAdminActions={!canUseAdminPlanificacionActions}
                 isLoading={isPageLoading}
                 isUpdating={isUpdating}
                 pendingChangesCount={pendingChangesCount}
@@ -1039,7 +1073,7 @@ const Planificacion: React.FC = () => {
       </div>
 
       {/* Modal Importar */}
-      {!isReadOnlyMode ? (
+      {canImportPlanificacion && (
         <ImportarModal
           isOpen={showModalImportar}
           onClose={() => setShowModalImportar(false)}
@@ -1051,7 +1085,7 @@ const Planificacion: React.FC = () => {
           isDownloadingTemplate={isDownloadingTemplate}
           isImportingExcel={isImportingExcel}
         />
-      ) : null}
+      )}
 
       {/* Modal de Confirmación de Vale */}
       {!isReadOnlyMode && showConfirmacionValeModal && pendingValeModification && (

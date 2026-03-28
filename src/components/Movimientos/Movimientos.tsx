@@ -141,9 +141,11 @@ const Movimientos: React.FC = () => {
   const { toast } = useToastContext();
   const { user } = useAuth();
   const isResponsableAcopio = user?.rol === 'responsable_acopio';
-
   // Estado de permisos operativos para responsables de acopio
   const [permisosOperativos, setPermisosOperativos] = useState<MisPermisos | null>(null);
+  const canAccessVales = !isResponsableAcopio;
+  const canImportMovimientos = !isResponsableAcopio;
+  const canExportMovimientos = true;
 
   // Determinar readonly: responsable sin permiso de edición = readonly
   const isReadOnlyMode = isResponsableAcopio && !(permisosOperativos?.movimientos_edicion ?? false);
@@ -1817,6 +1819,11 @@ const Movimientos: React.FC = () => {
         ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
       };
       loadMovimientos(filters);
+      if (isResponsableAcopio) {
+        void PermisoOperativoService.getMisPermisos(selectedMes, selectedAnio)
+          .then(setPermisosOperativos)
+          .catch(() => setPermisosOperativos(null));
+      }
       toast.success(`Datos actualizados - ${vacunaSeleccionada?.nombre} - ${MESES[selectedMes - 1]} ${selectedAnio}`);
     } else {
       toast.warning('Seleccione una vacuna para actualizar los datos');
@@ -1888,6 +1895,10 @@ const Movimientos: React.FC = () => {
         header={(
           <MovimientosHeaderCompact
             isReadOnly={isReadOnlyMode}
+            hasOperativeEditPermission={isResponsableAcopio && (permisosOperativos?.movimientos_edicion ?? false)}
+            hideValesAction={!canAccessVales}
+            hideImportAction={!canImportMovimientos}
+            hideExportAction={!canExportMovimientos}
             lockedCentroAcopioLabel={lockedCentroAcopioLabel}
             showReadOnlyCentroFilter={canFilterAssignedCentros}
             allCentrosLabel={allCentrosLabel}
@@ -1921,8 +1932,18 @@ const Movimientos: React.FC = () => {
             onSaveChanges={handleSaveAllPendingChanges}
             onRefresh={handleRefresh}
             onExport={handleExportar}
-            onImport={() => setShowImportarModal(true)}
-            onOpenVales={() => setShowValesModal(true)}
+            onImport={() => {
+              if (!canImportMovimientos) {
+                return;
+              }
+              setShowImportarModal(true);
+            }}
+            onOpenVales={() => {
+              if (!canAccessVales) {
+                return;
+              }
+              setShowValesModal(true);
+            }}
             onOpenAjusteDeficit={() => setShowAjusteDeficitModal(true)}
             ajusteDeficitDisponible={ajusteDeficitDisponible}
             progresoVales={progresoVales}
@@ -2003,7 +2024,7 @@ const Movimientos: React.FC = () => {
         />
       )}
 
-      {showValesModal && (
+      {canAccessVales && showValesModal && (
         <div className={`${COMPONENT_STYLES.modal.overlay} flex items-center justify-center p-4 sm:p-6`}>
           <div className="bg-white rounded-[24px] w-full max-w-7xl max-h-[95vh] overflow-hidden shadow-2xl ring-1 ring-zinc-200/50 flex flex-col">
             <ValesErrorBoundary>
@@ -2019,7 +2040,7 @@ const Movimientos: React.FC = () => {
         </div>
       )}
 
-      {showImportarModal && (
+      {canImportMovimientos && showImportarModal && (
         <ImportarModal
           isOpen={showImportarModal}
           onClose={() => setShowImportarModal(false)}

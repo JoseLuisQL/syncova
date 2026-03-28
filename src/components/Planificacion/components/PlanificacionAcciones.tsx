@@ -4,6 +4,7 @@ import { COMPONENT_STYLES } from '../constants';
 
 interface PlanificacionAccionesProps {
   readOnly?: boolean;
+  hideAdminActions?: boolean;
   isLoading: boolean;
   isUpdating: boolean;
   pendingChangesCount: number;
@@ -16,6 +17,7 @@ interface PlanificacionAccionesProps {
 
 export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(({
   readOnly = false,
+  hideAdminActions = false,
   isLoading,
   isUpdating,
   pendingChangesCount,
@@ -38,19 +40,21 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
   return (
     <div className="rounded-[16px] border border-zinc-200/90 bg-white shadow-sm p-4 sm:p-5">
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={onGuardarProgramacion}
-          disabled={isUpdating || isLoading}
-          className={COMPONENT_STYLES.button.primary}
-        >
-          {isUpdating ? (
-            <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
-          ) : (
-            <FloppyDisk className="h-4 w-4" weight="bold" />
-          )}
-          {isUpdating ? 'Fijando...' : 'Fijar programación'}
-        </button>
+        {!hideAdminActions ? (
+          <button
+            type="button"
+            onClick={onGuardarProgramacion}
+            disabled={isUpdating || isLoading}
+            className={COMPONENT_STYLES.button.primary}
+          >
+            {isUpdating ? (
+              <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
+            ) : (
+              <FloppyDisk className="h-4 w-4" weight="bold" />
+            )}
+            {isUpdating ? 'Fijando...' : 'Fijar programación'}
+          </button>
+        ) : null}
 
         <button
           type="button"
@@ -66,20 +70,22 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
           {isLoading ? 'Cargando...' : 'Recalcular Matriz'}
         </button>
 
-        <button
-          type="button"
-          onClick={onSincronizar}
-          disabled={isLoading || isUpdating}
-          className={COMPONENT_STYLES.button.primary}
-          title="Sincronizar entregas con módulo de movimientos"
-        >
-          {isLoading ? (
-            <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
-          ) : (
-            <LinkIcon className="h-4 w-4" weight="bold" />
-          )}
-          Sincronizar
-        </button>
+        {!hideAdminActions ? (
+          <button
+            type="button"
+            onClick={onSincronizar}
+            disabled={isLoading || isUpdating}
+            className={COMPONENT_STYLES.button.primary}
+            title="Sincronizar entregas con módulo de movimientos"
+          >
+            {isLoading ? (
+              <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
+            ) : (
+              <LinkIcon className="h-4 w-4" weight="bold" />
+            )}
+            Sincronizar
+          </button>
+        ) : null}
 
         {pendingChangesCount > 0 ? (
           <button

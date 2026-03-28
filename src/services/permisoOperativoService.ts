@@ -4,7 +4,6 @@ import { apiClient, ApiResponse } from '../config/api';
 export const TIPOS_PERMISO = {
   MOVIMIENTOS_EDICION: 'movimientos_edicion',
   PLANIFICACION_EDICION: 'planificacion_edicion',
-  EXPORTAR_EXCEL: 'exportar_excel',
 } as const;
 
 export type TipoPermisoOperativo = typeof TIPOS_PERMISO[keyof typeof TIPOS_PERMISO];
@@ -29,14 +28,12 @@ export interface UsuarioConPermisos {
   permisos: {
     movimientos_edicion: PermisoInfo;
     planificacion_edicion: PermisoInfo;
-    exportar_excel: PermisoInfo;
   };
 }
 
 export interface PermisosGlobales {
   movimientos_edicion: PermisoInfo;
   planificacion_edicion: PermisoInfo;
-  exportar_excel: PermisoInfo;
 }
 
 export interface ResponsablesConPermisosResponse {
@@ -58,7 +55,6 @@ export interface TogglePermisoDto {
 export interface MisPermisos {
   movimientos_edicion: boolean;
   planificacion_edicion: boolean;
-  exportar_excel: boolean;
 }
 
 export class PermisoOperativoService {
@@ -103,6 +99,18 @@ export class PermisoOperativoService {
 
     if (!response.data.success || !response.data.data) {
       throw new Error(response.data.error || 'Error al obtener mis permisos');
+    }
+
+    return response.data.data;
+  }
+
+  static async getMisPermisosPorAnio(anio: number): Promise<MisPermisos> {
+    const response = await apiClient.get<ApiResponse<MisPermisos>>(
+      `${this.BASE_PATH}/mis-permisos?anio=${anio}&scope=anio`,
+    );
+
+    if (!response.data.success || !response.data.data) {
+      throw new Error(response.data.error || 'Error al obtener mis permisos anuales');
     }
 
     return response.data.data;

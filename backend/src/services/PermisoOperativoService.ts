@@ -4,7 +4,6 @@ import { prisma } from '@/config/database';
 export const TIPOS_PERMISO = {
   MOVIMIENTOS_EDICION: 'movimientos_edicion',
   PLANIFICACION_EDICION: 'planificacion_edicion',
-  EXPORTAR_EXCEL: 'exportar_excel',
 } as const;
 
 export type TipoPermisoOperativo = typeof TIPOS_PERMISO[keyof typeof TIPOS_PERMISO];
@@ -33,7 +32,6 @@ interface UsuarioConPermisos {
   permisos: {
     movimientos_edicion: PermisoInfo;
     planificacion_edicion: PermisoInfo;
-    exportar_excel: PermisoInfo;
   };
 }
 
@@ -48,7 +46,6 @@ interface PermisoInfo {
 interface PermisosGlobales {
   movimientos_edicion: PermisoInfo;
   planificacion_edicion: PermisoInfo;
-  exportar_excel: PermisoInfo;
 }
 
 export class PermisoOperativoService {
@@ -111,7 +108,6 @@ export class PermisoOperativoService {
     const globales: PermisosGlobales = {
       movimientos_edicion: buildPermisoInfo(TIPOS_PERMISO.MOVIMIENTOS_EDICION, permisosGlobalesDb, true),
       planificacion_edicion: buildPermisoInfo(TIPOS_PERMISO.PLANIFICACION_EDICION, permisosGlobalesDb, true),
-      exportar_excel: buildPermisoInfo(TIPOS_PERMISO.EXPORTAR_EXCEL, permisosGlobalesDb, true),
     };
 
     // Construir respuesta por usuario
@@ -145,7 +141,6 @@ export class PermisoOperativoService {
         permisos: {
           movimientos_edicion: getPermisoEfectivo(TIPOS_PERMISO.MOVIMIENTOS_EDICION),
           planificacion_edicion: getPermisoEfectivo(TIPOS_PERMISO.PLANIFICACION_EDICION),
-          exportar_excel: getPermisoEfectivo(TIPOS_PERMISO.EXPORTAR_EXCEL),
         },
       };
     });
@@ -159,6 +154,7 @@ export class PermisoOperativoService {
   static async togglePermiso(dto: TogglePermisoDto) {
     const { tipo, mes, anio, habilitado, usuarioId, programado, fechaActivacion, fechaDesactivacion, creadoPorId } = dto;
 
+    const usuarioScope = usuarioId === undefined ? null : usuarioId;
     const data = {
       habilitado: programado ? false : habilitado,
       programado: programado ?? false,
@@ -171,7 +167,7 @@ export class PermisoOperativoService {
     const existing = await prisma.permisoOperativo.findFirst({
       where: {
         tipo,
-        usuarioId: usuarioId ?? null,
+        usuarioId: usuarioScope,
         mes,
         anio,
       },
@@ -187,7 +183,7 @@ export class PermisoOperativoService {
     return prisma.permisoOperativo.create({
       data: {
         tipo,
-        usuarioId: usuarioId ?? null,
+        usuarioId: usuarioScope,
         mes,
         anio,
         ...data,
@@ -244,6 +240,43 @@ export class PermisoOperativoService {
     }
 
     return result;
+  }
+
+  /**
+   * Obtener permisos activos del usuario para un año completo
+   */
+  static async getPermisosUsuarioPorAnio(
+    usuarioId: string,
+    anio: number,
+  ): Promise<Record<string, boolean>> {
+    const tipos = Object.values(TIPOS_PERMISO);
+    const result: Record<string, boolean> = {};
+
+    for (const tipo of tipos) {
+      result[tipo] = false;
+
+      for (let mes = 1; mes <= 12; mes += 1) {
+        const tienePermiso = await this.verificarPermiso(usuarioId, tipo, mes, anio);
+        if (tienePermiso) {
+          result[tipo] = true;
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Verificar si un usuario tiene un permiso en cualquier mes del año
+   */
+  static async verificarPermisoEnAnio(
+    usuarioId: string,
+    tipo: TipoPermisoOperativo,
+    anio: number,
+  ): Promise<boolean> {
+    const permisos = await this.getPermisosUsuarioPorAnio(usuarioId, anio);
+    return permisos[tipo] ?? false;
   }
 
   /**

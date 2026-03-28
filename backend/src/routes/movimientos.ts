@@ -67,7 +67,7 @@ const denyResponsableUnlessMovEdicion = async (
 };
 
 /**
- * Middleware: permite a responsable_acopio si tiene permiso de exportar excel
+ * Middleware: permite exportación a responsable_acopio manteniendo el scope asignado.
  */
 const denyResponsableUnlessExport = async (
   req: AuthenticatedRequest,
@@ -78,11 +78,21 @@ const denyResponsableUnlessExport = async (
     next();
     return;
   }
-  const mes = parseInt(req.body?.mes || req.query?.mes as string) || new Date().getMonth() + 1;
-  const anio = parseInt(req.body?.anio || req.query?.anio as string) || new Date().getFullYear();
-  const tiene = await PermisoOperativoService.verificarPermiso(req.user.id, TIPOS_PERMISO.EXPORTAR_EXCEL, mes, anio);
-  if (tiene) { next(); return; }
-  denyResponsableAcopio(req, res, next);
+
+  next();
+};
+
+const requireMovimientosExportAccess = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): void => {
+  if (req.user?.rol === 'responsable_acopio') {
+    next();
+    return;
+  }
+
+  requirePermissions(['movimientos:write'])(req, res, next);
 };
 
 router.use(authenticate, requireCentroAcopioAssignment, requirePermissions(['movimientos:read']));
@@ -157,8 +167,8 @@ router.post('/reporte-errores',
 // RUTAS DE EXPORTACIÓN (con permiso operativo condicional)
 // =====================================================
 
-router.post('/exportar/vacuna/:vacunaId', requirePermissions(['movimientos:write']), denyResponsableUnlessExport, MovimientosController.exportarPorVacuna);
-router.post('/exportar/todas-vacunas', requirePermissions(['movimientos:write']), denyResponsableUnlessExport, MovimientosController.exportarTodasVacunas);
+router.post('/exportar/vacuna/:vacunaId', requireMovimientosExportAccess, denyResponsableUnlessExport, MovimientosController.exportarPorVacuna);
+router.post('/exportar/todas-vacunas', requireMovimientosExportAccess, denyResponsableUnlessExport, MovimientosController.exportarTodasVacunas);
 
 // =====================================================
 // ESTADÍSTICAS Y STOCK

@@ -64,8 +64,11 @@ export class PermisoOperativoController {
     const { usuarioId } = req.params;
     const mes = parseInt(req.query.mes as string) || new Date().getMonth() + 1;
     const anio = parseInt(req.query.anio as string) || new Date().getFullYear();
+    const scope = req.query.scope as string | undefined;
 
-    const permisos = await PermisoOperativoService.getPermisosUsuario(usuarioId, mes, anio);
+    const permisos = scope === 'anio'
+      ? await PermisoOperativoService.getPermisosUsuarioPorAnio(usuarioId, anio)
+      : await PermisoOperativoService.getPermisosUsuario(usuarioId, mes, anio);
     ResponseUtil.success(res, permisos, 'Permisos del usuario cargados');
   }
 
@@ -76,8 +79,11 @@ export class PermisoOperativoController {
     const userId = req.user!.id;
     const mes = parseInt(req.query.mes as string) || new Date().getMonth() + 1;
     const anio = parseInt(req.query.anio as string) || new Date().getFullYear();
+    const scope = req.query.scope as string | undefined;
 
-    const permisos = await PermisoOperativoService.getPermisosUsuario(userId, mes, anio);
+    const permisos = scope === 'anio'
+      ? await PermisoOperativoService.getPermisosUsuarioPorAnio(userId, anio)
+      : await PermisoOperativoService.getPermisosUsuario(userId, mes, anio);
     ResponseUtil.success(res, permisos, 'Mis permisos cargados');
   }
 

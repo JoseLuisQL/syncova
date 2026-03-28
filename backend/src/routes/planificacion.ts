@@ -4,12 +4,99 @@ import { authenticate } from '@/middleware/auth';
 import { denyRoles, requireCentroAcopioAssignment } from '@/middleware/accessControl';
 import { requirePermissions } from '@/middleware/permissions';
 import { uploadSingleExcel, handleUploadError } from '@/middleware/upload';
+import { AuthenticatedRequest } from '@/types';
+import { Response, NextFunction } from 'express';
+import { PermisoOperativoService, TIPOS_PERMISO } from '@/services/PermisoOperativoService';
+import { prisma } from '@/config/database';
 
 /**
  * Rutas para gestión de planificación anual de vacunas
  */
 const router = Router();
 const denyResponsableAcopio = denyRoles(['responsable_acopio']);
+
+const denyResponsableUnlessPlanificacionEdicion = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  if (!req.user || req.user.rol !== 'responsable_acopio') {
+    next();
+    return;
+  }
+
+  let anio: number | undefined;
+
+  if (req.body?.anio) {
+    anio = parseInt(req.body.anio);
+  } else if (req.query?.anio) {
+    anio = parseInt(req.query.anio as string);
+  }
+
+  if (!anio && req.params?.id && req.method === 'PUT') {
+    try {
+      const planificacion = await prisma.planificacionAnual.findUnique({
+        where: { id: req.params.id },
+        select: { anio: true },
+      });
+      if (planificacion) {
+        anio = planificacion.anio;
+      }
+    } catch (err) {
+      console.error('[denyResponsableUnlessPlanificacionEdicion] Error looking up planificacion:', err);
+    }
+  }
+
+  if (!anio) {
+    anio = new Date().getFullYear();
+  }
+
+  const tiene = await PermisoOperativoService.verificarPermiso(
+    req.user.id,
+    TIPOS_PERMISO.PLANIFICACION_EDICION,
+    1,
+    anio,
+  );
+
+  const tienePermisoAnual = tiene
+    || await PermisoOperativoService.verificarPermisoEnAnio(
+      req.user.id,
+      TIPOS_PERMISO.PLANIFICACION_EDICION,
+      anio,
+    );
+
+  if (tienePermisoAnual) {
+    next();
+    return;
+  }
+
+  denyResponsableAcopio(req, res, next);
+};
+
+const denyResponsableUnlessPlanificacionExport = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  if (!req.user || req.user.rol !== 'responsable_acopio') {
+    next();
+    return;
+  }
+  next();
+};
+
+const requirePlanificacionExportAccess = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): void => {
+  if (req.user?.rol === 'responsable_acopio') {
+    next();
+    return;
+  }
+
+  requirePermissions(['planificacion:write'])(req, res, next);
+};
 
 router.use(authenticate, requireCentroAcopioAssignment, requirePermissions(['planificacion:read']));
 
@@ -83,7 +170,7 @@ router.get('/:id', PlanificacionController.getById);
  * @access Public (TODO: Proteger con autenticación)
  * @body {CreatePlanificacionDto} data - Datos de la nueva planificación
  */
-router.post('/', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.create);
+router.post('/', requirePermissions(['planificacion:write']), denyResponsableUnlessPlanificacionEdicion, PlanificacionController.create);
 
 /**
  * @route PUT /api/planificacion/:id
@@ -92,7 +179,7 @@ router.post('/', requirePermissions(['planificacion:write']), denyResponsableAco
  * @param {string} id - ID de la planificación
  * @body {UpdatePlanificacionDto} data - Datos a actualizar
  */
-router.put('/:id', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.update);
+router.put('/:id', requirePermissions(['planificacion:write']), denyResponsableUnlessPlanificacionEdicion, PlanificacionController.update);
 
 
 
@@ -205,7 +292,7 @@ router.post('/registrar-mes-actual', requirePermissions(['planificacion:write'])
  * @body {string} responsableReporte - Nombre del responsable del reporte
  * @body {string} [observaciones] - Observaciones adicionales
  */
-router.post('/exportar/vacuna/:vacunaId', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.exportarPorVacuna);
+router.post('/exportar/vacuna/:vacunaId', requirePlanificacionExportAccess, denyResponsableUnlessPlanificacionExport, PlanificacionController.exportarPorVacuna);
 
 /**
  * @route POST /api/planificacion/exportar/todas-vacunas
@@ -217,6 +304,6 @@ router.post('/exportar/vacuna/:vacunaId', requirePermissions(['planificacion:wri
  * @body {string} responsableReporte - Nombre del responsable del reporte
  * @body {string} [observaciones] - Observaciones adicionales
  */
-router.post('/exportar/todas-vacunas', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.exportarTodasVacunas);
+router.post('/exportar/todas-vacunas', requirePlanificacionExportAccess, denyResponsableUnlessPlanificacionExport, PlanificacionController.exportarTodasVacunas);
 
 export default router;

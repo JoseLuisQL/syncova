@@ -1,11 +1,17 @@
 import { Router } from 'express';
 import { ValeController } from '@/controllers/ValeController';
+import { authenticate } from '@/middleware/auth';
+import { denyRoles, requireCentroAcopioAssignment } from '@/middleware/accessControl';
+import { requirePermissions } from '@/middleware/permissions';
 
 /**
  * Rutas para gestión profesional de Vales de Entrega
  * Módulo 11: VALES DE ENTREGA
  */
 const router = Router();
+const denyResponsableAcopio = denyRoles(['responsable_acopio']);
+
+router.use(authenticate, requireCentroAcopioAssignment, requirePermissions(['vales:read']));
 
 // =====================================================
 // RUTAS PRINCIPALES DE VALES
@@ -26,7 +32,7 @@ const router = Router();
  *   "afectarStock": true
  * }
  */
-router.post('/generar', ValeController.generarVale);
+router.post('/generar', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.generarVale);
 
 /**
  * @route POST /api/vales/validar-stock
@@ -41,7 +47,7 @@ router.post('/generar', ValeController.generarVale);
  *   "tipoVale": "solo_base"
  * }
  */
-router.post('/validar-stock', ValeController.validarStock);
+router.post('/validar-stock', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.validarStock);
 
 /**
  * @route POST /api/vales/vista-previa
@@ -55,7 +61,7 @@ router.post('/validar-stock', ValeController.validarStock);
  *   "anio": 2024
  * }
  */
-router.post('/vista-previa', ValeController.getVistaPrevia);
+router.post('/vista-previa', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.getVistaPrevia);
 
 /**
  * @route GET /api/vales
@@ -80,7 +86,7 @@ router.get('/', ValeController.getVales);
  * @query {number} [anio] - Año (por defecto año actual)
  * @example GET /api/vales/estadisticas?centroAcopioId=uuid&anio=2024
  */
-router.get('/estadisticas', ValeController.getEstadisticas);
+router.get('/estadisticas', denyResponsableAcopio, ValeController.getEstadisticas);
 
 /**
  * @route GET /api/vales/tipos-generados
@@ -91,7 +97,7 @@ router.get('/estadisticas', ValeController.getEstadisticas);
  * @query {number} anio - Año
  * @example GET /api/vales/tipos-generados?centroAcopioId=uuid&mes=8&anio=2025
  */
-router.get('/tipos-generados', ValeController.getTiposValesGenerados);
+router.get('/tipos-generados', denyResponsableAcopio, ValeController.getTiposValesGenerados);
 
 /**
  * @route GET /api/vales/verificar-existencia
@@ -103,7 +109,7 @@ router.get('/tipos-generados', ValeController.getTiposValesGenerados);
  * @query {number} anio - Año
  * @example GET /api/vales/verificar-existencia?establecimientoId=uuid&vacunaId=uuid&mes=8&anio=2025
  */
-router.get('/verificar-existencia', ValeController.verificarValesExistentes);
+router.get('/verificar-existencia', denyResponsableAcopio, ValeController.verificarValesExistentes);
 
 /**
  * @route GET /api/vales/grupos-entregas-generados
@@ -114,7 +120,7 @@ router.get('/verificar-existencia', ValeController.verificarValesExistentes);
  * @query {number} anio - Año
  * @example GET /api/vales/grupos-entregas-generados?centroAcopioId=uuid&mes=8&anio=2025
  */
-router.get('/grupos-entregas-generados', ValeController.getGruposEntregasAdicionalesGenerados);
+router.get('/grupos-entregas-generados', denyResponsableAcopio, ValeController.getGruposEntregasAdicionalesGenerados);
 
 /**
  * @route GET /api/vales/entregas-adicionales-disponibles
@@ -125,7 +131,7 @@ router.get('/grupos-entregas-generados', ValeController.getGruposEntregasAdicion
  * @query {number} anio - Año
  * @example GET /api/vales/entregas-adicionales-disponibles?centroAcopioId=uuid&mes=8&anio=2025
  */
-router.get('/entregas-adicionales-disponibles', ValeController.getEntregasAdicionalesDisponibles);
+router.get('/entregas-adicionales-disponibles', denyResponsableAcopio, ValeController.getEntregasAdicionalesDisponibles);
 
 /**
  * @route GET /api/vales/calcular-impacto-modificacion
@@ -139,7 +145,7 @@ router.get('/entregas-adicionales-disponibles', ValeController.getEntregasAdicio
  * @query {number} cantidadNueva - Nueva cantidad de entrega
  * @example GET /api/vales/calcular-impacto-modificacion?establecimientoId=uuid&vacunaId=uuid&mes=8&anio=2025&cantidadActual=2&cantidadNueva=1
  */
-router.get('/calcular-impacto-modificacion', ValeController.calcularImpactoModificacion);
+router.get('/calcular-impacto-modificacion', denyResponsableAcopio, ValeController.calcularImpactoModificacion);
 
 /**
  * @route GET /api/vales/:id
@@ -162,7 +168,7 @@ router.get('/:id', ValeController.getValeById);
  *   "usuarioId": "uuid"
  * }
  */
-router.patch('/:id/estado', ValeController.cambiarEstado);
+router.patch('/:id/estado', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.cambiarEstado);
 
 /**
  * @route GET /api/vales/:id/diagnostico
@@ -171,7 +177,7 @@ router.patch('/:id/estado', ValeController.cambiarEstado);
  * @param {string} id - ID del vale a diagnosticar
  * @example GET /api/vales/uuid-del-vale/diagnostico
  */
-router.get('/:id/diagnostico', ValeController.diagnosticarVale);
+router.get('/:id/diagnostico', denyResponsableAcopio, ValeController.diagnosticarVale);
 
 /**
  * @route POST /api/vales/:id/limpiar-reversion
@@ -180,7 +186,7 @@ router.get('/:id/diagnostico', ValeController.diagnosticarVale);
  * @param {string} id - ID del vale a limpiar
  * @example POST /api/vales/uuid-del-vale/limpiar-reversion
  */
-router.post('/:id/limpiar-reversion', ValeController.limpiarEstadoReversion);
+router.post('/:id/limpiar-reversion', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.limpiarEstadoReversion);
 
 /**
  * @route POST /api/vales/:id/revertir
@@ -189,7 +195,7 @@ router.post('/:id/limpiar-reversion', ValeController.limpiarEstadoReversion);
  * @param {string} id - ID del vale a revertir
  * @example POST /api/vales/uuid-del-vale/revertir
  */
-router.post('/:id/revertir', ValeController.revertirVale);
+router.post('/:id/revertir', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.revertirVale);
 
 /**
  * @route POST /api/vales/:id/sincronizar
@@ -202,7 +208,7 @@ router.post('/:id/revertir', ValeController.revertirVale);
  *   "usuarioId": "uuid"
  * }
  */
-router.post('/:id/sincronizar', ValeController.sincronizarVale);
+router.post('/:id/sincronizar', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.sincronizarVale);
 
 /**
  * @route GET /api/vales/:id/modificaciones
@@ -231,7 +237,7 @@ router.get('/:id/modificaciones', ValeController.getModificaciones);
  *   "formatoExportacion": "excel"
  * }
  */
-router.post('/:id/export/excel', ValeController.exportarExcel);
+router.post('/:id/export/excel', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.exportarExcel);
 
 /**
  * @route POST /api/vales/export/combined/excel
@@ -249,7 +255,7 @@ router.post('/:id/export/excel', ValeController.exportarExcel);
  *   }
  * }
  */
-router.post('/export/combined/excel', ValeController.exportarValesCombinados);
+router.post('/export/combined/excel', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.exportarValesCombinados);
 
 /**
  * @route POST /api/vales/:id/export/pdf
@@ -265,7 +271,7 @@ router.post('/export/combined/excel', ValeController.exportarValesCombinados);
  *   "formatoExportacion": "pdf"
  * }
  */
-router.post('/:id/export/pdf', ValeController.exportarPDF);
+router.post('/:id/export/pdf', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.exportarPDF);
 
 /**
  * @route POST /api/vales/:id/export/preview
@@ -274,7 +280,7 @@ router.post('/:id/export/pdf', ValeController.exportarPDF);
  * @param {string} id - ID del vale
  * @body {Omit<ValeExportConfig, 'formatoExportacion'>} config - Configuración sin formato
  */
-router.post('/:id/export/preview', ValeController.getExportPreview);
+router.post('/:id/export/preview', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.getExportPreview);
 
 /**
  * @route POST /api/vales/auto-sync
@@ -289,7 +295,7 @@ router.post('/:id/export/preview', ValeController.getExportPreview);
  *   "anio": 2024
  * }
  */
-router.post('/auto-sync', ValeController.autoSync);
+router.post('/auto-sync', requirePermissions(['vales:write']), denyResponsableAcopio, ValeController.autoSync);
 
 // =====================================================
 // RUTAS FUTURAS (Para implementación posterior)
