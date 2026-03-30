@@ -2,6 +2,7 @@ import React, { memo, useMemo, useRef, useState } from 'react';
 import { BellRinging, Database, Image, SpinnerGap, ShieldCheck, Trash, UploadSimple } from '@phosphor-icons/react';
 import { useAlertasGlobal } from '../../../contexts/AlertasContext';
 import { useToastContext } from '../../../contexts/ToastContext';
+import { ConfiguracionService, type BackupExportFormat } from '../../../services/configuracionService';
 import { Modal } from '../../Establecimientos/components';
 import { getCategoryById, getEditableFieldsByGroup, getFieldsByCategory } from '../constants';
 import type {
@@ -207,6 +208,8 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
   const [isCleaningAlerts, setIsCleaningAlerts] = useState(false);
   const [cleanupDays, setCleanupDays] = useState(30);
   const [cleanupDialogOpen, setCleanupDialogOpen] = useState(false);
+  const [isExportingBackup, setIsExportingBackup] = useState(false);
+  const [backupExportFormat, setBackupExportFormat] = useState<BackupExportFormat>('backup');
   const [lastGenerationResult, setLastGenerationResult] = useState<{
     alertasGeneradas: number;
     alertasVencimiento: number;
@@ -323,6 +326,31 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
       toast.error('No se pudo limpiar alertas', 'La operacion no termino correctamente.');
     } finally {
       setIsCleaningAlerts(false);
+    }
+  };
+
+  const handleExportDatabaseBackup = async () => {
+    setIsExportingBackup(true);
+    try {
+      const { blob, filename } = await ConfiguracionService.exportDatabaseBackup(backupExportFormat);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success(
+        'Respaldo exportado',
+        `La copia de seguridad en formato ${backupExportFormat.toUpperCase()} se descargo correctamente.`
+      );
+    } catch (error) {
+      console.error('Error al exportar respaldo manual:', error);
+      toast.error('No se pudo exportar el respaldo', 'Verifica la configuracion del servidor e intenta nuevamente.');
+    } finally {
+      setIsExportingBackup(false);
     }
   };
 
@@ -491,6 +519,32 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
         </section>
       ) : null}
       {group.id === 'operacion' ? renderReadonlyCategory('backup') : null}
+      {group.id === 'operacion' ? (
+        <MinimalActionRow
+          title="Exportar respaldo manual"
+          description="Genera y descarga una copia completa de la base de datos actual en .backup o .sql."
+          buttonLabel={isExportingBackup ? 'Exportando...' : 'Exportar respaldo'}
+          onAction={handleExportDatabaseBackup}
+          isLoading={isExportingBackup}
+          footer={
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <label htmlFor="backup-export-format" className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
+                Formato
+              </label>
+              <select
+                id="backup-export-format"
+                value={backupExportFormat}
+                onChange={(event) => setBackupExportFormat(event.target.value as BackupExportFormat)}
+                className={`${inputClassName} max-w-[160px]`}
+                disabled={isExportingBackup}
+              >
+                <option value="backup">.backup</option>
+                <option value="sql">.sql</option>
+              </select>
+            </div>
+          }
+        />
+      ) : null}
       {group.id === 'operacion' ? renderReadonlyCategory('reportes') : null}
       {group.id === 'operacion' ? renderReadonlyCategory('api') : null}
       {group.id === 'operacion' ? renderOperationDiagnostics() : null}

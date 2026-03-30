@@ -1,11 +1,144 @@
 import { prisma } from '@/config/database';
 import { ServiceResult, ConfiguracionSistema } from '@/types';
 import { createError } from '@/middleware/errorHandler';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+import fs from 'fs';
+import fsPromises from 'fs/promises';
+import os from 'os';
+import path from 'path';
+
+const execFileAsync = promisify(execFile);
+
+export type BackupExportFormat = 'backup' | 'sql';
 
 /**
  * Servicio para gestión de configuraciones del sistema
  */
 export class ConfiguracionService {
+  private static readonly BACKUP_FILENAME_PREFIX = 'sivac-backup';
+
+  private static formatBackupTimestamp(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}${month}${day}-${hours}${minutes}${seconds}`;
+  }
+
+  private static resolvePostgresToolsDir(): string | null {
+    const candidates = [
+      process.env.PG_BIN_DIR,
+      'C:\\Program Files\\PostgreSQL\\17\\bin',
+      'C:\\Program Files\\PostgreSQL\\16\\bin',
+      'C:\\Program Files\\PostgreSQL\\15\\bin',
+      'C:\\Program Files\\PostgreSQL\\14\\bin',
+      'C:\\Program Files\\PostgreSQL\\13\\bin',
+      'C:\\Program Files\\PostgreSQL\\12\\bin',
+    ].filter(Boolean) as string[];
+
+    for (const candidate of candidates) {
+      const pgDumpExecutable = path.join(candidate, 'pg_dump.exe');
+
+      if (fs.existsSync(pgDumpExecutable)) {
+        return candidate;
+      }
+    }
+
+    return null;
+  }
+
+  private static normalizeDatabaseUrlForPgDump(rawDatabaseUrl: string): string {
+    const parsedUrl = new URL(rawDatabaseUrl);
+    const schema = parsedUrl.searchParams.get('schema');
+
+    if (schema) {
+      parsedUrl.searchParams.delete('schema');
+    }
+
+    if (!parsedUrl.pathname || parsedUrl.pathname === '/') {
+      throw new Error('La conexion de base de datos no incluye un nombre de base de datos valido.');
+    }
+
+    return parsedUrl.toString();
+  }
+
+  static async exportDatabaseBackup(
+    format: BackupExportFormat = 'backup'
+  ): Promise<ServiceResult<{ buffer: Buffer; filename: string; size: number; contentType: string }>> {
+    const databaseUrl = process.env.DATABASE_URL;
+
+    if (!databaseUrl) {
+      return {
+        success: false,
+        error: 'No se encontro la configuracion de base de datos en el servidor.',
+      };
+    }
+
+    const postgresToolsDir = this.resolvePostgresToolsDir();
+    let pgDumpDatabaseUrl: string;
+
+    try {
+      pgDumpDatabaseUrl = this.normalizeDatabaseUrlForPgDump(databaseUrl);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'No se pudo interpretar la conexion de base de datos del servidor.',
+      };
+    }
+
+    if (!postgresToolsDir) {
+      return {
+        success: false,
+        error: 'No se encontro pg_dump en el servidor. Configure PG_BIN_DIR o instale las herramientas cliente de PostgreSQL.',
+      };
+    }
+
+    const tempDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'sivac-backup-'));
+    const extension = format === 'sql' ? 'sql' : 'backup';
+    const filename = `${this.BACKUP_FILENAME_PREFIX}-${this.formatBackupTimestamp(new Date())}.${extension}`;
+    const outputPath = path.join(tempDir, filename);
+
+    try {
+      const pgDumpArgs = format === 'sql'
+        ? ['--format=plain', '--no-owner', '--no-privileges', `--file=${outputPath}`, pgDumpDatabaseUrl]
+        : ['--format=custom', '--no-owner', '--no-privileges', `--file=${outputPath}`, pgDumpDatabaseUrl];
+
+      await execFileAsync(
+        path.join(postgresToolsDir, 'pg_dump.exe'),
+        pgDumpArgs,
+        {
+          windowsHide: true,
+          maxBuffer: 10 * 1024 * 1024,
+          env: process.env,
+        }
+      );
+
+      const buffer = await fsPromises.readFile(outputPath);
+
+      return {
+        success: true,
+        data: {
+          buffer,
+          filename,
+          size: buffer.byteLength,
+          contentType: format === 'sql' ? 'application/sql' : 'application/octet-stream',
+        },
+      };
+    } catch (error) {
+      console.error('Error al exportar respaldo de base de datos:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'No se pudo exportar el respaldo de la base de datos',
+      };
+    } finally {
+      await fsPromises.rm(tempDir, { recursive: true, force: true }).catch(() => undefined);
+    }
+  }
+
   /**
    * Obtener todas las configuraciones públicas
    */

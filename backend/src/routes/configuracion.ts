@@ -187,6 +187,17 @@ router.delete('/logo',
 );
 
 /**
+ * @route POST /api/configuracion/backup/export
+ * @desc Exportar respaldo manual de la base de datos
+ * @access Private (Administrador)
+ */
+router.post('/backup/export',
+  authorize(['administrador']),
+  checkPermissions('write:configuracion'),
+  ConfiguracionController.exportDatabaseBackup
+);
+
+/**
  * @route PUT /api/configuracion/bulk
  * @desc Actualizar múltiples configuraciones
  * @access Private (Administrador)

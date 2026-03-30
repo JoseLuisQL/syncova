@@ -474,6 +474,32 @@ export class ConfiguracionController {
       ResponseUtil.internalError(res);
     }
   }
+
+  /**
+   * Exportar respaldo manual de la base de datos
+   * POST /api/configuracion/backup/export
+   */
+  static async exportDatabaseBackup(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const requestedFormat = typeof req.query.formato === 'string' ? req.query.formato.toLowerCase() : 'backup';
+      const format = requestedFormat === 'sql' ? 'sql' : 'backup';
+      const result = await ConfiguracionService.exportDatabaseBackup(format);
+
+      if (!result.success || !result.data) {
+        ResponseUtil.error(res, result.error || 'No se pudo exportar el respaldo de la base de datos', 500);
+        return;
+      }
+
+      res.setHeader('Content-Type', result.data.contentType);
+      res.setHeader('Content-Disposition', `attachment; filename="${result.data.filename}"`);
+      res.setHeader('Content-Length', String(result.data.size));
+      res.setHeader('Cache-Control', 'no-store');
+      res.send(result.data.buffer);
+    } catch (error) {
+      console.error('Error en exportDatabaseBackup:', error);
+      ResponseUtil.internalError(res, 'No se pudo exportar el respaldo de la base de datos');
+    }
+  }
 }
 
 export default ConfiguracionController;

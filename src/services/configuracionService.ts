@@ -23,6 +23,8 @@ export interface ConfiguracionMap {
   [clave: string]: string;
 }
 
+export type BackupExportFormat = 'backup' | 'sql';
+
 /**
  * Servicio para gestión de configuraciones del sistema
  */
@@ -294,6 +296,33 @@ export class ConfiguracionService {
       return response.data.success;
     } catch (error) {
       logger.error('Error al eliminar logo', error);
+      throw handleApiError(error as AxiosError);
+    }
+  }
+
+  static async exportDatabaseBackup(format: BackupExportFormat = 'backup'): Promise<{ blob: Blob; filename: string }> {
+    try {
+      logger.debug('Exportando respaldo manual de base de datos', { format });
+      const response = await apiClient.post<Blob>(
+        `${this.BASE_PATH}/backup/export?formato=${format}`,
+        {},
+        {
+          responseType: 'blob',
+        }
+      );
+
+      const contentDisposition = response.headers['content-disposition'];
+      const filenameMatch = typeof contentDisposition === 'string'
+        ? contentDisposition.match(/filename="?([^"]+)"?/)
+        : null;
+      const filename = filenameMatch?.[1] || `sivac-backup-${new Date().toISOString().slice(0, 10)}.${format}`;
+      const blob = new Blob([response.data], {
+        type: response.headers['content-type'] || 'application/octet-stream',
+      });
+
+      return { blob, filename };
+    } catch (error) {
+      logger.error('Error al exportar respaldo manual de base de datos', error);
       throw handleApiError(error as AxiosError);
     }
   }
