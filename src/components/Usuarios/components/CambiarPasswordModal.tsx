@@ -126,10 +126,10 @@ const CambiarPasswordModal: React.FC<CambiarPasswordModalProps> = memo(({
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -tranzinc-y-1/2 text-zinc-400 transition-colors hover:text-zinc-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 transition-colors hover:text-zinc-600"
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeSlash className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </FormField>
@@ -160,10 +160,10 @@ const CambiarPasswordModal: React.FC<CambiarPasswordModalProps> = memo(({
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -tranzinc-y-1/2 text-zinc-400 transition-colors hover:text-zinc-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 transition-colors hover:text-zinc-600"
                   aria-label={showConfirmPassword ? 'Ocultar confirmación' : 'Mostrar confirmación'}
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? <EyeSlash className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </FormField>
