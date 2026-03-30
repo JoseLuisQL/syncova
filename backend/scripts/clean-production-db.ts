@@ -1,8 +1,13 @@
 /**
- * Script de limpieza de base de datos de producción
+ * Script de limpieza de base de datos de producción (SEGURO)
  * 
- * Elimina todos los usuarios excepto 'admin' y el rol 'operador'.
- * Maneja correctamente las relaciones de foreign keys.
+ * Solo elimina usuarios que NO tienen dependencias en:
+ *   - ValeEntrega, Kardex, MovimientoVacuna, EntregaAdicional
+ *   - PermisoOperativo (como creador)
+ * 
+ * Los usuarios CON dependencias se PRESERVAN intactos.
+ * Relaciones con cascade (UsuarioCentroAcopio, PermisoOperativo del usuario)
+ * y relaciones nullable (Alerta, IciDemidRegistro) se manejan automáticamente.
  * 
  * USO:
  *   Producción:  DATABASE_URL="postgresql://user:pass@host:5432/db" npx tsx scripts/clean-production-db.ts
@@ -14,7 +19,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function cleanDatabase() {
-  console.log('🔧 Script de limpieza de base de datos');
+  console.log('🔧 Script de limpieza de base de datos (MODO SEGURO)');
   console.log('📌 DATABASE_URL:', process.env.DATABASE_URL?.replace(/\/\/.*@/, '//*****@') || 'No definida');
   console.log('');
 
@@ -35,58 +40,114 @@ async function cleanDatabase() {
 
   console.log(`📊 Estado actual: ${totalUsuarios} usuarios totales`);
   console.log(`👤 Admin: ${adminExists.nombres} ${adminExists.apellidos} (${adminExists.email})`);
-  console.log(`🗑️  Usuarios a eliminar (${nonAdminUsers.length}):`);
-  nonAdminUsers.forEach(u => console.log(`   - ${u.usuario} (${u.rol}) - ${u.nombres} ${u.apellidos}`));
   console.log('');
 
   if (nonAdminUsers.length === 0) {
-    console.log('✅ No hay usuarios no-admin para eliminar.');
+    console.log('✅ No hay usuarios no-admin para evaluar.');
   } else {
-    const nonAdminIds = nonAdminUsers.map(u => u.id);
+    // ========== PASO 2: Evaluar dependencias de cada usuario ==========
+    console.log('🔍 Evaluando dependencias de cada usuario...\n');
 
-    // ========== PASO 2: Eliminar registros dependientes ==========
-    console.log('🧹 Eliminando registros dependientes...');
+    const usersToDelete: typeof nonAdminUsers = [];
+    const usersToKeep: Array<typeof nonAdminUsers[0] & { dependencies: string[] }> = [];
 
-    // 2a. ValeDetalle (hijo de ValeEntrega)
-    const vales = await prisma.valeEntrega.findMany({
-      where: { usuarioId: { in: nonAdminIds } },
-      select: { id: true }
-    });
-    if (vales.length > 0) {
-      const valeIds = vales.map(v => v.id);
-      const valeDetDel = await prisma.valeDetalle.deleteMany({ where: { valeEntregaId: { in: valeIds } } });
-      console.log(`   ✅ ValeDetalle eliminados: ${valeDetDel.count}`);
+    for (const user of nonAdminUsers) {
+      const dependencies: string[] = [];
+
+      // Verificar ValeEntrega
+      const valeCount = await prisma.valeEntrega.count({ where: { usuarioId: user.id } });
+      if (valeCount > 0) dependencies.push(`${valeCount} ValeEntrega`);
+
+      // Verificar Kardex
+      const kardexCount = await prisma.kardex.count({ where: { usuarioId: user.id } });
+      if (kardexCount > 0) dependencies.push(`${kardexCount} Kardex`);
+
+      // Verificar MovimientoVacuna
+      const movCount = await prisma.movimientoVacuna.count({ where: { usuarioId: user.id } });
+      if (movCount > 0) dependencies.push(`${movCount} MovimientoVacuna`);
+
+      // Verificar EntregaAdicional
+      const entregaCount = await prisma.entregaAdicional.count({ where: { usuarioId: user.id } });
+      if (entregaCount > 0) dependencies.push(`${entregaCount} EntregaAdicional`);
+
+      // Verificar PermisoOperativo como creador (creadoPorId - FK requerido sin cascade)
+      const permisoCreadorCount = await prisma.permisoOperativo.count({ where: { creadoPorId: user.id } });
+      if (permisoCreadorCount > 0) dependencies.push(`${permisoCreadorCount} PermisoOperativo (creador)`);
+
+      if (dependencies.length > 0) {
+        usersToKeep.push({ ...user, dependencies });
+      } else {
+        usersToDelete.push(user);
+      }
     }
 
-    // 2b. ValeEntrega
-    const valeDel = await prisma.valeEntrega.deleteMany({ where: { usuarioId: { in: nonAdminIds } } });
-    console.log(`   ✅ ValeEntrega eliminados: ${valeDel.count}`);
+    // ========== Mostrar resultados del análisis ==========
+    if (usersToKeep.length > 0) {
+      console.log(`🛡️  Usuarios PROTEGIDOS (${usersToKeep.length}) - tienen dependencias:`);
+      usersToKeep.forEach(u => {
+        console.log(`   ✅ ${u.usuario} (${u.rol}) - ${u.nombres} ${u.apellidos}`);
+        console.log(`      └─ ${u.dependencies.join(', ')}`);
+      });
+      console.log('');
+    }
 
-    // 2c. EntregaAdicional
-    const entregaDel = await prisma.entregaAdicional.deleteMany({ where: { usuarioId: { in: nonAdminIds } } });
-    console.log(`   ✅ EntregaAdicional eliminados: ${entregaDel.count}`);
+    if (usersToDelete.length > 0) {
+      console.log(`🗑️  Usuarios a ELIMINAR (${usersToDelete.length}) - sin dependencias:`);
+      usersToDelete.forEach(u => {
+        console.log(`   - ${u.usuario} (${u.rol}) - ${u.nombres} ${u.apellidos}`);
+      });
+      console.log('');
 
-    // 2d. Kardex
-    const kardexDel = await prisma.kardex.deleteMany({ where: { usuarioId: { in: nonAdminIds } } });
-    console.log(`   ✅ Kardex eliminados: ${kardexDel.count}`);
+      // ========== PASO 3: Eliminar usuarios sin dependencias ==========
+      const deleteIds = usersToDelete.map(u => u.id);
 
-    // 2e. MovimientoVacuna
-    const movDel = await prisma.movimientoVacuna.deleteMany({ where: { usuarioId: { in: nonAdminIds } } });
-    console.log(`   ✅ MovimientoVacuna eliminados: ${movDel.count}`);
+      console.log('🧹 Limpiando registros seguros antes de eliminar...');
 
-    // ========== PASO 3: Eliminar usuarios ==========
-    const usersDel = await prisma.usuario.deleteMany({ where: { usuario: { not: 'admin' } } });
-    console.log(`\n🗑️  Usuarios eliminados: ${usersDel.count}`);
+      // Alertas: FK opcional, simplemente desvincular
+      const alertasUpdated = await prisma.alerta.updateMany({
+        where: { usuarioId: { in: deleteIds } },
+        data: { usuarioId: null }
+      });
+      if (alertasUpdated.count > 0) {
+        console.log(`   ✅ Alertas desvinculadas: ${alertasUpdated.count}`);
+      }
+
+      // IciDemidRegistro: FK opcional con onDelete: SetNull, desvincular
+      const iciUpdated = await prisma.iciDemidRegistro.updateMany({
+        where: { usuarioId: { in: deleteIds } },
+        data: { usuarioId: null }
+      });
+      if (iciUpdated.count > 0) {
+        console.log(`   ✅ IciDemidRegistro desvinculados: ${iciUpdated.count}`);
+      }
+
+      // UsuarioCentroAcopio: tiene onDelete: Cascade, se elimina automáticamente
+      // PermisoOperativo (como usuario): tiene onDelete: Cascade, se elimina automáticamente
+
+      // Eliminar usuarios
+      const usersDel = await prisma.usuario.deleteMany({
+        where: { id: { in: deleteIds } }
+      });
+      console.log(`\n🗑️  Usuarios eliminados: ${usersDel.count}`);
+    } else {
+      console.log('ℹ️  Todos los usuarios no-admin tienen dependencias. No se eliminó ninguno.');
+    }
   }
 
   // ========== PASO 4: Eliminar rol operador ==========
   console.log('\n🔐 Limpiando roles...');
   const operadorRole = await prisma.role.findUnique({ where: { codigo: 'operador' } });
   if (operadorRole) {
-    const permsDel = await prisma.rolePermission.deleteMany({ where: { roleId: operadorRole.id } });
-    console.log(`   ✅ Permisos de operador eliminados: ${permsDel.count}`);
-    await prisma.role.delete({ where: { codigo: 'operador' } });
-    console.log('   ✅ Rol operador eliminado');
+    // Verificar que ningún usuario use este rol antes de eliminarlo
+    const usersWithOperador = await prisma.usuario.count({ where: { roleId: operadorRole.id } });
+    if (usersWithOperador > 0) {
+      console.log(`   ⚠️  Rol operador NO eliminado: ${usersWithOperador} usuario(s) aún lo usan`);
+    } else {
+      const permsDel = await prisma.rolePermission.deleteMany({ where: { roleId: operadorRole.id } });
+      console.log(`   ✅ Permisos de operador eliminados: ${permsDel.count}`);
+      await prisma.role.delete({ where: { codigo: 'operador' } });
+      console.log('   ✅ Rol operador eliminado');
+    }
   } else {
     console.log('   ℹ️  Rol operador no encontrado (ya fue eliminado)');
   }
