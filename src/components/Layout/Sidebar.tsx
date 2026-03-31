@@ -5,6 +5,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { CaretLeft, CaretRight, Buildings, X } from '@phosphor-icons/react';
 import { SivacLogo } from '../common/SivacLogo';
 import { MENU_SECTIONS } from './constants';
+import { DESIGN_TOKENS } from '../../styles/designTokens';
 
 const Sidebar: React.FC = memo(() => {
   const { sidebarCollapsed, setSidebarCollapsed, mobileMenuOpen, setMobileMenuOpen } = useApp();
@@ -39,8 +40,8 @@ const Sidebar: React.FC = memo(() => {
       <aside
         className={`
           fixed left-0 top-0 z-50 h-[100dvh]
-          bg-white
-          border-r border-gray-200
+          ${DESIGN_TOKENS.surfaces.canvas}
+          border-r ${DESIGN_TOKENS.border.default}
           flex flex-col
           transition-all duration-300 ease-out
           ${sidebarCollapsed ? 'lg:w-[68px]' : 'lg:w-60'}
@@ -51,14 +52,14 @@ const Sidebar: React.FC = memo(() => {
         aria-label="Menu principal"
       >
         {/* Header con Logo */}
-        <div className="h-16 flex items-center px-4 border-b border-gray-100">
+        <div className={`h-16 flex items-center px-4 border-b ${DESIGN_TOKENS.border.soft}`}>
           <div className={`flex items-center gap-3 overflow-hidden transition-all duration-300 ${sidebarCollapsed && !mobileMenuOpen ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'}`}>
             <div className="w-10 h-10 flex items-center justify-center flex-shrink-0 transition-transform hover:scale-105 duration-300">
               <SivacLogo size={36} />
             </div>
             <div className="min-w-0">
-              <h1 className="text-lg font-bold text-gray-900 tracking-tight">SIVAC</h1>
-              <p className="text-[11px] text-gray-500 font-medium -mt-0.5">Sistema de Vacunas</p>
+              <h1 className={`text-lg font-bold ${DESIGN_TOKENS.text.primary} tracking-tight`}>SIVAC</h1>
+              <p className={`text-[11px] ${DESIGN_TOKENS.text.muted} font-medium -mt-0.5`}>Sistema de Vacunas</p>
             </div>
           </div>
           
@@ -71,7 +72,7 @@ const Sidebar: React.FC = memo(() => {
           {/* Mobile close button */}
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="lg:hidden ml-auto p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            className="lg:hidden ml-auto p-2 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
             aria-label="Cerrar menu"
           >
             <X className="h-5 w-5" weight="bold" />
@@ -85,13 +86,13 @@ const Sidebar: React.FC = memo(() => {
             hidden lg:flex
             absolute -right-3 top-[72px]
             w-6 h-6 rounded-full
-            bg-white border border-gray-200
+            bg-white border border-zinc-200
             items-center justify-center
-            text-gray-400 hover:text-gray-900 hover:border-gray-300
+            text-zinc-400 hover:text-zinc-900 hover:border-zinc-300
             shadow-sm
             transition-all duration-200
             hover:scale-110
-            focus:outline-none focus:ring-2 focus:ring-gray-500/20
+            focus:outline-none focus:ring-2 focus:ring-zinc-500/20
             z-50
           `}
           aria-label={sidebarCollapsed ? 'Expandir menu' : 'Colapsar menu'}
@@ -115,7 +116,7 @@ const Sidebar: React.FC = memo(() => {
                   ${sidebarCollapsed && !mobileMenuOpen ? 'lg:opacity-0 lg:h-0 lg:overflow-hidden' : 'opacity-100'}
                 `}
               >
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
                   {section.title}
                 </span>
               </div>
@@ -137,8 +138,8 @@ const Sidebar: React.FC = memo(() => {
                         py-2.5 rounded-lg
                         transition-all duration-200
                         ${isActive 
-                          ? 'bg-gray-900 text-white shadow-md shadow-gray-900/10' 
-                          : 'text-gray-600 hover:bg-gray-100/80 hover:text-gray-900'
+                          ? 'bg-zinc-900 text-white shadow-md shadow-zinc-900/10' 
+                          : 'text-zinc-600 hover:bg-zinc-100/80 hover:text-zinc-900'
                         }
                       `}
                       aria-current={isActive ? 'page' : undefined}
@@ -167,8 +168,8 @@ const Sidebar: React.FC = memo(() => {
                         <div className="
                           hidden lg:block
                           absolute left-full ml-3 px-3 py-1.5
-                          bg-gray-900 text-white text-xs font-medium
-                          rounded-md shadow-lg border border-gray-800
+                          bg-zinc-900 text-white text-xs font-medium
+                          rounded-md shadow-lg border border-zinc-800
                           opacity-0 invisible
                           group-hover:opacity-100 group-hover:visible
                           transition-all duration-200
@@ -189,14 +190,14 @@ const Sidebar: React.FC = memo(() => {
         {/* Footer */}
         <div 
           className={`
-            border-t border-gray-100 bg-gray-50/50
+            border-t border-zinc-100 bg-zinc-50/50
             transition-all duration-300
             ${sidebarCollapsed && !mobileMenuOpen ? 'lg:p-3' : 'p-4'}
           `}
         >
           <div className={`flex items-center ${sidebarCollapsed && !mobileMenuOpen ? 'lg:justify-center' : 'gap-3'}`}>
-            <div className="w-9 h-9 rounded-lg border border-gray-200 bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
-              <Buildings className="w-4 h-4 text-gray-700" weight="duotone" />
+            <div className="w-9 h-9 rounded-lg border border-zinc-200 bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+              <Buildings className="w-4 h-4 text-zinc-700" weight="duotone" />
             </div>
             <div 
               className={`
@@ -204,8 +205,8 @@ const Sidebar: React.FC = memo(() => {
                 ${sidebarCollapsed && !mobileMenuOpen ? 'lg:w-0 lg:opacity-0 lg:overflow-hidden' : 'opacity-100'}
               `}
             >
-              <p className="text-sm font-semibold text-gray-900 truncate">DISA Apurimac II</p>
-              <p className="text-[10px] text-gray-500 font-medium truncate">Estrategia Sanitaria</p>
+              <p className="text-sm font-semibold text-zinc-900 truncate">DISA Apurimac II</p>
+              <p className="text-[10px] text-zinc-500 font-medium truncate">Estrategia Sanitaria</p>
             </div>
           </div>
         </div>

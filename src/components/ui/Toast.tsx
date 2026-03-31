@@ -24,26 +24,26 @@ const TOAST_STYLES = {
   success: {
     container: 'bg-white border-l-4 border-l-emerald-500',
     icon: 'text-emerald-500',
-    title: 'text-gray-900',
+    title: 'text-zinc-900',
     progress: 'bg-emerald-500',
   },
   error: {
     container: 'bg-white border-l-4 border-l-rose-500',
     icon: 'text-rose-500',
-    title: 'text-gray-900',
+    title: 'text-zinc-900',
     progress: 'bg-rose-500',
   },
   warning: {
     container: 'bg-white border-l-4 border-l-amber-500',
     icon: 'text-amber-500',
-    title: 'text-gray-900',
+    title: 'text-zinc-900',
     progress: 'bg-amber-500',
   },
   info: {
-    container: 'bg-white border-l-4 border-l-teal-500',
-    icon: 'text-teal-500',
-    title: 'text-gray-900',
-    progress: 'bg-teal-500',
+    container: 'bg-white border-l-4 border-l-blue-500',
+    icon: 'text-blue-500',
+    title: 'text-zinc-900',
+    progress: 'bg-blue-500',
   },
 } as const;
 
@@ -118,7 +118,7 @@ const Toast: React.FC<ToastProps> = memo(({ toast, onClose }) => {
           {toast.title}
         </p>
         {toast.message && (
-          <p className="mt-0.5 text-sm text-gray-500">
+          <p className="mt-0.5 text-sm text-zinc-500">
             {toast.message}
           </p>
         )}
@@ -126,7 +126,7 @@ const Toast: React.FC<ToastProps> = memo(({ toast, onClose }) => {
           <button
             type="button"
             onClick={toast.action.onClick}
-            className="mt-2 text-sm font-medium text-teal-600 hover:text-teal-700"
+            className="mt-2 text-sm font-medium text-blue-600 hover:text-blue-700"
           >
             {toast.action.label}
           </button>
@@ -136,14 +136,14 @@ const Toast: React.FC<ToastProps> = memo(({ toast, onClose }) => {
       <button
         type="button"
         onClick={handleClose}
-        className="flex-shrink-0 p-1 -m-1 text-gray-400 hover:text-gray-500 rounded transition-colors"
+        className="flex-shrink-0 p-1 -m-1 text-zinc-400 hover:text-zinc-500 rounded transition-colors"
         aria-label="Cerrar"
       >
         <X className="h-4 w-4" />
       </button>
 
       {toast.duration && toast.duration > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-100 overflow-hidden rounded-b-lg">
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-100 overflow-hidden rounded-b-lg">
           <div
             className={`h-full ${styles.progress} transition-none`}
             style={{ width: `${progress}%` }}

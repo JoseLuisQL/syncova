@@ -4,6 +4,7 @@ import {
   COMPONENT_STYLES as INVENTORY_COMPONENT_STYLES,
   type ColorScheme,
 } from '../Inventario/constants';
+import { DESIGN_TOKENS } from '../../styles/designTokens';
 
 export const COMPONENT_STYLES = INVENTORY_COMPONENT_STYLES;
 export { COLORS };
@@ -48,16 +49,16 @@ export const MOVIMIENTO_CONFIG = {
     label: 'Transferencia',
     tone: 'secondary' as ColorScheme,
     icon: ArrowsLeftRight,
-    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700',
-    chipClassName: 'border-blue-200 bg-blue-50 text-blue-700',
+    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700',
+    chipClassName: 'border-zinc-200 bg-zinc-50 text-zinc-700',
   },
   ajuste: {
     key: 'ajuste',
     label: 'Ajuste',
     tone: 'warning' as ColorScheme,
     icon: Faders,
-    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700',
-    chipClassName: 'border-amber-200 bg-amber-50 text-amber-700',
+    badgeClassName: `inline-flex items-center gap-1 rounded-full ${DESIGN_TOKENS.semantic.warning.surface} px-2.5 py-1 text-xs font-medium text-amber-700`,
+    chipClassName: `${DESIGN_TOKENS.semantic.warning.border} ${DESIGN_TOKENS.semantic.warning.surface} text-amber-700`,
   },
   default: {
     key: 'default',

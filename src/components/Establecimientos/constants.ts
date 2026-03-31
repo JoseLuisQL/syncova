@@ -1,59 +1,60 @@
 import { Pulse, Building, Buildings, GitBranch, MapPin, TreeStructure, Shield, ShareNetwork } from '@phosphor-icons/react';
+import { DESIGN_GRADIENTS, DESIGN_TOKENS } from '../../styles/designTokens';
 
 export const COLORS = {
   primary: {
-    gradient: 'from-zinc-900 to-zinc-900',
+    gradient: DESIGN_GRADIENTS.primary,
     surface: 'bg-zinc-100',
     surfaceSoft: 'bg-zinc-100/60',
-    border: 'border-zinc-200',
-    text: 'text-zinc-900',
-    textStrong: 'text-teal-900',
+    border: DESIGN_TOKENS.border.default,
+    text: DESIGN_TOKENS.text.primary,
+    textStrong: DESIGN_TOKENS.text.primary,
     icon: 'text-zinc-900',
   },
   secondary: {
-    gradient: 'from-zinc-900 to-sky-600',
+    gradient: DESIGN_GRADIENTS.secondary,
     surface: 'bg-zinc-100',
     surfaceSoft: 'bg-zinc-100/70',
-    border: 'border-cyan-200',
-    text: 'text-zinc-900',
-    textStrong: 'text-cyan-900',
+    border: DESIGN_TOKENS.border.default,
+    text: DESIGN_TOKENS.text.primary,
+    textStrong: DESIGN_TOKENS.text.primary,
     icon: 'text-zinc-900',
   },
   success: {
-    gradient: 'from-emerald-500 to-zinc-800',
-    surface: 'bg-emerald-50',
+    gradient: DESIGN_GRADIENTS.success,
+    surface: DESIGN_TOKENS.semantic.success.surface,
     surfaceSoft: 'bg-emerald-50/70',
-    border: 'border-emerald-200',
-    text: 'text-emerald-700',
-    textStrong: 'text-emerald-900',
-    icon: 'text-emerald-600',
+    border: DESIGN_TOKENS.semantic.success.border,
+    text: DESIGN_TOKENS.semantic.success.text,
+    textStrong: DESIGN_TOKENS.semantic.success.textStrong,
+    icon: DESIGN_TOKENS.semantic.success.icon,
   },
   warning: {
-    gradient: 'from-amber-500 to-orange-500',
-    surface: 'bg-amber-50',
+    gradient: DESIGN_GRADIENTS.warning,
+    surface: DESIGN_TOKENS.semantic.warning.surface,
     surfaceSoft: 'bg-amber-50/70',
-    border: 'border-amber-200',
-    text: 'text-amber-700',
-    textStrong: 'text-amber-900',
-    icon: 'text-amber-600',
+    border: DESIGN_TOKENS.semantic.warning.border,
+    text: DESIGN_TOKENS.semantic.warning.text,
+    textStrong: DESIGN_TOKENS.semantic.warning.textStrong,
+    icon: DESIGN_TOKENS.semantic.warning.icon,
   },
   danger: {
-    gradient: 'from-rose-500 to-red-500',
-    surface: 'bg-rose-50',
+    gradient: DESIGN_GRADIENTS.danger,
+    surface: DESIGN_TOKENS.semantic.danger.surface,
     surfaceSoft: 'bg-rose-50/70',
-    border: 'border-rose-200',
-    text: 'text-rose-700',
-    textStrong: 'text-rose-900',
-    icon: 'text-rose-600',
+    border: DESIGN_TOKENS.semantic.danger.border,
+    text: DESIGN_TOKENS.semantic.danger.text,
+    textStrong: DESIGN_TOKENS.semantic.danger.textStrong,
+    icon: DESIGN_TOKENS.semantic.danger.icon,
   },
   neutral: {
-    gradient: 'from-zinc-500 to-zinc-600',
-    surface: 'bg-zinc-50',
+    gradient: DESIGN_GRADIENTS.secondary,
+    surface: DESIGN_TOKENS.semantic.neutral.surface,
     surfaceSoft: 'bg-zinc-50/80',
-    border: 'border-zinc-200',
-    text: 'text-zinc-700',
-    textStrong: 'text-zinc-900',
-    icon: 'text-zinc-500',
+    border: DESIGN_TOKENS.semantic.neutral.border,
+    text: DESIGN_TOKENS.semantic.neutral.text,
+    textStrong: DESIGN_TOKENS.semantic.neutral.textStrong,
+    icon: DESIGN_TOKENS.semantic.neutral.icon,
   },
 } as const;
 
@@ -112,7 +113,7 @@ export const SECTION_GROUPS = [
 ] as const;
 
 export const COMPONENT_STYLES = {
-  pageBackground: 'min-h-screen bg-[linear-gradient(180deg,#f8fcfc_0%,#f3fbfb_48%,#eff7f7_100%)]',
+  pageBackground: 'min-h-screen bg-zinc-50/50',
   surface: 'rounded-[26px] border border-zinc-200/90 bg-white shadow-[0_14px_34px_-28px_rgba(15,23,42,0.24)]',
   panel: 'rounded-[22px] border border-zinc-200/90 bg-white shadow-[0_8px_20px_-18px_rgba(15,23,42,0.2)]',
   mutedPanel: 'rounded-[20px] border border-zinc-200 bg-zinc-50/80',
@@ -121,12 +122,12 @@ export const COMPONENT_STYLES = {
     title: 'text-[1.45rem] font-semibold tracking-tight text-zinc-950 sm:text-[1.55rem]',
     subtitle: 'text-[0.92rem] text-zinc-600',
     iconWrapper:
-      'flex h-12 w-12 items-center justify-center rounded-[18px] bg-gradient-to-br from-zinc-900 to-zinc-900 text-white shadow-md shadow-zinc-800/10',
+      'flex h-12 w-12 items-center justify-center rounded-[18px] bg-zinc-900 text-white shadow-md shadow-zinc-800/10',
   },
 
   button: {
     primary:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-zinc-900 to-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-zinc-900 hover:to-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-800 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-800 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     secondary:
       'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     ghost:
@@ -135,7 +136,7 @@ export const COMPONENT_STYLES = {
       'inline-flex h-8 w-8 items-center justify-center rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
     iconEdit: 'border border-zinc-200 bg-zinc-100 text-zinc-900 hover:bg-zinc-100 focus:ring-zinc-800',
     iconDelete: 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 focus:ring-rose-500',
-    iconView: 'border border-cyan-200 bg-zinc-100 text-zinc-900 hover:bg-cyan-100 focus:ring-zinc-800',
+    iconView: 'border border-zinc-200 bg-zinc-100 text-zinc-900 hover:bg-zinc-50 focus:ring-zinc-800',
     iconNavigate: 'border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 focus:ring-amber-500',
   },
 
@@ -205,7 +206,7 @@ export const COMPONENT_STYLES = {
     shell: 'rounded-[28px] border border-zinc-200/90 bg-white shadow-sm',
     tab:
       'inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-zinc-800/20',
-    tabActive: 'bg-zinc-100 text-zinc-900 shadow-[inset_0_0_0_1px_rgba(45,212,191,0.45)]',
+    tabActive: 'bg-zinc-100 text-zinc-900 shadow-[inset_0_0_0_1px_rgba(161,161,170,0.45)]',
     tabInactive: 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900',
   },
 } as const;
@@ -247,7 +248,7 @@ export const TIPO_ESTABLECIMIENTO_CONFIG = {
   puesto_salud: {
     label: 'Puesto de Salud',
     tone: 'secondary' as const,
-    iconWrapper: 'bg-cyan-100 text-cyan-800',
+    iconWrapper: 'bg-zinc-100 text-zinc-800',
     badgeClassName: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-900',
   },
   hospital: {

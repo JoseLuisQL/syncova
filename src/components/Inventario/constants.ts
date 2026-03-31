@@ -8,10 +8,11 @@ import {
   TrendUp,
   Icon
 } from '@phosphor-icons/react';
+import { DESIGN_COLOR_SCALES, DESIGN_TOKENS } from '../../styles/designTokens';
 
 export const COLORS = {
   primary: {
-    gradient: 'from-zinc-800 to-zinc-950',
+    gradient: DESIGN_COLOR_SCALES.primary.gradient,
     surface: 'bg-zinc-50/80',
     surfaceSoft: 'bg-white',
     border: 'border-zinc-200/60',
@@ -20,16 +21,16 @@ export const COLORS = {
     icon: 'text-zinc-700',
   },
   secondary: {
-    gradient: 'from-slate-500 to-slate-600',
-    surface: 'bg-slate-50/80',
+    gradient: DESIGN_COLOR_SCALES.secondary.gradient,
+    surface: 'bg-zinc-50/80',
     surfaceSoft: 'bg-white',
-    border: 'border-slate-200/60',
-    text: 'text-slate-600',
-    textStrong: 'text-slate-900',
-    icon: 'text-slate-500',
+    border: 'border-zinc-200/60',
+    text: 'text-zinc-600',
+    textStrong: 'text-zinc-900',
+    icon: 'text-zinc-500',
   },
   success: {
-    gradient: 'from-emerald-500 to-emerald-600',
+    gradient: DESIGN_COLOR_SCALES.success.gradient,
     surface: 'bg-emerald-50/50',
     surfaceSoft: 'bg-emerald-50/30',
     border: 'border-emerald-200/60',
@@ -38,7 +39,7 @@ export const COLORS = {
     icon: 'text-emerald-600',
   },
   warning: {
-    gradient: 'from-amber-400 to-amber-500',
+    gradient: DESIGN_COLOR_SCALES.warning.gradient,
     surface: 'bg-amber-50/50',
     surfaceSoft: 'bg-amber-50/30',
     border: 'border-amber-200/60',
@@ -47,7 +48,7 @@ export const COLORS = {
     icon: 'text-amber-600',
   },
   danger: {
-    gradient: 'from-rose-500 to-rose-600',
+    gradient: DESIGN_COLOR_SCALES.danger.gradient,
     surface: 'bg-rose-50/50',
     surfaceSoft: 'bg-rose-50/30',
     border: 'border-rose-200/60',
@@ -140,7 +141,7 @@ export const COMPONENT_STYLES = {
       'inline-flex h-8 w-8 items-center justify-center rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
     iconEdit: 'border border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 focus:ring-zinc-500',
     iconDelete: 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:text-rose-900 focus:ring-rose-500',
-    iconView: 'border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-900 focus:ring-blue-500',
+    iconView: `border ${DESIGN_TOKENS.semantic.info.border} ${DESIGN_TOKENS.semantic.info.surface} text-blue-700 hover:bg-blue-100 hover:text-blue-900 focus:ring-blue-500`,
   },
 
   input: {

@@ -1,62 +1,53 @@
 import { Package, Buildings, TrendUp, Warning } from '@phosphor-icons/react';
+import { DESIGN_GRADIENTS, DESIGN_TOKENS } from '../../styles/designTokens';
 
 export const DASHBOARD_COLORS = {
   primary: {
-    gradient: 'from-zinc-900 to-zinc-800',
+    gradient: DESIGN_GRADIENTS.primary,
     bg: 'bg-zinc-100',
-    text: 'text-zinc-900',
+    text: DESIGN_TOKENS.text.primary,
     icon: 'text-zinc-800',
-    border: 'border-zinc-200',
+    border: DESIGN_TOKENS.border.default,
     hover: 'hover:bg-zinc-200',
   },
   secondary: {
-    gradient: 'from-zinc-500 to-zinc-600',
-    bg: 'bg-zinc-50',
-    text: 'text-zinc-700',
+    gradient: DESIGN_GRADIENTS.secondary,
+    bg: DESIGN_TOKENS.surfaces.muted,
+    text: DESIGN_TOKENS.text.secondary,
     icon: 'text-zinc-600',
-    border: 'border-zinc-200',
+    border: DESIGN_TOKENS.border.default,
   },
   success: {
-    gradient: 'from-emerald-900 to-emerald-800',
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-900',
+    gradient: DESIGN_GRADIENTS.success,
+    bg: DESIGN_TOKENS.semantic.success.surface,
+    text: DESIGN_TOKENS.semantic.success.textStrong,
     icon: 'text-emerald-800',
-    border: 'border-emerald-200',
+    border: DESIGN_TOKENS.semantic.success.border,
   },
   warning: {
-    gradient: 'from-amber-600 to-amber-700',
-    bg: 'bg-amber-50',
-    text: 'text-amber-900',
+    gradient: DESIGN_GRADIENTS.warning,
+    bg: DESIGN_TOKENS.semantic.warning.surface,
+    text: DESIGN_TOKENS.semantic.warning.textStrong,
     icon: 'text-amber-800',
-    border: 'border-amber-200',
+    border: DESIGN_TOKENS.semantic.warning.border,
   },
   danger: {
-    gradient: 'from-rose-600 to-rose-700',
-    bg: 'bg-rose-50',
-    text: 'text-rose-900',
+    gradient: DESIGN_GRADIENTS.danger,
+    bg: DESIGN_TOKENS.semantic.danger.surface,
+    text: DESIGN_TOKENS.semantic.danger.textStrong,
     icon: 'text-rose-800',
-    border: 'border-rose-200',
+    border: DESIGN_TOKENS.semantic.danger.border,
   },
   info: {
-    gradient: 'from-blue-600 to-blue-700',
-    bg: 'bg-blue-50',
-    text: 'text-blue-900',
+    gradient: DESIGN_GRADIENTS.info,
+    bg: DESIGN_TOKENS.semantic.info.surface,
+    text: DESIGN_TOKENS.semantic.info.textStrong,
     icon: 'text-blue-800',
-    border: 'border-blue-200',
+    border: DESIGN_TOKENS.semantic.info.border,
   },
 } as const;
 
-export const CHART_COLORS = {
-  primary: '#09090b',     // zinc-950
-  secondary: '#27272a',   // zinc-800
-  tertiary: '#52525b',    // zinc-600
-  quaternary: '#a1a1aa',  // zinc-400
-  success: '#059669',     // emerald-600
-  info: '#2563eb',        // blue-600
-  warning: '#d97706',     // amber-600
-  danger: '#e11d48',      // rose-600
-  muted: '#d4d4d8',       // zinc-300
-} as const;
+export const CHART_COLORS = DESIGN_TOKENS.chart;
 
 export const CHART_GRADIENT_COLORS = [
   { main: '#09090b', light: 'rgba(9, 9, 11, 0.15)' },

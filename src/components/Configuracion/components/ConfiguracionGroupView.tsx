@@ -5,6 +5,7 @@ import { useToastContext } from '../../../contexts/ToastContext';
 import { ConfiguracionService, type BackupExportFormat } from '../../../services/configuracionService';
 import { Modal } from '../../Establecimientos/components';
 import { getCategoryById, getEditableFieldsByGroup, getFieldsByCategory } from '../constants';
+import { CONFIG_STYLES } from '../styles';
 import type {
   ConfiguracionCategoryDefinition,
   ConfiguracionFieldDefinition,
@@ -37,13 +38,10 @@ interface ConfiguracionGroupViewProps {
   onCleanupResolvedAlerts: (days: number) => Promise<{ eliminadas: number }>;
 }
 
-const subtleBadgeClassName = 'inline-flex items-center rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-zinc-600';
-const inputClassName =
-  'w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 transition placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200';
-const secondaryButtonClassName =
-  'inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60';
-const primaryButtonClassName =
-  'inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60';
+const subtleBadgeClassName = CONFIG_STYLES.subtleBadge;
+const inputClassName = CONFIG_STYLES.input;
+const secondaryButtonClassName = CONFIG_STYLES.buttonSecondary;
+const primaryButtonClassName = CONFIG_STYLES.buttonPrimary;
 
 const formatFieldValue = (field: ConfiguracionFieldDefinition, value: ConfiguracionFieldValue): string => {
   if (field.formatValue) {

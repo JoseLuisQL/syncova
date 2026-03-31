@@ -7,10 +7,11 @@ import {
   Target,
   TrendUp,
 } from '@phosphor-icons/react';
+import { DESIGN_COLOR_SCALES, DESIGN_TOKENS } from '../../styles/designTokens';
 
 export const COLORS = {
   primary: {
-    gradient: 'from-zinc-600 to-zinc-600',
+    gradient: DESIGN_COLOR_SCALES.primary.gradient,
     surface: 'bg-zinc-50',
     surfaceSoft: 'bg-zinc-50',
     border: 'border-zinc-200',
@@ -20,7 +21,7 @@ export const COLORS = {
     shadow: 'shadow-sm',
   },
   secondary: {
-    gradient: 'from-zinc-600 to-zinc-600',
+    gradient: DESIGN_COLOR_SCALES.secondary.gradient,
     surface: 'bg-zinc-50',
     surfaceSoft: 'bg-zinc-50',
     border: 'border-zinc-200',
@@ -30,7 +31,7 @@ export const COLORS = {
     shadow: 'shadow-sm',
   },
   success: {
-    gradient: 'from-emerald-500 to-zinc-500',
+    gradient: DESIGN_COLOR_SCALES.success.gradient,
     surface: 'bg-emerald-50',
     surfaceSoft: 'bg-emerald-50/80',
     border: 'border-emerald-200',
@@ -40,7 +41,7 @@ export const COLORS = {
     shadow: 'shadow-sm',
   },
   warning: {
-    gradient: 'from-amber-500 to-orange-500',
+    gradient: DESIGN_COLOR_SCALES.warning.gradient,
     surface: 'bg-amber-50',
     surfaceSoft: 'bg-amber-50/80',
     border: 'border-amber-200',
@@ -50,7 +51,7 @@ export const COLORS = {
     shadow: 'shadow-sm',
   },
   danger: {
-    gradient: 'from-rose-500 to-red-500',
+    gradient: DESIGN_COLOR_SCALES.danger.gradient,
     surface: 'bg-rose-50',
     surfaceSoft: 'bg-rose-50/80',
     border: 'border-rose-200',
@@ -60,7 +61,7 @@ export const COLORS = {
     shadow: 'shadow-sm',
   },
   neutral: {
-    gradient: 'from-zinc-500 to-zinc-600',
+    gradient: DESIGN_COLOR_SCALES.secondary.gradient,
     surface: 'bg-zinc-50',
     surfaceSoft: 'bg-zinc-50',
     border: 'border-zinc-200',
@@ -70,7 +71,7 @@ export const COLORS = {
     shadow: 'shadow-sm',
   },
   info: {
-    gradient: 'from-zinc-500 to-blue-500',
+    gradient: DESIGN_COLOR_SCALES.info.gradient,
     surface: 'bg-zinc-50',
     surfaceSoft: 'bg-zinc-50',
     border: 'border-zinc-200',
@@ -177,7 +178,7 @@ export const COMPONENT_STYLES = {
     ghost:
       'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     success:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-emerald-600 hover:to-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     icon:
       'inline-flex h-9 w-9 items-center justify-center rounded-xl transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
     iconEdit: 'border border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:ring-zinc-500',
@@ -287,7 +288,7 @@ export const COMPONENT_STYLES = {
   },
 
   alert: {
-    info: 'rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-zinc-800',
+    info: `rounded-xl border ${DESIGN_TOKENS.semantic.info.border}/60 ${DESIGN_TOKENS.semantic.info.surface}/50 p-4 ${DESIGN_TOKENS.semantic.info.textStrong}`,
     error: 'rounded-xl border border-rose-200 bg-rose-50/80 p-4 text-rose-800',
     warning: 'rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-amber-800',
   },

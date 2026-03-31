@@ -9,6 +9,7 @@ import { useConfiguracion } from './hooks/useConfiguracion';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
 import type { ConfiguracionGroupId } from './types';
+import { CONFIG_STYLES } from './styles';
 
 const Configuracion: React.FC = () => {
   const { toast } = useToastContext();
@@ -189,7 +190,7 @@ const Configuracion: React.FC = () => {
             </button>
             <button
               type="button"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-gradient-to-r from-rose-600 to-red-600 px-4 py-2 text-sm font-medium text-white transition hover:from-rose-700 hover:to-red-700"
+              className={`${CONFIG_STYLES.buttonDanger} min-h-[44px] rounded-xl px-4 py-2`}
               onClick={handleConfirmNavigation}
             >
               Descartar y navegar

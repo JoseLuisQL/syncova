@@ -3,10 +3,11 @@ import {
   Warning,
   WarningCircle,
 } from '@phosphor-icons/react';
+import { DESIGN_GRADIENTS, DESIGN_TOKENS } from '../../styles/designTokens';
 
 export const COLORS = {
   primary: {
-    gradient: 'from-zinc-800 to-zinc-900',
+    gradient: DESIGN_GRADIENTS.primary,
     gradientHover: 'from-zinc-900 to-black',
     bg: 'bg-zinc-50',
     bgSoft: 'bg-zinc-50/75',
@@ -18,7 +19,7 @@ export const COLORS = {
     focus: 'focus:ring-zinc-500/20 focus:border-zinc-500',
   },
   secondary: {
-    gradient: 'from-zinc-700 to-zinc-800',
+    gradient: DESIGN_GRADIENTS.secondary,
     gradientHover: 'from-zinc-800 to-zinc-900',
     bg: 'bg-zinc-50',
     bgSoft: 'bg-zinc-50/75',
@@ -30,7 +31,7 @@ export const COLORS = {
     focus: 'focus:ring-zinc-500/20 focus:border-zinc-500',
   },
   success: {
-    gradient: 'from-zinc-800 to-zinc-900',
+    gradient: DESIGN_GRADIENTS.success,
     gradientHover: 'from-zinc-900 to-black',
     bg: 'bg-zinc-50',
     bgSoft: 'bg-zinc-50/75',
@@ -42,7 +43,7 @@ export const COLORS = {
     focus: 'focus:ring-zinc-500/20 focus:border-zinc-500',
   },
   warning: {
-    gradient: 'from-zinc-700 to-zinc-800',
+    gradient: DESIGN_GRADIENTS.warning,
     gradientHover: 'from-zinc-800 to-zinc-900',
     bg: 'bg-zinc-50',
     bgSoft: 'bg-zinc-50/75',
@@ -50,11 +51,11 @@ export const COLORS = {
     textDark: 'text-zinc-900',
     border: 'border-zinc-200',
     icon: 'text-zinc-600',
-    badge: 'bg-amber-50 text-amber-800', // Warning badge still uses amber for immediate recognition
+    badge: DESIGN_TOKENS.semantic.warning.badge,
     focus: 'focus:ring-zinc-500/20 focus:border-zinc-500',
   },
   danger: {
-    gradient: 'from-rose-500 to-rose-600',
+    gradient: DESIGN_GRADIENTS.danger,
     gradientHover: 'from-rose-600 to-rose-700',
     bg: 'bg-rose-50',
     bgSoft: 'bg-rose-50/75',
@@ -62,20 +63,19 @@ export const COLORS = {
     textDark: 'text-rose-900',
     border: 'border-rose-200',
     icon: 'text-rose-600',
-    badge: 'bg-rose-50 text-rose-800',
+    badge: DESIGN_TOKENS.semantic.danger.badge,
     focus: 'focus:ring-rose-500/20 focus:border-rose-500',
   },
   neutral: {
-    gradient: 'from-slate-500 to-slate-600',
-    gradientHover: 'from-slate-600 to-slate-700',
-    bg: 'bg-slate-50',
-    bgSoft: 'bg-slate-50/80',
-    text: 'text-slate-600',
-    textDark: 'text-slate-900',
-    border: 'border-slate-200',
-    icon: 'text-slate-500',
-    badge: 'bg-slate-100 text-slate-700',
-    focus: 'focus:ring-slate-400/20 focus:border-slate-400',
+    gradient: DESIGN_GRADIENTS.secondary,
+    bg: 'bg-zinc-50',
+    bgSoft: 'bg-zinc-50/80',
+    text: 'text-zinc-600',
+    textDark: 'text-zinc-900',
+    border: 'border-zinc-200',
+    icon: 'text-zinc-500',
+    badge: 'bg-zinc-100 text-zinc-700',
+    focus: 'focus:ring-zinc-400/20 focus:border-zinc-400',
   },
 } as const;
 

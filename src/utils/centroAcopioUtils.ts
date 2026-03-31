@@ -167,28 +167,28 @@ export const COLORES_CENTROS_ACOPIO = {
     name: 'Índigo Institucional'
   },
   'KISHUARA': {
-    bg: 'bg-teal-50',
-    border: 'border-teal-200',
-    text: 'text-teal-800',
-    accent: 'bg-teal-500',
+    bg: 'bg-zinc-50',
+    border: 'border-zinc-200',
+    text: 'text-zinc-800',
+    accent: 'bg-zinc-500',
     icon: '🏘️',
-    name: 'Turquesa Claro'
+    name: 'Zinc Claro'
   },
   'MATAPUQUIO': {
-    bg: 'bg-cyan-50',
-    border: 'border-cyan-200',
-    text: 'text-cyan-800',
-    accent: 'bg-cyan-500',
+    bg: 'bg-blue-50',
+    border: 'border-blue-200',
+    text: 'text-blue-800',
+    accent: 'bg-blue-500',
     icon: '🏪',
-    name: 'Cian Corporativo'
+    name: 'Azul Institucional'
   },
   'TURPO': {
-    bg: 'bg-sky-50',
-    border: 'border-sky-200',
-    text: 'text-sky-800',
-    accent: 'bg-sky-500',
+    bg: 'bg-zinc-100',
+    border: 'border-zinc-300',
+    text: 'text-zinc-800',
+    accent: 'bg-zinc-600',
     icon: '🏬',
-    name: 'Azul Cielo'
+    name: 'Zinc Profundo'
   },
   'TALAVERA': {
     bg: 'bg-violet-50',
@@ -256,12 +256,12 @@ export const COLORES_CENTROS_ACOPIO = {
     name: 'Hospital EsSalud'
   },
   'DEFAULT': {
-    bg: 'bg-gray-50',
-    border: 'border-gray-200',
-    text: 'text-gray-800',
-    accent: 'bg-gray-500',
+    bg: 'bg-zinc-50',
+    border: 'border-zinc-200',
+    text: 'text-zinc-800',
+    accent: 'bg-zinc-500',
     icon: '🏥',
-    name: 'Gris Neutro'
+    name: 'Zinc Neutro'
   }
 };
 

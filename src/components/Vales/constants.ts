@@ -5,11 +5,12 @@ import {
   Package,
   Plus,
 } from '@phosphor-icons/react';
+import { DESIGN_GRADIENTS, DESIGN_TOKENS } from '../../styles/designTokens';
 
 // Paleta de colores unificada con Inventario y Movimientos (teal/cyan)
 export const COLORS = {
   primary: {
-    gradient: 'from-zinc-800 to-zinc-900',
+    gradient: DESIGN_GRADIENTS.primary,
     gradientHover: 'from-zinc-900 to-black',
     bg: 'bg-zinc-50',
     bgHover: 'hover:bg-zinc-100',
@@ -21,7 +22,7 @@ export const COLORS = {
     focus: 'focus:ring-zinc-900 focus:border-zinc-900',
   },
   secondary: {
-    gradient: 'from-zinc-700 to-zinc-800',
+    gradient: DESIGN_GRADIENTS.secondary,
     bg: 'bg-zinc-50',
     text: 'text-zinc-700',
     textDark: 'text-zinc-900',
@@ -29,7 +30,7 @@ export const COLORS = {
     icon: 'text-zinc-600',
   },
   success: {
-    gradient: 'from-emerald-500 to-emerald-600',
+    gradient: DESIGN_GRADIENTS.success,
     bg: 'bg-emerald-50/50',
     bgGradient: 'from-emerald-50 to-emerald-50',
     text: 'text-emerald-700',
@@ -39,7 +40,7 @@ export const COLORS = {
     badge: 'bg-emerald-50 text-emerald-800 border border-emerald-200/60',
   },
   warning: {
-    gradient: 'from-amber-500 to-amber-600',
+    gradient: DESIGN_GRADIENTS.warning,
     bg: 'bg-amber-50/50',
     bgGradient: 'from-amber-50 to-amber-50',
     text: 'text-amber-700',
@@ -49,7 +50,7 @@ export const COLORS = {
     badge: 'bg-amber-50 text-amber-800 border border-amber-200/60',
   },
   danger: {
-    gradient: 'from-rose-500 to-rose-600',
+    gradient: DESIGN_GRADIENTS.danger,
     bg: 'bg-rose-50/50',
     bgGradient: 'from-rose-50 to-rose-50',
     text: 'text-rose-700',
@@ -177,9 +178,9 @@ export const ANIOS_DISPONIBLES = [2024, 2025, 2026] as const;
 export const ESTADOS_VALE = {
   generado: {
     label: 'Generado',
-    bg: 'bg-cyan-50',
-    text: 'text-cyan-800',
-    border: 'border-cyan-200/60',
+    bg: DESIGN_TOKENS.semantic.info.surface,
+    text: 'text-blue-800',
+    border: 'border-blue-200/60',
     icon: Clock,
   },
   impreso: {
