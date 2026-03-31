@@ -28,9 +28,9 @@ const SummaryMetric: React.FC<{
 }> = ({ label, value, tone = 'base' }) => {
   const className =
     tone === 'alt'
-      ? 'border-zinc-300 bg-zinc-50 text-zinc-900'
+      ? 'border-teal-200 bg-teal-50 text-teal-900'
       : tone === 'base'
-      ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm'
+      ? 'border-teal-600 bg-teal-600 text-white shadow-sm'
       : 'border-zinc-200 bg-white text-zinc-800 shadow-sm';
 
   return (
@@ -115,7 +115,7 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
                 Punteros directos a la matriz. Tienen control independiente por ticket.
               </p>
             </div>
-            <span className="rounded-md bg-zinc-900 px-2.5 py-1 text-[0.7rem] font-black tracking-widest text-white uppercase">
+            <span className="rounded-md bg-teal-600 px-2.5 py-1 text-[0.7rem] font-black tracking-widest text-white uppercase">
               {movimiento.entregasAdicionales?.length || 0} Traces
             </span>
           </div>
@@ -159,12 +159,12 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
                           entrega.tieneValeGenerado
                             ? 'border-zinc-200 bg-zinc-100 text-zinc-700 cursor-not-allowed shadow-inner'
                             : hasPendingEntregaChange(entrega.id)
-                            ? 'border-zinc-900 bg-zinc-50 text-zinc-900 focus:ring-zinc-900'
-                            : 'border-zinc-300 bg-white text-zinc-900 focus:border-zinc-900 focus:ring-zinc-900/30 shadow-sm'
+                            ? 'border-teal-600 bg-teal-50 text-teal-900 focus:ring-teal-600'
+                            : 'border-zinc-300 bg-white text-zinc-900 focus:border-teal-600 focus:ring-teal-600/30 shadow-sm'
                         }`}
                       />
                       {hasPendingEntregaChange(entrega.id) && !entrega.tieneValeGenerado ? (
-                        <span className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full border-2 border-white bg-zinc-900 animate-pulse" />
+                        <span className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full border-2 border-white bg-teal-600 animate-pulse" />
                       ) : null}
                     </div>
 

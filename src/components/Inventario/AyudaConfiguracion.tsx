@@ -66,7 +66,7 @@ const AyudaConfiguracion: React.FC<AyudaConfiguracionProps> = ({ isOpen, onClose
             </div>
           </div>
 
-          <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-900 text-white shadow-sm mt-6">
+          <div className="bg-teal-600 p-5 rounded-xl border border-teal-600 text-white shadow-sm mt-6">
             <div className="flex items-start">
               <WarningCircle className="h-5 w-5 text-zinc-400 mr-3 mt-0.5" weight="fill" />
               <div>
@@ -180,35 +180,35 @@ const AyudaConfiguracion: React.FC<AyudaConfiguracionProps> = ({ isOpen, onClose
             <h4 className="font-semibold text-zinc-900 mb-4">Configuración por Defecto</h4>
             <ol className="space-y-4 text-sm text-zinc-700">
               <li className="flex items-start">
-                <span className="bg-zinc-900 text-white rounded-full min-w-[24px] h-[24px] flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shadow-sm">1</span>
+                <span className="bg-teal-600 text-white rounded-full min-w-[24px] h-[24px] flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shadow-sm">1</span>
                 <div>
                   <strong className="text-zinc-900">Ir a la pestaña "Configuración por Defecto"</strong>
                   <p className="text-zinc-500 mt-0.5">Seleccione la pestaña correspondiente en la interfaz</p>
                 </div>
               </li>
               <li className="flex items-start">
-                <span className="bg-zinc-900 text-white rounded-full min-w-[24px] h-[24px] flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shadow-sm">2</span>
+                <span className="bg-teal-600 text-white rounded-full min-w-[24px] h-[24px] flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shadow-sm">2</span>
                 <div>
                   <strong className="text-zinc-900">Hacer clic en "Nueva Configuración"</strong>
                   <p className="text-zinc-500 mt-0.5">Abrir el formulario de creación</p>
                 </div>
               </li>
               <li className="flex items-start">
-                <span className="bg-zinc-900 text-white rounded-full min-w-[24px] h-[24px] flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shadow-sm">3</span>
+                <span className="bg-teal-600 text-white rounded-full min-w-[24px] h-[24px] flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shadow-sm">3</span>
                 <div>
                   <strong className="text-zinc-900">Seleccionar Vacuna y Jeringa</strong>
                   <p className="text-zinc-500 mt-0.5">Elegir la combinación que desea configurar</p>
                 </div>
               </li>
               <li className="flex items-start">
-                <span className="bg-zinc-900 text-white rounded-full min-w-[24px] h-[24px] flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shadow-sm">4</span>
+                <span className="bg-teal-600 text-white rounded-full min-w-[24px] h-[24px] flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shadow-sm">4</span>
                 <div>
                   <strong className="text-zinc-900">Establecer Multiplicador y Prioridad</strong>
                   <p className="text-zinc-500 mt-0.5">Definir cuántas jeringas por dosis y el orden de selección</p>
                 </div>
               </li>
               <li className="flex items-start">
-                <span className="bg-zinc-900 text-white rounded-full min-w-[24px] h-[24px] flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shadow-sm">5</span>
+                <span className="bg-teal-600 text-white rounded-full min-w-[24px] h-[24px] flex items-center justify-center text-xs font-bold mr-3 mt-0.5 shadow-sm">5</span>
                 <div>
                   <strong className="text-zinc-900">Guardar la Configuración</strong>
                   <p className="text-zinc-500 mt-0.5">Confirmar y activar la nueva configuración</p>
@@ -261,7 +261,7 @@ const AyudaConfiguracion: React.FC<AyudaConfiguracionProps> = ({ isOpen, onClose
                   onClick={() => setActiveSection(section.id)}
                   className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-zinc-900 text-white shadow-sm'
+                      ? 'bg-teal-600 text-white shadow-sm'
                       : 'text-zinc-600 hover:bg-zinc-200/50 hover:text-zinc-900'
                   }`}
                 >

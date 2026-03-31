@@ -46,7 +46,7 @@ const AdminUserCard: React.FC<{ admin: Usuario }> = memo(({ admin }) => {
           <div className={`
             flex items-center justify-center w-9 h-9 rounded-full text-[13px] font-bold
             ${isActive 
-              ? 'bg-zinc-900 text-white' 
+              ? 'bg-teal-600 text-white' 
               : 'bg-zinc-200 text-zinc-500'
             }
           `}>
@@ -147,12 +147,12 @@ const AdminUsersSection: React.FC = memo(() => {
     >
       <header className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
         <h3 className="text-[14px] font-bold text-zinc-900 flex items-center gap-2.5 tracking-tight">
-          <div className="p-1.5 rounded-lg bg-zinc-900 shadow-sm">
+          <div className="p-1.5 rounded-lg bg-teal-600 shadow-sm">
             <ShieldCheck className="h-4 w-4 text-white" weight="bold" aria-hidden="true" />
           </div>
           Administradores
           {admins.length > 0 && (
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-zinc-900 text-white shadow-sm ml-0.5">
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-teal-600 text-white shadow-sm ml-0.5">
               {admins.length}
             </span>
           )}

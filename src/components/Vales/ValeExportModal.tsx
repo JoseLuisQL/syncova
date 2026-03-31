@@ -32,7 +32,7 @@ const StepIndicator = memo<{
   <div className="flex items-center">
     <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
       currentStep >= step
-        ? 'bg-zinc-900 border-teal-600 text-white'
+        ? 'bg-teal-600 border-teal-600 text-white'
         : 'bg-white border-gray-300 text-gray-400'
     }`}>
       {currentStep > step ? (
@@ -429,7 +429,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
             <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Eye className="h-5 w-5 text-zinc-600" />
-                <span className="font-medium text-teal-900">Vista Previa</span>
+                <span className="font-medium text-teal-800">Vista Previa</span>
               </div>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
@@ -457,7 +457,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
                 <div className="flex items-start gap-3">
                   <CheckCircle weight="bold" className="h-5 w-5 text-zinc-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-semibold text-zinc-900">Contenido seleccionado</h4>
+                    <h4 className="text-sm font-semibold text-teal-900">Contenido seleccionado</h4>
                     <p className="text-sm text-zinc-700 mt-1">
                       {esExportacionGlobal
                         ? `Se exportarán ${valesOriginales.length} vales con todas las entregas.`

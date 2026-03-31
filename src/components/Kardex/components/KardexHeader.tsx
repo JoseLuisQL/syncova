@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { BookOpenText, DownloadSimple, SpinnerGap, ArrowsClockwise } from '@phosphor-icons/react';
+import { DownloadSimple, SpinnerGap, ArrowsClockwise } from '@phosphor-icons/react';
 import { COMPONENT_STYLES } from '../constants';
 
 interface KardexHeaderProps {
@@ -26,19 +26,7 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
   return (
     <section className="overflow-hidden bg-transparent">
       <div className="border-b border-zinc-200/90 px-4 py-5 sm:px-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-start gap-4">
-            <div className={COMPONENT_STYLES.header.iconWrapper}>
-              <BookOpenText className="h-6 w-6" aria-hidden="true" />
-            </div>
-            <div className="min-w-0">
-              <h1 className={COMPONENT_STYLES.header.title}>Kardex</h1>
-              <p className={`${COMPONENT_STYLES.header.subtitle} mt-1`}>
-                Trazabilidad por lote, documento y saldo operativo dentro del mismo lenguaje visual del sistema.
-              </p>
-            </div>
-          </div>
-
+        <div className="flex flex-wrap items-center gap-2 lg:justify-end">
           <div className="flex flex-wrap items-center gap-2 lg:justify-end">
             <button
               type="button"

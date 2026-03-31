@@ -75,15 +75,15 @@ const UserMenu: React.FC = memo(() => {
           className={`
             flex items-center gap-2 p-1.5 pr-2 rounded-xl
             transition-all duration-200 border border-transparent
-            hover:bg-gray-50 hover:border-gray-200
-            focus:outline-none focus:ring-2 focus:ring-gray-900/10
-            ${isMenuOpen ? 'bg-gray-50 border-gray-200 shadow-sm' : ''}
+            hover:bg-teal-50 hover:border-teal-200
+            focus:outline-none focus:ring-2 focus:ring-teal-500/10
+            ${isMenuOpen ? 'bg-teal-50 border-teal-200 shadow-sm' : ''}
           `}
           aria-expanded={isMenuOpen}
           aria-haspopup="true"
         >
           {/* Avatar Neutro Superior */}
-          <div className="w-8 h-8 rounded-[10px] bg-gray-900 border border-gray-950 flex items-center justify-center shadow-sm">
+          <div className="w-8 h-8 rounded-[10px] bg-teal-600 border border-teal-700 flex items-center justify-center shadow-sm">
             <span className="text-xs font-bold text-white tracking-widest leading-none pl-[1px]">
               {getUserInitials()}
             </span>
@@ -103,7 +103,7 @@ const UserMenu: React.FC = memo(() => {
           <CaretDown 
             className={`
               w-4 h-4 ml-1 text-gray-400 transition-transform duration-200
-              ${isMenuOpen ? 'rotate-180 text-gray-900' : ''}
+              ${isMenuOpen ? 'rotate-180 text-teal-700' : ''}
             `} 
             weight="bold"
           />
@@ -123,9 +123,9 @@ const UserMenu: React.FC = memo(() => {
             role="menu"
           >
             {/* User Header */}
-            <div className="p-5 bg-gray-50/50 border-b border-gray-100">
+            <div className="p-5 bg-teal-50/40 border-b border-gray-100">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gray-900 flex items-center justify-center shadow-md flex-shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-teal-600 flex items-center justify-center shadow-md flex-shrink-0">
                   <span className="text-base font-bold tracking-wider text-white">
                     {getUserInitials()}
                   </span>
@@ -152,13 +152,13 @@ const UserMenu: React.FC = memo(() => {
                 <div className="mt-4 pt-4 border-t border-gray-200/60 space-y-2.5">
                   {(user.centroAcopio || user.establecimiento) && (
                     <div className="flex items-center gap-2.5 text-[13px] text-gray-600 font-medium">
-                      <Buildings className="w-4 h-4 text-gray-400" weight="duotone" />
+                      <Buildings className="w-4 h-4 text-teal-500" weight="duotone" />
                       <span className="truncate">{user.centroAcopio?.nombre || user.establecimiento?.nombre}</span>
                     </div>
                   )}
                   {user.ultimoAcceso && (
                     <div className="flex items-center gap-2.5 text-[13px] text-gray-500">
-                      <Clock className="w-4 h-4 text-gray-400" weight="duotone" />
+                      <Clock className="w-4 h-4 text-teal-500" weight="duotone" />
                       <span>{new Date(user.ultimoAcceso).toLocaleDateString('es-PE', { 
                         day: '2-digit', 
                         month: 'short',
@@ -181,12 +181,12 @@ const UserMenu: React.FC = memo(() => {
                 className="
                   flex items-center gap-3 w-full px-3 py-2.5 rounded-xl
                   text-[13px] font-semibold text-gray-600
-                  hover:bg-gray-100 hover:text-gray-900
+                  hover:bg-teal-50 hover:text-teal-700
                   transition-colors duration-150
                 "
                 role="menuitem"
               >
-                <Key className="w-4 h-4 text-gray-400" weight="duotone" />
+                <Key className="w-4 h-4 text-teal-500" weight="duotone" />
                 Cambiar contraseña
               </button>
               

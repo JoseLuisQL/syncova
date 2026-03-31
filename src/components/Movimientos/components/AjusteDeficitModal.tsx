@@ -45,8 +45,8 @@ const SummaryCard: React.FC<{
     tone === 'alert'
       ? 'border-rose-200 bg-white text-rose-900 shadow-sm'
       : tone === 'alt'
-      ? 'border-zinc-300 bg-zinc-50 text-zinc-900 shadow-sm'
-      : 'border-zinc-900 bg-zinc-900 text-white shadow-sm';
+      ? 'border-teal-200 bg-teal-50 text-teal-900 shadow-sm'
+      : 'border-teal-600 bg-teal-600 text-white shadow-sm';
 
   return (
     <div className={`rounded-[16px] border px-5 py-4 ${className}`}>
@@ -270,7 +270,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
           </div>
         </div>
       ) : datos && !datos.puedeAjustar ? (
-        <div className="rounded-[16px] border border-zinc-900 bg-zinc-900 p-5 shadow-sm">
+        <div className="rounded-[16px] border border-teal-600 bg-teal-600 p-5 shadow-sm">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white border border-white/20">
               <LockKey className="h-6 w-6" weight="fill" />
@@ -321,7 +321,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                   onClick={() => setOpcionSeleccionada(opcion.id)}
                   className={`rounded-[16px] border p-5 text-left transition-all ${
                     opcionSeleccionada === opcion.id
-                      ? 'border-zinc-900 bg-zinc-900 text-white shadow-md'
+                      ? 'border-teal-600 bg-teal-600 text-white shadow-md'
                       : 'border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100 text-zinc-900'
                   }`}
                 >
@@ -331,7 +331,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                         <p className={`text-[0.95rem] font-black tracking-tight ${opcionSeleccionada === opcion.id ? 'text-white' : 'text-zinc-900'}`}>{opcion.nombre}</p>
                         {opcion.esRecomendada ? (
                           <span className={`rounded-md px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-widest ${
-                            opcionSeleccionada === opcion.id ? 'bg-white text-zinc-900' : 'bg-zinc-900 text-white'
+                            opcionSeleccionada === opcion.id ? 'bg-white text-teal-700' : 'bg-teal-600 text-white'
                           }`}>
                             Priority
                           </span>
@@ -406,7 +406,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                         className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left ${centro.tieneValeGenerado ? 'opacity-80' : ''}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${centro.tieneValeGenerado ? 'bg-zinc-200 text-zinc-500' : 'bg-zinc-900 text-white'}`}>
+                          <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${centro.tieneValeGenerado ? 'bg-zinc-200 text-zinc-500' : 'bg-teal-600 text-white'}`}>
                             {centro.tieneValeGenerado ? <LockKey className="h-4 w-4" weight="fill" /> : <Buildings className="h-4 w-4" weight="duotone" />}
                           </div>
                           <div>
@@ -461,7 +461,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                                       className={`ml-2 rounded-md border px-2 py-0.5 text-[0.7rem] font-black ${
                                         ajuste.diferencia < 0
                                           ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                          : 'bg-zinc-900 text-white border-zinc-900'
+                                          : 'bg-teal-600 text-white border-teal-600'
                                       }`}
                                     >
                                       {ajuste.diferencia > 0 ? '+' : ''}
@@ -490,7 +490,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                   <p className="text-[0.65rem] font-bold uppercase tracking-widest text-rose-500">Delta</p>
                   <p className="mt-1 text-xl font-black tracking-tight text-rose-600">-{opcionActual.reduccionTotal.toLocaleString()}</p>
                 </div>
-                <div className="p-4 rounded-xl border border-zinc-900 bg-zinc-900 shadow-md">
+                <div className="p-4 rounded-xl border border-teal-600 bg-teal-600 shadow-md">
                   <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-400">Target Resolved</p>
                   <p className="mt-1 text-xl font-black tracking-tight text-white">{opcionActual.totalDespues.toLocaleString()}</p>
                 </div>

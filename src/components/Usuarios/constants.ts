@@ -4,21 +4,21 @@ import {
   Key,
   CheckCircle,
 } from '@phosphor-icons/react';
-import { DESIGN_GRADIENTS, DESIGN_TOKENS } from '../../styles/designTokens';
+import { DESIGN_COLOR_SCALES, DESIGN_GRADIENTS, DESIGN_TOKENS } from '../../styles/designTokens';
 
 // Paleta de colores unificada (Cockpit Mode - Zinc)
 export const COLORS = {
   primary: {
-    gradient: DESIGN_GRADIENTS.primary,
-    gradientHover: 'from-zinc-900 to-black',
-    bg: 'bg-zinc-50',
+    gradient: DESIGN_COLOR_SCALES.primary.gradient,
+    gradientHover: 'from-teal-700 to-cyan-700',
+    bg: DESIGN_COLOR_SCALES.primary.surface,
     bgHover: 'hover:bg-zinc-100',
-    text: 'text-zinc-900',
-    textDark: 'text-black',
-    border: 'border-zinc-200',
-    icon: 'text-zinc-700',
-    ring: 'ring-zinc-900',
-    focus: 'focus:ring-zinc-900 focus:border-zinc-900',
+    text: DESIGN_COLOR_SCALES.primary.text,
+    textDark: DESIGN_COLOR_SCALES.primary.textStrong,
+    border: DESIGN_COLOR_SCALES.primary.border,
+    icon: DESIGN_COLOR_SCALES.primary.icon,
+    ring: 'ring-teal-600',
+    focus: 'focus:ring-teal-600 focus:border-teal-600',
   },
   secondary: {
     gradient: DESIGN_GRADIENTS.secondary,
@@ -110,9 +110,9 @@ export const COMPONENT_STYLES = {
 
   button: {
     primary: `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white 
-              bg-zinc-900 hover:bg-zinc-800 border border-transparent
+              bg-teal-600 hover:bg-teal-700 border border-transparent
               shadow-sm transition-all duration-200 
-              focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2
+              focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2
               disabled:opacity-50 disabled:cursor-not-allowed`,
     secondary: `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium 
                 text-zinc-700 bg-white border border-zinc-200 
@@ -151,7 +151,7 @@ export const COMPONENT_STYLES = {
     base: `w-full px-3 py-2 rounded-md border text-sm
            transition-all duration-200 bg-white
            focus:outline-none focus:ring-2 focus:ring-offset-0`,
-    normal: 'border-zinc-300 focus:ring-zinc-900 focus:border-zinc-900 hover:border-zinc-400 placeholder:text-zinc-400',
+    normal: 'border-zinc-300 focus:ring-teal-600 focus:border-teal-600 hover:border-zinc-400 placeholder:text-zinc-400',
     error: 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 text-rose-900',
     label: 'block text-[0.8rem] font-medium text-zinc-700 mb-1.5',
     errorText: 'mt-1 text-xs text-rose-600 font-medium',
@@ -163,7 +163,7 @@ export const COMPONENT_STYLES = {
            bg-white transition-all duration-200
            focus:outline-none focus:ring-2 focus:ring-offset-0
            disabled:bg-zinc-50 disabled:text-zinc-500 disabled:cursor-not-allowed`,
-    normal: 'border-zinc-300 focus:ring-zinc-900 focus:border-zinc-900 hover:border-zinc-400',
+    normal: 'border-zinc-300 focus:ring-teal-600 focus:border-teal-600 hover:border-zinc-400',
   },
 
   table: {
@@ -200,7 +200,7 @@ export const COMPONENT_STYLES = {
 
   stats: {
     card: 'rounded-xl p-4 border border-zinc-200 bg-white hover:border-zinc-300 transition-colors duration-200 shadow-sm',
-    cardGradient: 'rounded-xl p-4 bg-zinc-900 text-white shadow-md',
+    cardGradient: 'rounded-xl p-4 bg-teal-600 text-white shadow-md',
     value: 'text-2xl font-bold tracking-tight tabular-nums',
     label: 'text-[0.8rem] font-medium text-zinc-500 uppercase tracking-widest',
     iconWrapper: 'p-2 rounded-lg bg-zinc-100 text-zinc-600',
@@ -218,7 +218,7 @@ export const COMPONENT_STYLES = {
     container: 'bg-zinc-50 border-b border-zinc-200 sticky top-0 z-10 px-4 pt-2 flex gap-1 overflow-X-auto scrollbar-hide',
     tab: `flex items-center gap-2 px-3 py-2 text-sm font-medium border-b-2
           transition-all duration-200 cursor-pointer whitespace-nowrap`,
-    tabActive: 'text-zinc-900 border-zinc-900',
+    tabActive: 'text-teal-700 border-teal-600',
     tabInactive: 'text-zinc-500 border-transparent hover:text-zinc-700 hover:border-zinc-300',
   },
 
@@ -226,12 +226,12 @@ export const COMPONENT_STYLES = {
     container: 'bg-white px-5 py-3 border-t border-zinc-200 flex items-center justify-between',
     info: 'text-[0.8rem] text-zinc-500',
     button: 'px-2.5 py-1.5 text-sm font-medium rounded border transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed',
-    buttonActive: 'bg-zinc-900 border-zinc-900 text-white',
+    buttonActive: 'bg-teal-600 border-teal-600 text-white',
     buttonInactive: 'bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50',
   },
 
   bulkActions: {
-    container: 'bg-zinc-900 border border-zinc-800 rounded-lg p-2.5 flex items-center justify-between shadow-lg text-white mb-4 animate-in fade-in slide-in-from-bottom-2',
+    container: 'bg-teal-600 border border-teal-600 rounded-lg p-2.5 flex items-center justify-between shadow-lg text-white mb-4 animate-in fade-in slide-in-from-bottom-2',
     text: 'text-sm font-medium ml-2',
   },
 } as const;
@@ -242,7 +242,7 @@ export const STATS_CONFIG = [
     key: 'total',
     label: 'Total Usuarios',
     icon: Users,
-    gradient: 'from-zinc-100 to-zinc-200 text-zinc-900',
+    gradient: 'from-teal-50 to-teal-100 text-teal-900',
   },
   {
     key: 'activos',
@@ -254,7 +254,7 @@ export const STATS_CONFIG = [
     key: 'roles',
     label: 'Roles',
     icon: Shield,
-    gradient: 'from-zinc-100 to-zinc-200 text-zinc-900',
+    gradient: 'from-teal-50 to-teal-100 text-teal-900',
   },
 ] as const;
 

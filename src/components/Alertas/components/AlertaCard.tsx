@@ -45,13 +45,13 @@ export const AlertaCard: React.FC<AlertaCardProps> = memo(({
   const handleEliminar = useCallback(() => onEliminar(alerta.id), [alerta.id, onEliminar]);
 
   return (
-    <article className={`rounded-[20px] border p-4 ${isSelected ? 'border-teal-300 bg-zinc-100/70' : !alerta.leida ? 'border-zinc-200 bg-white' : 'border-zinc-200 bg-white'}`}>
+    <article className={`rounded-[20px] border p-4 ${isSelected ? 'border-teal-300 bg-teal-50/70' : !alerta.leida ? 'border-zinc-200 bg-white' : 'border-zinc-200 bg-white'}`}>
       <div className="flex items-start gap-3">
         <input
           type="checkbox"
           checked={isSelected}
           onChange={handleToggle}
-          className="mt-1 h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-800"
+          className="mt-1 h-4 w-4 rounded border-zinc-300 text-teal-600 focus:ring-teal-500"
           aria-label={`Seleccionar alerta: ${alerta.titulo}`}
         />
 
@@ -72,7 +72,7 @@ export const AlertaCard: React.FC<AlertaCardProps> = memo(({
             <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${tipoInfo?.bgColor || 'bg-zinc-100'} ${tipoInfo?.color || 'text-zinc-700'}`}>
               {tipoInfo?.label || alerta.tipo}
             </span>
-            <span className={alerta.leida ? 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700' : 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-900'}>
+            <span className={alerta.leida ? 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700' : 'inline-flex items-center rounded-full bg-teal-100 px-2.5 py-1 text-xs font-medium text-teal-700'}>
               {alerta.leida ? 'Leída' : 'Pendiente'}
             </span>
           </div>

@@ -5,6 +5,7 @@ import { useToastContext } from '../../contexts/ToastContext';
 import { useRateLimitHandler } from '../../hooks/useRateLimitHandler';
 import { SivacLogo } from '../common/SivacLogo';
 import { User, LockKey, Eye, EyeClosed, SpinnerGap, Clock as ClockIcon, WarningCircle, XCircle } from '@phosphor-icons/react';
+import { DESIGN_TOKENS } from '../../styles/designTokens';
 
 // ============================================================================
 // CONSTANTS
@@ -183,12 +184,12 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading, canRetry, remain
     const base = 
       'w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm ' +
       'font-bold text-white transition-all duration-200 focus:outline-none focus:ring-2 ' +
-      'focus:ring-offset-2 focus:ring-gray-900 shadow-sm';
+      'focus:ring-offset-2 shadow-sm';
     
     if (isDisabled) {
       return `${base} bg-gray-300 text-gray-500 cursor-not-allowed shadow-none`;
     }
-    return `${base} bg-gray-900 hover:bg-gray-800 active:scale-[0.98]`;
+    return `${base} ${DESIGN_TOKENS.interactive.primary} active:scale-[0.98]`;
   }, [isDisabled]);
 
   const renderContent = () => {
@@ -297,7 +298,7 @@ const LoginForm: React.FC = () => {
     <button
       type="button"
       onClick={togglePasswordVisibility}
-      className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900"
+      className="p-1 rounded-md text-gray-400 hover:text-teal-700 hover:bg-teal-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-600"
       aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
     >
       {showPassword ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
@@ -312,7 +313,7 @@ const LoginForm: React.FC = () => {
         <div className="w-full max-w-[400px] mx-auto animate-fade-in-up">
           
           <header className="mb-10 text-left">
-            <div className="mb-8 w-14 h-14 bg-gray-900 text-white rounded-2xl flex items-center justify-center shadow-md">
+            <div className="mb-8 w-14 h-14 bg-teal-600 text-white rounded-2xl flex items-center justify-center shadow-md">
               <SivacLogo size={32} />
             </div>
             <h1 className="text-[2rem] leading-tight font-extrabold text-gray-900 tracking-tighter">
@@ -382,18 +383,18 @@ const LoginForm: React.FC = () => {
       </div>
 
       {/* Right Axis: Contextual Graphic Layer */}
-      <div className="hidden lg:flex lg:w-[55%] relative flex-col justify-end p-12 bg-gray-950 overflow-hidden group">
+  <div className="hidden lg:flex lg:w-[55%] relative flex-col justify-end p-12 bg-zinc-950 overflow-hidden group">
         <img 
           src="/portada.png" 
           alt="SIVAC Portada" 
           className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-[15s] ease-out group-hover:scale-105"
         />
         {/* Gradients to ensure text readability without hiding the 3D art */}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-transparent/10" />
-        <div className="absolute inset-0 bg-gradient-to-l from-transparent to-gray-950/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/55 to-teal-950/10" />
+        <div className="absolute inset-0 bg-gradient-to-l from-transparent to-teal-950/25" />
         
         <div className="relative z-10 max-w-lg mb-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-          <div className="inline-block px-3 py-1.5 mb-6 text-xs font-bold tracking-widest text-emerald-400 uppercase border border-emerald-400/30 rounded-full bg-emerald-400/10 backdrop-blur-sm shadow-[0_0_15px_rgba(52,211,153,0.1)]">
+          <div className="inline-block px-3 py-1.5 mb-6 text-xs font-bold tracking-widest text-teal-300 uppercase border border-teal-400/30 rounded-full bg-teal-400/10 backdrop-blur-sm shadow-[0_0_15px_rgba(45,212,191,0.12)]">
             Sistema Oficial
           </div>
           <h2 className="text-3xl font-extrabold text-white tracking-tight leading-tight drop-shadow-md">

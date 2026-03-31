@@ -138,7 +138,7 @@ const Sidebar: React.FC = memo(() => {
                         py-2.5 rounded-lg
                         transition-all duration-200
                         ${isActive 
-                          ? 'bg-zinc-900 text-white shadow-md shadow-zinc-900/10' 
+                          ? 'bg-teal-600 text-white shadow-md shadow-teal-600/20 hover:bg-teal-700' 
                           : 'text-zinc-600 hover:bg-zinc-100/80 hover:text-zinc-900'
                         }
                       `}
@@ -168,8 +168,8 @@ const Sidebar: React.FC = memo(() => {
                         <div className="
                           hidden lg:block
                           absolute left-full ml-3 px-3 py-1.5
-                          bg-zinc-900 text-white text-xs font-medium
-                          rounded-md shadow-lg border border-zinc-800
+                          bg-teal-700 text-white text-xs font-medium
+                          rounded-md shadow-lg border border-teal-800
                           opacity-0 invisible
                           group-hover:opacity-100 group-hover:visible
                           transition-all duration-200

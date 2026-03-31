@@ -16,11 +16,11 @@ import { DESIGN_COLOR_SCALES } from '../../styles/designTokens';
 export const COLORS = {
   primary: {
     gradient: DESIGN_COLOR_SCALES.primary.gradient,
-    surface: 'bg-zinc-100',
-    surfaceSoft: 'bg-zinc-50/70',
+    surface: 'bg-teal-50',
+    surfaceSoft: 'bg-teal-50/70',
     border: DESIGN_COLOR_SCALES.primary.border,
-    text: 'text-zinc-900',
-    textStrong: 'text-zinc-950',
+    text: 'text-teal-800',
+    textStrong: 'text-teal-950',
     icon: DESIGN_COLOR_SCALES.primary.icon,
     shadow: 'shadow-zinc-500/10',
   },
@@ -175,12 +175,12 @@ export const COMPONENT_STYLES = {
     title: 'text-[1.45rem] font-bold tracking-tight text-zinc-900 sm:text-[1.55rem]',
     subtitle: 'text-[0.85rem] font-medium text-zinc-500 mt-0.5',
     iconWrapper:
-      'flex h-12 w-12 items-center justify-center rounded-[16px] bg-zinc-900 text-white shadow-sm',
+      'flex h-12 w-12 items-center justify-center rounded-[16px] bg-teal-600 text-white shadow-sm',
   },
 
   button: {
     primary:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[14px] bg-zinc-900 px-4 py-2 text-[13px] font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:shadow disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[14px] bg-teal-600 px-4 py-2 text-[13px] font-bold text-white shadow-sm transition hover:bg-teal-700 hover:shadow disabled:cursor-not-allowed disabled:opacity-60',
     secondary:
       'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[14px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-60',
     ghost:
@@ -194,7 +194,7 @@ export const COMPONENT_STYLES = {
 
   input: {
     base:
-      'w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-[13px] font-medium text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300',
+      'w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-[13px] font-medium text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-300',
     normal: 'hover:border-zinc-300',
     error: 'border-rose-300 bg-rose-50/60 focus:border-rose-500 focus:ring-rose-500/20 text-rose-900 placeholder:text-rose-400',
     label: 'mb-1.5 block text-[12px] font-bold text-zinc-700 tracking-wide',
@@ -206,7 +206,7 @@ export const COMPONENT_STYLES = {
     container: 'rounded-[20px] border border-zinc-200/60 bg-white p-4 shadow-sm sm:p-5',
     searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400',
     searchInput:
-      'w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-10 pr-4 text-[13px] font-medium text-zinc-900 shadow-sm transition placeholder:text-zinc-400 hover:border-zinc-300 focus:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-900/10',
+      'w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-10 pr-4 text-[13px] font-medium text-zinc-900 shadow-sm transition placeholder:text-zinc-400 hover:border-zinc-300 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-500/10',
   },
 
   table: {
@@ -247,7 +247,7 @@ export const COMPONENT_STYLES = {
   badge: {
     active: 'inline-flex items-center rounded-md bg-emerald-100/50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-emerald-800 border border-emerald-200/50',
     inactive: 'inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-zinc-600 border border-zinc-200',
-    count: 'inline-flex items-center rounded-md bg-zinc-900 px-2.5 py-0.5 text-[11px] font-bold text-white shadow-sm',
+    count: 'inline-flex items-center rounded-md bg-teal-600 px-2.5 py-0.5 text-[11px] font-bold text-white shadow-sm',
     warning: 'inline-flex items-center rounded-md bg-amber-100/50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-800 border border-amber-200/50',
     danger: 'inline-flex items-center rounded-md bg-rose-100/50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-rose-800 border border-rose-200/50',
     info: 'inline-flex items-center rounded-md bg-blue-100/50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-blue-800 border border-blue-200/50',
@@ -259,7 +259,7 @@ export const COMPONENT_STYLES = {
     info: 'text-[12px] font-bold text-zinc-500',
     button:
       'rounded-xl border border-zinc-200 bg-white px-3 py-2 text-[12px] font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-zinc-100 disabled:shadow-none',
-    buttonActive: 'border-zinc-900 bg-zinc-900 text-white shadow-sm hover:bg-zinc-800',
+    buttonActive: 'border-teal-600 bg-teal-600 text-white shadow-sm hover:bg-teal-700',
     buttonInactive: 'text-zinc-700 border-zinc-200',
   },
 

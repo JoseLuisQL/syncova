@@ -1,24 +1,24 @@
 import { Pulse, Building, Buildings, GitBranch, MapPin, TreeStructure, Shield, ShareNetwork } from '@phosphor-icons/react';
-import { DESIGN_GRADIENTS, DESIGN_TOKENS } from '../../styles/designTokens';
+import { DESIGN_COLOR_SCALES, DESIGN_GRADIENTS, DESIGN_TOKENS } from '../../styles/designTokens';
 
 export const COLORS = {
   primary: {
-    gradient: DESIGN_GRADIENTS.primary,
-    surface: 'bg-zinc-100',
-    surfaceSoft: 'bg-zinc-100/60',
-    border: DESIGN_TOKENS.border.default,
-    text: DESIGN_TOKENS.text.primary,
-    textStrong: DESIGN_TOKENS.text.primary,
-    icon: 'text-zinc-900',
+    gradient: DESIGN_COLOR_SCALES.primary.gradient,
+    surface: 'bg-teal-50',
+    surfaceSoft: 'bg-teal-50/70',
+    border: DESIGN_COLOR_SCALES.primary.border,
+    text: DESIGN_COLOR_SCALES.primary.text,
+    textStrong: DESIGN_COLOR_SCALES.primary.textStrong,
+    icon: DESIGN_COLOR_SCALES.primary.icon,
   },
   secondary: {
     gradient: DESIGN_GRADIENTS.secondary,
-    surface: 'bg-zinc-100',
-    surfaceSoft: 'bg-zinc-100/70',
+    surface: 'bg-cyan-50',
+    surfaceSoft: 'bg-cyan-50/70',
     border: DESIGN_TOKENS.border.default,
     text: DESIGN_TOKENS.text.primary,
     textStrong: DESIGN_TOKENS.text.primary,
-    icon: 'text-zinc-900',
+    icon: 'text-cyan-800',
   },
   success: {
     gradient: DESIGN_GRADIENTS.success,
@@ -122,28 +122,28 @@ export const COMPONENT_STYLES = {
     title: 'text-[1.45rem] font-semibold tracking-tight text-zinc-950 sm:text-[1.55rem]',
     subtitle: 'text-[0.92rem] text-zinc-600',
     iconWrapper:
-      'flex h-12 w-12 items-center justify-center rounded-[18px] bg-zinc-900 text-white shadow-md shadow-zinc-800/10',
+      'flex h-12 w-12 items-center justify-center rounded-[18px] bg-teal-600 text-white shadow-md shadow-teal-500/20',
   },
 
   button: {
     primary:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-800 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     secondary:
       'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     ghost:
       'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     icon:
       'inline-flex h-8 w-8 items-center justify-center rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
-    iconEdit: 'border border-zinc-200 bg-zinc-100 text-zinc-900 hover:bg-zinc-100 focus:ring-zinc-800',
+    iconEdit: 'border border-teal-200 bg-teal-50 text-teal-700 hover:bg-teal-100 focus:ring-teal-500',
     iconDelete: 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 focus:ring-rose-500',
-    iconView: 'border border-zinc-200 bg-zinc-100 text-zinc-900 hover:bg-zinc-50 focus:ring-zinc-800',
+    iconView: 'border border-teal-200 bg-teal-50 text-teal-700 hover:bg-teal-100 focus:ring-teal-500',
     iconNavigate: 'border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 focus:ring-amber-500',
   },
 
   input: {
     base:
-      'w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-800/18',
-    normal: 'border-zinc-200 hover:border-zinc-300 focus:border-zinc-800',
+      'w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-500/18',
+    normal: 'border-zinc-200 hover:border-zinc-300 focus:border-teal-500',
     error: 'border-rose-300 bg-rose-50/60 focus:border-rose-500 focus:ring-rose-500/20',
     label: 'mb-1 block text-[0.84rem] font-medium text-zinc-700',
     errorText: 'mt-1 text-xs text-rose-600',
@@ -162,7 +162,7 @@ export const COMPONENT_STYLES = {
   badge: {
     active: 'inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700',
     inactive: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600',
-    count: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-900',
+    count: 'inline-flex items-center rounded-full bg-teal-100 px-2.5 py-1 text-xs font-medium text-teal-700',
     warning: 'inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700',
     danger: 'inline-flex items-center rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700',
     neutral: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700',
@@ -190,7 +190,7 @@ export const COMPONENT_STYLES = {
     container: 'rounded-[20px] border border-zinc-200 bg-white p-3 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.14)] sm:p-3.5',
     searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400',
     searchInput:
-      'w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-10 pr-4 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 hover:border-zinc-300 focus:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-800/18',
+      'w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-10 pr-4 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 hover:border-zinc-300 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18',
   },
 
   pagination: {
@@ -198,15 +198,15 @@ export const COMPONENT_STYLES = {
     info: 'text-sm text-zinc-600',
     button:
       'rounded-xl border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50',
-    buttonActive: 'border-zinc-200 bg-zinc-100 text-zinc-900',
+    buttonActive: 'border-teal-200 bg-teal-50 text-teal-700',
     buttonInactive: 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50',
   },
 
   nav: {
     shell: 'rounded-[28px] border border-zinc-200/90 bg-white shadow-sm',
     tab:
-      'inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-zinc-800/20',
-    tabActive: 'bg-zinc-100 text-zinc-900 shadow-[inset_0_0_0_1px_rgba(161,161,170,0.45)]',
+      'inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-teal-500/20',
+    tabActive: 'bg-teal-50 text-teal-700 shadow-[inset_0_0_0_1px_rgba(45,212,191,0.28)]',
     tabInactive: 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900',
   },
 } as const;
@@ -242,14 +242,14 @@ export const TIPO_ESTABLECIMIENTO_CONFIG = {
   centro_salud: {
     label: 'Centro de Salud',
     tone: 'primary' as const,
-    iconWrapper: 'bg-zinc-100 text-zinc-900',
-    badgeClassName: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-900',
+    iconWrapper: 'bg-teal-100 text-teal-700',
+    badgeClassName: 'inline-flex items-center rounded-full bg-teal-100 px-2.5 py-1 text-xs font-medium text-teal-700',
   },
   puesto_salud: {
     label: 'Puesto de Salud',
     tone: 'secondary' as const,
-    iconWrapper: 'bg-zinc-100 text-zinc-800',
-    badgeClassName: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-900',
+    iconWrapper: 'bg-cyan-100 text-cyan-800',
+    badgeClassName: 'inline-flex items-center rounded-full bg-cyan-100 px-2.5 py-1 text-xs font-medium text-cyan-800',
   },
   hospital: {
     label: 'Hospital',

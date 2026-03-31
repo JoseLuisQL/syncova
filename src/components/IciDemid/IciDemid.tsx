@@ -283,24 +283,24 @@ const IciDemid: React.FC = () => {
           </div>
 
           <div className="px-4 py-3">
-            <div className="rounded-2xl bg-gradient-to-r bg-zinc-800 p-1">
+            <div className="rounded-2xl border border-teal-200 bg-gradient-to-r from-teal-600 via-teal-600 to-cyan-600 p-1 shadow-sm">
               <div className="flex flex-wrap items-center gap-3 rounded-[18px] bg-white/10 px-4 py-3 text-white">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/18">
                     <MicrosoftExcelLogo className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-white/70">ICI DEMID</p>
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-teal-100/80">ICI DEMID</p>
                     <p className="text-sm font-semibold">{selectedAnio}</p>
                   </div>
                 </div>
-                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
+                <span className="rounded-full border border-white/15 bg-white/12 px-3 py-1 text-xs font-semibold">
                   Registros: {registrosFiltrados.length.toLocaleString()}
                 </span>
-                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
+                <span className="rounded-full border border-white/15 bg-white/12 px-3 py-1 text-xs font-semibold">
                   Stock fin total: {totalStockFin.toLocaleString()}
                 </span>
-                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
+                <span className="rounded-full border border-white/15 bg-white/12 px-3 py-1 text-xs font-semibold">
                   Meses detectados: {mesesDelAnio.map((month) => MESES_CORTOS[month - 1]).join(', ') || 'Sin datos'}
                 </span>
               </div>

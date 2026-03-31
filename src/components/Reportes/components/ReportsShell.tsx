@@ -1,5 +1,4 @@
 import React, { memo, useMemo } from 'react';
-import { Gear } from '@phosphor-icons/react';
 import { useAppNavigation } from '../../../hooks/useRouting';
 import { COMPONENT_STYLES, REPORTS_SECTIONS, ReportSectionConfig, SECTION_GROUPS, SectionId } from '../constants';
 
@@ -33,20 +32,6 @@ const ReportsShell: React.FC<ReportsShellProps> = ({
     <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1500px] flex-col gap-3">
         <section className="overflow-hidden bg-transparent">
-          <div className="border-b border-zinc-200/90 px-4 py-4 sm:px-5 lg:px-6">
-            <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-              <div className={COMPONENT_STYLES.header.iconWrapper}>
-                <Gear className="h-5 w-5" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 max-w-3xl">
-                <h1 className={`${COMPONENT_STYLES.header.title} text-[1.35rem] sm:text-[1.52rem]`}>Reportes</h1>
-                <p className={`${COMPONENT_STYLES.header.subtitle} mt-0.5 text-sm leading-6 sm:text-[0.92rem]`}>
-                  Inventario, distribución y seguimiento en un solo espacio operativo.
-                </p>
-              </div>
-            </div>
-          </div>
-
           <nav aria-label="Secciones de reportes" className="px-3 py-2.5 sm:px-4">
             <div className={`grid gap-3 ${gridClassName}`}>
               {groupedSections.map((group) => {

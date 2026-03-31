@@ -1,5 +1,4 @@
 import React, { memo, useMemo } from 'react';
-import { Buildings } from '@phosphor-icons/react';
 import { COMPONENT_STYLES, SECTION_GROUPS, SectionConfig, SectionId } from '../constants';
 import { useAppNavigation } from '../../../hooks/useRouting';
 
@@ -28,22 +27,6 @@ const EstablishmentsShell: React.FC<EstablishmentsShellProps> = ({
     <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
         <section className="overflow-hidden bg-transparent">
-          <div className="border-b border-zinc-200/90 px-4 py-5 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-start gap-4">
-                <div className={COMPONENT_STYLES.header.iconWrapper}>
-                  <Buildings className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <div className="min-w-0">
-                  <h1 className={COMPONENT_STYLES.header.title}>Establecimientos</h1>
-                  <p className={`${COMPONENT_STYLES.header.subtitle} mt-1`}>
-                    Estructura territorial, centros de acopio y establecimientos bajo un mismo lenguaje operativo.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <nav aria-label="Secciones de establecimientos" className="px-3 py-3 sm:px-4">
             <div className={`grid gap-3 ${groupedSections.length > 1 ? 'xl:grid-cols-2' : 'grid-cols-1'}`}>
               {groupedSections.map((group) => {

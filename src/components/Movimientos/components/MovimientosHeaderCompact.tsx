@@ -230,14 +230,14 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   const stockPanelContent = hideStockMetrics ? null : (
     <div className="border-t border-zinc-100 px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-50/50">
       {!selectedVacuna ? (
-        <div className="flex items-center gap-2.5 rounded-[14px] bg-zinc-900 border border-zinc-900 px-3 py-2.5 sm:px-4 sm:py-3 shadow-sm">
+        <div className="flex items-center gap-2.5 rounded-[14px] bg-teal-600 border border-teal-600 px-3 py-2.5 sm:px-4 sm:py-3 shadow-sm">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10">
             <Package className="h-4 w-4 text-white" weight="duotone" />
           </div>
           <p className="text-sm font-semibold tracking-tight text-white">Selecciona una vacuna para visualizar el marco operativo.</p>
         </div>
       ) : isLoadingStock || isUpdatingStock ? (
-        <div className="flex items-center gap-2.5 rounded-[14px] bg-zinc-900 border border-zinc-900 px-3 py-2.5 sm:px-4 sm:py-3 shadow-sm">
+        <div className="flex items-center gap-2.5 rounded-[14px] bg-teal-600 border border-teal-600 px-3 py-2.5 sm:px-4 sm:py-3 shadow-sm">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10">
             <CircleNotch className="h-4 w-4 animate-spin text-white" weight="bold" />
           </div>
@@ -262,40 +262,40 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
       ) : stockInfo ? (
         <div className="space-y-2">
           {/* Barra de resumen estilo terminal (Cockpit Mode) */}
-          <div className="relative rounded-[16px] bg-zinc-900 border border-zinc-900 px-[5px] py-[5px] shadow-sm">
+          <div className="relative rounded-[16px] border border-teal-200 bg-gradient-to-r from-teal-600 via-teal-600 to-cyan-600 px-[5px] py-[5px] shadow-sm">
             <div className="flex flex-wrap items-center gap-y-1">
               {/* PERÍODO */}
-              <div className="flex items-center gap-2 rounded-xl bg-white/10 border border-white/5 px-3 py-2 sm:gap-2.5">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 sm:h-8 sm:w-8">
+              <div className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/12 px-3 py-2 sm:gap-2.5">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/18 sm:h-8 sm:w-8">
                   <CalendarBlank className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-zinc-400 sm:text-[0.6rem]">Target</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Target</p>
                   <p className="text-xs font-black tracking-tight text-white sm:text-sm">{periodoEntrega.etiqueta.toUpperCase()}</p>
                 </div>
               </div>
 
-              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-zinc-500 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
+              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-white/45 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
 
               {/* INICIAL - expandible */}
               <div className="relative" ref={stockInicialRef}>
                 <button
                   type="button"
                   onClick={() => setShowStockInicialDropdown((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-xl bg-white/10 border border-transparent px-3 py-2 text-left transition hover:bg-white/15 hover:border-white/10 sm:gap-2.5"
+                  className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-left transition hover:bg-white/14 hover:border-white/20 sm:gap-2.5"
                 >
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 sm:h-8 sm:w-8">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/18 sm:h-8 sm:w-8">
                     <Package className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                   </div>
                   <div>
-                    <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-zinc-400 sm:text-[0.6rem]">Apertura</p>
+                    <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Apertura</p>
                     <p className="text-xs font-black tracking-tight text-white sm:text-sm">
                       {stockInfo.tieneHistorialInicial
                         ? (stockInfo.stockInicialHistorico?.toLocaleString() || '0')
                         : '—'}
                     </p>
                   </div>
-                  <CaretDown className={`h-3 w-3 text-zinc-500 transition-transform ${showStockInicialDropdown ? 'rotate-180' : ''}`} weight="bold" />
+                  <CaretDown className={`h-3 w-3 text-white/55 transition-transform ${showStockInicialDropdown ? 'rotate-180' : ''}`} weight="bold" />
                 </button>
 
                 {showStockInicialDropdown ? (
@@ -320,7 +320,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 ) : null}
               </div>
 
-              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-zinc-500 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
+              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-white/45 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
 
               {/* BARRA ENTREGAS */}
               <div className="relative">
@@ -332,7 +332,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 />
               </div>
 
-              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-zinc-500 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
+              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-white/45 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
 
               {/* DISPONIBLE */}
               <button
@@ -342,11 +342,11 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left transition sm:gap-2.5 ${
                   stockInfo.stockDisponible < 0
                     ? 'border-rose-500/50 bg-rose-500/20 hover:bg-rose-500/30'
-                    : 'border-white/5 bg-white/10 hover:bg-white/15 hover:border-white/10'
+                    : 'border-white/15 bg-white/10 hover:bg-white/14 hover:border-white/20'
                 }`}
               >
                 <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg sm:h-8 sm:w-8 ${
-                  stockInfo.stockDisponible < 0 ? 'bg-rose-500/40' : 'bg-black/40'
+                  stockInfo.stockDisponible < 0 ? 'bg-rose-500/40' : 'bg-white/18'
                 }`}>
                   {stockInfo.stockDisponible < 0
                     ? <Warning className="h-3.5 w-3.5 text-rose-100 sm:h-4 sm:w-4" weight="fill" />
@@ -354,7 +354,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 </div>
                 <div>
                   <p className={`text-[0.55rem] font-bold uppercase tracking-[0.15em] sm:text-[0.6rem] ${
-                    stockInfo.stockDisponible < 0 ? 'text-rose-200' : 'text-zinc-400'
+                    stockInfo.stockDisponible < 0 ? 'text-rose-200' : 'text-teal-100/80'
                   }`}>
                     {stockInfo.stockDisponible < 0 ? 'Fractura' : 'Clearance'}
                   </p>
@@ -367,26 +367,26 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 ) : null}
               </button>
 
-              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-zinc-500 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
+              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-white/45 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
 
               {/* ACTUAL (CIERRE) + LOTES */}
               <div className="relative" ref={stockActualRef}>
                 <button
                   type="button"
                   onClick={() => setShowStockActualDropdown((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-xl bg-white/10 border border-transparent px-3 py-2 text-left transition hover:bg-white/15 hover:border-white/10 sm:gap-2.5"
+                  className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-left transition hover:bg-white/14 hover:border-white/20 sm:gap-2.5"
                 >
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 sm:h-8 sm:w-8">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/18 sm:h-8 sm:w-8">
                     <Package className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                   </div>
                   <div>
-                    <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-zinc-400 sm:text-[0.6rem]">Cierre Operativo</p>
+                    <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Cierre Operativo</p>
                     <p className="text-xs font-black tracking-tight text-white sm:text-sm">{stockInfo.stockActual.toLocaleString()}</p>
                   </div>
-                  <span className="inline-flex items-center gap-1 rounded-md bg-zinc-800 border border-zinc-700 px-2 py-0.5 text-[0.65rem] font-bold tracking-widest text-zinc-300">
+                  <span className="inline-flex items-center gap-1 rounded-md border border-white/20 bg-white/14 px-2 py-0.5 text-[0.65rem] font-bold tracking-widest text-white">
                     {lotesDisponibles.length} LTX
                   </span>
-                  <CaretDown className={`h-3 w-3 text-zinc-500 transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} weight="bold" />
+                  <CaretDown className={`h-3 w-3 text-white/55 transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} weight="bold" />
                 </button>
 
                 {showStockActualDropdown ? (
@@ -401,19 +401,19 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                             key={lote.id}
                             className={`rounded-xl border px-3 py-2.5 ${
                               index === 0
-                                ? 'border-zinc-900 bg-zinc-900 text-white'
+                                ? 'border-teal-200 bg-teal-50 text-teal-950'
                                 : 'border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-900'
                             }`}
                           >
                             <div className="flex items-center justify-between gap-2">
                               <div className="min-w-0">
                                 <p className="truncate text-[0.85rem] font-black tracking-tight">{lote.numero}</p>
-                                <p className={`text-[0.65rem] font-medium ${index === 0 ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                                <p className={`text-[0.65rem] font-medium ${index === 0 ? 'text-teal-700' : 'text-zinc-500'}`}>
                                   EXP: {new Date(lote.fechaVencimiento).toLocaleDateString()}
                                 </p>
                               </div>
                               <span className={`shrink-0 rounded-lg px-2.5 py-1 text-[0.75rem] font-black tracking-tight ${
-                                index === 0 ? 'bg-white text-zinc-900' : 'bg-zinc-100 text-zinc-900'
+                                index === 0 ? 'border border-teal-200 bg-white text-teal-900' : 'bg-zinc-100 text-zinc-900'
                               }`}>
                                 {lote.cantidadActual.toLocaleString()}
                               </span>
@@ -447,7 +447,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 )}
                 <span className="hidden sm:inline font-bold">Bridging Mes Siguiente</span>
                 <span className="sm:hidden font-bold">Bridge</span>
-                <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[0.65rem] uppercase tracking-widest font-black text-zinc-900 ml-1 border border-zinc-200">
+                <span className="rounded-md bg-teal-50 px-2 py-0.5 text-[0.65rem] uppercase tracking-widest font-black text-teal-800 ml-1 border border-teal-200">
                   {periodoSiguiente}
                 </span>
               </button>

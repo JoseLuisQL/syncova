@@ -40,8 +40,8 @@ const IciDemidImportProgressModal: React.FC<IciDemidImportProgressModalProps> = 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-zinc-950/55 p-4 backdrop-blur-sm">
       <div className="relative w-full max-w-2xl overflow-hidden rounded-[28px] border border-white/20 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.35)]">
-        <div className="absolute inset-x-0 top-0 h-1 bg-zinc-800" />
-        <div className="relative overflow-hidden bg-gradient-to-br from-zinc-950 via-teal-950 to-cyan-900 px-6 py-8 text-white">
+        <div className="absolute inset-x-0 top-0 h-1 bg-teal-600" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-teal-900 via-cyan-900 to-teal-700 px-6 py-8 text-white">
           <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-zinc-800/20 blur-3xl" />
           <div className="absolute -left-10 bottom-0 h-28 w-28 rounded-full bg-emerald-400/20 blur-3xl" />
 
@@ -74,7 +74,7 @@ const IciDemidImportProgressModal: React.FC<IciDemidImportProgressModalProps> = 
               </div>
               <div className="h-3 overflow-hidden rounded-full bg-white/10">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r bg-zinc-200 transition-all duration-700 ease-out"
+                  className="h-full rounded-full bg-gradient-to-r from-teal-300 via-cyan-200 to-white transition-all duration-700 ease-out"
                   style={{ width: `${activeConfig.progress}%` }}
                 />
               </div>

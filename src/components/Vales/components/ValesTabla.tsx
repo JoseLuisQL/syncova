@@ -33,7 +33,7 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
 
   if (hasBase && additionalCount > 0) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[0.65rem] font-bold uppercase tracking-wider bg-zinc-900 text-white border border-zinc-900">
+      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[0.65rem] font-bold uppercase tracking-wider bg-teal-600 text-white border border-teal-600">
         <Stack weight="bold" className="h-3 w-3" />
         <span className="hidden sm:inline">Completo</span>
         <span className="sm:hidden">C</span>
@@ -162,7 +162,7 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
                   {/* Totales */}
                   <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
                     <div className="flex flex-col items-center gap-1">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-900 text-white rounded-[4px] text-[0.7rem] font-bold tabular-nums tracking-tight">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-600 text-white rounded-[4px] text-[0.7rem] font-bold tabular-nums tracking-tight">
                         <Package weight="bold" className="h-3 w-3" />
                         {vale.totalVacunas.toLocaleString('en-US')}
                       </span>

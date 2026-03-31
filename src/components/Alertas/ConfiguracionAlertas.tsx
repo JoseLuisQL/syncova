@@ -129,7 +129,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 max="90"
                 value={config.diasAnticipacion}
                 onChange={(event) => handleUpdate('diasAnticipacion', parseInt(event.target.value, 10) || defaultConfig.diasAnticipacion)}
-                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-800/18"
+                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18"
               />
               <p className="mt-2 text-xs text-zinc-500">Controla cuándo se dispara una alerta de vencimiento.</p>
             </div>
@@ -143,7 +143,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 step="10"
                 value={config.stockMinimo}
                 onChange={(event) => handleUpdate('stockMinimo', parseInt(event.target.value, 10) || defaultConfig.stockMinimo)}
-                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-800/18"
+                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18"
               />
               <p className="mt-2 text-xs text-zinc-500">Se usa para generar alertas automáticas de stock bajo.</p>
             </div>
@@ -156,7 +156,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 max="365"
                 value={config.diasRetencion}
                 onChange={(event) => handleUpdate('diasRetencion', parseInt(event.target.value, 10) || defaultConfig.diasRetencion)}
-                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-800/18"
+                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18"
               />
               <p className="mt-2 text-xs text-zinc-500">Define cuántos días conservar alertas resueltas antes de limpiar.</p>
             </div>
@@ -175,7 +175,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 type="button"
                 onClick={handleGenerarAlertas}
                 disabled={isGenerating}
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-zinc-900 to-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-zinc-900 hover:to-zinc-900 disabled:opacity-60"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-teal-700 hover:to-cyan-800 disabled:opacity-60"
               >
                 <Lightning className="h-4 w-4" weight="fill" />
                 {isGenerating ? 'Analizando...' : 'Generar alertas'}
@@ -184,8 +184,8 @@ const ConfiguracionAlertas: React.FC = memo(() => {
 
             {lastResult ? (
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[16px] border border-zinc-200 bg-zinc-100/70 p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-900">Vencimiento</p>
+                <div className="rounded-[16px] border border-teal-200 bg-teal-50/70 p-4">
+                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-teal-700">Vencimiento</p>
                   <p className="mt-2 text-xl font-semibold text-teal-900">{lastResult.alertasVencimiento || 0}</p>
                 </div>
                 <div className="rounded-[16px] border border-rose-200 bg-rose-50/70 p-4">

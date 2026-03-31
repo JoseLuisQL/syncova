@@ -13,12 +13,12 @@ import { DESIGN_COLOR_SCALES, DESIGN_TOKENS } from '../../styles/designTokens';
 export const COLORS = {
   primary: {
     gradient: DESIGN_COLOR_SCALES.primary.gradient,
-    surface: 'bg-zinc-50/80',
-    surfaceSoft: 'bg-white',
-    border: 'border-zinc-200/60',
-    text: 'text-zinc-900',
-    textStrong: 'text-black',
-    icon: 'text-zinc-700',
+    surface: DESIGN_COLOR_SCALES.primary.surface,
+    surfaceSoft: DESIGN_COLOR_SCALES.primary.surfaceSoft,
+    border: DESIGN_COLOR_SCALES.primary.border,
+    text: DESIGN_COLOR_SCALES.primary.text,
+    textStrong: DESIGN_COLOR_SCALES.primary.textStrong,
+    icon: DESIGN_COLOR_SCALES.primary.icon,
   },
   secondary: {
     gradient: DESIGN_COLOR_SCALES.secondary.gradient,
@@ -125,12 +125,12 @@ export const COMPONENT_STYLES = {
     title: 'text-[1.35rem] font-bold tracking-tight text-zinc-900 sm:text-[1.45rem]',
     subtitle: 'text-[0.88rem] text-zinc-500 mt-0.5',
     iconWrapper:
-      'flex h-12 w-12 items-center justify-center rounded-[14px] bg-zinc-900 text-white shadow-sm',
+      'flex h-12 w-12 items-center justify-center rounded-[14px] bg-teal-600 text-white shadow-sm',
   },
 
   button: {
     primary:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-sm',
+      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-sm',
     secondary:
       'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     ghost:
@@ -146,8 +146,8 @@ export const COMPONENT_STYLES = {
 
   input: {
     base:
-      'w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-600/20',
-    normal: 'border-zinc-200 hover:border-zinc-300 focus:border-zinc-500',
+      'w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-600/20',
+    normal: 'border-zinc-200 hover:border-zinc-300 focus:border-teal-600',
     error: 'border-rose-300 bg-rose-50/40 focus:border-rose-500 focus:ring-rose-500/20',
     label: 'mb-1.5 block text-[0.82rem] font-medium text-zinc-700',
     errorText: 'mt-1 text-xs font-medium text-rose-600',

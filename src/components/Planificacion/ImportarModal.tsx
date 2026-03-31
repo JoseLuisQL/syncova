@@ -60,7 +60,7 @@ const StepIndicator = memo<{ currentStep: Step; totalSteps: number }>(({ current
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-all ${
                 currentStep === step.num
-                  ? 'bg-zinc-900 text-white shadow-sm ring-2 ring-zinc-900 ring-offset-2'
+                  ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600 ring-offset-2'
                   : currentStep > step.num
                   ? 'bg-zinc-200 text-zinc-900'
                   : 'bg-zinc-100 text-zinc-400 border border-zinc-200'
@@ -83,7 +83,7 @@ const StepIndicator = memo<{ currentStep: Step; totalSteps: number }>(({ current
           {index < totalSteps - 1 && (
             <div
               className={`mx-3 mb-5 h-[2px] w-12 ${
-                currentStep > step.num ? 'bg-zinc-900' : 'bg-zinc-200'
+                currentStep > step.num ? 'bg-teal-600' : 'bg-zinc-200'
               }`}
             />
           )}
@@ -107,13 +107,13 @@ const ImportTypeCard = memo<{
       onClick={onClick}
       className={`relative flex w-full flex-col items-center rounded-[16px] border-[2px] p-6 transition-all duration-200 ${
         selected
-          ? 'border-zinc-900 bg-zinc-50 shadow-sm'
+          ? 'border-teal-600 bg-teal-50 shadow-sm'
           : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50/50'
       }`}
     >
       {selected && (
         <div className="absolute right-3 top-3">
-          <CheckCircle className="h-5 w-5 text-zinc-900" weight="fill" />
+          <CheckCircle className="h-5 w-5 text-teal-600" weight="fill" />
         </div>
       )}
       <div
@@ -348,7 +348,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header - Zinc Flat */}
-        <div className="border-b border-zinc-200 bg-zinc-900 px-6 py-5">
+        <div className="border-b border-zinc-200 bg-teal-700 px-6 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
@@ -535,7 +535,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 onClick={() => !archivo && fileInputRef.current?.click()}
                 className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-8 text-center transition-all ${
                   isDragging
-                    ? 'border-zinc-900 bg-zinc-100'
+                    ? 'border-teal-600 bg-teal-50'
                     : archivo
                     ? 'border-zinc-300 bg-zinc-50'
                     : 'border-zinc-200 hover:border-zinc-400 hover:bg-zinc-50'

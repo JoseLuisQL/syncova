@@ -93,9 +93,9 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
 
     if (progresoVales.estado === 'completo') {
       return {
-        card: 'border-zinc-900 bg-zinc-900',
-        pill: 'bg-zinc-800 text-white border border-white/10',
-        bar: 'bg-zinc-500',
+        card: 'border-teal-600 bg-teal-600',
+        pill: 'bg-teal-700 text-white border border-teal-500',
+        bar: 'bg-teal-300',
         icon: <CheckCircle className="h-4 w-4 text-white" weight="fill" />,
         label: 'Locked',
       };
@@ -132,7 +132,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
           !progresoVales || progresoVales.estado === 'sin_vales'
             ? 'bg-zinc-100/50 hover:bg-zinc-100'
             : progresoVales.estado === 'completo'
-            ? 'bg-zinc-900 hover:bg-zinc-800'
+            ? 'bg-teal-600 hover:bg-teal-700'
             : 'bg-zinc-100/50 hover:bg-zinc-100 shadow-[inset_0_0_0_1px_rgba(228,228,231,1)]'
         }`}
       >
@@ -208,7 +208,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
               </div>
             ) : progresoVales.estado === 'completo' ? (
               <div className="flex flex-col items-center justify-center px-4 py-12 text-center bg-zinc-50">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-md border border-zinc-900">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-md border border-teal-600">
                   <CheckCircle className="h-6 w-6" weight="fill" />
                 </div>
                 <p className="text-[0.95rem] font-black tracking-tight text-zinc-900">Locking Completado</p>

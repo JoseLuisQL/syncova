@@ -103,9 +103,9 @@ const colorClasses: Record<
     border: 'border-zinc-200',
     text: 'text-zinc-600',
     textStrong: 'text-teal-900',
-    iconBg: 'bg-zinc-100',
-    iconText: 'text-zinc-900',
-    iconBorder: 'border-zinc-200',
+    iconBg: 'bg-teal-100',
+    iconText: 'text-teal-700',
+    iconBorder: 'border-teal-200',
   },
   secondary: {
     surface: 'bg-white',
@@ -147,7 +147,7 @@ const colorClasses: Record<
     surface: 'bg-white',
     border: 'border-zinc-200',
     text: 'text-zinc-600',
-    textStrong: 'text-zinc-900',
+    textStrong: 'text-zinc-800',
     iconBg: 'bg-zinc-200',
     iconText: 'text-zinc-700',
     iconBorder: 'border-zinc-200',
@@ -287,11 +287,11 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = memo(({ message = '
     aria-live="polite"
   >
     <div className="flex items-center gap-3 text-zinc-700">
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-zinc-900 inventory-breathe">
+      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 text-teal-700 inventory-breathe">
         <SpinnerGap className="h-5 w-5 animate-spin" aria-hidden="true" />
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-zinc-900">{message}</p>
+        <p className="text-sm font-semibold text-zinc-800">{message}</p>
         <p className="text-xs text-zinc-500">Preparando la información para mostrarla de forma clara.</p>
       </div>
     </div>
@@ -320,7 +320,7 @@ export const EmptyState: React.FC<EmptyStateProps> = memo(({
     <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100">
       <Icon className="h-8 w-8 text-zinc-400" aria-hidden="true" />
     </div>
-    <p className="text-lg font-medium text-zinc-900">{title}</p>
+    <p className="text-lg font-medium text-zinc-800">{title}</p>
     {description ? <p className="mt-1 max-w-md text-sm text-zinc-500">{description}</p> : null}
     {action ? (
       <button type="button" onClick={action.onClick} className={`${COMPONENT_STYLES.button.primary} mt-5`}>

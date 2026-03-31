@@ -108,11 +108,11 @@ const colorClasses: Record<
   primary: {
     surface: 'bg-white',
     border: 'border-zinc-200/80',
-    text: 'text-zinc-500',
-    textStrong: 'text-zinc-900',
-    iconBg: 'bg-zinc-900',
+    text: 'text-teal-700',
+    textStrong: 'text-teal-900',
+    iconBg: 'bg-teal-600',
     iconText: 'text-white',
-    iconBorder: 'border-zinc-800',
+    iconBorder: 'border-teal-600',
   },
   secondary: {
     surface: 'bg-white',

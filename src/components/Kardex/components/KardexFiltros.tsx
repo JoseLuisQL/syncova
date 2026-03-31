@@ -454,7 +454,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
                 const isSelected = tipoMovimiento === option.value;
                 const selectedClass =
                   option.value === 'todos'
-                    ? 'border-zinc-900 bg-zinc-900 text-white'
+                    ? 'border-teal-600 bg-teal-600 text-white'
                     : getMovimientoConfig(option.value).chipClassName;
 
                 return (

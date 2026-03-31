@@ -49,8 +49,8 @@ export const MOVIMIENTO_CONFIG = {
     label: 'Transferencia',
     tone: 'secondary' as ColorScheme,
     icon: ArrowsLeftRight,
-    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700',
-    chipClassName: 'border-zinc-200 bg-zinc-50 text-zinc-700',
+    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-cyan-100 px-2.5 py-1 text-xs font-medium text-cyan-800',
+    chipClassName: 'border-cyan-200 bg-cyan-50 text-cyan-800',
   },
   ajuste: {
     key: 'ajuste',
@@ -65,8 +65,8 @@ export const MOVIMIENTO_CONFIG = {
     label: 'Movimiento',
     tone: 'neutral' as ColorScheme,
     icon: Package,
-    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700',
-    chipClassName: 'border-zinc-200 bg-zinc-50 text-zinc-700',
+    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-teal-100 px-2.5 py-1 text-xs font-medium text-teal-700',
+    chipClassName: 'border-teal-200 bg-teal-50 text-teal-700',
   },
 } as const;
 

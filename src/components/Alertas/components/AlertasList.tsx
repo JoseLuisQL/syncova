@@ -143,7 +143,7 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                         type="checkbox"
                         checked={selectedAlertas.includes(alerta.id)}
                         onChange={() => onToggleSelect(alerta.id)}
-                        className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-800"
+                        className="h-4 w-4 rounded border-zinc-300 text-teal-600 focus:ring-teal-500"
                         aria-label={`Seleccionar alerta: ${alerta.titulo}`}
                       />
                     </TableCell>
@@ -151,7 +151,7 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="font-medium text-zinc-900">{alerta.titulo}</p>
-                          {!alerta.leida ? <span className="h-2 w-2 rounded-full bg-zinc-800" /> : null}
+                          {!alerta.leida ? <span className="h-2 w-2 rounded-full bg-teal-600" /> : null}
                         </div>
                         <p className="mt-1 text-sm text-zinc-600">{alerta.descripcion}</p>
                       </div>

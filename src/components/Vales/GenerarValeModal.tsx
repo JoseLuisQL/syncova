@@ -207,7 +207,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
               <button
                 onClick={handleGenerarVale}
                 disabled={isGenerating || !vistaPrevia}
-                className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-zinc-900 border border-zinc-800 rounded-lg hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-teal-600 border border-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm disabled:opacity-50"
                 title={!vistaPrevia ? "No hay datos para generar el vale" : "Generar vale y afectar stocks"}
               >
                 {isGenerating ? (
@@ -222,7 +222,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
             <button
               onClick={handleGenerarVale}
               disabled={isGenerating || !vistaPrevia}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-zinc-900 border border-zinc-800 text-white rounded-lg hover:bg-zinc-800 transition-colors shadow-sm disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-teal-600 border border-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors shadow-sm disabled:opacity-50"
             >
               {isGenerating ? (
                 <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" />
@@ -363,7 +363,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
                 value={observaciones}
                 onChange={(e) => setObservaciones(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 bg-white border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:border-transparent text-sm transition-all"
+                className="w-full px-4 py-3 bg-white border border-zinc-300 rounded-xl focus:ring-2 focus:ring-teal-600 focus:border-transparent text-sm transition-all"
                 placeholder="Ej. Entrega extraordinaria por campaña de vacunación..."
               />
             </div>

@@ -12,16 +12,29 @@ export const DESIGN_TOKENS = {
     muted: 'text-zinc-500',
     subtle: 'text-zinc-400',
     inverse: 'text-white',
+    brand: 'text-teal-800',
+    brandStrong: 'text-teal-900',
   },
   border: {
     default: 'border-zinc-200',
     soft: 'border-zinc-100',
     strong: 'border-zinc-300',
+    brand: 'border-teal-300',
   },
   interactive: {
-    primary: 'bg-zinc-900 text-white hover:bg-zinc-800 focus:ring-zinc-900',
+    primary: 'bg-teal-600 text-white hover:bg-teal-700 focus:ring-teal-600',
     secondary: 'bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 focus:ring-zinc-300',
     ghost: 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 focus:ring-zinc-300',
+  },
+  brand: {
+    surface: 'bg-teal-50',
+    surfaceSoft: 'bg-teal-50/80',
+    border: 'border-teal-300',
+    text: 'text-teal-800',
+    textStrong: 'text-teal-900',
+    icon: 'text-teal-700',
+    accent: 'bg-teal-600',
+    accentHover: 'bg-teal-700',
   },
   semantic: {
     success: {
@@ -66,7 +79,7 @@ export const DESIGN_TOKENS = {
     },
   },
   chart: {
-    primary: '#09090b',
+    primary: '#090b0bff',
     secondary: '#27272a',
     tertiary: '#52525b',
     quaternary: '#a1a1aa',
@@ -79,7 +92,7 @@ export const DESIGN_TOKENS = {
 } as const;
 
 export const DESIGN_GRADIENTS = {
-  primary: 'from-zinc-900 to-zinc-800',
+  primary: 'from-teal-600 to-teal-700',
   secondary: 'from-zinc-600 to-zinc-700',
   success: 'from-emerald-600 to-emerald-700',
   warning: 'from-amber-500 to-amber-600',
@@ -90,12 +103,12 @@ export const DESIGN_GRADIENTS = {
 export const DESIGN_COLOR_SCALES = {
   primary: {
     gradient: DESIGN_GRADIENTS.primary,
-    surface: 'bg-zinc-50',
-    surfaceSoft: 'bg-zinc-50/80',
-    border: 'border-zinc-200',
-    text: 'text-zinc-700',
-    textStrong: 'text-zinc-900',
-    icon: 'text-zinc-700',
+    surface: DESIGN_TOKENS.brand.surface,
+    surfaceSoft: DESIGN_TOKENS.brand.surfaceSoft,
+    border: DESIGN_TOKENS.brand.border,
+    text: DESIGN_TOKENS.brand.text,
+    textStrong: DESIGN_TOKENS.brand.textStrong,
+    icon: DESIGN_TOKENS.brand.icon,
   },
   secondary: {
     gradient: DESIGN_GRADIENTS.secondary,

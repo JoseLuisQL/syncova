@@ -99,7 +99,7 @@ const AlertasSection: React.FC = memo(() => {
           </div>
           Centro de Alertas
           {alertCount > 0 && (
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-zinc-900 text-white shadow-sm ml-1">
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-teal-600 text-white shadow-sm ml-1">
               {alertCount}
             </span>
           )}

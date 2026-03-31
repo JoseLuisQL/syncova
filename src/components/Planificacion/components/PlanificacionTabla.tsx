@@ -73,7 +73,7 @@ const EditablePlanningField: React.FC<EditablePlanningFieldProps> = memo(({
         onBlur={onBlur}
         disabled={disabled}
         aria-label={ariaLabel}
-        className={`${widthClass} min-w-0 bg-transparent px-2.5 py-2.5 text-center text-[0.85rem] font-bold tabular-nums text-zinc-900 transition-colors focus:bg-white focus:outline-none focus:ring-[1.5px] focus:ring-inset focus:ring-zinc-900 disabled:cursor-not-allowed hover:bg-zinc-100/50 ${pending ? 'bg-amber-50 text-amber-900 focus:bg-amber-50' : ''}`}
+        className={`${widthClass} min-w-0 bg-transparent px-2.5 py-2.5 text-center text-[0.85rem] font-bold tabular-nums text-zinc-900 transition-colors focus:bg-white focus:outline-none focus:ring-[1.5px] focus:ring-inset focus:ring-teal-600 disabled:cursor-not-allowed hover:bg-zinc-100/50 ${pending ? 'bg-amber-50 text-amber-900 focus:bg-amber-50' : ''}`}
       />
       {pending ? (
         <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-white bg-amber-500" />
@@ -90,7 +90,7 @@ const TotalPill: React.FC<{
 }> = memo(({ value, tone = 'zinc' }) => {
   const className =
     tone === 'dark'
-      ? 'bg-zinc-900 text-white shadow-sm'
+      ? 'bg-teal-600 text-white shadow-sm'
       : tone === 'muted'
       ? 'bg-zinc-100 text-zinc-500'
       : 'bg-white border border-zinc-200 text-zinc-900 font-black';
@@ -129,7 +129,7 @@ const MobileTotalesSummary: React.FC<{
         <p className="text-[0.65rem] font-black uppercase tracking-widest text-zinc-400">Total Global</p>
         <p className="mt-0.5 text-xs font-semibold text-zinc-600">{count} unidades</p>
       </div>
-      <span className="rounded-lg bg-zinc-900 px-3 py-1.5 text-[0.75rem] font-black text-white shadow-sm">
+        <span className="rounded-lg bg-teal-600 px-3 py-1.5 text-[0.75rem] font-black text-white shadow-sm">
         Volumen: {totalGeneral.toLocaleString()}
       </span>
     </div>
@@ -186,7 +186,7 @@ const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
       onClick={() => onRowSelect(estData.establecimiento.id)}
       className={`rounded-[16px] border p-3 transition-colors ${
         isSelected
-          ? 'border-zinc-900 bg-zinc-50 shadow-sm ring-1 ring-zinc-900'
+          ? 'border-teal-600 bg-teal-50 shadow-sm ring-1 ring-teal-600'
           : `border-zinc-200 ${colores.bg} hover:border-zinc-300`
       }`}
     >
@@ -271,7 +271,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
         <div className="hidden min-h-0 flex-1 overflow-auto md:block selection:bg-zinc-200">
           <table className="w-full border-collapse" role="table" aria-label="Matriz de datos">
             <thead className="sticky top-0 z-20">
-              <tr className="border-b-[3px] border-zinc-900 bg-white">
+              <tr className="border-b-[3px] border-teal-600 bg-white">
                 <th className={`sticky left-0 z-30 w-[260px] min-w-[260px] bg-white px-2 py-2.5 text-left text-[0.65rem] font-black uppercase tracking-[0.15em] text-zinc-600 border-r border-zinc-200/60`}>
                   Nomenclatura (Punto de Entrega)
                 </th>
@@ -335,7 +335,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                     onClick={() => onRowSelect(estData.establecimiento.id)}
                     className={`${rowBg} cursor-pointer transition-colors border-b border-zinc-100 ${!isSelected && 'hover:brightness-[0.97]'}`}
                   >
-                    <td className={`sticky left-0 z-10 box-border border-r border-zinc-200 px-3 py-2.5 ${isSelected ? 'bg-zinc-100/60 ring-inset ring-[1.5px] ring-zinc-900' : colores.bg}`}>
+                    <td className={`sticky left-0 z-10 box-border border-r border-zinc-200 px-3 py-2.5 ${isSelected ? 'bg-teal-50/70 ring-inset ring-[1.5px] ring-teal-600' : colores.bg}`}>
                       <div className="min-w-0">
                         <div className="flex items-center justify-between">
                           <p className={`truncate text-xs font-black tracking-tight ${isSelected ? 'text-zinc-900' : 'text-zinc-700'}`}>
@@ -357,7 +357,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                       const isPending = hasPendingChange(estIndex, mesIndex);
 
                       return (
-                        <td key={`${estData.establecimiento.id}-${mesIndex}`} className={`border-r border-zinc-100 p-0 align-middle ${isSelected ? 'border-y border-y-zinc-900 border-r-zinc-300' : ''}`}>
+                        <td key={`${estData.establecimiento.id}-${mesIndex}`} className={`border-r border-zinc-100 p-0 align-middle ${isSelected ? 'border-y border-y-teal-600 border-r-teal-200' : ''}`}>
                           <EditablePlanningField
                             readOnly={readOnly}
                             value={currentValue}
@@ -372,7 +372,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                       );
                     })}
 
-                    <td className={`p-0 text-center align-middle ${isSelected ? 'border-y border-y-zinc-900 border-r-2 border-r-zinc-900 bg-zinc-100' : ''}`}>
+                    <td className={`p-0 text-center align-middle ${isSelected ? 'border-y border-y-teal-600 border-r-2 border-r-teal-600 bg-teal-50/70' : ''}`}>
                       <div className="flex h-full w-full items-center justify-center p-2 text-[0.8rem] font-black tabular-nums text-zinc-900">
                          {estData.total > 0 ? estData.total.toLocaleString() : <span className="text-zinc-300">-</span>}
                       </div>

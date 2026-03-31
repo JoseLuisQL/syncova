@@ -328,7 +328,7 @@ export const DataTable: React.FC<DataTableProps> = memo(({
       <div className="inventory-loading-shell p-4 sm:p-5">
         <div className="flex items-center gap-3 pb-4 text-zinc-700">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 inventory-breathe">
-            <div className="h-4 w-4 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
+            <div className="h-4 w-4 rounded-full border-2 border-teal-600 border-t-transparent animate-spin" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-zinc-900">{loadingMessage}</p>

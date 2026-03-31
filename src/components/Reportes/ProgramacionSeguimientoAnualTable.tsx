@@ -291,7 +291,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
               className={`w-20 px-2 py-1 text-right text-[0.85rem] tabular-nums tracking-tight border rounded-md focus:outline-none focus:ring-1 focus:border-transparent transition-all disabled:opacity-50 ${
                 isPendingChange
                   ? 'border-amber-400 bg-amber-50 focus:ring-amber-500'
-                  : 'border-zinc-300 hover:border-zinc-400 focus:ring-zinc-900 bg-white'
+                  : 'border-zinc-300 hover:border-zinc-400 focus:ring-teal-500 bg-white'
               }`}
               title={isPendingChange ? 'Cambios pendientes - Se guardará automáticamente' : ''}
             />
@@ -369,8 +369,8 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       <div className="px-5 py-4 border-b border-zinc-200 bg-white">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
-            <div className="bg-zinc-100 p-2 rounded-xl flex items-center justify-center">
-              <Package className="h-5 w-5 text-zinc-900" />
+            <div className="flex items-center justify-center rounded-xl bg-teal-100 p-2">
+              <Package className="h-5 w-5 text-teal-700" />
             </div>
             <div>
               <h3 className="text-lg font-semibold tracking-tight text-zinc-900 leading-none">
@@ -386,7 +386,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
             <button
               onClick={handleExportarExcel}
               disabled={isExporting || loading || items.length === 0}
-              className="flex items-center px-4 py-2 border border-zinc-200 bg-white text-zinc-700 text-sm font-medium rounded-xl hover:bg-zinc-50 focus:ring-2 focus:ring-zinc-900/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="flex items-center rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:border-teal-200 hover:bg-teal-50 focus:ring-2 focus:ring-teal-500/20 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isExporting ? (
                 <>
@@ -395,7 +395,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
                 </>
               ) : (
                 <>
-                  <FileXls weight="duotone" className="h-4 w-4 mr-2 text-zinc-600" />
+                  <FileXls weight="duotone" className="mr-2 h-4 w-4 text-teal-600" />
                   Descargar MS Excel
                 </>
               )}
@@ -550,8 +550,8 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
             (<span className="font-medium text-zinc-700">{items.filter(i => i.tipo === 'vacuna').length}</span> vacunas, <span className="font-medium text-zinc-700 ml-1">{items.filter(i => i.tipo === 'jeringa').length}</span> jeringas)
           </div>
         </div>
-        <div className="flex items-center space-x-2 bg-zinc-100/80 px-2.5 py-1.5 rounded-lg border border-zinc-200/60">
-          <FloppyDisk className="h-3.5 w-3.5 text-zinc-500" />
+        <div className="flex items-center space-x-2 rounded-lg border border-teal-200/70 bg-teal-50 px-2.5 py-1.5">
+          <FloppyDisk className="h-3.5 w-3.5 text-teal-600" />
           <span className="text-[0.7rem] font-medium text-zinc-600 uppercase tracking-wider">Guardado Automático</span>
         </div>
       </div>
@@ -559,14 +559,14 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       {/* Export Section - Professional Design */}
       <div className="border-t border-gray-200 bg-white p-6">
         <div className="flex items-center justify-center">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 border border-blue-200 shadow-sm max-w-2xl w-full">
+          <div className="w-full max-w-2xl rounded-xl border border-teal-200 bg-gradient-to-r from-teal-50 via-white to-cyan-50 p-6 shadow-sm">
             <div className="flex items-center mb-4">
-              <div className="bg-blue-100 p-3 rounded-lg mr-4">
-                <DownloadSimple className="h-6 w-6 text-blue-600" />
+              <div className="mr-4 rounded-lg bg-teal-100 p-3">
+                <DownloadSimple className="h-6 w-6 text-teal-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">📊 Exportar Programación y Seguimiento Anual</h3>
-                <p className="text-sm text-gray-600">Generar reporte Excel profesional con todos los datos</p>
+                <h3 className="text-lg font-semibold text-zinc-900">Exportar Programación y Seguimiento Anual</h3>
+                <p className="text-sm text-zinc-600">Generar reporte Excel profesional con todos los datos</p>
               </div>
             </div>
 
@@ -575,7 +575,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
               <button
                 onClick={handleExportarExcel}
                 disabled={isExporting || loading || items.length === 0}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg font-medium shadow-lg"
+                className="flex items-center justify-center rounded-lg bg-teal-600 px-8 py-3 text-lg font-medium text-white shadow-lg transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isExporting ? (
                   <>
@@ -592,12 +592,12 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
             </div>
 
             {/* Information Section */}
-            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="mt-6 rounded-lg border border-teal-200 bg-teal-50 p-4">
               <div className="flex items-start">
-                <Package className="h-5 w-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-800">
+                <Package className="mr-3 mt-0.5 h-5 w-5 shrink-0 text-teal-600" />
+                <div className="text-sm text-teal-900">
                   <p className="font-medium mb-1">Información sobre la exportación:</p>
-                  <ul className="list-disc list-inside space-y-1 text-blue-700">
+                  <ul className="list-inside list-disc space-y-1 text-teal-700">
                     <li>El reporte incluirá todos los datos de programación y seguimiento por trimestre</li>
                     <li>Se exportará en formato Excel con diseño profesional y corporativo</li>
                     <li>Incluye separación por vacunas y jeringas con colores diferenciados</li>

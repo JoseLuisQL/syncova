@@ -14,9 +14,9 @@ interface ChartSectionProps {
 }
 
 /* ─── Paletas SEMÁNTICAS (Tufte/Data-Viz 2025) ─── */
-const PALETA_ZINC = ['#0f172a', '#334155', '#64748b', '#94a3b8', '#cbd5e1'];
+const PALETA_ZINC = ['#0f9fa8', '#0b8790', '#155e75', '#64748b', '#cbd5e1'];
 const AREA = {
-  entregas:   { stroke: '#09090b', grad: 'rgba(9,9,11,' },    // zinc-950
+  entregas:   { stroke: '#0f9fa8', grad: 'rgba(15,159,168,' },
   recepciones:{ stroke: '#71717a', grad: 'rgba(113,113,122,' }, // zinc-500
 };
 
@@ -113,7 +113,7 @@ const AreaChartSection: React.FC<{ data: MovimientosMensuales[]; isLoading?: boo
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-[16px] bg-gradient-to-br from-zinc-100 to-zinc-50 flex items-center justify-center border border-zinc-200/80 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5)]">
-              <TrendUp className="h-5 w-5 text-zinc-900" weight="bold" />
+              <TrendUp className="h-5 w-5 text-teal-700" weight="bold" />
             </div>
             <div>
               <h3 className="text-[16px] font-extrabold text-zinc-950 tracking-tight">Salidas vs Recepciones</h3>
@@ -124,9 +124,9 @@ const AreaChartSection: React.FC<{ data: MovimientosMensuales[]; isLoading?: boo
             <div className="flex items-center gap-2.5">
               <div className="text-right">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block leading-none mb-1.5">Salidas (Entregas)</span>
-                <span className="text-[16px] font-extrabold text-zinc-900 tabular-nums">{totals.entregas.toLocaleString()}</span>
+                <span className="text-[16px] font-extrabold text-teal-700 tabular-nums">{totals.entregas.toLocaleString()}</span>
               </div>
-              <span className="w-1.5 h-8 rounded-full bg-zinc-900" />
+              <span className="w-1.5 h-8 rounded-full bg-teal-600" />
             </div>
             <div className="flex items-center gap-2.5">
               <div className="text-right">
@@ -211,7 +211,7 @@ const DonutChartSection: React.FC<{ data: StockPorVacuna[]; isLoading?: boolean 
         <div className="bg-white rounded-[24px] border border-zinc-200/60 p-7 shadow-sm">
           <div className="flex items-center gap-4 mb-8">
             <div className="w-12 h-12 rounded-[16px] bg-zinc-100 flex items-center justify-center">
-              <Package className="h-5 w-5 text-zinc-900" weight="bold" />
+              <Package className="h-5 w-5 text-teal-700" weight="bold" />
             </div>
             <h3 className="text-[16px] font-extrabold text-zinc-950">Disponibilidad de Vacunas</h3>
           </div>

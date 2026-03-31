@@ -17,6 +17,7 @@ import {
   type PermisosGlobales,
   type TipoPermisoOperativo,
 } from '../../services/permisoOperativoService';
+import { DESIGN_TOKENS } from '../../styles/designTokens';
 
 // ===== Config =====
 const MESES = [
@@ -139,7 +140,7 @@ const ScheduleModal: React.FC<{
             <ToggleSwitch
               checked={usarDesactivacion}
               onChange={setUsarDesactivacion}
-              colorClass="bg-zinc-700"
+              colorClass="bg-teal-600"
             />
             <span className="text-sm text-zinc-700">Programar desactivación automática</span>
           </div>
@@ -177,7 +178,7 @@ const ScheduleModal: React.FC<{
               onClose();
             }}
             disabled={!fechaActivacion}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-900 px-3.5 py-2 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${DESIGN_TOKENS.interactive.primary}`}
           >
             <Timer className="h-3.5 w-3.5" />
             Programar
@@ -322,7 +323,7 @@ const QuickPermissionsSection: React.FC = memo(() => {
         <header className="px-6 py-4 border-b border-zinc-100 bg-zinc-50/50">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-[14px] bg-zinc-900 flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 rounded-[14px] bg-teal-600 flex items-center justify-center shadow-sm">
                 <ShieldCheck className="h-5 w-5 text-white" weight="bold" />
               </div>
               <div>

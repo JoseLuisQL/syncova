@@ -244,10 +244,10 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
         className={`${COMPONENT_STYLES.modal.containerShell} max-w-5xl max-h-[92vh] flex flex-col sm:rounded-[30px]`}
       >
         {/* Header */}
-        <div className="px-6 py-5 border-b border-zinc-200 bg-gradient-to-r from-zinc-50 via-white to-zinc-100/80">
+        <div className="px-6 py-5 border-b border-zinc-200 bg-gradient-to-r from-teal-50 via-white to-cyan-50/80">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-600 to-zinc-600 shadow-[0_16px_30px_-18px_rgba(13,148,136,0.75)]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-700 shadow-[0_16px_30px_-18px_rgba(13,148,136,0.75)]">
                 <Key className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
               <div>
@@ -290,7 +290,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                 placeholder="Buscar permisos por nombre, código o recurso..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-zinc-500 transition-all duration-200 hover:border-zinc-300"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 hover:border-zinc-300"
                 aria-label="Buscar permisos"
               />
             </div>
@@ -301,7 +301,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="px-4 py-2.5 rounded-xl border border-zinc-200 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-zinc-500 transition-all duration-200 hover:border-zinc-300 min-w-[180px]"
+                className="px-4 py-2.5 rounded-xl border border-zinc-200 text-sm font-medium bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200 hover:border-zinc-300 min-w-[180px]"
                 aria-label="Filtrar por categoría"
               >
                 <option value="todas">Todas las categorías</option>
@@ -347,7 +347,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
               <div className="flex items-center gap-2">
                 <button
                   onClick={selectAll}
-                  className="px-3 py-1.5 text-xs font-medium text-zinc-700 bg-zinc-50 rounded-lg hover:bg-zinc-100 transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors"
                 >
                   Seleccionar visibles
                 </button>
@@ -420,17 +420,17 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                           onClick={(e) => toggleAllInCategory(category, e)}
                           className={`flex items-center justify-center w-6 h-6 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
                             allSelected 
-                              ? 'bg-zinc-600 border-zinc-600' 
+                              ? 'bg-teal-600 border-teal-600' 
                               : someSelected 
-                                ? 'bg-zinc-100 border-zinc-400' 
-                                : 'bg-white border-zinc-300 hover:border-zinc-300'
+                                ? 'bg-teal-50 border-teal-300' 
+                                : 'bg-white border-zinc-300 hover:border-teal-300'
                           } ${isReadOnly ? 'cursor-not-allowed opacity-60' : ''}`}
                           role="checkbox"
                           aria-checked={allSelected ? 'true' : someSelected ? 'mixed' : 'false'}
                           aria-label={`Seleccionar todos los permisos de ${category}`}
                         >
                           {allSelected && <Check className="h-4 w-4 text-white" />}
-                          {someSelected && !allSelected && <div className="w-2 h-0.5 bg-zinc-600 rounded" />}
+                          {someSelected && !allSelected && <div className="w-2 h-0.5 bg-teal-600 rounded" />}
                         </div>
 
                         {/* Indicador expandido */}
@@ -458,8 +458,8 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                                 key={permission.id}
                                 className={`flex items-start gap-3 rounded-[20px] border p-3.5 cursor-pointer transition-all duration-200 ${
                                   isSelected
-                                    ? 'border-zinc-200 bg-zinc-50/65 shadow-sm ring-1 ring-zinc-100'
-                                    : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50'
+                                    ? 'border-teal-200 bg-teal-50/70 shadow-sm ring-1 ring-teal-100'
+                                    : 'border-zinc-200 bg-white hover:border-teal-200 hover:bg-teal-50/40'
                                 }`}
                               >
                                 <input
@@ -478,7 +478,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                                 {/* Checkbox visual */}
                                 <div className={`flex-shrink-0 mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
                                   isSelected 
-                                    ? 'bg-zinc-600 border-zinc-600' 
+                                    ? 'bg-teal-600 border-teal-600' 
                                     : 'bg-white border-zinc-300'
                                 }`}>
                                   {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
@@ -505,7 +505,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                                   )}
                                   
                                   <div className="mt-1.5">
-                                    <code className={`text-xs px-1.5 py-0.5 rounded ${isSelected ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-100 text-zinc-500'}`}>
+                                    <code className={`text-xs px-1.5 py-0.5 rounded ${isSelected ? 'bg-teal-100 text-teal-700' : 'bg-zinc-100 text-zinc-500'}`}>
                                       {permission.codigo}
                                     </code>
                                   </div>
@@ -524,7 +524,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-zinc-200 bg-zinc-50/70">
+        <div className="px-6 py-4 border-t border-zinc-200 bg-teal-50/60">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Resumen */}
             <div className="flex items-center gap-2 text-sm text-zinc-600">

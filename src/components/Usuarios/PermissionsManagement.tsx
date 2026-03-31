@@ -69,7 +69,7 @@ const ToggleSwitch: React.FC<{
       className={`
         relative inline-flex ${w} ${h} shrink-0 cursor-pointer rounded-full
         border-2 border-transparent transition-colors duration-200 ease-in-out
-        focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
         disabled:opacity-50 disabled:cursor-not-allowed
         ${checked ? colorClass : 'bg-zinc-200'}
       `}
@@ -134,7 +134,7 @@ const ScheduleModal: React.FC<{
               checked={usarDesactivacion}
               onChange={setUsarDesactivacion}
               size="sm"
-              colorClass="bg-zinc-700"
+              colorClass="bg-teal-600"
             />
             <span className="text-sm text-zinc-700">Programar desactivación automática</span>
           </div>
@@ -297,7 +297,7 @@ const PermissionsManagement: React.FC = () => {
       <section className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 text-white">
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
@@ -311,7 +311,7 @@ const PermissionsManagement: React.FC = () => {
               <select
                 value={selectedMes}
                 onChange={(e) => setSelectedMes(Number(e.target.value))}
-                className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-8 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-400"
+                className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-8 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
                 {MESES.map((mes, i) => (
                   <option key={i} value={i + 1}>{mes}</option>
@@ -324,7 +324,7 @@ const PermissionsManagement: React.FC = () => {
               <select
                 value={selectedAnio}
                 onChange={(e) => setSelectedAnio(Number(e.target.value))}
-                className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-8 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-400"
+                className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-8 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
                 {aniosDisponibles.map(anio => (
                   <option key={anio} value={anio}>{anio}</option>
@@ -359,14 +359,14 @@ const PermissionsManagement: React.FC = () => {
                 key={config.tipo}
                 className={`
                   rounded-xl border p-4 transition-all duration-200
-                  ${permiso?.habilitado ? 'border-emerald-200 bg-emerald-50/50' : 'border-zinc-200 bg-zinc-50/50'}
+                  ${permiso?.habilitado ? 'border-teal-200 bg-teal-50/70' : 'border-zinc-200 bg-zinc-50/50'}
                 `}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className={`
                       flex h-9 w-9 items-center justify-center rounded-xl
-                      ${permiso?.habilitado ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-100 text-zinc-500'}
+                      ${permiso?.habilitado ? 'bg-teal-100 text-teal-700' : 'bg-zinc-100 text-zinc-500'}
                     `}>
                       <Icon className="h-4.5 w-4.5" />
                     </div>
@@ -392,7 +392,7 @@ const PermissionsManagement: React.FC = () => {
                       usuarioId: null,
                       label: `${config.label} (Global)`,
                     })}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-800 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-600 hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700 transition-colors"
                   >
                     <Timer className="h-3.5 w-3.5" />
                     Programar
@@ -417,12 +417,12 @@ const PermissionsManagement: React.FC = () => {
 
       {/* ═══ Per-User Permissions ═══ */}
       <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-zinc-200 bg-zinc-50/70 px-5 py-4">
+        <div className="border-b border-zinc-200 bg-teal-50/60 px-5 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-zinc-500" />
               <h4 className="text-sm font-semibold text-zinc-900">Permisos individuales</h4>
-              <span className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
+              <span className="inline-flex items-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
                 {usuarios.length} responsables
               </span>
             </div>

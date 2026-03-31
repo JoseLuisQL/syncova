@@ -129,7 +129,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                       value={selectedCentroAcopio}
                       onChange={(event) => onCentroAcopioChange(event.target.value)}
                       disabled={isLoading}
-                      className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm font-medium focus:ring-zinc-900`}
+                      className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm font-medium`}
                     >
                       <option value="todos">{allCentrosLabel}</option>
                       {centrosAcopio.map((centro) => (
@@ -159,7 +159,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                     value={selectedVacuna}
                     onChange={(event) => onVacunaChange(event.target.value)}
                     disabled={isLoading}
-                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm font-medium focus:ring-zinc-900`}
+                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-8 pr-8 text-xs sm:pl-10 sm:pr-10 sm:text-sm font-medium`}
                   >
                     {vacunas.length === 0 ? <option value="">Inicializando...</option> : null}
                     {vacunas.map((vacuna) => (
@@ -182,7 +182,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                     value={selectedAnio}
                     onChange={(event) => onAnioChange(Number(event.target.value))}
                     disabled={isLoadingAnios}
-                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-10 pr-8 text-xs sm:pl-12 sm:pr-10 sm:text-sm font-bold focus:ring-zinc-900`}
+                    className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan} pl-10 pr-8 text-xs sm:pl-12 sm:pr-10 sm:text-sm font-bold`}
                   >
                     {aniosDisponibles.map((anio) => (
                       <option key={anio} value={anio}>
@@ -247,63 +247,63 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
 
       <div className="border-t border-zinc-100 px-3 py-2.5 sm:px-4 sm:py-3 bg-zinc-50/50">
         {!selectedVacuna ? (
-          <div className="flex items-center gap-2.5 rounded-[14px] bg-zinc-900 border border-zinc-900 px-3 py-2.5 sm:px-4 sm:py-3 shadow-sm">
+          <div className="flex items-center gap-2.5 rounded-[14px] bg-teal-600 border border-teal-600 px-3 py-2.5 sm:px-4 sm:py-3 shadow-sm">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10">
               <Package className="h-4 w-4 text-white" weight="duotone" />
             </div>
             <p className="text-sm font-semibold tracking-tight text-white">Selecciona una vacuna para visualizar el marco operativo.</p>
           </div>
         ) : (
-          <div className="relative rounded-[16px] bg-zinc-900 border border-zinc-900 px-[5px] py-[5px] shadow-sm">
+          <div className="relative rounded-[16px] border border-teal-200 bg-gradient-to-r from-teal-600 via-teal-600 to-cyan-600 px-[5px] py-[5px] shadow-sm">
             <div className="flex flex-wrap items-center gap-y-1">
-              <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 sm:h-8 sm:w-8">
+              <div className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/12 px-2.5 py-2 sm:gap-2.5 sm:px-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/18 sm:h-8 sm:w-8">
                   <Package className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-zinc-400 sm:text-[0.6rem]">Target</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Target</p>
                   <p className="text-xs font-black tracking-tight text-white sm:text-sm">{vacunaSeleccionada?.nombre || 'Indefinido'}</p>
                 </div>
               </div>
 
-              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-zinc-500 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
+              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-white/45 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
 
-              <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 sm:h-8 sm:w-8">
+              <div className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/12 px-2.5 py-2 sm:gap-2.5 sm:px-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/18 sm:h-8 sm:w-8">
                   <CalendarBlank className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-zinc-400 sm:text-[0.6rem]">Period</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Periodo</p>
                   <p className="text-xs font-black tracking-tight text-white sm:text-sm">{selectedAnio}</p>
                 </div>
               </div>
 
-              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-zinc-500 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
+              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-white/45 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
 
-              <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 sm:h-8 sm:w-8">
+              <div className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/12 px-2.5 py-2 sm:gap-2.5 sm:px-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/18 sm:h-8 sm:w-8">
                   <Buildings className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-zinc-400 sm:text-[0.6rem]">Scope</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Scope</p>
                   <p className="text-xs font-black tracking-tight text-white sm:text-sm">{centroNombre}</p>
                 </div>
               </div>
 
-              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-zinc-500 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
+              <ArrowRight className="mx-1 h-3 w-3 shrink-0 text-white/45 sm:mx-1.5 sm:h-3.5 sm:w-3.5" weight="bold" />
 
-              <div className="flex items-center gap-2 rounded-xl bg-white/10 px-2.5 py-2 sm:gap-2.5 sm:px-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/40 sm:h-8 sm:w-8">
+              <div className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/12 px-2.5 py-2 sm:gap-2.5 sm:px-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/18 sm:h-8 sm:w-8">
                   <CheckCircle className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="fill" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-zinc-400 sm:text-[0.6rem]">Units</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Units</p>
                   <p className="text-xs font-black tracking-tight text-white sm:text-sm">{establecimientosCount.toLocaleString()}</p>
                 </div>
               </div>
 
               <div className="ml-auto flex flex-wrap items-center gap-2 px-1 py-1">
-                <span className="inline-flex items-center rounded-lg bg-zinc-800 border border-zinc-700 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-wider text-white shadow-sm">
+                <span className="inline-flex items-center rounded-lg border border-white/20 bg-white/14 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-wider text-white shadow-sm">
                   Total Anual: {totalGeneral.toLocaleString()}
                 </span>
                 {pendingChangesCount > 0 ? (
@@ -311,7 +311,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                     Mutado: {pendingChangesCount}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center rounded-lg bg-zinc-800/50 border border-zinc-700/50 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-wider text-zinc-400">
+                  <span className="inline-flex items-center rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-wider text-teal-50">
                     Sync Completa
                   </span>
                 )}

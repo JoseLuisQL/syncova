@@ -225,7 +225,7 @@ const CalculadoraJeringas: React.FC<CalculadoraJeringasProps> = ({
                 ))}
               </div>
 
-              <div className="mt-4 p-4 bg-zinc-900 border border-zinc-900 rounded-2xl text-white">
+              <div className="mt-4 p-4 bg-teal-600 border border-teal-600 rounded-2xl text-white">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium text-zinc-100">Total de Jeringas Necesarias</p>

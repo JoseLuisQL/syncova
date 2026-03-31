@@ -1,5 +1,4 @@
 import React, { memo } from 'react';
-import { Bell } from '@phosphor-icons/react';
 import { useAppNavigation } from '../../../hooks/useRouting';
 import { AlertSectionConfig, ALERTS_SECTIONS, COMPONENT_STYLES, SectionId } from '../constants';
 
@@ -22,23 +21,11 @@ const AlertsShell: React.FC<AlertsShellProps> = ({
     <main className="min-h-full bg-white">
       <div className="mx-auto flex max-w-[1500px] flex-col gap-3">
         <section className="overflow-hidden bg-transparent">
-          <div className="border-b border-zinc-200/90 px-4 py-4 sm:px-5 lg:px-6">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-              <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                <div className={COMPONENT_STYLES.header.iconWrapper}>
-                  <Bell className="h-5 w-5" aria-hidden="true" weight="bold" />
-                </div>
-                <div className="min-w-0 max-w-3xl">
-                  <h1 className={`${COMPONENT_STYLES.header.title} text-[1.35rem] sm:text-[1.52rem]`}>Alertas</h1>
-                  <p className={`${COMPONENT_STYLES.header.subtitle} mt-0.5 text-sm leading-6 sm:text-[0.92rem]`}>
-                    Monitoreo y gestión de eventos críticos.
-                  </p>
-                </div>
-              </div>
-
-              {action ? <div className="flex flex-wrap items-center gap-2">{action}</div> : null}
+          {action ? (
+            <div className="border-b border-zinc-200/90 px-4 py-4 sm:px-5 lg:px-6">
+              <div className="flex flex-wrap items-center gap-2">{action}</div>
             </div>
-          </div>
+          ) : null}
 
           <nav aria-label="Secciones de alertas" className="px-3 py-3 sm:px-4">
             <div className="flex flex-wrap gap-2">

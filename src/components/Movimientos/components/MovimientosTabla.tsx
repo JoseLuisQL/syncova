@@ -99,7 +99,7 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = memo(({
     : `${styles.normal} ${styles.focus}`;
 
   const indicatorClassName = typing
-    ? 'bg-zinc-900 animate-pulse'
+    ? 'bg-teal-600 animate-pulse'
     : pending
     ? 'bg-amber-400 animate-pulse'
     : '';
@@ -148,7 +148,7 @@ const MetricPill: React.FC<{
       : tone === 'cyan'
       ? 'bg-transparent text-zinc-900 font-bold'
       : tone === 'teal'
-      ? 'bg-zinc-900 text-white shadow-sm font-black'
+      ? 'bg-teal-600 text-white shadow-sm font-black'
       : 'bg-transparent text-zinc-600 font-semibold';
 
   return (
@@ -858,7 +858,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
       <button
         type="button"
         onClick={onOpenColumnSettings}
-        className="absolute right-2 top-2 z-30 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 bg-white/95 text-zinc-900 shadow-sm backdrop-blur transition hover:bg-zinc-900 hover:text-white sm:right-3 sm:top-3"
+        className="absolute right-2 top-2 z-30 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 bg-white/95 text-zinc-900 shadow-sm backdrop-blur transition hover:bg-teal-600 hover:text-white sm:right-3 sm:top-3"
         title={`Configurar columnas (${visibleCount}/${configurableColumnsAllowed.length})`}
         aria-label="Configurar columnas visibles"
       >
@@ -877,7 +877,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         <div className="hidden min-h-0 flex-1 overflow-auto md:block selection:bg-zinc-200">
           <table className="w-max min-w-full table-fixed border-collapse" role="table" aria-label="Matriz de datos">
             <thead className="sticky top-0 z-20">
-              <tr className="border-b-[3px] border-zinc-900 bg-white">
+              <tr className="border-b-[3px] border-teal-600 bg-white">
                 {columnasVisibles.map((column, index) => {
                   const isFirst = index === 0;
 
@@ -954,7 +954,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                     onClick={() => onRowSelect(movimiento.establecimientoId)}
                     className={`${rowBg} cursor-pointer transition-colors border-b border-zinc-100 ${!isSelected && 'hover:brightness-[0.97]'}`}
                   >
-                    <td className={`sticky left-0 z-10 box-border border-r border-zinc-200 px-3 py-2.5 ${isSelected ? 'bg-zinc-100/60 ring-inset ring-[1.5px] ring-zinc-900' : colores.bg}`}>
+                    <td className={`sticky left-0 z-10 box-border border-r border-zinc-200 px-3 py-2.5 ${isSelected ? 'bg-teal-50/70 ring-inset ring-[1.5px] ring-teal-600' : colores.bg}`}>
                       <div className="min-w-0">
                         <div className="flex items-center justify-between">
                           <p className={`truncate text-xs font-black tracking-tight ${isSelected ? 'text-zinc-900' : 'text-zinc-700'}`}>
@@ -992,7 +992,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                         return (
                           <td
                             key={column.key}
-                            className={`border-r border-zinc-100 align-middle ${isEditable ? 'p-0' : 'px-2 py-1'} ${isSelected ? 'border-y border-y-zinc-900 border-r-zinc-300' : ''} ${
+                            className={`border-r border-zinc-100 align-middle ${isEditable ? 'p-0' : 'px-2 py-1'} ${isSelected ? 'border-y border-y-teal-600 border-r-teal-200' : ''} ${
                               column.key === 'entrega' ? 'align-top' : 'text-center'
                             } ${column.key === 'totalSaldo' || column.key === 'saldo' ? 'bg-zinc-50/50' : ''}`}
                           >
