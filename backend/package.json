@@ -39,9 +39,12 @@
   "author": "DISA Apurímac II",
   "license": "MIT",
   "dependencies": {
+    "@ai-sdk/google": "^3.0.58",
+    "@ai-sdk/openai-compatible": "^2.0.38",
     "@prisma/client": "^5.7.1",
     "@types/bcrypt": "^5.0.2",
     "@types/multer": "^2.0.0",
+    "ai": "^6.0.146",
     "axios": "^1.11.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
@@ -59,7 +62,8 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
     "node-fetch": "^2.7.0",
-    "pdfkit": "^0.17.1"
+    "pdfkit": "^0.17.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

@@ -78,7 +78,7 @@ const setupInterceptors = (client: AxiosInstance) => {
       const originalRequest = error.config as any;
 
       // Manejo centralizado de errores
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh')) {
         originalRequest._retry = true;
 
         // Intentar refrescar el token
@@ -113,7 +113,7 @@ const setupInterceptors = (client: AxiosInstance) => {
         }
       } else if (error.response?.status === 403) {
         console.warn('Acceso denegado');
-      } else if (error.response?.status >= 500) {
+      } else if ((error.response?.status || 0) >= 500) {
         console.error('Error del servidor:', error.message);
       }
 

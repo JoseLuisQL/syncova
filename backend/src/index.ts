@@ -30,6 +30,7 @@ import alertasRoutes from '@/routes/alertas';
 import dashboardRoutes from '@/routes/dashboard';
 import iciDemidRoutes from '@/routes/ici-demid';
 import permisosOperativosRoutes from '@/routes/permisos-operativos';
+import sibotRoutes from '@/routes/sibot';
 import { PermisoOperativoService } from '@/services/PermisoOperativoService';
 
 /**
@@ -116,6 +117,7 @@ async function startServer(): Promise<void> {
     app.use('/api/dashboard', dashboardRoutes);
     app.use('/api/ici-demid', iciDemidRoutes);
     app.use('/api/permisos-operativos', permisosOperativosRoutes);
+    app.use('/api/sibot', sibotRoutes);
 
     // Configurar manejo de errores (debe ir al final)
     setupErrorHandling(app);

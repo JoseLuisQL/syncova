@@ -9,6 +9,8 @@ import Header from './components/Layout/Header';
 import AppRoutes from './components/routing/AppRoutes';
 import PageTitle from './components/routing/PageTitle';
 import { useCurrentRoute } from './hooks/useRouting';
+import { useAuth } from './contexts/AuthContext';
+import { SiBotFloating } from './components/SiBot/SiBotFloating';
 
 function App() {
   return (
@@ -28,6 +30,7 @@ function App() {
 const AppContent: React.FC = () => {
   const { currentModule, breadcrumbs } = useCurrentRoute();
   const { sidebarCollapsed } = useApp();
+  const { user } = useAuth();
 
   const getModuleTitle = (module: string, breadcrumbs: { label: string; path: string; isLast: boolean }[]) => {
     if (breadcrumbs.length > 1) {
@@ -71,6 +74,9 @@ const AppContent: React.FC = () => {
           <main className="p-4 sm:p-6">
             <AppRoutes />
           </main>
+          
+          {/* SiBot AI Agent - Solo Administradores */}
+          {user?.rol === 'administrador' && <SiBotFloating />}
         </div>
       </div>
     </ProtectedRoute>
@@ -78,3 +84,4 @@ const AppContent: React.FC = () => {
 };
 
 export default App;
+
