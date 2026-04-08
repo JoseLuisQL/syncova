@@ -143,9 +143,6 @@ build/
 .DS_Store
 Thumbs.db
 
-# Prisma
-prisma/migrations/
-
 # Uploads
 uploads/
 temp/
@@ -167,8 +164,7 @@ tmp/
 temp/
 *.tmp
 
-# Lock files (mantener solo uno)
-package-lock.json
+# Lock files opcionales no usados
 yarn.lock
 
 # Environment specific
