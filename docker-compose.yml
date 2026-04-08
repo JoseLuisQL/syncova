@@ -89,6 +89,7 @@ services:
       - traefik.http.routers.sivac-api.rule=Host(`${APP_DOMAIN:-sivac.qware.me}`) && (PathPrefix(`/api`) || Path(`/health`) || PathPrefix(`/uploads`))
       - traefik.http.routers.sivac-api.entrypoints=websecure
       - traefik.http.routers.sivac-api.tls=true
+      - traefik.http.routers.sivac-api.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
       - traefik.http.routers.sivac-api.priority=100
       - traefik.http.services.sivac-api.loadbalancer.server.port=3001
 
@@ -124,6 +125,7 @@ services:
       - traefik.http.routers.sivac-web.rule=Host(`${APP_DOMAIN:-sivac.qware.me}`)
       - traefik.http.routers.sivac-web.entrypoints=websecure
       - traefik.http.routers.sivac-web.tls=true
+      - traefik.http.routers.sivac-web.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
       - traefik.http.routers.sivac-web.priority=10
       - traefik.http.services.sivac-web.loadbalancer.server.port=80
 
