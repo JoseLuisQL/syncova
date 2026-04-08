@@ -23,7 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.production
+.env.deploy
 .factory/*
 .agents/*
 .claude
 skills/
+docker/sql/*
+!docker/sql/.gitkeep

@@ -295,6 +295,9 @@ model Usuario {
   iciDemidRegistros IciDemidRegistro[]
   permisosOperativos       PermisoOperativo[] @relation("PermisoOperativoUsuario")
   permisosOperativosCreados PermisoOperativo[] @relation("PermisoOperativoCreadoPor")
+  sibotSessions      SibotSession[]
+  sibotToolExecutions SibotToolExecution[]
+  sibotSecurityEvents SibotSecurityEvent[]
 
   @@index([roleId], name: "idx_usuario_role")
   @@index([centroAcopioId], name: "idx_usuario_centro_acopio")
@@ -713,4 +716,82 @@ model PermisoOperativo {
   @@index([usuarioId], name: "idx_permiso_operativo_usuario")
   @@index([habilitado, fechaActivacion], name: "idx_permiso_operativo_programado")
   @@map("permisos_operativos")
+}
+
+model SibotSession {
+  id             String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  localSessionId String               @unique @map("local_session_id") @db.VarChar(120)
+  usuarioId      String               @map("usuario_id") @db.Uuid
+  createdAt      DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  usuario        Usuario              @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  attachments    SibotAttachment[]
+  toolExecutions SibotToolExecution[]
+  securityEvents SibotSecurityEvent[]
+
+  @@index([usuarioId], name: "idx_sibot_session_usuario")
+  @@index([updatedAt], name: "idx_sibot_session_updated")
+  @@map("sibot_sessions")
+}
+
+model SibotAttachment {
+  id             String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sessionId      String        @map("session_id") @db.Uuid
+  tipo           String        @db.VarChar(32)
+  mimeType       String        @map("mime_type") @db.VarChar(150)
+  nombreOriginal String        @map("nombre_original") @db.VarChar(255)
+  nombreArchivo  String        @map("nombre_archivo") @db.VarChar(255)
+  storagePath    String        @map("storage_path") @db.Text
+  tamanoBytes    Int           @map("tamano_bytes")
+  sha256         String        @db.VarChar(64)
+  metadata       Json?         @map("metadata") @db.JsonB
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  session        SibotSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], name: "idx_sibot_attachment_session")
+  @@index([tipo], name: "idx_sibot_attachment_tipo")
+  @@index([sha256], name: "idx_sibot_attachment_sha256")
+  @@map("sibot_attachments")
+}
+
+model SibotToolExecution {
+  id             String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sessionId      String?       @map("session_id") @db.Uuid
+  usuarioId      String        @map("usuario_id") @db.Uuid
+  toolName       String        @map("tool_name") @db.VarChar(120)
+  status         String        @db.VarChar(32)
+  filtersApplied Json?         @map("filters_applied") @db.JsonB
+  evidence       Json?         @db.JsonB
+  recordCount    Int?          @map("record_count")
+  durationMs     Int?          @map("duration_ms")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  session        SibotSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  usuario        Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], name: "idx_sibot_tool_session")
+  @@index([usuarioId], name: "idx_sibot_tool_usuario")
+  @@index([toolName, createdAt], name: "idx_sibot_tool_name_fecha")
+  @@map("sibot_tool_executions")
+}
+
+model SibotSecurityEvent {
+  id         String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sessionId  String?       @map("session_id") @db.Uuid
+  usuarioId  String        @map("usuario_id") @db.Uuid
+  tipo       String        @db.VarChar(80)
+  severidad  String        @db.VarChar(24)
+  detalle    Json?         @db.JsonB
+  createdAt  DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  session    SibotSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  usuario    Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], name: "idx_sibot_security_session")
+  @@index([usuarioId], name: "idx_sibot_security_usuario")
+  @@index([tipo, createdAt], name: "idx_sibot_security_tipo_fecha")
+  @@map("sibot_security_events")
 }

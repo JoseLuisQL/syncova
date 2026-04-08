@@ -1,11 +1,16 @@
 import { prisma } from '@/config/database';
+import { Prisma } from '@prisma/client';
 import {
   SibotCitation,
   SibotToolExecutionLog,
 } from './types';
 
-function toJsonValue(value: unknown): unknown {
-  return value === undefined ? null : value;
+function toJsonValue(value: unknown): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput {
+  if (value === undefined || value === null) {
+    return Prisma.JsonNull;
+  }
+
+  return value as Prisma.InputJsonValue;
 }
 
 export class SibotStorageService {

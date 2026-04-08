@@ -1,0 +1,25 @@
+node_modules
+dist
+dist-ssr
+.git
+.factory
+.agents
+.claude
+.env
+.env.*
+*.log
+frontend-dev.log
+backend-dev.log
+test-results
+coverage
+docs
+output
+image.png
+ICI DEMID.xlsx
+backend/node_modules
+backend/dist
+backend/uploads
+backend/.env
+backend/.env.*
+docker/sql/*
+!docker/sql/.gitkeep
