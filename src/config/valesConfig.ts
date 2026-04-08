@@ -265,12 +265,15 @@ export const getEnvironmentConfig = () => {
   const isDevelopment = import.meta.env.MODE === 'development';
   const isProduction = import.meta.env.MODE === 'production';
   const isTesting = import.meta.env.MODE === 'test';
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+    || import.meta.env.VITE_API_URL?.replace(/\/api$/, '')
+    || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
 
   return {
     isDevelopment,
     isProduction,
     isTesting,
-    apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001',
+    apiBaseUrl,
     enableMocks: isDevelopment && import.meta.env.VITE_ENABLE_MOCKS === 'true',
     enableLogs: isDevelopment || import.meta.env.VITE_ENABLE_LOGS === 'true',
     enableAnalytics: isProduction && import.meta.env.VITE_ENABLE_ANALYTICS === 'true'

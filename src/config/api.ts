@@ -14,9 +14,9 @@ export const getApiBaseUrl = () => {
   // Detectar si estamos accediendo desde la red local
   const currentHost = window.location.hostname;
   
-  // Si el hostname es una IP de red local (no localhost), usar esa IP para la API
+  // Si no estamos en localhost, asumir proxy reverso bajo el mismo origen
   if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-    return `http://${currentHost}:${DEFAULT_PORTS.BACKEND}/api`;
+    return `${window.location.origin}/api`;
   }
   
   // Por defecto, usar localhost

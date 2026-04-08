@@ -1,6 +1,7 @@
 /**
  * Utilidades para debugging y desarrollo
  */
+import { getApiBaseUrl } from '../config/api';
 
 export const isDevelopment = import.meta.env.VITE_ENVIRONMENT === 'development';
 export const isDebugEnabled = import.meta.env.VITE_DEBUG === 'true';
@@ -55,7 +56,11 @@ export const formatApiError = (error: any): string => {
  */
 export const checkBackendConnection = async (): Promise<boolean> => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL?.replace('/api', '')}/health`);
+    const apiBaseUrl = getApiBaseUrl();
+    const backendOrigin = apiBaseUrl.endsWith('/api')
+      ? apiBaseUrl.slice(0, -4)
+      : apiBaseUrl;
+    const response = await fetch(`${backendOrigin}/health`);
     return response.ok;
   } catch (error) {
     logger.error('Error al verificar conexión con backend', error);

@@ -54,7 +54,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-change_this_password}@db:5432/${POSTGRES_DB:-sivac}?schema=public
       JWT_SECRET: ${JWT_SECRET:-change_this_jwt_secret_with_at_least_32_characters}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:${FRONTEND_PORT:-5173}}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://${APP_DOMAIN:-sivac.qware.me},http://${APP_DOMAIN:-sivac.qware.me},http://localhost:${FRONTEND_PORT:-5173}}
       RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
       RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
       LOG_LEVEL: ${LOG_LEVEL:-info}
@@ -66,7 +66,9 @@ services:
       GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY:-}
       SIBOT_GOOGLE_API_KEY: ${SIBOT_GOOGLE_API_KEY:-}
     ports:
-      - "${BACKEND_PORT:-3001}:3001"
+      - "${BACKEND_BIND_IP:-127.0.0.1}:${BACKEND_PORT:-3001}:3001"
+    expose:
+      - "3001"
     volumes:
       - backend_uploads:/app/uploads
     healthcheck:
@@ -77,19 +79,35 @@ services:
       start_period: 30s
     networks:
       - sivac_net
+      - traefik_net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-traefik_default}
+      - traefik.http.middlewares.sivac-api-https-redirect.redirectscheme.scheme=https
+      - traefik.http.routers.sivac-api-http.rule=Host(`${APP_DOMAIN:-sivac.qware.me}`) && (PathPrefix(`/api`) || Path(`/health`) || PathPrefix(`/uploads`))
+      - traefik.http.routers.sivac-api-http.entrypoints=web
+      - traefik.http.routers.sivac-api-http.middlewares=sivac-api-https-redirect
+      - traefik.http.routers.sivac-api-http.service=noop@internal
+      - traefik.http.routers.sivac-api.rule=Host(`${APP_DOMAIN:-sivac.qware.me}`) && (PathPrefix(`/api`) || Path(`/health`) || PathPrefix(`/uploads`))
+      - traefik.http.routers.sivac-api.entrypoints=websecure
+      - traefik.http.routers.sivac-api.tls=true
+      - traefik.http.routers.sivac-api.priority=100
+      - traefik.http.services.sivac-api.loadbalancer.server.port=3001
 
   frontend:
     build:
       context: .
       dockerfile: docker/frontend.Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:${BACKEND_PORT:-3001}/api}
+        VITE_API_URL: ${VITE_API_URL:-/api}
     restart: unless-stopped
     depends_on:
       backend:
         condition: service_healthy
     ports:
-      - "${FRONTEND_PORT:-5173}:80"
+      - "${FRONTEND_BIND_IP:-127.0.0.1}:${FRONTEND_PORT:-5173}:80"
+    expose:
+      - "80"
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]
       interval: 15s
@@ -98,6 +116,20 @@ services:
       start_period: 10s
     networks:
       - sivac_net
+      - traefik_net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-traefik_default}
+      - traefik.http.middlewares.sivac-web-https-redirect.redirectscheme.scheme=https
+      - traefik.http.routers.sivac-web-http.rule=Host(`${APP_DOMAIN:-sivac.qware.me}`)
+      - traefik.http.routers.sivac-web-http.entrypoints=web
+      - traefik.http.routers.sivac-web-http.middlewares=sivac-web-https-redirect
+      - traefik.http.routers.sivac-web-http.service=noop@internal
+      - traefik.http.routers.sivac-web.rule=Host(`${APP_DOMAIN:-sivac.qware.me}`)
+      - traefik.http.routers.sivac-web.entrypoints=websecure
+      - traefik.http.routers.sivac-web.tls=true
+      - traefik.http.routers.sivac-web.priority=10
+      - traefik.http.services.sivac-web.loadbalancer.server.port=80
 
 volumes:
   postgres_data:
@@ -106,3 +138,6 @@ volumes:
 networks:
   sivac_net:
     driver: bridge
+  traefik_net:
+    external: true
+    name: ${TRAEFIK_NETWORK:-traefik_default}
