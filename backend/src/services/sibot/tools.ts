@@ -6,6 +6,7 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/config/database';
+import { logBuffer } from './logBuffer';
 
 // ─── Helper: format dates ─────────────────────────────────────
 
@@ -18,6 +19,27 @@ function fmtDate(d: Date | null | undefined): string {
 
 export function createSibotTools() {
   return {
+    // ── 0. DevOps / System Logs ─────────────────────────────
+    getSystemLogs: tool({
+      description:
+        'Obtiene los últimos registros (logs) del sistema, errores recientes o información de depuración de SIVAC. Úsalo si el usuario reporta que "algo falló", si hubo un error en una transacción, o si pide que actúes como administrador para revisar consola.',
+      inputSchema: z.object({
+        limite: z.number().min(5).max(100).optional().describe('Cantidad de logs a leer (max 100)'),
+        soloErrores: z.boolean().optional().describe('Filtrar exclusivamente logs con nivel "error"'),
+      }),
+      execute: async ({ limite, soloErrores }) => {
+        let logs = logBuffer.getRecentLogs(limite || 40);
+        if (soloErrores) {
+          logs = logs.filter(l => l.level === 'error');
+        }
+        return logs.map(l => ({
+          fecha: l.timestamp,
+          nivel: l.level.toUpperCase(),
+          mensaje: l.message
+        }));
+      },
+    }),
+
     // ── 1. Dashboard Stats ──────────────────────────────────
     getDashboardStats: tool({
       description:

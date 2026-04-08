@@ -40,6 +40,7 @@
   "license": "MIT",
   "dependencies": {
     "@ai-sdk/google": "^3.0.58",
+    "@ai-sdk/openai": "^3.0.51",
     "@ai-sdk/openai-compatible": "^2.0.38",
     "@prisma/client": "^5.7.1",
     "@types/bcrypt": "^5.0.2",

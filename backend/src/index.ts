@@ -32,11 +32,15 @@ import iciDemidRoutes from '@/routes/ici-demid';
 import permisosOperativosRoutes from '@/routes/permisos-operativos';
 import sibotRoutes from '@/routes/sibot';
 import { PermisoOperativoService } from '@/services/PermisoOperativoService';
+import { logBuffer } from '@/services/sibot/logBuffer';
 
 /**
  * Función principal para inicializar el servidor
  */
 async function startServer(): Promise<void> {
+  // Inicializar interceptor de logs para Inteligencia SaBot
+  logBuffer.overrideConsole();
+
   try {
     // Crear aplicación Express
     const app = express();
