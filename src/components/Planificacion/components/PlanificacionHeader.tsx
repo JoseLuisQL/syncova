@@ -53,6 +53,7 @@ interface ActionButtonProps {
   disabled?: boolean;
   isPrimary?: boolean;
   count?: number;
+  showLabel?: boolean;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
@@ -62,6 +63,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   disabled = false,
   isPrimary = false,
   count,
+  showLabel = true,
 }) => (
   <button
     type="button"
@@ -71,7 +73,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     title={label}
   >
     {icon}
-    <span className="hidden lg:inline">{label}</span>
+    {showLabel ? <span className="hidden lg:inline">{label}</span> : null}
     {count ? (
       <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold text-inherit">{count}</span>
     ) : null}
@@ -209,7 +211,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
             ) : null}
 
             <ActionButton
-              label="Sync"
+              label="Sincronizar"
               icon={<ArrowsClockwise className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} weight="bold" />}
               onClick={onRefresh}
               disabled={isLoading || !selectedVacuna}
@@ -217,10 +219,11 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
 
             {!isReadOnly && !hideImportAction ? (
               <ActionButton
-                label="I/O Excel"
+                label="Importar Excel"
                 icon={isImporting ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <UploadSimple className="h-4 w-4" weight="bold" />}
                 onClick={onImportar}
                 disabled={isImporting}
+                showLabel={false}
               />
             ) : (
               <span className={`inline-flex min-h-[38px] items-center rounded-xl border px-3 py-1.5 text-xs font-bold uppercase tracking-wider sm:text-sm sm:min-h-[44px] ${
@@ -228,7 +231,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                   ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                   : 'border-zinc-200 bg-zinc-50 text-zinc-500'
               }`}>
-                {hasOperativeEditPermission ? 'Edición habilitada' : 'Read Only'}
+                {hasOperativeEditPermission ? 'Edición habilitada' : 'Solo lectura'}
               </span>
             )}
 
@@ -261,7 +264,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                   <Package className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Target</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Biológico</p>
                   <p className="text-xs font-black tracking-tight text-white sm:text-sm">{vacunaSeleccionada?.nombre || 'Indefinido'}</p>
                 </div>
               </div>
@@ -285,7 +288,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                   <Buildings className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Scope</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Operador base</p>
                   <p className="text-xs font-black tracking-tight text-white sm:text-sm">{centroNombre}</p>
                 </div>
               </div>
@@ -297,7 +300,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                   <CheckCircle className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="fill" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Units</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Establecimientos</p>
                   <p className="text-xs font-black tracking-tight text-white sm:text-sm">{establecimientosCount.toLocaleString()}</p>
                 </div>
               </div>
@@ -308,11 +311,11 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                 </span>
                 {pendingChangesCount > 0 ? (
                   <span className="inline-flex items-center rounded-lg bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-wider text-amber-300">
-                    Mutado: {pendingChangesCount}
+                    Cambios pendientes: {pendingChangesCount}
                   </span>
                 ) : (
                   <span className="inline-flex items-center rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-[0.7rem] font-black uppercase tracking-wider text-teal-50">
-                    Sync Completa
+                    Sincronización completa
                   </span>
                 )}
               </div>

@@ -87,7 +87,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
         pill: 'bg-zinc-100 text-zinc-700 border border-zinc-200',
         bar: 'bg-zinc-300',
         icon: <Clock className="h-4 w-4 text-zinc-500" />,
-        label: 'Awaiting Lock',
+        label: 'Pendiente',
       };
     }
 
@@ -97,7 +97,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
         pill: 'bg-teal-700 text-white border border-teal-500',
         bar: 'bg-teal-300',
         icon: <CheckCircle className="h-4 w-4 text-white" weight="fill" />,
-        label: 'Locked',
+        label: 'Bloqueado',
       };
     }
 
@@ -106,7 +106,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
       pill: 'bg-white text-rose-700 border border-rose-200',
       bar: 'bg-rose-500',
       icon: <WarningCircle className="h-4 w-4 text-rose-600" weight="duotone" />,
-      label: 'Locking',
+      label: 'Bloqueando',
     };
   }, [progresoVales]);
 
@@ -142,7 +142,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
           {isLoading ? <CircleNotch className={`h-4 w-4 animate-spin ${progresoVales?.estado === 'completo' ? 'text-white' : 'text-zinc-900'}`} weight="bold" /> : <Truck className={`h-4 w-4 ${progresoVales?.estado === 'completo' ? 'text-white' : 'text-zinc-900'}`} weight="duotone" />}
         </div>
         <div className="min-w-0">
-          <p className={`text-[0.6rem] font-bold uppercase tracking-[0.15em] ${progresoVales?.estado === 'completo' ? 'text-white/70' : 'text-zinc-500'}`}>Outflow Total</p>
+          <p className={`text-[0.6rem] font-bold uppercase tracking-[0.15em] ${progresoVales?.estado === 'completo' ? 'text-white/70' : 'text-zinc-500'}`}>Entregas totales</p>
           <p className={`text-[0.95rem] tracking-tight font-black ${progresoVales?.estado === 'completo' ? 'text-white' : 'text-zinc-900'}`}>
             {totalEntregas.toLocaleString()}
           </p>
@@ -163,10 +163,10 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
           <div className="border-b border-zinc-100 bg-zinc-50 px-4 py-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Validación de Tickets</h3>
+                <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Validación de vales</h3>
                 <p className="mt-1 text-xs text-zinc-500 font-medium">
                   {progresoVales?.totalEstablecimientosConEntregas
-                    ? `${progresoVales.establecimientosConValeCompleto} de ${progresoVales.totalEstablecimientosConEntregas} tickets bloqueados logísticamente.`
+                    ? `${progresoVales.establecimientosConValeCompleto} de ${progresoVales.totalEstablecimientosConEntregas} vales bloqueados logísticamente.`
                     : 'Aún no existen flujos transaccionales listos para generar vales.'}
                 </p>
               </div>
@@ -176,7 +176,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
                     type="button"
                     onClick={onRefresh}
                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-900 shadow-sm"
-                    title="Forzar Sync"
+                    title="Forzar sincronización"
                   >
                     <ArrowsClockwise className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} weight="bold" />
                   </button>
@@ -196,7 +196,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
             {isLoading ? (
               <div className="flex flex-col items-center justify-center gap-3 px-4 py-12 text-zinc-500">
                 <CircleNotch className="h-6 w-6 animate-spin text-zinc-900" weight="bold" />
-                <span className="text-xs font-bold uppercase tracking-widest text-zinc-900">Sincronizando Estado...</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-zinc-900">Sincronizando estado...</span>
               </div>
             ) : !progresoVales || progresoVales.totalEstablecimientosConEntregas === 0 ? (
               <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
@@ -204,16 +204,16 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
                   <Package className="h-5 w-5 text-zinc-400" weight="duotone" />
                 </div>
                 <p className="text-[0.95rem] font-black tracking-tight text-zinc-900">Slot Vacío</p>
-                <p className="mt-1 text-xs text-zinc-500 font-medium max-w-[200px]">Debes generar entregas para visualizar el locking progress.</p>
+                <p className="mt-1 text-xs text-zinc-500 font-medium max-w-[200px]">Debes generar entregas para visualizar el progreso del bloqueo.</p>
               </div>
             ) : progresoVales.estado === 'completo' ? (
               <div className="flex flex-col items-center justify-center px-4 py-12 text-center bg-zinc-50">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-md border border-teal-600">
                   <CheckCircle className="h-6 w-6" weight="fill" />
                 </div>
-                <p className="text-[0.95rem] font-black tracking-tight text-zinc-900">Locking Completado</p>
+                <p className="text-[0.95rem] font-black tracking-tight text-zinc-900">Bloqueo completado</p>
                 <p className="mt-1 text-xs text-zinc-500 font-medium">
-                  {progresoVales.totalEstablecimientosConEntregas} tickets bloqueados exitosamente.
+                  {progresoVales.totalEstablecimientosConEntregas} vales bloqueados exitosamente.
                 </p>
               </div>
             ) : (
@@ -222,7 +222,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
                   <span className="font-bold uppercase tracking-widest text-zinc-900">
                     {totalPendientes} Flujo{totalPendientes === 1 ? '' : 's'} Libre{totalPendientes === 1 ? '' : 's'}
                   </span>
-                  <span className="font-bold tracking-tight text-zinc-500">{porcentaje}% Locked</span>
+                  <span className="font-bold tracking-tight text-zinc-500">{porcentaje}% bloqueado</span>
                 </div>
 
                 <div className="space-y-2 p-3 bg-white">

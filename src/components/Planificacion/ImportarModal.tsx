@@ -48,7 +48,7 @@ const StepIndicator = memo<{ currentStep: Step; totalSteps: number }>(({ current
   const steps = [
     { num: 1, label: 'Estructura' },
     { num: 2, label: 'Entorno' },
-    { num: 3, label: 'I/O Excel' },
+    { num: 3, label: 'Excel' },
     { num: 4, label: 'Reporte' },
   ];
 

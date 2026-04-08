@@ -94,6 +94,7 @@ interface ActionButtonProps {
   disabled?: boolean;
   isPrimary?: boolean;
   count?: number;
+  showLabel?: boolean;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
@@ -103,6 +104,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   disabled = false,
   isPrimary = false,
   count,
+  showLabel = true,
 }) => (
   <button
     type="button"
@@ -112,7 +114,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     title={label}
   >
     {icon}
-    <span className="hidden lg:inline">{label}</span>
+    {showLabel ? <span className="hidden lg:inline">{label}</span> : null}
     {count ? (
       <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold text-inherit">{count}</span>
     ) : null}
@@ -270,7 +272,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                   <CalendarBlank className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Target</p>
+                  <p className="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-teal-100/80 sm:text-[0.6rem]">Periodo objetivo</p>
                   <p className="text-xs font-black tracking-tight text-white sm:text-sm">{periodoEntrega.etiqueta.toUpperCase()}</p>
                 </div>
               </div>
@@ -356,7 +358,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                   <p className={`text-[0.55rem] font-bold uppercase tracking-[0.15em] sm:text-[0.6rem] ${
                     stockInfo.stockDisponible < 0 ? 'text-rose-200' : 'text-teal-100/80'
                   }`}>
-                    {stockInfo.stockDisponible < 0 ? 'Fractura' : 'Clearance'}
+                    {stockInfo.stockDisponible < 0 ? 'Fractura' : 'Disponible'}
                   </p>
                   <p className={`text-xs font-black tracking-tight sm:text-sm ${
                     stockInfo.stockDisponible < 0 ? 'text-rose-50' : 'text-white'
@@ -583,10 +585,10 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                     ? COMPONENT_STYLES.button.secondary
                     : 'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-transparent bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 focus:ring-offset-white'
                 }
-                title="Tickets (Vales)"
+                title="Vales"
               >
                 <Receipt className="h-4 w-4" weight="bold" />
-                <span className="hidden lg:inline">Tickets (Vales)</span>
+                <span className="hidden lg:inline">Vales</span>
               </button>
             ) : (
               <span className={`inline-flex min-h-[44px] items-center rounded-xl border px-4 py-2 text-sm font-bold uppercase tracking-wider ${
@@ -594,19 +596,19 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                   ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                   : 'border-zinc-200 bg-zinc-50 text-zinc-500'
               }`}>
-                {hasOperativeEditPermission ? 'Edición habilitada' : 'Read Only'}
+                {hasOperativeEditPermission ? 'Edición habilitada' : 'Solo lectura'}
               </span>
             )}
 
             <ActionButton
-              label="Sync"
+              label="Sincronizar"
               icon={<ArrowsClockwise className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} weight="bold" />}
               onClick={onRefresh}
               disabled={isLoading || !selectedVacuna}
             />
 
             {!isReadOnly && !hideImportAction ? (
-              <ActionButton label="I/O Excel" icon={<UploadSimple className="h-4 w-4" weight="bold" />} onClick={onImport} />
+              <ActionButton label="Importar Excel" icon={<UploadSimple className="h-4 w-4" weight="bold" />} onClick={onImport} showLabel={false} />
             ) : null}
 
             {!hideExportAction ? (
