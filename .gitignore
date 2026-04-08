@@ -31,3 +31,4 @@ dist-ssr
 skills/
 docker/sql/*
 !docker/sql/.gitkeep
+!docker/sql/init.sql
