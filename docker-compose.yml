@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-sivac}
@@ -18,7 +18,7 @@ services:
       - sivac_net
 
   db-restore:
-    image: postgres:16-alpine
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
     restart: "no"
     depends_on:
       db:
