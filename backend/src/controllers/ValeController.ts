@@ -630,52 +630,46 @@ export class ValeController {
 
   /**
    * Verificar existencia de vales para múltiples establecimientos×meses en UNA sola query
-   * GET /api/vales/verificar-existencia-batch
+   * POST /api/vales/verificar-existencia-batch
    *
-   * Query params:
+   * Body (JSON):
    *   - vacunaId: UUID
    *   - anio: number
-   *   - items: JSON string → [{ establecimientoId, mes }, ...]
+   *   - items: [{ establecimientoId, mes }, ...]
    *
    * Response: { claves: string[] }  — keys "establecimientoId-mes" que tienen vales activos
    */
   static async verificarValesExistentesBatch(req: Request, res: Response): Promise<void> {
     try {
-      const { vacunaId, anio, items: itemsRaw } = req.query;
+      const { vacunaId, anio, items } = req.body;
 
-      if (!vacunaId || !validateUUID(vacunaId as string)) {
+      if (!vacunaId || !validateUUID(vacunaId)) {
         ResponseUtil.error(res, 'ID de vacuna inválido', 400);
         return;
       }
 
-      const anioNum = parseInt(anio as string);
+      const anioNum = typeof anio === 'number' ? anio : parseInt(anio);
       if (!anioNum || anioNum < 2020) {
         ResponseUtil.error(res, 'Año inválido', 400);
         return;
       }
 
-      let items: Array<{ establecimientoId: string; mes: number }>;
-      try {
-        items = JSON.parse(itemsRaw as string);
-        if (!Array.isArray(items) || items.length === 0) {
-          ResponseUtil.error(res, 'items debe ser un array no vacío', 400);
-          return;
-        }
-        // Validate each item
-        for (const item of items) {
-          if (!item.establecimientoId || !validateUUID(item.establecimientoId) ||
-              !item.mes || item.mes < 1 || item.mes > 12) {
-            ResponseUtil.error(res, 'Formato de items inválido. Cada item debe tener establecimientoId (UUID) y mes (1-12)', 400);
-            return;
-          }
-        }
-      } catch {
-        ResponseUtil.error(res, 'items debe ser un JSON array válido', 400);
+      if (!Array.isArray(items) || items.length === 0) {
+        ResponseUtil.error(res, 'items debe ser un array no vacío', 400);
         return;
       }
 
+      // Validate a sample of items (skip exhaustive validation for perf)
+      for (const item of items) {
+        if (!item.establecimientoId || !validateUUID(item.establecimientoId) ||
+            !item.mes || item.mes < 1 || item.mes > 12) {
+          ResponseUtil.error(res, 'Formato de items inválido. Cada item debe tener establecimientoId (UUID) y mes (1-12)', 400);
+          return;
+        }
+      }
+
       const result = await ValeService.verificarValesExistentesBatch(
-        vacunaId as string,
+        vacunaId,
         anioNum,
         items
       );

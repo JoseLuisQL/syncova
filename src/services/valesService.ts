@@ -526,15 +526,9 @@ export class ValesService {
     try {
       if (items.length === 0) return new Set();
 
-      const response = await apiClient.get<ApiResponse<{ claves: string[] }>>(
+      const response = await apiClient.post<ApiResponse<{ claves: string[] }>>(
         `${this.BASE_URL}/verificar-existencia-batch`,
-        {
-          params: {
-            vacunaId,
-            anio,
-            items: JSON.stringify(items),
-          },
-        }
+        { vacunaId, anio, items }
       );
 
       if (response.data.success && response.data.data) {

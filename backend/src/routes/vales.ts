@@ -122,7 +122,7 @@ router.get('/verificar-existencia', denyResponsableAcopio, ValeController.verifi
  * @returns {{ claves: string[] }} Claves "establecimientoId-mes" con vales activos
  * @example GET /api/vales/verificar-existencia-batch?vacunaId=uuid&anio=2026&items=[{"establecimientoId":"uuid","mes":3}]
  */
-router.get('/verificar-existencia-batch', denyResponsableAcopio, ValeController.verificarValesExistentesBatch);
+router.post('/verificar-existencia-batch', denyResponsableAcopio, ValeController.verificarValesExistentesBatch);
 
 /**
  * @route GET /api/vales/grupos-entregas-generados
