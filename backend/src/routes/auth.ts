@@ -10,12 +10,12 @@ import { clearRateLimitEndpoint } from '@/utils/rateLimitUtils';
  */
 const authRateLimit = rateLimit({
   windowMs: process.env.NODE_ENV === 'development' ? 5 * 60 * 1000 : 15 * 60 * 1000, // 5 min en dev, 15 min en prod
-  max: process.env.NODE_ENV === 'development' ? 10000 : 5, // 10000 intentos en dev, 5 en prod
+  max: process.env.NODE_ENV === 'development' ? 10000 : 20, // 10000 intentos en dev, 20 en prod
   message: {
     success: false,
     message: process.env.NODE_ENV === 'development'
       ? 'Demasiados intentos de autenticación. Intente nuevamente en 5 minutos.'
-      : 'Demasiados intentos de autenticación. Intente nuevamente en 15 minutos.',
+      : 'Demasiadas solicitudes desde esta IP, intente nuevamente más tarde',
     error: 'RATE_LIMIT_EXCEEDED',
     timestamp: new Date().toISOString(),
     retryAfter: process.env.NODE_ENV === 'development' ? 300 : 900 // segundos
