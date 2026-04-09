@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Package } from '@phosphor-icons/react';
+import { Package, CheckCircle } from '@phosphor-icons/react';
 import { DataTable } from '../../Establecimientos/components';
 import { MESES_CORTOS } from '../constants';
 import { Establecimiento } from '../../../types';
@@ -27,6 +27,7 @@ interface PlanificacionTablaProps {
   onFieldBlur: (estIndex: number, mesIndex: number) => void;
   calcularTotalMes: (mesIndex: number) => number;
   calcularTotalGeneral: () => number;
+  hasValeGenerado?: (establecimientoId: string, mesIndex: number) => boolean;
 }
 
 interface EditablePlanningFieldProps {
@@ -163,6 +164,7 @@ interface MobilePlanificacionCardProps {
   onTempValueChange: PlanificacionTablaProps['onTempValueChange'];
   onFieldBlur: PlanificacionTablaProps['onFieldBlur'];
   onRowSelect: (id: string | null) => void;
+  hasValeGenerado?: (establecimientoId: string, mesIndex: number) => boolean;
 }
 
 const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
@@ -177,6 +179,7 @@ const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
   onTempValueChange,
   onFieldBlur,
   onRowSelect,
+  hasValeGenerado,
 }) => {
   const estiloEstablecimiento = getEstiloEstablecimiento(estData.establecimiento);
   const { centro, colores } = estiloEstablecimiento;
@@ -211,12 +214,16 @@ const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
         {MESES_CORTOS.map((mes, mesIndex) => {
           const currentValue = getCurrentValue(estIndex, mesIndex, estData.distribucionMensual[mesIndex]);
           const isPending = hasPendingChange(estIndex, mesIndex);
+          const tieneVale = hasValeGenerado?.(estData.establecimiento.id, mesIndex) ?? false;
 
           return (
             <div key={`${estData.establecimiento.id}-${mes}`} className="rounded-lg border border-zinc-200 bg-white p-1">
               <div className="mb-0.5 flex items-center justify-between px-1">
                 <span className="text-[0.55rem] font-bold uppercase tracking-wider text-zinc-400">{mes}</span>
-                {isPending ? <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> : null}
+                <div className="flex items-center gap-0.5">
+                  {tieneVale && <CheckCircle className="h-3 w-3 text-teal-500" weight="fill" />}
+                  {isPending ? <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> : null}
+                </div>
               </div>
               <div className="rounded-md bg-zinc-50 overflow-hidden">
                 <EditablePlanningField
@@ -234,6 +241,7 @@ const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
             </div>
           );
         })}
+
       </div>
     </div>
   );
@@ -255,6 +263,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
   onFieldBlur,
   calcularTotalMes,
   calcularTotalGeneral,
+  hasValeGenerado,
 }) => {
   const isDisabled = readOnly || isUpdating || isLoading;
   const totalGeneral = calcularTotalGeneral();
@@ -355,9 +364,10 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                     {estData.distribucionMensual.map((valor, mesIndex) => {
                       const currentValue = getCurrentValue(estIndex, mesIndex, valor);
                       const isPending = hasPendingChange(estIndex, mesIndex);
+                      const tieneVale = hasValeGenerado?.(estData.establecimiento.id, mesIndex) ?? false;
 
                       return (
-                        <td key={`${estData.establecimiento.id}-${mesIndex}`} className={`border-r border-zinc-100 p-0 align-middle ${isSelected ? 'border-y border-y-teal-600 border-r-teal-200' : ''}`}>
+                        <td key={`${estData.establecimiento.id}-${mesIndex}`} className={`relative border-r border-zinc-100 p-0 align-middle ${isSelected ? 'border-y border-y-teal-600 border-r-teal-200' : ''}`}>
                           <EditablePlanningField
                             readOnly={readOnly}
                             value={currentValue}
@@ -368,6 +378,11 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                             onChange={(nextValue) => onTempValueChange(estIndex, mesIndex, nextValue)}
                             onBlur={() => onFieldBlur(estIndex, mesIndex)}
                           />
+                          {tieneVale && (
+                            <span className="pointer-events-none absolute right-0.5 top-0.5 z-10 flex items-center justify-center rounded-full bg-white/95 shadow-sm ring-1 ring-teal-200">
+                              <CheckCircle className="h-3 w-3 text-teal-500" weight="fill" />
+                            </span>
+                          )}
                         </td>
                       );
                     })}
@@ -412,6 +427,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                   onTempValueChange={onTempValueChange}
                   onFieldBlur={onFieldBlur}
                   onRowSelect={onRowSelect}
+                  hasValeGenerado={hasValeGenerado}
                 />
               ))}
             </div>

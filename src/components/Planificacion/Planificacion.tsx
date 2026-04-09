@@ -85,6 +85,9 @@ const Planificacion: React.FC = () => {
     establecimientoId: string;
   } | null>(null);
 
+  // Estado de vales generados por celda: Set de claves "establecimientoId-mesIndex"
+  const [valesEstado, setValesEstado] = useState<Set<string>>(new Set());
+
   // Refs para mantener valores actualizados en closures
   const selectedVacunaRef = useRef(selectedVacuna);
   const datosVacunaRef = useRef<typeof datosVacuna>(null);
@@ -278,6 +281,36 @@ const Planificacion: React.FC = () => {
     }
   }, [vacunas, selectedVacuna]);
 
+  // Cargar estado de vales generados para la vacuna/año seleccionados
+  const cargarEstadoVales = useCallback(async (planificaciones: PlanificacionConRelaciones[]) => {
+    if (!selectedVacuna || !selectedAnio || planificaciones.length === 0) return;
+
+    const nuevosVales = new Set<string>();
+
+    await Promise.allSettled(
+      planificaciones.flatMap((plan) =>
+        Array.from({ length: 12 }, (_, mesIndex) => async () => {
+          if ((plan.distribucionMensual[mesIndex] ?? 0) === 0) return;
+          try {
+            const verificacion = await ValesService.verificarValesExistentes(
+              plan.establecimientoId,
+              selectedVacuna,
+              mesIndex + 1,
+              selectedAnio
+            );
+            if (verificacion.success && verificacion.data?.existenVales) {
+              nuevosVales.add(`${plan.establecimientoId}-${mesIndex}`);
+            }
+          } catch {
+            // Ignorar errores individuales
+          }
+        })
+      ).flat().map(fn => fn())
+    );
+
+    setValesEstado(nuevosVales);
+  }, [selectedVacuna, selectedAnio]);
+
   // Cargar planificaciones por vacuna y año
   const loadPlanificacionesPorVacuna = async (preserveTempValues: boolean = false) => {
     if (!selectedVacuna || !selectedAnio) return;
@@ -294,6 +327,8 @@ const Planificacion: React.FC = () => {
         setTempValues({});
         setPendingChanges({});
       }
+      // Cargar estado de vales en background sin bloquear la UI
+      void cargarEstadoVales(planificaciones);
     } catch (error) {
       console.error('Error al cargar planificaciones:', error);
       toast.error('Error al cargar planificaciones');
@@ -1051,6 +1086,9 @@ const Planificacion: React.FC = () => {
                 onFieldBlur={handleFieldBlur}
                 calcularTotalMes={calcularTotalMes}
                 calcularTotalGeneral={calcularTotalGeneral}
+                hasValeGenerado={(establecimientoId, mesIndex) =>
+                  valesEstado.has(`${establecimientoId}-${mesIndex}`)
+                }
               />
             </div>
 
