@@ -37,7 +37,7 @@ if [ ! -f "${RESTORE_FILE_PATH}" ]; then
 fi
 
 echo "Restaurando base de datos desde ${RESTORE_FILE_PATH}..."
-psql -v ON_ERROR_STOP=1 -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}" -f "${RESTORE_FILE_PATH}"
+pg_restore --no-owner --no-acl -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}" "${RESTORE_FILE_PATH}"
 
 FINAL_TABLE_COUNT="$(psql -tA -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}" -d "${DB_NAME}" -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")"
 
