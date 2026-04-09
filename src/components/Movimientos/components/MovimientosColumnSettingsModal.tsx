@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Check, ArrowCounterClockwise, Faders, X, WarningCircle } from '@phosphor-icons/react';
+import { Check, ArrowCounterClockwise, Faders, X } from '@phosphor-icons/react';
 import Portal from '../../common/Portal';
 import {
   COLUMNAS_CONFIGURABLES,
@@ -45,16 +45,13 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
         <div className={COMPONENT_STYLES.modal.container} onClick={(event) => event.stopPropagation()}>
           <div className={`${COMPONENT_STYLES.modal.panel} max-w-2xl overflow-hidden`}>
             <div className={COMPONENT_STYLES.modal.header}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 border border-zinc-900 text-white shadow-sm">
                     <Faders className="h-6 w-6" weight="duotone" />
                   </div>
                   <div>
                     <h2 className="text-[1.05rem] font-black tracking-tight text-zinc-900">Configuración de Columnas</h2>
-                    <p className="mt-1 text-[0.75rem] font-medium text-zinc-500 leading-relaxed max-w-sm">
-                      Muestra u oculta columnas de la transaccionalidad sin afectar cálculos sistémicos de stock.
-                    </p>
                   </div>
                 </div>
                 <button
@@ -69,16 +66,13 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
             </div>
 
             <div className={COMPONENT_STYLES.modal.body}>
-              <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 shadow-sm">
+              <div className="mb-5 flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 shadow-sm">
                 <div>
                   <p className="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-zinc-500">Visibilidad global</p>
                   <p className="mt-1 text-[0.95rem] font-black tracking-tight text-zinc-900">
                     {visibleCount} de {columnasConfigurablesPermitidas.length} columnas activas
                   </p>
                 </div>
-                <span className="rounded-md border border-zinc-300 bg-white px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest text-zinc-700 shadow-sm">
-                  Layer Locked: Nodos Puntos
-                </span>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -101,7 +95,7 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
                           {column.label}
                         </p>
                         <p className={`mt-0.5 text-[0.65rem] font-semibold uppercase tracking-widest ${active ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                          {active ? 'Visible en Slot' : 'Oculto'}
+                          {active ? 'Visible en tabla' : 'Oculta'}
                         </p>
                       </div>
                       <span
@@ -118,16 +112,7 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
                 })}
               </div>
 
-              <div className="mt-5 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 shadow-sm">
-                <div className="flex gap-3">
-                  <div className="mt-0.5 shrink-0 text-zinc-400">
-                    <WarningCircle className="h-5 w-5" weight="duotone" />
-                  </div>
-                  <p className="text-sm font-medium text-zinc-600 leading-relaxed">
-                    Si desactivas un slot, los valores siguen computándose en la matriz en tiempo real en background.
-                  </p>
-                </div>
-              </div>
+
             </div>
 
             <div className={`${COMPONENT_STYLES.modal.footer} flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-zinc-100 bg-zinc-50/50`}>
