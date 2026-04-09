@@ -629,6 +629,70 @@ export class ValeController {
   }
 
   /**
+   * Verificar existencia de vales para múltiples establecimientos×meses en UNA sola query
+   * GET /api/vales/verificar-existencia-batch
+   *
+   * Query params:
+   *   - vacunaId: UUID
+   *   - anio: number
+   *   - items: JSON string → [{ establecimientoId, mes }, ...]
+   *
+   * Response: { claves: string[] }  — keys "establecimientoId-mes" que tienen vales activos
+   */
+  static async verificarValesExistentesBatch(req: Request, res: Response): Promise<void> {
+    try {
+      const { vacunaId, anio, items: itemsRaw } = req.query;
+
+      if (!vacunaId || !validateUUID(vacunaId as string)) {
+        ResponseUtil.error(res, 'ID de vacuna inválido', 400);
+        return;
+      }
+
+      const anioNum = parseInt(anio as string);
+      if (!anioNum || anioNum < 2020) {
+        ResponseUtil.error(res, 'Año inválido', 400);
+        return;
+      }
+
+      let items: Array<{ establecimientoId: string; mes: number }>;
+      try {
+        items = JSON.parse(itemsRaw as string);
+        if (!Array.isArray(items) || items.length === 0) {
+          ResponseUtil.error(res, 'items debe ser un array no vacío', 400);
+          return;
+        }
+        // Validate each item
+        for (const item of items) {
+          if (!item.establecimientoId || !validateUUID(item.establecimientoId) ||
+              !item.mes || item.mes < 1 || item.mes > 12) {
+            ResponseUtil.error(res, 'Formato de items inválido. Cada item debe tener establecimientoId (UUID) y mes (1-12)', 400);
+            return;
+          }
+        }
+      } catch {
+        ResponseUtil.error(res, 'items debe ser un JSON array válido', 400);
+        return;
+      }
+
+      const result = await ValeService.verificarValesExistentesBatch(
+        vacunaId as string,
+        anioNum,
+        items
+      );
+
+      if (!result.success) {
+        ResponseUtil.error(res, result.error || 'Error en verificación batch', 500);
+        return;
+      }
+
+      ResponseUtil.success(res, result.data, 'Verificación batch completada');
+    } catch (error) {
+      console.error('Error en ValeController.verificarValesExistentesBatch:', error);
+      ResponseUtil.error(res, 'Error interno del servidor', 500);
+    }
+  }
+
+  /**
    * Obtener grupos de entregas adicionales ya generados
    * GET /api/vales/grupos-entregas-generados
    */

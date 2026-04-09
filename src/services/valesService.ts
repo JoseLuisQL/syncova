@@ -515,6 +515,39 @@ export class ValesService {
   }
 
   /**
+   * Verificar existencia de vales para múltiples establecimientos×meses en UNA sola request.
+   * Reemplaza N×12 llamadas individuales. Devuelve un Set de claves "establecimientoId-mes".
+   */
+  static async verificarValesExistentesBatch(
+    vacunaId: string,
+    anio: number,
+    items: Array<{ establecimientoId: string; mes: number }>
+  ): Promise<Set<string>> {
+    try {
+      if (items.length === 0) return new Set();
+
+      const response = await apiClient.get<ApiResponse<{ claves: string[] }>>(
+        `${this.BASE_URL}/verificar-existencia-batch`,
+        {
+          params: {
+            vacunaId,
+            anio,
+            items: JSON.stringify(items),
+          },
+        }
+      );
+
+      if (response.data.success && response.data.data) {
+        return new Set(response.data.data.claves);
+      }
+      return new Set();
+    } catch (error: any) {
+      console.error('Error en verificarValesExistentesBatch:', error);
+      return new Set();
+    }
+  }
+
+  /**
    * SINCRONIZACIÓN AUTOMÁTICA EN TIEMPO REAL
    * Verifica y sincroniza vales automáticamente cuando detecta cambios
    * TEMPORALMENTE DESHABILITADA PARA EVITAR ERRORES

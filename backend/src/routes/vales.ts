@@ -112,6 +112,19 @@ router.get('/tipos-generados', denyResponsableAcopio, ValeController.getTiposVal
 router.get('/verificar-existencia', denyResponsableAcopio, ValeController.verificarValesExistentes);
 
 /**
+ * @route GET /api/vales/verificar-existencia-batch
+ * @desc Verificar existencia de vales para múltiples establecimientos×meses en UNA sola query.
+ *       Reemplaza N×12 llamadas individuales a /verificar-existencia.
+ * @access Private
+ * @query {string} vacunaId - ID de la vacuna
+ * @query {number} anio - Año
+ * @query {string} items - JSON array: [{ establecimientoId, mes }, ...]
+ * @returns {{ claves: string[] }} Claves "establecimientoId-mes" con vales activos
+ * @example GET /api/vales/verificar-existencia-batch?vacunaId=uuid&anio=2026&items=[{"establecimientoId":"uuid","mes":3}]
+ */
+router.get('/verificar-existencia-batch', denyResponsableAcopio, ValeController.verificarValesExistentesBatch);
+
+/**
  * @route GET /api/vales/grupos-entregas-generados
  * @desc Obtener números de grupos de entregas adicionales ya generados en vales
  * @access Public (TODO: Proteger con autenticación)

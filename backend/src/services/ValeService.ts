@@ -53,6 +53,7 @@ export class ValeService {
   static validateGenerarValeData = ValeValidationService.validateGenerarValeData;
   static validarIntegridadVale = ValeValidationService.validarIntegridadVale;
   static verificarValesExistentesParaEstablecimiento = ValeValidationService.verificarValesExistentesParaEstablecimiento;
+  static verificarValesExistentesBatch = ValeValidationService.verificarValesExistentesBatch;
   
   // ==================== QUERY METHODS ====================
   

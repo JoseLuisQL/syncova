@@ -281,32 +281,39 @@ const Planificacion: React.FC = () => {
     }
   }, [vacunas, selectedVacuna]);
 
-  // Cargar estado de vales generados para la vacuna/año seleccionados
+  // Cargar estado de vales generados para la vacuna/año seleccionados (UN solo request batch)
   const cargarEstadoVales = useCallback(async (planificaciones: PlanificacionConRelaciones[]) => {
     if (!selectedVacuna || !selectedAnio || planificaciones.length === 0) return;
 
-    const nuevosVales = new Set<string>();
+    // Construir la lista de combinaciones establecimiento×mes que tienen valor > 0
+    const items: Array<{ establecimientoId: string; mes: number }> = [];
+    for (const plan of planificaciones) {
+      for (let mesIndex = 0; mesIndex < 12; mesIndex++) {
+        if ((plan.distribucionMensual[mesIndex] ?? 0) > 0) {
+          items.push({ establecimientoId: plan.establecimientoId, mes: mesIndex + 1 });
+        }
+      }
+    }
 
-    await Promise.allSettled(
-      planificaciones.flatMap((plan) =>
-        Array.from({ length: 12 }, (_, mesIndex) => async () => {
-          if ((plan.distribucionMensual[mesIndex] ?? 0) === 0) return;
-          try {
-            const verificacion = await ValesService.verificarValesExistentes(
-              plan.establecimientoId,
-              selectedVacuna,
-              mesIndex + 1,
-              selectedAnio
-            );
-            if (verificacion.success && verificacion.data?.existenVales) {
-              nuevosVales.add(`${plan.establecimientoId}-${mesIndex}`);
-            }
-          } catch {
-            // Ignorar errores individuales
-          }
-        })
-      ).flat().map(fn => fn())
+    if (items.length === 0) {
+      setValesEstado(new Set());
+      return;
+    }
+
+    // Una sola llamada al backend en vez de N×12 requests
+    const clavesConVales = await ValesService.verificarValesExistentesBatch(
+      selectedVacuna,
+      selectedAnio,
+      items
     );
+
+    // Convertir las claves "establecimientoId-mes" (1-indexed) a "establecimientoId-mesIndex" (0-indexed)
+    const nuevosVales = new Set<string>();
+    for (const clave of clavesConVales) {
+      const [estId, mesStr] = clave.split('-');
+      const mesIndex = parseInt(mesStr) - 1; // mes 1→index 0, mes 12→index 11
+      nuevosVales.add(`${estId}-${mesIndex}`);
+    }
 
     setValesEstado(nuevosVales);
   }, [selectedVacuna, selectedAnio]);

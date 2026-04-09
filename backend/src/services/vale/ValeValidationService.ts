@@ -327,4 +327,69 @@ export class ValeValidationService {
       };
     }
   }
+
+  /**
+   * Batch verification: check vale existence for multiple establishments × months in ONE query.
+   * Replaces N×12 individual requests with a single DB round-trip.
+   *
+   * @param vacunaId     - Vaccine ID (same for all)
+   * @param anio         - Year
+   * @param items        - Array of { establecimientoId, mes } to check
+   * @returns Set of keys in format "establecimientoId-mes" that have active vales
+   */
+  static async verificarValesExistentesBatch(
+    vacunaId: string,
+    anio: number,
+    items: Array<{ establecimientoId: string; mes: number }>
+  ): Promise<ServiceResult<{ claves: string[] }>> {
+    try {
+      if (items.length === 0) {
+        return { success: true, data: { claves: [] } };
+      }
+
+      // Collect unique establecimientoIds to fetch centroAcopioId in bulk
+      const establecimientoIds = [...new Set(items.map(i => i.establecimientoId))];
+      const meses = [...new Set(items.map(i => i.mes))];
+
+      // Fetch all valeDetalles that match the criteria in a single query
+      const detalles = await prisma.valeDetalle.findMany({
+        where: {
+          vacunaId,
+          establecimientoId: { in: establecimientoIds },
+          valeEntrega: {
+            anio,
+            mes: { in: meses },
+            estado: 'generado',
+          },
+        },
+        select: {
+          establecimientoId: true,
+          valeEntrega: {
+            select: {
+              mes: true,
+            },
+          },
+        },
+      });
+
+      // Build a Set of keys for O(1) lookup: "establecimientoId-mes"
+      const clavesSet = new Set<string>();
+      for (const detalle of detalles) {
+        const clave = `${detalle.establecimientoId}-${detalle.valeEntrega.mes}`;
+        clavesSet.add(clave);
+      }
+
+      // Only return keys that were actually requested
+      const requestedKeys = new Set(items.map(i => `${i.establecimientoId}-${i.mes}`));
+      const claves = [...clavesSet].filter(k => requestedKeys.has(k));
+
+      return { success: true, data: { claves } };
+    } catch (error) {
+      console.error('Error en verificarValesExistentesBatch:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error en verificación batch de vales',
+      };
+    }
+  }
 }
