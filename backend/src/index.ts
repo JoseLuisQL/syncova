@@ -45,6 +45,11 @@ async function startServer(): Promise<void> {
     // Crear aplicación Express
     const app = express();
 
+    // CRÍTICO: Habilitar trust proxy para que el rate limiter use la IP real del cliente
+    // en vez de la IP interna de Traefik. Sin esto, todos los usuarios comparten el mismo
+    // bucket de rate limiting (la IP del proxy).
+    app.set('trust proxy', 1);
+
     // Configurar middlewares globales
     setupMiddlewares(app);
 

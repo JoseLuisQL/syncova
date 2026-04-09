@@ -38,7 +38,7 @@ const envSchema = Joi.object({
   
   RATE_LIMIT_MAX_REQUESTS: Joi.number()
     .positive()
-    .default(100)
+    .default(1000)
     .description('Máximo número de requests por ventana'),
   
   LOG_LEVEL: Joi.string()

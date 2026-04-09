@@ -43,9 +43,10 @@ export const setupMiddlewares = (app: Application): void => {
   }));
 
   // Rate limiting con configuración diferente para desarrollo
+  // NOTA: app.set('trust proxy', 1) debe estar activo para que req.ip sea la IP real del cliente
   const limiter = rateLimit({
     windowMs: config.rateLimit.windowMs,
-    max: config.env === 'development' ? config.rateLimit.maxRequests * 100 : config.rateLimit.maxRequests, // 100x más en desarrollo
+    max: config.env === 'development' ? config.rateLimit.maxRequests * 10 : config.rateLimit.maxRequests,
     message: {
       success: false,
       message: 'Demasiadas solicitudes desde esta IP, intente nuevamente más tarde',
@@ -55,12 +56,6 @@ export const setupMiddlewares = (app: Application): void => {
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => {
-      // En desarrollo, saltar rate limiting para casi todas las rutas excepto login
-      if (config.env === 'development') {
-        const loginRoutes = req.path.includes('/api/auth/login');
-        return !loginRoutes; // Solo aplicar rate limiting a login en desarrollo
-      }
-
       // En producción, solo saltar para rutas de salud
       const healthRoutes = req.path === '/health' || req.path === '/api/health';
       return healthRoutes;
