@@ -42,11 +42,30 @@ export const setupMiddlewares = (app: Application): void => {
     exposedHeaders: ['X-Total-Count'],
   }));
 
-  // Rate limiting con configuración diferente para desarrollo
-  // NOTA: app.set('trust proxy', 1) debe estar activo para que req.ip sea la IP real del cliente
-  const limiter = rateLimit({
+  // ─── Rate Limiting ─────────────────────────────────────────────────
+  // Tier 1: STRICT limiter for auth routes only (prevent brute-force)
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,   // 15 min
+    max: 30,                     // 30 login attempts per 15 min
+    message: {
+      success: false,
+      message: 'Demasiados intentos de autenticación, intente nuevamente más tarde',
+      timestamp: new Date().toISOString(),
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  // Aplicar limiter estricto SOLO a rutas de auth
+  app.use('/api/auth/login', authLimiter);
+  app.use('/api/auth/register', authLimiter);
+
+  // Tier 2: GENEROUS global limiter for all other API routes
+  // Una SPA con múltiples módulos puede generar 50-100 requests por navegación.
+  // Con 20 navegaciones en 15 min = 1000-2000 requests. Usamos 5000 como techo seguro.
+  const globalLimiter = rateLimit({
     windowMs: config.rateLimit.windowMs,
-    max: config.env === 'development' ? config.rateLimit.maxRequests * 10 : config.rateLimit.maxRequests,
+    max: config.env === 'development' ? 50000 : 5000,
     message: {
       success: false,
       message: 'Demasiadas solicitudes desde esta IP, intente nuevamente más tarde',
@@ -56,13 +75,12 @@ export const setupMiddlewares = (app: Application): void => {
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => {
-      // En producción, solo saltar para rutas de salud
-      const healthRoutes = req.path === '/health' || req.path === '/api/health';
-      return healthRoutes;
+      // Siempre saltar rutas de salud y assets estáticos
+      return req.path === '/health' || req.path === '/api/health' || req.path.startsWith('/assets');
     },
   });
 
-  app.use(limiter);
+  app.use(globalLimiter);
 
   // Compresión de respuestas
   app.use(compression({

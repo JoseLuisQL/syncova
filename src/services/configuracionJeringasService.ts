@@ -20,11 +20,38 @@ export interface ConfiguracionJeringaResponse {
   message: string;
 }
 
+// Cache de jeringas activas — se carga 1 vez y se reutiliza
+let _jeringasCache: any[] | null = null;
+let _jeringasCacheTimestamp = 0;
+const JERINGAS_CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+
 /**
  * Servicio para manejar configuraciones de jeringas
  */
 export class ConfiguracionJeringasService {
-  
+
+  /**
+   * Obtener jeringas activas (con cache para evitar requests duplicados)
+   */
+  private static async getJeringasActivas(): Promise<any[]> {
+    const now = Date.now();
+    if (_jeringasCache && (now - _jeringasCacheTimestamp) < JERINGAS_CACHE_TTL) {
+      return _jeringasCache;
+    }
+
+    try {
+      const response = await apiClient.get('/jeringas?estado=activo');
+      if (response.data.success) {
+        _jeringasCache = response.data.data;
+        _jeringasCacheTimestamp = now;
+        return _jeringasCache!;
+      }
+    } catch (error) {
+      console.error('❌ Error al obtener jeringas activas:', error);
+    }
+    return _jeringasCache || [];
+  }
+
   /**
    * Calcular jeringas necesarias para una vacuna específica
    */
@@ -52,7 +79,7 @@ export class ConfiguracionJeringasService {
       if (response.data.success) {
         console.log(`✅ [ConfiguracionJeringasService] Configuración obtenida:`, response.data.data);
 
-        // Enriquecer con información de jeringas si no está presente
+        // Enriquecer con información de jeringas (usa cache interna)
         const jeringasEnriquecidas = await this.enriquecerConInfoJeringas(response.data.data);
 
         return {
@@ -62,8 +89,6 @@ export class ConfiguracionJeringasService {
         };
       } else {
         console.log(`⚠️ [ConfiguracionJeringasService] No se encontró configuración para vacuna: ${vacunaId}`);
-        // Para el modal, si no hay configuración específica, devolver array vacío
-        // El modal mostrará un mensaje apropiado
         return {
           success: true,
           data: [],
@@ -81,40 +106,32 @@ export class ConfiguracionJeringasService {
   }
   
   /**
-   * Enriquecer datos de jeringas con información completa
+   * Enriquecer datos de jeringas con información completa (usa cache)
    */
   private static async enriquecerConInfoJeringas(jeringas: JeringaCalculada[]): Promise<JeringaCalculada[]> {
     try {
-      // Obtener IDs únicos de jeringas
       const jeringaIds = [...new Set(jeringas.map(j => j.jeringaId))];
       
       if (jeringaIds.length === 0) {
         return jeringas;
       }
       
-      // Obtener información completa de jeringas
-      const jeringasResponse = await apiClient.get('/jeringas?estado=activo');
+      // Usa cache interna — solo 1 request en toda la sesión
+      const jeringasCompletas = await this.getJeringasActivas();
       
-      if (jeringasResponse.data.success) {
-        const jeringasCompletas = jeringasResponse.data.data;
+      return jeringas.map(jeringa => {
+        const jeringaCompleta = jeringasCompletas.find((j: any) => j.id === jeringa.jeringaId);
         
-        // Mapear información completa
-        return jeringas.map(jeringa => {
-          const jeringaCompleta = jeringasCompletas.find((j: any) => j.id === jeringa.jeringaId);
-          
-          return {
-            ...jeringa,
-            jeringa: jeringaCompleta ? {
-              id: jeringaCompleta.id,
-              tipo: jeringaCompleta.tipo,
-              capacidad: jeringaCompleta.capacidad,
-              color: jeringaCompleta.color
-            } : undefined
-          };
-        });
-      }
-      
-      return jeringas;
+        return {
+          ...jeringa,
+          jeringa: jeringaCompleta ? {
+            id: jeringaCompleta.id,
+            tipo: jeringaCompleta.tipo,
+            capacidad: jeringaCompleta.capacidad,
+            color: jeringaCompleta.color
+          } : undefined
+        };
+      });
     } catch (error) {
       console.error('❌ Error al enriquecer información de jeringas:', error);
       return jeringas; // Devolver datos originales en caso de error
@@ -138,25 +155,36 @@ export class ConfiguracionJeringasService {
   }
   
   /**
-   * Obtener configuración consolidada para múltiples vacunas
+   * Obtener configuración consolidada para múltiples vacunas.
+   * Ejecuta en PARALELO (no secuencial) para máxima velocidad,
+   * y usa cache de jeringas para evitar N requests de enriquecimiento.
    */
   static async obtenerConfiguracionConsolidada(
     vacunas: { vacunaId: string; cantidad: number }[],
     centroAcopioId?: string
   ): Promise<ApiResponse<{ [vacunaId: string]: JeringaCalculada[] }>> {
     try {
+      // Pre-cargar cache de jeringas UNA sola vez antes de entrar al loop
+      await this.getJeringasActivas();
+
+      // Ejecutar TODAS las solicitudes en paralelo en vez de secuencial
+      const results = await Promise.allSettled(
+        vacunas.map(async (vacuna) => {
+          const config = await this.calcularJeringasNecesarias(
+            vacuna.vacunaId,
+            vacuna.cantidad,
+            centroAcopioId,
+            false
+          );
+          return { vacunaId: vacuna.vacunaId, config };
+        })
+      );
+
       const configuraciones: { [vacunaId: string]: JeringaCalculada[] } = {};
       
-      for (const vacuna of vacunas) {
-        const config = await this.calcularJeringasNecesarias(
-          vacuna.vacunaId,
-          vacuna.cantidad,
-          centroAcopioId,
-          false // NO usar fallback para el modal - solo configuraciones reales
-        );
-
-        if (config.success) {
-          configuraciones[vacuna.vacunaId] = config.data;
+      for (const result of results) {
+        if (result.status === 'fulfilled' && result.value.config.success) {
+          configuraciones[result.value.vacunaId] = result.value.config.data;
         }
       }
       
