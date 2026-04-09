@@ -152,9 +152,14 @@ export const useMovimientos = () => {
   ): Promise<MovimientoVacuna | null> => {
     logger.debug('Actualizando movimiento:', { id, data });
 
-    const result = await updateApi.execute(() => MovimientosService.update(id, data));
+    const result = await updateApi.executeWithResult(() => MovimientosService.update(id, data));
 
-    return result || null;
+    if (!result.success) {
+      // Re-lanzar con el mensaje real del backend para que el frontend lo maneje
+      throw new Error(result.error || 'Error al actualizar movimiento');
+    }
+
+    return result.data;
   }, [updateApi]);
 
   /**

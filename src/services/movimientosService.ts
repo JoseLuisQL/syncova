@@ -120,7 +120,8 @@ export class MovimientosService {
       return response.data.data;
     } catch (error) {
       logger.error('Error al actualizar movimiento:', error);
-      throw handleApiError(error as AxiosError);
+      const msg = handleApiError(error as AxiosError);
+      throw new Error(msg);
     }
   }
 

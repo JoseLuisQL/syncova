@@ -307,7 +307,7 @@ const Movimientos: React.FC = () => {
   // ============================================================================
   // FUNCIONES AUXILIARES
   // ============================================================================
-  const getFieldKey = useCallback((establecimientoId: string, campo: string) => 
+  const getFieldKey = useCallback((establecimientoId: string, campo: string) =>
     `${establecimientoId}-${campo}`, []);
 
   const getCurrentValue = useCallback((establecimientoId: string, campo: string, originalValue: number): number => {
@@ -505,7 +505,7 @@ const Movimientos: React.FC = () => {
   // ============================================================================
   // EFECTOS
   // ============================================================================
-  
+
   // Cargar años disponibles desde la API
   useEffect(() => {
     const fetchAniosDisponibles = async () => {
@@ -517,7 +517,7 @@ const Movimientos: React.FC = () => {
         // Solo actualizar si el año inicial no está en la lista de años disponibles
         if (!response.anios.includes(selectedAnio) && response.anios.length > 0) {
           // Buscar el año más cercano al seleccionado
-          const anioMasCercano = response.anios.reduce((prev, curr) => 
+          const anioMasCercano = response.anios.reduce((prev, curr) =>
             Math.abs(curr - selectedAnio) < Math.abs(prev - selectedAnio) ? curr : prev
           );
           setSelectedAnio(anioMasCercano);
@@ -852,7 +852,7 @@ const Movimientos: React.FC = () => {
   // ============================================================================
   const handleRefreshProgresoVales = useCallback(async () => {
     if (!selectedVacuna) return;
-    
+
     setIsLoadingProgresoVales(true);
     try {
       const progreso = await MovimientosService.getProgresoVales(
@@ -909,7 +909,7 @@ const Movimientos: React.FC = () => {
               fechaGeneracion: vale.fechaGeneracion
             }))
           });
-          
+
           // Mostrar modal y cargar impacto en paralelo
           setShowConfirmacionModal(true);
           setIsLoadingImpacto(true);
@@ -925,7 +925,7 @@ const Movimientos: React.FC = () => {
               valorOriginal,
               value
             );
-            
+
             if (impactoResult.success && impactoResult.data) {
               setImpactoModificacion(impactoResult.data);
             }
@@ -1019,7 +1019,9 @@ const Movimientos: React.FC = () => {
     } catch (redistributionError: any) {
       const errorMessage = redistributionError?.response?.data?.message || redistributionError?.response?.data?.error || redistributionError?.message || '';
 
-      if (errorMessage.includes('No hay cantidades suficientes') ||
+      // Error específico: sin planificación en meses siguientes
+      if (errorMessage.includes('SIN_PLANIFICACION_DISPONIBLE') ||
+        errorMessage.includes('No hay cantidades suficientes') ||
         errorMessage.includes('Faltan') ||
         errorMessage.includes('redistribuir')) {
 
@@ -1080,7 +1082,17 @@ const Movimientos: React.FC = () => {
     } catch (err: any) {
       const establecimiento = establecimientosFiltradosMap.get(establecimientoId);
       const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
-      toast.error(`Error al guardar - ${nombreEstablecimiento}`);
+      const errorMessage = err?.response?.data?.message || err?.response?.data?.error || err?.message || '';
+
+      if (errorMessage.includes('SIN_PLANIFICACION_DISPONIBLE') || errorMessage.includes('No hay entregas programadas')) {
+        toast.warning(
+          `Sin planificación — ${nombreEstablecimiento}`,
+          'Para asignar una entrega, primero debes definir las cantidades en el módulo de Planificaciones.',
+          { duration: 7000 }
+        );
+      } else {
+        toast.error(`Error al guardar — ${nombreEstablecimiento}`);
+      }
     } finally {
       setIsAutoSaving(false);
     }
@@ -1426,7 +1438,7 @@ const Movimientos: React.FC = () => {
       await updateStockInRealTime();
     } catch (redistributionError: any) {
       const errorMessage = redistributionError?.response?.data?.message || redistributionError?.response?.data?.error || redistributionError?.message || '';
-      
+
       console.log('[DEBUG] Error completo:', redistributionError?.response?.data);
       console.log('[DEBUG] Mensaje de error:', errorMessage);
 

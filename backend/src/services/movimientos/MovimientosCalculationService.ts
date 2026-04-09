@@ -160,7 +160,7 @@ export class MovimientosCalculationService {
       }
 
       if (incrementoRestante > 0) {
-        throw new Error(`No hay cantidades suficientes en los meses siguientes. Faltan ${incrementoRestante} unidades por redistribuir.`);
+        throw new Error(`SIN_PLANIFICACION_DISPONIBLE: No hay entregas programadas en los meses siguientes para redistribuir ${incrementoRestante} unidad(es). Para asignar una entrega, primero debes definir las cantidades en el módulo de Planificaciones.`);
       }
 
       return {
