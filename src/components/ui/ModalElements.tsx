@@ -60,12 +60,12 @@ export const Modal: React.FC<ModalProps> = memo(({
             <div className="sm:flex sm:items-start">
               {Icon && (
                 <div className={MODAL_STYLES.modal.headerIconWrapper}>
-                  <Icon className="h-6 w-6" aria-hidden="true" weight="regular" />
+                  <Icon className="h-5 w-5" aria-hidden="true" weight="duotone" />
                 </div>
               )}
               <div className={`mt-3 text-center sm:mt-0 sm:text-left min-w-0 ${Icon ? 'sm:ml-4' : ''}`}>
-                <h2 className="text-lg font-semibold leading-6 text-gray-900">{title}</h2>
-                {subtitle ? <p className="mt-2 text-sm text-gray-500">{subtitle}</p> : null}
+                <h2 className="text-[1.1rem] font-bold tracking-tight text-gray-950">{title}</h2>
+                {subtitle ? <p className="mt-1 text-[0.85rem] text-gray-500 leading-tight pr-4">{subtitle}</p> : null}
               </div>
             </div>
             {/* Mobile close button (visible only on small screens below the title for clarity or absolute if preferred, but usually absolute covers it. Actually let's use absolute for all) */}
@@ -128,12 +128,12 @@ export const SideSheet: React.FC<SideSheetProps> = memo(({
             <div className="sm:flex sm:items-start">
               {Icon && (
                 <div className={MODAL_STYLES.modal.headerIconWrapper}>
-                  <Icon className="h-6 w-6" aria-hidden="true" weight="regular" />
+                  <Icon className="h-5 w-5" aria-hidden="true" weight="duotone" />
                 </div>
               )}
               <div className={`mt-3 sm:mt-0 sm:text-left min-w-0 ${Icon ? 'sm:ml-4' : ''}`}>
-                <h2 className="text-lg font-semibold leading-6 text-gray-900">{title}</h2>
-                {subtitle ? <p className="mt-2 text-sm text-gray-500">{subtitle}</p> : null}
+                <h2 className="text-[1.1rem] font-bold tracking-tight text-gray-950">{title}</h2>
+                {subtitle ? <p className="mt-1 text-[0.85rem] text-gray-500 leading-tight pr-4">{subtitle}</p> : null}
               </div>
             </div>
           </div>
@@ -203,7 +203,7 @@ export const FormField: React.FC<FormFieldProps> = memo(({
   <div className="mb-4 last:mb-0">
     <label htmlFor={id} className={MODAL_STYLES.input.label}>
       {label}
-      {required ? <span className="ml-0.5 text-rose-500">*</span> : null}
+      {required ? <span className="ml-1 text-rose-500">*</span> : null}
     </label>
     {children}
     {helpText && !error ? <p className={MODAL_STYLES.input.helpText}>{helpText}</p> : null}
@@ -218,14 +218,14 @@ interface FormSectionProps {
   children: React.ReactNode;
 }
 
-export const FormSection: React.FC<FormSectionProps> = memo(({ title, description, children }) => (
-  // Removed gray background, removed rounded borders, changed to a crisp, open layout.
-  <section className="mb-8 last:mb-0">
-    <header className="mb-5 border-b border-gray-100 pb-4">
-      <h3 className="text-base font-semibold leading-6 text-gray-900">{title}</h3>
-      {description ? <p className="mt-1 text-sm text-gray-500">{description}</p> : null}
-    </header>
-    <div className="space-y-5">
+export const FormSection: React.FC<FormSectionProps> = memo(({ title, children }) => (
+  <section className="mb-6 last:mb-0">
+    {title && (
+      <h3 className="mb-4 text-[0.75rem] font-bold uppercase tracking-widest text-zinc-400/80">
+        {title}
+      </h3>
+    )}
+    <div className="space-y-4">
       {children}
     </div>
   </section>

@@ -237,28 +237,27 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
   );
 
   return (
-    <section className="overflow-hidden bg-transparent">
-      <div className="border-b border-zinc-200/90 px-4 py-4 sm:px-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-none bg-zinc-50 text-zinc-700">
-              <FileText className="h-5 w-5" />
+    <section className="w-full">
+      <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-sm overflow-hidden">
+        <div className="border-b border-zinc-100 flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between bg-zinc-50/50">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-50 text-teal-600 shadow-sm ring-1 ring-teal-100/50">
+              <FileText className="h-6 w-6" aria-hidden="true" weight="duotone" />
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-zinc-950">Movimientos del kardex</h2>
-              <p className="mt-1 text-sm text-zinc-500">
-                {total.toLocaleString()} registros listos para auditoría y seguimiento por lote.
+            <div className="flex flex-col">
+              <h2 className="text-[1.05rem] font-bold text-zinc-900 tracking-tight">Movimientos del kardex</h2>
+              <p className="text-sm text-zinc-500 font-medium mt-0.5">
+                {total.toLocaleString()} registros encontrados para auditoría y seguimiento.
               </p>
             </div>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-none bg-zinc-50 px-3 py-1.5 text-sm text-zinc-600">
+          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white px-3 py-1.5 shadow-sm text-sm text-zinc-500">
             <Clock className="h-4 w-4 text-zinc-400" />
-            <span>Vista compacta con entrada, salida y saldo.</span>
+            <span className="font-medium">Vista compacta de saldos</span>
           </div>
         </div>
-      </div>
 
-      <div className="hidden lg:block">{desktopTable}</div>
+        <div className="hidden lg:block bg-white">{desktopTable}</div>
 
       <div className="space-y-3 p-4 lg:hidden">
         {loading ? (
@@ -341,6 +340,7 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
             );
           })
         )}
+        </div>
       </div>
     </section>
   );

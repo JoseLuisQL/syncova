@@ -30,34 +30,32 @@ const ReportsShell: React.FC<ReportsShellProps> = ({
 
   return (
     <main className="min-h-full bg-white">
-      <div className="mx-auto flex max-w-[1500px] flex-col gap-3">
-        <section className="overflow-hidden bg-transparent">
-          <nav aria-label="Secciones de reportes" className="px-3 py-2.5 sm:px-4">
-            <div className={`grid gap-3 ${gridClassName}`}>
+      <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
+        <section className="bg-transparent border-b border-zinc-100 pb-2">
+          <nav aria-label="Secciones de reportes" className="px-3 py-3 sm:px-4">
+            <div className="flex flex-wrap items-start gap-x-12 gap-y-6">
               {groupedSections.map((group) => {
                 const GroupIcon = group.icon;
-                const innerGridClassName =
-                  group.sections.length >= 3
-                    ? 'grid-cols-1 min-[560px]:grid-cols-2 xl:grid-cols-3'
-                    : group.sections.length === 2
-                      ? 'grid-cols-1 min-[560px]:grid-cols-2'
-                      : 'grid-cols-1';
 
                 return (
-                  <section key={group.key} className="rounded-xl border border-zinc-200 bg-zinc-50 p-2.5">
-                    <div className="mb-2 flex items-center gap-2 px-1.5">
-                      <GroupIcon className="h-3.5 w-3.5 text-zinc-500" aria-hidden="true" />
+                  <div key={group.key} className="flex flex-col">
+                    <div className="mb-3 flex items-center gap-2 pl-1">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100/80 text-zinc-500">
+                        <GroupIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                      </div>
                       <div>
-                        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                        <h3 className="text-[0.68rem] font-bold uppercase tracking-[0.15em] text-zinc-500">
                           {group.label}
-                        </p>
-                        <p className="hidden text-[0.72rem] text-zinc-500 sm:block">
-                          {group.description}
-                        </p>
+                        </h3>
+                        {group.description && (
+                          <p className="mt-0.5 text-[0.65rem] font-medium text-zinc-400">
+                            {group.description}
+                          </p>
+                        )}
                       </div>
                     </div>
 
-                    <div className={`grid gap-2 ${innerGridClassName}`}>
+                    <div className="flex flex-wrap gap-2">
                       {group.sections.map((section) => {
                         const Icon = section.icon;
                         const isActive = section.id === activeSection;
@@ -67,24 +65,46 @@ const ReportsShell: React.FC<ReportsShellProps> = ({
                             key={section.id}
                             type="button"
                             onClick={() => navigateToModule('reportes', section.routeSegment)}
-                            className={`${COMPONENT_STYLES.nav.tab} ${
-                              isActive ? COMPONENT_STYLES.nav.tabActive : COMPONENT_STYLES.nav.tabInactive
-                            } min-w-0 w-full justify-start rounded-xl px-3 py-3`}
+                            className={`group flex items-center gap-3 rounded-xl border px-3 py-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 ${
+                              isActive
+                                ? 'border-teal-200 bg-teal-50/80 shadow-sm ring-1 ring-teal-100'
+                                : 'border-zinc-200/80 bg-white hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-sm'
+                            }`}
                             aria-current={isActive ? 'page' : undefined}
                             title={section.contextLabel}
                           >
-                            <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                            <span className="flex min-w-0 flex-col items-start text-left">
-                              <span className="text-[0.98rem] leading-tight text-zinc-900">{section.label}</span>
-                              <span className="mt-1 hidden text-[0.72rem] font-normal leading-snug text-zinc-500 md:block">
-                                {section.description}
+                            <div
+                              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                                isActive
+                                  ? 'bg-teal-600 text-white shadow-sm'
+                                  : 'bg-zinc-100 text-zinc-500 group-hover:bg-zinc-200 group-hover:text-zinc-700'
+                              }`}
+                            >
+                              <Icon className="h-4 w-4" aria-hidden="true" />
+                            </div>
+                            <div className="flex flex-col items-start text-left">
+                               <span
+                                className={`text-[0.85rem] font-semibold tracking-tight transition-colors ${
+                                  isActive ? 'text-teal-900' : 'text-zinc-700 group-hover:text-zinc-900'
+                                }`}
+                              >
+                                {section.label}
                               </span>
-                            </span>
+                              {section.description && (
+                                <span
+                                  className={`mt-[1px] max-w-[160px] truncate text-[0.68rem] leading-tight transition-colors sm:max-w-[200px] ${
+                                    isActive ? 'text-teal-700/80' : 'text-zinc-500'
+                                  }`}
+                                >
+                                  {section.description}
+                                </span>
+                              )}
+                            </div>
                           </button>
                         );
                       })}
                     </div>
-                  </section>
+                  </div>
                 );
               })}
             </div>

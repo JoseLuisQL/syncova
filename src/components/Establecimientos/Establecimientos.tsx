@@ -3,7 +3,7 @@ import { Buildings, MapPin, Phone, Plus, ArrowsClockwise, User } from '@phosphor
 import CascadingSelector from '../common/CascadingSelector';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
-import { CreateEstablecimientoDto, Establecimiento, EstablecimientoFilters, UpdateEstablecimientoDto } from '../../types';
+import { CreateEstablecimientoDto, Establecimiento, EstablecimientoFilters, UpdateEstablecimientoDto, CentroAcopio } from '../../types';
 import {
   ActionButtons,
   EmptyState,
@@ -73,6 +73,7 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
 
   const {
     establecimientos,
+    centrosAcopio,
     pagination,
     isLoading,
     error,
@@ -328,6 +329,7 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
       {showModal ? (
         <EstablecimientoModal
           establecimiento={editingEstablecimiento}
+          centrosAcopio={centrosAcopio}
           defaultRedId={selectedRedId}
           defaultMicroredId={selectedMicroredId}
           defaultCentroAcopioId={selectedCentroAcopioId}
@@ -464,6 +466,7 @@ EstablecimientoMobileCard.displayName = 'EstablecimientoMobileCard';
 
 interface EstablecimientoModalProps {
   establecimiento: Establecimiento | null;
+  centrosAcopio: CentroAcopio[];
   defaultRedId?: string;
   defaultMicroredId?: string;
   defaultCentroAcopioId?: string;
@@ -474,6 +477,7 @@ interface EstablecimientoModalProps {
 
 const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
   establecimiento,
+  centrosAcopio,
   defaultRedId = '',
   defaultMicroredId = '',
   defaultCentroAcopioId = '',
@@ -481,6 +485,11 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
   onSubmit,
   isLoading = false,
 }) => {
+  const centroAcopioActual = useMemo(() => {
+    if (!establecimiento?.centroAcopioId) return null;
+    return centrosAcopio.find(c => c.id === establecimiento.centroAcopioId);
+  }, [centrosAcopio, establecimiento?.centroAcopioId]);
+
   const [formData, setFormData] = useState({
     nombre: establecimiento?.nombre || '',
     tipo: establecimiento?.tipo || 'centro_salud',
@@ -489,8 +498,8 @@ const EstablecimientoModal: React.FC<EstablecimientoModalProps> = ({
     direccion: establecimiento?.direccion || '',
     responsable: establecimiento?.responsable || '',
     telefono: establecimiento?.telefono || '',
-    redId: establecimiento?.centroAcopio?.microred?.redId || defaultRedId,
-    microredId: establecimiento?.centroAcopio?.microredId || defaultMicroredId,
+    redId: (centroAcopioActual?.microred as any)?.red?.id || defaultRedId,
+    microredId: centroAcopioActual?.microredId || defaultMicroredId,
     estado: establecimiento?.estado || 'activo',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});

@@ -259,7 +259,7 @@ const Kardex: React.FC = () => {
 
   return (
     <main className="min-h-full bg-white">
-      <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-4 pb-12 pt-6 sm:px-6 lg:px-8">
         <div aria-live="polite" className="sr-only">
           {liveRegionMessage}
         </div>

@@ -156,11 +156,6 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
       isOpen={isOpen}
       onClose={onClose}
       title={usuario ? 'Editar usuario' : 'Nuevo usuario'}
-      subtitle={
-        usuario
-          ? 'Actualiza la cuenta y mantiene alineado su alcance operativo con los centros asignados.'
-          : 'Crea una cuenta con su perfil operativo y los centros de acopio que podrá gestionar.'
-      }
       icon={User}
       size="xl"
       footer={(
@@ -173,7 +168,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
         />
       )}
     >
-      <div className="space-y-4">
+      <div className="space-y-6">
         {usuario ? (
           <div className="grid gap-3 md:grid-cols-3">
             {[
@@ -184,15 +179,13 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
               const Icon = item.icon;
 
               return (
-                <div key={item.label} className="rounded-[20px] border border-zinc-200 bg-white p-4 shadow-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">{item.label}</p>
-                      <p className="mt-2 text-sm font-semibold leading-6 text-zinc-900">{item.value}</p>
-                    </div>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-600">
-                      <Icon className="h-4 w-4" aria-hidden="true" />
-                    </div>
+                <div key={item.label} className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm flex items-center justify-between">
+                  <div>
+                    <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-400">{item.label}</p>
+                    <p className="mt-1 text-sm font-semibold text-zinc-900">{item.value}</p>
+                  </div>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-50 text-zinc-400">
+                    <Icon className="h-4 w-4" aria-hidden="true" />
                   </div>
                 </div>
               );
@@ -200,7 +193,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
           </div>
         ) : null}
 
-        <FormSection title="Identidad y acceso" description="Datos base para autenticar al usuario y reconocerlo dentro del sistema.">
+        <FormSection title="Identidad y acceso">
           <div className="grid gap-4 md:grid-cols-2">
             <TextInput
               id="usuario-nombres"
@@ -237,7 +230,6 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
               placeholder="nombre.usuario"
               required
               error={errors.usuario}
-              helpText="Identificador usado para el ingreso al sistema."
             />
 
             {!usuario ? (
@@ -246,7 +238,6 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
                 label="Contraseña inicial"
                 required
                 error={errors.password}
-                helpText="Debe tener al menos 8 caracteres."
               >
                 <div className="relative">
                   <input
@@ -271,25 +262,17 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
                 </div>
               </FormField>
             ) : (
-              <div className="rounded-[20px] border border-zinc-200 bg-zinc-50/80 p-4 md:col-span-2">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-700 shadow-sm">
-                    <Key className="h-4 w-4" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-zinc-900">Contraseña gestionada por separado</p>
-                    <p className="mt-1 text-sm text-zinc-800">
-                      Para mantener el control y la trazabilidad, el cambio de contraseña se realiza desde el modal específico
-                      de seguridad.
-                    </p>
-                  </div>
+              <div className="md:col-span-2 flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50/50 p-3">
+                <div className="flex items-center gap-2 text-sm text-zinc-500">
+                  <Key className="h-4 w-4" />
+                  <span>Contraseña gestionada por separado en su módulo de seguridad.</span>
                 </div>
               </div>
             )}
           </div>
         </FormSection>
 
-        <FormSection title="Perfil operativo" description="Define el rol del usuario, su estado y el alcance territorial que tendrá disponible.">
+        <FormSection title="Perfil operativo">
           <div className="grid gap-4 md:grid-cols-2">
             <SelectInput
               id="usuario-rol"
@@ -312,74 +295,18 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
                   { value: 'inactivo', label: 'Inactivo' },
                 ]}
               />
-            ) : (
-              <div className="rounded-[20px] border border-zinc-200 bg-white p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
-                    <EnvelopeSimple className="h-4 w-4" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-zinc-900">Alta inicial en estado activo</p>
-                    <p className="mt-1 text-sm text-zinc-600">
-                      Las nuevas cuentas se crean activas para facilitar el primer acceso. Luego podrás ajustar el estado si lo necesitas.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="grid gap-3 lg:grid-cols-[1.35fr_0.95fr]">
-            <div className="rounded-[20px] border border-zinc-200 bg-white p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-50 text-zinc-700">
-                  <Buildings className="h-4 w-4" aria-hidden="true" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-zinc-900">Centro principal operativo</p>
-                  <p className="mt-1 text-sm text-zinc-600">
-                    {primaryCentro
-                      ? `${primaryCentro.nombre} (${primaryCentro.codigo || 'sin código'})`
-                      : 'Aún no se ha definido un centro principal.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[20px] border border-amber-200 bg-amber-50/80 p-4">
-              <p className="text-sm font-semibold text-amber-900">Regla operativa</p>
-              <p className="mt-1 text-sm text-amber-800">
-                El primer centro seleccionado se usa como referencia principal para mantener compatibilidad con el flujo actual.
-              </p>
-            </div>
+            ) : null}
           </div>
         </FormSection>
 
-        <FormSection
-          title="Centros de acopio asignados"
-          description="Selecciona uno o varios centros. Para responsables de acopio esta asignación es obligatoria."
-        >
-          <div className="flex flex-col gap-3 rounded-[20px] border border-zinc-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-zinc-900">Cobertura configurada</p>
-              <p className="mt-1 text-sm text-zinc-500">
-                {selectedCentros.length > 0
-                  ? `${selectedCentros.length} centro${selectedCentros.length === 1 ? '' : 's'} seleccionado${selectedCentros.length === 1 ? '' : 's'}.`
-                  : 'No hay centros seleccionados todavía.'}
-              </p>
-            </div>
-            <span className="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-semibold text-zinc-700">
-              {primaryCentro ? `Principal: ${primaryCentro.nombre}` : 'Sin centro principal'}
-            </span>
-          </div>
-
+        <FormSection title="Centros de acopio asignados">
           {centrosActivos.length === 0 ? (
-            <div className="rounded-[20px] border border-zinc-200 bg-white p-5 text-sm text-zinc-600">
-              No hay centros de acopio activos disponibles para asignar.
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-500">
+              No hay centros de acopio activos.
             </div>
           ) : (
             <div>
-              <div className="grid max-h-72 gap-2 overflow-y-auto rounded-[22px] border border-zinc-200 bg-white p-3 md:grid-cols-2">
+              <div className="grid max-h-72 gap-2 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-2 md:grid-cols-2">
                 {centrosActivos.map((centro) => {
                   const isSelected = formData.centroAcopioIds.includes(centro.id);
 
@@ -388,31 +315,26 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
                       key={centro.id}
                       type="button"
                       onClick={() => handleToggleCentro(centro.id)}
-                      className={`rounded-[18px] border px-4 py-3 text-left transition-all ${
+                      className={`rounded-lg border px-3 py-2 text-left transition-all ${
                         isSelected
-                          ? 'border-zinc-300 bg-zinc-50 text-zinc-900 shadow-sm'
-                          : 'border-zinc-200 bg-zinc-50/60 text-zinc-700 hover:border-zinc-300 hover:bg-white'
+                          ? 'border-teal-600/30 bg-teal-50/50 text-teal-900 shadow-sm'
+                          : 'border-zinc-200 bg-zinc-50/30 text-zinc-600 hover:border-zinc-300 hover:bg-white'
                       }`}
                       aria-pressed={isSelected}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold">{centro.nombre}</p>
-                          <p className="mt-1 text-xs text-zinc-500">{centro.codigo || 'Sin código'}</p>
-                        </div>
-                        <span
-                          className={`inline-flex rounded-full px-2 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.08em] ${
-                            isSelected ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-200 text-zinc-600'
-                          }`}
-                        >
-                          {isSelected ? 'Asignado' : 'Disponible'}
-                        </span>
+                      <div className="flex flex-col gap-1">
+                        <p className={`truncate text-sm font-semibold ${isSelected ? 'text-teal-900' : 'text-zinc-700'}`}>
+                          {centro.nombre}
+                        </p>
+                        <p className="text-xs text-zinc-400">{centro.codigo || 'Sin código'}</p>
                       </div>
                     </button>
                   );
                 })}
               </div>
-              {errors.centroAcopioIds ? <p className={COMPONENT_STYLES.input.errorText}>{errors.centroAcopioIds}</p> : null}
+              {errors.centroAcopioIds ? (
+                <p className="mt-2 text-xs font-semibold text-rose-500">{errors.centroAcopioIds}</p>
+              ) : null}
             </div>
           )}
         </FormSection>

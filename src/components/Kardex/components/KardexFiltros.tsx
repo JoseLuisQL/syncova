@@ -395,14 +395,15 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
   ]);
 
   return (
-    <section aria-label="Filtros del kardex" className="bg-transparent">
-      <div className="space-y-4 p-4">
-        <div className="grid gap-3 xl:grid-cols-12">
-          <div className="xl:col-span-5">
+    <section aria-label="Filtros del kardex" className="w-full">
+      <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5 space-y-5">
+        <div className="grid gap-x-5 gap-y-6 lg:grid-cols-12">
+          {/* Fila 1: Búsqueda y Fechas */}
+          <div className="lg:col-span-6 xl:col-span-6">
             <label htmlFor="kardex-search" className={COMPONENT_STYLES.input.label}>
               Buscar
             </label>
-            <div className="relative">
+            <div className="relative mt-1">
               <MagnifyingGlass className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
               <input
                 id="kardex-search"
@@ -415,11 +416,11 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
             </div>
           </div>
 
-          <div className="xl:col-span-2">
+          <div className="lg:col-span-3 xl:col-span-3">
             <label htmlFor="kardex-fecha-inicio" className={COMPONENT_STYLES.input.label}>
               Desde
             </label>
-            <div className="relative">
+            <div className="relative mt-1">
               <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
               <input
                 id="kardex-fecha-inicio"
@@ -431,11 +432,11 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
             </div>
           </div>
 
-          <div className="xl:col-span-2">
+          <div className="lg:col-span-3 xl:col-span-3">
             <label htmlFor="kardex-fecha-fin" className={COMPONENT_STYLES.input.label}>
               Hasta
             </label>
-            <div className="relative">
+            <div className="relative mt-1">
               <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
               <input
                 id="kardex-fecha-fin"
@@ -447,25 +448,22 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
             </div>
           </div>
 
-          <div className="xl:col-span-3">
-            <label className={COMPONENT_STYLES.input.label}>Movimiento</label>
-            <div className="flex flex-wrap gap-1.5">
+          {/* Fila 2: Tipo de Movimiento (Full Width Segmented Control) */}
+          <div className="lg:col-span-12 border-b border-zinc-100/80 pb-5">
+            <label className={COMPONENT_STYLES.input.label}>Filtro de Movimiento</label>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
               {MOVIMIENTO_OPTIONS.map((option) => {
                 const isSelected = tipoMovimiento === option.value;
-                const selectedClass =
-                  option.value === 'todos'
-                    ? 'border-teal-600 bg-teal-600 text-white'
-                    : getMovimientoConfig(option.value).chipClassName;
 
                 return (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() => onTipoMovimientoChange(option.value)}
-                    className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                    className={`transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 rounded-xl border px-5 py-2.5 ${
                       isSelected
-                        ? selectedClass
-                        : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
+                        ? 'border-teal-200 bg-teal-50 shadow-sm ring-1 ring-teal-100/50 text-teal-900 font-semibold text-sm tracking-tight'
+                        : 'border-zinc-200/80 bg-white hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-sm text-zinc-600 hover:text-zinc-900 font-medium text-sm tracking-tight'
                     }`}
                   >
                     {option.label}
@@ -476,47 +474,54 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
           </div>
         </div>
 
-        <div className="grid gap-3 xl:grid-cols-12">
-          <div className="xl:col-span-3">
+        <div className="grid gap-x-5 gap-y-6 lg:grid-cols-12 pt-2">
+          {/* Fila 3: Productos y Lotes */}
+          <div className="lg:col-span-4 xl:col-span-3">
             <label htmlFor="kardex-tipo-item" className={COMPONENT_STYLES.input.label}>
               Tipo de producto
             </label>
-            <select
-              id="kardex-tipo-item"
-              value={selectedTipo}
-              onChange={(event) => onTipoChange(event.target.value as 'vacuna' | 'jeringa' | 'todos')}
-              className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
-            >
-              {TIPO_ITEM_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <div className="mt-1">
+              <select
+                id="kardex-tipo-item"
+                value={selectedTipo}
+                onChange={(event) => onTipoChange(event.target.value as 'vacuna' | 'jeringa' | 'todos')}
+                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
+              >
+                {TIPO_ITEM_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="xl:col-span-5">
-            <SearchableSelect
-              id="kardex-item"
-              label="Producto específico"
-              value={selectedItem}
-              options={itemOptions}
-              placeholder={selectedTipo === 'todos' ? 'Seleccione antes el tipo' : 'Todos los productos'}
-              disabled={selectedTipo === 'todos'}
-              onChange={(value) => onItemChange(value)}
-            />
+          <div className="lg:col-span-4 xl:col-span-5">
+            <div className="mt-1">
+              <SearchableSelect
+                id="kardex-item"
+                label="Producto específico"
+                value={selectedItem}
+                options={itemOptions}
+                placeholder={selectedTipo === 'todos' ? 'Seleccione antes el tipo' : 'Todos los productos'}
+                disabled={selectedTipo === 'todos'}
+                onChange={(value) => onItemChange(value)}
+              />
+            </div>
           </div>
 
-          <div className="xl:col-span-4">
-            <SearchableSelect
-              id="kardex-lote"
-              label="Lote"
-              value={selectedLote}
-              options={loteOptions}
-              placeholder={selectedItem ? 'Todos los lotes' : 'Seleccione antes un producto'}
-              disabled={!selectedItem}
-              onChange={(value) => onLoteChange(value)}
-            />
+          <div className="lg:col-span-4 xl:col-span-4">
+            <div className="mt-1">
+              <SearchableSelect
+                id="kardex-lote"
+                label="Lote"
+                value={selectedLote}
+                options={loteOptions}
+                placeholder={selectedItem ? 'Todos los lotes' : 'Seleccione antes un producto'}
+                disabled={!selectedItem}
+                onChange={(value) => onLoteChange(value)}
+              />
+            </div>
           </div>
         </div>
 
