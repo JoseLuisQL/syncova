@@ -301,7 +301,7 @@ const validateDataType = (req: any, res: any, next: any) => {
     }
     
     next();
-  } catch (error) {
+  } catch {
     return res.status(400).json({
       success: false,
       message: 'Error de validación de tipo de dato',

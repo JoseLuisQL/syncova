@@ -551,7 +551,7 @@ const Movimientos: React.FC = () => {
           isReadOnlyMode ? Promise.resolve() : loadCentrosAcopio(),
           loadVacunasActivas()
         ]);
-      } catch (err) {
+      } catch {
         toast.error('Error al cargar datos iniciales');
       }
     };
@@ -724,7 +724,7 @@ const Movimientos: React.FC = () => {
               setStockInfo(freshStock);
               toast.info('Stock actualizado automáticamente');
             }
-          } catch (err) {
+          } catch {
             setStockError('Error al actualizar stock automáticamente');
           } finally {
             setIsLoadingStock(false);
@@ -937,7 +937,7 @@ const Movimientos: React.FC = () => {
 
           return true;
         }
-      } catch (err) {
+      } catch {
         // Error en verificación, continuar con modificación normal
       }
     }
@@ -974,7 +974,7 @@ const Movimientos: React.FC = () => {
         return false;
       }
       return true;
-    } catch (err) {
+    } catch {
       return true;
     }
   };
@@ -1212,7 +1212,7 @@ const Movimientos: React.FC = () => {
           });
           return;
         }
-      } catch (err) {
+      } catch {
         toast.error('Error de validación - No se pudo verificar la planificación');
         return;
       }
@@ -1362,7 +1362,7 @@ const Movimientos: React.FC = () => {
           setPendingEntregasChanges(prev => { const n = { ...prev }; delete n[key]; return n; });
           return;
         }
-      } catch (err) {
+      } catch {
         toast.error('Error de validación');
         return;
       }
@@ -1523,7 +1523,7 @@ const Movimientos: React.FC = () => {
 
       toast.success(`Entrega adicional creada - ${nombreEstablecimiento} - #${siguienteNumero}`);
       await updateStockInRealTime();
-    } catch (err: any) {
+    } catch {
       toast.error('Error al agregar entrega adicional');
     } finally {
       setIsProcessingEntrega(false);
@@ -1583,7 +1583,7 @@ const Movimientos: React.FC = () => {
         await silentLoadMovimientos(bgFilters);
       }
       await updateStockInRealTime();
-    } catch (err) {
+    } catch {
       toast.error('Error al eliminar entrega adicional');
     } finally {
       setIsProcessingEntrega(false);
@@ -1624,7 +1624,7 @@ const Movimientos: React.FC = () => {
       setShowConfirmacionModal(false);
       setPendingModification(null);
       setImpactoModificacion(null);
-    } catch (err: any) {
+    } catch {
       toast.error(`Error al modificar entrega - ${pendingModification.establecimientoNombre}`);
     } finally {
       setIsAutoSaving(false);
@@ -1689,7 +1689,7 @@ const Movimientos: React.FC = () => {
               skipRedistribucion: true
             })
           });
-        } catch (updateError) {
+        } catch {
           // Continuar de todas formas
         }
 
@@ -1724,7 +1724,7 @@ const Movimientos: React.FC = () => {
         setTempValues(prev => { const n = { ...prev }; delete n[key]; return n; });
         setPendingChanges(prev => { const n = { ...prev }; delete n[key]; return n; });
       }
-    } catch (err: any) {
+    } catch {
       toast.error(`Error al registrar - ${pendingSinDisponibilidad.establecimientoNombre}`);
     } finally {
       setIsAutoSaving(false);
@@ -1789,7 +1789,7 @@ const Movimientos: React.FC = () => {
             await handleSaveFieldValue(establecimientoId, campo, value);
             exitosos++;
           }
-        } catch (err) {
+        } catch {
           errores++;
         }
       }
@@ -1802,7 +1802,7 @@ const Movimientos: React.FC = () => {
             await handleSaveEntregaAdicionalValue(entregaId, value);
             exitosos++;
           }
-        } catch (err) {
+        } catch {
           errores++;
         }
       }
@@ -1814,7 +1814,7 @@ const Movimientos: React.FC = () => {
       } else {
         toast.error(`Error al guardar - ${errores} campo(s) fallaron`);
       }
-    } catch (err) {
+    } catch {
       toast.error('Error inesperado al guardar');
     } finally {
       setIsAutoSaving(false);
@@ -1876,7 +1876,7 @@ const Movimientos: React.FC = () => {
       );
 
       toast.success(`Exportación completada - ${vacunaSelec.nombre}`);
-    } catch (err: any) {
+    } catch {
       toast.error('Error en exportación');
     } finally {
       setIsExporting(false);

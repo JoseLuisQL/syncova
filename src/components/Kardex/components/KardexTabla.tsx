@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { BookOpenText, Clock, FileText, Package } from '@phosphor-icons/react';
+import { BookOpenText, Clock, FileText } from '@phosphor-icons/react';
 import {
   ActionButtons,
   EmptyState,

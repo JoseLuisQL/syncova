@@ -8,8 +8,7 @@ import {
   PlanificacionConRelaciones,
   EstadisticasPlanificacion,
   ImportarPlanificacionDto,
-  DistribucionAutomaticaDto,
-  EstadoPlanificacion
+  DistribucionAutomaticaDto
 } from '@/types';
 import { HttpError } from '@/middleware/errorHandler';
 import { MovimientosService } from './MovimientosService';
@@ -906,11 +905,12 @@ export class PlanificacionService {
             distribucionMensual = this.distribucionUniforme(metaAnual);
             break;
 
-          case 'historico':
+          case 'historico': {
             const metaHistorica = await this.calcularMetaHistorica(establecimiento.id, data.vacunaId, data.anio);
             metaAnual = metaHistorica || metaBase;
             distribucionMensual = this.distribucionUniforme(metaAnual);
             break;
+          }
 
           default:
             metaAnual = metaBase;
@@ -1794,7 +1794,6 @@ export class PlanificacionService {
       }[] = [];
 
       const errores: string[] = [];
-      let filasProcesadas = 0;
 
       // Procesar filas de manera asíncrona (empezar desde la fila 5, que es donde están los datos)
       const totalRows = worksheet.rowCount;
@@ -1844,8 +1843,6 @@ export class PlanificacionService {
             metaAnual,
             distribucionMensual
           });
-
-          filasProcesadas++;
 
         } catch (error) {
           errores.push(`Fila ${rowNumber}: Error al procesar - ${error instanceof Error ? error.message : 'Error desconocido'}`);

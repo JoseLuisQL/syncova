@@ -799,7 +799,7 @@ export class MovimientosExportService {
       let maxLength = 0;
 
       // Revisar todas las celdas de la columna para encontrar el contenido más largo
-      worksheet.eachRow((row, rowNumber) => {
+      worksheet.eachRow((row, _rowNumber) => {
         const cell = row.getCell(index + 1);
         if (cell.value) {
           const cellLength = cell.value.toString().length;

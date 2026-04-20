@@ -1,5 +1,5 @@
 import React from 'react';
-import { Warning, CircleNotch, Trash, ArrowRight } from '@phosphor-icons/react';
+import { Warning, CircleNotch, Trash } from '@phosphor-icons/react';
 import { Modal } from '../Establecimientos/components';
 import { COMPONENT_STYLES } from './constants';
 

@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { useAppNavigation } from '../../../hooks/useRouting';
-import { AlertSectionConfig, ALERTS_SECTIONS, COMPONENT_STYLES, SectionId } from '../constants';
+import { MODULE_LAYOUT } from '../../../styles/layout';
+import { AlertSectionConfig, ALERTS_SECTIONS, SectionId } from '../constants';
 
 interface AlertsShellProps {
   activeSection: SectionId;
@@ -19,7 +20,7 @@ const AlertsShell: React.FC<AlertsShellProps> = ({
 
   return (
     <main className="min-h-full bg-white">
-      <div className="mx-auto flex max-w-[1500px] flex-col gap-3">
+      <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col gap-3`}>
         <section className="bg-transparent border-b border-zinc-100 pb-2">
           {action ? (
             <div className="border-b border-zinc-200/90 px-4 py-4 sm:px-5 lg:px-6 mb-2">

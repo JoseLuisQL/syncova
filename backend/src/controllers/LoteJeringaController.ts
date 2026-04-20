@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { LoteJeringaService } from '@/services/LoteJeringaService';
 import { CreateLoteJeringaDto, UpdateLoteJeringaDto, EstadoLote, FormaIngreso, ComprobanteClase } from '@/types';
 import { successResponse, errorResponse, paginatedResponse } from '@/utils/response';
-import { validateRequired, validateEnum, validateUUID, validateDate, validateNumber, isRequired, isValidEnum } from '@/utils/validation';
+import { validateUUID, validateDate, validateNumber, isRequired, isValidEnum } from '@/utils/validation';
 
 /**
  * Mapear valores del frontend a valores de Prisma para FormaIngreso

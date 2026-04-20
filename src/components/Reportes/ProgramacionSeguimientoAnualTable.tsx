@@ -195,12 +195,12 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
     saldoAnterior: number,
     entregas: any,
     consumo: any,
-    programacion: any
+    _programacion: any
   ) => {
-    let saldoQ1 = saldoAnterior + entregas.q1 - consumo.q1;
-    let saldoQ2 = saldoQ1 + entregas.q2 - consumo.q2;
-    let saldoQ3 = saldoQ2 + entregas.q3 - consumo.q3;
-    let saldoQ4 = saldoQ3 + entregas.q4 - consumo.q4;
+    const saldoQ1 = saldoAnterior + entregas.q1 - consumo.q1;
+    const saldoQ2 = saldoQ1 + entregas.q2 - consumo.q2;
+    const saldoQ3 = saldoQ2 + entregas.q3 - consumo.q3;
+    const saldoQ4 = saldoQ3 + entregas.q4 - consumo.q4;
 
     return {
       q1: saldoQ1,
@@ -268,7 +268,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
   };
 
   // Render quarter columns
-  const renderQuarterColumns = (item: TableItem, itemIndex: number, quarter: string, color: string) => {
+  const renderQuarterColumns = (item: TableItem, itemIndex: number, quarter: string, _color: string) => {
     const currentValue = getCurrentValue(itemIndex, quarter);
     const isPendingChange = isPending(itemIndex, quarter);
     const entregado = item.entregas[quarter as keyof typeof item.entregas];

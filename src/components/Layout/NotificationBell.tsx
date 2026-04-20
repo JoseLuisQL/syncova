@@ -55,7 +55,7 @@ const playNotificationSound = () => {
 
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.3);
-  } catch (err) {
+  } catch {
     // Ignorar errores (policy del navegador o falta de intearcción del usuario)
   }
 };

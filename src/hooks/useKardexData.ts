@@ -80,7 +80,7 @@ const normalizeFilters = (filters: Partial<KardexFilters>): KardexFilters => {
 };
 
 const stripPagination = (filters: KardexFilters): Omit<KardexFilters, 'page' | 'limit'> => {
-  const { page, limit, ...rest } = filters;
+  const { page: _page, limit: _limit, ...rest } = filters;
   return rest;
 };
 

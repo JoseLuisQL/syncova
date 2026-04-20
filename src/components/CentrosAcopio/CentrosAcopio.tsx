@@ -133,7 +133,7 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
     return () => window.clearTimeout(timeoutId);
   }, [filterEstado, filterMicroredId, filterRedId, searchTerm, setFilters]);
 
-  const stats = useMemo(
+  const _stats = useMemo(
     () => [
       { ...STATS_CONFIG.centrosAcopio[0], value: total, color: STATS_CONFIG.centrosAcopio[0].color as ColorScheme },
       {

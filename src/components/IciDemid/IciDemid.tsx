@@ -8,6 +8,7 @@ import { useVacunas } from '../../hooks/useVacunas';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import { IciDemidImportPreview, IciDemidRegistro } from '../../types';
+import { MODULE_LAYOUT } from '../../styles/layout';
 import IciDemidService from '../../services/iciDemidService';
 import IciDemidErroresModal from './IciDemidErroresModal';
 import IciDemidImportProgressModal from './IciDemidImportProgressModal';
@@ -222,7 +223,7 @@ const IciDemid: React.FC = () => {
 
   return (
     <div className="h-[calc(100vh-4rem)] overflow-hidden bg-white p-4 md:h-[calc(100vh-5rem)] md:p-6">
-      <div className="mx-auto flex h-full max-w-[1800px] flex-col gap-4 overflow-hidden">
+      <div className={`${MODULE_LAYOUT.fullWidth} flex h-full flex-col gap-4 overflow-hidden`}>
         <section className="bg-transparent">
           <div className="border-b border-zinc-100 px-4 py-4">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">

@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef } from 'react';
  */
 export const useAutoSync = () => {
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastSyncRef = useRef<{ [key: string]: number }>({});
+  const _lastSyncRef = useRef<{ [key: string]: number }>({});
 
   /**
    * Trigger para cuando cambia una entrega base
@@ -55,7 +55,7 @@ export const useAutoSync = () => {
     vacunaId: string,
     mes: number,
     anio: number,
-    showNotification: boolean = true
+    _showNotification: boolean = true
   ) => {
     console.log(`🚀 [useAutoSync] Trigger manual - ${establecimientoId}, ${mes}/${anio}`);
     // Por ahora solo logueamos, la sincronización se maneja en el backend

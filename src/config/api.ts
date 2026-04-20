@@ -94,7 +94,7 @@ const setupInterceptors = (client: AxiosInstance) => {
             // Reintentar la petición original con el nuevo token
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
             return client(originalRequest);
-          } catch (refreshError) {
+          } catch {
             // Si falla el refresh, limpiar datos y redirigir a login
             localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
             localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);

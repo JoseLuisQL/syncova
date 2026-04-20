@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { CentroAcopioService } from '@/services/CentroAcopioService';
 import { CreateCentroAcopioDto, UpdateCentroAcopioDto, EstadoGeneral } from '@/types';
-import { createError } from '@/middleware/errorHandler';
 
 /**
  * Controlador para gestión de centros de acopio

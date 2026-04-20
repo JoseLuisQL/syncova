@@ -15,7 +15,6 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts';
-import { ChartBar } from '@phosphor-icons/react';
 
 type ChartType = 'bar' | 'line' | 'pie';
 
@@ -157,7 +156,7 @@ function AxisTick({ x = 0, y = 0, payload, maxChars = 10 }: AxisTickProps) {
   );
 }
 
-function ChartLoadingState({ title }: { title?: string }) {
+function ChartLoadingState() {
   const shouldReduceMotion = useReducedMotion();
 
   const bars = [0, 1, 2, 3];
@@ -246,7 +245,6 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
   }
 
   const resolvedChartType = (propType || config.type || 'bar') as ChartType;
-  const isCartesian = resolvedChartType === 'bar' || resolvedChartType === 'line';
   const dataPoints = config.data.length;
   const xTickChars = dataPoints > 10 ? 8 : 11;
   const scrollWidth = resolvedChartType === 'pie'

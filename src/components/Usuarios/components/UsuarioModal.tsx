@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import { Buildings, Clock, Eye, EyeSlash, Key, EnvelopeSimple, Shield, User } from '@phosphor-icons/react';
+import { Clock, Eye, EyeSlash, Key, Shield, User } from '@phosphor-icons/react';
 import { CentroAcopio, Role, Usuario } from '../../../types';
 import {
   FormField,
@@ -86,12 +86,10 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
       : options;
   }, [formData.rol, roles]);
 
-  const selectedCentros = useMemo(
+  const _selectedCentros = useMemo(
     () => centrosActivos.filter((centro) => formData.centroAcopioIds.includes(centro.id)),
     [centrosActivos, formData.centroAcopioIds],
   );
-
-  const primaryCentro = selectedCentros[0];
 
   const handleChange = (field: keyof UsuarioFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

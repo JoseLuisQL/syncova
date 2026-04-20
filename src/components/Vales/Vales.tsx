@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useStockEvents } from '../../utils/stockEventEmitter';
 import { ArrowsClockwise, Gear, X, SpinnerGap } from '@phosphor-icons/react';
-import { ValeEntrega, ValesService, ValeTypeSelectionConfig } from '../../services/valesService';
+import { ValeEntrega, ValesService, ValeTypeSelectionConfig, type ValesFilters as ValesQueryFilters } from '../../services/valesService';
 import { useVales } from '../../hooks/useVales';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useVacunas } from '../../hooks/useVacunas';
 import { useToastContext } from '../../contexts/ToastContext';
+import { MODULE_LAYOUT } from '../../styles/layout';
 import ValeDetalleModal from './ValeDetalleModal';
 import ValesConnectionTest from './ValesConnectionTest';
 import ValeExportModal from './ValeExportModal';
@@ -21,6 +22,8 @@ interface ValesProps {
   initialAnio?: number;
   onClose?: () => void;
 }
+
+type ValeEstadoFilter = 'todos' | NonNullable<ValesQueryFilters['estado']>;
 
 const Vales: React.FC<ValesProps> = ({
   initialCentroAcopioId,
@@ -54,7 +57,7 @@ const Vales: React.FC<ValesProps> = ({
   const [selectedMes, setSelectedMes] = useState<number>(initialMes || new Date().getMonth() + 1);
   const [selectedAnio, setSelectedAnio] = useState<number>(initialAnio || new Date().getFullYear());
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedEstado, setSelectedEstado] = useState<string>('todos');
+  const [selectedEstado, setSelectedEstado] = useState<ValeEstadoFilter>('todos');
 
   // Estados para modales
   const [showDetalleModal, setShowDetalleModal] = useState<boolean>(false);
@@ -108,7 +111,7 @@ const Vales: React.FC<ValesProps> = ({
         ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio }),
         mes: selectedMes,
         anio: selectedAnio,
-        ...(selectedEstado !== 'todos' && { estado: selectedEstado as any }),
+        ...(selectedEstado !== 'todos' && { estado: selectedEstado }),
         ...(searchTerm && { search: searchTerm }),
         limit: 100
       };
@@ -211,7 +214,7 @@ const Vales: React.FC<ValesProps> = ({
       ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio }),
       mes: selectedMes,
       anio: selectedAnio,
-      ...(selectedEstado !== 'todos' && { estado: selectedEstado as any }),
+      ...(selectedEstado !== 'todos' && { estado: selectedEstado }),
       ...(searchTerm && { search: searchTerm }),
       limit: 100
     };
@@ -327,7 +330,7 @@ const Vales: React.FC<ValesProps> = ({
       ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio }),
       mes: selectedMes,
       anio: selectedAnio,
-      ...(selectedEstado !== 'todos' && { estado: selectedEstado as any }),
+      ...(selectedEstado !== 'todos' && { estado: selectedEstado }),
       ...(searchTerm && { search: searchTerm }),
       limit: 100
     });
@@ -357,7 +360,7 @@ const Vales: React.FC<ValesProps> = ({
       />
 
       {/* Contenido principal */}
-      <section className={`${onClose ? 'w-full px-4 sm:px-6' : 'max-w-7xl mx-auto px-4 sm:px-6'} py-6 space-y-6`}>
+      <section className={`${MODULE_LAYOUT.fullWidth} ${MODULE_LAYOUT.pageSpacingX} py-6 space-y-6`}>
 
         {/* Filtros */}
         <ValesFilters

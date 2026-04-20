@@ -19,7 +19,7 @@ export const errorHandler = (
   error: CustomError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   // Log del error
   console.error('Error capturado:', {
@@ -122,7 +122,7 @@ const handlePrismaError = (error: Prisma.PrismaClientKnownRequestError, res: Res
       );
       break;
 
-    case 'P2002':
+    case 'P2002': {
       const target = error.meta?.target as string[] | undefined;
       const field = target ? target[0] : 'campo';
       ResponseUtil.conflict(
@@ -130,6 +130,7 @@ const handlePrismaError = (error: Prisma.PrismaClientKnownRequestError, res: Res
         `Ya existe un registro con ese ${field}`
       );
       break;
+    }
 
     case 'P2003':
       ResponseUtil.validationError(

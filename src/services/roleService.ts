@@ -3,15 +3,12 @@ import {
   CreateRoleDto,
   UpdateRoleDto,
   RoleFilters,
-  RolesResponse,
   RoleStats,
-  Permission,
-  RolePermissionAssignment
+  Permission
 } from '../types';
 import {
   apiClient,
-  ApiResponse,
-  PaginatedResponse
+  ApiResponse
 } from '../config/api';
 import { logger } from '../utils/debug';
 

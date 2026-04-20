@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 /**
  * Utilidades para manejo de rate limiting
@@ -46,7 +46,7 @@ export class RateLimitUtils {
    * Middleware para logging de rate limiting en desarrollo
    */
   static developmentLogger() {
-    return (req: Request, _res: Response, next: Function) => {
+    return (req: Request, _res: Response, next: NextFunction) => {
       if (process.env['NODE_ENV'] === 'development') {
         const info = RateLimitUtils.getRateLimitInfo(req);
         

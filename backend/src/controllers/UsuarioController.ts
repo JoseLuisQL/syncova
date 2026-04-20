@@ -3,7 +3,7 @@ import { UsuarioService } from '@/services/UsuarioService';
 import { RoleService } from '@/services/RoleService';
 import { CreateUsuarioDto, UpdateUsuarioDto, ChangePasswordDto, EstadoGeneral, RolUsuario } from '@/types';
 import { successResponse, errorResponse, paginatedResponse } from '@/utils/response';
-import { validateRequired, validateEnum, validateUUID } from '@/utils/validation';
+import { validateRequired, validateUUID } from '@/utils/validation';
 
 /**
  * Controlador para gestión de usuarios

@@ -7,7 +7,6 @@ import {
   FileText,
   Package,
   Gear,
-  Trash2,
   ArrowCounterClockwise,
   Eye
 } from '@phosphor-icons/react';

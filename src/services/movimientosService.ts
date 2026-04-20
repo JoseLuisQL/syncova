@@ -1,7 +1,6 @@
 import {
   apiClient,
   ApiResponse,
-  PaginatedResponse,
   buildQueryParams,
   handleApiError
 } from '../config/api';

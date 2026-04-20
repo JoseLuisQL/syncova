@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { ArrowsClockwise } from '@phosphor-icons/react';
 import type { ConfiguracionGroupDefinition, ConfiguracionGroupId } from '../types';
+import { MODULE_LAYOUT } from '../../../styles/layout';
 import { CONFIG_STYLES } from '../styles';
 
 interface ConfiguracionShellProps {
@@ -24,7 +25,7 @@ const ConfiguracionShell: React.FC<ConfiguracionShellProps> = ({
 }) => {
   return (
     <main className={CONFIG_STYLES.page}>
-      <div className="mx-auto flex max-w-[1120px] flex-col gap-3">
+      <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col gap-3`}>
         <section className="bg-transparent border-b border-zinc-100 pb-2">
           <div className="border-b border-zinc-200/90 px-4 py-4 sm:px-5 lg:px-6 mb-2">
             <div className="flex flex-wrap items-center gap-2">

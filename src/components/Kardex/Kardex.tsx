@@ -3,7 +3,8 @@ import { ErrorAlert } from '../Inventario/components/SharedComponents';
 import { useKardexData } from '../../hooks/useKardexData';
 import { KardexExportConfig, KardexExportService } from '../../services/KardexExportService';
 import { KardexFilters } from '../../services/KardexService';
-import { COMPONENT_STYLES, KARDEX_FILTER_DEBOUNCE } from './constants';
+import { MODULE_LAYOUT } from '../../styles/layout';
+import { KARDEX_FILTER_DEBOUNCE } from './constants';
 import {
   KardexFiltros,
   KardexHeader,
@@ -88,7 +89,6 @@ const buildRequestFilters = (uiFilters: KardexUiFilters, limit: number) => ({
 const Kardex: React.FC = () => {
   const {
     movimientos,
-    estadisticas,
     total,
     vacunas,
     jeringas,
@@ -259,7 +259,7 @@ const Kardex: React.FC = () => {
 
   return (
     <main className="min-h-full bg-white">
-      <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-4 pb-12 pt-6 sm:px-6 lg:px-8">
+      <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col gap-6 px-4 pb-12 pt-6 sm:px-6 lg:px-8`}>
         <div aria-live="polite" className="sr-only">
           {liveRegionMessage}
         </div>

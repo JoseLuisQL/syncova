@@ -5,7 +5,7 @@ import { COMPONENT_STYLES, USER_SECTIONS, SectionId } from '../constants';
 interface SectionItem {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: Icon;
 }
 
 interface UsuariosHeaderProps {

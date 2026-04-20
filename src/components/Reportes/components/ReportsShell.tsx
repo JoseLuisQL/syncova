@@ -1,6 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import { useAppNavigation } from '../../../hooks/useRouting';
-import { COMPONENT_STYLES, REPORTS_SECTIONS, ReportSectionConfig, SECTION_GROUPS, SectionId } from '../constants';
+import { REPORTS_SECTIONS, ReportSectionConfig, SECTION_GROUPS, SectionId } from '../constants';
+import { MODULE_LAYOUT } from '../../../styles/layout';
 
 interface ReportsShellProps {
   activeSection: SectionId;
@@ -22,15 +23,9 @@ const ReportsShell: React.FC<ReportsShellProps> = ({
       })).filter((group) => group.sections.length > 0),
     [sections],
   );
-  const gridClassName = useMemo(() => {
-    if (groupedSections.length <= 1) return 'grid-cols-1';
-    if (groupedSections.length === 2) return 'grid-cols-1 xl:grid-cols-[1.55fr_0.9fr]';
-    return 'grid-cols-1 xl:grid-cols-[1.25fr_0.78fr_0.9fr]';
-  }, [groupedSections.length]);
-
   return (
     <main className="min-h-full bg-white">
-      <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
+      <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col gap-4`}>
         <section className="bg-transparent border-b border-zinc-100 pb-2">
           <nav aria-label="Secciones de reportes" className="px-3 py-3 sm:px-4">
             <div className="flex flex-wrap items-start gap-x-12 gap-y-6">

@@ -279,7 +279,7 @@ export class EstablecimientoService {
       } else {
         return false;
       }
-    } catch (error) {
+    } catch {
       // Si hay error, asumimos que el código no está disponible
       return false;
     }

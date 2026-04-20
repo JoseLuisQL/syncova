@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, useRef, Suspense, lazy } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { useDashboard } from '../../hooks/useDashboard';
 import { useToastContext } from '../../contexts/ToastContext';
+import { MODULE_LAYOUT } from '../../styles/layout';
 
 import CentrosAcopioSection from './CentrosAcopioSection';
 import EstablecimientosSection from './EstablecimientosSection';
@@ -94,7 +95,7 @@ const Dashboard: React.FC = () => {
           {/* Subtle background element (Creative Frontend Aesthetics) */}
           <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-zinc-100/80 to-transparent pointer-events-none" />
           
-          <div className="w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative z-10 max-w-7xl mx-auto">
+          <div className={`${MODULE_LAYOUT.fullWidth} ${MODULE_LAYOUT.pageSpacingX} py-8 space-y-8 relative z-10`}>
             {/* ═══ Quick Permissions — Admin only, first visible section ═══ */}
             {isAdmin && <QuickPermissionsSection />}
 
@@ -108,7 +109,7 @@ const Dashboard: React.FC = () => {
 
             <section 
               aria-label="Información detallada"
-              className={`grid grid-cols-1 gap-6 pt-4 ${isResponsable ? 'lg:grid-cols-2 max-w-5xl mx-auto' : 'lg:grid-cols-3'}`}
+              className={`grid grid-cols-1 gap-6 pt-4 ${isResponsable ? 'lg:grid-cols-2' : 'lg:grid-cols-3'}`}
             >
               <motion.div className="h-full" whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 400 }}>
                 {isResponsable ? <EstablecimientosSection /> : <CentrosAcopioSection />}

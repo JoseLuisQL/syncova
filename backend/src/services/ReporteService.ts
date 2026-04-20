@@ -1009,7 +1009,7 @@ export class ReporteService {
         mes,
         anio,
         incluirInactivos = false,
-        agruparPor = 'mes'
+        agruparPor: _agruparPor = 'mes'
       } = filters;
 
       // Construir condiciones WHERE
@@ -1946,7 +1946,7 @@ export class ReporteService {
       // 3) Consulta de entregas con vale generado para el ultimo mes de cada establecimiento/vacuna
       // Recopilar todos los meses unicos que necesitamos consultar
       const mesesParaVales = new Map<string, { mes: number; anio: number }>();
-      for (const [key, base] of baseStockMap) {
+      for (const base of baseStockMap.values()) {
         const mesAnioKey = `${base.mes}-${base.anio}`;
         if (!mesesParaVales.has(mesAnioKey)) {
           mesesParaVales.set(mesAnioKey, { mes: base.mes, anio: base.anio });
@@ -2149,8 +2149,6 @@ export class ReporteService {
         },
         orderBy: { nombre: 'asc' }
       });
-
-      const vacunaMap = new Map(vacunas.map(v => [v.id, v.nombre]));
 
       // Calcular el mes y año del rango de fechas (usar el último mes del rango)
       const fechaFin = new Date(filters.fechaFin);

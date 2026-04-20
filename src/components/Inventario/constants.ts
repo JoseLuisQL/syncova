@@ -5,8 +5,7 @@ import {
   SlidersHorizontal,
   Warning,
   Syringe,
-  TrendUp,
-  Icon
+  TrendUp
 } from '@phosphor-icons/react';
 import { DESIGN_COLOR_SCALES, DESIGN_TOKENS } from '../../styles/designTokens';
 

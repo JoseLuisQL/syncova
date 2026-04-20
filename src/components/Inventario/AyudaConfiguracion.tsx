@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Question, BookOpen, Lightbulb, WarningCircle, CheckCircle, ArrowRight, X } from '@phosphor-icons/react';
-import { COMPONENT_STYLES } from './constants';
 
 interface AyudaConfiguracionProps {
   isOpen: boolean;
@@ -292,11 +291,6 @@ const AyudaConfiguracion: React.FC<AyudaConfiguracionProps> = ({ isOpen, onClose
           )}
         </div>
       </div>
-    </div>
-  );
-};
-
-export default AyudaConfiguracion; </div>
     </div>
   );
 };

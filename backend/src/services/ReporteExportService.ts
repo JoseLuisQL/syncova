@@ -3163,8 +3163,6 @@ export class ReporteExportService {
     // Ordenar grupos por el orden minimo de sus establecimientos
     gruposMicrored.sort((a, b) => a.ordenMinimo - b.ordenMinimo);
     
-    let microredIndex = 0;
-
     // Colores para el diseño mejorado
     const colorTotalDisa = 'FF1E3A8A'; // Azul oscuro para TOTAL DISA
     const colorRedHeader = 'FF3B82F6'; // Azul medio para RED headers
@@ -3500,7 +3498,6 @@ export class ReporteExportService {
         }
       }
       
-      microredIndex++;
     });  // Cierre del forEach de grupos
 
     // SEGUNDO: Generar las filas especiales con formulas (TOTAL DISA, RED JOSE MARIA, RED SONDOR, ESSALUD)
@@ -3546,7 +3543,6 @@ export class ReporteExportService {
     ];
 
     // Filas especiales empiezan en filasEspecialesStartRow
-    const rowTotalDisa = filasEspecialesStartRow;
     const rowRedJoseMaria = filasEspecialesStartRow + 1;
     const rowRedSondor = filasEspecialesStartRow + 2;
     const rowEssalud = filasEspecialesStartRow + 3;

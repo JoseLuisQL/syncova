@@ -537,7 +537,7 @@ export class ProgramacionAnualCenaresService {
   private static async aplicarSaldos2024Estaticos(
     saldosMap: Map<string, number>,
     vacunas: any[],
-    jeringas: any[]
+    _jeringas: any[]
   ): Promise<void> {
     try {
       // Mapeo de nombres de vacunas a valores de saldo 2024
@@ -570,7 +570,7 @@ export class ProgramacionAnualCenaresService {
         const nombreVacuna = vacuna.nombre.trim();
 
         // Buscar coincidencia exacta (case-sensitive primero)
-        if (saldos2024.hasOwnProperty(nombreVacuna)) {
+        if (Object.prototype.hasOwnProperty.call(saldos2024, nombreVacuna)) {
           saldosMap.set(vacuna.id, saldos2024[nombreVacuna]);
           console.log(`✅ Saldo 2024 estático aplicado para ${nombreVacuna}: ${saldos2024[nombreVacuna]}`);
         } else {
@@ -759,10 +759,10 @@ export class ProgramacionAnualCenaresService {
     entregas: any,
     consumo: any
   ): any {
-    let saldoQ1 = saldoAnterior + entregas.q1 - consumo.q1;
-    let saldoQ2 = saldoQ1 + entregas.q2 - consumo.q2;
-    let saldoQ3 = saldoQ2 + entregas.q3 - consumo.q3;
-    let saldoQ4 = saldoQ3 + entregas.q4 - consumo.q4;
+    const saldoQ1 = saldoAnterior + entregas.q1 - consumo.q1;
+    const saldoQ2 = saldoQ1 + entregas.q2 - consumo.q2;
+    const saldoQ3 = saldoQ2 + entregas.q3 - consumo.q3;
+    const saldoQ4 = saldoQ3 + entregas.q4 - consumo.q4;
 
     return {
       q1: saldoQ1,

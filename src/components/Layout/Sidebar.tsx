@@ -107,7 +107,7 @@ const Sidebar: React.FC = memo(() => {
 
         {/* Navegacion */}
         <nav className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-3 space-y-5">
-          {filteredMenuSections.map((section, sectionIndex) => (
+          {filteredMenuSections.map((section, _sectionIndex) => (
             <div key={section.title}>
               {/* Titulo de seccion */}
               <div 

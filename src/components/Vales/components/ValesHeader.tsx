@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { Receipt, Plus, ArrowsClockwise, X, SpinnerGap } from '@phosphor-icons/react';
 import { COMPONENT_STYLES } from '../constants';
+import { MODULE_LAYOUT } from '../../../styles/layout';
 
 interface ValesHeaderProps {
   onGenerarVale: () => void;
@@ -21,7 +22,7 @@ export const ValesHeader: React.FC<ValesHeaderProps> = memo(({
 }) => {
   return (
     <header className={COMPONENT_STYLES.header.container}>
-      <div className={`${onClose ? 'w-full px-4 sm:px-6' : 'max-w-7xl mx-auto px-4 sm:px-6'} py-4`}>
+      <div className={`${MODULE_LAYOUT.fullWidth} ${MODULE_LAYOUT.pageSpacingX} py-4`}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* Titulo */}
           <div className="flex items-center gap-4">

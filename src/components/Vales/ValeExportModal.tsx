@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback, memo } from 'react';
 import {
-  X, FileText, DownloadSimple, FileXls, User, Package, CheckCircle, ArrowRight, ArrowLeft, Eye, Gear, SpinnerGap
+  FileText, DownloadSimple, FileXls, User, Package, CheckCircle, ArrowRight, ArrowLeft, Eye, Gear, SpinnerGap
 } from '@phosphor-icons/react';
 import { ValeEntrega } from '../../services/valesService';
 import { useToastContext } from '../../contexts/ToastContext';

@@ -9,8 +9,7 @@ import {
   MenuItem,
   Grid,
   Typography,
-  Alert,
-  CircularProgress
+  Alert
 } from '@mui/material';
 import { CentroAcopio, CreateCentroAcopioDto, UpdateCentroAcopioDto } from '@/types';
 import CascadingSelector from '@/components/common/CascadingSelector';
@@ -112,7 +111,7 @@ const CentroAcopioForm: React.FC<CentroAcopioFormProps> = ({ centroAcopio, onSub
 
     // Validar teléfono (opcional)
     if (formData.telefono && formData.telefono.trim()) {
-      if (!/^[\d\s\-\+\(\)]+$/.test(formData.telefono.trim())) {
+      if (!/^[\d\s+()-]+$/.test(formData.telefono.trim())) {
         newErrors.telefono = 'El teléfono solo puede contener números, espacios, guiones, paréntesis y el signo +';
       } else if (formData.telefono.trim().length > 20) {
         newErrors.telefono = 'El teléfono no puede exceder 20 caracteres';

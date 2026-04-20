@@ -60,7 +60,7 @@ export class ValidationUtil {
       centroAcopioId: Joi.string().uuid().optional().allow(null),
       direccion: Joi.string().trim().min(10).max(500).required(),
       responsable: Joi.string().trim().min(3).max(255).required(),
-      telefono: Joi.string().trim().pattern(/^[0-9\-\+\s\(\)]+$/).max(20).optional(),
+      telefono: Joi.string().trim().pattern(/^[0-9+\s()-]+$/).max(20).optional(),
     }),
 
     updateEstablecimiento: Joi.object({
@@ -70,7 +70,7 @@ export class ValidationUtil {
       centroAcopioId: Joi.string().uuid().optional().allow(null),
       direccion: Joi.string().trim().min(10).max(500).optional(),
       responsable: Joi.string().trim().min(3).max(255).optional(),
-      telefono: Joi.string().trim().pattern(/^[0-9\-\+\s\(\)]+$/).max(20).optional(),
+      telefono: Joi.string().trim().pattern(/^[0-9+\s()-]+$/).max(20).optional(),
       estado: Joi.string().valid('activo', 'inactivo').optional(),
     }),
 
@@ -221,7 +221,7 @@ export class ValidationUtil {
    * Valida formato de teléfono
    */
   static isValidPhone(phone: string): boolean {
-    const phoneRegex = /^[0-9\-\+\s\(\)]+$/;
+    const phoneRegex = /^[0-9+\s()-]+$/;
     return phoneRegex.test(phone) && phone.length >= 7 && phone.length <= 20;
   }
 
@@ -247,7 +247,7 @@ export class ValidationUtil {
       errors.push('La contraseña debe contener al menos un número');
     }
 
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
       errors.push('La contraseña debe contener al menos un carácter especial');
     }
 

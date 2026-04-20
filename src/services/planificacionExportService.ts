@@ -1,6 +1,4 @@
 import { apiClient } from '../config/api';
-import { ApiResponse } from '../types/api';
-
 /**
  * Configuración para exportación de planificación
  */

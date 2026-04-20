@@ -117,7 +117,7 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
     return () => window.clearTimeout(timeoutId);
   }, [applyFilters, contextFilters, filterEstado, filterTipo, searchTerm]);
 
-  const stats = useMemo(
+  const _stats = useMemo(
     () => [
       {
         ...STATS_CONFIG.establecimientos[0],

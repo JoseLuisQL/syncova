@@ -628,8 +628,6 @@ export class ConfiguracionJeringaVacunaService {
         throw createError('Vacuna no encontrada', 404);
       }
 
-      const totalDosis = cantidadVacunas * vacuna.dosisPorFrasco;
-
       // Obtener información completa de las jeringas
       const jeringasIds = configResult.data.map(config => config.jeringaId);
       const jeringas = await prisma.jeringa.findMany({

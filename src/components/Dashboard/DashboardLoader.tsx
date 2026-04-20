@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
+import { MODULE_LAYOUT } from '../../styles/layout';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -24,7 +25,7 @@ export const DashboardLoader: React.FC = () => {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="w-full max-w-7xl mx-auto space-y-8"
+        className={`${MODULE_LAYOUT.fullWidth} space-y-8`}
       >
         {/* Header Skeleton */}
         <motion.div variants={itemVariants} className="flex justify-between items-center mb-8">

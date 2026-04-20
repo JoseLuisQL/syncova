@@ -110,7 +110,7 @@ const Microredes: React.FC<MicroredesProps> = ({
     return () => window.clearTimeout(timeoutId);
   }, [filterEstado, filterRedId, searchTerm, setFilters]);
 
-  const stats = useMemo(
+  const _stats = useMemo(
     () => [
       { ...STATS_CONFIG.microredes[0], value: total, color: STATS_CONFIG.microredes[0].color as ColorScheme },
       {

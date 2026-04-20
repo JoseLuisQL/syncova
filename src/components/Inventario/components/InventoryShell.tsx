@@ -1,7 +1,8 @@
 import React, { memo, useMemo } from 'react';
 import { FolderKanban, Package2, Settings2 } from 'lucide-react';
-import { INVENTORY_SECTIONS, COMPONENT_STYLES, SectionId } from '../constants';
+import { INVENTORY_SECTIONS, SectionId } from '../constants';
 import { useAppNavigation } from '../../../hooks/useRouting';
+import { MODULE_LAYOUT } from '../../../styles/layout';
 
 interface InventoryShellProps {
   activeSection: SectionId;
@@ -36,7 +37,7 @@ const InventoryShell: React.FC<InventoryShellProps> = ({ activeSection, children
 
   return (
     <main className="min-h-full bg-white">
-      <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
+      <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col gap-4`}>
         <section className="bg-transparent border-b border-zinc-100 pb-2">
           <nav aria-label="Secciones de inventario" className="px-3 py-3 sm:px-4">
             <div className="flex flex-wrap items-start gap-x-12 gap-y-6">

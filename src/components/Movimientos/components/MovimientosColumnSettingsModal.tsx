@@ -26,10 +26,10 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
   onSelectAll,
   onReset,
 }) => {
-  if (!isOpen) return null;
-
   const { user } = useAuth();
   const isResponsable = user?.rol === 'responsable_acopio';
+
+  if (!isOpen) return null;
 
   const columnasConfigurablesPermitidas = COLUMNAS_CONFIGURABLES.filter(
     (c) => !(isResponsable && c.key === 'ici')

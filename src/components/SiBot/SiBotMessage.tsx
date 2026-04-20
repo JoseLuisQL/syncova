@@ -78,7 +78,7 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
               remarkPlugins={[remarkGfm]}
               components={{
                 pre: ({children}) => <div className="my-0 max-w-full overflow-visible whitespace-normal">{children}</div>,
-                code({ node, inline, className, children, ...props }: any) {
+                code({ inline, className, children, ...props }: any) {
                   const matchName = /language-(\w+)/.exec(className || '');
                   const language = matchName ? matchName[1] : '';
                   const contentString = String(children).replace(/\n$/, '');

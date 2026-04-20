@@ -810,7 +810,7 @@ export class MovimientosExcelService {
         };
 
         vacunaError.erroresDetallados.forEach(error => {
-          if (conteoErrores.hasOwnProperty(error.tipoError)) {
+          if (Object.prototype.hasOwnProperty.call(conteoErrores, error.tipoError)) {
             conteoErrores[error.tipoError as keyof typeof conteoErrores]++;
           }
         });

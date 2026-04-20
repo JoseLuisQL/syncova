@@ -1,4 +1,4 @@
-import { Establecimiento, Vacuna, Lote, Jeringa, LoteJeringa, MovimientoVacuna, Usuario, Alerta } from '../types';
+import { Establecimiento, Vacuna, Lote, Jeringa, MovimientoVacuna, Usuario, Alerta } from '../types';
 
 export const mockEstablecimientos: Establecimiento[] = [
   // Centros de Acopio

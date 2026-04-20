@@ -94,7 +94,7 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
     return () => window.clearTimeout(timeoutId);
   }, [filterEstado, searchTerm, setFilters]);
 
-  const stats = useMemo(
+  const _stats = useMemo(
     () => [
       { ...STATS_CONFIG.redes[0], value: total, color: STATS_CONFIG.redes[0].color as ColorScheme },
       {

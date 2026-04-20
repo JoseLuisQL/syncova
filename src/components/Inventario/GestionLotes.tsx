@@ -45,8 +45,8 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
   isLoading = false,
   isUpdating = false,
   isDeleting = false,
-  stats: externalStats,
-  isLoadingStats = false,
+  stats: _externalStats,
+  isLoadingStats: _isLoadingStats = false,
   vacunas = [],
   jeringas = [],
 }) => {

@@ -7,7 +7,6 @@ import {
   IUsuario, 
   ServiceResult, 
   RolUsuario, 
-  EstadoGeneral,
   LoginDto,
   RefreshTokenDto,
   ChangePasswordDto 
@@ -139,7 +138,7 @@ export class AuthService {
       });
 
       // Preparar respuesta sin el hash de contraseña
-      const { passwordHash, role, ...userWithoutPassword } = user;
+      const { passwordHash: _passwordHash, role, ...userWithoutPassword } = user;
 
       // Extraer códigos de permisos del rol
       const permissions = role?.rolePermissions?.map(rp => rp.permission.codigo) || [];
@@ -176,7 +175,7 @@ export class AuthService {
       let decoded: JwtPayload;
       try {
         decoded = jwt.verify(refreshToken, this.JWT_SECRET) as JwtPayload;
-      } catch (error) {
+      } catch {
         throw createError.unauthorized('Refresh token inválido o expirado');
       }
 
@@ -436,7 +435,7 @@ export class AuthService {
       }
 
       // Remover hash de contraseña y extraer permisos
-      const { passwordHash, role, ...userWithoutPassword } = user;
+      const { passwordHash: _passwordHash, role, ...userWithoutPassword } = user;
       const permissions = role?.rolePermissions?.map(rp => rp.permission.codigo) || [];
       const centroAcopioIds = user.centrosAcopioAsignados?.map((item: { centroAcopioId: string }) => item.centroAcopioId) || [];
 

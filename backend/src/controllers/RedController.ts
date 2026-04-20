@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { RedService } from '@/services/RedService';
 import { CreateRedDto, UpdateRedDto, EstadoGeneral } from '@/types';
-import { createError } from '@/middleware/errorHandler';
 
 /**
  * Controlador para gestión de redes

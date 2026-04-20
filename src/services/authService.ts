@@ -1,7 +1,6 @@
 import { apiClient, ApiResponse, handleApiError } from '../config/api';
 import { 
   LoginDto, 
-  RefreshTokenDto, 
   ChangePasswordDto, 
   AuthResponse, 
   AuthUser, 
@@ -51,8 +50,6 @@ class AuthService {
 
       // Manejo específico para errores de rate limiting
       if (error.response?.status === 429) {
-        const retryAfter = error.response.data?.retryAfter || 300; // 5 minutos por defecto
-        const minutes = Math.ceil(retryAfter / 60);
         throw new Error(`Demasiadas solicitudes desde esta IP, intente nuevamente más tarde`);
       }
 

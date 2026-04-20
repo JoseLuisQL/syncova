@@ -286,7 +286,7 @@ export const getJeringasUnicas = (): { tipo: string; capacidad: string }[] => {
 export const calcularJeringasDefecto = (
   vacunaNombre: string,
   cantidadVacunas: number,
-  dosisPorFrasco: number = 1
+  _dosisPorFrasco: number = 1
 ): { tipo: string; capacidad: string; cantidad: number }[] => {
   const config = getConfiguracionDefecto(vacunaNombre);
 

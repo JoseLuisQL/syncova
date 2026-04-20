@@ -280,13 +280,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   /**
-   * Limpiar errores
-   */
-  const clearError = (): void => {
-    dispatch({ type: 'AUTH_CLEAR_ERROR' });
-  };
-
-  /**
    * Valor del contexto
    */
   const contextValue: AuthContextType = {

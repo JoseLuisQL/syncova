@@ -8,6 +8,7 @@ import { ConfiguracionGroupView, ConfiguracionShell, ConfiguracionSkeleton } fro
 import { useConfiguracion } from './hooks/useConfiguracion';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useAppNavigation, useCurrentRoute } from '../../hooks/useRouting';
+import { MODULE_LAYOUT } from '../../styles/layout';
 import type { ConfiguracionGroupId } from './types';
 import { CONFIG_STYLES } from './styles';
 
@@ -102,7 +103,7 @@ const Configuracion: React.FC = () => {
   if (accessibleGroups.length === 0) {
     return (
       <main className="min-h-screen">
-        <div className="mx-auto max-w-[980px] py-6">
+        <div className={`${MODULE_LAYOUT.fullWidth} ${MODULE_LAYOUT.pageSpacingX} py-6`}>
           <EmptyState
             icon={Warning}
             title="Sin acceso a Configuracion"

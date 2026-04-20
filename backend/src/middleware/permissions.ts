@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest, RolUsuario } from '@/types';
 import { ResponseUtil } from '@/utils/response';
 import { prisma } from '@/config/database';

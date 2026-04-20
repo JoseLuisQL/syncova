@@ -49,7 +49,7 @@ class LogBufferService {
       if (this.logs.length > this.MAX_LOGS) {
         this.logs.shift();
       }
-    } catch (e) {
+    } catch {
       // Evitar que el interceptor rompa la app
     }
   }

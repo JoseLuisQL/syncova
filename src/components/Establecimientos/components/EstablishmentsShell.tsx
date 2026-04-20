@@ -1,6 +1,7 @@
 import React, { memo, useMemo } from 'react';
-import { COMPONENT_STYLES, SECTION_GROUPS, SectionConfig, SectionId } from '../constants';
+import { SECTION_GROUPS, SectionConfig, SectionId } from '../constants';
 import { useAppNavigation } from '../../../hooks/useRouting';
+import { MODULE_LAYOUT } from '../../../styles/layout';
 
 interface EstablishmentsShellProps {
   activeSection: SectionId;
@@ -25,7 +26,7 @@ const EstablishmentsShell: React.FC<EstablishmentsShellProps> = ({
 
   return (
     <main className="min-h-full bg-white">
-      <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
+      <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col gap-4`}>
         <section className="bg-transparent border-b border-zinc-100 pb-2">
           <nav aria-label="Secciones de establecimientos" className="px-3 py-3 sm:px-4">
             <div className="flex flex-wrap items-start gap-x-12 gap-y-6">

@@ -3,13 +3,11 @@ import {
   CreatePermissionDto,
   UpdatePermissionDto,
   PermissionFilters,
-  PermissionsResponse,
   PermissionStats
 } from '../types';
 import {
   apiClient,
-  ApiResponse,
-  PaginatedResponse
+  ApiResponse
 } from '../config/api';
 import { logger } from '../utils/debug';
 

@@ -1,7 +1,8 @@
 import React, { memo } from 'react';
 import { Key, Shield, Users } from '@phosphor-icons/react';
 import { useAppNavigation } from '../../../hooks/useRouting';
-import { COMPONENT_STYLES, SectionId, USER_SECTIONS } from '../constants';
+import { MODULE_LAYOUT } from '../../../styles/layout';
+import { SectionId, USER_SECTIONS } from '../constants';
 
 interface UsersShellProps {
   activeSection: SectionId;
@@ -30,7 +31,7 @@ const UsersShell: React.FC<UsersShellProps> = ({ activeSection, children }) => {
 
   return (
     <main className="min-h-full bg-white">
-      <div className="mx-auto flex max-w-[1500px] flex-col gap-4">
+      <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col gap-4`}>
         <section className="bg-transparent border-b border-zinc-100 pb-2">
           <nav aria-label="Secciones de usuarios" className="px-3 py-3 sm:px-4">
             <div className="flex flex-wrap items-start gap-x-12 gap-y-6">

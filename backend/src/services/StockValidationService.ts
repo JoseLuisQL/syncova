@@ -280,8 +280,6 @@ export class StockValidationService {
       }
 
       // Calculate total doses
-      const totalDoses = requirement.quantity * vaccine.dosisPorFrasco;
-
       // Get syringe configuration
       const configResult = await ConfiguracionJeringaVacunaService.calcularJeringasNecesarias(
         requirement.vaccineId,

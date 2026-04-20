@@ -6,8 +6,7 @@ import {
   ValesFilters,
   ResumenGeneracion,
   VistaPrevia,
-  ModificacionVale,
-  SincronizacionValeResponse
+  ModificacionVale
 } from '../services/valesService';
 import { useApi } from './useApi';
 import { logger } from '../utils/debug';

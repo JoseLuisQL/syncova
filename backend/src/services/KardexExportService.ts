@@ -749,7 +749,7 @@ class KardexExportService {
    */
   private static generarNombreHojaUnico(workbook: ExcelJS.Workbook, itemNombre: string): string {
     // Limpiar el nombre base
-    let nombreBase = this.limpiarNombreHoja(itemNombre);
+    const nombreBase = this.limpiarNombreHoja(itemNombre);
     let nombreFinal = nombreBase;
     let contador = 1;
 
@@ -790,7 +790,7 @@ class KardexExportService {
    */
   private static limpiarNombreHoja(nombre: string): string {
     return nombre
-      .replace(/[\\\/\?\*\[\]:]/g, '') // Remover caracteres no permitidos en Excel (agregado ':')
+      .replace(/[\\/?*[\]:]/g, '') // Remover caracteres no permitidos en Excel (agregado ':')
       .replace(/\s+/g, ' ') // Normalizar espacios múltiples
       .substring(0, 31) // Máximo 31 caracteres
       .trim();

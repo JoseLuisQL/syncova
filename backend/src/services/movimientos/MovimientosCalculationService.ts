@@ -203,7 +203,7 @@ export class MovimientosCalculationService {
 
       console.log(`🔄 [Redistribución] Trasladando ${disminucion} unidades al mes ${mesSiguiente}/${anioSiguiente}`);
 
-      let movimientoSiguiente = await tx.movimientoVacuna.findUnique({
+      const movimientoSiguiente = await tx.movimientoVacuna.findUnique({
         where: {
           uk_movimiento_establecimiento_vacuna_mes_anio: {
             establecimientoId: movimientoOriginal.establecimientoId,

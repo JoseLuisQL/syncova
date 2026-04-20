@@ -12,7 +12,7 @@ export class PasswordUtils {
   static async hashPassword(password: string): Promise<string> {
     try {
       return await bcrypt.hash(password, this.SALT_ROUNDS);
-    } catch (error) {
+    } catch {
       throw new Error('Error al encriptar contraseña');
     }
   }
@@ -23,7 +23,7 @@ export class PasswordUtils {
   static async verifyPassword(password: string, hash: string): Promise<boolean> {
     try {
       return await bcrypt.compare(password, hash);
-    } catch (error) {
+    } catch {
       throw new Error('Error al verificar contraseña');
     }
   }
@@ -55,7 +55,7 @@ export class PasswordUtils {
     }
 
     // Al menos un carácter especial
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
       errors.push('La contraseña debe contener al menos un carácter especial');
     }
 

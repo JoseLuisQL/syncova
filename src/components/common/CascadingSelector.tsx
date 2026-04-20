@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { GitBranch, Loader2, LucideIcon, MapPin, Network, Warehouse } from 'lucide-react';
 import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
 import { useMicroredes } from '../../hooks/useMicroredes';
 import { useRedes } from '../../hooks/useRedes';
@@ -34,7 +33,7 @@ interface CascadingSelectorProps {
   };
 }
 
-const selectorCardBase = 'rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition';
+const _selectorCardBase = 'rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition';
 
 const CascadingSelector: React.FC<CascadingSelectorProps> = ({
   selectedRedId = '',
@@ -112,17 +111,17 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
     setLocalCentroAcopioId(selectedCentroAcopioId);
   }, [selectedCentroAcopioId]);
 
-  const selectedRedLabel = useMemo(
+  const _selectedRedLabel = useMemo(
     () => redes.find((red) => red.id === localRedId)?.nombre || 'Sin red seleccionada',
     [localRedId, redes],
   );
 
-  const selectedMicroredLabel = useMemo(
+  const _selectedMicroredLabel = useMemo(
     () => filteredMicroredes.find((microred) => microred.id === localMicroredId)?.nombre || 'Sin microred seleccionada',
     [filteredMicroredes, localMicroredId],
   );
 
-  const selectedCentroLabel = useMemo(
+  const _selectedCentroLabel = useMemo(
     () =>
       filteredCentrosAcopio.find((centroAcopio) => centroAcopio.id === localCentroAcopioId)?.nombre ||
       'Sin centro de acopio seleccionado',

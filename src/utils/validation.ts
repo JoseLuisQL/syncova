@@ -152,7 +152,7 @@ export const validateCentroAcopio = (data: CreateCentroAcopioDto | UpdateCentroA
 
   // Teléfono es opcional pero si se proporciona debe ser válido
   if (data.telefono && data.telefono.trim().length > 0) {
-    if (!/^[\d\s\-\+\(\)]+$/.test(data.telefono.trim())) {
+    if (!/^[\d\s+()-]+$/.test(data.telefono.trim())) {
       errors.telefono = 'El teléfono solo puede contener números, espacios, guiones, paréntesis y el signo +';
     } else if (data.telefono.trim().length < 7) {
       errors.telefono = 'El teléfono debe tener al menos 7 dígitos';
@@ -214,7 +214,7 @@ export const validatePhone = (phone: string): string | null => {
     return null; // Teléfono es opcional
   }
   
-  if (!/^[\d\s\-\+\(\)]+$/.test(phone.trim())) {
+  if (!/^[\d\s+()-]+$/.test(phone.trim())) {
     return 'El teléfono solo puede contener números, espacios, guiones, paréntesis y el signo +';
   }
   

@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { MicroredService } from '@/services/MicroredService';
 import { CreateMicroredDto, UpdateMicroredDto, EstadoGeneral } from '@/types';
-import { createError } from '@/middleware/errorHandler';
 
 /**
  * Controlador para gestión de microredes

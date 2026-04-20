@@ -476,7 +476,7 @@ export class ValesService {
    * Verificar si un vale necesita sincronización
    * (Compara las fechas de actualización del vale vs movimientos relacionados)
    */
-  static async verificarNecesidadSincronizacion(valeId: string): Promise<boolean> {
+  static async verificarNecesidadSincronizacion(_valeId: string): Promise<boolean> {
     try {
       // Por ahora retornamos false, pero en el futuro se podría implementar
       // una verificación más sofisticada comparando timestamps

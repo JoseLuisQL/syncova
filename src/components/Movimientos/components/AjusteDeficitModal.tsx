@@ -14,7 +14,6 @@ import {
 } from '@phosphor-icons/react';
 import { Modal } from '../../Establecimientos/components';
 import { MESES, COMPONENT_STYLES } from '../constants';
-import { COLORES_CENTROS_ACOPIO } from '../../../utils/centroAcopioUtils';
 import { useToastContext } from '../../../contexts/ToastContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import {

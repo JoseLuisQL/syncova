@@ -922,7 +922,9 @@ class ValeExportService {
       .replace(/[ÚÙÜÛ]/g, 'U')
       .replace(/ñ/g, 'n')
       .replace(/Ñ/g, 'N')
-      .replace(/[^\x00-\x7F]/g, '') // Remover caracteres no ASCII
+      .split('')
+      .filter((char) => char.charCodeAt(0) <= 0x7f)
+      .join('')
       .trim();
   }
 
@@ -1851,7 +1853,7 @@ class ValeExportService {
     currentY += 20;
 
     // ESTABLECIMIENTOS - Layout vertical (uno debajo del otro)
-    datos.establecimientos.forEach((establecimiento: any, estIndex: number) => {
+    datos.establecimientos.forEach((establecimiento: any) => {
       // Filtrar vacunas y jeringas con cantidad > 0
       const vacunasConDatos = establecimiento.vacunas.filter((v: any) => v.cantidad > 0);
       const jeringasEstConDatos = establecimiento.jeringas.filter((j: any) => j.cantidad > 0);
