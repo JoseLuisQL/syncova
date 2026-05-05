@@ -321,8 +321,8 @@ const LoginForm: React.FC = () => {
 
         {/* Logo and Header */}
         <div className="flex flex-col items-center mb-8">
-          <div className="mb-6 bg-white/10 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-white/20 flex items-center justify-center">
-            <SivacLogo size={42} />
+          <div className="mb-6 bg-white/10 backdrop-blur-md p-4 rounded-[20px] shadow-xl border border-white/20 flex items-center justify-center">
+            <SivacLogo size={80} />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight text-center drop-shadow-md">
             Acceso a SIVAC
