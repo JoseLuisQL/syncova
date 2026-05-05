@@ -1,165 +1,87 @@
-import React, { memo, useMemo, useRef, useEffect } from 'react';
+import React, { memo } from 'react';
 import { Warning, WarningCircle, Info, Bell } from '@phosphor-icons/react';
 import { usePaginatedAlertas } from '../../hooks/usePaginatedDashboard';
-import Pagination from './Pagination';
 import { EmptyState, SectionSkeleton } from './LoadingStates';
-import { ALERT_LEVEL_CONFIG } from './constants';
 import type { AlertaReciente } from '../../services/dashboardService';
 
 const getAlertIcon = (tipo: string, nivel: string) => {
-  const iconClass = "h-4 w-4";
-  
-  if (nivel === 'critico') {
-    return <WarningCircle className={`${iconClass} text-rose-600`} weight="fill" />;
-  }
-  
+  if (nivel === 'critico') return <WarningCircle size={16} className="text-rose-600" weight="fill" />;
   switch (tipo) {
     case 'stock_bajo':
-    case 'vencimiento_proximo':
-      return <Warning className={`${iconClass} text-amber-600`} weight="fill" />;
-    case 'sistema':
-      return <Info className={`${iconClass} text-blue-600`} weight="fill" />;
-    default:
-      return <Bell className={`${iconClass} text-zinc-400`} weight="fill" />;
+    case 'vencimiento_proximo': return <Warning size={16} className="text-amber-500" weight="fill" />;
+    case 'sistema': return <Info size={16} className="text-blue-500" weight="fill" />;
+    default: return <Bell size={16} className="text-zinc-400" weight="fill" />;
   }
 };
 
 const formatDate = (fecha: Date): string => {
   const date = new Date(fecha);
-  return new Intl.DateTimeFormat('es-ES', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
+  return new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date);
 };
 
-const AlertaCard: React.FC<{ alerta: AlertaReciente }> = memo(({ alerta }) => {
-  const config = ALERT_LEVEL_CONFIG[alerta.nivel as keyof typeof ALERT_LEVEL_CONFIG] 
-    || ALERT_LEVEL_CONFIG.bajo;
-
-  return (
-    <div
-      className="flex items-start gap-3.5 p-4 rounded-xl border border-transparent hover:border-zinc-200 hover:bg-zinc-50/80 hover:shadow-sm transition-all duration-200"
-      role="listitem"
-    >
-      <div className={`flex-shrink-0 mt-0.5 p-2 rounded-xl bg-white border border-zinc-100 shadow-sm ${config.bg.replace('bg-', 'text-')}`}>
-        {getAlertIcon(alerta.tipo, alerta.nivel)}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-[13px] font-bold text-zinc-900 line-clamp-2 leading-relaxed tracking-tight">
-            {alerta.mensaje}
-          </p>
-          <span className={`px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-widest flex-shrink-0 ${config.badge}`}>
-            {alerta.nivel}
-          </span>
-        </div>
-        <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold text-zinc-400 uppercase tracking-widest">
-          <time dateTime={new Date(alerta.fechaCreacion).toISOString()}>
-            {formatDate(alerta.fechaCreacion)}
-          </time>
-          {alerta.establecimiento && (
-            <>
-              <span aria-hidden="true" className="text-zinc-300">•</span>
-              <span className="truncate max-w-[150px] font-bold text-zinc-500">{alerta.establecimiento}</span>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-});
-
-AlertaCard.displayName = 'AlertaCard';
-
 const AlertasSection: React.FC = memo(() => {
-  const { data, pagination, loading, error, currentPage, setPage, refresh } = usePaginatedAlertas(4);
-
-  const refreshRef = useRef(refresh);
-  useEffect(() => {
-    refreshRef.current = refresh;
-  });
-
-  const handleRefresh = () => {
-    refreshRef.current();
-  };
-
-  const alertCount = useMemo(() => pagination.total, [pagination.total]);
+  const { data, loading, error, pagination } = usePaginatedAlertas(4);
 
   return (
-    <section 
-      className="bg-white rounded-2xl border border-zinc-200/60 shadow-sm overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300"
-      aria-label={`Alertas recientes (${alertCount} total)`}
-    >
-      <header className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
-        <h3 className="text-[14px] font-bold text-zinc-900 flex items-center gap-2.5 tracking-tight">
-          <div className="p-1.5 rounded-lg bg-white border border-zinc-200 shadow-sm">
-            <Warning className="h-4 w-4 text-zinc-900" weight="bold" aria-hidden="true" />
-          </div>
-          Centro de Alertas
-          {alertCount > 0 && (
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-teal-600 text-white shadow-sm ml-1">
-              {alertCount}
-            </span>
-          )}
-        </h3>
-        <button
-          onClick={handleRefresh}
-          disabled={loading}
-          className="text-[12px] font-bold text-zinc-400 hover:text-zinc-900 disabled:opacity-50 
-            disabled:cursor-not-allowed transition-colors"
-          aria-label={loading ? 'Actualizando alertas' : 'Actualizar alertas'}
-        >
-          {loading ? 'Cargando...' : 'Recargar'}
-        </button>
+    <section className="bg-white rounded-md border border-zinc-200 shadow-sm flex flex-col h-full">
+      <header className="px-6 py-5 border-b border-zinc-100 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Bell size={18} className="text-zinc-400" />
+          <h3 className="text-[15px] font-extrabold text-zinc-900 tracking-tight">Resumen de alertas</h3>
+        </div>
+        {pagination.total > 0 && (
+          <span className="text-[12px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">
+            {pagination.total} activas
+          </span>
+        )}
       </header>
 
-      <div className="p-3">
+      <div className="flex-1 flex flex-col p-6 overflow-y-auto">
         {loading && data.length === 0 ? (
           <SectionSkeleton rows={4} />
         ) : error ? (
-          <div className="text-center py-8">
-            <Warning className="mx-auto h-8 w-8 text-zinc-300 mb-2" weight="duotone" aria-hidden="true" />
-            <p className="text-sm font-bold text-zinc-700 mb-1">Fallo de lectura</p>
-            <p className="text-xs font-medium text-zinc-400 mb-4">{error}</p>
-            <button
-              onClick={handleRefresh}
-              className="text-xs font-bold text-zinc-900 hover:underline"
-            >
-              Reconectar
-            </button>
-          </div>
+          <div className="text-center text-sm text-rose-600">{error}</div>
         ) : data.length === 0 ? (
-          <EmptyState
-            icon={<Bell className="h-full w-full" weight="duotone" />}
-            title="Sistemas operativos nominales"
-            description="Cero incidencias reportadas en el periodo."
-          />
+          <EmptyState title="Cero incidencias" description="No hay alertas." icon={<Bell />} />
         ) : (
-          <div className="space-y-1" role="list" aria-label="Lista de alertas">
+          <div className="space-y-4">
             {data.map((alerta) => (
-              <AlertaCard key={alerta.id} alerta={alerta} />
+              <div key={alerta.id} className="flex gap-3 relative pb-4 border-b border-zinc-100 last:border-0 last:pb-0">
+                <div className="flex-shrink-0 mt-0.5">
+                  {getAlertIcon(alerta.tipo, alerta.nivel)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                      {alerta.tipo.replace('_', ' ')}
+                    </span>
+                    <span className="text-[11px] font-medium text-zinc-400 whitespace-nowrap ml-2">
+                      {formatDate(alerta.fechaCreacion)}
+                    </span>
+                  </div>
+                  <p className="text-[13px] font-medium text-zinc-800 leading-snug pr-4">
+                    {alerta.mensaje}
+                  </p>
+                  {alerta.establecimiento && (
+                    <p className="text-[12px] font-medium text-zinc-500 mt-1 truncate">
+                      {alerta.establecimiento}
+                    </p>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         )}
       </div>
 
-      {pagination.totalPages > 1 && (
-        <div className="border-t border-zinc-100 px-4 py-3 bg-zinc-50/30">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={pagination.totalPages}
-            onPageChange={setPage}
-            totalItems={pagination.total}
-            itemsPerPage={pagination.limit}
-          />
-        </div>
-      )}
+      <div className="px-6 py-4 border-t border-zinc-100 mt-auto">
+        <button className="text-[13px] font-bold text-teal-600 hover:text-teal-700 transition-colors flex items-center gap-1">
+          Centro de notificaciones <span className="text-lg leading-none">→</span>
+        </button>
+      </div>
     </section>
   );
 });
 
 AlertasSection.displayName = 'AlertasSection';
-
 export default AlertasSection;

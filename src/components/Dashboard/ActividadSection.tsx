@@ -1,175 +1,80 @@
-import React, { memo, useRef, useEffect } from 'react';
-import { ArrowRight, Clock, User, Buildings, FileText, Package } from '@phosphor-icons/react';
+import React, { memo } from 'react';
+import { ArrowRight, Clock, FileText, Package } from '@phosphor-icons/react';
 import { usePaginatedActividad } from '../../hooks/usePaginatedDashboard';
-import Pagination from './Pagination';
 import { EmptyState, SectionSkeleton } from './LoadingStates';
-import { ACTIVITY_TYPE_CONFIG } from './constants';
-import type { ActividadReciente } from '../../services/dashboardService';
 
-const getActivityIcon = (tipo: ActividadReciente['tipo']) => {
-  const iconClass = "h-4 w-4";
-  
+const getActivityIcon = (tipo: string) => {
   switch (tipo) {
-    case 'vale_generado':
-      return <FileText className={`${iconClass} text-violet-600`} weight="fill" />;
-    case 'lote_recibido':
-      return <Package className={`${iconClass} text-emerald-600`} weight="fill" />;
-    case 'movimiento_registrado':
-      return <ArrowRight className={`${iconClass} text-blue-600`} weight="bold" />;
-    default:
-      return <Clock className={`${iconClass} text-zinc-400`} weight="bold" />;
+    case 'vale_generado': return <FileText size={14} className="text-violet-500" weight="fill" />;
+    case 'lote_recibido': return <Package size={14} className="text-emerald-500" weight="fill" />;
+    case 'movimiento_registrado': return <ArrowRight size={14} className="text-blue-500" weight="bold" />;
+    default: return <Clock size={14} className="text-zinc-400" weight="bold" />;
   }
 };
 
-const formatRelativeTime = (fecha: Date): string => {
-  const now = new Date();
-  const date = new Date(fecha);
-  const diffMs = now.getTime() - date.getTime();
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
-
-  if (diffMinutes < 1) return 'Ahora';
-  if (diffMinutes < 60) return `Hace ${diffMinutes}m`;
-  
-  const diffHours = Math.floor(diffMinutes / 60);
-  if (diffHours < 24) return `Hace ${diffHours}h`;
-
-  return new Intl.DateTimeFormat('es-ES', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
+const formatTimeOnly = (fecha: Date): string => {
+  return new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit' }).format(new Date(fecha));
 };
 
-const ActividadCard: React.FC<{ actividad: ActividadReciente }> = memo(({ actividad }) => {
-  const config = ACTIVITY_TYPE_CONFIG[actividad.tipo] || ACTIVITY_TYPE_CONFIG.movimiento_registrado;
-
-  return (
-    <div
-      className="flex items-start gap-3.5 p-4 rounded-xl border border-transparent hover:border-zinc-200 hover:bg-zinc-50/80 hover:shadow-sm transition-all duration-200"
-      role="listitem"
-    >
-      <div className={`flex-shrink-0 mt-0.5 p-2 rounded-xl bg-white border border-zinc-100 shadow-sm ${config.bg.replace('bg-', 'text-')}`}>
-        {getActivityIcon(actividad.tipo)}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2 mb-1.5">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">
-            {config.label}
-          </span>
-          <time 
-            className="text-[11px] font-semibold text-zinc-400"
-            dateTime={new Date(actividad.fecha).toISOString()}
-          >
-            {formatRelativeTime(actividad.fecha)}
-          </time>
-        </div>
-        <p className="text-[13px] font-medium text-zinc-900 line-clamp-2 leading-relaxed">
-          {actividad.descripcion}
-        </p>
-        {(actividad.usuario || actividad.establecimiento) && (
-          <div className="mt-2.5 flex items-center gap-3 text-[11px] font-semibold tracking-wide text-zinc-400">
-            {actividad.usuario && (
-              <span className="flex items-center gap-1.5">
-                <User className="h-3 w-3" weight="bold" aria-hidden="true" />
-                <span className="truncate max-w-[100px]">{actividad.usuario}</span>
-              </span>
-            )}
-            {actividad.establecimiento && (
-              <span className="flex items-center gap-1.5">
-                <Buildings className="h-3 w-3" weight="bold" aria-hidden="true" />
-                <span className="truncate max-w-[100px]">{actividad.establecimiento}</span>
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-});
-
-ActividadCard.displayName = 'ActividadCard';
-
 const ActividadSection: React.FC = memo(() => {
-  const { data, pagination, loading, error, currentPage, setPage, refresh } = usePaginatedActividad(5);
-
-  const refreshRef = useRef(refresh);
-  useEffect(() => {
-    refreshRef.current = refresh;
-  });
-
-  const handleRefresh = () => {
-    refreshRef.current();
-  };
+  const { data, loading, error } = usePaginatedActividad(6);
 
   return (
-    <section 
-      className="bg-white rounded-2xl border border-zinc-200/60 shadow-sm overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300"
-      aria-label="Actividad reciente"
-    >
-      <header className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
-        <h3 className="text-[14px] font-bold text-zinc-900 flex items-center gap-2.5 tracking-tight">
-          <div className="p-1.5 rounded-lg bg-white border border-zinc-200 shadow-sm">
-            <Clock className="h-4 w-4 text-zinc-900" weight="bold" aria-hidden="true" />
-          </div>
-          Registro Contable
-        </h3>
-        <button
-          onClick={handleRefresh}
-          disabled={loading}
-          className="text-[12px] font-bold text-zinc-400 hover:text-zinc-900 disabled:opacity-50 
-            disabled:cursor-not-allowed transition-colors"
-          aria-label={loading ? 'Actualizando actividad' : 'Actualizar actividad'}
-        >
-          {loading ? 'Cargando...' : 'Recargar'}
-        </button>
+    <section className="bg-white rounded-md border border-zinc-200 shadow-sm flex flex-col h-full">
+      <header className="px-6 py-5 border-b border-zinc-100 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Clock size={18} className="text-zinc-400" />
+          <h3 className="text-[15px] font-extrabold text-zinc-900 tracking-tight">Actividad contable</h3>
+        </div>
       </header>
 
-      <div className="p-3">
+      <div className="flex-1 flex flex-col p-6 overflow-y-auto">
         {loading && data.length === 0 ? (
           <SectionSkeleton rows={5} />
         ) : error ? (
-          <div className="text-center py-8">
-            <Clock className="mx-auto h-8 w-8 text-zinc-300 mb-2" weight="duotone" aria-hidden="true" />
-            <p className="text-sm font-bold text-zinc-700 mb-1">Fallo de sincronización</p>
-            <p className="text-xs font-medium text-zinc-400 mb-4">{error}</p>
-            <button
-              onClick={handleRefresh}
-              className="text-xs font-bold text-zinc-900 hover:underline"
-            >
-              Reintentar conexión
-            </button>
-          </div>
+          <div className="text-center text-sm text-rose-600">{error}</div>
         ) : data.length === 0 ? (
-          <EmptyState
-            icon={<Clock className="h-full w-full" weight="duotone" />}
-            title="Libre de operaciones"
-            description="Sin registros en la base de datos temporal."
-          />
+          <EmptyState title="Sin actividad" description="No hay registros recientes." icon={<Clock />} />
         ) : (
-          <div className="space-y-1" role="list" aria-label="Lista de actividades">
-            {data.map((actividad) => (
-              <ActividadCard key={actividad.id} actividad={actividad} />
+          <div className="relative before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-zinc-100">
+            {data.map((actividad, index) => (
+              <div key={actividad.id} className={`relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active ${index !== data.length - 1 ? 'mb-6' : ''}`}>
+                <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-white bg-zinc-50 shadow-sm text-slate-500 z-10 absolute left-0 md:left-1/2 md:-translate-x-1/2">
+                  {getActivityIcon(actividad.tipo)}
+                </div>
+                
+                <div className="w-[calc(100%-2.5rem)] md:w-[calc(50%-2rem)] ml-10 md:ml-0 flex flex-col">
+                  <div className="bg-white rounded-md border border-zinc-100 p-3 shadow-sm group-hover:border-zinc-200 transition-colors relative">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                        {actividad.tipo.replace('_', ' ')}
+                      </span>
+                      <time className="text-[11px] font-medium text-zinc-400">
+                        {formatTimeOnly(actividad.fecha)}
+                      </time>
+                    </div>
+                    <p className="text-[13px] font-medium text-zinc-800 line-clamp-2">
+                      {actividad.descripcion}
+                    </p>
+                    <div className="mt-1 flex items-center gap-2 text-[11px] text-zinc-400 font-semibold truncate">
+                      {actividad.usuario && <span>{actividad.usuario}</span>}
+                    </div>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         )}
       </div>
 
-      {pagination.totalPages > 1 && (
-        <div className="border-t border-zinc-100 px-4 py-3 bg-zinc-50/30">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={pagination.totalPages}
-            onPageChange={setPage}
-            totalItems={pagination.total}
-            itemsPerPage={pagination.limit}
-          />
-        </div>
-      )}
+      <div className="px-6 py-4 border-t border-zinc-100 mt-auto">
+        <button className="text-[13px] font-bold text-teal-600 hover:text-teal-700 transition-colors flex items-center gap-1">
+          Ver registro completo <span className="text-lg leading-none">→</span>
+        </button>
+      </div>
     </section>
   );
 });
 
 ActividadSection.displayName = 'ActividadSection';
-
 export default ActividadSection;

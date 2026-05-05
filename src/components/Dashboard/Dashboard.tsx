@@ -8,23 +8,15 @@ import CentrosAcopioSection from './CentrosAcopioSection';
 import EstablecimientosSection from './EstablecimientosSection';
 import AlertasSection from './AlertasSection';
 import ActividadSection from './ActividadSection';
-import QuickPermissionsSection from './QuickPermissionsSection';
+import MetricsSection from './MetricsSection';
+import StockAvailabilitySection from './StockAvailabilitySection';
+import PermisosPlanificacion from './PermisosPlanificacion';
+
 import { ErrorState } from './LoadingStates';
 import { DashboardLoader } from './DashboardLoader';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ChartSection = lazy(() => import('./ChartSection'));
-
-const ChartSkeleton: React.FC = () => (
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div className="bg-white rounded-[24px] border border-zinc-100/80 p-6">
-      <div className="h-[340px] bg-zinc-50 rounded-xl animate-pulse" />
-    </div>
-    <div className="bg-white rounded-[24px] border border-zinc-100/80 p-6">
-      <div className="h-[340px] bg-zinc-50 rounded-xl animate-pulse" />
-    </div>
-  </div>
-);
 
 const fadeVariants: Variants = {
   initial: { opacity: 0, y: 15 },
@@ -35,7 +27,6 @@ const fadeVariants: Variants = {
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const isResponsable = user?.rol === 'responsable_acopio';
-  const isAdmin = user?.rol === 'administrador';
   
   const { toast } = useToastContext();
   const toastRef = useRef(toast);
@@ -50,6 +41,7 @@ const Dashboard: React.FC = () => {
     refresh,
     movimientosMensuales,
     stockPorVacuna,
+    estadisticas,
     hasData,
   } = useDashboard();
 
@@ -80,7 +72,7 @@ const Dashboard: React.FC = () => {
           <DashboardLoader />
         </motion.div>
       ) : error && !hasData ? (
-        <motion.main key="error" {...fadeVariants} className="min-h-screen bg-zinc-50/60 px-4 sm:px-6 lg:px-8 py-8">
+        <motion.main key="error" {...fadeVariants} className="min-h-screen bg-slate-50 px-4 sm:px-6 lg:px-8 py-8">
           <ErrorState error={error} onRetry={handleRefresh} />
         </motion.main>
       ) : (
@@ -90,38 +82,45 @@ const Dashboard: React.FC = () => {
           animate="animate"
           exit="exit"
           variants={fadeVariants}
-          className="min-h-screen relative bg-[#fcfcfc]"
+          className="min-h-screen relative bg-slate-50"
         >
-          {/* Subtle background element (Creative Frontend Aesthetics) */}
-          <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-zinc-100/80 to-transparent pointer-events-none" />
-          
-          <div className={`${MODULE_LAYOUT.fullWidth} ${MODULE_LAYOUT.pageSpacingX} py-8 space-y-8 relative z-10`}>
-            {/* ═══ Quick Permissions — Admin only, first visible section ═══ */}
-            {isAdmin && <QuickPermissionsSection />}
+          <div className={`${MODULE_LAYOUT.fullWidth} ${MODULE_LAYOUT.pageSpacingX} py-8 space-y-6 relative z-10`}>
+            
+            {/* 1. Metrics Row */}
+            <MetricsSection stats={estadisticas} isLoading={loading && !hasData} />
 
-            <Suspense fallback={<ChartSkeleton />}>
-              <ChartSection
-                movimientosMensuales={movimientosMensuales}
-                stockPorVacuna={stockPorVacuna}
-                isLoading={loading && !hasData}
-              />
-            </Suspense>
+            {/* 2. Charts and Planning Row */}
+            <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-5">
+                <Suspense fallback={<div className="bg-white rounded-md border border-zinc-200 p-6 h-[400px] animate-pulse" />}>
+                  <ChartSection
+                    movimientosMensuales={movimientosMensuales}
+                    isLoading={loading && !hasData}
+                  />
+                </Suspense>
+              </div>
+              <div className="lg:col-span-4">
+                <StockAvailabilitySection 
+                  data={stockPorVacuna} 
+                  isLoading={loading && !hasData} 
+                />
+              </div>
+              <div className="lg:col-span-3">
+                <PermisosPlanificacion />
+              </div>
+            </section>
 
-            <section 
-              aria-label="Información detallada"
-              className={`grid grid-cols-1 gap-6 pt-4 ${isResponsable ? 'lg:grid-cols-2' : 'lg:grid-cols-3'}`}
-            >
-              <motion.div className="h-full" whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 400 }}>
+            {/* 3. Bottom Row */}
+            <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-5">
                 {isResponsable ? <EstablecimientosSection /> : <CentrosAcopioSection />}
-              </motion.div>
-              <motion.div className="h-full" whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 400 }}>
+              </div>
+              <div className="lg:col-span-4">
                 <AlertasSection />
-              </motion.div>
-              {!isResponsable && (
-                <motion.div className="h-full" whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 400 }}>
-                  <ActividadSection />
-                </motion.div>
-              )}
+              </div>
+              <div className="lg:col-span-3">
+                <ActividadSection />
+              </div>
             </section>
           </div>
         </motion.main>
