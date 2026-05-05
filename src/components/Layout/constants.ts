@@ -63,10 +63,10 @@ export const MENU_SECTIONS: MenuSection[] = [
 
 // Estilos de Breadcrumbs
 export const BREADCRUMBS_STYLES = {
-  nav: 'flex items-center flex-wrap gap-1.5 text-sm',
-  homeButton: 'flex items-center p-1.5 rounded-md text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-200',
+  nav: 'flex items-center flex-wrap gap-1.5 text-[12px] font-bold uppercase tracking-wide',
+  homeButton: 'flex items-center p-1.5 rounded-sm text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors duration-150 focus:outline-none focus:ring-1 focus:ring-teal-500',
   homeIcon: 'w-4 h-4',
-  separator: 'w-3.5 h-3.5 text-gray-300 flex-shrink-0',
-  item: 'text-gray-500 hover:text-gray-900 cursor-pointer transition-colors duration-200 font-medium',
-  itemLast: 'text-gray-900 font-semibold',
+  separator: 'w-3 h-3 text-zinc-300 flex-shrink-0',
+  item: 'text-zinc-500 hover:text-zinc-900 cursor-pointer transition-colors duration-150',
+  itemLast: 'text-zinc-900',
 } as const;
