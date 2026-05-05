@@ -5,21 +5,20 @@ import { useToastContext } from '../../contexts/ToastContext';
 import { useRateLimitHandler } from '../../hooks/useRateLimitHandler';
 import { SivacLogo } from '../common/SivacLogo';
 import { User, LockKey, Eye, EyeClosed, SpinnerGap, Clock as ClockIcon, WarningCircle, XCircle } from '@phosphor-icons/react';
-import { DESIGN_TOKENS } from '../../styles/designTokens';
 
 // ============================================================================
 // CONSTANTS
 // ============================================================================
 
-const INPUT_BASE_CLASSES = 
-  'block w-full pl-11 pr-4 py-3.5 border rounded-xl text-gray-900 placeholder-gray-400 ' +
-  'focus:outline-none focus:ring-1 focus:border-gray-900 transition-all duration-200 bg-white ' +
-  'text-sm font-medium';
+const INPUT_BASE_CLASSES =
+  'block w-full pl-11 pr-4 py-3 rounded-xl border text-zinc-900 placeholder-zinc-400 ' +
+  'focus:outline-none focus:ring-[3px] transition-all duration-200 bg-white ' +
+  'text-[15px] font-medium shadow-sm';
 
-const INPUT_NORMAL_CLASSES = 'border-gray-200 hover:border-gray-300';
-const INPUT_ERROR_CLASSES = 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30';
+const INPUT_NORMAL_CLASSES = 'border-zinc-200 hover:border-zinc-300 focus:border-teal-500 focus:ring-teal-500/10';
+const INPUT_ERROR_CLASSES = 'border-rose-300 focus:ring-rose-500/10 focus:border-rose-500 bg-rose-50/30';
 
-const LABEL_CLASSES = 'block text-sm font-semibold text-gray-900 mb-2 tracking-tight';
+const LABEL_CLASSES = 'block text-sm font-semibold text-zinc-900 mb-2 tracking-tight';
 const ERROR_TEXT_CLASSES = 'mt-1.5 text-xs font-medium text-rose-600 flex items-center gap-1.5';
 
 // ============================================================================
@@ -96,11 +95,11 @@ const InputField: React.FC<InputFieldProps> = ({
   return (
     <div>
       <label htmlFor={id} className={LABEL_CLASSES}>
-        {label} <span className="text-gray-400">*</span>
+        {label} <span className="text-zinc-400">*</span>
       </label>
       <div className="relative group">
         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none transition-colors duration-200">
-          <span className={`${error ? 'text-rose-400' : 'text-gray-400 group-focus-within:text-gray-900'}`}>
+          <span className={`${error ? 'text-rose-400' : 'text-zinc-400 group-focus-within:text-zinc-900'}`}>
             {icon}
           </span>
         </div>
@@ -118,7 +117,7 @@ const InputField: React.FC<InputFieldProps> = ({
           aria-describedby={error ? `${id}-error` : undefined}
         />
         {rightElement && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+          <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center">
             {rightElement}
           </div>
         )}
@@ -147,19 +146,19 @@ const RateLimitAlert: React.FC<RateLimitAlertProps> = ({ remainingTime }) => {
   const timeDisplay = `${minutes}:${String(seconds).padStart(2, '0')}`;
 
   return (
-    <div 
-      className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl animate-fade-in"
+    <div
+      className="mt-5 p-4 bg-amber-50/80 border border-amber-200/60 rounded-xl animate-fade-in"
       role="alert"
     >
       <div className="flex items-start gap-3">
-        <WarningCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" weight="fill" />
+        <WarningCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" weight="fill" />
         <div>
           <p className="text-sm font-semibold text-amber-900 tracking-tight">
-            Demasiados intentos de login
+            Demasiados intentos
           </p>
-          <p className="text-sm text-amber-800 mt-0.5 font-medium">
+          <p className="text-[13px] text-amber-800 mt-0.5 font-medium leading-relaxed">
             Podrá intentar nuevamente en{' '}
-            <span className="font-mono font-bold bg-amber-100 px-1.5 py-0.5 rounded ml-1">{timeDisplay}</span>
+            <span className="font-mono font-bold bg-amber-100/50 px-1.5 py-0.5 rounded ml-0.5">{timeDisplay}</span>
           </p>
         </div>
       </div>
@@ -179,17 +178,17 @@ interface SubmitButtonProps {
 
 const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading, canRetry, remainingTime }) => {
   const isDisabled = isLoading || !canRetry;
-  
+
   const buttonClasses = useMemo(() => {
-    const base = 
-      'w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm ' +
-      'font-bold text-white transition-all duration-200 focus:outline-none focus:ring-2 ' +
-      'focus:ring-offset-2 shadow-sm';
-    
+    const base =
+      'w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-[15px] ' +
+      'font-bold transition-all duration-200 focus:outline-none focus:ring-[3px] ' +
+      'focus:ring-offset-1 shadow-sm';
+
     if (isDisabled) {
-      return `${base} bg-gray-300 text-gray-500 cursor-not-allowed shadow-none`;
+      return `${base} bg-zinc-100 text-zinc-400 cursor-not-allowed border border-zinc-200/50 shadow-none`;
     }
-    return `${base} ${DESIGN_TOKENS.interactive.primary} active:scale-[0.98]`;
+    return `${base} bg-[#14B8A6] text-white hover:bg-[#0D9488] focus:ring-[#14B8A6]/20 active:scale-[0.98] border border-transparent shadow-md shadow-[#14B8A6]/20`;
   }, [isDisabled]);
 
   const renderContent = () => {
@@ -197,11 +196,11 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading, canRetry, remain
       return (
         <>
           <SpinnerGap className="h-5 w-5 animate-spin" weight="bold" />
-          <span>Iniciando sesión...</span>
+          <span>Ingresando...</span>
         </>
       );
     }
-    
+
     if (!canRetry) {
       const minutes = Math.ceil(remainingTime / 60);
       return (
@@ -211,7 +210,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading, canRetry, remain
         </>
       );
     }
-    
+
     return <span>Iniciar sesión</span>;
   };
 
@@ -246,7 +245,7 @@ const LoginForm: React.FC = () => {
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: value,
@@ -298,43 +297,57 @@ const LoginForm: React.FC = () => {
     <button
       type="button"
       onClick={togglePasswordVisibility}
-      className="p-1 rounded-md text-gray-400 hover:text-teal-700 hover:bg-teal-50 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-600"
+      className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100/80 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-200"
       aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
     >
-      {showPassword ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
+      {showPassword ? <EyeClosed className="w-[18px] h-[18px]" weight="bold" /> : <Eye className="w-[18px] h-[18px]" weight="bold" />}
     </button>
   ), [showPassword, togglePasswordVisibility]);
 
   return (
-    <div className="min-h-[100dvh] w-full flex bg-white font-sans overflow-hidden">
-      
-      {/* Left Axis: Functional Form Layer */}
-      <div className="w-full lg:w-[45%] flex flex-col justify-center px-6 sm:px-12 md:px-24">
-        <div className="w-full max-w-[400px] mx-auto animate-fade-in-up">
-          
-          <header className="mb-10 text-left">
-            <div className="mb-8 w-14 h-14 bg-teal-600 text-white rounded-2xl flex items-center justify-center shadow-md">
-              <SivacLogo size={32} />
-            </div>
-            <h1 className="text-[2rem] leading-tight font-extrabold text-gray-900 tracking-tighter">
-              Bienvenido a SIVAC
-            </h1>
-            <p className="text-[15px] font-medium text-gray-500 mt-2">
-              Ingresa tus credenciales para administrar la cadena de suministros médicos.
-            </p>
-          </header>
+    <div className="relative min-h-[100dvh] w-full flex items-center justify-center font-sans p-4 sm:p-8 overflow-hidden">
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-6">
+      {/* Background Image Layer */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/portada.png"
+          alt="SIVAC Background"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-[420px] animate-fade-in-up">
+
+        {/* Logo and Header */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="mb-6 bg-white/10 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-white/20 flex items-center justify-center">
+            <SivacLogo size={42} />
+          </div>
+          <h1 className="text-2xl font-bold text-white tracking-tight text-center drop-shadow-md">
+            Acceso a SIVAC
+          </h1>
+          <p className="text-[15px] font-medium text-blue-100/90 mt-2 text-center max-w-[280px] leading-relaxed drop-shadow">
+            Gestión de inventarios y red de frío en tiempo real
+          </p>
+        </div>
+
+        {/* Form Card */}
+        <div className="bg-white/95 backdrop-blur-xl p-7 sm:p-10 rounded-[28px] shadow-[0_24px_48px_rgba(0,0,0,0.4)] border border-white/50 relative overflow-hidden">
+          {/* Subtle top accent */}
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 to-sky-400 opacity-100" />
+
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <InputField
               id="usuario"
               name="usuario"
               type="text"
               label="Usuario o correo"
               value={formData.usuario}
-              placeholder="ejemplo@minsa.gob.pe"
+              placeholder="usuario@mail.com"
               error={errors.usuario}
               autoComplete="username"
-              icon={<User className="w-5 h-5" weight="duotone" />}
+              icon={<User className="w-[18px] h-[18px]" weight="bold" />}
               onChange={handleInputChange}
             />
 
@@ -347,21 +360,21 @@ const LoginForm: React.FC = () => {
               placeholder="••••••••"
               error={errors.password}
               autoComplete="current-password"
-              icon={<LockKey className="w-5 h-5" weight="duotone" />}
+              icon={<LockKey className="w-[18px] h-[18px]" weight="bold" />}
               onChange={handleInputChange}
               rightElement={passwordToggleButton}
             />
 
             {authError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl" role="alert">
-                <p className="text-sm font-medium text-rose-700 flex items-center gap-2">
+              <div className="p-3.5 bg-rose-50/80 border border-rose-200/60 rounded-xl" role="alert">
+                <p className="text-[13px] font-semibold text-rose-700 flex items-center gap-2">
                   <XCircle className="w-5 h-5 flex-shrink-0" weight="fill" />
                   {authError}
                 </p>
               </div>
             )}
 
-            <div className="pt-2">
+            <div className="pt-3">
               <SubmitButton
                 isLoading={isLoading}
                 canRetry={canRetry}
@@ -373,39 +386,17 @@ const LoginForm: React.FC = () => {
               <RateLimitAlert remainingTime={rateLimitState.remainingTime} />
             )}
           </form>
-
-          <footer className="mt-12 text-left">
-            <p className="text-xs font-semibold tracking-wide text-gray-400 uppercase">
-              SEDE • DISA Apurímac II
-            </p>
-          </footer>
         </div>
-      </div>
 
-      {/* Right Axis: Contextual Graphic Layer */}
-  <div className="hidden lg:flex lg:w-[55%] relative flex-col justify-end p-12 bg-zinc-950 overflow-hidden group">
-        <img 
-          src="/portada.png" 
-          alt="SIVAC Portada" 
-          className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-[15s] ease-out group-hover:scale-105"
-        />
-        {/* Gradients to ensure text readability without hiding the 3D art */}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/55 to-teal-950/10" />
-        <div className="absolute inset-0 bg-gradient-to-l from-transparent to-teal-950/25" />
-        
-        <div className="relative z-10 max-w-lg mb-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-          <div className="inline-block px-3 py-1.5 mb-6 text-xs font-bold tracking-widest text-teal-300 uppercase border border-teal-400/30 rounded-full bg-teal-400/10 backdrop-blur-sm shadow-[0_0_15px_rgba(45,212,191,0.12)]">
-            Sistema Oficial
-          </div>
-          <h2 className="text-3xl font-extrabold text-white tracking-tight leading-tight drop-shadow-md">
-            Control de inventarios y red de frío en tiempo real.
-          </h2>
-          <p className="text-gray-300 mt-4 text-[15px] max-w-md font-medium leading-relaxed drop-shadow">
-            Plataforma especializada en la monitorización de biológicos y material descartable en toda la red micro-regional, asegurando el abastecimiento ininterrumpido.
+        {/* Footer */}
+        <footer className="mt-10 text-center">
+          <p className="text-[11px] font-bold tracking-[0.1em] text-white/50 uppercase drop-shadow-sm">
+            Sede • Disa Apurímac II
           </p>
-        </div>
+        </footer>
+
       </div>
-      
+
     </div>
   );
 };
