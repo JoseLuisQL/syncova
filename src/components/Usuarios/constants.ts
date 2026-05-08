@@ -145,11 +145,11 @@ export const COMPONENT_STYLES = {
   },
 
   input: {
-    base: `w-full rounded-[10px] border bg-white px-4 py-2.5 text-sm text-[#15171d] shadow-sm
-           transition placeholder:text-[#8b8f9b] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70`,
+    base: `min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-[13px] text-[#15171d] shadow-none
+           transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70`,
     normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     error: 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 text-rose-900',
-    label: 'block text-[0.8rem] font-medium text-zinc-700 mb-1.5',
+    label: 'mb-1.5 block text-[12px] font-medium text-[#424750]',
     errorText: 'mt-1 text-xs text-rose-600 font-medium',
     helpText: 'mt-1 text-[0.7rem] text-zinc-500 leading-snug',
   },
@@ -182,15 +182,15 @@ export const COMPONENT_STYLES = {
   },
 
   modal: {
-    overlay: 'fixed inset-0 bg-zinc-950/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 sm:p-6 overflow-y-auto',
-    containerShell: 'mx-auto w-full overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl',
-    container: 'bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl ring-1 ring-zinc-200',
-    containerMedium: 'bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl ring-1 ring-zinc-200',
-    containerLarge: 'bg-white rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl ring-1 ring-zinc-200',
-    header: 'px-5 py-4 border-b border-zinc-200 bg-white flex items-center justify-between',
-    headerTitle: 'text-base font-semibold text-zinc-900',
-    body: 'px-5 py-5 overflow-y-auto max-h-[calc(90vh-130px)]',
-    footer: 'px-5 py-4 border-t border-zinc-200 flex justify-end gap-3 bg-zinc-50',
+    overlay: 'fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-[#111318]/20 p-4 backdrop-blur-[2px] sm:p-6',
+    containerShell: 'mx-auto w-full overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    container: 'max-h-[88vh] w-full max-w-lg overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    containerMedium: 'max-h-[88vh] w-full max-w-2xl overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    containerLarge: 'max-h-[88vh] w-full max-w-5xl overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    header: 'flex items-center justify-between border-b border-[#eeeef3] bg-white px-4 py-3.5 sm:px-5',
+    headerTitle: 'text-[15px] font-semibold leading-5 text-[#15171d]',
+    body: 'max-h-[calc(88vh-130px)] overflow-y-auto px-4 py-4 sm:px-5',
+    footer: 'flex justify-end gap-2 border-t border-[#eeeef3] bg-[#fbfafd] px-4 py-3 sm:px-5',
   },
 
   stats: {

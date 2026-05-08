@@ -344,34 +344,34 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
       <div 
-        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] ring-1 ring-zinc-200/50 sm:max-h-[90vh] sm:rounded-[14px]"
+        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:max-h-[88vh] sm:rounded-[10px]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="border-b border-[#eeeef3] bg-white px-6 py-5">
+        <div className="border-b border-[#eeeef3] bg-white px-5 py-3.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-white text-[#606571]">
-                <UploadSimple className="h-5 w-5" weight="bold" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                <UploadSimple className="h-4 w-4" weight="bold" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold tracking-tight text-[#15171d]">Importar planificación</h2>
-                <p className="text-sm text-[#606571]">
+                <h2 className="text-[15px] font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">Importar planificación</h2>
+                <p className="mt-1 text-[12px] leading-4 text-[#606571]">
                   {step < 4 ? 'Carga matrices anuales desde Excel' : 'Resultado de la importación'}
                 </p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="rounded-[9px] p-2 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]"
+              className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]"
               aria-label="Cerrar modal"
             >
-              <X className="h-5 w-5" weight="bold" />
+              <X className="h-4 w-4" weight="bold" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto bg-white p-6">
+        <div className="flex-1 overflow-y-auto bg-white px-5 py-4">
           <StepIndicator currentStep={step} totalSteps={4} />
 
           {/* Step 1: Tipo */}
@@ -706,7 +706,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-[#eeeef3] bg-white px-6 py-4">
+        <div className="flex items-center justify-between border-t border-[#eeeef3] bg-[#fbfafd] px-5 py-3">
           <div>
             {step > 1 && step < 4 && (
               <button
@@ -728,7 +728,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleClose}
               className={COMPONENT_STYLES.button.ghost}

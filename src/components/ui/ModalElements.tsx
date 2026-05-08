@@ -44,37 +44,36 @@ export const Modal: React.FC<ModalProps> = memo(({
     <div className={MODAL_STYLES.modal.overlay} onClick={(event) => event.target === event.currentTarget && onClose()}>
       <div className={MODAL_STYLES.modal.container}>
         <div className={`${MODAL_STYLES.modal.panel} ${sizeClasses[size]}`}>
-          {/* Close button - absolute top right according to Untitled UI specs */}
-          <div className="absolute right-4 top-4 hidden sm:block">
+          <div className="absolute right-3 top-3 hidden sm:block">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200"
+              className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-white text-[#8b8f9b] transition hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
               aria-label="Cerrar"
             >
-              <X className="h-5 w-5" weight="bold" />
+              <X className="h-4 w-4" weight="bold" />
             </button>
           </div>
 
           <div className={MODAL_STYLES.modal.header}>
-            <div className="sm:flex sm:items-start">
+            <div className="flex items-start gap-3 pr-8">
               {Icon && (
                 <div className={MODAL_STYLES.modal.headerIconWrapper}>
-                  <Icon className="h-5 w-5" aria-hidden="true" weight="duotone" />
+                  <Icon className="h-4 w-4" aria-hidden="true" weight="duotone" />
                 </div>
               )}
-              <div className={`mt-3 text-center sm:mt-0 sm:text-left min-w-0 ${Icon ? 'sm:ml-4' : ''}`}>
-                <h2 className="text-[1.1rem] font-bold tracking-tight text-gray-950">{title}</h2>
-                {subtitle ? <p className="mt-1 text-[0.85rem] text-gray-500 leading-tight pr-4">{subtitle}</p> : null}
+              <div className="min-w-0 text-left">
+                <h2 className="text-[15px] font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">{title}</h2>
+                {subtitle ? <p className="mt-1 text-[12px] leading-5 text-[#606571]">{subtitle}</p> : null}
               </div>
             </div>
-            {/* Mobile close button (visible only on small screens below the title for clarity or absolute if preferred, but usually absolute covers it. Actually let's use absolute for all) */}
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-4 top-4 sm:hidden text-gray-400 hover:text-gray-500"
+              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-[7px] text-[#8b8f9b] transition hover:bg-[#fbfafd] hover:text-[#15171d] sm:hidden"
+              aria-label="Cerrar"
             >
-              <X className="h-5 w-5" weight="bold" />
+              <X className="h-4 w-4" weight="bold" />
             </button>
           </div>
 
@@ -113,31 +112,31 @@ export const SideSheet: React.FC<SideSheetProps> = memo(({
     <div className={MODAL_STYLES.modal.overlay} onClick={(event) => event.target === event.currentTarget && onClose()}>
       <div className="flex h-full items-end justify-end sm:items-stretch">
         <aside className={MODAL_STYLES.modal.sideSheetPanel}>
-          <div className="absolute right-4 top-4">
+          <div className="absolute right-3 top-3">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200"
+              className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-white text-[#8b8f9b] transition hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
               aria-label="Cerrar panel"
             >
-              <X className="h-5 w-5" weight="bold" />
+              <X className="h-4 w-4" weight="bold" />
             </button>
           </div>
           
           <div className={MODAL_STYLES.modal.header}>
-            <div className="sm:flex sm:items-start">
+            <div className="flex items-start gap-3 pr-8">
               {Icon && (
                 <div className={MODAL_STYLES.modal.headerIconWrapper}>
-                  <Icon className="h-5 w-5" aria-hidden="true" weight="duotone" />
+                  <Icon className="h-4 w-4" aria-hidden="true" weight="duotone" />
                 </div>
               )}
-              <div className={`mt-3 sm:mt-0 sm:text-left min-w-0 ${Icon ? 'sm:ml-4' : ''}`}>
-                <h2 className="text-[1.1rem] font-bold tracking-tight text-gray-950">{title}</h2>
-                {subtitle ? <p className="mt-1 text-[0.85rem] text-gray-500 leading-tight pr-4">{subtitle}</p> : null}
+              <div className="min-w-0 text-left">
+                <h2 className="text-[15px] font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">{title}</h2>
+                {subtitle ? <p className="mt-1 text-[12px] leading-5 text-[#606571]">{subtitle}</p> : null}
               </div>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto px-5 pb-5 sm:px-6 sm:pb-6">{children}</div>
+          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">{children}</div>
           {footer ? <div className={MODAL_STYLES.modal.footer}>{footer}</div> : null}
         </aside>
       </div>
@@ -165,7 +164,7 @@ export const ModalFooter: React.FC<ModalFooterProps> = memo(({
   isSubmitDisabled = false,
   submitType = 'submit',
 }) => (
-  <div className="w-full flex flex-col gap-3 sm:flex-row-reverse sm:gap-3">
+  <div className="flex w-full flex-col gap-2 sm:flex-row-reverse sm:gap-2">
     <button
       type={submitType}
       onClick={submitType === 'button' ? onSubmit : undefined}
@@ -176,7 +175,7 @@ export const ModalFooter: React.FC<ModalFooterProps> = memo(({
       {isLoading ? <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" weight="bold" /> : null}
       <span>{submitLabel}</span>
     </button>
-    <button type="button" onClick={onCancel} className={`${MODAL_STYLES.button.secondary} sm:w-auto w-full mt-3 sm:mt-0`} disabled={isLoading}>
+    <button type="button" onClick={onCancel} className={`${MODAL_STYLES.button.secondary} w-full sm:mt-0 sm:w-auto`} disabled={isLoading}>
       {cancelLabel}
     </button>
   </div>
@@ -200,7 +199,7 @@ export const FormField: React.FC<FormFieldProps> = memo(({
   children,
   helpText,
 }) => (
-  <div className="mb-4 last:mb-0">
+  <div className="mb-3 last:mb-0">
     <label htmlFor={id} className={MODAL_STYLES.input.label}>
       {label}
       {required ? <span className="ml-1 text-rose-500">*</span> : null}
@@ -219,13 +218,13 @@ interface FormSectionProps {
 }
 
 export const FormSection: React.FC<FormSectionProps> = memo(({ title, children }) => (
-  <section className="mb-6 last:mb-0">
+  <section className="mb-5 last:mb-0">
     {title && (
-      <h3 className="mb-4 text-[0.75rem] font-bold uppercase tracking-widest text-zinc-400/80">
+      <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8b8f9b]">
         {title}
       </h3>
     )}
-    <div className="space-y-4">
+    <div className="space-y-3">
       {children}
     </div>
   </section>
@@ -439,49 +438,50 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = memo(({
     <div className={MODAL_STYLES.modal.overlay} onClick={(event) => event.target === event.currentTarget && onClose()}>
       <div className={MODAL_STYLES.modal.container}>
         <div className="w-full sm:max-w-md">
-          <div className="relative w-full rounded-2xl bg-white shadow-xl ring-1 ring-gray-900/5 sm:rounded-xl">
-            {/* Absolute Close */}
-            <div className="absolute right-4 top-4 hidden sm:block">
+          <div className="relative w-full overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
+            <div className="absolute right-3 top-3 hidden sm:block">
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-white text-[#8b8f9b] transition hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
+                aria-label="Cerrar"
               >
-                <X className="h-5 w-5" weight="bold" />
+                <X className="h-4 w-4" weight="bold" />
               </button>
             </div>
             
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-4 top-4 sm:hidden text-gray-400 hover:text-gray-500"
+              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-[7px] text-[#8b8f9b] transition hover:bg-[#fbfafd] hover:text-[#15171d] sm:hidden"
+              aria-label="Cerrar"
             >
-              <X className="h-5 w-5" weight="bold" />
+              <X className="h-4 w-4" weight="bold" />
             </button>
 
-            <div className="px-5 pt-5 pb-4 sm:px-6 sm:pt-6">
-              <div className="sm:flex sm:items-start">
-                <div className="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[8px] border-rose-50 bg-rose-100 sm:mx-0 sm:h-12 sm:w-12 text-rose-600">
-                  <Warning className="h-6 w-6" weight="regular" />
+            <div className="border-b border-[#eeeef3] px-4 py-3.5 sm:px-5">
+              <div className="flex items-start gap-3 pr-8">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 text-rose-600">
+                  <Warning className="h-4 w-4" weight="regular" />
                 </div>
-                <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                  <h3 className="text-lg font-semibold leading-6 text-gray-900">Eliminar {itemType}</h3>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                      Se eliminará <span className="font-semibold text-gray-900">"{itemName}"</span>. Esta acción no se puede deshacer.
+                <div className="min-w-0 text-left">
+                  <h3 className="text-[15px] font-semibold leading-5 text-[#15171d]">Eliminar {itemType}</h3>
+                  <div className="mt-1">
+                    <p className="text-[12px] leading-5 text-[#606571]">
+                      Se eliminará <span className="font-semibold text-[#15171d]">"{itemName}"</span>. Esta acción no se puede deshacer.
                     </p>
-                    {warningMessage ? <p className="mt-2 text-sm text-amber-600">{warningMessage}</p> : null}
+                    {warningMessage ? <p className="mt-2 text-xs font-medium text-amber-700">{warningMessage}</p> : null}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gray-50 px-5 py-4 sm:flex sm:flex-row-reverse sm:px-6 rounded-b-xl border-t border-gray-200">
+            <div className="border-t border-[#eeeef3] bg-[#fbfafd] px-4 py-3 sm:flex sm:flex-row-reverse sm:px-5">
               <button
                 type="button"
                 onClick={onConfirm}
                 disabled={isLoading}
-                className="inline-flex w-full justify-center rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus:outline-none focus:ring-4 focus:ring-rose-100 sm:ml-3 sm:w-auto disabled:opacity-50"
+                className="inline-flex h-9 w-full items-center justify-center rounded-[7px] bg-rose-600 px-3.5 text-[13px] font-semibold text-white shadow-none transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:ring-offset-2 sm:ml-2 sm:w-auto disabled:opacity-50"
               >
                 {isLoading ? <SpinnerGap className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" weight="bold" /> : null}
                 <span>Eliminar</span>

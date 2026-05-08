@@ -100,23 +100,23 @@ const ScheduleModal: React.FC<{
 
   return (
     <div className={COMPONENT_STYLES.modal.overlay} onClick={onClose}>
-      <div className="bg-white rounded-xl max-w-md w-full shadow-2xl ring-1 ring-zinc-200" onClick={e => e.stopPropagation()}>
+      <div className={`${COMPONENT_STYLES.modal.containerShell} w-full max-w-md`} onClick={e => e.stopPropagation()}>
         <div className={COMPONENT_STYLES.modal.header}>
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 text-zinc-700">
-              <Timer className="h-5 w-5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+              <Timer className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-zinc-900">Programar activación</h3>
+              <h3 className={COMPONENT_STYLES.modal.headerTitle}>Programar activación</h3>
               <p className="text-xs text-zinc-500">{permisoLabel}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors">
+          <button onClick={onClose} className="rounded-[7px] p-1.5 text-zinc-400 transition-colors hover:bg-[#fbfafd] hover:text-zinc-600">
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="px-5 py-5 space-y-4">
+        <div className="space-y-4 px-5 py-4">
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1.5">
               Fecha y hora de activación

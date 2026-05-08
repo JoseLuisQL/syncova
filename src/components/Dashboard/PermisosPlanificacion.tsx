@@ -29,45 +29,45 @@ const ScheduleModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm"
+      className="fixed inset-0 z-[300] flex items-center justify-center bg-[#111318]/20 p-4 backdrop-blur-[2px]"
       onClick={onClose}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="mx-4 flex w-full max-w-md flex-col rounded-[18px] border border-[#e3e9f0] bg-white shadow-xl"
+        className="flex w-full max-w-md flex-col overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
+        <div className="flex items-center justify-between border-b border-[#eeeef3] px-5 py-3.5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center border border-zinc-200 bg-neutral text-primary">
-              <Timer className="h-5 w-5" weight="bold" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+              <Timer className="h-4 w-4" weight="bold" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-primary">Programar activación</h3>
-              <p className="text-xs font-medium text-secondary">{permisoLabel}</p>
+              <h3 className="text-[15px] font-semibold leading-5 text-[#15171d]">Programar activación</h3>
+              <p className="text-[12px] leading-4 text-[#606571]">{permisoLabel}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-secondary transition-colors hover:bg-neutral hover:text-primary">
+          <button onClick={onClose} className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]">
             <X className="h-4 w-4" weight="bold" />
           </button>
         </div>
 
-        <div className="px-5 py-5 space-y-5">
+        <div className="space-y-4 px-5 py-4">
           <div>
-            <label className="mb-1.5 block text-[13px] font-semibold text-primary">
+            <label className="mb-1.5 block text-[12px] font-medium text-[#424750]">
               Fecha y hora de activación
             </label>
             <input
               type="datetime-local"
               value={fechaActivacion}
               onChange={(e) => setFechaActivacion(e.target.value)}
-              className="w-full border border-zinc-200 bg-white px-3 py-2 text-[13px] text-primary transition-colors focus:border-tertiary focus:outline-none"
+              className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-[13px] text-[#15171d] transition-colors focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
             />
           </div>
 
-          <div className="flex items-center gap-3 border border-zinc-100 bg-neutral p-3">
+          <div className="flex items-center gap-3 rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] p-3">
             <button
               type="button"
               role="switch"
@@ -82,7 +82,7 @@ const ScheduleModal: React.FC<{
 
           {usarDesactivacion && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-              <label className="mb-1.5 block text-[13px] font-semibold text-primary">
+              <label className="mb-1.5 block text-[12px] font-medium text-[#424750]">
                 Fecha y hora de desactivación
               </label>
               <input
@@ -90,16 +90,16 @@ const ScheduleModal: React.FC<{
                 value={fechaDesactivacion}
                 onChange={(e) => setFechaDesactivacion(e.target.value)}
                 min={fechaActivacion}
-                className="w-full border border-zinc-200 bg-white px-3 py-2 text-[13px] text-primary transition-colors focus:border-tertiary focus:outline-none"
+                className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-[13px] text-[#15171d] transition-colors focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
               />
             </motion.div>
           )}
         </div>
 
-        <div className="mt-auto flex items-center justify-end gap-2 border-t border-zinc-100 bg-neutral/60 px-5 py-4">
+        <div className="mt-auto flex items-center justify-end gap-2 border-t border-[#eeeef3] bg-[#fbfafd] px-5 py-3">
           <button
             onClick={onClose}
-            className="inline-flex items-center justify-center border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold text-secondary transition-colors hover:bg-neutral"
+            className="inline-flex h-9 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-white px-3.5 text-[13px] font-semibold text-[#15171d] transition-colors hover:bg-white"
           >
             Cancelar
           </button>
@@ -113,7 +113,7 @@ const ScheduleModal: React.FC<{
               onClose();
             }}
             disabled={!fechaActivacion}
-            className="inline-flex items-center justify-center gap-1.5 border border-tertiary bg-tertiary px-4 py-2 text-[13px] font-semibold text-primary transition-colors hover:border-primary hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[7px] border border-[#7c3aed] bg-[#7c3aed] px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Timer className="h-4 w-4" weight="bold" />
             Programar

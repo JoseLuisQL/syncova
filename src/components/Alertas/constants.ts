@@ -194,10 +194,10 @@ export const COMPONENT_STYLES = {
 
   input: {
     base:
-      'w-full rounded-[10px] border bg-white px-4 py-2.5 text-sm text-[#15171d] shadow-sm transition placeholder:text-[#8b8f9b] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
+      'min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-[13px] text-[#15171d] shadow-none transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
     normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     error: 'border-rose-300 bg-rose-50/60 focus:border-rose-500 focus:ring-rose-500/20 text-rose-900 placeholder:text-rose-400',
-    label: 'mb-1.5 block text-[12px] font-bold text-zinc-700 tracking-wide',
+    label: 'mb-1.5 block text-[12px] font-medium text-[#424750]',
     errorText: 'mt-1.5 text-[11px] font-bold text-rose-600',
     helpText: 'mt-1.5 text-[11px] font-semibold text-zinc-500',
   },
@@ -227,13 +227,13 @@ export const COMPONENT_STYLES = {
   },
 
   modal: {
-    overlay: 'fixed inset-0 z-50 bg-zinc-950/40 backdrop-blur-sm',
-    container: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-4 sm:items-center sm:p-6',
+    overlay: 'fixed inset-0 z-[300] bg-[#111318]/20 backdrop-blur-[2px]',
+    container: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6',
     panel:
-      'w-full rounded-[24px] bg-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] ring-1 ring-zinc-200/60 sm:max-h-[85vh] overflow-hidden',
-    header: 'border-b border-zinc-100 px-6 py-5',
-    body: 'max-h-[calc(100vh-180px)] overflow-y-auto px-6 py-6 sm:max-h-[calc(85vh-160px)] custom-scrollbar',
-    footer: 'border-t border-zinc-100 bg-zinc-50/50 px-6 py-5',
+      'w-full overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:max-h-[88vh] sm:rounded-[10px]',
+    header: 'border-b border-[#eeeef3] px-4 py-3.5 sm:px-5',
+    body: 'max-h-[calc(100vh-150px)] overflow-y-auto px-4 py-4 sm:max-h-[calc(88vh-136px)] sm:px-5 custom-scrollbar',
+    footer: 'border-t border-[#eeeef3] bg-[#fbfafd] px-4 py-3 sm:px-5',
   },
 
   stats: {

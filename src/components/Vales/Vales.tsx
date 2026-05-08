@@ -621,26 +621,26 @@ const Vales: React.FC<ValesProps> = ({
       />
 
       {showDiagnostico && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full mx-4 max-h-[95vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-[#111318]/20 p-4 backdrop-blur-[2px]">
+          <div className="max-h-[95vh] w-full max-w-6xl overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
+            <div className="flex items-center justify-between border-b border-[#eeeef3] bg-white px-5 py-3.5">
               <div className="flex items-center space-x-3">
-                <div className="flex items-center justify-center w-10 h-10 bg-amber-100 rounded-lg">
-                  <Gear weight="bold" className="h-5 w-5 text-amber-600" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-amber-600">
+                  <Gear weight="bold" className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Diagnóstico de Conectividad</h3>
-                  <p className="text-sm text-gray-600">Verificación del estado del sistema</p>
+                  <h3 className="text-[15px] font-semibold leading-5 text-[#15171d]">Diagnóstico de Conectividad</h3>
+                  <p className="mt-1 text-[12px] leading-4 text-[#606571]">Verificación del estado del sistema</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowDiagnostico(false)}
-                className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                className="rounded-[7px] p-1.5 transition-colors hover:bg-[#fbfafd]"
               >
-                <X weight="bold" className="h-5 w-5 text-zinc-500" />
+                <X weight="bold" className="h-4 w-4 text-zinc-500" />
               </button>
             </div>
-            <div className="overflow-y-auto max-h-[calc(95vh-120px)] p-6">
+            <div className="max-h-[calc(95vh-120px)] overflow-y-auto px-5 py-4">
               <ValesConnectionTest />
             </div>
           </div>
@@ -674,18 +674,18 @@ const Vales: React.FC<ValesProps> = ({
       )}
 
       {showModificacionesModal && valeSeleccionado && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-[#111318]/20 p-4 backdrop-blur-[2px]">
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
+            <div className="flex items-center justify-between border-b border-[#eeeef3] px-5 py-3.5">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center">
-                  <ArrowsClockwise weight="bold" className="h-5 w-5 text-white" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                  <ArrowsClockwise weight="bold" className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-[15px] font-semibold leading-5 text-[#15171d]">
                     Modificaciones del Vale {valeSeleccionado.numero}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="mt-1 text-[12px] leading-4 text-[#606571]">
                     Sincronización con datos actualizados
                   </p>
                 </div>
@@ -695,14 +695,14 @@ const Vales: React.FC<ValesProps> = ({
                   setShowModificacionesModal(false);
                   setValeSeleccionado(null);
                 }}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]"
               >
-                <X weight="bold" className="h-5 w-5" />
+                <X weight="bold" className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <div className="max-h-[calc(90vh-140px)] overflow-y-auto px-5 py-4">
+              <div className="mb-5 rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] p-3">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-sm text-gray-600">Centro de Acopio</p>
@@ -727,7 +727,7 @@ const Vales: React.FC<ValesProps> = ({
                 <button
                   onClick={() => sincronizarVale(valeSeleccionado.id)}
                   disabled={isSyncing}
-                  className="w-full px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+                  className="flex h-9 w-full items-center justify-center space-x-2 rounded-[7px] bg-[#7c3aed] px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSyncing ? (
                     <>
@@ -750,12 +750,12 @@ const Vales: React.FC<ValesProps> = ({
                   </h4>
                   <div className="space-y-3">
                     {modificaciones.map((modificacion, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div key={index} className="rounded-[8px] border border-[#e7e7ef] bg-white p-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
                               <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                modificacion.tipo === 'cantidad_programada_modificada' ? 'bg-teal-100 text-teal-800' :
+                                modificacion.tipo === 'cantidad_programada_modificada' ? 'bg-[#f3f0ff] text-[#7c3aed]' :
                                 modificacion.tipo === 'entrega_adicional_modificada' ? 'bg-amber-100 text-amber-800' :
                                 modificacion.tipo === 'entrega_adicional_agregada' ? 'bg-emerald-100 text-emerald-800' :
                                 modificacion.tipo === 'establecimiento_agregado' ? 'bg-cyan-100 text-cyan-800' :
