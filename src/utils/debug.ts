@@ -15,6 +15,11 @@ export const logger = {
     console.log(`[SIVAC INFO] ${message}`, data || '');
   },
 
+  success: (message: string, data?: any) => {
+    // Temporalmente habilitado para debugging
+    console.log(`[SIVAC SUCCESS] ${message}`, data || '');
+  },
+
   error: (message: string, error?: any) => {
     // Temporalmente habilitado para debugging
     console.error(`[SIVAC ERROR] ${message}`, error || '');

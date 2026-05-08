@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Establecimiento,
   CreateEstablecimientoDto,
@@ -14,7 +14,11 @@ import { logger } from '../utils/debug';
 /**
  * Hook personalizado para gestión de establecimientos
  */
-export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
+export function useEstablecimientos(
+  initialFilters?: EstablecimientoFilters,
+  options?: { autoLoad?: boolean }
+) {
+  const { autoLoad = true } = options || {};
   // Estados principales
   const [establecimientos, setEstablecimientos] = useState<Establecimiento[]>([]);
   const [centrosAcopio, setCentrosAcopio] = useState<CentroAcopio[]>([]);
@@ -34,18 +38,32 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
   }>();
   const crudApi = useCrudApi<Establecimiento>();
   const centrosApi = useApi<CentroAcopio[]>();
+  const pendingListKeyRef = useRef<string | null>(null);
+  const pendingCentrosRef = useRef(false);
+  const loadedListKeyRef = useRef<string | null>(null);
+  const hasLoadedCentrosRef = useRef(false);
+  const initialFiltersRef = useRef(initialFilters);
 
   /**
    * Cargar establecimientos con filtros
    */
-  const loadEstablecimientos = useCallback(async (newFilters?: EstablecimientoFilters) => {
-    // Evitar múltiples llamadas simultáneas
-    if (listApi.isLoading) {
-      logger.debug('🔄 useEstablecimientos.loadEstablecimientos - Ya hay una carga en progreso, saltando...');
+  const loadEstablecimientos = useCallback(async (
+    newFilters?: EstablecimientoFilters,
+    options?: { force?: boolean }
+  ) => {
+    const currentFilters = newFilters || filters;
+    const requestKey = JSON.stringify(currentFilters || {});
+    const force = options?.force === true;
+
+    if (pendingListKeyRef.current === requestKey) {
       return;
     }
 
-    const currentFilters = newFilters || filters;
+    if (!force && loadedListKeyRef.current === requestKey) {
+      return;
+    }
+
+    pendingListKeyRef.current = requestKey;
 
     try {
       logger.debug('🔄 useEstablecimientos.loadEstablecimientos - Cargando con filtros:', currentFilters);
@@ -70,6 +88,7 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
 
         setEstablecimientos(result.establecimientos);
         setPagination(result.pagination);
+        loadedListKeyRef.current = requestKey;
 
         // Actualizar filtros si se pasaron nuevos
         if (newFilters) {
@@ -82,13 +101,29 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
     } catch (error) {
       logger.error('❌ useEstablecimientos.loadEstablecimientos - Error al cargar establecimientos:', error);
       setEstablecimientos([]);
+    } finally {
+      if (pendingListKeyRef.current === requestKey) {
+        pendingListKeyRef.current = null;
+      }
     }
-  }, [listApi]); // Solo depende de la API para evitar problemas de dependencias circulares
+  }, [filters, listApi.execute]);
 
   /**
    * Cargar centros de acopio
    */
-  const loadCentrosAcopio = useCallback(async () => {
+  const loadCentrosAcopio = useCallback(async (options?: { force?: boolean }) => {
+    const force = options?.force === true;
+
+    if (pendingCentrosRef.current) {
+      return;
+    }
+
+    if (!force && hasLoadedCentrosRef.current) {
+      return;
+    }
+
+    pendingCentrosRef.current = true;
+
     try {
       const result = await centrosApi.execute(() =>
         EstablecimientoService.getCentrosAcopio()
@@ -96,12 +131,15 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
 
       if (result) {
         setCentrosAcopio(result);
+        hasLoadedCentrosRef.current = true;
       }
     } catch (error) {
       console.error('Error al cargar centros de acopio:', error);
       setCentrosAcopio([]);
+    } finally {
+      pendingCentrosRef.current = false;
     }
-  }, [centrosApi]);
+  }, [centrosApi.execute]);
 
   /**
    * Crear nuevo establecimiento
@@ -114,10 +152,10 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
 
       if (result) {
         // Recargar la lista después de crear
-        await loadEstablecimientos();
+        await loadEstablecimientos(undefined, { force: true });
         // Si es un centro de acopio, recargar también la lista de centros
         if (data.tipo === 'centro_acopio') {
-          await loadCentrosAcopio();
+          await loadCentrosAcopio({ force: true });
         }
         return true;
       }
@@ -145,7 +183,7 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
 
         // Si cambió a centro de acopio o desde centro de acopio, recargar centros
         if (data.tipo === 'centro_acopio' || result.tipo === 'centro_acopio') {
-          await loadCentrosAcopio();
+          await loadCentrosAcopio({ force: true });
         }
         return true;
       }
@@ -173,7 +211,7 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
 
         // Si era un centro de acopio, recargar la lista de centros
         if (establecimiento?.tipo === 'centro_acopio') {
-          await loadCentrosAcopio();
+          await loadCentrosAcopio({ force: true });
         }
         return true;
       }
@@ -255,18 +293,22 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
    * Refrescar datos
    */
   const refresh = useCallback(() => {
-    loadEstablecimientos();
-    loadCentrosAcopio();
+    loadEstablecimientos(undefined, { force: true });
+    loadCentrosAcopio({ force: true });
   }, [loadEstablecimientos, loadCentrosAcopio]);
 
   // Cargar datos iniciales - SIN DEPENDENCIAS para evitar bucle infinito
   useEffect(() => {
+    if (!autoLoad) {
+      return;
+    }
+
     logger.info('Inicializando hook useEstablecimientos');
     const initializeData = async () => {
       try {
         // Usar los filtros iniciales si están disponibles, sino usar filtros por defecto
-        if (initialFilters) {
-          await loadEstablecimientos(initialFilters);
+        if (initialFiltersRef.current) {
+          await loadEstablecimientos(initialFiltersRef.current);
         } else {
           await loadEstablecimientos();
         }
@@ -276,7 +318,7 @@ export function useEstablecimientos(initialFilters?: EstablecimientoFilters) {
       }
     };
     initializeData();
-  }, []); // Array vacío para ejecutar solo una vez
+  }, [autoLoad, loadEstablecimientos, loadCentrosAcopio]);
 
   // Estados derivados
   const isLoading = listApi.loading || crudApi.isLoading || centrosApi.loading;

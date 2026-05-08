@@ -4,9 +4,43 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import { createHash } from 'crypto';
 import { config } from '@/config/env';
 import { errorHandler, notFoundHandler } from './errorHandler';
 import { sanitizeInput } from './validation';
+
+const getGlobalRateLimitKey = (req: express.Request): string => {
+  const authorization = req.headers.authorization;
+
+  if (authorization?.startsWith('Bearer ')) {
+    const tokenHash = createHash('sha256')
+      .update(authorization.slice('Bearer '.length))
+      .digest('hex');
+
+    return `token:${tokenHash}`;
+  }
+
+  return `ip:${req.ip || req.socket.remoteAddress || 'unknown'}`;
+};
+
+const createRateLimitHandler = (limiterName: string, message: string, retryAfter: number) => {
+  return (req: express.Request, res: express.Response): void => {
+    console.warn(`[RateLimit:${limiterName}] ${req.method} ${req.originalUrl}`, {
+      ip: req.ip,
+      forwardedFor: req.headers['x-forwarded-for'],
+      realIp: req.headers['x-real-ip'],
+      userAgent: req.headers['user-agent'],
+    });
+
+    res.status(429).json({
+      success: false,
+      message,
+      error: 'RATE_LIMIT_EXCEEDED',
+      timestamp: new Date().toISOString(),
+      retryAfter,
+    });
+  };
+};
 
 /**
  * Configuración de middlewares globales
@@ -43,40 +77,28 @@ export const setupMiddlewares = (app: Application): void => {
   }));
 
   // ─── Rate Limiting ─────────────────────────────────────────────────
-  // Tier 1: STRICT limiter for auth routes only (prevent brute-force)
-  const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,   // 15 min
-    max: 30,                     // 30 login attempts per 15 min
-    message: {
-      success: false,
-      message: 'Demasiados intentos de autenticación, intente nuevamente más tarde',
-      timestamp: new Date().toISOString(),
-    },
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
-
-  // Aplicar limiter estricto SOLO a rutas de auth
-  app.use('/api/auth/login', authLimiter);
-  app.use('/api/auth/register', authLimiter);
-
-  // Tier 2: GENEROUS global limiter for all other API routes
+  // GENEROUS global limiter for normal API traffic. Auth has dedicated limiters
+  // in routes/auth.ts to avoid mixing normal SPA traffic with login/refresh.
   // Una SPA con múltiples módulos puede generar 50-100 requests por navegación.
   // Con 20 navegaciones en 15 min = 1000-2000 requests. Usamos 5000 como techo seguro.
+  const globalRetryAfter = Math.ceil(config.rateLimit.windowMs / 1000);
   const globalLimiter = rateLimit({
     windowMs: config.rateLimit.windowMs,
-    max: config.env === 'development' ? 50000 : 5000,
-    message: {
-      success: false,
-      message: 'Demasiadas solicitudes desde esta IP, intente nuevamente más tarde',
-      timestamp: new Date().toISOString(),
-      retryAfter: Math.ceil(config.rateLimit.windowMs / 1000),
-    },
+    max: config.env === 'development' ? Math.max(config.rateLimit.maxRequests, 50000) : config.rateLimit.maxRequests,
+    handler: createRateLimitHandler(
+      'global',
+      'Demasiadas solicitudes, intente nuevamente más tarde',
+      globalRetryAfter
+    ),
+    keyGenerator: getGlobalRateLimitKey,
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => {
-      // Siempre saltar rutas de salud y assets estáticos
-      return req.path === '/health' || req.path === '/api/health' || req.path.startsWith('/assets');
+      // Siempre saltar rutas de salud, auth con limiters propios y assets estáticos
+      return req.path === '/health'
+        || req.path === '/api/health'
+        || req.path.startsWith('/api/auth')
+        || req.path.startsWith('/assets');
     },
   });
 

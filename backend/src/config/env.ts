@@ -38,8 +38,13 @@ const envSchema = Joi.object({
   
   RATE_LIMIT_MAX_REQUESTS: Joi.number()
     .positive()
-    .default(1000)
+    .default(5000)
     .description('Máximo número de requests por ventana'),
+
+  TRUST_PROXY: Joi.alternatives()
+    .try(Joi.number().integer().min(0), Joi.boolean(), Joi.string())
+    .default(1)
+    .description('Configuración Express trust proxy para despliegues detrás de reverse proxy'),
   
   LOG_LEVEL: Joi.string()
     .valid('error', 'warn', 'info', 'debug')
@@ -93,6 +98,23 @@ if (error) {
   throw new Error(`❌ Error en configuración de variables de entorno: ${error.message}`);
 }
 
+const normalizeTrustProxy = (value: unknown): boolean | number | string => {
+  if (typeof value !== 'string') {
+    return value as boolean | number;
+  }
+
+  const normalized = value.trim();
+  if (normalized === 'true') return true;
+  if (normalized === 'false') return false;
+
+  const numericValue = Number(normalized);
+  if (normalized && Number.isInteger(numericValue)) {
+    return numericValue;
+  }
+
+  return normalized;
+};
+
 // Exportar configuración tipada
 export const config = {
   env: envVars.NODE_ENV as 'development' | 'production' | 'test',
@@ -111,6 +133,7 @@ export const config = {
     windowMs: envVars.RATE_LIMIT_WINDOW_MS as number,
     maxRequests: envVars.RATE_LIMIT_MAX_REQUESTS as number,
   },
+  trustProxy: normalizeTrustProxy(envVars.TRUST_PROXY),
   logging: {
     level: envVars.LOG_LEVEL as string,
   },

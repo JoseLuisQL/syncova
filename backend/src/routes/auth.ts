@@ -22,13 +22,14 @@ const authRateLimit = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true,
   // Solo aplicar rate limiting a login
   skip: (req) => req.path !== '/login'
 });
 
 const refreshRateLimit = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutos
-  max: process.env.NODE_ENV === 'development' ? 10000 : 10, // 10000 en dev, 10 en prod
+  max: process.env.NODE_ENV === 'development' ? 10000 : 60, // 10000 en dev, 60 en prod
   message: {
     success: false,
     message: 'Demasiados intentos de refresh. Intente nuevamente en 5 minutos.',
@@ -37,7 +38,8 @@ const refreshRateLimit = rateLimit({
     retryAfter: 300
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  skipSuccessfulRequests: true
 });
 
 const passwordChangeRateLimit = rateLimit({

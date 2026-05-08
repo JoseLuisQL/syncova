@@ -106,8 +106,8 @@ const Vales: React.FC<ValesProps> = ({
     sincronizarValesAutomaticamente
   } = useVales();
 
-  const { centrosAcopio, loadEstablecimientos, loadCentrosAcopio } = useEstablecimientos();
-  const { loadVacunasActivas } = useVacunas();
+  const { centrosAcopio, loadEstablecimientos, loadCentrosAcopio } = useEstablecimientos(undefined, { autoLoad: false });
+  const { loadVacunasActivas } = useVacunas(undefined, { autoLoad: false });
 
   // Estados locales para filtros
   const [selectedCentroAcopio, setSelectedCentroAcopio] = useState<string>(initialCentroAcopioId || 'todos');

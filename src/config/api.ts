@@ -28,6 +28,54 @@ const API_BASE_URL = getApiBaseUrl();
 // Debug: mostrar la URL que se está usando
 console.log('🔗 API Base URL configurada:', API_BASE_URL);
 
+let refreshTokenPromise: Promise<string> | null = null;
+
+const getErrorStatus = (error: unknown): number | undefined => {
+  return axios.isAxiosError(error) ? error.response?.status : undefined;
+};
+
+const getRetryAfterSeconds = (error: AxiosError): string | undefined => {
+  const data = error.response?.data as any;
+  const headerRetryAfter = error.response?.headers?.['retry-after'];
+  return data?.retryAfter?.toString() || headerRetryAfter?.toString();
+};
+
+export const formatRateLimitMessage = (error: AxiosError): string => {
+  const data = error.response?.data as any;
+  const retryAfter = getRetryAfterSeconds(error);
+  const message = data?.message || 'Demasiadas solicitudes, intente nuevamente más tarde';
+
+  return retryAfter
+    ? `${message}. Reintente en ${retryAfter} segundos.`
+    : message;
+};
+
+const clearStoredAuth = (): void => {
+  localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+  localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+  localStorage.removeItem(STORAGE_KEYS.USER);
+};
+
+const requestNewAccessToken = async (refreshToken: string): Promise<string> => {
+  const response = await axios.post(
+    `${API_BASE_URL}/auth/refresh`,
+    { refreshToken },
+    {
+      timeout: API_TIMEOUTS.DEFAULT,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  const accessToken = response.data?.data?.accessToken;
+  if (!response.data?.success || !accessToken) {
+    throw new Error(response.data?.message || response.data?.error || 'Error al refrescar token');
+  }
+
+  return accessToken;
+};
+
 /**
  * Instancia de axios configurada para el backend SIVAC
  */
@@ -75,38 +123,54 @@ const setupInterceptors = (client: AxiosInstance) => {
       return response;
     },
     async (error: AxiosError) => {
-      const originalRequest = error.config as any;
+      const originalRequest = (error.config || {}) as any;
+
+      if (error.response?.status === 429) {
+        console.warn('Límite de solicitudes alcanzado:', formatRateLimitMessage(error));
+        return Promise.reject(error);
+      }
+
+      const isRefreshRequest = originalRequest.url?.includes('/auth/refresh');
+      const isLoginRequest = originalRequest.url?.includes('/auth/login');
 
       // Manejo centralizado de errores
-      if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh')) {
+      if (error.response?.status === 401 && !originalRequest._retry && !isRefreshRequest && !isLoginRequest) {
         originalRequest._retry = true;
 
         // Intentar refrescar el token
         const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
         if (refreshToken) {
           try {
-            const response = await client.post('/auth/refresh', { refreshToken });
-            const { accessToken } = response.data.data;
+            if (!refreshTokenPromise) {
+              refreshTokenPromise = requestNewAccessToken(refreshToken).finally(() => {
+                refreshTokenPromise = null;
+              });
+            }
+
+            const accessToken = await refreshTokenPromise;
 
             // Actualizar token en localStorage
             localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
 
             // Reintentar la petición original con el nuevo token
+            originalRequest.headers = originalRequest.headers || {};
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
             return client(originalRequest);
-          } catch {
-            // Si falla el refresh, limpiar datos y redirigir a login
-            localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-            localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-            localStorage.removeItem(STORAGE_KEYS.USER);
+          } catch (refreshError) {
+            if (getErrorStatus(refreshError) === 429) {
+              return Promise.reject(refreshError);
+            }
+
+            // Si falla el refresh por token inválido, limpiar datos y redirigir a login
+            clearStoredAuth();
 
             // Emitir evento personalizado para que el contexto de auth maneje el logout
             window.dispatchEvent(new CustomEvent(SYSTEM_EVENTS.AUTH_LOGOUT));
+            return Promise.reject(refreshError);
           }
         } else {
           // No hay refresh token, limpiar datos
-          localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-          localStorage.removeItem(STORAGE_KEYS.USER);
+          clearStoredAuth();
 
           // Emitir evento personalizado para logout
           window.dispatchEvent(new CustomEvent(SYSTEM_EVENTS.AUTH_LOGOUT));
@@ -191,6 +255,10 @@ export const buildQueryParams = (params?: QueryParams): string => {
  * Función helper para manejar errores de API
  */
 export const handleApiError = (error: AxiosError): string => {
+  if (error.response?.status === 429) {
+    return formatRateLimitMessage(error);
+  }
+
   if (error.response?.data) {
     const errorData = error.response.data as any;
     return errorData.error || errorData.message || 'Error en la operación';

@@ -1,4 +1,4 @@
-import { apiClient, ApiResponse, handleApiError } from '../config/api';
+import { apiClient, ApiResponse, formatRateLimitMessage, handleApiError } from '../config/api';
 import { 
   LoginDto, 
   ChangePasswordDto, 
@@ -50,7 +50,7 @@ class AuthService {
 
       // Manejo específico para errores de rate limiting
       if (error.response?.status === 429) {
-        throw new Error(`Demasiadas solicitudes desde esta IP, intente nuevamente más tarde`);
+        throw new Error(formatRateLimitMessage(error));
       }
 
       throw new Error(handleApiError(error));
@@ -80,6 +80,10 @@ class AuthService {
       return response.data.data;
     } catch (error: any) {
       logger.error('Error al refrescar token:', error);
+      if (error.response?.status === 429) {
+        throw new Error(formatRateLimitMessage(error));
+      }
+
       // Si falla el refresh, limpiar todo y forzar re-login
       this.clearAuth();
       throw new Error(handleApiError(error));
@@ -186,6 +190,10 @@ class AuthService {
       return response.data.data;
     } catch (error: any) {
       logger.error('Error al verificar autenticación:', error);
+      if (error.response?.status === 429 && this.getToken() && this.getUser()) {
+        return { authenticated: true, user: this.getUser() || undefined };
+      }
+
       return { authenticated: false };
     }
   }

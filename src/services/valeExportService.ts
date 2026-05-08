@@ -1,4 +1,4 @@
-import { apiClient } from '../config/api';
+import { apiClient, formatRateLimitMessage } from '../config/api';
 import { ApiResponse } from '../types/api';
 import { ValeEntrega } from './valesService';
 
@@ -66,7 +66,7 @@ export class ValeExportService {
       return response.data;
     } catch (error) {
       console.error('❌ Error al exportar vale a Excel:', error);
-      throw this.handleExportError(error);
+      throw await this.handleExportError(error);
     }
   }
 
@@ -95,7 +95,7 @@ export class ValeExportService {
       return response.data;
     } catch (error) {
       console.error('❌ Error al exportar vale a PDF:', error);
-      throw this.handleExportError(error);
+      throw await this.handleExportError(error);
     }
   }
 
@@ -138,7 +138,7 @@ export class ValeExportService {
       return response.data;
     } catch (error) {
       console.error('❌ Error al exportar vales combinados a Excel:', error);
-      throw this.handleExportError(error);
+      throw await this.handleExportError(error);
     }
   }
 
@@ -431,21 +431,23 @@ export class ValeExportService {
       return response.data;
     } catch (error) {
       console.error('❌ Error al obtener vista previa:', error);
-      throw this.handleExportError(error);
+      throw await this.handleExportError(error);
     }
   }
 
   /**
    * Manejar errores de exportación
    */
-  private static handleExportError(error: any): Error {
+  private static async handleExportError(error: any): Promise<Error> {
     if (error.response) {
       const status = error.response.status;
-      const message = error.response.data?.message || error.response.data?.error;
+      const message = await this.extractErrorMessage(error);
       
       switch (status) {
         case 400:
           return new Error(message || 'Configuración de exportación inválida');
+        case 429:
+          return new Error(message || formatRateLimitMessage(error));
         case 404:
           return new Error('Vale no encontrado');
         case 422:
@@ -462,6 +464,22 @@ export class ValeExportService {
     }
     
     return new Error(error.message || 'Error desconocido en la exportación');
+  }
+
+  private static async extractErrorMessage(error: any): Promise<string | undefined> {
+    const data = error.response?.data;
+
+    if (data instanceof Blob) {
+      try {
+        const text = await data.text();
+        const parsed = JSON.parse(text);
+        return parsed?.message || parsed?.error;
+      } catch {
+        return undefined;
+      }
+    }
+
+    return data?.message || data?.error;
   }
 
   /**

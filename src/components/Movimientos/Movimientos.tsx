@@ -130,13 +130,13 @@ const Movimientos: React.FC = () => {
     isLoading: isLoadingEstablecimientos,
     loadEstablecimientos,
     loadCentrosAcopio
-  } = useEstablecimientos({ noPagination: true });
+  } = useEstablecimientos({ noPagination: true }, { autoLoad: false });
 
   const {
     vacunasActivas,
     isLoadingActivas,
     loadVacunasActivas
-  } = useVacunas();
+  } = useVacunas(undefined, { autoLoad: false });
 
   const { toast } = useToastContext();
   const { user } = useAuth();
@@ -303,6 +303,7 @@ const Movimientos: React.FC = () => {
   const voucherValidationTimeouts = useRef<{ [key: string]: NodeJS.Timeout }>({});
   const [isTyping, setIsTyping] = useState<{ [key: string]: boolean }>({});
   const initialDataLoadedRef = useRef(false);
+  const filterLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // ============================================================================
   // FUNCIONES AUXILIARES
@@ -588,7 +589,22 @@ const Movimientos: React.FC = () => {
         anio: selectedAnio,
         ...(selectedCentroAcopio !== 'todos' && { centroAcopioId: selectedCentroAcopio })
       };
-      loadMovimientos(filters);
+
+      if (filterLoadTimeoutRef.current) {
+        clearTimeout(filterLoadTimeoutRef.current);
+      }
+
+      filterLoadTimeoutRef.current = setTimeout(() => {
+        loadMovimientos(filters);
+        filterLoadTimeoutRef.current = null;
+      }, 300);
+
+      return () => {
+        if (filterLoadTimeoutRef.current) {
+          clearTimeout(filterLoadTimeoutRef.current);
+          filterLoadTimeoutRef.current = null;
+        }
+      };
     }
   }, [selectedVacuna, selectedMes, selectedAnio, selectedCentroAcopio]);
 
@@ -769,6 +785,9 @@ const Movimientos: React.FC = () => {
       Object.values(voucherValidationTimeouts.current).forEach(timeout => {
         if (timeout) clearTimeout(timeout);
       });
+      if (filterLoadTimeoutRef.current) {
+        clearTimeout(filterLoadTimeoutRef.current);
+      }
     };
   }, []);
 

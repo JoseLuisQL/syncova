@@ -24,8 +24,8 @@
     "fix:lotes-verify": "tsx scripts/run-lote-correction.ts -- --verificar-solo",
     "fix:lotes-correct": "tsx scripts/run-lote-correction.ts -- --corregir --backup",
     "fix:lotes-dt": "tsx scripts/run-lote-correction.ts -- --caso-dt",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix",
+    "lint": "node ../node_modules/eslint/bin/eslint.js src/**/*.ts",
+    "lint:fix": "node ../node_modules/eslint/bin/eslint.js src/**/*.ts --fix",
     "test": "jest",
     "test:watch": "jest --watch"
   },

@@ -111,6 +111,7 @@ export function useApi<T = any>() {
 
   return {
     ...state,
+    isLoading: state.loading,
     execute,
     executeWithResult,
     reset,
