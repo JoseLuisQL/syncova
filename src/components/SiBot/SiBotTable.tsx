@@ -63,7 +63,7 @@ export const SiBotTable: React.FC<SiBotTableProps> = ({ children }) => {
         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-zinc-200 pt-12">
           <table
             ref={tableRef}
-            className="min-w-full text-[11.5px] text-left divide-y divide-zinc-200/80"
+            className="min-w-full text-left text-[11.5px]"
           >
             {children}
           </table>

@@ -249,9 +249,8 @@ export const Pagination: React.FC<PaginationProps> = memo(({
     <nav aria-label="Paginacion" className={COMPONENT_STYLES.pagination.container}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className={COMPONENT_STYLES.pagination.info}>
-          Mostrando <span className="font-semibold text-slate-900">{startItem}</span> a{' '}
-          <span className="font-semibold text-slate-900">{endItem}</span> de{' '}
-          <span className="font-semibold text-slate-900">{total}</span>
+          <span className="font-semibold text-[#606571]">{startItem}-{endItem}</span> de{' '}
+          <span className="font-semibold text-[#606571]">{total}</span>
         </p>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -260,8 +259,9 @@ export const Pagination: React.FC<PaginationProps> = memo(({
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage <= 1}
             className={`${COMPONENT_STYLES.pagination.button} ${COMPONENT_STYLES.pagination.buttonInactive}`}
+            aria-label="Página anterior"
           >
-            Anterior
+            ‹
           </button>
 
           {pageNumbers.map((pageNum) => (
@@ -283,8 +283,9 @@ export const Pagination: React.FC<PaginationProps> = memo(({
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage >= totalPages}
             className={`${COMPONENT_STYLES.pagination.button} ${COMPONENT_STYLES.pagination.buttonInactive}`}
+            aria-label="Página siguiente"
           >
-            Siguiente
+            ›
           </button>
         </div>
       </div>
@@ -352,7 +353,7 @@ export const DataTable: React.FC<DataTableProps> = memo(({
         ) : (
           <div className="overflow-hidden rounded-[20px] border border-slate-200 bg-white/95">
             <table className="min-w-full table-fixed">
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="bg-white">
                 {Array.from({ length: skeletonRows }).map((_, rowIndex) => (
                   <tr key={`table-skeleton-${rowIndex + 1}`} className="inventory-reveal" style={{ animationDelay: `${rowIndex * 45}ms` }}>
                     {Array.from({ length: skeletonColumns }).map((__, columnIndex) => (

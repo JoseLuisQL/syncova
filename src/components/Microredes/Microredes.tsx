@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Buildings, GitBranch, TreeStructure, Plus, ArrowsClockwise } from '@phosphor-icons/react';
+import { Buildings, GitBranch, TreeStructure, Plus } from '@phosphor-icons/react';
 import { CreateMicroredDto, Microred, Red, UpdateMicroredDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useMicroredes } from '../../hooks/useMicroredes';
@@ -228,12 +228,12 @@ const Microredes: React.FC<MicroredesProps> = ({
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full divide-y divide-zinc-200">
+      <table className="min-w-full border-separate border-spacing-0">
         <TableHeader columns={TABLE_COLUMNS} />
-        <tbody className="divide-y divide-zinc-100">
+        <tbody className="bg-white">
           {microredes.length === 0 ? (
             <tr>
-              <td colSpan={TABLE_COLUMNS.length}>
+              <td colSpan={TABLE_COLUMNS.length + 1}>
                 <EmptyState
                   icon={GitBranch}
                   title="No se encontraron microredes"
@@ -280,16 +280,10 @@ const Microredes: React.FC<MicroredesProps> = ({
             filters={filtersConfig}
             onClear={handleClearFilters}
             actions={
-              <>
-                <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={() => void fetchMicroredes()} disabled={loading}>
-                  <ArrowsClockwise className="h-4 w-4" />
-                  <span>Actualizar</span>
-                </button>
-                <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={loading}>
-                  <Plus className="h-4 w-4" />
-                  <span>Nueva microred</span>
-                </button>
-              </>
+              <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={loading}>
+                <Plus className="h-4 w-4" />
+                <span>Nueva microred</span>
+              </button>
             }
           />
 
@@ -366,14 +360,9 @@ const MicroredDesktopRow: React.FC<MicroredRowProps> = memo(({
   return (
     <TableRow>
       <TableCell>
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900">
-            <GitBranch className="h-5 w-5" aria-hidden="true" />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-zinc-900">{microred.nombre}</p>
-            <p className="text-xs text-zinc-500">{microred.codigo || 'Sin código registrado'}</p>
-          </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-[#15171d]">{microred.nombre}</p>
+          <p className="text-xs text-[#8b8f9b]">{microred.codigo || 'Sin código registrado'}</p>
         </div>
       </TableCell>
       <TableCell>

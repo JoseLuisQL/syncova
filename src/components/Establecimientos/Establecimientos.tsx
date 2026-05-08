@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Buildings, MapPin, Phone, Plus, ArrowsClockwise, User } from '@phosphor-icons/react';
+import { Buildings, MapPin, Phone, Plus, User } from '@phosphor-icons/react';
 import CascadingSelector from '../common/CascadingSelector';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
@@ -233,12 +233,12 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full divide-y divide-zinc-200">
+      <table className="min-w-full border-separate border-spacing-0">
         <TableHeader columns={TABLE_COLUMNS} />
-        <tbody className="divide-y divide-zinc-100">
+        <tbody className="bg-white">
           {establecimientos.length === 0 ? (
             <tr>
-              <td colSpan={TABLE_COLUMNS.length}>
+              <td colSpan={TABLE_COLUMNS.length + 1}>
                 <EmptyState
                   icon={Buildings}
                   title="No se encontraron establecimientos"
@@ -284,16 +284,10 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
             filters={filtersConfig}
             onClear={handleClearFilters}
             actions={
-              <>
-                <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={refresh} disabled={isLoading}>
-                  <ArrowsClockwise className="h-4 w-4" />
-                  <span>Actualizar</span>
-                </button>
-                <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={isCreating}>
-                  <Plus className="h-4 w-4" />
-                  <span>Nuevo establecimiento</span>
-                </button>
-              </>
+              <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={isCreating}>
+                <Plus className="h-4 w-4" />
+                <span>Nuevo establecimiento</span>
+              </button>
             }
           />
 
@@ -370,14 +364,9 @@ const EstablecimientoDesktopRow: React.FC<EstablecimientoRowProps> = memo(({
   return (
     <TableRow>
       <TableCell>
-        <div className="flex items-center gap-3">
-          <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${tipoConfig.iconWrapper}`}>
-            <Buildings className="h-5 w-5" aria-hidden="true" />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-zinc-900">{establecimiento.nombre}</p>
-            <p className="text-xs text-zinc-500">{establecimiento.codigo}</p>
-          </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-[#15171d]">{establecimiento.nombre}</p>
+          <p className="text-xs text-[#8b8f9b]">{establecimiento.codigo}</p>
         </div>
       </TableCell>
       <TableCell>

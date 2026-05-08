@@ -33,7 +33,7 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
 
   if (hasBase && additionalCount > 0) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[0.65rem] font-bold uppercase tracking-wider bg-teal-600 text-white border border-teal-600">
+      <span className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
         <Stack weight="bold" className="h-3 w-3" />
         <span className="hidden sm:inline">Completo</span>
         <span className="sm:hidden">C</span>
@@ -43,7 +43,7 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
 
   if (hasBase) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[0.65rem] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-700 border border-zinc-200">
+      <span className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
         <CheckCircle weight="bold" className="h-3 w-3" />
         <span className="hidden sm:inline">Base</span>
         <span className="sm:hidden">B</span>
@@ -53,7 +53,7 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
 
   if (additionalCount > 0) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[0.65rem] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-700 border border-zinc-200">
+      <span className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
         <Plus weight="bold" className="h-3 w-3" />
         <span className="hidden sm:inline">Adic. #{additionalCount}</span>
         <span className="sm:hidden">A{additionalCount}</span>
@@ -62,7 +62,7 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[0.65rem] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-600 border border-zinc-200">
+    <span className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
       <CheckCircle weight="bold" className="h-3 w-3" />
       <span>Base</span>
     </span>
@@ -77,7 +77,7 @@ const EstadoBadge: React.FC<{ estado: string }> = memo(({ estado }) => {
   const Icon = config.icon;
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[0.7rem] font-semibold tracking-tight ${config.bg} ${config.text} border ${config.border}`}>
+    <span className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
       <Icon weight="bold" className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">{config.label}</span>
     </span>

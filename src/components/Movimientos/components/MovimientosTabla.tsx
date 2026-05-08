@@ -858,7 +858,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
       <button
         type="button"
         onClick={onOpenColumnSettings}
-        className="absolute right-2 top-2 z-30 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 bg-white/95 text-zinc-900 shadow-sm backdrop-blur transition hover:bg-teal-600 hover:text-white sm:right-3 sm:top-3"
+        className="absolute right-2 top-2 z-30 inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-white/95 text-[#15171d] shadow-sm backdrop-blur transition hover:bg-[#fbfafd] sm:right-3 sm:top-3"
         title={`Configurar columnas (${visibleCount}/${configurableColumnsAllowed.length})`}
         aria-label="Configurar columnas visibles"
       >
@@ -877,7 +877,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         <div className="hidden min-h-0 flex-1 overflow-auto md:block selection:bg-zinc-200">
           <table className="w-max min-w-full table-fixed border-collapse" role="table" aria-label="Matriz de datos">
             <thead className="sticky top-0 z-20">
-              <tr className="border-b-[3px] border-teal-600 bg-white">
+              <tr className="border-y border-[#e7e7ef] bg-[#fbfafd]">
                 {columnasVisibles.map((column, index) => {
                   const isFirst = index === 0;
 
@@ -886,8 +886,8 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                       key={column.key}
                       className={`${COMPONENT_STYLES.table.headerCell} ${column.width} ${
                         isFirst
-                          ? 'sticky left-0 z-30 bg-white border-r border-zinc-200/60'
-                          : 'border-r border-zinc-100'
+                          ? 'sticky left-0 z-30 bg-[#fbfafd] border-r border-[#e7e7ef]'
+                          : 'border-r border-[#eeeef3]'
                       } ${
                         column.align === 'center'
                           ? 'text-center'
@@ -907,8 +907,8 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 })}
               </tr>
               {/* Totales Macro movidos aquí al thead para sticky automático sin gaps */}
-              <tr className="border-b border-zinc-300 bg-zinc-50/95 shadow-sm backdrop-blur-sm">
-                <th className="sticky left-0 z-30 border-r border-zinc-200 bg-zinc-50/95 px-3 py-2 text-left font-normal">
+              <tr className="border-b border-[#eeeef3] bg-white/95 shadow-sm backdrop-blur-sm">
+                <th className="sticky left-0 z-30 border-r border-[#e7e7ef] bg-white/95 px-3 py-2 text-left font-normal">
                   <div className="flex items-center justify-between">
                     <span className="text-[0.65rem] font-black uppercase tracking-widest text-zinc-600">Total Macro</span>
                     <span className="text-xs font-bold text-zinc-400">{datosTabla.length} un.</span>
@@ -917,7 +917,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 {columnasVisibles
                   .filter((column) => column.key !== 'establecimiento')
                   .map((column) => (
-                    <th key={column.key} className={`border-r border-zinc-100 bg-zinc-50/95 px-1 py-1 font-normal ${column.key === 'entrega' ? 'align-top text-center' : 'text-center align-middle'}`}>
+                    <th key={column.key} className={`border-r border-[#eeeef3] bg-white/95 px-1 py-1 font-normal ${column.key === 'entrega' ? 'align-top text-center' : 'text-center align-middle'}`}>
                       {renderTotalCell(column.key)}
                     </th>
                   ))}
@@ -952,7 +952,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                   <tr
                     key={`${movimiento.establecimientoId}-${selectedMes}-${selectedAnio}`}
                     onClick={() => onRowSelect(movimiento.establecimientoId)}
-                    className={`${rowBg} cursor-pointer transition-colors border-b border-zinc-100 ${!isSelected && 'hover:brightness-[0.97]'}`}
+                    className={`${rowBg} cursor-pointer border-b border-[#eeeef3] transition-colors ${!isSelected && 'hover:brightness-[0.99]'}`}
                   >
                     <td className={`sticky left-0 z-10 box-border border-r border-zinc-200 px-3 py-2.5 ${isSelected ? 'bg-teal-50/70 ring-inset ring-[1.5px] ring-teal-600' : colores.bg}`}>
                       <div className="min-w-0">

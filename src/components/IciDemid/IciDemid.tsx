@@ -312,10 +312,10 @@ const IciDemid: React.FC = () => {
         <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent">
           <DataTable isLoading={isLoading} loadingMessage="Cargando registros ICI DEMID..." skeletonRows={8} skeletonColumns={16} loadingVariant="table">
             <div className="hidden min-h-0 flex-1 overflow-auto md:block">
-              <table className="w-max min-w-full table-auto divide-y divide-zinc-200">
-                <thead className="sticky top-0 z-20 bg-white">
-                  <tr className="border-b border-zinc-200 bg-zinc-50/95">
-                    <th className={`${COMPONENT_STYLES.table.headerCell} sticky left-0 z-30 w-[280px] min-w-[280px] bg-zinc-50/95 text-left shadow-[8px_0_14px_-12px_rgba(15,23,42,0.16)]`}>
+              <table className="w-max min-w-full table-auto">
+                <thead className="sticky top-0 z-20 bg-[#fbfafd]">
+                  <tr className={COMPONENT_STYLES.table.header}>
+                    <th className={`${COMPONENT_STYLES.table.headerCell} sticky left-0 z-30 w-[280px] min-w-[280px] bg-[#fbfafd] text-left shadow-[8px_0_14px_-12px_rgba(15,23,42,0.16)]`}>
                       <div className="flex items-center gap-2">
                         <Buildings className="h-4 w-4 text-zinc-500" />
                         Establecimiento
@@ -346,7 +346,7 @@ const IciDemid: React.FC = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100">
+                <tbody className="bg-white">
                   {registrosFiltrados.length === 0 ? (
                     <tr>
                       <td colSpan={mesesDelAnio.length + 6} className="px-6 py-16 text-center">
@@ -363,7 +363,7 @@ const IciDemid: React.FC = () => {
                     registrosFiltrados.map((registro) => {
                       const estilo = getEstiloEstablecimiento(registro.establecimiento);
                       return (
-                        <tr key={registro.id} className={`transition-colors ${estilo.colores.bg} hover:bg-zinc-50/50`}>
+                        <tr key={registro.id} className={`${COMPONENT_STYLES.table.row} ${estilo.colores.bg}`}>
                           <td className={`sticky left-0 z-10 border-r border-white/60 px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)] ${estilo.colores.bg}`}>
                             <div className="flex items-start gap-3">
                               <span className="mt-2 h-2.5 w-2.5 rounded-full bg-zinc-500 ring-2 ring-white/80" />

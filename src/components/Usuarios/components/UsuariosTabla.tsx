@@ -79,8 +79,8 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
 
   return (
     <div className={COMPONENT_STYLES.table.container}>
-      <div className="overflow-X-auto">
-        <table className="min-w-full divide-y divide-zinc-200">
+      <div className="overflow-x-auto">
+        <table className="min-w-full">
           <thead className={COMPONENT_STYLES.table.header}>
             <tr>
               <th className="px-4 py-3 text-left w-12">
@@ -88,7 +88,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                   type="checkbox"
                   checked={selectedUsers.length === usuarios.length && usuarios.length > 0}
                   onChange={onSelectAll}
-                  className="rounded border-zinc-300 text-zinc-600 focus:ring-zinc-500"
+                  className="h-4 w-4 rounded-[5px] border-[#e7e7ef] text-[#7c3aed] focus:ring-[#7c3aed]/20"
                 />
               </th>
               <th className={COMPONENT_STYLES.table.headerCell}>Usuario</th>
@@ -98,7 +98,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
               <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Acciones</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-zinc-100">
+          <tbody className="bg-white">
             {isLoading ? (
               <tr>
                 <td colSpan={6} className="px-6 py-12 text-center">
@@ -129,14 +129,14 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                       type="checkbox"
                       checked={selectedUsers.includes(usuario.id)}
                       onChange={() => onSelectUser(usuario.id)}
-                      className="rounded border-zinc-300 text-zinc-600 focus:ring-zinc-500"
+                      className="h-4 w-4 rounded-[5px] border-[#e7e7ef] text-[#7c3aed] focus:ring-[#7c3aed]/20"
                     />
                   </td>
                   <td className={COMPONENT_STYLES.table.cell}>
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-zinc-500 to-zinc-500 flex items-center justify-center">
-                          <User className="h-5 w-5 text-white" />
+                        <div className="h-10 w-10 rounded-full border border-[#e7e7ef] bg-[#f8f7fb] flex items-center justify-center">
+                          <User className="h-5 w-5 text-[#606571]" />
                         </div>
                       </div>
                       <div className="ml-3">
@@ -243,9 +243,8 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
         <div className={COMPONENT_STYLES.pagination.container}>
           <div className="flex items-center justify-between">
             <div className={COMPONENT_STYLES.pagination.info}>
-              Mostrando {((pagination.page - 1) * pagination.limit) + 1} a{' '}
-              {Math.min(pagination.page * pagination.limit, pagination.total)} de{' '}
-              {pagination.total} usuarios
+              {((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} de{' '}
+              {pagination.total}
             </div>
             <div className="flex gap-2">
               <button
@@ -253,7 +252,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                 disabled={!pagination.hasPrev}
                 className={`${COMPONENT_STYLES.pagination.button} ${COMPONENT_STYLES.pagination.buttonInactive}`}
               >
-                Anterior
+                ‹
               </button>
 
               {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
@@ -280,7 +279,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                 disabled={!pagination.hasNext}
                 className={`${COMPONENT_STYLES.pagination.button} ${COMPONENT_STYLES.pagination.buttonInactive}`}
               >
-                Siguiente
+                ›
               </button>
             </div>
           </div>

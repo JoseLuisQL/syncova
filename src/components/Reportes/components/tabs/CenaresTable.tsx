@@ -62,13 +62,6 @@ const TRIMESTRE_LABELS = {
   q4: '4° Trim',
 };
 
-const quarterTone = {
-  q1: 'bg-zinc-50 text-zinc-900',
-  q2: 'bg-zinc-50 text-zinc-900',
-  q3: 'bg-zinc-50 text-zinc-900',
-  q4: 'bg-zinc-50 text-zinc-900',
-} as const;
-
 const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todos' }) => {
   const [items, setItems] = useState<TableItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -346,30 +339,30 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
         <div className="max-h-[620px] overflow-x-auto overflow-y-auto">
           <table className="w-full min-w-[1600px] border-collapse">
             <thead className="sticky top-0 z-20">
-              <tr className="bg-zinc-50 border-y border-zinc-200 text-zinc-600">
-                <th className="sticky left-0 z-30 min-w-[220px] border-r border-zinc-200 bg-zinc-50 px-4 py-3 text-left text-[0.7rem] font-semibold uppercase tracking-widest">
+              <tr className="border-y border-[#e7e7ef] bg-[#fbfafd] text-[#8b8f9b]">
+                <th className="sticky left-0 z-30 min-w-[220px] border-r border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em]">
                   Item
                 </th>
-                <th className="sticky left-[220px] z-30 min-w-[90px] border-r border-zinc-200 bg-zinc-50 px-3 py-3 text-center text-[0.7rem] font-semibold uppercase tracking-widest">
+                <th className="sticky left-[220px] z-30 min-w-[90px] border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em]">
                   Saldo {anio - 1}
                 </th>
                 {TRIMESTRES.map((quarter) => (
                   <th
                     key={quarter}
                     colSpan={5}
-                    className={`${quarterTone[quarter]} border-y border-r border-zinc-200 px-2 py-3 text-center text-[0.7rem] font-semibold uppercase tracking-widest`}
+                    className="border-y border-r border-[#e7e7ef] bg-[#fbfafd] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]"
                   >
                     {TRIMESTRE_LABELS[quarter]}
                   </th>
                 ))}
-                <th colSpan={3} className="bg-zinc-50 px-2 py-3 text-center text-[0.7rem] font-semibold uppercase tracking-widest border-y border-zinc-200">
+                <th colSpan={3} className="border-y border-[#e7e7ef] bg-[#fbfafd] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
                   Totales
                 </th>
               </tr>
 
-              <tr className="bg-white border-b border-zinc-200 text-zinc-500 font-medium">
-                <th className="sticky left-0 z-30 border-r border-zinc-200 bg-white" />
-                <th className="sticky left-[220px] z-30 border-r border-zinc-200 bg-white" />
+              <tr className="border-b border-[#eeeef3] bg-white font-medium text-[#8b8f9b]">
+                <th className="sticky left-0 z-30 border-r border-[#e7e7ef] bg-white" />
+                <th className="sticky left-[220px] z-30 border-r border-[#e7e7ef] bg-white" />
                 {TRIMESTRES.map((quarter) => (
                   <React.Fragment key={`sub-${quarter}`}>
                     <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Prog.</th>
@@ -385,15 +378,15 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-zinc-100 bg-white">
+            <tbody className="bg-white">
               {filteredItems.map((item, index) => {
                 const totalProg = item.programacion.q1 + item.programacion.q2 + item.programacion.q3 + item.programacion.q4;
                 const totalEntr = item.entregas.q1 + item.entregas.q2 + item.entregas.q3 + item.entregas.q4;
                 const totalDif = totalProg - totalEntr;
 
                 return (
-                  <tr key={item.id} className="group transition-colors hover:bg-zinc-50/30">
-                    <td className="sticky left-0 z-10 border-r border-zinc-200 bg-white px-4 py-3 shadow-sm transition-colors group-hover:bg-zinc-50/30">
+                  <tr key={item.id} className="group border-b border-[#eeeef3] transition-colors hover:bg-[#fbfafd]">
+                    <td className="sticky left-0 z-10 border-r border-[#e7e7ef] bg-white px-4 py-3 shadow-sm transition-colors group-hover:bg-[#fbfafd]">
                       <div className="flex items-center gap-2">
                         <span className={`flex-shrink-0 rounded p-1.5 ${item.tipo === 'vacuna' ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-100 text-zinc-700'}`}>
                           {item.tipo === 'vacuna' ? <Package className="h-3.5 w-3.5" /> : <Syringe weight="duotone" className="h-3.5 w-3.5" />}
@@ -404,7 +397,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
                       </div>
                     </td>
 
-                    <td className="sticky left-[220px] z-10 border-r border-zinc-200 bg-zinc-50 px-3 py-3 text-center text-sm font-semibold text-zinc-700 shadow-sm transition-colors group-hover:bg-zinc-50/50">
+                    <td className="sticky left-[220px] z-10 border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-3 text-center text-sm font-semibold text-[#15171d] shadow-sm transition-colors group-hover:bg-[#fbfafd]">
                       {item.saldoAnterior.toLocaleString()}
                     </td>
 

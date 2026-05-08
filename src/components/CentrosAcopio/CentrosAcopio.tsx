@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Building, Buildings, GitBranch, MapPin, TreeStructure, Plus, ArrowsClockwise, User } from '@phosphor-icons/react';
+import { Buildings, GitBranch, MapPin, TreeStructure, Plus, User } from '@phosphor-icons/react';
 import { CentroAcopio, CreateCentroAcopioDto, Microred, UpdateCentroAcopioDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
@@ -285,12 +285,12 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full divide-y divide-zinc-200">
+      <table className="min-w-full border-separate border-spacing-0">
         <TableHeader columns={TABLE_COLUMNS} />
-        <tbody className="divide-y divide-zinc-100">
+        <tbody className="bg-white">
           {centrosAcopio.length === 0 ? (
             <tr>
-              <td colSpan={TABLE_COLUMNS.length}>
+              <td colSpan={TABLE_COLUMNS.length + 1}>
                 <EmptyState
                   icon={Buildings}
                   title="No se encontraron centros de acopio"
@@ -337,26 +337,15 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
             filters={filtersConfig}
             onClear={handleClearFilters}
             actions={
-              <>
-                <button
-                  type="button"
-                  className={COMPONENT_STYLES.button.secondary}
-                  onClick={() => void fetchCentrosAcopio()}
-                  disabled={loading}
-                >
-                  <ArrowsClockwise className="h-4 w-4" />
-                  <span>Actualizar</span>
-                </button>
-                <button
-                  type="button"
-                  className={COMPONENT_STYLES.button.primary}
-                  onClick={() => handleOpenModal()}
-                  disabled={loading}
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Nuevo centro</span>
-                </button>
-              </>
+              <button
+                type="button"
+                className={COMPONENT_STYLES.button.primary}
+                onClick={() => handleOpenModal()}
+                disabled={loading}
+              >
+                <Plus className="h-4 w-4" />
+                <span>Nuevo centro</span>
+              </button>
             }
           />
 
@@ -434,14 +423,9 @@ const CentroDesktopRow: React.FC<CentroRowProps> = memo(({
   return (
     <TableRow>
       <TableCell>
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
-            <Building className="h-5 w-5" aria-hidden="true" />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-zinc-900">{centro.nombre}</p>
-            <p className="text-xs text-zinc-500">{centro.codigo || 'Sin código registrado'}</p>
-          </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-[#15171d]">{centro.nombre}</p>
+          <p className="text-xs text-[#8b8f9b]">{centro.codigo || 'Sin código registrado'}</p>
         </div>
       </TableCell>
       <TableCell>

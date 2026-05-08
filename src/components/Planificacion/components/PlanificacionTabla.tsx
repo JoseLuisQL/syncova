@@ -280,24 +280,24 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
         <div className="hidden min-h-0 flex-1 overflow-auto md:block selection:bg-zinc-200">
           <table className="w-full border-collapse" role="table" aria-label="Matriz de datos">
             <thead className="sticky top-0 z-20">
-              <tr className="border-b-[3px] border-teal-600 bg-white">
-                <th className={`sticky left-0 z-30 w-[260px] min-w-[260px] bg-white px-2 py-2.5 text-left text-[0.65rem] font-black uppercase tracking-[0.15em] text-zinc-600 border-r border-zinc-200/60`}>
+              <tr className="border-y border-[#e7e7ef] bg-[#fbfafd]">
+                <th className="sticky left-0 z-30 w-[260px] min-w-[260px] border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">
                   Nomenclatura (Punto de Entrega)
                 </th>
                 {MESES_CORTOS.map((mes) => (
-                  <th key={mes} className={`w-[70px] min-w-[70px] px-2 py-2.5 text-center text-[0.65rem] font-black uppercase tracking-[0.15em] text-zinc-500 border-r border-zinc-100`}>
+                  <th key={mes} className="w-[70px] min-w-[70px] border-r border-[#eeeef3] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">
                     {mes}
                   </th>
                 ))}
-                <th className={`w-[90px] min-w-[90px] px-2 py-2.5 text-center text-[0.65rem] font-black uppercase tracking-[0.15em] text-zinc-900`}>
+                <th className="w-[90px] min-w-[90px] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
                   Suma
                 </th>
               </tr>
             </thead>
 
             <tbody className="text-[0.85rem]">
-              <tr className="sticky top-[35px] z-[15] border-b border-zinc-300 bg-zinc-50/90 backdrop-blur-sm">
-                <td className="sticky left-0 z-20 border-r border-zinc-200 bg-zinc-50/90 px-3 py-2">
+              <tr className="sticky top-[45px] z-[15] border-b border-[#eeeef3] bg-white/95 backdrop-blur-sm">
+                <td className="sticky left-0 z-20 border-r border-[#e7e7ef] bg-white/95 px-3 py-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[0.65rem] font-black uppercase tracking-widest text-zinc-600">Total Macro</span>
                     <span className="text-xs font-bold text-zinc-400">{establecimientos.length} un.</span>
@@ -342,7 +342,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                   <tr
                     key={estData.planificacionId ?? estData.establecimiento.id}
                     onClick={() => onRowSelect(estData.establecimiento.id)}
-                    className={`${rowBg} cursor-pointer transition-colors border-b border-zinc-100 ${!isSelected && 'hover:brightness-[0.97]'}`}
+                    className={`${rowBg} cursor-pointer border-b border-[#eeeef3] transition-colors ${!isSelected && 'hover:brightness-[0.99]'}`}
                   >
                     <td className={`sticky left-0 z-10 box-border border-r border-zinc-200 px-3 py-2.5 ${isSelected ? 'bg-teal-50/70 ring-inset ring-[1.5px] ring-teal-600' : colores.bg}`}>
                       <div className="min-w-0">

@@ -103,7 +103,7 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
       {/* Navigation Tabs */}
       <nav className={COMPONENT_STYLES.nav.container} aria-label="Secciones">
         <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-1 overflow-X-auto py-3 scrollbar-hide">
+          <div className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
             {displaySections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.id;

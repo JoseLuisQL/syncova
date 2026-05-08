@@ -265,10 +265,10 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
                   ]}
                 />
 
-                <div className="overflow-hidden rounded-lg border border-gray-200 bg-white mt-4">
+                <div className="mt-4 overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                    <table className="min-w-full">
+                      <thead className={COMPONENT_STYLES.table.header}>
                         <tr>
                           <th className={COMPONENT_STYLES.table.headerCell}>Establecimiento</th>
                           <th className={COMPONENT_STYLES.table.headerCell}>Código</th>
@@ -276,9 +276,9 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
                           <th className={COMPONENT_STYLES.table.headerCell}>Tipo</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-100">
+                      <tbody className="bg-white">
                         {deliveryBreakdown.detalles.map((detalle) => (
-                          <tr key={`${detalle.establecimientoId}-${detalle.vacunaId}-${detalle.cantidadEntregada}`}>
+                          <tr key={`${detalle.establecimientoId}-${detalle.vacunaId}-${detalle.cantidadEntregada}`} className={COMPONENT_STYLES.table.row}>
                             <td className={COMPONENT_STYLES.table.cell}>
                               <p className="text-sm font-medium text-zinc-900">{detalle.establecimientoNombre}</p>
                             </td>
@@ -292,11 +292,11 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
                             </td>
                             <td className={COMPONENT_STYLES.table.cell}>
                               {detalle.numeroEntregaAdicional ? (
-                                <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                                <span className={COMPONENT_STYLES.badge.warning}>
                                   Adicional
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                                <span className={COMPONENT_STYLES.badge.active}>
                                   Programada
                                 </span>
                               )}

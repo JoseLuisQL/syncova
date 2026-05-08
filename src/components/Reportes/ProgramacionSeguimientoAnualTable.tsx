@@ -364,9 +364,9 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl">
+    <div className="overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]">
       {/* Header Minimal */}
-      <div className="px-5 py-4 border-b border-zinc-200 bg-white">
+      <div className="border-b border-[#eeeef3] bg-white px-5 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
             <div className="flex items-center justify-center rounded-xl bg-teal-100 p-2">
@@ -386,7 +386,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
             <button
               onClick={handleExportarExcel}
               disabled={isExporting || loading || items.length === 0}
-              className="flex items-center rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:border-teal-200 hover:bg-teal-50 focus:ring-2 focus:ring-teal-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center rounded-[10px] border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] shadow-sm transition-colors hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isExporting ? (
                 <>
@@ -414,41 +414,41 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       {/* Table Container with Horizontal Scroll */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1400px]">
-          <thead className="bg-zinc-50 border-b border-zinc-200">
+          <thead className="bg-[#fbfafd] border-y border-[#e7e7ef]">
             <tr>
-              <th className="px-4 py-3 text-left text-[0.7rem] font-semibold text-zinc-500 uppercase tracking-widest sticky left-0 bg-zinc-50 border-y border-zinc-200 z-10 border-r">
+              <th className="sticky left-0 z-10 border-r border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">
                 <div className="flex items-center">
                   <Package className="h-4 w-4 mr-2" />
                   Descripción del Ítem
                 </div>
               </th>
-              <th className="px-3 py-3 text-right text-[0.7rem] font-semibold text-zinc-500 uppercase tracking-widest border-y border-zinc-200 border-r bg-zinc-50">
+              <th className="border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">
                 Saldo {anio - 1}
               </th>
               {/* Q1 Columns */}
-              <th colSpan={5} className="px-3 py-2 text-center text-[0.7rem] font-semibold text-zinc-700 uppercase tracking-widest border-zinc-200 border-y border-r bg-zinc-50">
+              <th colSpan={5} className="border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
                 1° Trimestre
               </th>
               {/* Q2 Columns */}
-              <th colSpan={5} className="px-3 py-2 text-center text-[0.7rem] font-semibold text-zinc-700 uppercase tracking-widest border-zinc-200 border-y border-r bg-zinc-50">
+              <th colSpan={5} className="border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
                 2° Trimestre
               </th>
               {/* Q3 Columns */}
-              <th colSpan={5} className="px-3 py-2 text-center text-[0.7rem] font-semibold text-zinc-700 uppercase tracking-widest border-zinc-200 border-y border-r bg-zinc-50">
+              <th colSpan={5} className="border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
                 3° Trimestre
               </th>
               {/* Q4 Columns */}
-              <th colSpan={5} className="px-3 py-2 text-center text-[0.7rem] font-semibold text-zinc-700 uppercase tracking-widest border-zinc-200 border-y border-r bg-zinc-50">
+              <th colSpan={5} className="border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
                 4° Trimestre
               </th>
               {/* Annual Totals */}
-              <th colSpan={3} className="px-3 py-2 text-center text-[0.7rem] font-semibold text-zinc-700 uppercase tracking-widest border-y border-zinc-200 bg-zinc-50">
+              <th colSpan={3} className="bg-[#fbfafd] px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
                 Total Anual
               </th>
             </tr>
 
             {/* Sub-headers */}
-            <tr className="bg-white border-b border-zinc-200 text-zinc-500">
+            <tr className="border-b border-[#eeeef3] bg-white text-[#8b8f9b]">
               <th className="px-4 py-2 sticky left-0 bg-white z-10 border-r border-zinc-200"></th>
               <th className="px-3 py-2 border-r border-zinc-200"></th>
 
@@ -468,14 +468,14 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
             </tr>
           </thead>
           
-          <tbody className="bg-white divide-y divide-gray-100">
+          <tbody className="bg-white">
             {items.map((item, itemIndex) => {
               const totalProgramado = item.programacion.q1 + item.programacion.q2 + item.programacion.q3 + item.programacion.q4;
               const totalEntregado = item.entregas.q1 + item.entregas.q2 + item.entregas.q3 + item.entregas.q4;
               const diferenciaTotal = totalProgramado - totalEntregado;
 
               return (
-                <tr key={item.id} className="hover:bg-zinc-50 transition-colors duration-200 border-b border-gray-100">
+                <tr key={item.id} className="border-b border-[#eeeef3] transition-colors duration-200 hover:bg-[#fbfafd]">
                   {/* Item Description */}
                   <td className="px-6 py-4 text-sm font-semibold text-gray-900 sticky left-0 bg-white z-10 border-r border-gray-100">
                     <div className="flex items-center space-x-3">

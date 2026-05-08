@@ -192,9 +192,9 @@ const GestionVacunas: React.FC = () => {
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full divide-y divide-slate-200">
+      <table className="min-w-full">
         <TableHeader columns={TABLE_COLUMNS} />
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="bg-white">
           {vacunas.length === 0 ? (
             <tr>
               <td colSpan={6}>
@@ -237,13 +237,13 @@ const GestionVacunas: React.FC = () => {
                   </td>
                   <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
                     <div className="flex flex-wrap items-center justify-center gap-1.5 text-[0.78rem]">
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">
+                      <span className={COMPONENT_STYLES.badge.count}>
                         {stockInfo.lotesActivos} act.
                       </span>
-                      <span className="rounded-full bg-amber-50 px-2 py-0.5 text-amber-700">
+                      <span className={COMPONENT_STYLES.badge.warning}>
                         {stockInfo.lotesPorVencer} pv
                       </span>
-                      <span className="rounded-full bg-rose-50 px-2 py-0.5 text-rose-700">
+                      <span className={COMPONENT_STYLES.badge.danger}>
                         {stockInfo.lotesVencidos} venc.
                       </span>
                     </div>

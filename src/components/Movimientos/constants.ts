@@ -83,12 +83,12 @@ export const COLORS = {
 } as const;
 
 export const COMPONENT_STYLES = {
-  pageBackground: 'min-h-screen bg-zinc-50/30',
-  shell: 'rounded-[16px] border border-zinc-200/80 bg-white shadow-sm',
-  surface: 'rounded-[16px] border border-zinc-200/80 bg-white shadow-sm',
-  panel: 'rounded-[16px] border border-zinc-200/80 bg-white shadow-sm',
-  mutedPanel: 'rounded-[16px] border border-zinc-200 bg-zinc-50',
-
+  pageBackground: 'min-h-screen bg-[#f0eff4]',
+  shell: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
+  surface: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
+  panel: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
+  mutedPanel: 'rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd]',
+  card: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
   header: {
     container: 'sticky top-0 z-20 backdrop-blur-md bg-white/80',
     title: 'text-[1.42rem] font-semibold tracking-tight text-zinc-900 sm:text-[1.54rem]',
@@ -99,17 +99,17 @@ export const COMPONENT_STYLES = {
 
   button: {
     primary:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     secondary:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     success:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     warning:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     danger:
       'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     ghost:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#e7e7ef] bg-white px-3 py-2 text-sm font-semibold text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     icon:
       'inline-flex h-9 w-9 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
     iconEdit: 'border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:ring-zinc-900',
@@ -138,22 +138,21 @@ export const COMPONENT_STYLES = {
   },
 
   table: {
-    container: 'overflow-hidden rounded-none border border-zinc-200 bg-white shadow-sm',
-    header: 'bg-white',
-    headerCell: 'px-2 py-2.5 text-left text-[0.65rem] font-black uppercase tracking-[0.15em] text-zinc-500',
-    row: 'transition-colors duration-150 border-b border-zinc-100',
-    cell: 'px-2 py-2 align-middle text-sm text-zinc-700',
-    emptyIcon: 'mx-auto mb-4 h-11 w-11 text-zinc-300',
+    container: 'overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
+    header: 'bg-[#fbfafd] border-y border-[#e7e7ef]',
+    headerCell: 'px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]',
+    row: 'transition-colors duration-150 border-b border-[#eeeef3] hover:bg-[#fbfafd]',
+    cell: 'px-3 py-3 align-middle text-sm text-[#15171d]',
   },
 
   badge: {
-    active: 'inline-flex items-center rounded-full bg-teal-600 px-2.5 py-1 text-xs font-medium text-white',
-    inactive: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600',
-    count: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700',
-    warning: 'inline-flex items-center rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-medium text-amber-700',
-    danger: 'inline-flex items-center rounded-full bg-rose-50 border border-rose-200 px-2.5 py-1 text-xs font-medium text-rose-700',
-    info: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700',
-    neutral: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700',
+    active: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
+    inactive: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    count: 'inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    warning: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
+    danger: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    info: 'inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    neutral: 'inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
   },
 
   modal: {
@@ -178,25 +177,25 @@ export const COMPONENT_STYLES = {
   },
 
   filter: {
-    container: 'rounded-[16px] border border-zinc-200 bg-white p-3 shadow-sm sm:p-4',
+    container: 'rounded-[18px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] sm:p-4',
     header: 'border-b border-zinc-100 px-5 py-4 sm:px-6',
     body: 'px-5 py-4 sm:px-6',
     searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400',
     searchInput:
-      'w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-10 pr-4 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 hover:border-zinc-300 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10',
+      'w-full rounded-[10px] border border-[#e7e7ef] bg-white py-2 pl-10 pr-4 text-sm text-[#15171d] shadow-sm transition placeholder:text-[#8b8f9b] hover:border-[#d7d8e2] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
   },
 
   pagination: {
-    container: 'border-t border-zinc-100 bg-white px-4 py-3 sm:px-5',
-    info: 'text-sm text-zinc-600',
+    container: 'border-t border-[#eeeef3] bg-white px-4 py-4 sm:px-5',
+    info: 'text-sm font-medium text-[#747986]',
     button:
-      'rounded-lg border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50',
-    buttonActive: 'border-teal-600 bg-teal-600 text-white shadow-sm',
-    buttonInactive: 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50',
+      'min-h-9 min-w-9 rounded-[10px] border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40',
+    buttonActive: 'border-[#e7e7ef] bg-white text-[#15171d] shadow-sm',
+    buttonInactive: 'border-transparent bg-transparent text-[#606571] hover:bg-[#fbfafd] hover:text-[#15171d]',
   },
 
   section: {
-    container: 'rounded-[16px] border border-zinc-200/90 bg-white shadow-sm',
+    container: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
     header: 'border-b border-zinc-100 px-5 py-4 sm:px-6',
     headerTitle: 'text-base font-semibold text-zinc-900',
     headerSubtitle: 'mt-1 text-sm text-zinc-500',

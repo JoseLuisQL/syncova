@@ -57,16 +57,16 @@ const IciDemidErroresModal: React.FC<IciDemidErroresModalProps> = ({ isOpen, onC
               ) : null}
             </div>
 
-            <div className="rounded-2xl border border-zinc-200 bg-white">
-              <div className="border-b border-zinc-100 px-4 py-3">
+            <div className="overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white">
+              <div className="border-b border-[#eeeef3] px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Warning className="h-4 w-4 text-rose-500" />
                   <h4 className="text-sm font-semibold text-zinc-800">Detalle por fila</h4>
                 </div>
               </div>
               <div className="max-h-[420px] overflow-auto">
-                <table className="min-w-full divide-y divide-zinc-200">
-                  <thead className="sticky top-0 bg-zinc-50">
+                <table className="min-w-full">
+                  <thead className={`sticky top-0 ${COMPONENT_STYLES.table.header}`}>
                     <tr>
                       <th className={COMPONENT_STYLES.table.headerCell}>Fila</th>
                       <th className={COMPONENT_STYLES.table.headerCell}>Tipo</th>
@@ -74,14 +74,14 @@ const IciDemidErroresModal: React.FC<IciDemidErroresModalProps> = ({ isOpen, onC
                       <th className={COMPONENT_STYLES.table.headerCell}>Descripción del error</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100">
+                  <tbody className="bg-white">
                     {(errores.erroresDetalle || []).map((error, index) => (
-                      <tr key={`${error.fila}-${index}`} className="hover:bg-zinc-50/60">
+                      <tr key={`${error.fila}-${index}`} className={COMPONENT_STYLES.table.row}>
                         <td className={COMPONENT_STYLES.table.cell}>
                           <span className="font-semibold text-zinc-700">{error.fila}</span>
                         </td>
                         <td className={COMPONENT_STYLES.table.cell}>
-                          <span className="inline-flex rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-rose-700">
+                          <span className={COMPONENT_STYLES.badge.danger}>
                             {error.tipo}
                           </span>
                         </td>

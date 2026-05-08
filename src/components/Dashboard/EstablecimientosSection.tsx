@@ -23,18 +23,18 @@ const EstablecimientosSection: React.FC = memo(() => {
         ) : data.length === 0 ? (
           <EmptyState title="Sin establecimientos" description="No hay datos disponibles." icon={<Hospital />} />
         ) : (
-          <table className="w-full text-left border-collapse min-w-[400px]">
+          <table className="w-full min-w-[400px] border-collapse text-left">
             <thead>
-              <tr className="border-b border-[#eef1f5] bg-[#f8fbfd]">
-                <th className="whitespace-nowrap px-5 py-3 text-left font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Establecimiento</th>
-                <th className="whitespace-nowrap px-5 py-3 text-center font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Código</th>
-                <th className="whitespace-nowrap px-5 py-3 text-right font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Tipo</th>
-                <th className="whitespace-nowrap px-5 py-3 text-right font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Estado</th>
+              <tr className="border-y border-[#e7e7ef] bg-[#fbfafd]">
+                <th className="whitespace-nowrap px-5 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Establecimiento</th>
+                <th className="whitespace-nowrap px-5 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Código</th>
+                <th className="whitespace-nowrap px-5 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Tipo</th>
+                <th className="whitespace-nowrap px-5 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Estado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100">
+            <tbody className="bg-white">
               {data.map((est) => (
-                <tr key={est.id} className="transition-colors hover:bg-neutral/50">
+                <tr key={est.id} className="border-b border-[#eeeef3] transition-colors hover:bg-[#fbfafd]">
                   <td className="whitespace-nowrap px-5 py-3.5 text-[13px] font-semibold text-[#171b22]">
                     {est.nombre}
                   </td>

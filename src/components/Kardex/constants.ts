@@ -4,7 +4,6 @@ import {
   COMPONENT_STYLES as INVENTORY_COMPONENT_STYLES,
   type ColorScheme,
 } from '../Inventario/constants';
-import { DESIGN_TOKENS } from '../../styles/designTokens';
 
 export const COMPONENT_STYLES = INVENTORY_COMPONENT_STYLES;
 export { COLORS };
@@ -33,40 +32,40 @@ export const MOVIMIENTO_CONFIG = {
     label: 'Ingreso',
     tone: 'success' as ColorScheme,
     icon: ArrowCircleUp,
-    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700',
-    chipClassName: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    badgeClassName: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
+    chipClassName: 'border-[#e7e7ef] bg-white text-[#15171d]',
   },
   salida: {
     key: 'salida',
     label: 'Salida',
     tone: 'danger' as ColorScheme,
     icon: ArrowCircleDown,
-    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700',
-    chipClassName: 'border-rose-200 bg-rose-50 text-rose-700',
+    badgeClassName: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    chipClassName: 'border-[#e7e7ef] bg-white text-[#15171d]',
   },
   transferencia: {
     key: 'transferencia',
     label: 'Transferencia',
     tone: 'secondary' as ColorScheme,
     icon: ArrowsLeftRight,
-    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-cyan-100 px-2.5 py-1 text-xs font-medium text-cyan-800',
-    chipClassName: 'border-cyan-200 bg-cyan-50 text-cyan-800',
+    badgeClassName: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-sky-500',
+    chipClassName: 'border-[#e7e7ef] bg-white text-[#15171d]',
   },
   ajuste: {
     key: 'ajuste',
     label: 'Ajuste',
     tone: 'warning' as ColorScheme,
     icon: Faders,
-    badgeClassName: `inline-flex items-center gap-1 rounded-full ${DESIGN_TOKENS.semantic.warning.surface} px-2.5 py-1 text-xs font-medium text-amber-700`,
-    chipClassName: `${DESIGN_TOKENS.semantic.warning.border} ${DESIGN_TOKENS.semantic.warning.surface} text-amber-700`,
+    badgeClassName: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
+    chipClassName: 'border-[#e7e7ef] bg-white text-[#15171d]',
   },
   default: {
     key: 'default',
     label: 'Movimiento',
     tone: 'neutral' as ColorScheme,
     icon: Package,
-    badgeClassName: 'inline-flex items-center gap-1 rounded-full bg-teal-100 px-2.5 py-1 text-xs font-medium text-teal-700',
-    chipClassName: 'border-teal-200 bg-teal-50 text-teal-700',
+    badgeClassName: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    chipClassName: 'border-[#e7e7ef] bg-white text-[#15171d]',
   },
 } as const;
 

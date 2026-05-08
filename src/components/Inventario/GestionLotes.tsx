@@ -177,9 +177,9 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
           skeletonColumns={columns.length}
           loadingVariant="table"
         >
-          <table className="min-w-full divide-y divide-slate-200">
+          <table className="min-w-full">
             <TableHeader columns={columns} />
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="bg-white">
               {filteredLotes.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length}>

@@ -131,9 +131,9 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full divide-y divide-zinc-200">
+      <table className="min-w-full">
         <TableHeader columns={TABLE_COLUMNS as unknown as Array<{ key: string; label: string; align?: 'left' | 'center' | 'right' }>} />
-        <tbody className="divide-y divide-zinc-100">
+        <tbody className="bg-white">
           {movimientos.length === 0 ? (
             <tr>
               <td colSpan={TABLE_COLUMNS.length}>

@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { GitBranch, TreeStructure, Plus, ArrowsClockwise } from '@phosphor-icons/react';
+import { GitBranch, TreeStructure, Plus } from '@phosphor-icons/react';
 import { CreateRedDto, Red, UpdateRedDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useRedes } from '../../hooks/useRedes';
@@ -198,12 +198,12 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full divide-y divide-zinc-200">
+      <table className="min-w-full border-separate border-spacing-0">
         <TableHeader columns={TABLE_COLUMNS} />
-        <tbody className="divide-y divide-zinc-100">
+        <tbody className="bg-white">
           {redes.length === 0 ? (
             <tr>
-              <td colSpan={TABLE_COLUMNS.length}>
+              <td colSpan={TABLE_COLUMNS.length + 1}>
                 <EmptyState
                   icon={TreeStructure}
                   title="No se encontraron redes"
@@ -250,16 +250,10 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
             filters={filtersConfig}
             onClear={handleClearFilters}
             actions={
-              <>
-                <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={() => void fetchRedes()} disabled={loading}>
-                  <ArrowsClockwise className="h-4 w-4" />
-                  <span>Actualizar</span>
-                </button>
-                <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={loading}>
-                  <Plus className="h-4 w-4" />
-                  <span>Nueva red</span>
-                </button>
-              </>
+              <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={loading}>
+                <Plus className="h-4 w-4" />
+                <span>Nueva red</span>
+              </button>
             }
           />
 
@@ -335,14 +329,9 @@ const RedDesktopRow: React.FC<RedRowProps> = memo(({
   return (
     <TableRow>
       <TableCell>
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900">
-            <TreeStructure className="h-5 w-5" aria-hidden="true" />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-zinc-900">{red.nombre}</p>
-            <p className="text-xs text-zinc-500">{red.codigo || 'Sin código registrado'}</p>
-          </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-[#15171d]">{red.nombre}</p>
+          <p className="text-xs text-[#8b8f9b]">{red.codigo || 'Sin código registrado'}</p>
         </div>
       </TableCell>
       <TableCell>

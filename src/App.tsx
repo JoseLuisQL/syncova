@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './contexts/AppContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -31,6 +32,25 @@ const AppContent: React.FC = () => {
   const { currentModule } = useCurrentRoute();
   const { sidebarCollapsed } = useApp();
   const { user } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    const resetScroll = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    resetScroll();
+    requestAnimationFrame(resetScroll);
+    window.setTimeout(resetScroll, 0);
+  }, [location.pathname, location.search]);
 
   return (
     <ProtectedRoute>
@@ -49,7 +69,7 @@ const AppContent: React.FC = () => {
           <Header />
           
           {/* Main content */}
-          <main className={currentModule === 'dashboard' ? 'p-0' : 'p-4 sm:p-6'}>
+          <main className={currentModule === 'dashboard' ? 'p-0 [overflow-anchor:none]' : 'p-4 sm:p-6 [overflow-anchor:none]'}>
             <AppRoutes />
           </main>
           

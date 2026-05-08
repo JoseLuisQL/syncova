@@ -216,16 +216,6 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
     }
   };
 
-  const getEstadoColor = (estado: string) =>
-    estado === 'activo'
-      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-      : 'border-rose-200 bg-rose-50 text-rose-700';
-
-  const getTipoColor = (esDefault: boolean) =>
-    esDefault
-      ? 'border-zinc-200 bg-zinc-50 text-zinc-700'
-      : 'border-zinc-200 bg-zinc-50 text-zinc-700';
-
   if (loading) {
     return (
       <div className="rounded-[24px] border border-zinc-200 bg-white p-6 shadow-sm">
@@ -353,22 +343,22 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[24px] border border-zinc-200 bg-white shadow-sm">
-        <div className="overflow-X-auto">
-          <table className="min-w-full divide-y divide-zinc-200">
-            <thead className="bg-zinc-50/90">
+      <section className={COMPONENT_STYLES.table.container}>
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead className={COMPONENT_STYLES.table.header}>
               <tr>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Rol</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Código</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Tipo</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Estado</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Usuarios</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Permisos</th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Creado</th>
-                <th className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Acciones</th>
+                <th className={COMPONENT_STYLES.table.headerCell}>Rol</th>
+                <th className={COMPONENT_STYLES.table.headerCell}>Código</th>
+                <th className={COMPONENT_STYLES.table.headerCell}>Tipo</th>
+                <th className={COMPONENT_STYLES.table.headerCell}>Estado</th>
+                <th className={COMPONENT_STYLES.table.headerCell}>Usuarios</th>
+                <th className={COMPONENT_STYLES.table.headerCell}>Permisos</th>
+                <th className={COMPONENT_STYLES.table.headerCell}>Creado</th>
+                <th className={`${COMPONENT_STYLES.table.headerCell} text-right`}>Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200 bg-white">
+            <tbody className="bg-white">
               {filteredRoles.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-14 text-center">
@@ -387,8 +377,8 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                 </tr>
               ) : (
                 filteredRoles.map((role) => (
-                  <tr key={role.id} className="transition-colors duration-150 hover:bg-zinc-50/70">
-                    <td className="px-6 py-4">
+                  <tr key={role.id} className={COMPONENT_STYLES.table.row}>
+                    <td className={COMPONENT_STYLES.table.cell}>
                       <div className="flex items-center gap-4">
                         <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${
                           role.esDefault
@@ -404,17 +394,17 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex rounded-lg bg-zinc-100 px-2.5 py-1 font-mono text-sm text-zinc-800">
+                      <span className="inline-flex rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 font-mono text-sm text-[#15171d]">
                         {role.codigo}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getTipoColor(role.esDefault)}`}>
+                      <span className="inline-flex rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
                         {role.esDefault ? 'Sistema' : 'Personalizado'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getEstadoColor(role.estado)}`}>
+                      <span className={`inline-flex gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:mt-[5px] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full ${role.estado === 'activo' ? 'before:bg-emerald-500' : 'before:bg-rose-500'}`}>
                         {role.estado === 'activo' ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>

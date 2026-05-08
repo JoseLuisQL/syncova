@@ -131,7 +131,7 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                 { key: 'acciones', label: 'Acciones', align: 'right' },
               ]}
             />
-            <tbody className="divide-y divide-zinc-100 bg-white">
+            <tbody className="bg-white">
               {alertasPaginadas.map((alerta) => {
                 const tipoInfo = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo);
                 const nivelInfo = NIVELES_ALERTA.find((nivel) => nivel.id === alerta.nivel);
@@ -143,7 +143,7 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                         type="checkbox"
                         checked={selectedAlertas.includes(alerta.id)}
                         onChange={() => onToggleSelect(alerta.id)}
-                        className="h-4 w-4 rounded border-zinc-300 text-teal-600 focus:ring-teal-500"
+                        className="h-4 w-4 rounded-[5px] border-[#e7e7ef] text-[#7c3aed] focus:ring-[#7c3aed]/20"
                         aria-label={`Seleccionar alerta: ${alerta.titulo}`}
                       />
                     </TableCell>
@@ -157,12 +157,12 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                       </div>
                     </TableCell>
                     <TableCell align="center">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${tipoInfo?.bgColor || 'bg-zinc-100'} ${tipoInfo?.color || 'text-zinc-700'}`}>
+                      <span className="inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
                         {tipoInfo?.label || alerta.tipo}
                       </span>
                     </TableCell>
                     <TableCell align="center">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${nivelInfo?.bgColor || 'bg-zinc-100'} ${nivelInfo?.color || 'text-zinc-700'}`}>
+                      <span className="inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
                         {nivelInfo?.label || alerta.nivel}
                       </span>
                     </TableCell>

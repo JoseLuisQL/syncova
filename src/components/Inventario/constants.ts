@@ -129,11 +129,11 @@ export const COMPONENT_STYLES = {
 
   button: {
     primary:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-sm',
+      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     secondary:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     ghost:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100/80 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#e7e7ef] bg-white px-3 py-2 text-sm font-semibold text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     success:
       'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-sm',
     icon:
@@ -145,8 +145,8 @@ export const COMPONENT_STYLES = {
 
   input: {
     base:
-      'w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-600/20',
-    normal: 'border-zinc-200 hover:border-zinc-300 focus:border-teal-600',
+      'w-full rounded-[10px] border bg-white px-4 py-2.5 text-sm text-[#15171d] shadow-sm transition placeholder:text-[#8b8f9b] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
+    normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     error: 'border-rose-300 bg-rose-50/40 focus:border-rose-500 focus:ring-rose-500/20',
     label: 'mb-1.5 block text-[0.82rem] font-medium text-zinc-700',
     errorText: 'mt-1 text-xs font-medium text-rose-600',
@@ -154,20 +154,20 @@ export const COMPONENT_STYLES = {
   },
 
   table: {
-    container: 'overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-sm',
-    header: 'bg-zinc-50/90 border-b border-zinc-200/80',
-    headerCell: 'px-4 py-3.5 text-left text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-zinc-500',
-    row: 'transition hover:bg-zinc-50/60 border-b border-zinc-100/80 last:border-0',
-    cell: 'px-4 py-4 align-top text-sm',
+    container: 'overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
+    header: 'bg-[#fbfafd] border-y border-[#e7e7ef]',
+    headerCell: 'px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]',
+    row: 'transition-colors hover:bg-[#fbfafd] border-b border-[#eeeef3] last:border-0',
+    cell: 'px-4 py-3.5 align-middle text-sm text-[#15171d]',
     emptyIcon: 'mx-auto mb-4 h-11 w-11 text-zinc-300',
   },
 
   badge: {
-    active: 'inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700',
-    inactive: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-600',
-    count: 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-800',
-    warning: 'inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700',
-    danger: 'inline-flex items-center rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700',
+    active: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
+    inactive: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    count: 'inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    warning: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
+    danger: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
   },
 
   modal: {
@@ -190,19 +190,19 @@ export const COMPONENT_STYLES = {
   },
 
   filter: {
-    container: 'rounded-[16px] border border-zinc-200 bg-white p-3 shadow-sm sm:p-4',
-    searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400',
+    container: 'rounded-[18px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] sm:p-4',
+    searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]',
     searchInput:
-      'w-full rounded-xl border border-zinc-200 bg-white py-2 pl-10 pr-4 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 hover:border-zinc-300 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-600/20',
+      'w-full rounded-[10px] border border-[#e7e7ef] bg-white py-2 pl-10 pr-4 text-sm text-[#15171d] shadow-sm transition placeholder:text-[#8b8f9b] hover:border-[#d7d8e2] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
   },
 
   pagination: {
-    container: 'border-t border-zinc-200/80 bg-zinc-50/50 px-4 py-3 sm:px-5',
-    info: 'text-sm font-medium text-zinc-600',
+    container: 'border-t border-[#eeeef3] bg-white px-4 py-4 sm:px-5',
+    info: 'text-sm font-medium text-[#747986]',
     button:
-      'rounded-xl border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50',
-    buttonActive: 'border-zinc-300 bg-white text-zinc-900 shadow-sm',
-    buttonInactive: 'border-transparent bg-transparent text-zinc-600 hover:bg-zinc-200/50 hover:text-zinc-900',
+      'min-h-9 min-w-9 rounded-[10px] border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40',
+    buttonActive: 'border-[#e7e7ef] bg-white text-[#15171d] shadow-sm',
+    buttonInactive: 'border-transparent bg-transparent text-[#606571] hover:bg-[#fbfafd] hover:text-[#15171d]',
   },
 
   nav: {
