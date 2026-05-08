@@ -2,10 +2,9 @@ import React, { memo } from 'react';
 import { MapPin } from '@phosphor-icons/react';
 import { usePaginatedCentrosAcopio } from '../../hooks/usePaginatedDashboard';
 import { EmptyState, SectionSkeleton } from './LoadingStates';
-import type { CentroAcopioStatus } from '../../services/dashboardService';
 
 const CentrosAcopioSection: React.FC = memo(() => {
-  const { data, loading, error, refresh } = usePaginatedCentrosAcopio(5);
+  const { data, loading, error } = usePaginatedCentrosAcopio(5);
 
   return (
     <section className="bg-white rounded-md border border-zinc-200 shadow-sm overflow-hidden flex flex-col h-full">

@@ -294,7 +294,6 @@ const NotificationBell: React.FC = memo(() => {
                 Ver todas las notificaciones
               </button>
             </div>
-          )}
         </div>
       )}
     </div>

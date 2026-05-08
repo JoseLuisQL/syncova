@@ -2,7 +2,6 @@ import React, { memo } from 'react';
 import { Warning, WarningCircle, Info, Bell } from '@phosphor-icons/react';
 import { usePaginatedAlertas } from '../../hooks/usePaginatedDashboard';
 import { EmptyState, SectionSkeleton } from './LoadingStates';
-import type { AlertaReciente } from '../../services/dashboardService';
 
 const getAlertIcon = (tipo: string, nivel: string) => {
   if (nivel === 'critico') return <WarningCircle size={16} className="text-rose-600" weight="fill" />;
