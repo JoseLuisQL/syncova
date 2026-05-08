@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, CalendarCheck, CloudArrowUp, ArrowSquareOut, Timer, X, CaretDown, ArrowsClockwise } from '@phosphor-icons/react';
+import { ShieldCheck, CalendarCheck, ArrowSquareOut, Timer, X, CaretDown, ArrowsClockwise } from '@phosphor-icons/react';
 import { useToastContext } from '../../contexts/ToastContext';
 import {
   PermisoOperativoService,
@@ -36,53 +36,53 @@ const ScheduleModal: React.FC<{
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-md max-w-md w-full shadow-xl ring-1 ring-zinc-200 mx-4 flex flex-col"
+        className="mx-4 flex w-full max-w-md flex-col rounded-[18px] border border-[#e3e9f0] bg-white shadow-xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-zinc-50 border border-zinc-200 text-zinc-700">
+            <div className="flex h-9 w-9 items-center justify-center border border-zinc-200 bg-neutral text-primary">
               <Timer className="h-5 w-5" weight="bold" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-zinc-900">Programar activación</h3>
-              <p className="text-xs text-zinc-500 font-medium">{permisoLabel}</p>
+              <h3 className="text-sm font-semibold text-primary">Programar activación</h3>
+              <p className="text-xs font-medium text-secondary">{permisoLabel}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors">
+          <button onClick={onClose} className="p-1.5 text-secondary transition-colors hover:bg-neutral hover:text-primary">
             <X className="h-4 w-4" weight="bold" />
           </button>
         </div>
 
         <div className="px-5 py-5 space-y-5">
           <div>
-            <label className="block text-[13px] font-bold text-zinc-800 mb-1.5">
+            <label className="mb-1.5 block text-[13px] font-semibold text-primary">
               Fecha y hora de activación
             </label>
             <input
               type="datetime-local"
               value={fechaActivacion}
               onChange={(e) => setFechaActivacion(e.target.value)}
-              className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+              className="w-full border border-zinc-200 bg-white px-3 py-2 text-[13px] text-primary transition-colors focus:border-tertiary focus:outline-none"
             />
           </div>
 
-          <div className="flex items-center gap-3 bg-zinc-50 p-3 rounded-md border border-zinc-100">
+          <div className="flex items-center gap-3 border border-zinc-100 bg-neutral p-3">
             <button
               type="button"
               role="switch"
               aria-checked={usarDesactivacion}
               onClick={() => setUsarDesactivacion(!usarDesactivacion)}
-              className={`relative inline-flex w-9 h-5 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${usarDesactivacion ? 'bg-teal-600' : 'bg-zinc-300'}`}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${usarDesactivacion ? 'bg-tertiary' : 'bg-zinc-300'}`}
             >
               <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow ring-0 transition-transform duration-200 ease-in-out ${usarDesactivacion ? 'translate-x-4' : 'translate-x-0'}`} />
             </button>
-            <span className="text-[13px] font-bold text-zinc-700">Programar desactivación automática</span>
+            <span className="text-[13px] font-semibold text-primary">Programar desactivación automática</span>
           </div>
 
           {usarDesactivacion && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-              <label className="block text-[13px] font-bold text-zinc-800 mb-1.5">
+              <label className="mb-1.5 block text-[13px] font-semibold text-primary">
                 Fecha y hora de desactivación
               </label>
               <input
@@ -90,16 +90,16 @@ const ScheduleModal: React.FC<{
                 value={fechaDesactivacion}
                 onChange={(e) => setFechaDesactivacion(e.target.value)}
                 min={fechaActivacion}
-                className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-[13px] text-zinc-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                className="w-full border border-zinc-200 bg-white px-3 py-2 text-[13px] text-primary transition-colors focus:border-tertiary focus:outline-none"
               />
             </motion.div>
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-zinc-100 bg-zinc-50/50 rounded-b-md mt-auto">
+        <div className="mt-auto flex items-center justify-end gap-2 border-t border-zinc-100 bg-neutral/60 px-5 py-4">
           <button
             onClick={onClose}
-            className="inline-flex items-center justify-center rounded-md border border-zinc-200 bg-white px-4 py-2 text-[13px] font-bold text-zinc-600 hover:bg-zinc-50 transition-colors"
+            className="inline-flex items-center justify-center border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold text-secondary transition-colors hover:bg-neutral"
           >
             Cancelar
           </button>
@@ -113,7 +113,7 @@ const ScheduleModal: React.FC<{
               onClose();
             }}
             disabled={!fechaActivacion}
-            className="inline-flex items-center justify-center gap-1.5 rounded-md px-4 py-2 text-[13px] font-bold bg-teal-600 text-white hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-1.5 border border-tertiary bg-tertiary px-4 py-2 text-[13px] font-semibold text-primary transition-colors hover:border-primary hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Timer className="h-4 w-4" weight="bold" />
             Programar
@@ -210,26 +210,23 @@ const PermisosPlanificacion: React.FC = () => {
 
   return (
     <>
-      <motion.div 
-        whileHover={{ y: -2 }}
-        className="bg-white rounded-md border border-zinc-200 p-6 shadow-sm h-full flex flex-col relative"
-      >
-        <div className="flex items-center gap-2 mb-8">
-          <CloudArrowUp size={18} className="text-zinc-400" />
-          <h3 className="text-[15px] font-extrabold text-zinc-900 tracking-tight">Permisos y planificación</h3>
+      <section className="relative flex h-full flex-col rounded-[18px] border border-[#e3e9f0] bg-white p-5 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
+        <div className="mb-7">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9aa4b2]">Control</p>
+          <h3 className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[#171b22]">Permisos y planificación</h3>
         </div>
 
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-[13px] font-bold text-zinc-800">Mis permisos de acceso</h4>
+          <h4 className="text-[13px] font-semibold text-primary">Mis permisos de acceso</h4>
           <div className="flex items-center gap-2">
             <button 
               onClick={() => void loadGlobales()}
               disabled={loading}
-              className={`text-zinc-400 hover:text-zinc-700 transition-colors ${loading ? 'animate-spin' : ''}`}
+              className={`text-secondary transition-colors hover:text-primary ${loading ? 'animate-spin' : ''}`}
             >
               <ArrowsClockwise size={14} weight="bold" />
             </button>
-            <button className="text-[12px] font-semibold text-teal-600 hover:text-teal-700 flex items-center gap-1">
+            <button className="flex items-center gap-1 text-[12px] font-semibold text-tertiary hover:text-primary">
               Gestionar <ArrowSquareOut size={14} />
             </button>
           </div>
@@ -241,7 +238,7 @@ const PermisosPlanificacion: React.FC = () => {
               value={selectedMes}
               onChange={(e) => setSelectedMes(Number(e.target.value))}
               disabled={loading}
-              className="w-full appearance-none rounded-md border border-zinc-200 bg-zinc-50 pl-3 pr-8 py-1.5 text-[12px] font-bold text-zinc-700 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors disabled:opacity-50"
+              className="w-full appearance-none rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] py-1.5 pl-3 pr-8 text-[12px] font-semibold text-[#171b22] transition-colors focus:border-[#35bfa8] focus:outline-none disabled:opacity-50"
             >
               {MESES.map((mes, i) => (
                 <option key={i} value={i + 1}>{mes}</option>
@@ -254,7 +251,7 @@ const PermisosPlanificacion: React.FC = () => {
               value={selectedAnio}
               onChange={(e) => setSelectedAnio(Number(e.target.value))}
               disabled={loading}
-              className="w-full appearance-none rounded-md border border-zinc-200 bg-zinc-50 pl-3 pr-8 py-1.5 text-[12px] font-bold text-zinc-700 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors disabled:opacity-50"
+              className="w-full appearance-none rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] py-1.5 pl-3 pr-8 text-[12px] font-semibold text-[#171b22] transition-colors focus:border-[#35bfa8] focus:outline-none disabled:opacity-50"
             >
               {aniosDisponibles.map(anio => (
                 <option key={anio} value={anio}>{anio}</option>
@@ -267,20 +264,20 @@ const PermisosPlanificacion: React.FC = () => {
         <div className="space-y-6 mb-8 relative">
           {loading && !globales && (
             <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
-              <ArrowsClockwise size={20} className="animate-spin text-teal-600" />
+              <ArrowsClockwise size={20} className="animate-spin text-tertiary" />
             </div>
           )}
           <div className={`flex items-start gap-3 transition-opacity ${loading ? 'opacity-50' : 'opacity-100'}`}>
-            <div className="p-2 bg-zinc-50 rounded-md border border-zinc-100 mt-1">
-              <ShieldCheck size={16} className="text-zinc-500" />
+            <div className="mt-1 rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] p-2">
+              <ShieldCheck size={16} className="text-secondary" />
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h5 className="text-[13px] font-bold text-zinc-800">Editar Movimientos</h5>
+                <h5 className="text-[13px] font-semibold text-primary">Editar Movimientos</h5>
                 <button 
                   onClick={() => handleToggle(TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo, !(movPermiso?.habilitado ?? false))}
                   disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
-                  className={`w-9 h-5 rounded-full transition-colors relative flex items-center px-0.5 disabled:opacity-50 ${movPermiso?.habilitado ? 'bg-teal-600' : 'bg-zinc-200'}`}
+                  className={`relative flex h-5 w-9 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${movPermiso?.habilitado ? 'bg-[#35bfa8]' : 'bg-zinc-200'}`}
                 >
                   <motion.div 
                     layout
@@ -290,18 +287,18 @@ const PermisosPlanificacion: React.FC = () => {
                   />
                 </button>
               </div>
-              <p className="text-[11px] text-zinc-500 mb-2">Trans., Ingreso, Salida, Trans. Salida</p>
+              <p className="mb-2 text-[11px] text-secondary">Trans., Ingreso, Salida, Trans. Salida</p>
               
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => setScheduleModal({ isOpen: true, label: 'Editar Movimientos', tipo: TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo })}
                   disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
-                  className="text-[11px] font-bold text-teal-600 hover:text-teal-700 transition-colors flex items-center gap-1 bg-teal-50 px-2 py-1 rounded-md disabled:opacity-50"
+                  className="flex items-center gap-1 rounded-[10px] border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-[11px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b] disabled:opacity-50"
                 >
                   <Timer size={13} weight="bold" /> Programar
                 </button>
                 {movPermiso?.programado && movPermiso.fechaActivacion && (
-                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-1 rounded-md">
+                  <span className="border border-zinc-200 bg-neutral px-2 py-1 font-mono text-[10px] font-semibold text-secondary">
                     Prog: {new Date(movPermiso.fechaActivacion).toLocaleString('es-PE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </span>
                 )}
@@ -310,16 +307,16 @@ const PermisosPlanificacion: React.FC = () => {
           </div>
 
           <div className={`flex items-start gap-3 transition-opacity ${loading ? 'opacity-50' : 'opacity-100'}`}>
-            <div className="p-2 bg-zinc-50 rounded-md border border-zinc-100 mt-1">
-              <CalendarCheck size={16} className="text-zinc-500" />
+            <div className="mt-1 rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] p-2">
+              <CalendarCheck size={16} className="text-secondary" />
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h5 className="text-[13px] font-bold text-zinc-800">Editar Planificaciones</h5>
+                <h5 className="text-[13px] font-semibold text-primary">Editar Planificaciones</h5>
                 <button 
                   onClick={() => handleToggle(TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo, !(planPermiso?.habilitado ?? false))}
                   disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
-                  className={`w-9 h-5 rounded-full transition-colors relative flex items-center px-0.5 disabled:opacity-50 ${planPermiso?.habilitado ? 'bg-teal-600' : 'bg-zinc-200'}`}
+                  className={`relative flex h-5 w-9 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${planPermiso?.habilitado ? 'bg-[#35bfa8]' : 'bg-zinc-200'}`}
                 >
                   <motion.div 
                     layout
@@ -329,18 +326,18 @@ const PermisosPlanificacion: React.FC = () => {
                   />
                 </button>
               </div>
-              <p className="text-[11px] text-zinc-500 mb-2">Modificar planificaciones anuales</p>
+              <p className="mb-2 text-[11px] text-secondary">Modificar planificaciones anuales</p>
               
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => setScheduleModal({ isOpen: true, label: 'Editar Planificaciones', tipo: TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo })}
                   disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
-                  className="text-[11px] font-bold text-teal-600 hover:text-teal-700 transition-colors flex items-center gap-1 bg-teal-50 px-2 py-1 rounded-md disabled:opacity-50"
+                  className="flex items-center gap-1 rounded-[10px] border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-[11px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b] disabled:opacity-50"
                 >
                   <Timer size={13} weight="bold" /> Programar
                 </button>
                 {planPermiso?.programado && planPermiso.fechaActivacion && (
-                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-1 rounded-md">
+                  <span className="border border-zinc-200 bg-neutral px-2 py-1 font-mono text-[10px] font-semibold text-secondary">
                     Prog: {new Date(planPermiso.fechaActivacion).toLocaleString('es-PE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </span>
                 )}
@@ -350,37 +347,37 @@ const PermisosPlanificacion: React.FC = () => {
         </div>
 
         <div className="mt-auto">
-          <h4 className="text-[13px] font-bold text-zinc-800 mb-2">Planificación anual 2026</h4>
+          <h4 className="mb-2 text-[13px] font-semibold text-primary">Planificación anual 2026</h4>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[11px] font-medium text-zinc-500">Estado general</span>
-            <span className="text-[12px] font-bold text-zinc-900">64%</span>
+            <span className="text-[11px] font-medium text-secondary">Estado general</span>
+            <span className="font-mono text-[12px] font-semibold text-primary">64%</span>
           </div>
           
-          <div className="h-1.5 w-full bg-zinc-100 rounded-full mb-4 overflow-hidden">
-            <div className="h-full bg-teal-600 rounded-full" style={{ width: '64%' }} />
+          <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-[#eef3f6]">
+            <div className="h-full rounded-full bg-[#35bfa8]" style={{ width: '64%' }} />
           </div>
 
           <div className="grid grid-cols-3 gap-2 mb-6 text-center">
             <div>
-              <div className="text-[15px] font-extrabold text-zinc-900">128</div>
-              <div className="text-[10px] text-zinc-500 font-medium uppercase">Programado</div>
+              <div className="font-mono text-[15px] font-semibold text-primary">128</div>
+              <div className="text-[10px] font-medium uppercase text-secondary">Programado</div>
             </div>
             <div>
-              <div className="text-[15px] font-extrabold text-zinc-900">82</div>
-              <div className="text-[10px] text-zinc-500 font-medium uppercase">Ejecutado</div>
+              <div className="font-mono text-[15px] font-semibold text-primary">82</div>
+              <div className="text-[10px] font-medium uppercase text-secondary">Ejecutado</div>
             </div>
             <div>
-              <div className="text-[15px] font-extrabold text-zinc-900">46</div>
-              <div className="text-[10px] text-zinc-500 font-medium uppercase">Pendiente</div>
+              <div className="font-mono text-[15px] font-semibold text-primary">46</div>
+              <div className="text-[10px] font-medium uppercase text-secondary">Pendiente</div>
             </div>
           </div>
 
-          <button className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold text-[13px] py-2.5 rounded-md transition-colors flex items-center justify-center gap-2">
+          <button className="flex w-full items-center justify-center gap-2 rounded-[12px] border border-[#269b8b] bg-[#35bfa8] py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#269b8b]">
             <CalendarCheck size={16} />
             Abrir planificación
           </button>
         </div>
-      </motion.div>
+      </section>
 
       <AnimatePresence>
         {scheduleModal && (

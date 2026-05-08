@@ -20,56 +20,53 @@ const itemVariants: Variants = {
 
 export const DashboardLoader: React.FC = () => {
   return (
-    <div className="w-full min-h-screen bg-zinc-50/50 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+    <div className="flex min-h-screen w-full items-center justify-center bg-neutral p-4 sm:p-6 lg:p-8">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="show"
         className={`${MODULE_LAYOUT.fullWidth} space-y-8`}
       >
-        {/* Header Skeleton */}
         <motion.div variants={itemVariants} className="flex justify-between items-center mb-8">
           <div className="space-y-3">
-            <div className="h-8 w-48 bg-zinc-200/60 rounded-lg animate-pulse" />
-            <div className="h-4 w-32 bg-zinc-100 rounded flex-shrink-0 animate-pulse" />
+            <div className="h-8 w-48 animate-pulse bg-zinc-200/70" />
+            <div className="h-4 w-32 flex-shrink-0 animate-pulse bg-white" />
           </div>
-          <div className="h-10 w-32 bg-zinc-200/60 rounded-xl animate-pulse" />
+          <div className="h-10 w-32 animate-pulse bg-zinc-200/70" />
         </motion.div>
 
-        {/* Stats Grid Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[1, 2, 3, 4].map((i) => (
             <motion.div
               key={i}
               variants={itemVariants}
-              className="bg-white rounded-2xl h-[120px] p-5 border border-zinc-100 overflow-hidden relative"
+              className="relative h-[120px] overflow-hidden border border-zinc-200 bg-white p-5"
             >
-              <div className="absolute inset-0 bg-gradient-to-tr from-zinc-50 to-white animate-pulse" />
+              <div className="absolute inset-0 animate-pulse bg-white" />
               <div className="relative z-10 flex justify-between">
                 <div className="space-y-4">
-                  <div className="h-4 w-20 bg-zinc-200/80 rounded" />
-                  <div className="h-8 w-16 bg-zinc-200/80 rounded" />
+                  <div className="h-4 w-20 bg-zinc-200/80" />
+                  <div className="h-8 w-16 bg-zinc-200/80" />
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-zinc-100" />
+                <div className="h-12 w-12 bg-neutral" />
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Charts Skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {[1, 2].map((i) => (
             <motion.div
               key={`chart-${i}`}
               variants={itemVariants}
-              className="bg-white rounded-[24px] h-[380px] border border-zinc-100 overflow-hidden relative p-6"
+              className="relative h-[380px] overflow-hidden border border-zinc-200 bg-white p-6"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 to-white cursor-wait" />
+              <div className="absolute inset-0 cursor-wait bg-white" />
                <div className="relative z-10 flex gap-4 items-center mb-8">
-                 <div className="w-10 h-10 rounded-xl bg-zinc-200/80 animate-pulse" />
-                 <div className="h-5 w-40 bg-zinc-200/80 rounded animate-pulse" />
+                 <div className="h-10 w-10 animate-pulse bg-zinc-200/80" />
+                 <div className="h-5 w-40 animate-pulse bg-zinc-200/80" />
                </div>
-               <div className="relative z-10 w-full h-[60%] bg-zinc-100/50 rounded-xl animate-pulse" />
+               <div className="relative z-10 h-[60%] w-full animate-pulse bg-neutral" />
             </motion.div>
           ))}
         </div>

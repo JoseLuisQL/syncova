@@ -7,10 +7,10 @@ const CentrosAcopioSection: React.FC = memo(() => {
   const { data, loading, error } = usePaginatedCentrosAcopio(5);
 
   return (
-    <section className="bg-white rounded-md border border-zinc-200 shadow-sm overflow-hidden flex flex-col h-full">
-      <header className="px-6 py-5 border-b border-zinc-100 flex items-center gap-2">
-        <MapPin size={18} className="text-zinc-400" />
-        <h3 className="text-[15px] font-extrabold text-zinc-900 tracking-tight">
+    <section className="flex h-full flex-col overflow-hidden rounded-[18px] border border-[#e3e9f0] bg-white shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
+      <header className="border-b border-[#eef1f5] px-5 py-4">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9aa4b2]">Red</p>
+        <h3 className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[#171b22]">
           Centros logísticos
         </h3>
       </header>
@@ -25,29 +25,29 @@ const CentrosAcopioSection: React.FC = memo(() => {
         ) : (
           <table className="w-full text-left border-collapse min-w-[400px]">
             <thead>
-              <tr className="border-b border-zinc-100">
-                <th className="px-6 py-3 text-[11px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Centro logístico</th>
-                <th className="px-6 py-3 text-[11px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap text-center">Inst.</th>
-                <th className="px-6 py-3 text-[11px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap text-right">Stock total</th>
-                <th className="px-6 py-3 text-[11px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Estado</th>
+              <tr className="border-b border-[#eef1f5] bg-[#f8fbfd]">
+                <th className="whitespace-nowrap px-5 py-3 text-left font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Centro logístico</th>
+                <th className="whitespace-nowrap px-5 py-3 text-center font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Inst.</th>
+                <th className="whitespace-nowrap px-5 py-3 text-right font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Stock total</th>
+                <th className="whitespace-nowrap px-5 py-3 text-left font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Estado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-50">
+            <tbody className="divide-y divide-zinc-100">
               {data.map((centro) => (
-                <tr key={centro.id} className="hover:bg-zinc-50/50 transition-colors">
-                  <td className="px-6 py-3.5 text-[13px] font-bold text-zinc-900 whitespace-nowrap">
+                <tr key={centro.id} className="transition-colors hover:bg-neutral/50">
+                  <td className="whitespace-nowrap px-5 py-3.5 text-[13px] font-semibold text-[#171b22]">
                     {centro.nombre}
                   </td>
-                  <td className="px-6 py-3.5 text-[13px] font-medium text-zinc-600 text-center">
+                  <td className="px-5 py-3.5 text-center font-mono text-[13px] font-medium text-secondary">
                     {centro.establecimientos}
                   </td>
-                  <td className="px-6 py-3.5 text-[13px] font-extrabold text-zinc-900 tabular-nums text-right">
+                  <td className="px-5 py-3.5 text-right font-mono text-[13px] font-semibold text-primary tabular-nums">
                     {centro.stockTotal.toLocaleString()}
                   </td>
-                  <td className="px-6 py-3.5 whitespace-nowrap">
+                  <td className="whitespace-nowrap px-5 py-3.5">
                     <div className="flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-full ${centro.estado === 'activo' ? 'bg-teal-500' : centro.estado === 'alerta' ? 'bg-amber-500' : 'bg-rose-500'}`} />
-                      <span className="text-[12px] font-semibold text-zinc-700 capitalize">
+                      <span className={`h-1.5 w-1.5 ${centro.estado === 'activo' ? 'bg-tertiary' : centro.estado === 'alerta' ? 'bg-secondary' : 'bg-primary'}`} />
+                      <span className="text-[12px] font-medium capitalize text-secondary">
                         {centro.estado}
                       </span>
                     </div>
@@ -59,8 +59,8 @@ const CentrosAcopioSection: React.FC = memo(() => {
         )}
       </div>
 
-      <div className="px-6 py-4 border-t border-zinc-100 mt-auto">
-        <button className="text-[13px] font-bold text-teal-600 hover:text-teal-700 transition-colors flex items-center gap-1">
+      <div className="mt-auto border-t border-zinc-100 px-5 py-4">
+        <button className="flex items-center gap-1 text-[13px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b]">
           Ver todos los centros <span className="text-lg leading-none">→</span>
         </button>
       </div>

@@ -7,10 +7,10 @@ const EstablecimientosSection: React.FC = memo(() => {
   const { data, loading, error } = usePaginatedEstablecimientosDashboard(5);
 
   return (
-    <section className="bg-white rounded-md border border-zinc-200 shadow-sm overflow-hidden flex flex-col h-full">
-      <header className="px-6 py-5 border-b border-zinc-100 flex items-center gap-2">
-        <Hospital size={18} className="text-zinc-400" />
-        <h3 className="text-[15px] font-extrabold text-zinc-900 tracking-tight">
+    <section className="flex h-full flex-col overflow-hidden rounded-[18px] border border-[#e3e9f0] bg-white shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
+      <header className="border-b border-[#eef1f5] px-5 py-4">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9aa4b2]">Red</p>
+        <h3 className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[#171b22]">
           Establecimientos
         </h3>
       </header>
@@ -25,29 +25,29 @@ const EstablecimientosSection: React.FC = memo(() => {
         ) : (
           <table className="w-full text-left border-collapse min-w-[400px]">
             <thead>
-              <tr className="border-b border-zinc-100">
-                <th className="px-6 py-3 text-[11px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Establecimiento</th>
-                <th className="px-6 py-3 text-[11px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap text-center">Código</th>
-                <th className="px-6 py-3 text-[11px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap text-right">Tipo</th>
-                <th className="px-6 py-3 text-[11px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap text-right">Estado</th>
+              <tr className="border-b border-[#eef1f5] bg-[#f8fbfd]">
+                <th className="whitespace-nowrap px-5 py-3 text-left font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Establecimiento</th>
+                <th className="whitespace-nowrap px-5 py-3 text-center font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Código</th>
+                <th className="whitespace-nowrap px-5 py-3 text-right font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Tipo</th>
+                <th className="whitespace-nowrap px-5 py-3 text-right font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-secondary">Estado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-50">
+            <tbody className="divide-y divide-zinc-100">
               {data.map((est) => (
-                <tr key={est.id} className="hover:bg-zinc-50/50 transition-colors">
-                  <td className="px-6 py-3.5 text-[13px] font-bold text-zinc-900 whitespace-nowrap">
+                <tr key={est.id} className="transition-colors hover:bg-neutral/50">
+                  <td className="whitespace-nowrap px-5 py-3.5 text-[13px] font-semibold text-[#171b22]">
                     {est.nombre}
                   </td>
-                  <td className="px-6 py-3.5 text-[13px] font-medium text-zinc-600 text-center">
+                  <td className="px-5 py-3.5 text-center font-mono text-[13px] font-medium text-secondary">
                     {est.codigo}
                   </td>
-                  <td className="px-6 py-3.5 text-[13px] font-medium text-zinc-600 text-right capitalize">
+                  <td className="px-5 py-3.5 text-right text-[13px] font-medium capitalize text-secondary">
                     {est.tipo.replace('_', ' ')}
                   </td>
-                  <td className="px-6 py-3.5 whitespace-nowrap text-right">
+                  <td className="whitespace-nowrap px-5 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      <span className={`w-2 h-2 rounded-full ${est.estado === 'activo' ? 'bg-teal-500' : 'bg-zinc-300'}`} />
-                      <span className="text-[12px] font-semibold text-zinc-700 capitalize">
+                      <span className={`h-1.5 w-1.5 ${est.estado === 'activo' ? 'bg-tertiary' : 'bg-secondary'}`} />
+                      <span className="text-[12px] font-medium capitalize text-secondary">
                         {est.estado}
                       </span>
                     </div>
@@ -59,8 +59,8 @@ const EstablecimientosSection: React.FC = memo(() => {
         )}
       </div>
 
-      <div className="px-6 py-4 border-t border-zinc-100 mt-auto">
-        <button className="text-[13px] font-bold text-teal-600 hover:text-teal-700 transition-colors flex items-center gap-1">
+      <div className="mt-auto border-t border-zinc-100 px-5 py-4">
+        <button className="flex items-center gap-1 text-[13px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b]">
           Ver todos los establecimientos <span className="text-lg leading-none">→</span>
         </button>
       </div>

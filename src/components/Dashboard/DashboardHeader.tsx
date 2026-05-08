@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
-import { ArrowsClockwise, Clock, WarningCircle } from '@phosphor-icons/react';
+import { ArrowsClockwise, DownloadSimple, MagnifyingGlass, Plus, WarningCircle } from '@phosphor-icons/react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface DashboardHeaderProps {
   lastUpdated: Date | null;
@@ -14,6 +15,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   isLoading,
   onRefresh,
 }) => {
+  const { user } = useAuth();
+
   const formattedTime = useMemo(() => {
     if (!lastUpdated) return null;
     return lastUpdated.toLocaleTimeString('es-ES', {
@@ -22,38 +25,38 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
     });
   }, [lastUpdated]);
 
-  const today = useMemo(() => {
-    return new Date().toLocaleDateString('es-ES', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  }, []);
+  const displayName = useMemo(() => {
+    if (!user) return 'equipo';
+    return user.nombres?.split(' ')[0] || user.usuario || 'equipo';
+  }, [user]);
 
   return (
-    <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5 border-b border-zinc-200/60 pb-5">
-      <div>
-        <h1 className="text-[26px] font-extrabold text-zinc-900 tracking-tight leading-none">
-          Panel de Control
+    <header className="flex min-h-16 flex-col gap-4 border-b border-[#dfe4eb] bg-[#f8fafc] px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="min-w-0">
+        <h1 className="truncate text-[18px] font-semibold tracking-[-0.02em] text-[#111827]">
+          Hola {displayName}, bienvenido de vuelta
         </h1>
-        <p className="text-[13px] font-medium text-zinc-500 tracking-wide mt-1.5 capitalize">
-          {today}
-        </p>
+        {formattedTime && (
+          <p className="mt-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-[#7a8797]">
+            Actualizado {formattedTime}
+          </p>
+        )}
       </div>
 
-      <div className="flex items-center gap-3">
-        {formattedTime && (
-          <div className="flex items-center gap-1.5 text-[12px] font-medium text-zinc-400">
-            <Clock className="h-3.5 w-3.5" weight="bold" aria-hidden="true" />
-            <span className="hidden sm:inline">Última actualización:</span>
-            <span className="text-zinc-600 font-bold tracking-wider">{formattedTime}</span>
-          </div>
-        )}
-
+      <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+        <label className="relative hidden min-w-[220px] md:block">
+          <MagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b95a3]" weight="bold" />
+          <input
+            type="search"
+            placeholder="Buscar"
+            className="h-10 w-full rounded-[12px] border border-[#dfe4eb] bg-white pl-9 pr-12 text-[12px] font-medium text-[#111827] outline-none transition-colors placeholder:text-[#9aa4b2] focus:border-[#34bda6]"
+          />
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] text-[#9aa4b2]">⌘ K</span>
+        </label>
+        
         {isStale && (
           <div 
-            className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-amber-700 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md uppercase"
+            className="flex h-10 items-center gap-1.5 rounded-[12px] border border-[#dfe4eb] bg-white px-3 text-[11px] font-semibold uppercase tracking-wider text-[#7a8797]"
             role="status"
             aria-live="polite"
           >
@@ -65,11 +68,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
         <button
           onClick={onRefresh}
           disabled={isLoading}
-          className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold 
-            transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 shadow-sm
+          className={`flex h-10 items-center justify-center gap-2 rounded-[12px] border px-3 text-[12px] font-semibold
+            transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#34bda6]/20
             ${isLoading 
-              ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed shadow-none border border-transparent' 
-              : 'bg-white text-zinc-700 border border-zinc-200 hover:border-zinc-300 hover:text-zinc-900 hover:shadow-md'
+              ? 'cursor-not-allowed border-[#dfe4eb] bg-[#eef1f5] text-[#9aa4b2]' 
+              : 'border-[#dfe4eb] bg-white text-[#111827] hover:border-[#34bda6]'
             }`}
           aria-label={isLoading ? 'Actualizando datos' : 'Actualizar datos'}
           aria-busy={isLoading}
@@ -82,6 +85,16 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           <span className="hidden sm:inline">
             {isLoading ? 'Actualizando...' : 'Actualizar'}
           </span>
+        </button>
+        
+        <button className="flex h-10 items-center justify-center gap-2 rounded-[12px] border border-[#dfe4eb] bg-white px-3 text-[12px] font-semibold text-[#111827] transition-colors hover:border-[#34bda6]">
+          <DownloadSimple className="h-4 w-4" weight="bold" />
+          Exportar CSV
+        </button>
+
+        <button className="flex h-10 items-center justify-center gap-2 rounded-[12px] border border-[#269b8b] bg-[#35bfa8] px-4 text-[12px] font-semibold text-white shadow-[0_10px_20px_-14px_rgba(53,191,168,0.75)] transition-colors hover:bg-[#269b8b]">
+          <Plus className="h-4 w-4" weight="bold" />
+          Nuevo
         </button>
       </div>
     </header>

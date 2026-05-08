@@ -2,7 +2,6 @@ import React, { useEffect, useCallback, useRef, Suspense, lazy } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { useDashboard } from '../../hooks/useDashboard';
 import { useToastContext } from '../../contexts/ToastContext';
-import { MODULE_LAYOUT } from '../../styles/layout';
 
 import CentrosAcopioSection from './CentrosAcopioSection';
 import EstablecimientosSection from './EstablecimientosSection';
@@ -72,7 +71,7 @@ const Dashboard: React.FC = () => {
           <DashboardLoader />
         </motion.div>
       ) : error && !hasData ? (
-        <motion.main key="error" {...fadeVariants} className="min-h-screen bg-slate-50 px-4 sm:px-6 lg:px-8 py-8">
+        <motion.main key="error" {...fadeVariants} className="min-h-screen bg-neutral px-4 py-8 sm:px-6 lg:px-8">
           <ErrorState error={error} onRetry={handleRefresh} />
         </motion.main>
       ) : (
@@ -82,24 +81,21 @@ const Dashboard: React.FC = () => {
           animate="animate"
           exit="exit"
           variants={fadeVariants}
-          className="min-h-screen relative bg-slate-50"
+          className="relative min-h-[calc(100dvh-4rem)] bg-[#f0eff4] text-[#111827]"
         >
-          <div className={`${MODULE_LAYOUT.fullWidth} ${MODULE_LAYOUT.pageSpacingX} py-8 space-y-6 relative z-10`}>
-            
-            {/* 1. Metrics Row */}
+          <div className="relative z-10 space-y-4 px-4 py-4 sm:px-5">
             <MetricsSection stats={estadisticas} isLoading={loading && !hasData} />
 
-            {/* 2. Charts and Planning Row */}
-            <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-5">
-                <Suspense fallback={<div className="bg-white rounded-md border border-zinc-200 p-6 h-[400px] animate-pulse" />}>
+            <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+              <div className="lg:col-span-6">
+                <Suspense fallback={<div className="h-[400px] animate-pulse border border-zinc-200 bg-white p-5" />}>
                   <ChartSection
                     movimientosMensuales={movimientosMensuales}
                     isLoading={loading && !hasData}
                   />
                 </Suspense>
               </div>
-              <div className="lg:col-span-4">
+              <div className="lg:col-span-3">
                 <StockAvailabilitySection 
                   data={stockPorVacuna} 
                   isLoading={loading && !hasData} 
@@ -110,8 +106,7 @@ const Dashboard: React.FC = () => {
               </div>
             </section>
 
-            {/* 3. Bottom Row */}
-            <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
               <div className="lg:col-span-5">
                 {isResponsable ? <EstablecimientosSection /> : <CentrosAcopioSection />}
               </div>

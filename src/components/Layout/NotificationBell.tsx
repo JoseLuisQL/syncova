@@ -150,11 +150,11 @@ const NotificationBell: React.FC = memo(() => {
       <button
         onClick={handleToggle}
         className={`
-          relative p-2 rounded-sm
+          relative flex h-10 w-10 items-center justify-center rounded-[9px] border
           transition-colors duration-200
-          focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-500
-          ${isOpen ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}
-          ${hasNewAlerts ? 'text-teal-600' : ''}
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dedfea]/70
+          ${isOpen ? 'border-[#c7c9d5] bg-[#f8f7fb] text-[#111318]' : 'border-[#dedfea] bg-white text-[#606571] hover:border-[#c7c9d5] hover:text-[#111318]'}
+          ${hasNewAlerts ? 'text-[#ff3d73]' : ''}
         `}
         aria-label={`Notificaciones${count > 0 ? ` (${count} no leídas)` : ''}`}
         aria-expanded={isOpen}
@@ -166,8 +166,8 @@ const NotificationBell: React.FC = memo(() => {
         {count > 0 && (
           <span className={`
             absolute top-1.5 right-1.5
-            w-2 h-2 rounded-none
-            bg-teal-500 ring-2 ring-white
+            h-2 w-2 rounded-full
+            bg-[#ff3d73] ring-2 ring-white
             ${hasNewAlerts ? 'animate-pulse' : ''}
           `} />
         )}
@@ -176,15 +176,15 @@ const NotificationBell: React.FC = memo(() => {
       {isOpen && (
         <div className="
           absolute right-0 mt-2 w-80 sm:w-96
-          bg-white shadow-md border border-zinc-200
-          z-50 overflow-hidden rounded-none
+          bg-white shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)] border border-white/90
+          z-50 overflow-hidden rounded-[18px]
           animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right
         ">
-          <div className="px-5 py-4 border-b border-zinc-200 bg-white flex items-center justify-between">
+          <div className="px-5 py-4 border-b border-[#e7e7ef] bg-white flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-[13px] text-zinc-900 uppercase tracking-widest">Notificaciones</h3>
+              <h3 className="font-semibold text-[13px] text-[#111318] uppercase tracking-widest">Notificaciones</h3>
               {count > 0 && (
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-teal-50 text-teal-700 rounded-sm border border-teal-200">
+                <span className="px-2 py-0.5 text-[10px] font-semibold bg-[#ff3d73] text-white rounded-full">
                   {displayCount} nuevas
                 </span>
               )}
@@ -192,7 +192,7 @@ const NotificationBell: React.FC = memo(() => {
             {count > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="text-[11px] font-bold text-zinc-500 hover:text-teal-600 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-500 rounded-sm px-1"
+                className="rounded-[6px] px-1 text-[11px] font-semibold text-[#747986] transition-colors hover:text-[#111318] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dedfea]/70"
               >
                 Marcar leídas
               </button>
@@ -203,19 +203,19 @@ const NotificationBell: React.FC = memo(() => {
           <div className="max-h-[380px] overflow-y-auto overscroll-contain
             [&::-webkit-scrollbar]:w-1.5
             [&::-webkit-scrollbar-track]:bg-transparent
-            [&::-webkit-scrollbar-thumb]:bg-zinc-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-zinc-300
+            [&::-webkit-scrollbar-thumb]:bg-[#dfe4eb] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#c8d1da]
           ">
             {isLoading && recentAlertas.length === 0 ? (
               <div className="flex items-center justify-center py-10">
-                <div className="w-5 h-5 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-[#111318] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : recentAlertas.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-                <div className="w-10 h-10 bg-zinc-50 flex items-center justify-center mb-3 border border-zinc-200">
-                  <Check className="w-5 h-5 text-zinc-400" weight="bold" />
+                <div className="w-10 h-10 rounded-[9px] bg-[#f8f7fb] flex items-center justify-center mb-3 border border-[#dedfea]">
+                  <Check className="w-5 h-5 text-[#8b8f9b]" weight="bold" />
                 </div>
-                <p className="text-sm font-medium text-zinc-900 leading-tight">Estás al día</p>
-                <p className="text-[13px] text-zinc-500 mt-1">No tienes notificaciones pendientes por leer.</p>
+                <p className="text-sm font-medium text-[#111318] leading-tight">Estás al día</p>
+                <p className="text-[13px] text-[#747986] mt-1">No tienes notificaciones pendientes por leer.</p>
               </div>
             ) : (
               <div className="flex flex-col">
@@ -230,26 +230,26 @@ const NotificationBell: React.FC = memo(() => {
                       onClick={handleAlertClick}
                       className={`
                         group relative flex items-start gap-3.5 px-5 py-3.5
-                        cursor-pointer border-b border-zinc-200 last:border-0
+                        cursor-pointer border-b border-[#e7e7ef] last:border-0
                         transition-colors duration-150
-                        hover:bg-zinc-50
+                        hover:bg-[#fbfafd]
                         ${isMarking ? 'opacity-50 pointer-events-none' : ''}
                       `}
                     >
-                      <div className={`p-1.5 rounded-sm ${config.bgColor} flex-shrink-0 mt-0.5 border border-zinc-200`}>
+                      <div className={`p-1.5 rounded-[9px] ${config.bgColor} flex-shrink-0 mt-0.5 border border-[#e7e7ef]`}>
                         <Icon className={`w-4 h-4 ${config.color}`} weight="fill" />
                       </div>
                       
                       <div className="flex-1 min-w-0 pt-0.5">
                         <div className="flex items-center justify-between gap-3 mb-1">
-                          <p className="text-[13px] font-semibold text-zinc-900 truncate pr-4">
+                          <p className="text-[13px] font-semibold text-[#111318] truncate pr-4">
                             {alerta.titulo}
                           </p>
-                          <span className="text-[11px] font-medium text-zinc-400 flex-shrink-0 tabular-nums">
+                          <span className="text-[11px] font-medium text-[#8b8f9b] flex-shrink-0 tabular-nums">
                             {formatTimeAgo(alerta.fechaCreacion)}
                           </span>
                         </div>
-                        <p className="text-[13px] text-zinc-500 leading-snug line-clamp-2 pr-6">
+                        <p className="text-[13px] text-[#747986] leading-snug line-clamp-2 pr-6">
                           {alerta.descripcion}
                         </p>
                       </div>
@@ -259,11 +259,11 @@ const NotificationBell: React.FC = memo(() => {
                         disabled={isMarking}
                         className={`
                           absolute right-4 top-1/2 -translate-y-1/2
-                          p-1.5 rounded-sm transition-all
+                          p-1.5 rounded-[7px] transition-all
                           opacity-0 group-hover:opacity-100 sm:focus-visible:opacity-100
                           ${isMarking 
                             ? 'text-zinc-300 cursor-not-allowed' 
-                            : 'text-zinc-400 hover:text-teal-600 hover:bg-teal-50 focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-500'
+                            : 'text-[#8b8f9b] hover:text-[#111318] hover:bg-[#f8f7fb] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dedfea]/70'
                           }
                         `}
                         title="Marcar como leída"
@@ -282,13 +282,13 @@ const NotificationBell: React.FC = memo(() => {
           </div>
 
           {/* Footer */}
-            <div className="p-2 border-t border-zinc-200 bg-zinc-50">
+            <div className="p-2 border-t border-[#e7e7ef] bg-white">
               <button
                 onClick={handleViewAll}
                 className="
-                  w-full py-2.5 text-[12px] font-bold text-zinc-600
-                  hover:text-teal-700 hover:bg-teal-50 border border-transparent hover:border-teal-200
-                  rounded-sm transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-500
+                  w-full py-2.5 text-[12px] font-semibold text-[#606571]
+                  hover:text-[#111318] hover:bg-[#f8f7fb] border border-transparent hover:border-[#dedfea]
+                  rounded-[9px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dedfea]/70
                 "
               >
                 Ver todas las notificaciones

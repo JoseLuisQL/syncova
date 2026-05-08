@@ -1,7 +1,6 @@
 import React from 'react';
-import { Package, Syringe, Users, Warning, Buildings } from '@phosphor-icons/react';
+import { DotsThree, Package, Syringe, Users, Warning } from '@phosphor-icons/react';
 import type { DashboardStats } from '../../services/dashboardService';
-import { motion } from 'framer-motion';
 
 interface MetricsSectionProps {
   stats: DashboardStats | null;
@@ -18,57 +17,53 @@ interface MetricCardProps {
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({ title, value, trend, trendUp, icon, subtitle }) => (
-  <motion.div 
-    whileHover={{ y: -2 }}
-    className="bg-white rounded-md border border-zinc-200 p-5 shadow-sm flex flex-col justify-between"
-  >
-    <div className="flex items-start justify-between mb-4">
+  <article className="min-h-[128px] rounded-[18px] border border-[#e3e9f0] bg-white p-4 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_45px_-32px_rgba(15,42,59,0.65)]">
+    <div className="mb-3 flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
-        <div className="text-teal-600">{icon}</div>
-        <h3 className="text-[12px] font-bold text-zinc-600 uppercase tracking-wider">{title}</h3>
-      </div>
-    </div>
-    
-    <div>
-      <div className="text-2xl font-extrabold text-zinc-900 tabular-nums leading-none mb-2">
-        {value}
-      </div>
-      
-      {trend && (
-        <div className="flex items-center gap-1">
-          <span className={`text-[12px] font-bold ${trendUp ? 'text-teal-600' : 'text-rose-600'}`}>
-            {trendUp ? '▲' : '▼'} {trend}
-          </span>
-          {subtitle && <span className="text-[11px] text-zinc-400 font-medium ml-1">{subtitle}</span>}
+        <div className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e4edf2] bg-[#f8fbfd] text-[#35bfa8]">
+          {icon}
         </div>
-      )}
-      
-      {!trend && subtitle && (
-        <div className="text-[12px] font-medium text-zinc-500">{subtitle}</div>
+        <h3 className="text-[12px] font-medium text-[#556575]">{title}</h3>
+      </div>
+      <DotsThree className="h-5 w-5 text-[#9aa4b2]" weight="bold" />
+    </div>
+
+    <div className="flex items-start justify-between gap-4">
+      <div className="min-w-0">
+        <div className="text-[25px] font-semibold leading-none tracking-[-0.04em] text-[#171b22] tabular-nums">
+          {value}
+        </div>
+        <p className="mt-2 max-w-[160px] text-[11px] leading-snug text-[#7a8797]">{subtitle}</p>
+      </div>
+      {trend && (
+        <span className={`mt-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+          trendUp ? 'border-[#bdeee5] bg-[#effbf8] text-[#269b8b]' : 'border-[#f3d1d1] bg-[#fff5f5] text-[#c15d5d]'
+        }`}>
+          {trendUp ? '↑' : '↓'} {trend}
+        </span>
       )}
     </div>
-    
-    {/* Simulated Sparkline */}
-    <div className="mt-4 h-8 w-full flex items-end gap-1 opacity-50">
-      {[40, 70, 45, 90, 65, 85, 100].map((h, i) => (
-        <div 
-          key={i} 
-          className={`flex-1 rounded-t-sm ${trendUp !== false ? 'bg-teal-500' : 'bg-rose-400'}`} 
-          style={{ height: `${h}%`, opacity: 0.2 + (i * 0.1) }} 
+
+    <div className="mt-3 flex h-8 items-end gap-1 overflow-hidden">
+      {[42, 70, 38, 78, 55, 88, 64, 96].map((height, index) => (
+        <div
+          key={index}
+          className={`w-2 rounded-sm ${trendUp === false ? 'bg-[#f0c05a]' : 'bg-[#44c4dd]'}`}
+          style={{ height: `${height}%`, opacity: 0.42 + index * 0.06 }}
         />
       ))}
-    </div>
-  </motion.div>
+      </div>
+  </article>
 );
 
 const MetricsSection: React.FC<MetricsSectionProps> = ({ stats, isLoading }) => {
   if (isLoading || !stats) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[1, 2, 3, 4, 5].map(i => (
-          <div key={i} className="bg-white rounded-md border border-zinc-100 p-5 h-36 animate-pulse">
-            <div className="h-4 bg-zinc-100 rounded w-1/2 mb-4" />
-            <div className="h-8 bg-zinc-100 rounded w-3/4" />
+          <div key={i} className="h-[128px] animate-pulse rounded-[18px] border border-[#e3e9f0] bg-white p-4">
+            <div className="mb-5 h-3 w-1/2 rounded bg-[#eef3f6]" />
+            <div className="h-8 w-3/4 rounded bg-[#eef3f6]" />
           </div>
         ))}
       </div>
@@ -76,30 +71,30 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({ stats, isLoading }) => 
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
       <MetricCard 
         title="Dosis Distribuidas"
         value={stats.entregasMes.toLocaleString() || "34,616"}
         trend="12.4%"
         trendUp={true}
-        subtitle="vs. mes anterior"
-        icon={<Package size={20} weight="bold" />}
+        subtitle="Incremento respecto al mes anterior"
+        icon={<Package size={15} weight="bold" />}
       />
       <MetricCard 
         title="Dosis Aplicadas"
         value={(stats.movimientosUltimoMes || 31013).toLocaleString()}
         trend="9.8%"
         trendUp={true}
-        subtitle="vs. mes anterior"
-        icon={<Syringe size={20} weight="bold" />}
+        subtitle="Datos de los últimos 7 días"
+        icon={<Syringe size={15} weight="bold" />}
       />
       <MetricCard 
         title="Cobertura Acumulada"
         value="82.6%"
         trend="4.7 pp"
         trendUp={true}
-        subtitle="vs. mes anterior"
-        icon={<Users size={20} weight="bold" />}
+        subtitle="Promedio de cumplimiento"
+        icon={<Users size={15} weight="bold" />}
       />
       <MetricCard 
         title="Alertas Activas"
@@ -107,13 +102,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({ stats, isLoading }) => 
         trend="2"
         trendUp={false}
         subtitle="vs. mes anterior"
-        icon={<Warning size={20} weight="bold" />}
-      />
-      <MetricCard 
-        title="Centros Activos"
-        value={stats.totalEstablecimientos || "19"}
-        subtitle="100% operativos"
-        icon={<Buildings size={20} weight="bold" />}
+        icon={<Warning size={15} weight="bold" />}
       />
     </div>
   );

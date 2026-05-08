@@ -1,6 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Info } from '@phosphor-icons/react';
 import type { StockPorVacuna } from '../../services/dashboardService';
 
 interface StockAvailabilitySectionProps {
@@ -11,10 +9,10 @@ interface StockAvailabilitySectionProps {
 const StockAvailabilitySection: React.FC<StockAvailabilitySectionProps> = ({ data, isLoading }) => {
   if (isLoading) {
     return (
-      <div className="bg-white rounded-md border border-zinc-200 p-6 shadow-sm h-full animate-pulse">
-        <div className="h-6 w-48 bg-zinc-100 rounded mb-6" />
+      <div className="h-full animate-pulse rounded-[18px] border border-[#e3e9f0] bg-white p-5">
+        <div className="mb-6 h-5 w-48 rounded bg-[#eef3f6]" />
         <div className="space-y-4">
-          {[1,2,3,4,5].map(i => <div key={i} className="h-8 bg-zinc-50 rounded" />)}
+          {[1,2,3,4,5].map(i => <div key={i} className="h-8 rounded bg-[#eef3f6]" />)}
         </div>
       </div>
     );
@@ -24,51 +22,47 @@ const StockAvailabilitySection: React.FC<StockAvailabilitySectionProps> = ({ dat
   const sortedData = [...data].sort((a,b) => b.stockTotal - a.stockTotal).slice(0, 6);
 
   return (
-    <motion.div 
-      whileHover={{ y: -2 }}
-      className="bg-white rounded-md border border-zinc-200 p-6 shadow-sm h-full flex flex-col"
-    >
-      <div className="flex items-center gap-2 mb-6">
-        <h3 className="text-[15px] font-extrabold text-zinc-900 tracking-tight">Disponibilidad en stock</h3>
-        <Info size={16} className="text-zinc-400" />
+    <section className="flex h-full flex-col rounded-[18px] border border-[#e3e9f0] bg-white p-5 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
+      <div className="mb-6">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9aa4b2]">Inventario</p>
+        <h3 className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[#171b22]">Disponibilidad en stock</h3>
       </div>
 
-      <div className="flex text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-3 px-1">
+      <div className="mb-3 flex px-1 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-secondary">
         <div className="w-1/3">Vacuna</div>
-        <div className="w-1/3 text-center">Stock disponible</div>
-        <div className="w-1/3 text-right">Cobertura estimada</div>
+        <div className="w-1/3 text-center">Stock</div>
+        <div className="w-1/3 text-right">Cobertura</div>
       </div>
 
-      <div className="flex-1 space-y-4">
+      <div className="flex-1 divide-y divide-zinc-100">
         {sortedData.map((item, i) => {
-          // Asumiendo una cobertura base para la UI demo si no viene del backend
           const diasCobertura = Math.max(3, Math.floor(item.stockTotal / 150)); 
           const pct = Math.min(100, (item.stockTotal / (sortedData[0]?.stockTotal || 1)) * 100);
           
           return (
-            <div key={i} className="flex items-center text-[13px] font-semibold text-zinc-800">
+            <div key={i} className="flex items-center py-3 text-[13px] font-medium text-primary">
               <div className="w-1/3 truncate pr-2">{item.vacunaNombre}</div>
-              <div className="w-1/3 text-center tabular-nums">{item.stockTotal.toLocaleString()}</div>
-              <div className="w-1/3 flex items-center justify-end gap-3">
-                <div className="w-16 h-1.5 bg-zinc-100 rounded-full overflow-hidden flex-shrink-0">
+              <div className="w-1/3 text-center font-mono tabular-nums">{item.stockTotal.toLocaleString()}</div>
+              <div className="flex w-1/3 items-center justify-end gap-3">
+                <div className="h-1.5 w-16 flex-shrink-0 overflow-hidden rounded-full bg-[#eef3f6]">
                   <div 
-                    className="h-full bg-teal-600 rounded-full" 
+                    className="h-full rounded-full bg-[#35bfa8]" 
                     style={{ width: `${pct}%` }} 
                   />
                 </div>
-                <span className="tabular-nums whitespace-nowrap min-w-[40px] text-right">{diasCobertura} días</span>
+                <span className="min-w-[42px] whitespace-nowrap text-right font-mono text-[12px] text-secondary tabular-nums">{diasCobertura}d</span>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="mt-6 pt-4 border-t border-zinc-100">
-        <button className="text-[13px] font-bold text-teal-600 hover:text-teal-700 transition-colors flex items-center gap-1">
+      <div className="mt-5 border-t border-zinc-100 pt-4">
+        <button className="flex items-center gap-1 text-[13px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b]">
           Ver inventario completo <span className="text-lg leading-none">→</span>
         </button>
       </div>
-    </motion.div>
+    </section>
   );
 };
 
