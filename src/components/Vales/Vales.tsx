@@ -1,19 +1,32 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useStockEvents } from '../../utils/stockEventEmitter';
-import { ArrowsClockwise, Gear, X, SpinnerGap } from '@phosphor-icons/react';
+import {
+  ArrowCounterClockwise,
+  ArrowsClockwise,
+  CheckCircle,
+  Download,
+  Eye,
+  Gear,
+  Package,
+  Plus,
+  Receipt,
+  SpinnerGap,
+  Stack,
+  X,
+} from '@phosphor-icons/react';
 import { ValeEntrega, ValesService, ValeTypeSelectionConfig, type ValesFilters as ValesQueryFilters } from '../../services/valesService';
 import { useVales } from '../../hooks/useVales';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useVacunas } from '../../hooks/useVacunas';
 import { useToastContext } from '../../contexts/ToastContext';
-import { MODULE_LAYOUT } from '../../styles/layout';
 import ValeDetalleModal from './ValeDetalleModal';
 import ValesConnectionTest from './ValesConnectionTest';
 import ValeExportModal from './ValeExportModal';
 import ConfirmacionModal from './ConfirmacionModal';
 import ValeTypeSelectionModal from './ValeTypeSelectionModal';
-import { ValesHeader, ValesFilters, ValesTabla } from './components';
-import { MESES, COMPONENT_STYLES } from './constants';
+import { DataTable, EmptyState, FilterBar, TableCell, TableHeader, TableRow } from '../Establecimientos/components';
+import { COMPONENT_STYLES as ESTABLECIMIENTOS_STYLES } from '../Establecimientos/constants';
+import { MESES, ANIOS_DISPONIBLES } from './constants';
 
 interface ValesProps {
   initialCentroAcopioId?: string;
@@ -24,6 +37,49 @@ interface ValesProps {
 }
 
 type ValeEstadoFilter = 'todos' | NonNullable<ValesQueryFilters['estado']>;
+
+const TABLE_COLUMNS = [
+  { key: 'numero', label: 'Número' },
+  { key: 'centro', label: 'Centro de acopio' },
+  { key: 'tipo', label: 'Tipo', align: 'center' as const },
+  { key: 'totales', label: 'Totales', align: 'center' as const },
+  { key: 'estado', label: 'Estado', align: 'center' as const },
+  { key: 'fecha', label: 'Fecha', align: 'center' as const },
+  { key: 'acciones', label: 'Acciones', align: 'right' as const },
+];
+
+const getTipoVale = (vale: ValeEntrega) => {
+  const adicionales = new Set<number>();
+  const tieneBase = vale.detalles?.some((detalle) => detalle.cantidadProgramada > 0) ?? false;
+
+  vale.detalles?.forEach((detalle) => {
+    if (detalle.cantidadAdicional > 0 && detalle.numeroEntregaAdicional) {
+      adicionales.add(detalle.numeroEntregaAdicional);
+    }
+  });
+
+  if (tieneBase && adicionales.size > 0) {
+    return { label: 'Completo', icon: Stack };
+  }
+
+  if (adicionales.size > 0) {
+    return { label: `Adic. #${adicionales.size}`, icon: Plus };
+  }
+
+  return { label: 'Base', icon: CheckCircle };
+};
+
+const estadoClassName: Record<ValeEntrega['estado'], string> = {
+  generado: ESTABLECIMIENTOS_STYLES.badge.active,
+  impreso: ESTABLECIMIENTOS_STYLES.badge.warning,
+  entregado: ESTABLECIMIENTOS_STYLES.badge.neutral,
+};
+
+const estadoLabel: Record<ValeEntrega['estado'], string> = {
+  generado: 'Generado',
+  impreso: 'Impreso',
+  entregado: 'Entregado',
+};
 
 const Vales: React.FC<ValesProps> = ({
   initialCentroAcopioId,
@@ -37,6 +93,7 @@ const Vales: React.FC<ValesProps> = ({
   // Hooks para gestión de datos
   const {
     vales,
+    total,
     isLoading,
     isGenerating,
     isReverting,
@@ -102,7 +159,7 @@ const Vales: React.FC<ValesProps> = ({
       }
     };
     initializeData();
-  }, []);
+  }, [loadCentrosAcopio, loadEstablecimientos, loadVacunasActivas]);
 
   // Cargar vales cuando cambian los filtros
   useEffect(() => {
@@ -119,7 +176,7 @@ const Vales: React.FC<ValesProps> = ({
     }, searchTerm ? 500 : 0);
 
     return () => clearTimeout(timeoutId);
-  }, [selectedCentroAcopio, selectedMes, selectedAnio, selectedEstado, searchTerm]);
+  }, [loadVales, selectedCentroAcopio, selectedMes, selectedAnio, selectedEstado, searchTerm]);
 
   // Efecto para detectar cuando se termina de generar un vale
   useEffect(() => {
@@ -152,7 +209,64 @@ const Vales: React.FC<ValesProps> = ({
     });
   }, [vales, searchTerm]);
 
-  // Estadísticas eliminadas por requerimiento
+  const filtersConfig = useMemo(
+    () => [
+      {
+        id: 'vales-centro-acopio',
+        label: 'Centro de acopio',
+        value: selectedCentroAcopio,
+        options: [
+          { value: 'todos', label: 'Todos los centros' },
+          ...centrosAcopio.map((centro) => ({
+            value: centro.id,
+            label: centro.nombre,
+          })),
+        ],
+        onChange: setSelectedCentroAcopio,
+      },
+      {
+        id: 'vales-mes',
+        label: 'Mes',
+        value: String(selectedMes),
+        options: MESES.map((mes, index) => ({
+          value: String(index + 1),
+          label: mes,
+        })),
+        onChange: (value: string) => setSelectedMes(Number(value)),
+      },
+      {
+        id: 'vales-anio',
+        label: 'Año',
+        value: String(selectedAnio),
+        options: ANIOS_DISPONIBLES.map((anioDisponible) => ({
+          value: String(anioDisponible),
+          label: String(anioDisponible),
+        })),
+        onChange: (value: string) => setSelectedAnio(Number(value)),
+      },
+      {
+        id: 'vales-estado',
+        label: 'Estado',
+        value: selectedEstado,
+        options: [
+          { value: 'todos', label: 'Todos los estados' },
+          { value: 'generado', label: 'Generado' },
+          { value: 'impreso', label: 'Impreso' },
+          { value: 'entregado', label: 'Entregado' },
+        ],
+        onChange: (value: string) => setSelectedEstado(value as ValeEstadoFilter),
+      },
+    ],
+    [centrosAcopio, selectedAnio, selectedCentroAcopio, selectedEstado, selectedMes],
+  );
+
+  const handleClearFilters = useCallback(() => {
+    setSearchTerm('');
+    setSelectedCentroAcopio(initialCentroAcopioId || 'todos');
+    setSelectedMes(initialMes || new Date().getMonth() + 1);
+    setSelectedAnio(initialAnio || new Date().getFullYear());
+    setSelectedEstado('todos');
+  }, [initialAnio, initialCentroAcopioId, initialMes]);
 
   // Funciones de manejo
   const handleGenerarVale = useCallback(() => {
@@ -348,46 +462,130 @@ const Vales: React.FC<ValesProps> = ({
   }, []);
 
   return (
-    <main className={onClose ? 'w-full bg-zinc-50 flex-1 overflow-y-auto h-full rounded-[24px]' : COMPONENT_STYLES.pageBackground} role="main">
-      {/* Header */}
-      <ValesHeader
-        onGenerarVale={handleGenerarVale}
-        onSincronizar={handleSincronizar}
-        onClose={onClose}
-        isGenerating={isGenerating || generandoVale}
-        isSyncing={isSyncing}
-        centroAcopioSeleccionado={selectedCentroAcopio !== 'todos'}
-      />
+    <main className={onClose ? 'h-full w-full flex-1 overflow-y-auto bg-white' : ESTABLECIMIENTOS_STYLES.pageBackground} role="main">
+      <section className={`${ESTABLECIMIENTOS_STYLES.surface} p-4 sm:p-6`}>
+        <div className="space-y-4">
+          <FilterBar
+            searchValue={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchPlaceholder="Buscar por número, centro u observación"
+            filters={filtersConfig}
+            onClear={handleClearFilters}
+            actions={
+              <>
+                <button
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={isLoading}
+                  className={ESTABLECIMIENTOS_STYLES.button.secondary}
+                >
+                  <ArrowsClockwise className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} weight="bold" />
+                  <span>Actualizar</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSincronizar}
+                  disabled={selectedCentroAcopio === 'todos' || isSyncing || isGenerating || generandoVale}
+                  className={ESTABLECIMIENTOS_STYLES.button.secondary}
+                >
+                  <ArrowsClockwise className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} weight="bold" />
+                  <span>Sincronizar</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGenerarVale}
+                  disabled={selectedCentroAcopio === 'todos' || isGenerating || generandoVale}
+                  className={ESTABLECIMIENTOS_STYLES.button.primary}
+                >
+                  {isGenerating || generandoVale ? (
+                    <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+                  ) : (
+                    <Plus className="h-4 w-4" weight="bold" />
+                  )}
+                  <span>{isGenerating || generandoVale ? 'Generando...' : 'Generar vale'}</span>
+                </button>
+                {onClose ? (
+                  <button type="button" onClick={onClose} className={ESTABLECIMIENTOS_STYLES.button.ghost}>
+                    <X className="h-4 w-4" weight="bold" />
+                    <span>Cerrar</span>
+                  </button>
+                ) : null}
+              </>
+            }
+          />
 
-      {/* Contenido principal */}
-      <section className={`${MODULE_LAYOUT.fullWidth} ${MODULE_LAYOUT.pageSpacingX} py-6 space-y-6`}>
+          <div className="hidden lg:block">
+            <DataTable
+              isLoading={isLoading}
+              loadingMessage="Cargando vales..."
+              skeletonRows={5}
+              skeletonColumns={TABLE_COLUMNS.length}
+              loadingVariant="table"
+            >
+              <table className="min-w-full border-separate border-spacing-0">
+                <TableHeader columns={TABLE_COLUMNS} />
+                <tbody className="bg-white">
+                  {valesFiltrados.length === 0 ? (
+                    <tr>
+                      <td colSpan={TABLE_COLUMNS.length + 1}>
+                        <EmptyState
+                          icon={Receipt}
+                          title="Sin vales generados"
+                          description="Ajuste los filtros o genere un nuevo vale para el centro seleccionado."
+                          action={selectedCentroAcopio !== 'todos' ? { label: 'Generar vale', onClick: handleGenerarVale } : undefined}
+                        />
+                      </td>
+                    </tr>
+                  ) : (
+                    valesFiltrados.map((vale) => (
+                      <ValeDesktopRow
+                        key={vale.id}
+                        vale={vale}
+                        isLoading={isReverting}
+                        onVerDetalle={() => handleVerDetalle(vale)}
+                        onExportar={() => handleExportar(vale)}
+                        onRevertir={() => handleRevertir(vale)}
+                      />
+                    ))
+                  )}
+                </tbody>
+              </table>
 
-        {/* Filtros */}
-        <ValesFilters
-          selectedCentroAcopio={selectedCentroAcopio}
-          selectedMes={selectedMes}
-          selectedAnio={selectedAnio}
-          selectedEstado={selectedEstado}
-          searchTerm={searchTerm}
-          centrosAcopio={centrosAcopio}
-          isLoading={isLoading}
-          onCentroAcopioChange={setSelectedCentroAcopio}
-          onMesChange={setSelectedMes}
-          onAnioChange={setSelectedAnio}
-          onEstadoChange={setSelectedEstado}
-          onSearchChange={setSearchTerm}
-          onRefresh={handleRefresh}
-        />
+              <div className={ESTABLECIMIENTOS_STYLES.pagination.container}>
+                <p className={ESTABLECIMIENTOS_STYLES.pagination.info}>
+                  <span className="font-semibold text-[#606571]">{valesFiltrados.length}</span> de{' '}
+                  <span className="font-semibold text-[#606571]">{total || valesFiltrados.length}</span> vales
+                </p>
+              </div>
+            </DataTable>
+          </div>
 
-        {/* Tabla */}
-        <ValesTabla
-          vales={valesFiltrados}
-          isLoading={isLoading}
-          isReverting={isReverting}
-          onVerDetalle={handleVerDetalle}
-          onExportar={handleExportar}
-          onRevertir={handleRevertir}
-        />
+          <div className="space-y-3 lg:hidden">
+            {isLoading ? (
+              <DataTable isLoading loadingMessage="Cargando vales..." skeletonRows={4} loadingVariant="cards" />
+            ) : valesFiltrados.length === 0 ? (
+              <div className={ESTABLECIMIENTOS_STYLES.panel}>
+                <EmptyState
+                  icon={Receipt}
+                  title="Sin vales generados"
+                  description="Ajuste los filtros o genere un nuevo vale para el centro seleccionado."
+                  action={selectedCentroAcopio !== 'todos' ? { label: 'Generar vale', onClick: handleGenerarVale } : undefined}
+                />
+              </div>
+            ) : (
+              valesFiltrados.map((vale) => (
+                <ValeMobileCard
+                  key={vale.id}
+                  vale={vale}
+                  isLoading={isReverting}
+                  onVerDetalle={() => handleVerDetalle(vale)}
+                  onExportar={() => handleExportar(vale)}
+                  onRevertir={() => handleRevertir(vale)}
+                />
+              ))
+            )}
+          </div>
+        </div>
       </section>
 
       {/* Modales */}
@@ -631,5 +829,168 @@ const Vales: React.FC<ValesProps> = ({
     </main>
   );
 };
+
+interface ValeRowProps {
+  vale: ValeEntrega;
+  isLoading?: boolean;
+  onVerDetalle: () => void;
+  onExportar: () => void;
+  onRevertir: () => void;
+}
+
+const ValeTypeBadge: React.FC<{ vale: ValeEntrega }> = ({ vale }) => {
+  const tipo = getTipoVale(vale);
+  const Icon = tipo.icon;
+
+  return (
+    <span className={ESTABLECIMIENTOS_STYLES.badge.neutral}>
+      <Icon className="mr-1 h-3 w-3" weight="bold" aria-hidden="true" />
+      {tipo.label}
+    </span>
+  );
+};
+
+const ValeEstadoBadge: React.FC<{ estado: ValeEntrega['estado'] }> = ({ estado }) => (
+  <span className={estadoClassName[estado] || ESTABLECIMIENTOS_STYLES.badge.neutral}>
+    {estadoLabel[estado] || estado}
+  </span>
+);
+
+const ValeActions: React.FC<Omit<ValeRowProps, 'vale'>> = ({
+  isLoading = false,
+  onVerDetalle,
+  onExportar,
+  onRevertir,
+}) => (
+  <div className="flex items-center justify-end gap-1.5">
+    <button
+      type="button"
+      onClick={onVerDetalle}
+      disabled={isLoading}
+      className={`${ESTABLECIMIENTOS_STYLES.button.icon} ${ESTABLECIMIENTOS_STYLES.button.iconView}`}
+      title="Ver detalle"
+    >
+      <Eye className="h-4 w-4" weight="bold" aria-hidden="true" />
+    </button>
+    <button
+      type="button"
+      onClick={onExportar}
+      disabled={isLoading}
+      className={`${ESTABLECIMIENTOS_STYLES.button.icon} ${ESTABLECIMIENTOS_STYLES.button.iconView}`}
+      title="Exportar"
+    >
+      <Download className="h-4 w-4" weight="bold" aria-hidden="true" />
+    </button>
+    <button
+      type="button"
+      onClick={onRevertir}
+      disabled={isLoading}
+      className={`${ESTABLECIMIENTOS_STYLES.button.icon} ${ESTABLECIMIENTOS_STYLES.button.iconDelete}`}
+      title="Revertir"
+    >
+      <ArrowCounterClockwise className="h-4 w-4" weight="bold" aria-hidden="true" />
+    </button>
+  </div>
+);
+
+const ValeDesktopRow: React.FC<ValeRowProps> = ({
+  vale,
+  isLoading = false,
+  onVerDetalle,
+  onExportar,
+  onRevertir,
+}) => (
+  <TableRow>
+    <TableCell>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-[#15171d]">{vale.numero}</p>
+        <p className="text-xs text-[#8b8f9b]">{MESES[vale.mes - 1]} {vale.anio}</p>
+      </div>
+    </TableCell>
+    <TableCell>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-[#15171d]">{vale.centroAcopio.nombre}</p>
+        <p className="text-xs text-[#8b8f9b]">{vale.centroAcopio.codigo || 'Sin código'}</p>
+      </div>
+    </TableCell>
+    <TableCell align="center">
+      <ValeTypeBadge vale={vale} />
+    </TableCell>
+    <TableCell align="center">
+      <div className="flex flex-col items-center gap-1">
+        <span className={ESTABLECIMIENTOS_STYLES.badge.count}>
+          <Package className="mr-1 h-3 w-3" weight="bold" aria-hidden="true" />
+          {vale.totalVacunas.toLocaleString('es-PE')}
+        </span>
+        <span className="text-xs text-[#8b8f9b]">
+          {vale.totalEstablecimientos} establecimientos
+        </span>
+      </div>
+    </TableCell>
+    <TableCell align="center">
+      <ValeEstadoBadge estado={vale.estado} />
+    </TableCell>
+    <TableCell align="center">
+      <span className="text-sm text-[#606571]">
+        {new Date(vale.fechaGeneracion).toLocaleDateString('es-PE', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })}
+      </span>
+    </TableCell>
+    <TableCell align="right">
+      <ValeActions
+        isLoading={isLoading}
+        onVerDetalle={onVerDetalle}
+        onExportar={onExportar}
+        onRevertir={onRevertir}
+      />
+    </TableCell>
+  </TableRow>
+);
+
+const ValeMobileCard: React.FC<ValeRowProps> = ({
+  vale,
+  isLoading = false,
+  onVerDetalle,
+  onExportar,
+  onRevertir,
+}) => (
+  <article className={`${ESTABLECIMIENTOS_STYLES.panel} p-4`}>
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="truncate text-base font-semibold text-zinc-950">{vale.numero}</p>
+        <p className="mt-1 text-sm text-zinc-500">{vale.centroAcopio.nombre}</p>
+      </div>
+      <ValeEstadoBadge estado={vale.estado} />
+    </div>
+
+    <div className="mt-4 grid grid-cols-2 gap-2.5">
+      <div className={ESTABLECIMIENTOS_STYLES.mutedPanel}>
+        <div className="p-3">
+          <p className="text-xs font-medium text-[#747986]">Periodo</p>
+          <p className="mt-1 text-sm font-semibold text-[#15171d]">{MESES[vale.mes - 1]} {vale.anio}</p>
+        </div>
+      </div>
+      <div className={ESTABLECIMIENTOS_STYLES.mutedPanel}>
+        <div className="p-3">
+          <p className="text-xs font-medium text-[#747986]">Total</p>
+          <p className="mt-1 text-sm font-semibold text-[#15171d]">{vale.totalVacunas.toLocaleString('es-PE')} vacunas</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-4 flex items-center justify-between gap-3">
+      <ValeTypeBadge vale={vale} />
+      <ValeActions
+        isLoading={isLoading}
+        onVerDetalle={onVerDetalle}
+        onExportar={onExportar}
+        onRevertir={onRevertir}
+      />
+    </div>
+  </article>
+);
 
 export default Vales;

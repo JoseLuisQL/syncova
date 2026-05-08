@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowsInSimple, ArrowsOutSimple, X, Trash } from '@phosphor-icons/react';
+import { ArrowsInSimple, ArrowsOutSimple, X, Trash, WarningCircle } from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useSiBot } from '../../hooks/useSiBot';
 import { SiBotMessage } from './SiBotMessage';
@@ -55,16 +55,17 @@ export const SiBotFloating: React.FC = () => {
 
   return (
     <>
-      {/* Boton Flotante */}
       <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={toggleOpen}
-          className={`flex items-center justify-center w-[58px] h-[58px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.04] active:scale-[0.96] shadow-[0_8px_30px_-6px_rgba(13,148,136,0.4)] hover:shadow-[0_12px_44px_-8px_rgba(13,148,136,0.5)] ${
-            isOpen ? 'bg-zinc-900 rotate-[135deg] shadow-[0_8px_30px_-6px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_44px_-8px_rgba(0,0,0,0.4)]' : 'bg-teal-600'
-          } text-white`}
+          className={`flex h-[58px] w-[58px] items-center justify-center rounded-full border transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.97] ${
+            isOpen
+              ? 'border-[#e7e7ef] bg-[#15171d] text-white shadow-[0_18px_44px_-26px_rgba(12,15,24,0.65)]'
+              : 'border-[#c8bbff] bg-[#7c3aed] text-white shadow-[0_18px_44px_-26px_rgba(124,58,237,0.9)]'
+          }`}
           aria-label="Toggle SiBot"
         >
-          {isOpen ? <X className="w-[22px] h-[22px] -rotate-[135deg]" weight="bold" /> : <SiBotLogo className="w-8 h-8 drop-shadow-md" />}
+          {isOpen ? <X className="h-[22px] w-[22px]" weight="bold" /> : <SiBotLogo className="h-8 w-8" />}
         </button>
       </div>
 
@@ -82,7 +83,7 @@ export const SiBotFloating: React.FC = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
                   onClick={toggleExpanded}
-                  className="fixed inset-0 z-40 hidden bg-zinc-950/10 backdrop-blur-[2px] lg:block"
+                  className="fixed inset-0 z-40 hidden bg-zinc-950/10 backdrop-blur-[1px] lg:block"
                 />
               )}
             </AnimatePresence>
@@ -93,23 +94,18 @@ export const SiBotFloating: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
               exit={{ opacity: 0, y: 12, scale: 0.96, filter: 'blur(3px)' }}
               transition={{ duration: 0.35, type: 'spring', damping: 24, stiffness: 280 }}
-              className={`fixed ${panelLayoutClass} bg-zinc-50/95 backdrop-blur-[24px] border border-zinc-200/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15),_0_0_0_1px_rgba(0,0,0,0.05)] flex flex-col overflow-hidden z-50 ring-1 ring-zinc-900/5 transition-[width,height,max-width,max-height,bottom,right,border-radius] duration-300 ease-out`}
+              className={`fixed ${panelLayoutClass} z-50 flex flex-col overflow-hidden border border-[#e7e7ef] bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] transition-[width,height,max-width,max-height,bottom,right,border-radius] duration-300 ease-out`}
             >
-            {/* Header Limpio */}
-            <div className="flex flex-col px-5 pt-5 pb-3 bg-transparent shrink-0">
+            <div className="flex shrink-0 flex-col border-b border-[#eeeef3] bg-white px-5 py-4">
                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 bg-white rounded-[10px] flex items-center justify-center shadow-sm border border-zinc-200/60 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-teal-50/50 to-transparent"></div>
-                      <SiBotLogo className="w-4 h-4 text-teal-600 relative z-10" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-white text-[#7c3aed]">
+                      <SiBotLogo className="h-4 w-4" />
                     </div>
                     <div className="flex flex-col">
-                      <h3 className="font-semibold text-zinc-900 text-[14px] tracking-tight leading-none">SiBot</h3>
-                      <p className="text-[11px] text-zinc-500 font-medium flex items-center gap-1.5 leading-none mt-1.5">
-                        <span className="relative flex w-1.5 h-1.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full w-1.5 h-1.5 bg-emerald-500"></span>
-                        </span>
+                      <h3 className="text-[14px] font-semibold leading-none tracking-tight text-[#15171d]">SiBot</h3>
+                      <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-medium leading-none text-[#606571]">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                         En línea
                       </p>
                     </div>
@@ -119,7 +115,7 @@ export const SiBotFloating: React.FC = () => {
                     <button
                       type="button"
                       onClick={toggleExpanded}
-                      className="hidden lg:inline-flex p-2 text-zinc-400 hover:text-zinc-700 hover:bg-white/90 rounded-[10px] transition-all duration-300 focus:outline-none border border-transparent hover:border-zinc-200/80"
+                      className="hidden rounded-[9px] border border-transparent p-2 text-[#8b8f9b] transition hover:border-[#e7e7ef] hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none lg:inline-flex"
                       title={isExpanded ? 'Volver a tamaño compacto' : 'Expandir panel'}
                     >
                       {isExpanded ? (
@@ -132,7 +128,7 @@ export const SiBotFloating: React.FC = () => {
                     {messages.length > 0 && (
                       <button 
                         onClick={clearHistory}
-                        className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50/80 rounded-[10px] transition-all duration-300 focus:outline-none"
+                        className="rounded-[9px] p-2 text-[#8b8f9b] transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none"
                         title="Limpiar historial"
                       >
                         <Trash className="w-5 h-5" weight="duotone" />
@@ -143,21 +139,19 @@ export const SiBotFloating: React.FC = () => {
 
             </div>
 
-            {/* Area De Conversacion. Added min-h-0 to prevent flex children from blowing out the bounds */}
-            <div className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${messagePanePaddingClass} scroll-smooth scrollbar-thin scrollbar-thumb-zinc-200 hover:scrollbar-thumb-zinc-300`}>
+            <div className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden ${messagePanePaddingClass} scroll-smooth scrollbar-thin scrollbar-thumb-zinc-200 hover:scrollbar-thumb-zinc-300`}>
               {messages.length === 0 ? (
                 <div className={`h-full flex flex-col items-center justify-center text-center opacity-100 ${emptyStateOffsetClass}`}>
                   <motion.div 
                     initial={{ scale: 0, opacity: 0 }} 
                     animate={{ scale: 1, opacity: 1 }} 
                     transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}
-                    className="w-[56px] h-[56px] bg-white border border-zinc-200/60 rounded-[1.2rem] flex items-center justify-center mb-4 shadow-[0_8px_30px_-6px_rgba(0,0,0,0.06)] relative overflow-hidden"
+                    className="mb-4 flex h-[56px] w-[56px] items-center justify-center rounded-[16px] border border-[#e7e7ef] bg-[#fbfafd] text-[#7c3aed]"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-tr from-teal-50 to-transparent"></div>
-                    <SiBotLogo className="w-7 h-7 text-teal-600 relative z-10" />
+                    <SiBotLogo className="h-7 w-7" />
                   </motion.div>
-                  <h4 className="text-zinc-900 font-bold mb-1.5 text-[15px] tracking-tight">Hola, soy SiBot</h4>
-                  <p className="text-zinc-500 text-[12px] max-w-[240px] leading-relaxed font-medium">
+                  <h4 className="mb-1.5 text-[15px] font-semibold tracking-tight text-[#15171d]">Hola, soy SiBot</h4>
+                  <p className="max-w-[250px] text-[12px] font-medium leading-relaxed text-[#606571]">
                     Analizo tus datos de SIVAC, inventario de vacunas y planificaciones en tiempo real.
                   </p>
                   <SiBotSuggestions onSelect={handleSuggestion} />
@@ -196,15 +190,13 @@ export const SiBotFloating: React.FC = () => {
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className={`px-4 py-3.5 rounded-[1rem] text-[13px] flex gap-3 items-start mt-4 shadow-sm mx-auto w-fit max-w-[90%] border ${
+                      className={`mx-auto mt-4 flex w-fit max-w-[90%] items-start gap-3 rounded-[14px] border px-4 py-3.5 text-[13px] ${
                         error.message.includes('Límite') || error.message.includes('429') || error.message.toLowerCase().includes('quota')
-                          ? 'bg-amber-50/90 border-amber-200/60 text-amber-800'
-                          : 'bg-red-50/90 border-red-200/60 text-red-600'
+                          ? 'border-amber-200 bg-amber-50 text-amber-800'
+                          : 'border-rose-200 bg-rose-50 text-rose-700'
                       }`}
                     >
-                      <span className="shrink-0 mt-0.5">
-                        {error.message.includes('Límite') || error.message.includes('429') || error.message.toLowerCase().includes('quota') ? '⚠️' : '🚨'}
-                      </span> 
+                      <WarningCircle className="mt-0.5 h-4 w-4 shrink-0" weight="bold" />
                       <div className="flex flex-col">
                         <span className="font-semibold mb-0.5">
                           {error.message.includes('Límite') || error.message.includes('429') || error.message.toLowerCase().includes('quota') 

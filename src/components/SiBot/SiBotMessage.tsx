@@ -24,9 +24,7 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
 
   const isUser = role === 'user';
   
-  // Extraemos las sugerencias generadas por la IA
-  // La IA envía algo parecido a: "--- \n **💡 Sugerencias:** \n - ¿Cual es el stock? \n"
-  const suggestionRegex = /---\s*\n*\s*\*\*💡\s*Sugerencias:\*\*\s*\n([\s\S]*)/i;
+  const suggestionRegex = /---\s*\n*\s*\*\*(?:💡\s*)?Sugerencias:\*\*\s*\n([\s\S]*)/i;
   const match = content.match(suggestionRegex);
   
   let mainContent = content;
@@ -51,27 +49,27 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
     <div className={`flex flex-col w-full mb-4 ${isUser ? 'items-end' : 'items-start'}`}>
       <div className={`flex w-full ${rowWidthClass} ${isUser ? 'flex-row-reverse' : 'flex-row'} items-end gap-2.5`}>
         {/* Avatar */}
-        <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center shadow-sm relative overflow-hidden border border-zinc-200/50
-          ${isUser ? 'bg-zinc-100 text-zinc-600' : 'bg-teal-600 text-white'}`}
+        <div className={`relative flex h-7 w-7 flex-shrink-0 items-center justify-center overflow-hidden rounded-[9px] border
+          ${isUser ? 'border-[#e7e7ef] bg-[#fbfafd] text-[#606571]' : 'border-[#c8bbff] bg-[#fbfafd] text-[#7c3aed]'}`}
         >
-          {isUser ? <User weight="bold" className="w-4 h-4" /> : <SiBotLogo className="w-4 h-4 absolute" />}
+          {isUser ? <User weight="bold" className="h-4 w-4" /> : <SiBotLogo className="absolute h-4 w-4" />}
         </div>
 
         {/* Message Bubble */}
         <div className={`relative ${bubblePaddingClass} text-[12.5px] leading-relaxed min-w-0 w-full overflow-x-hidden
           ${isUser 
-            ? 'bg-zinc-900 text-zinc-50 rounded-[1.25rem] rounded-br-[0.25rem] shadow-[0_4px_20px_-8px_rgba(0,0,0,0.15)]' 
-            : 'bg-white border-[1.5px] border-zinc-100 text-zinc-800 rounded-[1.25rem] rounded-bl-[0.25rem] shadow-[0_2px_14px_-6px_rgba(0,0,0,0.06)]'
+            ? 'bg-[#15171d] text-zinc-50 rounded-[14px] rounded-br-[4px]' 
+            : 'bg-white border border-[#e7e7ef] text-[#15171d] rounded-[14px] rounded-bl-[4px]'
           }`}
         >
           {!mainContent.trim() && !isUser ? (
              <div className="flex items-center gap-3 h-[24px] px-1 py-0.5">
                <div className="flex gap-1.5 items-center">
-                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }} className="w-1.5 h-1.5 bg-teal-500 rounded-full" />
-                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut", delay: 0.2 }} className="w-1.5 h-1.5 bg-teal-500 rounded-full" />
-                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut", delay: 0.4 }} className="w-1.5 h-1.5 bg-teal-500 rounded-full" />
+                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }} className="h-1.5 w-1.5 rounded-full bg-[#7c3aed]" />
+                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut", delay: 0.2 }} className="h-1.5 w-1.5 rounded-full bg-[#7c3aed]" />
+                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut", delay: 0.4 }} className="h-1.5 w-1.5 rounded-full bg-[#7c3aed]" />
                </div>
-               <span className="text-[12.5px] font-medium text-teal-600/90 tracking-wide animate-pulse">Analizando SIVAC...</span>
+               <span className="animate-pulse text-[12.5px] font-medium tracking-wide text-[#7c3aed]">Analizando SIVAC...</span>
              </div>
           ) : (
             <ReactMarkdown
@@ -105,27 +103,27 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
                   }
                   
                   return !inline ? (
-                    <div className="bg-zinc-950 rounded-xl p-4 my-3 overflow-x-auto text-zinc-200 text-[13px] font-mono border border-zinc-800 shadow-inner max-w-full">
+                    <div className="my-3 max-w-full overflow-x-auto rounded-[12px] border border-[#2b2f37] bg-[#15171d] p-4 font-mono text-[13px] text-zinc-200">
                       <code className={className} {...props}>{children}</code>
                     </div>
                   ) : (
-                    <code className="bg-zinc-100 text-zinc-800 px-1.5 py-0.5 rounded-md text-[13px] font-mono font-medium border border-zinc-200/50" {...props}>
+                    <code className="rounded-md border border-[#e7e7ef] bg-[#fbfafd] px-1.5 py-0.5 font-mono text-[13px] font-medium text-[#15171d]" {...props}>
                       {children}
                     </code>
                   );
                 },
                 p: ({children}) => <p className="mb-3 last:mb-0 tracking-tight">{children}</p>,
-                ul: ({children}) => <ul className="list-disc pl-5 mb-3 marker:text-zinc-400 space-y-1">{children}</ul>,
-                ol: ({children}) => <ol className="list-decimal pl-5 mb-3 marker:text-zinc-400 space-y-1 font-medium">{children}</ol>,
+                ul: ({children}) => <ul className="list-disc pl-5 mb-3 marker:text-[#8b8f9b] space-y-1">{children}</ul>,
+                ol: ({children}) => <ol className="list-decimal pl-5 mb-3 marker:text-[#8b8f9b] space-y-1 font-medium">{children}</ol>,
                 li: ({children}) => <li className="mb-1 leading-relaxed">{children}</li>,
-                h3: ({children}) => <h3 className="text-[15px] font-bold mt-5 mb-2 tracking-tight text-zinc-900">{children}</h3>,
-                h4: ({children}) => <h4 className="text-[13px] font-semibold mt-3 mb-1.5 tracking-tight text-zinc-800">{children}</h4>,
+                h3: ({children}) => <h3 className="text-[15px] font-semibold mt-5 mb-2 tracking-tight text-[#15171d]">{children}</h3>,
+                h4: ({children}) => <h4 className="text-[13px] font-semibold mt-3 mb-1.5 tracking-tight text-[#15171d]">{children}</h4>,
                 table: ({children}) => <SiBotTable>{children}</SiBotTable>,
                 thead: ({children}) => <thead className="bg-[#fbfafd]">{children}</thead>,
                 tbody: ({children}) => <tbody className="bg-white">{children}</tbody>,
                 th: ({children}) => <th className="whitespace-nowrap border-b border-[#eeeef3] bg-[#fbfafd] px-3 py-2 text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">{children}</th>,
-                td: ({children}) => <td className="px-3 py-2 text-zinc-600 font-medium min-w-[100px]">{children}</td>,
-                strong: ({children}) => <strong className="font-semibold text-zinc-900">{children}</strong>
+                td: ({children}) => <td className="min-w-[100px] px-3 py-2 font-medium text-[#606571]">{children}</td>,
+                strong: ({children}) => <strong className={`font-semibold ${isUser ? 'text-white' : 'text-[#15171d]'}`}>{children}</strong>
               }}
             >
               {mainContent}
@@ -136,14 +134,14 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
 
       {/* Renderizamos Sugerencias Extraidas Exclusivamente como Botones Interactivas (Chips) */}
       {formattedSuggestions.length > 0 && !isUser && (
-        <div className="flex flex-col gap-1.5 mt-2 ml-[38px] max-w-[90%]">
+        <div className="ml-[38px] mt-2 flex max-w-[90%] flex-col gap-1.5">
           {formattedSuggestions.map((suggestionText, idx) => (
              <button
                 key={idx}
                 onClick={() => onSuggestionSelect && onSuggestionSelect(suggestionText)}
-                className="group flex flex-row items-start gap-2 text-left text-[11.5px] bg-white border border-zinc-200/80 text-zinc-600 pl-2.5 pr-3 py-1.5 rounded-[0.85rem] transition-all duration-300 hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-[0_4px_15px_-5px_rgba(0,0,0,0.05)] hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98] outline-none font-medium w-fit max-w-full"
+                className="group flex w-fit max-w-full flex-row items-start gap-2 rounded-[10px] border border-[#e7e7ef] bg-white py-1.5 pl-2.5 pr-3 text-left text-[11.5px] font-medium text-[#606571] outline-none transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] active:scale-[0.99]"
              >
-                <Sparkle weight="fill" className="text-zinc-300 group-hover:text-amber-500 transition-colors flex-shrink-0 w-3.5 h-3.5 mt-0.5" />
+                <Sparkle weight="bold" className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#7c3aed] transition-colors" />
                 <span className="whitespace-normal leading-snug">{suggestionText}</span>
              </button>
           ))}

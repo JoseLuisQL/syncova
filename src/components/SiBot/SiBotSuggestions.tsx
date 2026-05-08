@@ -13,9 +13,9 @@ const suggestions = [
 
 export const SiBotSuggestions: React.FC<SiBotSuggestionsProps> = ({ onSelect }) => {
   return (
-    <div className="flex flex-col items-center justify-center gap-2.5 w-full max-w-[300px] mt-4">
-      <div className="flex items-center gap-1.5 text-zinc-400 text-[10px] font-semibold uppercase tracking-widest mb-0.5 opacity-80">
-        <Sparkle weight="duotone" className="text-zinc-400 w-3.5 h-3.5" />
+    <div className="mt-4 flex w-full max-w-[310px] flex-col items-center justify-center gap-2.5">
+      <div className="mb-0.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-[#8b8f9b]">
+        <Sparkle weight="bold" className="h-3.5 w-3.5 text-[#7c3aed]" />
         Sugerencias para empezar
       </div>
       <div className="flex flex-col w-full space-y-1.5">
@@ -23,7 +23,7 @@ export const SiBotSuggestions: React.FC<SiBotSuggestionsProps> = ({ onSelect }) 
           <button
             key={idx}
             onClick={() => onSelect(text)}
-            className="flex items-center justify-center text-center w-full text-[12px] leading-snug font-medium bg-white border border-zinc-200/80 text-zinc-600 px-3 py-2 rounded-xl transition-all duration-300 hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-[0_4px_20px_-8px_rgba(0,0,0,0.08)] active:scale-[0.98] outline-none"
+            className="flex w-full items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-white px-3 py-2 text-center text-[12px] font-medium leading-snug text-[#606571] outline-none transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] active:scale-[0.99]"
           >
             {text}
           </button>

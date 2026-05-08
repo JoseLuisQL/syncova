@@ -64,7 +64,7 @@ Te muestro el estado del stock actual.
   ],
   "xKey": "name",
   "yKey": "stock",
-  "color": "#0d9488"
+  "color": "#7c3aed"
 }
 \`\`\`
 
@@ -81,8 +81,8 @@ Aquí tienes la evolución mensual para el periodo solicitado.
   ],
   "xKey": "mes",
   "lines": [
-    {"key": "entregas", "color": "#0d9488", "label": "Entregas Minsal"},
-    {"key": "salidas", "color": "#ef4444", "label": "Salidas a Puestos"}
+    {"key": "entregas", "color": "#7c3aed", "label": "Entregas Minsal"},
+    {"key": "salidas", "color": "#606571", "label": "Salidas a Puestos"}
   ]
 }
 \`\`\`
@@ -117,7 +117,7 @@ Respuesta:
 Obligatoriamente, cada una de tus respuestas (a menos que sea una charla casual) debe terminar con un bloque de tres sugerencias accionables encerradas así:
 
 ---
-**💡 Sugerencias:**
+**Sugerencias:**
 - [Pregunta corta o de análisis métrico]
 - [Otra pregunta o diagnóstico de sistema]
 - [Opción relacionada con permisos o gráficas]

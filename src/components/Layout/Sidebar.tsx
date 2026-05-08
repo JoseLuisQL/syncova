@@ -170,7 +170,17 @@ const Sidebar: React.FC = memo(() => {
               </span>
             </button>
           ) : (
-            <SivacLogo size={34} />
+            <div className="flex min-w-0 items-center gap-3">
+              <SivacLogo size={34} />
+              <div className="min-w-0">
+                <p className="text-[18px] font-semibold leading-none tracking-[-0.03em] text-[#111318]">
+                  SIVAC
+                </p>
+                <p className="mt-1 truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8b8f9b]">
+                  Sistema de Vacunas
+                </p>
+              </div>
+            </div>
           )}
 
           {!isCollapsed && (

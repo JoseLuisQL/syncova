@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Warning } from '@phosphor-icons/react';
 import {
   Establecimiento,
   PlanificacionConRelaciones,
@@ -23,6 +22,7 @@ import {
   PlanificacionAcciones,
   ConfirmacionValeModal,
 } from './components';
+import { ErrorAlert } from '../Establecimientos/components';
 import ImportarModal from './ImportarModal';
 
 interface EstablecimientoData {
@@ -1022,9 +1022,9 @@ const Planificacion: React.FC = () => {
   const isPageLoading = isLoading || isContextLoading;
 
   return (
-    <main className="flex h-[calc(100vh-4rem)] flex-col bg-zinc-50">
-      <div className="mx-auto flex w-full max-w-full flex-1 flex-col overflow-hidden p-2 sm:p-4 lg:p-6">
-        <section className="flex flex-1 flex-col overflow-hidden rounded-[20px] border border-zinc-200 bg-white shadow-sm ring-1 ring-zinc-200/40">
+    <main className="flex h-[calc(100vh-4rem)] flex-col bg-transparent" role="main">
+      <div className="flex w-full flex-1 flex-col overflow-hidden p-0">
+        <section className="flex flex-1 flex-col overflow-hidden rounded-[22px] border border-[#e7e7ef] bg-white">
           <div className="shrink-0">
             <PlanificacionHeader
               isReadOnly={isReadOnlyMode}
@@ -1064,16 +1064,8 @@ const Planificacion: React.FC = () => {
           </div>
 
           {error ? (
-            <div className="shrink-0 border-b border-zinc-100 px-4 py-3">
-              <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 shadow-sm">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white border border-rose-100 shadow-sm text-rose-600">
-                  <Warning className="h-4 w-4" weight="bold" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-black tracking-tight text-rose-900">Error en resolución de Sandbox</p>
-                  <p className="mt-0.5 text-xs font-semibold text-rose-700">{error}</p>
-                </div>
-              </div>
+            <div className="shrink-0 border-b border-[#eeeef3] px-4 py-3">
+              <ErrorAlert message={error} onRetry={loadPlanificacionesPorVacuna} />
             </div>
           ) : null}
 

@@ -45,7 +45,7 @@ interface AxisTickProps {
   maxChars?: number;
 }
 
-const COLORS = ['#0f766e', '#2563eb', '#ea580c', '#7c3aed', '#dc2626', '#0891b2', '#65a30d'];
+const COLORS = ['#7c3aed', '#606571', '#8b8f9b', '#a78bfa', '#15171d', '#c4c7d0', '#6d28d9'];
 const numberFormatter = new Intl.NumberFormat('es-PE');
 const compactNumberFormatter = new Intl.NumberFormat('es-PE', {
   notation: 'compact',
@@ -166,10 +166,10 @@ function ChartLoadingState() {
       initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
       animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className="my-3 w-full rounded-[1.25rem] border border-zinc-200 bg-white"
+      className="my-3 w-full rounded-[14px] border border-[#e7e7ef] bg-white"
     >
       <div className="px-4 py-4">
-        <div className="rounded-[1rem] border border-zinc-200 bg-zinc-50/60 px-4 py-5">
+        <div className="rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-5">
           <div className="mb-4 space-y-3">
             {[0, 1, 2, 3].map((line) => (
               <div key={line} className="h-px w-full bg-[linear-gradient(90deg,rgba(228,228,231,0),rgba(228,228,231,1),rgba(228,228,231,0))]" />
@@ -180,7 +180,7 @@ function ChartLoadingState() {
             {bars.map((bar, index) => (
               <div key={bar} className="flex flex-1 flex-col items-center justify-end gap-3">
                 <motion.div
-                  className="w-full max-w-[34px] rounded-t-[10px] rounded-b-[4px] bg-zinc-300/80"
+                  className="w-full max-w-[34px] rounded-b-[4px] rounded-t-[10px] bg-[#c8bbff]"
                   animate={
                     shouldReduceMotion
                       ? undefined
@@ -199,7 +199,7 @@ function ChartLoadingState() {
                   style={{ height: 72 }}
                 />
                 <motion.div
-                  className="h-2 rounded-full bg-zinc-200"
+                  className="h-2 rounded-full bg-[#e7e7ef]"
                   animate={shouldReduceMotion ? undefined : { width: [18, 26, 18], opacity: [0.5, 0.9, 0.5] }}
                   transition={
                     shouldReduceMotion
@@ -234,7 +234,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
     config = JSON.parse(payload);
   } catch {
     return (
-      <div className="my-4 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-[12px] font-medium text-zinc-600">
+      <div className="my-4 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-[12px] font-medium text-[#606571]">
         No se pudo completar la visualización del gráfico.
       </div>
     );
@@ -270,8 +270,8 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
   const tooltipProps = {
     contentStyle: {
       borderRadius: '14px',
-      border: '1px solid #e4e4e7',
-      boxShadow: '0 12px 28px -18px rgb(15 23 42 / 0.28)',
+      border: '1px solid #e7e7ef',
+      boxShadow: 'none',
       padding: '10px 12px',
       fontSize: '12px',
       fontWeight: 600,
@@ -321,12 +321,12 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
             <Tooltip
               {...tooltipProps}
               labelFormatter={(label) => formatValue(label)}
-              cursor={{ fill: 'rgba(15,118,110,0.06)' }}
+      cursor={{ fill: 'rgba(124,58,237,0.06)' }}
             />
             <Bar
               dataKey={barYKey}
               name={config.title || 'Valor'}
-              fill={config.color || '#0f766e'}
+              fill={config.color || '#7c3aed'}
               radius={[8, 8, 2, 2]}
               maxBarSize={34}
               animationDuration={shouldReduceMotion ? 0 : 620}
@@ -395,10 +395,10 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
                 type="monotone"
                 dataKey={config.yKey || 'value'}
                 name={config.title || 'Valor'}
-                stroke={config.color || '#0f766e'}
+                stroke={config.color || '#7c3aed'}
                 strokeWidth={2.5}
                 strokeLinecap="round"
-                dot={{ r: 2.5, fill: config.color || '#0f766e', stroke: '#ffffff', strokeWidth: 1.5 }}
+                dot={{ r: 2.5, fill: config.color || '#7c3aed', stroke: '#ffffff', strokeWidth: 1.5 }}
                 activeDot={{ r: 4, stroke: '#ffffff', strokeWidth: 2 }}
                 connectNulls
                 animationDuration={shouldReduceMotion ? 0 : 700}
@@ -462,7 +462,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
   return (
     <motion.section
       {...cardMotion}
-      className="my-3 w-full rounded-[1.25rem] border border-zinc-200 bg-white"
+      className="my-3 w-full rounded-[14px] border border-[#e7e7ef] bg-white"
     >
       <div className="bg-white py-3">
         <div className="overflow-x-auto overflow-y-hidden px-4 pb-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-200">

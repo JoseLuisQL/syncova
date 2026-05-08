@@ -1,28 +1,36 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Warning, Buildings, Calculator, MicrosoftExcelLogo, SpinnerGap, Package, ArrowsClockwise, ShieldCheck, UploadSimple } from '@phosphor-icons/react';
-import { DataTable } from '../Establecimientos/components/FilterAndTable';
-import { COMPONENT_STYLES, MESES_CORTOS } from '../Planificacion/constants';
+import { Warning, Buildings, Calculator, MicrosoftExcelLogo, SpinnerGap, Package, ArrowsClockwise, ShieldCheck, UploadSimple, CalendarBlank, Syringe } from '@phosphor-icons/react';
+import { DataTable, EmptyState } from '../Establecimientos/components';
+import { COMPONENT_STYLES as ESTABLECIMIENTOS_STYLES } from '../Establecimientos/constants';
+import { MESES_CORTOS } from '../Planificacion/constants';
 import { ordenarEstablecimientos, getEstiloEstablecimiento } from '../../utils/centroAcopioUtils';
 import { useEstablecimientos } from '../../hooks/useEstablecimientos';
 import { useVacunas } from '../../hooks/useVacunas';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import { IciDemidImportPreview, IciDemidRegistro } from '../../types';
-import { MODULE_LAYOUT } from '../../styles/layout';
 import IciDemidService from '../../services/iciDemidService';
 import IciDemidErroresModal from './IciDemidErroresModal';
 import IciDemidImportProgressModal from './IciDemidImportProgressModal';
 
+const SELECT_CLASS =
+  'h-9 w-full appearance-none rounded-[9px] border border-[#e7e7ef] bg-white px-3 py-1.5 pr-8 text-sm font-medium text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-60';
+
+const FILTER_LABEL_CLASS = 'mb-1 block text-[0.84rem] font-medium text-zinc-700';
+
 const TotalPill: React.FC<{
   value: number | string;
-  tone?: 'neutral' | 'amber';
+  tone?: 'neutral' | 'amber' | 'purple';
 }> = ({ value, tone = 'neutral' }) => {
-  const className = tone === 'amber'
-    ? 'border-amber-200 bg-amber-50 text-amber-800'
-    : 'border-zinc-200 bg-zinc-50 text-zinc-700';
+  const className =
+    tone === 'purple'
+      ? 'border-[#c8bbff] bg-[#fbfafd] text-[#7c3aed]'
+      : tone === 'amber'
+        ? 'border-[#e7e7ef] bg-white text-amber-700'
+        : 'border-[#e7e7ef] bg-white text-[#15171d]';
 
   return (
-    <span className={`inline-flex min-w-[4.6rem] justify-center rounded-xl border px-2.5 py-2 text-sm font-semibold tabular-nums ${className}`}>
+    <span className={`inline-flex min-w-[4.6rem] justify-center rounded-[8px] border px-2.5 py-1.5 text-sm font-semibold tabular-nums ${className}`}>
       {typeof value === 'number' ? value.toLocaleString() : value}
     </span>
   );
@@ -32,35 +40,39 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
   const estilo = getEstiloEstablecimiento(registro.establecimiento);
 
   return (
-    <div className={`rounded-xl border border-zinc-200 p-3 shadow-sm transition-all hover:border-zinc-300 hover:shadow-md ${estilo.colores.bg}`}>
+    <div className={`rounded-[14px] border p-3 transition-colors hover:brightness-[0.98] ${estilo.colores.bg} ${estilo.colores.border}`}>
       <div className="flex items-start gap-3">
-        <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-zinc-500 ring-2 ring-white/80" />
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border bg-white ${estilo.colores.border}`}>
+          <span className={`h-3 w-3 rounded-full ${estilo.colores.accent}`} aria-hidden="true" />
+        </div>
         <div className="min-w-0 flex-1">
-          <p className={`truncate text-sm font-semibold ${estilo.colores.text}`}>{registro.establecimiento.nombre}</p>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-zinc-500">
+          <p className="truncate text-sm font-semibold text-[#15171d]">{registro.establecimiento.nombre}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-[#606571]">
             {registro.establecimiento.codigo ? <span>{registro.establecimiento.codigo}</span> : null}
-            {registro.establecimiento.codigo ? <span className="text-zinc-300">•</span> : null}
-            <span>{registro.vacuna.nombre}</span>
+            {registro.establecimiento.codigo ? <span className="text-[#c4c7d0]">•</span> : null}
+            <span className={`rounded-[8px] border bg-white px-2 py-0.5 font-medium ${estilo.colores.border} ${estilo.colores.text}`}>
+              {registro.vacuna.nombre}
+            </span>
           </div>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <div className="rounded-xl border border-white/70 bg-white/80 p-2.5">
-          <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-zinc-500">Total distribuido</p>
-          <p className="mt-1 text-sm font-semibold text-zinc-800 tabular-nums">{registro.totalDistribu.toLocaleString()}</p>
+        <div className="rounded-[10px] border border-[#e7e7ef] bg-white/90 p-2.5">
+          <p className="text-xs font-medium text-[#8b8f9b]">Total distribuido</p>
+          <p className="mt-1 text-sm font-semibold text-[#15171d] tabular-nums">{registro.totalDistribu.toLocaleString()}</p>
         </div>
-        <div className="rounded-xl border border-white/70 bg-white/80 p-2.5">
-          <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-zinc-500">Situación</p>
-          <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-zinc-700">{registro.situacion || '-'}</p>
+        <div className="rounded-[10px] border border-[#e7e7ef] bg-white/90 p-2.5">
+          <p className="text-xs font-medium text-[#8b8f9b]">Situación</p>
+          <p className="mt-1 text-xs font-semibold text-[#15171d]">{registro.situacion || '-'}</p>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-3 gap-2">
         {mesesDelAnio.map((month) => (
-          <div key={`${registro.id}-${month}`} className="rounded-xl border border-white/70 bg-white/80 p-2 text-center">
-            <p className="text-[0.6rem] font-semibold uppercase tracking-wide text-zinc-500">{MESES_CORTOS[month - 1]}</p>
-            <p className="mt-1 text-sm font-semibold text-zinc-800 tabular-nums">
+          <div key={`${registro.id}-${month}`} className="rounded-[10px] border border-[#e7e7ef] bg-white/90 p-2 text-center">
+            <p className="text-[0.58rem] font-semibold uppercase tracking-wider text-[#8b8f9b]">{MESES_CORTOS[month - 1]}</p>
+            <p className="mt-1 text-sm font-semibold text-[#15171d] tabular-nums">
               {(registro.distribucionMensual[month - 1] || 0).toLocaleString()}
             </p>
           </div>
@@ -68,7 +80,7 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
-        <TotalPill value={registro.disponibilidad || '-'} tone="neutral" />
+        <TotalPill value={registro.disponibilidad || '-'} tone="purple" />
         {registro.situacion ? <TotalPill value={registro.situacion} tone="amber" /> : null}
       </div>
     </div>
@@ -222,123 +234,125 @@ const IciDemid: React.FC = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] overflow-hidden bg-white p-4 md:h-[calc(100vh-5rem)] md:p-6">
-      <div className={`${MODULE_LAYOUT.fullWidth} flex h-full flex-col gap-4 overflow-hidden`}>
-        <section className="bg-transparent">
-          <div className="border-b border-zinc-100 px-4 py-4">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-              <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+    <div className="h-[calc(100vh-4rem)] overflow-hidden bg-transparent md:h-[calc(100vh-5rem)]">
+      <div className="flex h-full w-full flex-col overflow-hidden rounded-[22px] border border-[#e7e7ef] bg-white">
+        <section className="shrink-0 border-b border-[#eeeef3] bg-white p-3 sm:p-4">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+              <div className="grid flex-1 grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
                 <label>
-                  <span className={COMPONENT_STYLES.input.label}>Año</span>
-                  <select value={selectedAnio} onChange={(e) => setSelectedAnio(Number(e.target.value))} className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan}`}>
+                  <span className={FILTER_LABEL_CLASS}>Año</span>
+                  <div className="relative">
+                    <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" weight="bold" />
+                    <select value={selectedAnio} onChange={(e) => setSelectedAnio(Number(e.target.value))} className={`${SELECT_CLASS} pl-9`}>
                     {aniosDisponibles.map((anio) => (
                       <option key={anio} value={anio}>{anio}</option>
                     ))}
-                  </select>
+                    </select>
+                  </div>
                 </label>
                 <label>
-                  <span className={COMPONENT_STYLES.input.label}>Centro de acopio</span>
-                  <select value={selectedCentroAcopio} onChange={(e) => setSelectedCentroAcopio(e.target.value)} className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal}`}>
+                  <span className={FILTER_LABEL_CLASS}>Centro de acopio</span>
+                  <div className="relative">
+                    <Buildings className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" weight="bold" />
+                    <select value={selectedCentroAcopio} onChange={(e) => setSelectedCentroAcopio(e.target.value)} className={`${SELECT_CLASS} pl-9`}>
                     <option value="todos">Todos</option>
                     {centrosAcopio
                       .filter((centro) => !isReadOnlyMode || lockedCentroAcopioIds.includes(centro.id))
                       .map((centro) => (
                         <option key={centro.id} value={centro.id}>{centro.nombre}</option>
                       ))}
-                  </select>
+                    </select>
+                  </div>
                 </label>
                 <label>
-                  <span className={COMPONENT_STYLES.input.label}>Establecimiento</span>
-                  <select value={selectedEstablecimiento} onChange={(e) => setSelectedEstablecimiento(e.target.value)} className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal}`}>
+                  <span className={FILTER_LABEL_CLASS}>Establecimiento</span>
+                  <div className="relative">
+                    <Buildings className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" weight="bold" />
+                    <select value={selectedEstablecimiento} onChange={(e) => setSelectedEstablecimiento(e.target.value)} className={`${SELECT_CLASS} pl-9`}>
                     <option value="todos">Todos</option>
                     {establecimientosFiltrados.map((establecimiento) => (
                       <option key={establecimiento.id} value={establecimiento.id}>{establecimiento.nombre}</option>
                     ))}
-                  </select>
+                    </select>
+                  </div>
                 </label>
                 <label>
-                  <span className={COMPONENT_STYLES.input.label}>Vacuna</span>
-                  <select value={selectedVacuna} onChange={(e) => setSelectedVacuna(e.target.value)} className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan}`}>
+                  <span className={FILTER_LABEL_CLASS}>Vacuna</span>
+                  <div className="relative">
+                    <Syringe className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" weight="bold" />
+                    <select value={selectedVacuna} onChange={(e) => setSelectedVacuna(e.target.value)} className={`${SELECT_CLASS} pl-9`}>
                     <option value="todos">Todas</option>
                     {vacunasActivas.map((vacuna) => (
                       <option key={vacuna.id} value={vacuna.id}>{vacuna.nombre}</option>
                     ))}
-                  </select>
+                    </select>
+                  </div>
                 </label>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => loadData(true)} className={COMPONENT_STYLES.button.secondary} disabled={isLoading || isRefreshing}>
+                <button type="button" onClick={() => loadData(true)} className={ESTABLECIMIENTOS_STYLES.button.secondary} disabled={isLoading || isRefreshing}>
                   {isRefreshing ? <SpinnerGap className="h-4 w-4 animate-spin" /> : <ArrowsClockwise className="h-4 w-4" />}
                   Actualizar
                 </button>
                 {!isReadOnlyMode ? (
-                  <button type="button" onClick={handleImportClick} className={COMPONENT_STYLES.button.primary} disabled={isImporting}>
+                  <button type="button" onClick={handleImportClick} className={ESTABLECIMIENTOS_STYLES.button.primary} disabled={isImporting}>
                     {isImporting ? <SpinnerGap className="h-4 w-4 animate-spin" /> : <UploadSimple className="h-4 w-4" />}
                     Importar Excel
                   </button>
                 ) : null}
                 <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleImportFile} />
               </div>
-            </div>
           </div>
 
-          <div className="px-4 py-3">
-            <div className="rounded-2xl border border-teal-200 bg-gradient-to-r from-teal-600 via-teal-600 to-cyan-600 p-1 shadow-sm">
-              <div className="flex flex-wrap items-center gap-3 rounded-[18px] bg-white/10 px-4 py-3 text-white">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/18">
-                    <MicrosoftExcelLogo className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-teal-100/80">ICI DEMID</p>
-                    <p className="text-sm font-semibold">{selectedAnio}</p>
-                  </div>
-                </div>
-                <span className="rounded-full border border-white/15 bg-white/12 px-3 py-1 text-xs font-semibold">
-                  Registros: {registrosFiltrados.length.toLocaleString()}
-                </span>
-                <span className="rounded-full border border-white/15 bg-white/12 px-3 py-1 text-xs font-semibold">
-                  Stock fin total: {totalStockFin.toLocaleString()}
-                </span>
-                <span className="rounded-full border border-white/15 bg-white/12 px-3 py-1 text-xs font-semibold">
-                  Meses detectados: {mesesDelAnio.map((month) => MESES_CORTOS[month - 1]).join(', ') || 'Sin datos'}
-                </span>
-              </div>
-            </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#eeeef3] pt-3">
+            <span className="inline-flex min-h-9 items-center gap-2 rounded-[9px] border border-[#c8bbff] bg-[#fbfafd] px-3 py-1.5 text-sm text-[#15171d]">
+              <MicrosoftExcelLogo className="h-4 w-4 text-[#7c3aed]" weight="bold" />
+              <span className="text-xs font-medium text-[#8b8f9b]">ICI DEMID</span>
+              <strong className="font-semibold">{selectedAnio}</strong>
+            </span>
+            <span className={ESTABLECIMIENTOS_STYLES.badge.neutral}>
+              Registros: {registrosFiltrados.length.toLocaleString()}
+            </span>
+            <span className={ESTABLECIMIENTOS_STYLES.badge.neutral}>
+              Stock fin total: {totalStockFin.toLocaleString()}
+            </span>
+            <span className={ESTABLECIMIENTOS_STYLES.badge.info}>
+              Meses: {mesesDelAnio.map((month) => MESES_CORTOS[month - 1]).join(', ') || 'Sin datos'}
+            </span>
           </div>
         </section>
 
-        <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent">
+        <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
           <DataTable isLoading={isLoading} loadingMessage="Cargando registros ICI DEMID..." skeletonRows={8} skeletonColumns={16} loadingVariant="table">
             <div className="hidden min-h-0 flex-1 overflow-auto md:block">
-              <table className="w-max min-w-full table-auto">
+              <table className="w-max min-w-full border-separate border-spacing-0 table-auto">
                 <thead className="sticky top-0 z-20 bg-[#fbfafd]">
-                  <tr className={COMPONENT_STYLES.table.header}>
-                    <th className={`${COMPONENT_STYLES.table.headerCell} sticky left-0 z-30 w-[280px] min-w-[280px] bg-[#fbfafd] text-left shadow-[8px_0_14px_-12px_rgba(15,23,42,0.16)]`}>
+                  <tr className={ESTABLECIMIENTOS_STYLES.table.header}>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} sticky left-0 z-30 w-[280px] min-w-[280px] border-b border-r border-[#e7e7ef] bg-[#fbfafd] text-left shadow-[8px_0_14px_-12px_rgba(15,23,42,0.16)]`}>
                       <div className="flex items-center gap-2">
                         <Buildings className="h-4 w-4 text-zinc-500" />
                         Establecimiento
                       </div>
                     </th>
-                    <th className={`${COMPONENT_STYLES.table.headerCell} w-[220px] min-w-[220px] text-left`}>Vacuna</th>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[220px] min-w-[220px] border-b border-r border-[#eeeef3] text-left`}>Vacuna</th>
                     {mesesDelAnio.map((month) => (
-                      <th key={month} className={`${COMPONENT_STYLES.table.headerCell} w-[94px] min-w-[94px] text-center`}>{MESES_CORTOS[month - 1]}</th>
+                      <th key={month} className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[94px] min-w-[94px] border-b border-r border-[#eeeef3] text-center`}>{MESES_CORTOS[month - 1]}</th>
                     ))}
-                    <th className={`${COMPONENT_STYLES.table.headerCell} w-[110px] min-w-[110px] text-center`}>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[110px] min-w-[110px] border-b border-r border-[#eeeef3] text-center`}>
                       <div className="flex items-center justify-center gap-2">
                         <Package className="h-4 w-4 text-zinc-500" />
                         Stock fin
                       </div>
                     </th>
-                    <th className={`${COMPONENT_STYLES.table.headerCell} w-[128px] min-w-[128px] text-center`}>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[128px] min-w-[128px] border-b border-r border-[#eeeef3] text-center`}>
                       <div className="flex items-center justify-center gap-2">
                         <Calculator className="h-4 w-4 text-zinc-500" />
                         Total
                       </div>
                     </th>
-                    <th className={`${COMPONENT_STYLES.table.headerCell} w-[140px] min-w-[140px] text-center`}>Situación</th>
-                    <th className={`${COMPONENT_STYLES.table.headerCell} w-[140px] min-w-[140px] text-center`}>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[140px] min-w-[140px] border-b border-r border-[#eeeef3] text-center`}>Situación</th>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[140px] min-w-[140px] border-b border-[#eeeef3] text-center`}>
                       <div className="flex items-center justify-center gap-2">
                         <ShieldCheck className="h-4 w-4 text-zinc-500" />
                         Disponibilidad
@@ -350,39 +364,39 @@ const IciDemid: React.FC = () => {
                   {registrosFiltrados.length === 0 ? (
                     <tr>
                       <td colSpan={mesesDelAnio.length + 6} className="px-6 py-16 text-center">
-                        <div className="mx-auto flex max-w-md flex-col items-center">
-                          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-300">
-                            <Warning className="h-6 w-6" />
-                          </div>
-                          <p className="text-sm font-semibold text-zinc-700">No hay datos ICI DEMID para los filtros seleccionados</p>
-                          <p className="mt-1 text-sm text-zinc-500">Ajusta los filtros para visualizar la importación en una vista optimizada.</p>
-                        </div>
+                        <EmptyState
+                          icon={Warning}
+                          title="Sin registros ICI DEMID"
+                          description="Ajusta los filtros para visualizar la importación."
+                        />
                       </td>
                     </tr>
                   ) : (
                     registrosFiltrados.map((registro) => {
                       const estilo = getEstiloEstablecimiento(registro.establecimiento);
                       return (
-                        <tr key={registro.id} className={`${COMPONENT_STYLES.table.row} ${estilo.colores.bg}`}>
-                          <td className={`sticky left-0 z-10 border-r border-white/60 px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)] ${estilo.colores.bg}`}>
+                        <tr key={registro.id} className={`transition-[filter] hover:brightness-[0.98] ${estilo.colores.bg}`}>
+                          <td className={`sticky left-0 z-10 border-b border-r px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)] ${estilo.colores.border} ${estilo.colores.bg}`}>
                             <div className="flex items-start gap-3">
-                              <span className="mt-2 h-2.5 w-2.5 rounded-full bg-zinc-500 ring-2 ring-white/80" />
+                              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border bg-white ${estilo.colores.border}`}>
+                                <span className={`h-3 w-3 rounded-full ${estilo.colores.accent}`} aria-hidden="true" />
+                              </div>
                               <div className="min-w-0">
-                                <p className={`truncate text-sm font-semibold ${estilo.colores.text}`}>{registro.establecimiento.nombre}</p>
-                                <p className="mt-1 text-xs text-zinc-500">{registro.establecimiento.codigo}</p>
+                                <p className="truncate text-sm font-semibold text-[#15171d]">{registro.establecimiento.nombre}</p>
+                                <p className="mt-1 text-xs text-[#606571]">{registro.establecimiento.codigo}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm font-medium text-zinc-700">{registro.vacuna.nombre}</td>
+                          <td className="border-b border-r border-[#eeeef3] px-4 py-3 text-sm font-medium text-[#15171d]">{registro.vacuna.nombre}</td>
                           {mesesDelAnio.map((month) => (
-                            <td key={`${registro.id}-${month}`} className="px-3 py-3 text-center text-sm font-semibold text-zinc-700 tabular-nums">
+                            <td key={`${registro.id}-${month}`} className="border-b border-r border-[#eeeef3] px-3 py-3 text-center text-sm font-semibold text-[#15171d] tabular-nums">
                               {(registro.distribucionMensual[month - 1] || 0).toLocaleString()}
                             </td>
                           ))}
-                          <td className="px-3 py-3 text-center text-sm font-semibold text-cyan-800">{registro.stockFin.toLocaleString()}</td>
-                          <td className="px-3 py-3 text-center text-sm font-semibold text-zinc-800">{registro.totalDistribu.toLocaleString()}</td>
-                          <td className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wide text-zinc-600">{registro.situacion || '-'}</td>
-                          <td className="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wide text-zinc-600">{registro.disponibilidad || '-'}</td>
+                          <td className="border-b border-r border-[#eeeef3] px-3 py-3 text-center text-sm font-semibold text-[#7c3aed]">{registro.stockFin.toLocaleString()}</td>
+                          <td className="border-b border-r border-[#eeeef3] px-3 py-3 text-center text-sm font-semibold text-[#15171d]">{registro.totalDistribu.toLocaleString()}</td>
+                          <td className="border-b border-r border-[#eeeef3] px-3 py-3 text-center text-xs font-semibold text-[#606571]">{registro.situacion || '-'}</td>
+                          <td className="border-b border-[#eeeef3] px-3 py-3 text-center text-xs font-semibold text-[#606571]">{registro.disponibilidad || '-'}</td>
                         </tr>
                       );
                     })
@@ -391,14 +405,14 @@ const IciDemid: React.FC = () => {
               </table>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-auto p-2.5 md:hidden">
+            <div className="min-h-0 flex-1 overflow-auto bg-white p-2.5 md:hidden">
               {registrosFiltrados.length === 0 && !isLoading ? (
-                <div className="flex flex-col items-center py-10">
-                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-300">
-                    <Warning className="h-5 w-5" />
-                  </div>
-                  <p className="text-sm font-semibold text-zinc-800">No hay registros ICI DEMID</p>
-                  <p className="mt-1 text-xs text-zinc-500">Ajusta los filtros para ver la tabla autoajustada.</p>
+                <div className="rounded-[14px] border border-[#e7e7ef] bg-white">
+                  <EmptyState
+                    icon={Warning}
+                    title="Sin registros ICI DEMID"
+                    description="Ajusta los filtros para ver la tabla."
+                  />
                 </div>
               ) : (
                 <div className="mt-2.5 space-y-2">

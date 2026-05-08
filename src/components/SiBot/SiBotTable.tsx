@@ -39,7 +39,7 @@ export const SiBotTable: React.FC<SiBotTableProps> = ({ children }) => {
   };
 
   return (
-    <div className="my-3 overflow-hidden rounded-[1rem] border border-zinc-200/80 bg-white shadow-sm relative">
+    <div className="relative my-3 overflow-hidden rounded-[14px] border border-[#e7e7ef] bg-white">
       <div
         data-export-ignore="true"
         className="absolute right-3 top-3 z-10"
@@ -48,7 +48,7 @@ export const SiBotTable: React.FC<SiBotTableProps> = ({ children }) => {
           type="button"
           onClick={() => void handleExcel()}
           disabled={isExporting}
-          className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200/90 bg-white/96 px-3 py-1.5 text-[10px] font-medium text-zinc-600 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.35)] backdrop-blur-sm transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-55"
+          className="inline-flex items-center gap-1.5 rounded-[9px] border border-[#e7e7ef] bg-white px-3 py-1.5 text-[10px] font-medium text-[#606571] transition-colors hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] disabled:cursor-not-allowed disabled:opacity-55"
         >
           {isExporting ? (
             <CircleNotch className="h-3.5 w-3.5 animate-spin" />
@@ -60,7 +60,7 @@ export const SiBotTable: React.FC<SiBotTableProps> = ({ children }) => {
       </div>
 
       <div className="bg-white">
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-zinc-200 pt-12">
+        <div className="overflow-x-auto pt-12 scrollbar-thin scrollbar-thumb-zinc-200">
           <table
             ref={tableRef}
             className="min-w-full text-left text-[11.5px]"

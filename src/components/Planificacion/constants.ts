@@ -80,13 +80,12 @@ export const COLORS = {
 } as const;
 
 export const COMPONENT_STYLES = {
-  // Page background and surfaces using pure Zinc mode for data-dense tables
-  pageBackground: 'min-h-screen bg-[#f0eff4]',
-  shell: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
-  surface: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
-  panel: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
-  mutedPanel: 'rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd]',
-  card: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
+  pageBackground: 'min-h-screen bg-white',
+  shell: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
+  surface: 'rounded-none border-0 bg-transparent shadow-none',
+  panel: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
+  mutedPanel: 'rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd]',
+  card: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
   cardHover: 'transition hover:border-zinc-300 hover:shadow-sm',
 
   header: {
@@ -99,17 +98,17 @@ export const COMPONENT_STYLES = {
 
   button: {
     primary:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     secondary:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 py-1.5 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     success:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     warning:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     danger:
       'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     ghost:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#e7e7ef] bg-white px-3 py-2 text-sm font-semibold text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3 py-1.5 text-sm font-semibold text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     icon:
       'inline-flex h-9 w-9 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
     iconEdit: 'border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:ring-zinc-900',
@@ -120,8 +119,8 @@ export const COMPONENT_STYLES = {
 
   input: {
     base:
-      'w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-600/10',
-    normal: 'border-zinc-200 hover:border-zinc-300 focus:border-teal-600',
+      'w-full rounded-[10px] border bg-white px-4 py-2.5 text-sm text-[#15171d] shadow-sm transition placeholder:text-[#8b8f9b] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
+    normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     error: 'border-rose-300 bg-rose-50/60 focus:border-rose-500 focus:ring-rose-500/20',
     pending: 'border-zinc-300 bg-zinc-50 focus:border-zinc-400 focus:ring-zinc-500/20',
     label: 'mb-1 block text-[0.84rem] font-medium text-zinc-700',
@@ -131,18 +130,18 @@ export const COMPONENT_STYLES = {
 
   select: {
     base:
-      'w-full appearance-none rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition focus:outline-none focus:ring-2',
-    teal: 'border-zinc-200 hover:border-zinc-300 focus:border-teal-600 focus:ring-teal-600/10',
-    cyan: 'border-zinc-200 hover:border-zinc-300 focus:border-teal-600 focus:ring-teal-600/10',
-    emerald: 'border-zinc-200 hover:border-zinc-300 focus:border-teal-600 focus:ring-teal-600/10',
+      'h-9 w-full appearance-none rounded-[9px] border border-[#e7e7ef] bg-white px-3 py-1.5 pr-8 text-sm font-medium text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-60',
+    teal: '',
+    cyan: '',
+    emerald: '',
   },
 
   table: {
-    container: 'overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
-    header: 'bg-[#fbfafd]',
-    headerCell: 'px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]',
-    row: 'transition-colors duration-150 border-b border-[#eeeef3] hover:bg-[#fbfafd]',
-    cell: 'px-3 py-3 align-middle text-sm text-[#15171d]',
+    container: 'overflow-visible rounded-none border-0 bg-transparent shadow-none',
+    header: 'bg-transparent',
+    headerCell: 'bg-[#fbfafd] px-4 py-3 text-left text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]',
+    row: 'transition-colors hover:bg-[#fbfafd]',
+    cell: 'border-b border-[#eeeef3] px-4 py-3.5 align-middle text-sm text-[#15171d]',
     emptyIcon: 'mx-auto mb-4 h-11 w-11 text-zinc-300',
   },
 
@@ -157,15 +156,15 @@ export const COMPONENT_STYLES = {
   },
 
   modal: {
-    overlay: 'fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm',
+    overlay: 'fixed inset-0 z-[300] bg-zinc-950/45 backdrop-blur-sm',
     container: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6',
     containerLarge: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6',
     containerFullscreen: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-2 sm:items-center sm:p-4',
     panel:
-      'w-full rounded-[24px] bg-white shadow-2xl ring-1 ring-zinc-200/50 sm:max-h-[90vh]',
-    header: 'border-b border-zinc-100 px-5 py-4 sm:px-6',
+      'w-full rounded-t-2xl bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] ring-1 ring-zinc-200/50 sm:max-h-[90vh] sm:rounded-[14px]',
+    header: 'border-b border-[#eeeef3] px-5 py-4 sm:px-6',
     body: 'max-h-[calc(100vh-170px)] overflow-y-auto px-5 py-5 sm:max-h-[calc(90vh-156px)] sm:px-6',
-    footer: 'border-t border-zinc-100 bg-zinc-50/50 px-5 py-4 sm:px-6',
+    footer: 'border-t border-[#eeeef3] bg-white px-5 py-4 sm:px-6',
   },
 
   stats: {
@@ -178,7 +177,7 @@ export const COMPONENT_STYLES = {
   },
 
   filter: {
-    container: 'rounded-[18px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] sm:p-4',
+    container: 'bg-transparent p-0',
     header: 'border-b border-zinc-100 px-5 py-4 sm:px-6',
     body: 'px-5 py-4 sm:px-6',
     searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400',

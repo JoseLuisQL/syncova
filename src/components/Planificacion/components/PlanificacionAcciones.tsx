@@ -31,15 +31,24 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
 
   if (readOnly) {
     return (
-      <div className={`${COMPONENT_STYLES.mutedPanel} p-4 sm:p-5 text-sm font-semibold tracking-tight text-zinc-500`}>
-        Matriz de planificación estática. El rol de operador de acopio desactiva permisiones de edición directas en esta capa.
+      <div className="border-t border-[#eeeef3] bg-[#fbfafd] px-4 py-3 text-sm font-medium text-[#606571]">
+        Modo solo lectura. Tu rol puede revisar la matriz, pero no modificarla desde este módulo.
       </div>
     );
   }
 
   return (
-    <div className="rounded-[16px] border border-zinc-200/90 bg-white shadow-sm p-4 sm:p-5">
-      <div className="flex flex-wrap gap-2">
+    <div className="border-t border-[#eeeef3] bg-white px-4 py-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="text-sm text-[#606571]">
+          {pendingChangesCount > 0 ? (
+            <span className={COMPONENT_STYLES.badge.warning}>Cambios pendientes: {pendingChangesCount}</span>
+          ) : (
+            <span className={COMPONENT_STYLES.badge.active}>Matriz actualizada</span>
+          )}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
         {!hideAdminActions ? (
           <button
             type="button"
@@ -52,7 +61,7 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
             ) : (
               <FloppyDisk className="h-4 w-4" weight="bold" />
             )}
-            {isUpdating ? 'Fijando...' : 'Fijar programación'}
+            {isUpdating ? 'Guardando...' : 'Guardar programación'}
           </button>
         ) : null}
 
@@ -67,7 +76,7 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
           ) : (
             <ArrowsClockwise className="h-4 w-4" weight="bold" />
           )}
-          {isLoading ? 'Cargando...' : 'Recalcular Matriz'}
+          {isLoading ? 'Cargando...' : 'Recalcular'}
         </button>
 
         {!hideAdminActions ? (
@@ -83,7 +92,7 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
             ) : (
               <LinkIcon className="h-4 w-4" weight="bold" />
             )}
-            Sincronizar
+            Sincronizar movimientos
           </button>
         ) : null}
 
@@ -92,16 +101,17 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
             type="button"
             onClick={onGuardarPendientes}
             disabled={isUpdating}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-sm font-bold text-amber-950 shadow-sm transition hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className={COMPONENT_STYLES.button.primary}
           >
             {isUpdating ? (
               <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
             ) : (
               <FloppyDisk className="h-4 w-4" weight="bold" />
             )}
-            Guardar mutaciones ({pendingChangesCount})
+            Guardar cambios ({pendingChangesCount})
           </button>
         ) : null}
+        </div>
       </div>
     </div>
   );

@@ -84,7 +84,7 @@ export async function exportTableToExcel(table: HTMLTableElement, filename: stri
   headerRow.fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: 'FF0F766E' },
+    fgColor: { argb: 'FF7C3AED' },
   };
   headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
   headerRow.height = 22;

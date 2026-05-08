@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Package, CheckCircle } from '@phosphor-icons/react';
-import { DataTable } from '../../Establecimientos/components';
+import { DataTable, EmptyState } from '../../Establecimientos/components';
 import { MESES_CORTOS } from '../constants';
 import { Establecimiento } from '../../../types';
 import { getEstiloEstablecimiento } from '../../../utils/centroAcopioUtils';
@@ -74,7 +74,7 @@ const EditablePlanningField: React.FC<EditablePlanningFieldProps> = memo(({
         onBlur={onBlur}
         disabled={disabled}
         aria-label={ariaLabel}
-        className={`${widthClass} min-w-0 bg-transparent px-2.5 py-2.5 text-center text-[0.85rem] font-bold tabular-nums text-zinc-900 transition-colors focus:bg-white focus:outline-none focus:ring-[1.5px] focus:ring-inset focus:ring-teal-600 disabled:cursor-not-allowed hover:bg-zinc-100/50 ${pending ? 'bg-amber-50 text-amber-900 focus:bg-amber-50' : ''}`}
+        className={`${widthClass} min-w-0 bg-transparent px-2.5 py-2.5 text-center text-[0.85rem] font-semibold tabular-nums text-[#15171d] transition-colors hover:bg-[#fbfafd] focus:bg-white focus:outline-none focus:ring-[1.5px] focus:ring-inset focus:ring-[#7c3aed] disabled:cursor-not-allowed disabled:opacity-60 ${pending ? 'bg-amber-50 text-amber-900 focus:bg-amber-50' : ''}`}
       />
       {pending ? (
         <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-white bg-amber-500" />
@@ -91,13 +91,13 @@ const TotalPill: React.FC<{
 }> = memo(({ value, tone = 'zinc' }) => {
   const className =
     tone === 'dark'
-      ? 'bg-teal-600 text-white shadow-sm'
+      ? 'bg-[#7c3aed] text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)]'
       : tone === 'muted'
-      ? 'bg-zinc-100 text-zinc-500'
-      : 'bg-white border border-zinc-200 text-zinc-900 font-black';
+      ? 'border border-[#e7e7ef] bg-[#fbfafd] text-[#8b8f9b]'
+      : 'border border-[#e7e7ef] bg-white text-[#15171d] font-semibold';
 
   return (
-    <span className={`inline-flex min-w-[3.5rem] items-center justify-center rounded-[6px] px-2 py-1 text-[0.75rem] font-bold tabular-nums tracking-tight ${className}`}>
+    <span className={`inline-flex min-w-[3.5rem] items-center justify-center rounded-[8px] px-2 py-1 text-[0.75rem] font-semibold tabular-nums tracking-tight ${className}`}>
       {value.toLocaleString()}
     </span>
   );
@@ -107,13 +107,13 @@ TotalPill.displayName = 'TotalPill';
 
 const EstadoBadge: React.FC<{ total: number }> = memo(({ total }) => (
   <span
-    className={`inline-flex items-center rounded-sm px-1.5 py-[2px] text-[0.55rem] font-black uppercase tracking-[0.1em] ${
+    className={`inline-flex items-center gap-1.5 rounded-[8px] border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${
       total > 0
-        ? 'border border-zinc-300 bg-white text-zinc-800'
-        : 'border border-zinc-200 bg-zinc-100 text-zinc-400'
+        ? 'border-[#e7e7ef] text-[#15171d] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500 before:content-[""]'
+        : 'border-[#e7e7ef] text-[#606571] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400 before:content-[""]'
     }`}
   >
-    {total > 0 ? 'Con Matriz' : 'Pendiente'}
+    {total > 0 ? 'Con matriz' : 'Pendiente'}
   </span>
 ));
 
@@ -124,23 +124,23 @@ const MobileTotalesSummary: React.FC<{
   totalGeneral: number;
   calcularTotalMes: PlanificacionTablaProps['calcularTotalMes'];
 }> = memo(({ count, totalGeneral, calcularTotalMes }) => (
-  <div className="rounded-[16px] border border-zinc-200 bg-white p-3 shadow-sm">
-    <div className="flex items-center justify-between gap-3 border-b border-zinc-100 pb-3">
+  <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-3">
+    <div className="flex items-center justify-between gap-3 border-b border-[#eeeef3] pb-3">
       <div>
-        <p className="text-[0.65rem] font-black uppercase tracking-widest text-zinc-400">Total Global</p>
-        <p className="mt-0.5 text-xs font-semibold text-zinc-600">{count} unidades</p>
+        <p className="text-xs font-medium text-[#8b8f9b]">Total anual</p>
+        <p className="mt-0.5 text-sm font-semibold text-[#15171d]">{count} establecimientos</p>
       </div>
-        <span className="rounded-lg bg-teal-600 px-3 py-1.5 text-[0.75rem] font-black text-white shadow-sm">
-        Volumen: {totalGeneral.toLocaleString()}
+      <span className="rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-[0.75rem] font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)]">
+        {totalGeneral.toLocaleString()}
       </span>
     </div>
     <div className="mt-3 grid grid-cols-4 gap-1.5">
       {MESES_CORTOS.map((mes, mesIndex) => {
         const total = calcularTotalMes(mesIndex);
         return (
-          <div key={mes} className="rounded-lg bg-zinc-50 border border-zinc-100 px-1.5 py-2 text-center">
-            <p className="text-[0.55rem] font-bold uppercase tracking-wider text-zinc-400">{mes}</p>
-            <p className={`mt-0.5 text-[0.7rem] font-black tabular-nums ${total > 0 ? 'text-zinc-900' : 'text-zinc-300'}`}>
+          <div key={mes} className="rounded-[9px] border border-[#eeeef3] bg-[#fbfafd] px-1.5 py-2 text-center">
+            <p className="text-[0.58rem] font-semibold uppercase tracking-wider text-[#8b8f9b]">{mes}</p>
+            <p className={`mt-0.5 text-[0.7rem] font-semibold tabular-nums ${total > 0 ? 'text-[#15171d]' : 'text-[#c4c7d0]'}`}>
               {total > 0 ? total.toLocaleString() : '-'}
             </p>
           </div>
@@ -187,20 +187,23 @@ const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
   return (
     <div
       onClick={() => onRowSelect(estData.establecimiento.id)}
-      className={`rounded-[16px] border p-3 transition-colors ${
+      className={`rounded-[14px] border p-3 transition-colors ${
         isSelected
-          ? 'border-teal-600 bg-teal-50 shadow-sm ring-1 ring-teal-600'
-          : `border-zinc-200 ${colores.bg} hover:border-zinc-300`
+          ? `${colores.bg} ${colores.border} ring-1 ring-[#7c3aed]/25`
+          : `${colores.bg} ${colores.border} hover:brightness-[0.98]`
       }`}
     >
       <div className="flex items-start gap-2.5">
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border bg-white ${colores.border}`}>
+          <span className={`h-3 w-3 rounded-full ${colores.accent}`} aria-hidden="true" />
+        </div>
         <div className="min-w-0 flex-1">
-          <p className={`truncate text-sm font-black tracking-tight ${isSelected ? 'text-zinc-900' : 'text-zinc-800'}`}>
+          <p className="truncate text-sm font-semibold tracking-tight text-[#15171d]">
             {estData.establecimiento.nombre}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {selectedCentroAcopio === 'todos' ? (
-              <span className={`inline-flex rounded-sm border border-zinc-200 bg-zinc-100 px-1.5 py-[2px] text-[0.55rem] font-black uppercase tracking-[0.1em] text-zinc-500`}>
+              <span className={`inline-flex rounded-[8px] border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${colores.border} ${colores.text}`}>
                 {centro !== 'DEFAULT' ? centro : 'Base'}
               </span>
             ) : null}
@@ -210,22 +213,22 @@ const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
         <TotalPill value={estData.total} tone={isSelected ? "dark" : "zinc"} />
       </div>
 
-      <div className="mt-3 grid grid-cols-4 gap-1.5 border-t border-zinc-100 pt-3">
+      <div className="mt-3 grid grid-cols-4 gap-1.5 border-t border-[#eeeef3] pt-3">
         {MESES_CORTOS.map((mes, mesIndex) => {
           const currentValue = getCurrentValue(estIndex, mesIndex, estData.distribucionMensual[mesIndex]);
           const isPending = hasPendingChange(estIndex, mesIndex);
           const tieneVale = hasValeGenerado?.(estData.establecimiento.id, mesIndex) ?? false;
 
           return (
-            <div key={`${estData.establecimiento.id}-${mes}`} className="rounded-lg border border-zinc-200 bg-white p-1">
+            <div key={`${estData.establecimiento.id}-${mes}`} className="rounded-[9px] border border-[#e7e7ef] bg-white p-1">
               <div className="mb-0.5 flex items-center justify-between px-1">
-                <span className="text-[0.55rem] font-bold uppercase tracking-wider text-zinc-400">{mes}</span>
+                <span className="text-[0.58rem] font-semibold uppercase tracking-wider text-[#8b8f9b]">{mes}</span>
                 <div className="flex items-center gap-0.5">
-                  {tieneVale && <CheckCircle className="h-3 w-3 text-teal-500" weight="fill" />}
+                  {tieneVale && <CheckCircle className="h-3 w-3 text-[#7c3aed]" weight="fill" />}
                   {isPending ? <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> : null}
                 </div>
               </div>
-              <div className="rounded-md bg-zinc-50 overflow-hidden">
+              <div className="overflow-hidden rounded-[7px] bg-[#fbfafd]">
                 <EditablePlanningField
                   readOnly={readOnly}
                   value={currentValue}
@@ -269,51 +272,51 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
   const totalGeneral = calcularTotalGeneral();
 
   return (
-    <section className="relative flex h-full flex-1 flex-col bg-white" aria-label="Matriz General de Planificación">
+    <section className="relative flex h-full flex-1 flex-col bg-white" aria-label="Matriz de planificación">
       <DataTable
         isLoading={isLoading}
-        loadingMessage="Renderizando matriz Tufte-Style..."
+        loadingMessage="Cargando planificación..."
         skeletonRows={10}
         skeletonColumns={14}
         loadingVariant="table"
       >
         <div className="hidden min-h-0 flex-1 overflow-auto md:block selection:bg-zinc-200">
-          <table className="w-full border-collapse" role="table" aria-label="Matriz de datos">
+          <table className="w-full border-separate border-spacing-0" role="table" aria-label="Matriz de datos">
             <thead className="sticky top-0 z-20">
               <tr className="bg-[#fbfafd]">
-                <th className="sticky left-0 z-30 w-[260px] min-w-[260px] border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">
-                  Nomenclatura (Punto de Entrega)
+                <th className="sticky left-0 z-30 w-[260px] min-w-[260px] border-b border-r border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-left text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]">
+                  Establecimiento
                 </th>
                 {MESES_CORTOS.map((mes) => (
-                  <th key={mes} className="w-[70px] min-w-[70px] border-r border-[#eeeef3] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">
+                  <th key={mes} className="w-[70px] min-w-[70px] border-b border-r border-[#eeeef3] bg-[#fbfafd] px-2 py-3 text-center text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]">
                     {mes}
                   </th>
                 ))}
-                <th className="w-[90px] min-w-[90px] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
-                  Suma
+                <th className="w-[90px] min-w-[90px] border-b border-[#eeeef3] bg-[#fbfafd] px-2 py-3 text-center text-[12px] font-medium tracking-[-0.01em] text-[#606571]">
+                  Total
                 </th>
               </tr>
             </thead>
 
             <tbody className="text-[0.85rem]">
               <tr className="sticky top-[45px] z-[15] border-b border-[#eeeef3] bg-white/95 backdrop-blur-sm">
-                <td className="sticky left-0 z-20 border-r border-[#e7e7ef] bg-white/95 px-3 py-2">
+                <td className="sticky left-0 z-20 border-b border-r border-[#e7e7ef] bg-white/95 px-4 py-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[0.65rem] font-black uppercase tracking-widest text-zinc-600">Total Macro</span>
-                    <span className="text-xs font-bold text-zinc-400">{establecimientos.length} un.</span>
+                    <span className="text-xs font-medium text-[#606571]">Total mensual</span>
+                    <span className="text-xs font-medium text-[#8b8f9b]">{establecimientos.length} estab.</span>
                   </div>
                 </td>
                 {MESES_CORTOS.map((mes, mesIndex) => {
                   const val = calcularTotalMes(mesIndex);
                   return (
-                    <td key={`total-${mes}`} className="border-r border-zinc-100 bg-transparent px-1 py-1 text-center align-middle">
-                       <span className={`text-[0.75rem] font-black tabular-nums tracking-tight ${val > 0 ? 'text-zinc-900' : 'text-zinc-300'}`}>
+                    <td key={`total-${mes}`} className="border-b border-r border-[#eeeef3] bg-transparent px-1 py-1 text-center align-middle">
+                       <span className={`text-[0.75rem] font-semibold tabular-nums tracking-tight ${val > 0 ? 'text-[#15171d]' : 'text-[#c4c7d0]'}`}>
                          {val > 0 ? val.toLocaleString() : '-'}
                        </span>
                     </td>
                   );
                 })}
-                <td className="bg-transparent px-2 py-1 text-center align-middle">
+                <td className="border-b border-[#eeeef3] bg-transparent px-2 py-1 text-center align-middle">
                   <TotalPill value={totalGeneral} tone="dark" />
                 </td>
               </tr>
@@ -321,13 +324,11 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
               {establecimientos.length === 0 && !isLoading ? (
                 <tr>
                   <td colSpan={14} className="px-6 py-16 text-center">
-                    <div className="mx-auto flex max-w-[240px] flex-col items-center">
-                      <Package className="mb-4 h-12 w-12 text-zinc-200" weight="duotone" />
-                      <p className="text-base font-black tracking-tight text-zinc-900">Cuadrícula vacía</p>
-                      <p className="mt-1 text-sm text-zinc-500">
-                        Los filtros actuales no devuelven centros acopiables. Reajusta la selección para inyectar datos.
-                      </p>
-                    </div>
+                    <EmptyState
+                      icon={Package}
+                      title="Sin establecimientos"
+                      description="Ajusta los filtros para cargar la matriz de planificación."
+                    />
                   </td>
                 </tr>
               ) : null}
@@ -335,28 +336,40 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
               {establecimientos.map((estData, estIndex) => {
                 const isSelected = selectedRowId === estData.establecimiento.id;
                 const estiloEstablecimiento = getEstiloEstablecimiento(estData.establecimiento);
-                const { colores } = estiloEstablecimiento;
-                const rowBg = isSelected ? 'bg-zinc-100/60' : colores.bg;
+                const { colores, centro } = estiloEstablecimiento;
+                const rowBg = colores.bg;
                 
                 return (
                   <tr
                     key={estData.planificacionId ?? estData.establecimiento.id}
                     onClick={() => onRowSelect(estData.establecimiento.id)}
-                    className={`${rowBg} cursor-pointer border-b border-[#eeeef3] transition-colors ${!isSelected && 'hover:brightness-[0.99]'}`}
+                    className={`${rowBg} cursor-pointer transition-[filter] hover:brightness-[0.98]`}
                   >
-                    <td className={`sticky left-0 z-10 box-border border-r border-zinc-200 px-3 py-2.5 ${isSelected ? 'bg-teal-50/70 ring-inset ring-[1.5px] ring-teal-600' : colores.bg}`}>
+                    <td className={`sticky left-0 z-10 box-border border-b border-r px-4 py-3 ${colores.border} ${rowBg} ${isSelected ? 'ring-inset ring-[1.5px] ring-[#7c3aed]' : ''}`}>
                       <div className="min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className={`truncate text-xs font-black tracking-tight ${isSelected ? 'text-zinc-900' : 'text-zinc-700'}`}>
-                            {estData.establecimiento.nombre}
-                          </p>
-                          {estData.total === 0 && <span className="ml-2 h-1.5 w-1.5 rounded-full bg-amber-400"></span>}
-                        </div>
-                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                           {estData.establecimiento.codigo && (
-                             <span className="font-mono text-[0.6rem] font-bold text-zinc-400">{estData.establecimiento.codigo}</span>
-                           )}
-                           <EstadoBadge total={estData.total} />
+                        <div className="flex items-start gap-3">
+                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border bg-white ${colores.border}`}>
+                            <span className={`h-3 w-3 rounded-full ${colores.accent}`} aria-hidden="true" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="truncate text-sm font-semibold tracking-tight text-[#15171d]">
+                                {estData.establecimiento.nombre}
+                              </p>
+                              {estData.total === 0 && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400"></span>}
+                            </div>
+                            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                              {estData.establecimiento.codigo && (
+                                <span className="font-mono text-[0.68rem] font-medium text-[#8b8f9b]">{estData.establecimiento.codigo}</span>
+                              )}
+                              {selectedCentroAcopio === 'todos' ? (
+                                <span className={`inline-flex rounded-[8px] border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${colores.border} ${colores.text}`}>
+                                  {centro !== 'DEFAULT' ? centro : 'Regional'}
+                                </span>
+                              ) : null}
+                              <EstadoBadge total={estData.total} />
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -367,7 +380,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                       const tieneVale = hasValeGenerado?.(estData.establecimiento.id, mesIndex) ?? false;
 
                       return (
-                        <td key={`${estData.establecimiento.id}-${mesIndex}`} className={`relative border-r border-zinc-100 p-0 align-middle ${isSelected ? 'border-y border-y-teal-600 border-r-teal-200' : ''}`}>
+                        <td key={`${estData.establecimiento.id}-${mesIndex}`} className={`relative border-b border-r border-[#eeeef3] p-0 align-middle ${isSelected ? `${rowBg} ring-inset ring-[1px] ring-[#c8bbff]` : ''}`}>
                           <EditablePlanningField
                             readOnly={readOnly}
                             value={currentValue}
@@ -379,17 +392,17 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                             onBlur={() => onFieldBlur(estIndex, mesIndex)}
                           />
                           {tieneVale && (
-                            <span className="pointer-events-none absolute right-0.5 top-0.5 z-10 flex items-center justify-center rounded-full bg-white/95 shadow-sm ring-1 ring-teal-200">
-                              <CheckCircle className="h-3 w-3 text-teal-500" weight="fill" />
+                            <span className="pointer-events-none absolute right-0.5 top-0.5 z-10 flex items-center justify-center rounded-full bg-white/95 shadow-sm ring-1 ring-[#c8bbff]">
+                              <CheckCircle className="h-3 w-3 text-[#7c3aed]" weight="fill" />
                             </span>
                           )}
                         </td>
                       );
                     })}
 
-                    <td className={`p-0 text-center align-middle ${isSelected ? 'border-y border-y-teal-600 border-r-2 border-r-teal-600 bg-teal-50/70' : ''}`}>
-                      <div className="flex h-full w-full items-center justify-center p-2 text-[0.8rem] font-black tabular-nums text-zinc-900">
-                         {estData.total > 0 ? estData.total.toLocaleString() : <span className="text-zinc-300">-</span>}
+                    <td className={`border-b border-[#eeeef3] p-0 text-center align-middle ${isSelected ? `${rowBg} ring-inset ring-[1.5px] ring-[#7c3aed]` : ''}`}>
+                      <div className="flex h-full w-full items-center justify-center p-2 text-[0.8rem] font-semibold tabular-nums text-[#15171d]">
+                         {estData.total > 0 ? estData.total.toLocaleString() : <span className="text-[#c4c7d0]">-</span>}
                       </div>
                     </td>
                   </tr>
@@ -399,7 +412,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
           </table>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-auto p-2.5 md:hidden bg-zinc-50/50">
+        <div className="min-h-0 flex-1 overflow-auto bg-white p-2.5 md:hidden">
           <MobileTotalesSummary
             count={establecimientos.length}
             totalGeneral={totalGeneral}
@@ -407,9 +420,12 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
           />
 
           {establecimientos.length === 0 && !isLoading ? (
-            <div className="flex flex-col items-center py-10">
-              <Package className="mb-3 h-10 w-10 text-zinc-300" weight="duotone" />
-              <p className="text-sm font-black text-zinc-800">No hay establecimientos</p>
+            <div className="rounded-[14px] border border-[#e7e7ef] bg-white">
+              <EmptyState
+                icon={Package}
+                title="Sin establecimientos"
+                description="Ajusta los filtros para cargar la matriz de planificación."
+              />
             </div>
           ) : (
             <div className="mt-2.5 space-y-2.5">

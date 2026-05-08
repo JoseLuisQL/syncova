@@ -38,82 +38,86 @@ const IciDemidImportProgressModal: React.FC<IciDemidImportProgressModalProps> = 
   const activeIndex = STEP_ORDER.findIndex((step) => step.key === currentStep);
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-zinc-950/55 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-[28px] border border-white/20 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.35)]">
-        <div className="absolute inset-x-0 top-0 h-1 bg-teal-600" />
-        <div className="relative overflow-hidden bg-gradient-to-br from-teal-900 via-cyan-900 to-teal-700 px-6 py-8 text-white">
-          <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-zinc-800/20 blur-3xl" />
-          <div className="absolute -left-10 bottom-0 h-28 w-28 rounded-full bg-emerald-400/20 blur-3xl" />
-
-          <div className="relative flex flex-col gap-6">
-            <div className="flex items-start justify-between gap-4">
+    <div className="fixed inset-0 z-[320] flex items-center justify-center bg-zinc-950/45 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-2xl overflow-hidden rounded-[14px] border border-[#e7e7ef] bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)]">
+        <div className="border-b border-[#eeeef3] px-6 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-white text-[#7c3aed]">
+                <MicrosoftExcelLogo className="h-5 w-5" weight="bold" />
+              </div>
               <div>
-                <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-100">
-                  <Sparkle className="h-3.5 w-3.5" />
+                <p className="mb-1 inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] px-2.5 py-1 text-xs font-medium text-[#606571]">
+                  <Sparkle className="h-3.5 w-3.5 text-[#7c3aed]" weight="bold" />
                   Proceso de importación
                 </p>
-                <h2 className="text-2xl font-semibold tracking-tight">{activeConfig.title}</h2>
-                <p className="mt-2 max-w-xl text-sm text-zinc-200">{activeConfig.description}</p>
+                <h2 className="text-lg font-semibold tracking-tight text-[#15171d]">{activeConfig.title}</h2>
+                <p className="mt-1 max-w-xl text-sm text-[#606571]">{activeConfig.description}</p>
                 {fileName ? (
-                  <p className="mt-3 text-xs font-medium uppercase tracking-[0.16em] text-zinc-100/90">
+                  <p className="mt-2 max-w-xl truncate text-xs font-medium text-[#8b8f9b]">
                     Archivo: {fileName}
                   </p>
                 ) : null}
               </div>
-
-              <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10">
-                <div className="absolute inset-0 rounded-2xl border border-zinc-300/30 animate-ping" />
-                <SpinnerGap className="relative h-8 w-8 animate-spin text-zinc-200" />
-              </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.16em] text-zinc-100/80">
-                <span>Avance estimado</span>
-                <span>{activeConfig.progress}%</span>
-              </div>
-              <div className="h-3 overflow-hidden rounded-full bg-white/10">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd]">
+              <SpinnerGap className="h-5 w-5 animate-spin text-[#7c3aed]" weight="bold" />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-5 px-6 py-5">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-medium text-[#606571]">
+              <span>Avance estimado</span>
+              <span>{activeConfig.progress}%</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-[#eeeef3]">
+              <div
+                className="h-full rounded-full bg-[#7c3aed] transition-all duration-700 ease-out"
+                style={{ width: `${activeConfig.progress}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-3">
+            {STEP_ORDER.map((step, index) => {
+              const Icon = step.icon;
+              const isCompleted = index < activeIndex;
+              const isActive = index === activeIndex;
+
+              return (
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-teal-300 via-cyan-200 to-white transition-all duration-700 ease-out"
-                  style={{ width: `${activeConfig.progress}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-3">
-              {STEP_ORDER.map((step, index) => {
-                const Icon = step.icon;
-                const isCompleted = index < activeIndex;
-                const isActive = index === activeIndex;
-
-                return (
-                  <div
-                    key={step.key}
-                    className={`rounded-2xl border px-4 py-4 transition-all duration-300 ${
-                      isActive
-                        ? 'border-zinc-300/40 bg-zinc-800/14'
-                        : 'border-white/10 bg-white/8'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                          isCompleted ? 'bg-zinc-800/20 text-zinc-200' : isActive ? 'bg-zinc-800/20 text-zinc-100' : 'bg-white/10 text-zinc-200'
-                        }`}
-                      >
-                        {isCompleted ? <CheckCircle className="h-5 w-5" /> : <Icon className={`h-5 w-5 ${isActive ? 'animate-pulse' : ''}`} />}
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold">{step.label}</p>
-                        <p className="text-xs text-zinc-200/75">
-                          {isCompleted ? 'Completado' : isActive ? 'En proceso...' : 'Pendiente'}
-                        </p>
-                      </div>
+                  key={step.key}
+                  className={`rounded-[14px] border px-4 py-4 transition-colors ${
+                    isActive
+                      ? 'border-[#c8bbff] bg-[#fbfafd]'
+                      : 'border-[#e7e7ef] bg-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-[10px] border ${
+                        isCompleted
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-600'
+                          : isActive
+                            ? 'border-[#c8bbff] bg-white text-[#7c3aed]'
+                            : 'border-[#e7e7ef] bg-[#fbfafd] text-[#8b8f9b]'
+                      }`}
+                    >
+                      {isCompleted ? <CheckCircle className="h-5 w-5" weight="bold" /> : <Icon className={`h-5 w-5 ${isActive ? 'animate-pulse' : ''}`} weight="bold" />}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#15171d]">{step.label}</p>
+                      <p className="text-xs text-[#606571]">
+                        {isCompleted ? 'Completado' : isActive ? 'En proceso...' : 'Pendiente'}
+                      </p>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

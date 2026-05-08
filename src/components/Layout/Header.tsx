@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { List, MagnifyingGlass } from '@phosphor-icons/react';
+import { List } from '@phosphor-icons/react';
 import { useApp } from '../../contexts/AppContext';
 import NotificationBell from './NotificationBell';
 import Breadcrumbs from '../common/Breadcrumbs';
@@ -26,16 +26,6 @@ const Header: React.FC = memo(() => {
         </div>
 
         <div className="flex h-10 flex-shrink-0 items-center gap-2">
-          <label className="relative hidden min-w-[220px] lg:block">
-            <MagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b8f9b]" />
-            <input
-              type="search"
-              placeholder="Buscar"
-              className="h-10 w-full rounded-[9px] border border-[#dedfea] bg-white pl-9 pr-14 text-[13px] font-medium text-[#111318] outline-none transition-colors placeholder:text-[#8b8f9b] focus:border-[#babdca]"
-            />
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-[6px] border border-[#e3e4ed] bg-[#f8f7fb] px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[#686d78]">⌘ K</span>
-          </label>
-
           <NotificationBell />
         </div>
       </div>

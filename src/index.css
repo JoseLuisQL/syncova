@@ -110,3 +110,7 @@
     animation: none !important;
   }
 }
+
+[data-sileo-viewport] {
+  z-index: 1000 !important;
+}

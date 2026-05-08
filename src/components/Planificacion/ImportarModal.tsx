@@ -46,10 +46,10 @@ const ANIOS_DISPONIBLES = [2024, 2025, 2026, 2027];
 
 const StepIndicator = memo<{ currentStep: Step; totalSteps: number }>(({ currentStep, totalSteps }) => {
   const steps = [
-    { num: 1, label: 'Estructura' },
-    { num: 2, label: 'Entorno' },
-    { num: 3, label: 'Excel' },
-    { num: 4, label: 'Reporte' },
+    { num: 1, label: 'Tipo' },
+    { num: 2, label: 'Filtros' },
+    { num: 3, label: 'Archivo' },
+    { num: 4, label: 'Resultado' },
   ];
 
   return (
@@ -60,10 +60,10 @@ const StepIndicator = memo<{ currentStep: Step; totalSteps: number }>(({ current
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-all ${
                 currentStep === step.num
-                  ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-600 ring-offset-2'
+                  ? 'bg-[#7c3aed] text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] ring-2 ring-[#7c3aed]/25 ring-offset-2'
                   : currentStep > step.num
-                  ? 'bg-zinc-200 text-zinc-900'
-                  : 'bg-zinc-100 text-zinc-400 border border-zinc-200'
+                  ? 'border border-[#e7e7ef] bg-[#fbfafd] text-[#15171d]'
+                  : 'border border-[#e7e7ef] bg-white text-[#8b8f9b]'
               }`}
             >
               {currentStep > step.num ? (
@@ -74,7 +74,7 @@ const StepIndicator = memo<{ currentStep: Step; totalSteps: number }>(({ current
             </div>
             <span
               className={`mt-2 text-[0.65rem] font-bold uppercase tracking-wider ${
-                currentStep >= step.num ? 'text-zinc-900' : 'text-zinc-400'
+                currentStep >= step.num ? 'text-[#15171d]' : 'text-[#8b8f9b]'
               }`}
             >
               {step.label}
@@ -83,7 +83,7 @@ const StepIndicator = memo<{ currentStep: Step; totalSteps: number }>(({ current
           {index < totalSteps - 1 && (
             <div
               className={`mx-3 mb-5 h-[2px] w-12 ${
-                currentStep > step.num ? 'bg-teal-600' : 'bg-zinc-200'
+                currentStep > step.num ? 'bg-[#7c3aed]' : 'bg-[#e7e7ef]'
               }`}
             />
           )}
@@ -105,35 +105,35 @@ const ImportTypeCard = memo<{
   return (
     <button
       onClick={onClick}
-      className={`relative flex w-full flex-col items-center rounded-[16px] border-[2px] p-6 transition-all duration-200 ${
+      className={`relative flex w-full flex-col items-center rounded-[14px] border p-6 transition-colors ${
         selected
-          ? 'border-teal-600 bg-teal-50 shadow-sm'
-          : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50/50'
+          ? 'border-[#c8bbff] bg-[#fbfafd]'
+          : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
       }`}
     >
       {selected && (
         <div className="absolute right-3 top-3">
-          <CheckCircle className="h-5 w-5 text-teal-600" weight="fill" />
+          <CheckCircle className="h-5 w-5 text-[#7c3aed]" weight="fill" />
         </div>
       )}
       <div
-        className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border ${
-          selected ? 'bg-white border-zinc-300 shadow-sm' : 'bg-zinc-100 border-zinc-200 text-zinc-400'
+        className={`mb-4 flex h-14 w-14 items-center justify-center rounded-[14px] border ${
+          selected ? 'border-[#e7e7ef] bg-white text-[#7c3aed]' : 'border-[#e7e7ef] bg-[#fbfafd] text-[#8b8f9b]'
         }`}
       >
         {isVacuna ? (
-          <Syringe className={`h-7 w-7 ${selected ? 'text-zinc-900' : 'text-zinc-400'}`} weight={selected ? 'duotone' : 'regular'} />
+          <Syringe className="h-7 w-7" weight={selected ? 'duotone' : 'regular'} />
         ) : (
-          <Stack className={`h-7 w-7 ${selected ? 'text-zinc-900' : 'text-zinc-400'}`} weight={selected ? 'duotone' : 'regular'} />
+          <Stack className="h-7 w-7" weight={selected ? 'duotone' : 'regular'} />
         )}
       </div>
-      <h4 className={`mb-1 text-sm font-black tracking-tight ${selected ? 'text-zinc-900' : 'text-zinc-600'}`}>
-        {isVacuna ? 'Inyección Singular' : 'Inyección Masiva (Lote)'}
+      <h4 className={`mb-1 text-sm font-semibold tracking-tight ${selected ? 'text-[#15171d]' : 'text-[#606571]'}`}>
+        {isVacuna ? 'Por vacuna' : 'Importación masiva'}
       </h4>
-      <p className="text-center text-[0.75rem] font-semibold text-zinc-500">
+      <p className="text-center text-[0.75rem] font-medium text-[#606571]">
         {isVacuna
-          ? 'Importar red de distribución orientada a un solo biológico'
-          : 'Sobreescribir múltiples matrices biológicas simultáneamente'}
+          ? 'Carga la matriz anual de una vacuna específica.'
+          : 'Carga matrices de varias vacunas desde un solo archivo.'}
       </p>
     </button>
   );
@@ -147,16 +147,16 @@ const ResultCard = memo<{
   color: 'green' | 'blue' | 'purple' | 'red';
 }>(({ value, label, color }) => {
   const colorClasses = {
-    green: 'bg-zinc-50 border-zinc-200 text-zinc-900',
-    blue: 'bg-white border-zinc-200 text-zinc-700',
-    purple: 'bg-zinc-100 border-zinc-300 text-zinc-800',
+    green: 'bg-white border-[#e7e7ef] text-[#15171d]',
+    blue: 'bg-white border-[#e7e7ef] text-[#15171d]',
+    purple: 'bg-[#fbfafd] border-[#c8bbff] text-[#15171d]',
     red: 'bg-rose-50 border-rose-200 text-rose-800',
   };
 
   return (
-    <div className={`rounded-xl border p-4 text-center shadow-sm ${colorClasses[color]}`}>
-      <div className="text-2xl font-black tabular-nums">{value}</div>
-      <div className="mt-1 text-[0.65rem] font-bold uppercase tracking-widest opacity-80">{label}</div>
+    <div className={`rounded-[14px] border p-4 text-center ${colorClasses[color]}`}>
+      <div className="text-2xl font-semibold tabular-nums">{value}</div>
+      <div className="mt-1 text-xs font-medium text-[#8b8f9b]">{label}</div>
     </div>
   );
 });
@@ -225,7 +225,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
     }
     
     if (file.size > 10 * 1024 * 1024) {
-      alert('El payload no debe exceder 10MB');
+      alert('El archivo no debe exceder 10MB');
       return;
     }
     
@@ -267,7 +267,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
         await onDescargarPlantillaMasiva(selectedAnio);
       }
     } catch (error) {
-      console.error('Error IO Plantilla:', error);
+      console.error('Error al descargar plantilla:', error);
     }
   }, [tipoImportacion, selectedVacuna, selectedAnio, onDescargarPlantillaVacuna, onDescargarPlantillaMasiva]);
 
@@ -289,7 +289,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
         setStep(4);
       }
     } catch (error) {
-      console.error('Error I/O Subida:', error);
+      console.error('Error al importar archivo:', error);
     }
   }, [archivo, tipoImportacion, selectedVacuna, selectedAnio, onImportarVacuna, onImportarMasivo]);
 
@@ -340,30 +340,29 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
 
   return (
     <div 
-      className={COMPONENT_STYLES.modal.overlay}
+      className={`${COMPONENT_STYLES.modal.overlay} flex items-end justify-center p-3 sm:items-center sm:p-6`}
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
       <div 
-        className="mx-auto flex w-full max-w-2xl flex-col overflow-hidden rounded-[20px] bg-white shadow-2xl ring-1 ring-zinc-200/50"
+        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] ring-1 ring-zinc-200/50 sm:max-h-[90vh] sm:rounded-[14px]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header - Zinc Flat */}
-        <div className="border-b border-zinc-200 bg-teal-700 px-6 py-5">
+        <div className="border-b border-[#eeeef3] bg-white px-6 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
-                <UploadSimple className="h-5 w-5 text-white" weight="bold" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-white text-[#606571]">
+                <UploadSimple className="h-5 w-5" weight="bold" />
               </div>
               <div>
-                <h2 className="text-lg font-black tracking-tight text-white">Consola de Inyección IO</h2>
-                <p className="text-[0.75rem] font-semibold text-zinc-400">
-                  {step < 4 ? 'Parametriza el lote a inyectar' : 'Pipeline completado'}
+                <h2 className="text-lg font-semibold tracking-tight text-[#15171d]">Importar planificación</h2>
+                <p className="text-sm text-[#606571]">
+                  {step < 4 ? 'Carga matrices anuales desde Excel' : 'Resultado de la importación'}
                 </p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+              className="rounded-[9px] p-2 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]"
               aria-label="Cerrar modal"
             >
               <X className="h-5 w-5" weight="bold" />
@@ -372,16 +371,16 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 bg-white">
+        <div className="flex-1 overflow-y-auto bg-white p-6">
           <StepIndicator currentStep={step} totalSteps={4} />
 
           {/* Step 1: Tipo */}
           {step === 1 && (
             <div className="space-y-4">
               <div className="mb-6 text-center">
-                <h3 className="text-base font-black text-zinc-900">Estructura del Lote</h3>
-                <p className="mt-1 text-sm font-semibold text-zinc-500">
-                  Select the underlying data model for the batch
+                <h3 className="text-base font-semibold text-[#15171d]">Tipo de importación</h3>
+                <p className="mt-1 text-sm text-[#606571]">
+                  Selecciona cómo deseas cargar la planificación.
                 </p>
               </div>
 
@@ -398,17 +397,17 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 />
               </div>
 
-              <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+              <div className="mt-6 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-4">
                 <div className="flex items-start gap-3">
-                  <Info className="mt-0.5 h-5 w-5 shrink-0 text-zinc-500" weight="fill" />
-                  <div className="text-sm font-medium text-zinc-700 leading-relaxed">
+                  <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#606571]" weight="fill" />
+                  <div className="text-sm font-medium leading-relaxed text-[#606571]">
                     {tipoImportacion === 'vacuna' ? (
                       <>
-                        <strong className="text-zinc-900">Restricción de Vector Simple:</strong> Actualiza y muta explícitamente solo el biológico objetivo y sus nodos adjuntos en una única matriz Excel bidimensional.
+                        <strong className="text-[#15171d]">Importación por vacuna:</strong> actualiza la matriz anual únicamente para el biológico seleccionado.
                       </>
                     ) : (
                       <>
-                        <strong className="text-zinc-900">Restricción de Multi-vector:</strong> Analizador heurístico profundo. Lee múltiples hojas simultáneamente mapeándolas a sus objetos biológicos por indexación nominal (Nombre = Pestaña).
+                        <strong className="text-[#15171d]">Importación masiva:</strong> procesa varias hojas del Excel y las asigna a sus vacunas correspondientes.
                       </>
                     )}
                   </div>
@@ -421,9 +420,9 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
           {step === 2 && (
             <div className="space-y-6">
               <div className="mb-6 text-center">
-                <h3 className="text-base font-black text-zinc-900">Sandbox Target</h3>
-                <p className="mt-1 text-sm font-semibold text-zinc-500">
-                  Fijar variables de entorno para los templates
+                <h3 className="text-base font-semibold text-[#15171d]">Filtros de plantilla</h3>
+                <p className="mt-1 text-sm text-[#606571]">
+                  Define la vacuna y el año de trabajo.
                 </p>
               </div>
 
@@ -438,7 +437,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                       onChange={(e) => setSelectedVacuna(e.target.value)}
                       className={COMPONENT_STYLES.select.base}
                     >
-                      <option value="">-- Nodo Vacío --</option>
+                      <option value="">Selecciona una vacuna</option>
                       {vacunas.map((vacuna) => (
                         <option key={vacuna.id} value={vacuna.id}>
                           {vacuna.nombre}
@@ -446,9 +445,9 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                       ))}
                     </select>
                     {tipoImportacion === 'vacuna' && !selectedVacuna && (
-                      <p className="mt-1.5 flex items-center gap-1 text-[0.7rem] font-bold text-rose-600 uppercase tracking-wide">
+                      <p className="mt-1.5 flex items-center gap-1 text-xs font-medium text-rose-600">
                         <Warning className="h-3 w-3" weight="bold" />
-                        Target Requerido
+                        Vacuna requerida
                       </p>
                     )}
                   </div>
@@ -456,7 +455,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
 
                 <div className={tipoImportacion === 'masivo' ? 'col-span-1 md:col-span-2 mx-auto w-full max-w-xs' : ''}>
                   <label className={COMPONENT_STYLES.input.label}>
-                    Fiscal Year
+                    Año
                   </label>
                   <select
                     value={selectedAnio}
@@ -473,18 +472,18 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
               </div>
 
               {/* Descargar plantilla */}
-              <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-5">
+              <div className="mt-6 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-5">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-zinc-200 shadow-sm">
-                      <DownloadSimple className="h-5 w-5 text-zinc-900" weight="bold" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-white text-[#606571]">
+                      <DownloadSimple className="h-5 w-5" weight="bold" />
                     </div>
                     <div>
-                      <h4 className="font-black text-sm text-zinc-900">Descriptor Template IO</h4>
-                      <p className="text-[0.75rem] font-semibold text-zinc-500">
+                      <h4 className="text-sm font-semibold text-[#15171d]">Plantilla Excel</h4>
+                      <p className="text-sm text-[#606571]">
                         {tipoImportacion === 'vacuna'
-                          ? `Schema para biológico específico`
-                          : 'Schema de lote múltiple estandarizado'}
+                          ? 'Formato para una vacuna específica'
+                          : 'Formato masivo para varias vacunas'}
                       </p>
                     </div>
                   </div>
@@ -501,7 +500,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                     ) : (
                       <>
                         <DownloadSimple className="h-4 w-4" weight="bold" />
-                        Exportar Schema
+                        Descargar plantilla
                       </>
                     )}
                   </button>
@@ -514,9 +513,9 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
           {step === 3 && (
             <div className="space-y-6">
               <div className="mb-6 text-center">
-                <h3 className="text-base font-black text-zinc-900">Extracción de Data</h3>
-                <p className="mt-1 text-sm font-semibold text-zinc-500">
-                  Inserte el payload generado por el Excel
+                <h3 className="text-base font-semibold text-[#15171d]">Subir archivo</h3>
+                <p className="mt-1 text-sm text-[#606571]">
+                  Selecciona el Excel con la matriz de planificación.
                 </p>
               </div>
 
@@ -533,23 +532,23 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => !archivo && fileInputRef.current?.click()}
-                className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-8 text-center transition-all ${
+                className={`relative cursor-pointer rounded-[14px] border border-dashed p-8 text-center transition-colors ${
                   isDragging
-                    ? 'border-teal-600 bg-teal-50'
+                    ? 'border-[#c8bbff] bg-[#fbfafd]'
                     : archivo
-                    ? 'border-zinc-300 bg-zinc-50'
-                    : 'border-zinc-200 hover:border-zinc-400 hover:bg-zinc-50'
+                    ? 'border-[#e7e7ef] bg-[#fbfafd]'
+                    : 'border-[#e7e7ef] hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
                 }`}
               >
                 {archivo ? (
                   <div className="flex items-center justify-center gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-zinc-300 bg-white shadow-sm">
-                      <FileXls className="h-7 w-7 text-zinc-900" weight="duotone" />
+                    <div className="flex h-14 w-14 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-white">
+                      <FileXls className="h-7 w-7 text-[#15171d]" weight="duotone" />
                     </div>
                     <div className="text-left">
-                      <p className="font-bold text-zinc-900">{archivo.name}</p>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                        {(archivo.size / 1024).toFixed(1)} KB PAYLOAD
+                      <p className="font-semibold text-[#15171d]">{archivo.name}</p>
+                      <p className="text-xs font-medium text-[#8b8f9b]">
+                        {(archivo.size / 1024).toFixed(1)} KB
                       </p>
                     </div>
                     <button
@@ -565,37 +564,36 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl border border-zinc-200 bg-white shadow-sm">
-                      <UploadSimple className={`h-8 w-8 ${isDragging ? 'text-zinc-900' : 'text-zinc-400'}`} weight="duotone" />
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-white">
+                      <UploadSimple className={`h-8 w-8 ${isDragging ? 'text-[#7c3aed]' : 'text-[#8b8f9b]'}`} weight="duotone" />
                     </div>
                     <div>
-                      <p className="text-sm font-black text-zinc-800">
-                        {isDragging ? 'Drop IO Stream' : 'Pulse o arrastre para inyectar stream'}
+                      <p className="text-sm font-semibold text-[#15171d]">
+                        {isDragging ? 'Suelta el archivo aquí' : 'Haz clic o arrastra el archivo'}
                       </p>
-                      <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                        Solo Binary XML (.xlsx / .xls)
+                      <p className="mt-1 text-xs font-medium text-[#8b8f9b]">
+                        Solo archivos .xlsx o .xls
                       </p>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Resumen de inyección */}
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                <h4 className="mb-2 text-[0.7rem] font-bold uppercase tracking-widest text-zinc-500">Parámetros</h4>
-                <div className="flex flex-wrap gap-4 text-sm font-semibold text-zinc-700">
+              <div className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-4">
+                <h4 className="mb-2 text-xs font-medium text-[#8b8f9b]">Resumen</h4>
+                <div className="flex flex-wrap gap-4 text-sm font-medium text-[#606571]">
                   <span className="flex items-center gap-1.5">
-                    <span className="font-black text-zinc-900">IO:</span>
-                    {tipoImportacion === 'vacuna' ? 'Single-Vector' : 'Multi-Vector'}
+                    <span className="font-semibold text-[#15171d]">Tipo:</span>
+                    {tipoImportacion === 'vacuna' ? 'Por vacuna' : 'Masivo'}
                   </span>
                   {tipoImportacion === 'vacuna' && vacunaSeleccionada && (
                     <span className="flex items-center gap-1.5">
-                      <span className="font-black text-zinc-900">TGT:</span>
+                      <span className="font-semibold text-[#15171d]">Vacuna:</span>
                       {vacunaSeleccionada.nombre}
                     </span>
                   )}
                   <span className="flex items-center gap-1.5">
-                    <span className="font-black text-zinc-900">YR:</span>
+                    <span className="font-semibold text-[#15171d]">Año:</span>
                     {selectedAnio}
                   </span>
                 </div>
@@ -607,8 +605,8 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
           {step === 4 && resultadoImportacion && (
             <div className="space-y-6">
               <div className="mb-6 text-center">
-                <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border bg-white shadow-sm ${
-                  hasErrors ? 'border-amber-200 text-amber-500' : 'border-zinc-200 text-zinc-900'
+                <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[14px] border bg-white ${
+                  hasErrors ? 'border-amber-200 text-amber-500' : 'border-[#e7e7ef] text-[#7c3aed]'
                 }`}>
                   {hasErrors ? (
                     <Warning className="h-8 w-8" weight="duotone" />
@@ -616,11 +614,11 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                     <CheckCircle className="h-8 w-8" weight="duotone" />
                   )}
                 </div>
-                <h3 className="text-lg font-black tracking-tight text-zinc-900">
-                  {hasErrors ? 'Resolución Parcial' : 'Resolución Limpia'}
+                <h3 className="text-lg font-semibold tracking-tight text-[#15171d]">
+                  {hasErrors ? 'Importación parcial' : 'Importación completada'}
                 </h3>
-                <p className="mt-1 text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  {totalSuccess} Mutaciones Registradas
+                <p className="mt-1 text-sm text-[#606571]">
+                  {totalSuccess} registros procesados
                 </p>
               </div>
 
@@ -629,17 +627,17 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 <div className="grid grid-cols-3 gap-4">
                   <ResultCard
                     value={resultadoImportacion.creadas || 0}
-                    label="INSERTs"
+                    label="Creadas"
                     color="green"
                   />
                   <ResultCard
                     value={resultadoImportacion.actualizadas || 0}
-                    label="UPDATEs"
+                    label="Actualizadas"
                     color="blue"
                   />
                   <ResultCard
                     value={resultadoImportacion.errores?.length || 0}
-                    label="ERRORs"
+                    label="Errores"
                     color="red"
                   />
                 </div>
@@ -647,22 +645,22 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                   <ResultCard
                     value={resultadoImportacion.totalCreadas || 0}
-                    label="INSERTs"
+                    label="Creadas"
                     color="green"
                   />
                   <ResultCard
                     value={resultadoImportacion.totalActualizadas || 0}
-                    label="UPDATEs"
+                    label="Actualizadas"
                     color="blue"
                   />
                   <ResultCard
                     value={resultadoImportacion.vacunasProcesadas || 0}
-                    label="TBLs"
+                    label="Vacunas"
                     color="purple"
                   />
                   <ResultCard
                     value={resultadoImportacion.erroresPorVacuna?.length || 0}
-                    label="ERRORs"
+                    label="Errores"
                     color="red"
                   />
                 </div>
@@ -670,10 +668,10 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
 
               {/* Errores */}
               {tipoImportacion === 'vacuna' && resultadoImportacion.errores && resultadoImportacion.errores.length > 0 && (
-                <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 shadow-sm">
-                  <h4 className="mb-3 flex items-center gap-2 text-sm font-black tracking-tight text-rose-900">
+                <div className="rounded-[14px] border border-rose-200 bg-rose-50 p-4">
+                  <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-rose-900">
                     <Warning className="h-4 w-4" weight="bold" />
-                    Excepciones levantadas ({resultadoImportacion.errores.length})
+                    Errores encontrados ({resultadoImportacion.errores.length})
                   </h4>
                   <ul className="max-h-32 space-y-1 overflow-y-auto text-[0.8rem] font-medium text-rose-800">
                     {resultadoImportacion.errores.map((error: string, index: number) => (
@@ -689,8 +687,8 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
               {tipoImportacion === 'masivo' && resultadoImportacion.erroresPorVacuna && resultadoImportacion.erroresPorVacuna.length > 0 && (
                 <div className="max-h-48 space-y-3 overflow-y-auto pr-2">
                   {resultadoImportacion.erroresPorVacuna.map((vacunaError, index: number) => (
-                    <div key={index} className="rounded-xl border border-amber-200 bg-amber-50 p-3 shadow-sm">
-                      <h5 className="mb-2 text-[0.7rem] font-bold uppercase tracking-widest text-amber-900">Matriz: {vacunaError.vacuna}</h5>
+                    <div key={index} className="rounded-[14px] border border-amber-200 bg-amber-50 p-3">
+                      <h5 className="mb-2 text-xs font-semibold text-amber-900">Vacuna: {vacunaError.vacuna}</h5>
                       <ul className="space-y-1 text-[0.75rem] font-medium text-amber-800">
                         {vacunaError.errores.map((error: string, errorIndex: number) => (
                           <li key={errorIndex} className="flex items-start gap-2">
@@ -708,12 +706,12 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-zinc-100 bg-zinc-50 px-6 py-4">
+        <div className="flex items-center justify-between border-t border-[#eeeef3] bg-white px-6 py-4">
           <div>
             {step > 1 && step < 4 && (
               <button
                 onClick={handlePrevStep}
-                className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-zinc-600 transition-colors hover:bg-zinc-200 hover:text-zinc-900"
+                className={COMPONENT_STYLES.button.ghost}
               >
                 <CaretLeft className="h-4 w-4" weight="bold" />
                 Regresar
@@ -722,10 +720,10 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
             {step === 4 && (
               <button
                 onClick={resetForm}
-                className="flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 transition-colors hover:bg-zinc-100 shadow-sm"
+                className={COMPONENT_STYLES.button.secondary}
               >
                 <ArrowsClockwise className="h-4 w-4" weight="bold" />
-                Nuevo Lote
+                Nueva importación
               </button>
             )}
           </div>
@@ -733,9 +731,9 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={handleClose}
-              className="rounded-xl px-4 py-2.5 text-sm font-bold text-zinc-600 transition-colors hover:bg-zinc-200 hover:text-zinc-900"
+              className={COMPONENT_STYLES.button.ghost}
             >
-              {step === 4 ? 'Aceptar' : 'Abortar'}
+              {step === 4 ? 'Aceptar' : 'Cancelar'}
             </button>
 
             {step < 4 && (
@@ -752,7 +750,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 ) : step === 3 ? (
                   <>
                     <UploadSimple className="h-4 w-4" weight="bold" />
-                    Inyectar
+                    Importar
                   </>
                 ) : (
                   <>
