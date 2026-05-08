@@ -139,7 +139,7 @@ export const COMPONENT_STYLES = {
 
   table: {
     container: 'overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
-    header: 'bg-[#fbfafd] border-y border-[#e7e7ef]',
+    header: 'bg-[#fbfafd]',
     headerCell: 'px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]',
     row: 'transition-colors duration-150 border-b border-[#eeeef3] hover:bg-[#fbfafd]',
     cell: 'px-3 py-3 align-middle text-sm text-[#15171d]',

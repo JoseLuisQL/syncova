@@ -205,7 +205,7 @@ export const COMPONENT_STYLES = {
   table: {
     container: 'overflow-visible rounded-none border-0 bg-transparent shadow-none',
     header: 'bg-transparent',
-    headerCell: 'border-y border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-left text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]',
+    headerCell: 'bg-[#fbfafd] px-4 py-3 text-left text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]',
     row: 'transition-colors hover:bg-[#fbfafd]',
     cell: 'border-b border-[#eeeef3] px-4 py-3.5 align-middle text-sm text-[#15171d]',
     emptyIcon: 'mx-auto mb-4 h-11 w-11 text-zinc-300',

@@ -134,7 +134,7 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
             type="button"
             onClick={handleExportExcel}
             disabled={isExporting}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-emerald-700 hover:to-zinc-900 disabled:opacity-60"
+            className={COMPONENT_STYLES.button.primary}
           >
             {isExporting ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <FileXls className="h-4 w-4" weight="bold" />}
             Exportar Excel

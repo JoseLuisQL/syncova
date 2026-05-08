@@ -4,6 +4,7 @@ import { useAlertas } from '../../hooks/useAlertas';
 import { useToastContext } from '../../contexts/ToastContext';
 import { AlertActionDialog, AlertSectionCard, AlertasFilters, AlertasList, LoadingSpinner, NuevaAlertaModal } from './components';
 import { Alerta } from '../../types';
+import { COMPONENT_STYLES } from './constants';
 
 interface GestionAlertasProps {
   onRefresh?: () => void;
@@ -154,7 +155,7 @@ const GestionAlertas: React.FC<GestionAlertasProps> = memo(({ onRefresh }) => {
             <h2 className="text-lg font-semibold text-zinc-950">Gestión de alertas</h2>
             <p className="mt-1 text-sm text-zinc-500">Filtra, revisa y opera alertas activas sin salir del módulo.</p>
           </div>
-          <button type="button" onClick={() => setShowModal(true)} className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-teal-700 hover:to-cyan-800">
+          <button type="button" onClick={() => setShowModal(true)} className={COMPONENT_STYLES.button.primary}>
             <Plus className="h-4 w-4" weight="bold" />
             Nueva alerta
           </button>

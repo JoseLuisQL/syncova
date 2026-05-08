@@ -877,7 +877,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         <div className="hidden min-h-0 flex-1 overflow-auto md:block selection:bg-zinc-200">
           <table className="w-max min-w-full table-fixed border-collapse" role="table" aria-label="Matriz de datos">
             <thead className="sticky top-0 z-20">
-              <tr className="border-y border-[#e7e7ef] bg-[#fbfafd]">
+              <tr className="bg-[#fbfafd]">
                 {columnasVisibles.map((column, index) => {
                   const isFirst = index === 0;
 

@@ -177,7 +177,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
               const Icon = item.icon;
 
               return (
-                <div key={item.label} className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm flex items-center justify-between">
+                <div key={item.label} className="flex items-center justify-between rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] p-3">
                   <div>
                     <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-400">{item.label}</p>
                     <p className="mt-1 text-sm font-semibold text-zinc-900">{item.value}</p>
@@ -260,7 +260,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
                 </div>
               </FormField>
             ) : (
-              <div className="md:col-span-2 flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50/50 p-3">
+              <div className="md:col-span-2 flex items-center justify-between rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] p-3">
                 <div className="flex items-center gap-2 text-sm text-zinc-500">
                   <Key className="h-4 w-4" />
                   <span>Contraseña gestionada por separado en su módulo de seguridad.</span>
@@ -299,12 +299,12 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
 
         <FormSection title="Centros de acopio asignados">
           {centrosActivos.length === 0 ? (
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-500">
+            <div className="rounded-[12px] border border-[#e7e7ef] bg-white p-4 text-sm text-zinc-500">
               No hay centros de acopio activos.
             </div>
           ) : (
             <div>
-              <div className="grid max-h-72 gap-2 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-2 md:grid-cols-2">
+              <div className="grid max-h-72 gap-2 overflow-y-auto rounded-[12px] border border-[#e7e7ef] bg-white p-2 md:grid-cols-2">
                 {centrosActivos.map((centro) => {
                   const isSelected = formData.centroAcopioIds.includes(centro.id);
 
@@ -313,15 +313,15 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
                       key={centro.id}
                       type="button"
                       onClick={() => handleToggleCentro(centro.id)}
-                      className={`rounded-lg border px-3 py-2 text-left transition-all ${
+                      className={`rounded-[10px] border px-3 py-2 text-left transition-colors ${
                         isSelected
-                          ? 'border-teal-600/30 bg-teal-50/50 text-teal-900 shadow-sm'
-                          : 'border-zinc-200 bg-zinc-50/30 text-zinc-600 hover:border-zinc-300 hover:bg-white'
+                          ? 'border-[#c8bbff] bg-[#fbfafd] text-[#7c3aed]'
+                          : 'border-[#e7e7ef] bg-white text-zinc-600 hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
                       }`}
                       aria-pressed={isSelected}
                     >
                       <div className="flex flex-col gap-1">
-                        <p className={`truncate text-sm font-semibold ${isSelected ? 'text-teal-900' : 'text-zinc-700'}`}>
+                        <p className={`truncate text-sm font-semibold ${isSelected ? 'text-[#7c3aed]' : 'text-zinc-700'}`}>
                           {centro.nombre}
                         </p>
                         <p className="text-xs text-zinc-400">{centro.codigo || 'Sin código'}</p>

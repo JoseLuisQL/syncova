@@ -33,7 +33,7 @@ const PERMISO_CONFIG = [
     label: 'Editar Movimientos',
     description: 'Trans. Ingreso, Salida, Trans. Salida',
     icon: Table,
-    colorActive: 'bg-emerald-500',
+    colorActive: 'bg-[#7c3aed]',
     colorBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   },
   {
@@ -41,7 +41,7 @@ const PERMISO_CONFIG = [
     label: 'Editar Planificaciones',
     description: 'Modificar planificaciones anuales',
     icon: Pencil,
-    colorActive: 'bg-blue-500',
+    colorActive: 'bg-[#7c3aed]',
     colorBadge: 'bg-blue-50 text-blue-700 border-blue-200',
   },
 ];
@@ -69,7 +69,7 @@ const ToggleSwitch: React.FC<{
       className={`
         relative inline-flex ${w} ${h} shrink-0 cursor-pointer rounded-full
         border-2 border-transparent transition-colors duration-200 ease-in-out
-        focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2
         disabled:opacity-50 disabled:cursor-not-allowed
         ${checked ? colorClass : 'bg-zinc-200'}
       `}
@@ -134,7 +134,7 @@ const ScheduleModal: React.FC<{
               checked={usarDesactivacion}
               onChange={setUsarDesactivacion}
               size="sm"
-              colorClass="bg-teal-600"
+              colorClass="bg-[#7c3aed]"
             />
             <span className="text-sm text-zinc-700">Programar desactivación automática</span>
           </div>
@@ -282,8 +282,8 @@ const PermissionsManagement: React.FC = () => {
   // ===== Render Loading =====
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="flex items-center gap-3 text-zinc-600">
+      <div className="rounded-[14px] border border-[#e7e7ef] bg-white py-20">
+        <div className="flex items-center justify-center gap-3 text-zinc-600">
           <ArrowsClockwise className="h-5 w-5 animate-spin" />
           <span className="text-sm font-medium">Cargando permisos operativos...</span>
         </div>
@@ -292,12 +292,12 @@ const PermissionsManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* ═══ Header: Period Selector ═══ */}
-      <section className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
+      <section className={COMPONENT_STYLES.filter.container}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
@@ -311,7 +311,7 @@ const PermissionsManagement: React.FC = () => {
               <select
                 value={selectedMes}
                 onChange={(e) => setSelectedMes(Number(e.target.value))}
-                className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-8 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="h-9 appearance-none rounded-[9px] border border-[#e7e7ef] bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-[#15171d] shadow-sm outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
               >
                 {MESES.map((mes, i) => (
                   <option key={i} value={i + 1}>{mes}</option>
@@ -324,7 +324,7 @@ const PermissionsManagement: React.FC = () => {
               <select
                 value={selectedAnio}
                 onChange={(e) => setSelectedAnio(Number(e.target.value))}
-                className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-8 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="h-9 appearance-none rounded-[9px] border border-[#e7e7ef] bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-[#15171d] shadow-sm outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
               >
                 {aniosDisponibles.map(anio => (
                   <option key={anio} value={anio}>{anio}</option>
@@ -341,14 +341,14 @@ const PermissionsManagement: React.FC = () => {
       </section>
 
       {/* ═══ Global Switches ═══ */}
-      <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-4 shadow-none">
         <div className="mb-4 flex items-center gap-2">
           <Users className="h-4 w-4 text-zinc-500" />
           <h4 className="text-sm font-semibold text-zinc-900">Permisos globales</h4>
           <span className="text-xs text-zinc-500">— Aplican a todos los responsables de acopio</span>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           {PERMISO_CONFIG.map((config) => {
             const permiso = globales?.[config.tipo as keyof PermisosGlobales];
             const isToggling = toggling === `${config.tipo}-global`;
@@ -358,15 +358,15 @@ const PermissionsManagement: React.FC = () => {
               <div
                 key={config.tipo}
                 className={`
-                  rounded-xl border p-4 transition-all duration-200
-                  ${permiso?.habilitado ? 'border-teal-200 bg-teal-50/70' : 'border-zinc-200 bg-zinc-50/50'}
+                  rounded-[14px] border p-4 transition-colors duration-200
+                  ${permiso?.habilitado ? 'border-[#dedfea] bg-[#fbfafd]' : 'border-[#e7e7ef] bg-white'}
                 `}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className={`
                       flex h-9 w-9 items-center justify-center rounded-xl
-                      ${permiso?.habilitado ? 'bg-teal-100 text-teal-700' : 'bg-zinc-100 text-zinc-500'}
+                      ${permiso?.habilitado ? 'bg-[#f3f0ff] text-[#7c3aed]' : 'bg-[#fbfafd] text-[#606571]'}
                     `}>
                       <Icon className="h-4.5 w-4.5" />
                     </div>
@@ -392,7 +392,7 @@ const PermissionsManagement: React.FC = () => {
                       usuarioId: null,
                       label: `${config.label} (Global)`,
                     })}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-600 hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1.5 text-xs font-medium text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d]"
                   >
                     <Timer className="h-3.5 w-3.5" />
                     Programar
@@ -416,13 +416,13 @@ const PermissionsManagement: React.FC = () => {
       </section>
 
       {/* ═══ Per-User Permissions ═══ */}
-      <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-zinc-200 bg-teal-50/60 px-5 py-4">
+      <section className={COMPONENT_STYLES.table.container}>
+        <div className="mb-3 px-0 py-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-zinc-500" />
               <h4 className="text-sm font-semibold text-zinc-900">Permisos individuales</h4>
-              <span className="inline-flex items-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
+              <span className={COMPONENT_STYLES.badge.count}>
                 {usuarios.length} responsables
               </span>
             </div>
@@ -442,9 +442,9 @@ const PermissionsManagement: React.FC = () => {
             <p className="mt-1 text-xs text-zinc-500">No hay usuarios con rol de responsable de acopio.</p>
           </div>
         ) : (
-          <div className="divide-y divide-zinc-100">
+          <div>
             {/* Table header */}
-            <div className="hidden lg:grid grid-cols-[1fr_repeat(3,140px)_80px] items-center gap-2 px-5 py-3 bg-zinc-50/50 text-xs font-semibold uppercase tracking-widest text-zinc-500">
+            <div className="hidden grid-cols-[1fr_repeat(2,140px)_80px] items-center gap-2 rounded-[14px] bg-[#fbfafd] px-5 py-3 text-xs font-medium tracking-[-0.01em] text-[#8b8f9b] lg:grid">
               <span>Usuario</span>
               {PERMISO_CONFIG.map(c => (
                 <span key={c.tipo} className="text-center">{c.label.replace('Editar ', '')}</span>
@@ -455,13 +455,13 @@ const PermissionsManagement: React.FC = () => {
             {usuarios.map((usuario) => (
               <div
                 key={usuario.id}
-                className="px-5 py-4 hover:bg-zinc-50/50 transition-colors duration-150"
+                className="border-b border-[#eeeef3] px-5 py-4 transition-colors duration-150 hover:bg-[#fbfafd]"
               >
                 {/* Desktop layout */}
-                <div className="hidden lg:grid grid-cols-[1fr_repeat(3,140px)_80px] items-center gap-2">
+                <div className="hidden grid-cols-[1fr_repeat(2,140px)_80px] items-center gap-2 lg:grid">
                   {/* User info */}
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700 text-sm font-bold">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#e7e7ef] bg-[#fbfafd] text-sm font-bold text-[#606571]">
                       {usuario.nombres[0]}{usuario.apellidos[0]}
                     </div>
                     <div className="min-w-0">
@@ -512,7 +512,7 @@ const PermissionsManagement: React.FC = () => {
                         usuarioId: usuario.id,
                         label: `${usuario.nombres} ${usuario.apellidos}`,
                       })}
-                      className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+                      className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconKey}`}
                       title="Programar permisos"
                     >
                       <Timer className="h-4 w-4" />
@@ -523,7 +523,7 @@ const PermissionsManagement: React.FC = () => {
                 {/* Mobile layout */}
                 <div className="lg:hidden space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700 text-sm font-bold">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#e7e7ef] bg-[#fbfafd] text-sm font-bold text-[#606571]">
                       {usuario.nombres[0]}{usuario.apellidos[0]}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -538,7 +538,7 @@ const PermissionsManagement: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {PERMISO_CONFIG.map((config) => {
                       const permiso = usuario.permisos[config.tipo as keyof typeof usuario.permisos];
                       const isToggling = toggling === `${config.tipo}-${usuario.id}`;

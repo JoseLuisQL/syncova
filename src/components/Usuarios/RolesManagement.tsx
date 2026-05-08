@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Warning, CheckCircle, Clock, PencilSimple, Key, CircleNotch, Plus, ArrowsClockwise, MagnifyingGlass, Faders, Shield, Trash, Users, XCircle } from '@phosphor-icons/react';
+import { Warning, CheckCircle, Clock, PencilSimple, Key, CircleNotch, Plus, ArrowsClockwise, MagnifyingGlass, Faders, Shield, Trash, Users, X, XCircle } from '@phosphor-icons/react';
 import { CreateRoleDto, Permission, Role, UpdateRoleDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { PermissionService } from '../../services/permissionService';
@@ -218,9 +218,9 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
 
   if (loading) {
     return (
-      <div className="rounded-[24px] border border-zinc-200 bg-white p-6 shadow-sm">
+      <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-6 shadow-none">
         <div className="flex items-center gap-3 text-zinc-700">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-700">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
             <CircleNotch className="h-5 w-5 animate-spin" />
           </div>
           <div>
@@ -253,23 +253,79 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-4 sm:p-5">
-        <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-2 text-sm font-semibold text-zinc-700">
-            <Faders className="h-4 w-4 text-zinc-500" aria-hidden="true" />
-            <span>Filtros y acciones</span>
+      <section aria-label="Filtros de roles" className={COMPONENT_STYLES.filter.container}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            <div className="relative w-full sm:w-[280px]">
+              <label htmlFor="roles-search" className="sr-only">
+                Buscar rol
+              </label>
+              <MagnifyingGlass className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
+              <input
+                id="roles-search"
+                type="text"
+                placeholder="Buscar roles..."
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                className={COMPONENT_STYLES.filter.searchInput}
+              />
+            </div>
+
+            <details className="group relative">
+              <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 [&::-webkit-details-marker]:hidden">
+                <Faders className="h-4 w-4 text-[#606571]" aria-hidden="true" />
+                Filtros
+              </summary>
+              <div className="absolute left-0 top-11 z-30 w-[260px] rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="roles-estado" className="mb-1 block text-xs font-medium text-[#747986]">
+                      Estado
+                    </label>
+                    <select
+                      id="roles-estado"
+                      value={filterEstado}
+                      onChange={(event) => setFilterEstado(event.target.value as 'todos' | 'activo' | 'inactivo')}
+                      className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pr-8 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                    >
+                      <option value="todos">Todos los estados</option>
+                      <option value="activo">Activos</option>
+                      <option value="inactivo">Inactivos</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void loadRoles();
+                    }}
+                    className={`${COMPONENT_STYLES.button.secondary} w-full`}
+                  >
+                    <ArrowsClockwise className="h-4 w-4" />
+                    <span>Actualizar</span>
+                  </button>
+                </div>
+              </div>
+            </details>
+
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterEstado('todos');
+                }}
+                className={COMPONENT_STYLES.button.ghost}
+              >
+                <X className="h-4 w-4" />
+                <span>Limpiar</span>
+              </button>
+            ) : (
+              <span className={COMPONENT_STYLES.badge.count}>{filteredRoles.length} roles visibles</span>
+            )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => {
-                void loadRoles();
-              }}
-              className={COMPONENT_STYLES.button.secondary}
-            >
-              <ArrowsClockwise className="h-4 w-4" />
-              <span>Actualizar</span>
-            </button>
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
             {onNavigateToPermissions ? (
               <button
                 onClick={onNavigateToPermissions}
@@ -288,59 +344,6 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
             </button>
           </div>
         </div>
-
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_240px_auto]">
-          <div className="relative">
-            <label htmlFor="roles-search" className="mb-1.5 block text-sm font-medium text-zinc-700">
-              Buscar rol
-            </label>
-            <MagnifyingGlass className="pointer-events-none absolute left-3.5 top-[calc(50%+0.875rem)] h-4 w-4 -tranzinc-y-1/2 text-zinc-400" />
-            <input
-              id="roles-search"
-              type="text"
-              placeholder="Buscar por nombre, descripción o código"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              className={`${COMPONENT_STYLES.filter.searchInput} pl-10`}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="roles-estado" className="mb-1.5 block text-sm font-medium text-zinc-700">
-              Estado
-            </label>
-            <select
-              id="roles-estado"
-              value={filterEstado}
-              onChange={(event) => setFilterEstado(event.target.value as 'todos' | 'activo' | 'inactivo')}
-              className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-            >
-              <option value="todos">Todos los estados</option>
-              <option value="activo">Activos</option>
-              <option value="inactivo">Inactivos</option>
-            </select>
-          </div>
-
-          <div className="flex items-end">
-            {hasActiveFilters ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchTerm('');
-                  setFilterEstado('todos');
-                }}
-                className={COMPONENT_STYLES.button.secondary}
-              >
-                <ArrowsClockwise className="h-4 w-4" />
-                <span>Limpiar filtros</span>
-              </button>
-            ) : (
-              <div className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-600">
-                {filteredRoles.length} roles visibles
-              </div>
-            )}
-          </div>
-        </div>
       </section>
 
       <section className={COMPONENT_STYLES.table.container}>
@@ -348,14 +351,14 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
           <table className="min-w-full">
             <thead className={COMPONENT_STYLES.table.header}>
               <tr>
-                <th className={COMPONENT_STYLES.table.headerCell}>Rol</th>
+                <th className={`${COMPONENT_STYLES.table.headerCell} rounded-l-[14px]`}>Rol</th>
                 <th className={COMPONENT_STYLES.table.headerCell}>Código</th>
                 <th className={COMPONENT_STYLES.table.headerCell}>Tipo</th>
                 <th className={COMPONENT_STYLES.table.headerCell}>Estado</th>
                 <th className={COMPONENT_STYLES.table.headerCell}>Usuarios</th>
                 <th className={COMPONENT_STYLES.table.headerCell}>Permisos</th>
                 <th className={COMPONENT_STYLES.table.headerCell}>Creado</th>
-                <th className={`${COMPONENT_STYLES.table.headerCell} text-right`}>Acciones</th>
+                <th className={`${COMPONENT_STYLES.table.headerCell} rounded-r-[14px] text-right`}>Acciones</th>
               </tr>
             </thead>
             <tbody className="bg-white">
@@ -393,40 +396,40 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className={COMPONENT_STYLES.table.cell}>
                       <span className="inline-flex rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 font-mono text-sm text-[#15171d]">
                         {role.codigo}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className={COMPONENT_STYLES.table.cell}>
                       <span className="inline-flex rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
                         {role.esDefault ? 'Sistema' : 'Personalizado'}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className={COMPONENT_STYLES.table.cell}>
                       <span className={`inline-flex gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:mt-[5px] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full ${role.estado === 'activo' ? 'before:bg-emerald-500' : 'before:bg-rose-500'}`}>
                         {role.estado === 'activo' ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-zinc-700">
+                    <td className={COMPONENT_STYLES.table.cell}>
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-zinc-400" />
                         <span>{role._count?.usuarios || 0}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-zinc-700">
+                    <td className={COMPONENT_STYLES.table.cell}>
                       <div className="flex items-center gap-2">
                         <Key className="h-4 w-4 text-zinc-400" />
                         <span>{role._count?.rolePermissions || 0}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-zinc-500">
+                    <td className={COMPONENT_STYLES.table.cell}>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-zinc-400" />
                         <span>{new Date(role.createdAt).toLocaleDateString('es-PE')}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className={`${COMPONENT_STYLES.table.cell} text-right`}>
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => void handleManagePermissions(role)}

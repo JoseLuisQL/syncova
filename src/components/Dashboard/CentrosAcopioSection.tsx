@@ -25,7 +25,7 @@ const CentrosAcopioSection: React.FC = memo(() => {
         ) : (
           <table className="w-full min-w-[400px] border-collapse text-left">
             <thead>
-              <tr className="border-y border-[#e7e7ef] bg-[#fbfafd]">
+              <tr className="bg-[#fbfafd]">
                 <th className="whitespace-nowrap px-5 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Centro logístico</th>
                 <th className="whitespace-nowrap px-5 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Inst.</th>
                 <th className="whitespace-nowrap px-5 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Stock total</th>

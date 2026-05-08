@@ -83,7 +83,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
         <table className="min-w-full">
           <thead className={COMPONENT_STYLES.table.header}>
             <tr>
-              <th className="px-4 py-3 text-left w-12">
+              <th className="w-12 rounded-l-[14px] bg-[#fbfafd] px-4 py-3 text-left">
                 <input
                   type="checkbox"
                   checked={selectedUsers.length === usuarios.length && usuarios.length > 0}
@@ -95,7 +95,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
               <th className={COMPONENT_STYLES.table.headerCell}>Rol</th>
               <th className={COMPONENT_STYLES.table.headerCell}>Último Acceso</th>
               <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Estado</th>
-              <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Acciones</th>
+              <th className={`${COMPONENT_STYLES.table.headerCell} rounded-r-[14px] text-center`}>Acciones</th>
             </tr>
           </thead>
           <tbody className="bg-white">
@@ -124,7 +124,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                     selectedUsers.includes(usuario.id) ? COMPONENT_STYLES.table.rowSelected : ''
                   }`}
                 >
-                  <td className="px-4 py-4">
+                  <td className="border-b border-[#eeeef3] px-4 py-4">
                     <input
                       type="checkbox"
                       checked={selectedUsers.includes(usuario.id)}

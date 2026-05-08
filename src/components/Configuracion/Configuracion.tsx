@@ -184,14 +184,14 @@ const Configuracion: React.FC = () => {
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+              className={CONFIG_STYLES.buttonSecondary}
               onClick={() => setPendingNavigationGroup(null)}
             >
               Seguir editando
             </button>
             <button
               type="button"
-              className={`${CONFIG_STYLES.buttonDanger} min-h-[44px] rounded-xl px-4 py-2`}
+              className={CONFIG_STYLES.buttonDanger}
               onClick={handleConfirmNavigation}
             >
               Descartar y navegar
@@ -200,10 +200,10 @@ const Configuracion: React.FC = () => {
         }
       >
         <div className="space-y-4">
-          <div className="rounded-[20px] border border-zinc-200 bg-zinc-50/70 p-4 text-sm text-zinc-600">
+          <div className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-4 text-sm text-zinc-600">
             El bloque actual tiene <span className="font-semibold text-zinc-950">{activeDirtyCount}</span> cambio(s) sin guardar.
           </div>
-          <div className="rounded-[20px] border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-800">
+          <div className="rounded-[14px] border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-800">
             Si continuas, se restauraran los valores originales del bloque actual.
           </div>
         </div>

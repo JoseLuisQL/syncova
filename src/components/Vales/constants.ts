@@ -114,7 +114,7 @@ export const COMPONENT_STYLES = {
 
   table: {
     container: 'bg-white rounded-[18px] border border-[#e7e7ef] shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] overflow-hidden',
-    header: 'bg-[#fbfafd] border-y border-[#e7e7ef]',
+    header: 'bg-[#fbfafd]',
     headerCell: 'px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]',
     row: 'transition-colors duration-150 border-b border-[#eeeef3] hover:bg-[#fbfafd] last:border-0',
     cell: 'px-4 py-3.5 align-middle text-sm text-[#15171d]',

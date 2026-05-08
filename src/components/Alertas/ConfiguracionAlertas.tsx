@@ -4,6 +4,7 @@ import { AlertasService } from '../../services/alertasService';
 import { useAlertasGlobal } from '../../contexts/AlertasContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import { AlertActionDialog, AlertSectionCard } from './components';
+import { COMPONENT_STYLES } from './constants';
 
 interface ConfiguracionLocal {
   diasAnticipacion: number;
@@ -107,7 +108,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {count > 0 ? <span className="inline-flex items-center rounded-full bg-rose-50 px-3 py-1 text-sm font-medium text-rose-700">{count} sin leer</span> : null}
-            <button type="button" onClick={() => setShowResetConfirm(true)} className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50">
+            <button type="button" onClick={() => setShowResetConfirm(true)} className={COMPONENT_STYLES.button.secondary}>
               <ArrowsClockwise className="h-4 w-4" weight="bold" />
               Restablecer
             </button>
@@ -129,7 +130,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 max="90"
                 value={config.diasAnticipacion}
                 onChange={(event) => handleUpdate('diasAnticipacion', parseInt(event.target.value, 10) || defaultConfig.diasAnticipacion)}
-                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18"
+                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} mt-3`}
               />
               <p className="mt-2 text-xs text-zinc-500">Controla cuándo se dispara una alerta de vencimiento.</p>
             </div>
@@ -143,7 +144,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 step="10"
                 value={config.stockMinimo}
                 onChange={(event) => handleUpdate('stockMinimo', parseInt(event.target.value, 10) || defaultConfig.stockMinimo)}
-                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18"
+                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} mt-3`}
               />
               <p className="mt-2 text-xs text-zinc-500">Se usa para generar alertas automáticas de stock bajo.</p>
             </div>
@@ -156,7 +157,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 max="365"
                 value={config.diasRetencion}
                 onChange={(event) => handleUpdate('diasRetencion', parseInt(event.target.value, 10) || defaultConfig.diasRetencion)}
-                className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/18"
+                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} mt-3`}
               />
               <p className="mt-2 text-xs text-zinc-500">Define cuántos días conservar alertas resueltas antes de limpiar.</p>
             </div>
@@ -175,7 +176,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 type="button"
                 onClick={handleGenerarAlertas}
                 disabled={isGenerating}
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-teal-700 hover:to-cyan-800 disabled:opacity-60"
+                className={COMPONENT_STYLES.button.primary}
               >
                 <Lightning className="h-4 w-4" weight="fill" />
                 {isGenerating ? 'Analizando...' : 'Generar alertas'}
@@ -211,7 +212,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 type="button"
                 onClick={() => setShowCleanConfirm(true)}
                 disabled={isCleaning}
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                className={COMPONENT_STYLES.button.secondary}
               >
                 <Trash className="h-4 w-4" weight="bold" />
                 {isCleaning ? 'Limpiando...' : 'Limpiar antiguas'}

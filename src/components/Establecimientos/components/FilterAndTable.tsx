@@ -313,7 +313,7 @@ interface TableHeaderProps {
 export const TableHeader: React.FC<TableHeaderProps> = memo(({ columns }) => (
   <thead className={COMPONENT_STYLES.table.header}>
     <tr>
-      <th className="w-10 rounded-l-[14px] border-y border-l border-[#e7e7ef] bg-[#fbfafd] px-3 py-3 text-center">
+      <th className="w-10 rounded-l-[14px] bg-[#fbfafd] px-3 py-3 text-center">
         <input
           type="checkbox"
           className="h-4 w-4 rounded-[5px] border-[#e0e2ea] text-[#7c3aed] focus:ring-[#7c3aed]/20"
@@ -324,7 +324,7 @@ export const TableHeader: React.FC<TableHeaderProps> = memo(({ columns }) => (
         <th
           key={column.key}
           className={`${COMPONENT_STYLES.table.headerCell} ${
-            index === columns.length - 1 ? 'rounded-r-[14px] border-r' : ''
+            index === columns.length - 1 ? 'rounded-r-[14px]' : ''
           } ${
             column.align === 'right'
               ? 'text-right'

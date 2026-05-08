@@ -339,7 +339,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
         <div className="max-h-[620px] overflow-x-auto overflow-y-auto">
           <table className="w-full min-w-[1600px] border-collapse">
             <thead className="sticky top-0 z-20">
-              <tr className="border-y border-[#e7e7ef] bg-[#fbfafd] text-[#8b8f9b]">
+              <tr className="bg-[#fbfafd] text-[#8b8f9b]">
                 <th className="sticky left-0 z-30 min-w-[220px] border-r border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em]">
                   Item
                 </th>
@@ -350,12 +350,12 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
                   <th
                     key={quarter}
                     colSpan={5}
-                    className="border-y border-r border-[#e7e7ef] bg-[#fbfafd] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]"
+                    className="bg-[#fbfafd] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]"
                   >
                     {TRIMESTRE_LABELS[quarter]}
                   </th>
                 ))}
-                <th colSpan={3} className="border-y border-[#e7e7ef] bg-[#fbfafd] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
+                <th colSpan={3} className="bg-[#fbfafd] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
                   Totales
                 </th>
               </tr>

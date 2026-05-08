@@ -335,55 +335,51 @@ const Usuarios: React.FC = () => {
         </div>
       ) : null}
 
-      <section className="rounded-[26px] border border-zinc-200 bg-white shadow-sm">
-        <div className="space-y-4 p-4 sm:p-6">
-          <UsuariosFiltros
-            searchTerm={searchTerm}
-            filterRol={filterRol}
-            filterEstado={filterEstado}
-            filterCentroAcopio={filterCentroAcopio}
-            roles={roles}
-            centrosAcopio={centrosAcopio}
-            onSearchChange={setSearchTerm}
-            onRolChange={setFilterRol}
-            onEstadoChange={setFilterEstado}
-            onCentroAcopioChange={setFilterCentroAcopio}
-            onRefresh={() => void refresh()}
-            onExportar={() => void handleExportar()}
-            onNuevoUsuario={() => {
-              setEditingUser(null);
-              setShowModal(true);
-            }}
-            isRefreshing={isLoading}
-            isCreating={isCreating}
-          />
+      <UsuariosFiltros
+        searchTerm={searchTerm}
+        filterRol={filterRol}
+        filterEstado={filterEstado}
+        filterCentroAcopio={filterCentroAcopio}
+        roles={roles}
+        centrosAcopio={centrosAcopio}
+        onSearchChange={setSearchTerm}
+        onRolChange={setFilterRol}
+        onEstadoChange={setFilterEstado}
+        onCentroAcopioChange={setFilterCentroAcopio}
+        onRefresh={() => void refresh()}
+        onExportar={() => void handleExportar()}
+        onNuevoUsuario={() => {
+          setEditingUser(null);
+          setShowModal(true);
+        }}
+        isRefreshing={isLoading}
+        isCreating={isCreating}
+      />
 
-          <BulkActionsBar
-            selectedCount={selectedUsers.length}
-            onActivar={() => void handleBulkAction('activar')}
-            onDesactivar={() => void handleBulkAction('desactivar')}
-            onEliminar={() => void handleBulkAction('eliminar')}
-            onClearSelection={() => setSelectedUsers([])}
-            isProcessing={isUpdating || isDeleting}
-          />
+      <BulkActionsBar
+        selectedCount={selectedUsers.length}
+        onActivar={() => void handleBulkAction('activar')}
+        onDesactivar={() => void handleBulkAction('desactivar')}
+        onEliminar={() => void handleBulkAction('eliminar')}
+        onClearSelection={() => setSelectedUsers([])}
+        isProcessing={isUpdating || isDeleting}
+      />
 
-          <UsuariosTabla
-            usuarios={usuarios}
-            selectedUsers={selectedUsers}
-            roles={roles}
-            centrosAcopio={centrosAcopio}
-            isLoading={isLoading}
-            pagination={pagination}
-            onSelectUser={handleSelectUser}
-            onSelectAll={handleSelectAll}
-            onEdit={handleEdit}
-            onDelete={(id) => void handleDelete(id)}
-            onToggleEstado={(id) => void handleToggleEstado(id)}
-            onChangePassword={handleChangePassword}
-            onChangePage={(page) => void changePage(page)}
-          />
-        </div>
-      </section>
+      <UsuariosTabla
+        usuarios={usuarios}
+        selectedUsers={selectedUsers}
+        roles={roles}
+        centrosAcopio={centrosAcopio}
+        isLoading={isLoading}
+        pagination={pagination}
+        onSelectUser={handleSelectUser}
+        onSelectAll={handleSelectAll}
+        onEdit={handleEdit}
+        onDelete={(id) => void handleDelete(id)}
+        onToggleEstado={(id) => void handleToggleEstado(id)}
+        onChangePassword={handleChangePassword}
+        onChangePage={(page) => void changePage(page)}
+      />
 
       <UsuarioModal
         usuario={editingUser}

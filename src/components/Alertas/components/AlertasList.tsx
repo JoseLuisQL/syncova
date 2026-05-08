@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { Alerta } from '../../../types';
-import { DataTable, Pagination, TableCell, TableHeader, TableRow } from '../../Inventario/components/FilterAndTable';
+import { DataTable, Pagination } from '../../Inventario/components/FilterAndTable';
 import { COMPONENT_STYLES, ITEMS_PER_PAGE, NIVELES_ALERTA, TIPOS_ALERTA } from '../constants';
 import { AlertaCard } from './AlertaCard';
 import { EmptyState } from './EmptyState';
@@ -66,12 +66,12 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
   }
 
   return (
-    <section className={COMPONENT_STYLES.table.container}>
-      <div className="border-b border-zinc-100 bg-zinc-50/70 px-4 py-3.5 sm:px-5">
+    <section className="space-y-3">
+      <div className="border-b border-[#eeeef3] bg-white pb-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h3 className="text-base font-semibold text-zinc-950">Alertas filtradas</h3>
-            <p className="mt-1 text-sm text-zinc-500">{alertas.length} resultado(s) listos para revisión.</p>
+            <h3 className="text-[1.05rem] font-semibold text-[#15171d]">Alertas filtradas</h3>
+            <p className="mt-1 text-sm text-[#747986]">{alertas.length} resultado(s) listos para revisión.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -86,16 +86,16 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
       </div>
 
       {selectedAlertas.length > 0 ? (
-        <div className="border-b border-zinc-200 bg-zinc-100/80 px-4 py-3.5 sm:px-5">
+        <div className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <span className="text-sm font-medium text-teal-900">
+            <span className="text-sm font-medium text-[#15171d]">
               {selectedAlertas.length} alerta{selectedAlertas.length === 1 ? '' : 's'} seleccionada{selectedAlertas.length === 1 ? '' : 's'}
             </span>
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={onMarcarSeleccionadasLeidas} className={COMPONENT_STYLES.button.primary}>
                 Marcar leídas
               </button>
-              <button type="button" onClick={onEliminarSeleccionadas} className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:from-rose-700 hover:to-red-700">
+              <button type="button" onClick={onEliminarSeleccionadas} className={COMPONENT_STYLES.button.secondary}>
                 Eliminar
               </button>
             </div>
@@ -118,27 +118,41 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
       </div>
 
       <div className="hidden md:block">
-        <DataTable isLoading={isLoading} loadingMessage="Cargando alertas..." skeletonRows={5} skeletonColumns={6}>
-          <table className="min-w-full table-auto">
-            <TableHeader
-              columns={[
-                { key: 'select', label: '', align: 'center', className: 'w-12' },
-                { key: 'alerta', label: 'Alerta' },
-                { key: 'tipo', label: 'Tipo', align: 'center' },
-                { key: 'nivel', label: 'Nivel', align: 'center' },
-                { key: 'fecha', label: 'Fecha', align: 'center' },
-                { key: 'estado', label: 'Estado', align: 'center' },
-                { key: 'acciones', label: 'Acciones', align: 'right' },
-              ]}
-            />
+        <DataTable isLoading={isLoading} loadingMessage="Cargando alertas..." skeletonRows={5} skeletonColumns={7}>
+          <table className="min-w-full table-auto border-separate border-spacing-0">
+            <thead className={COMPONENT_STYLES.table.header}>
+              <tr>
+                <th className="w-10 rounded-l-[14px] bg-[#fbfafd] px-3 py-3 text-center">
+                  <input
+                    type="checkbox"
+                    checked={alertas.length > 0 && selectedAlertas.length === alertas.length}
+                    onChange={() => {
+                      if (selectedAlertas.length === alertas.length) {
+                        onDeselectAll();
+                        return;
+                      }
+                      onSelectAll();
+                    }}
+                    className="h-4 w-4 rounded-[5px] border-[#e0e2ea] text-[#7c3aed] focus:ring-[#7c3aed]/20"
+                    aria-label="Seleccionar todas las alertas"
+                  />
+                </th>
+                <th className={COMPONENT_STYLES.table.headerCell}>Alerta</th>
+                <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Tipo</th>
+                <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Nivel</th>
+                <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Fecha</th>
+                <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Estado</th>
+                <th className={`${COMPONENT_STYLES.table.headerCell} rounded-r-[14px] text-right`}>Acciones</th>
+              </tr>
+            </thead>
             <tbody className="bg-white">
               {alertasPaginadas.map((alerta) => {
                 const tipoInfo = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo);
                 const nivelInfo = NIVELES_ALERTA.find((nivel) => nivel.id === alerta.nivel);
 
                 return (
-                  <TableRow key={alerta.id} isSelected={selectedAlertas.includes(alerta.id)}>
-                    <TableCell align="center">
+                  <tr key={alerta.id} className={`${COMPONENT_STYLES.table.row} ${selectedAlertas.includes(alerta.id) ? 'bg-zinc-100/60' : ''}`}>
+                    <td className="w-10 border-b border-[#eeeef3] px-3 py-3 text-center align-middle">
                       <input
                         type="checkbox"
                         checked={selectedAlertas.includes(alerta.id)}
@@ -146,35 +160,35 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                         className="h-4 w-4 rounded-[5px] border-[#e7e7ef] text-[#7c3aed] focus:ring-[#7c3aed]/20"
                         aria-label={`Seleccionar alerta: ${alerta.titulo}`}
                       />
-                    </TableCell>
-                    <TableCell>
+                    </td>
+                    <td className={COMPONENT_STYLES.table.cell}>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-zinc-900">{alerta.titulo}</p>
-                          {!alerta.leida ? <span className="h-2 w-2 rounded-full bg-teal-600" /> : null}
+                          <p className="font-medium text-[#15171d]">{alerta.titulo}</p>
+                          {!alerta.leida ? <span className="h-2 w-2 rounded-full bg-[#7c3aed]" /> : null}
                         </div>
-                        <p className="mt-1 text-sm text-zinc-600">{alerta.descripcion}</p>
+                        <p className="mt-1 text-sm text-[#747986]">{alerta.descripcion}</p>
                       </div>
-                    </TableCell>
-                    <TableCell align="center">
+                    </td>
+                    <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
                       <span className="inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
                         {tipoInfo?.label || alerta.tipo}
                       </span>
-                    </TableCell>
-                    <TableCell align="center">
+                    </td>
+                    <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
                       <span className="inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
                         {nivelInfo?.label || alerta.nivel}
                       </span>
-                    </TableCell>
-                    <TableCell align="center">
+                    </td>
+                    <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
                       <span className="text-sm text-zinc-600">{formatearFecha(alerta.fechaCreacion)}</span>
-                    </TableCell>
-                    <TableCell align="center">
+                    </td>
+                    <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
                       <span className={alerta.leida ? COMPONENT_STYLES.badge.neutral : COMPONENT_STYLES.badge.count}>
                         {alerta.leida ? 'Leída' : 'Pendiente'}
                       </span>
-                    </TableCell>
-                    <TableCell align="right">
+                    </td>
+                    <td className={`${COMPONENT_STYLES.table.cell} text-right`}>
                       <div className="flex justify-end gap-2">
                         {alerta.leida ? (
                           <button type="button" onClick={() => onMarcarNoLeida(alerta.id)} className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconView}`} aria-label="Marcar no leída">
@@ -189,8 +203,8 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                           <span className="text-xs font-semibold">X</span>
                         </button>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 );
               })}
             </tbody>

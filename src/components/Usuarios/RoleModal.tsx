@@ -225,14 +225,14 @@ const RoleModal: React.FC<RoleModalProps> = ({
     >
       <div 
         ref={modalRef}
-        className={`${COMPONENT_STYLES.modal.containerShell} max-w-lg max-h-[92vh] flex flex-col sm:rounded-[28px]`}
+        className={`${COMPONENT_STYLES.modal.containerShell} max-w-lg max-h-[92vh] flex flex-col sm:rounded-[24px]`}
       >
         {/* Header */}
-        <div className="px-6 py-5 border-b border-zinc-200 bg-gradient-to-r from-zinc-50 via-white to-zinc-100/80">
+        <div className="px-6 py-5 border-b border-[#eeeef3] bg-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-600 to-zinc-600 shadow-[0_16px_30px_-18px_rgba(13,148,136,0.75)]">
-                <Shield className="h-6 w-6 text-white" aria-hidden="true" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                <Shield className="h-5 w-5" aria-hidden="true" />
               </div>
               <div>
                 <h2 id="role-modal-title" className="text-xl font-bold text-zinc-900">
@@ -393,10 +393,10 @@ const RoleModal: React.FC<RoleModalProps> = ({
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, estado: 'activo' }))}
                   disabled={isLoading || isSubmitting}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-[10px] border px-4 py-3 transition-colors duration-200 ${
                     formData.estado === 'activo'
-                      ? 'border-emerald-300 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 shadow-sm'
-                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
+                      ? 'border-[#c8bbff] bg-[#fbfafd] text-[#7c3aed]'
+                      : 'border-[#e7e7ef] bg-white text-zinc-600 hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
                   }`}
                 >
                   <ToggleRight className={`h-5 w-5 ${formData.estado === 'activo' ? 'text-emerald-600' : 'text-zinc-400'}`} />
@@ -409,10 +409,10 @@ const RoleModal: React.FC<RoleModalProps> = ({
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, estado: 'inactivo' }))}
                   disabled={isLoading || isSubmitting}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-[10px] border px-4 py-3 transition-colors duration-200 ${
                     formData.estado === 'inactivo'
-                      ? 'border-zinc-300 bg-zinc-100 text-zinc-700 ring-1 ring-zinc-200 shadow-sm'
-                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
+                      ? 'border-[#e7e7ef] bg-[#fbfafd] text-zinc-700'
+                      : 'border-[#e7e7ef] bg-white text-zinc-600 hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
                   }`}
                 >
                   <ToggleLeft className={`h-5 w-5 ${formData.estado === 'inactivo' ? 'text-zinc-600' : 'text-zinc-400'}`} />
@@ -432,7 +432,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-zinc-200 bg-zinc-50/70">
+        <div className="px-6 py-4 border-t border-[#eeeef3] bg-white">
           <div className="flex items-center justify-end gap-3">
             <button
               type="button"

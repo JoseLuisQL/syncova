@@ -96,10 +96,10 @@ export const USER_SECTIONS = [
 
 // Estilos de componentes reutilizables (Cockpit)
 export const COMPONENT_STYLES = {
-  pageBackground: 'min-h-[calc(100vh-4rem)] bg-zinc-50',
+  pageBackground: 'min-h-screen bg-white',
 
-  card: 'bg-white rounded-xl border border-zinc-200 shadow-[0_1px_3px_0_rgb(0,0,0,0.02)]',
-  cardHover: 'hover:shadow-md hover:border-zinc-300 transition-all duration-200',
+  card: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
+  cardHover: 'hover:bg-[#fbfafd] transition-colors duration-200',
 
   header: {
     container: 'bg-white border-b border-zinc-200 sticky top-0 z-20',
@@ -109,20 +109,17 @@ export const COMPONENT_STYLES = {
   },
 
   button: {
-    primary: `flex items-center gap-2 px-4 py-2 rounded-[10px] text-sm font-semibold text-white 
-              bg-[#7c3aed] hover:bg-[#6d28d9] border border-transparent
-              shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition-all duration-200 
+    primary: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white
+              shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9]
               focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2
-              disabled:opacity-50 disabled:cursor-not-allowed`,
-    secondary: `flex items-center gap-2 px-4 py-2 rounded-[10px] text-sm font-semibold 
-                text-[#15171d] bg-white border border-[#e7e7ef] 
-                hover:bg-[#fbfafd] hover:text-[#15171d] hover:border-[#d7d8e2]
-                shadow-sm transition-all duration-200
+              disabled:cursor-not-allowed disabled:opacity-60`,
+    secondary: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 py-1.5 text-sm font-semibold
+                text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd]
                 focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2
-                disabled:opacity-50 disabled:cursor-not-allowed`,
-    ghost: `inline-flex h-8 w-8 items-center justify-center rounded-md border border-transparent
-            text-zinc-500 transition-all duration-200 hover:bg-zinc-100 hover:text-zinc-900
-            focus:outline-none focus:ring-2 focus:ring-zinc-200 focus:ring-offset-1`,
+                disabled:cursor-not-allowed disabled:opacity-60`,
+    ghost: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3 py-1.5
+            text-sm font-semibold text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d]
+            focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
     success: `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-emerald-800 
               bg-emerald-50 border border-emerald-200
               hover:bg-emerald-100 hover:border-emerald-300
@@ -138,20 +135,19 @@ export const COMPONENT_STYLES = {
              hover:bg-rose-100 hover:border-rose-300
              shadow-sm transition-all duration-200
              disabled:opacity-50 disabled:cursor-not-allowed`,
-    icon: `p-1.5 rounded-md transition-all duration-200 
-           focus:outline-none focus:ring-2 focus:ring-offset-1`,
-    iconEdit: 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100',
-    iconDelete: 'text-rose-600 hover:text-rose-700 hover:bg-rose-50',
-    iconView: 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100',
-    iconKey: 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100',
-    iconShield: 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50',
+    icon: `inline-flex h-9 w-9 items-center justify-center rounded-xl transition
+           focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50`,
+    iconEdit: 'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900',
+    iconDelete: 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100',
+    iconView: 'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900',
+    iconKey: 'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900',
+    iconShield: 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
   },
 
   input: {
-    base: `w-full px-3 py-2 rounded-md border text-sm
-           transition-all duration-200 bg-white
-           focus:outline-none focus:ring-2 focus:ring-offset-0`,
-    normal: 'border-zinc-300 focus:ring-teal-600 focus:border-teal-600 hover:border-zinc-400 placeholder:text-zinc-400',
+    base: `w-full rounded-[10px] border bg-white px-4 py-2.5 text-sm text-[#15171d] shadow-sm
+           transition placeholder:text-[#8b8f9b] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70`,
+    normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     error: 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 text-rose-900',
     label: 'block text-[0.8rem] font-medium text-zinc-700 mb-1.5',
     errorText: 'mt-1 text-xs text-rose-600 font-medium',
@@ -159,21 +155,20 @@ export const COMPONENT_STYLES = {
   },
 
   select: {
-    base: `w-full px-3 py-2 rounded-md border text-sm font-medium
-           bg-white transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-offset-0
-           disabled:bg-zinc-50 disabled:text-zinc-500 disabled:cursor-not-allowed`,
-    normal: 'border-zinc-300 focus:ring-teal-600 focus:border-teal-600 hover:border-zinc-400',
+    base: `w-full rounded-[10px] border bg-white px-4 py-2.5 text-sm font-medium text-[#15171d] shadow-sm
+           transition focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70
+           disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500`,
+    normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
   },
 
   table: {
-    container: 'bg-white rounded-[18px] border border-[#e7e7ef] shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] overflow-hidden',
-    header: 'bg-[#fbfafd] border-y border-[#e7e7ef]',
-    headerCell: 'px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]',
-    row: 'hover:bg-[#fbfafd] transition-colors duration-150 border-b border-[#eeeef3] last:border-0',
+    container: 'overflow-visible rounded-none border-0 bg-transparent shadow-none',
+    header: 'bg-transparent',
+    headerCell: 'bg-[#fbfafd] px-4 py-3 text-left text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]',
+    row: 'transition-colors duration-150 hover:bg-[#fbfafd]',
     rowSelected: 'bg-[#fbfafd]',
-    cell: 'px-4 py-3.5 text-sm text-[#15171d] tabular-nums align-middle',
-    emptyIcon: 'h-10 w-10 mx-auto text-zinc-300 mb-3',
+    cell: 'border-b border-[#eeeef3] px-4 py-3.5 text-sm text-[#15171d] tabular-nums align-middle',
+    emptyIcon: 'mx-auto mb-3 h-10 w-10 text-zinc-300',
   },
 
   badge: {
@@ -207,11 +202,11 @@ export const COMPONENT_STYLES = {
   },
 
   filter: {
-    container: 'bg-white rounded-[18px] border border-[#e7e7ef] p-4 shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] flex flex-col sm:flex-row gap-3 items-center',
-    searchIcon: 'absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#606571]',
-    searchInput: `w-full pl-9 pr-3 py-2 rounded-[10px] border border-[#e7e7ef] text-sm 
-                  focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:border-[#babdca] 
-                  transition-all duration-200 hover:border-[#d7d8e2] placeholder:text-[#8b8f9b]`,
+    container: 'bg-transparent p-0',
+    searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]',
+    searchInput: `h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white py-1.5 pl-9 pr-3 text-sm text-[#15171d] shadow-sm
+                  transition placeholder:text-[#8b8f9b] hover:border-[#d7d8e2] focus:border-[#babdca]
+                  focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70`,
   },
 
   nav: {
@@ -223,15 +218,15 @@ export const COMPONENT_STYLES = {
   },
 
   pagination: {
-    container: 'bg-white px-5 py-4 border-t border-[#eeeef3] flex items-center justify-between',
-    info: 'text-[0.8rem] text-[#747986]',
-    button: 'min-h-9 min-w-9 px-2.5 py-1.5 text-sm font-medium rounded-[10px] border transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed',
+    container: 'border-t border-[#eeeef3] bg-white px-4 py-5 sm:px-5',
+    info: 'text-sm font-medium text-[#747986]',
+    button: 'min-h-9 min-w-9 rounded-[10px] border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40',
     buttonActive: 'bg-white border-[#e7e7ef] text-[#15171d] shadow-sm',
     buttonInactive: 'bg-transparent border-transparent text-[#606571] hover:bg-[#fbfafd]',
   },
 
   bulkActions: {
-    container: 'bg-teal-600 border border-teal-600 rounded-lg p-2.5 flex items-center justify-between shadow-lg text-white mb-4 animate-in fade-in slide-in-from-bottom-2',
+    container: 'mb-4 flex items-center justify-between rounded-[12px] border border-[#7c3aed] bg-[#7c3aed] p-2.5 text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] animate-in fade-in slide-in-from-bottom-2',
     text: 'text-sm font-medium ml-2',
   },
 } as const;

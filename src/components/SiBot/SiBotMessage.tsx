@@ -121,7 +121,7 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
                 h3: ({children}) => <h3 className="text-[15px] font-bold mt-5 mb-2 tracking-tight text-zinc-900">{children}</h3>,
                 h4: ({children}) => <h4 className="text-[13px] font-semibold mt-3 mb-1.5 tracking-tight text-zinc-800">{children}</h4>,
                 table: ({children}) => <SiBotTable>{children}</SiBotTable>,
-                thead: ({children}) => <thead className="border-y border-[#e7e7ef] bg-[#fbfafd]">{children}</thead>,
+                thead: ({children}) => <thead className="bg-[#fbfafd]">{children}</thead>,
                 tbody: ({children}) => <tbody className="bg-white">{children}</tbody>,
                 th: ({children}) => <th className="whitespace-nowrap border-b border-[#eeeef3] bg-[#fbfafd] px-3 py-2 text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">{children}</th>,
                 td: ({children}) => <td className="px-3 py-2 text-zinc-600 font-medium min-w-[100px]">{children}</td>,

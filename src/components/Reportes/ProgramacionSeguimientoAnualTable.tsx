@@ -414,7 +414,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       {/* Table Container with Horizontal Scroll */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1400px]">
-          <thead className="bg-[#fbfafd] border-y border-[#e7e7ef]">
+          <thead className="bg-[#fbfafd]">
             <tr>
               <th className="sticky left-0 z-10 border-r border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">
                 <div className="flex items-center">

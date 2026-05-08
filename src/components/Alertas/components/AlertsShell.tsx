@@ -19,19 +19,12 @@ const AlertsShell: React.FC<AlertsShellProps> = ({
   const { navigateToModule } = useAppNavigation();
 
   return (
-    <main className="min-h-full bg-white">
-      <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col gap-3`}>
-        <section className="bg-transparent border-b border-zinc-100 pb-2">
-          {action ? (
-            <div className="border-b border-zinc-200/90 px-4 py-4 sm:px-5 lg:px-6 mb-2">
-              <div className="flex flex-wrap items-center gap-2">{action}</div>
-            </div>
-          ) : null}
-
-          <nav aria-label="Secciones de alertas" className="px-3 py-3 sm:px-4">
-            <div className="flex flex-wrap gap-2">
+    <main className="min-h-[calc(100dvh-128px)] overflow-hidden rounded-[24px] border border-white/90 bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
+      <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col`}>
+        <nav aria-label="Secciones de alertas" className="border-b border-[#eeeef3] bg-white">
+          <div className="flex min-h-12 flex-col gap-3 px-5 sm:px-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex h-12 items-end gap-7">
               {sections.map((section) => {
-                const Icon = section.icon;
                 const isActive = section.id === activeSection;
 
                 return (
@@ -39,40 +32,26 @@ const AlertsShell: React.FC<AlertsShellProps> = ({
                     key={section.id}
                     type="button"
                     onClick={() => navigateToModule('alertas', section.routeSegment)}
-                    className={`group flex items-center gap-3 rounded-xl border px-3 py-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 ${
+                    className={`-mb-px inline-flex h-12 shrink-0 items-center border-b-2 px-0 text-[13px] font-medium transition-colors focus:outline-none ${
                       isActive
-                        ? 'border-teal-200 bg-teal-50/80 shadow-sm ring-1 ring-teal-100'
-                        : 'border-zinc-200/80 bg-white hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-sm'
+                        ? 'border-[#7c3aed] text-[#7c3aed]'
+                        : 'border-transparent text-[#747986] hover:text-[#15171d]'
                     }`}
                     aria-current={isActive ? 'page' : undefined}
                     title={section.contextLabel}
                   >
-                    <div
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                        isActive
-                          ? 'bg-teal-600 text-white shadow-sm'
-                          : 'bg-zinc-100 text-zinc-500 group-hover:bg-zinc-200 group-hover:text-zinc-700'
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" aria-hidden="true" weight={isActive ? "fill" : "bold"} />
-                    </div>
-                    <div className="flex flex-col items-start text-left">
-                       <span
-                        className={`text-[0.85rem] font-semibold tracking-tight transition-colors ${
-                          isActive ? 'text-teal-900' : 'text-zinc-700 group-hover:text-zinc-900'
-                        }`}
-                      >
-                        {section.label}
-                      </span>
-                    </div>
+                    {section.label}
                   </button>
                 );
               })}
             </div>
-          </nav>
-        </section>
+            {action ? (
+              <div className="flex flex-wrap items-center gap-2 pb-3 lg:h-12 lg:pb-2">{action}</div>
+            ) : null}
+          </div>
+        </nav>
 
-        {children}
+        <div className="flex flex-col gap-4 p-4 sm:p-6">{children}</div>
       </div>
     </main>
   );

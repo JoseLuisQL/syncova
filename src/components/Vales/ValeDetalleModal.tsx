@@ -318,7 +318,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                       </h3>
                       <div className="overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white">
                         <table className="w-full text-sm">
-                          <thead className="border-y border-[#e7e7ef] bg-[#fbfafd]">
+                          <thead className="bg-[#fbfafd]">
                             <tr>
                               <th className="w-12 px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">#</th>
                               <th className="px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Vacuna</th>
@@ -351,7 +351,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                       </h3>
                       <div className="overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white">
                         <table className="w-full text-sm">
-                          <thead className="border-y border-[#e7e7ef] bg-[#fbfafd]">
+                          <thead className="bg-[#fbfafd]">
                             <tr>
                               <th className="px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Tipo</th>
                               <th className="w-28 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Capacidad</th>
@@ -397,7 +397,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                           <p className="text-xs text-zinc-500">Código: {est.establecimiento.codigo}</p>
                         </div>
                         <table className="w-full text-sm">
-                          <thead className="border-y border-[#e7e7ef] bg-[#fbfafd]">
+                          <thead className="bg-[#fbfafd]">
                             <tr>
                               <th className="w-12 px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">#</th>
                               <th className="px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Vacuna</th>
