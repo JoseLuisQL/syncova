@@ -60,7 +60,7 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
             ) : (
               <CheckCircle className="h-4 w-4" weight="bold" />
             )}
-            <span>{isProcessing ? 'Guardando cambios...' : 'Confirmar Alteración'}</span>
+            <span>{isProcessing ? 'Guardando cambios...' : 'Confirmar cambio'}</span>
           </button>
         </div>
       }
@@ -76,34 +76,34 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
         <div className="space-y-5">
 
           {/* ── Bloque 1: Establecimiento + cambio de cantidad ── */}
-          <div className="rounded-2xl bg-zinc-950 px-5 py-4">
-            <p className="text-white font-bold text-sm tracking-tight">
+          <div className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] px-5 py-4">
+            <p className="text-[#15171d] font-bold text-sm tracking-tight">
               {impacto.resumen.establecimientoNombre}
             </p>
-            <p className="text-zinc-400 text-xs mt-0.5">{impacto.resumen.vacunaNombre}</p>
+            <p className="text-zinc-500 text-xs mt-0.5">{impacto.resumen.vacunaNombre}</p>
 
             <div className="mt-4 flex items-center gap-3">
               <div className="text-center">
                 <p className="text-[0.6rem] text-zinc-500 uppercase tracking-widest mb-1">Actual</p>
-                <p className="text-3xl font-black text-zinc-300 tabular-nums">
+                <p className="text-3xl font-semibold text-zinc-500 tabular-nums">
                   {impacto.resumen.cantidadActual.toLocaleString()}
                 </p>
               </div>
               <ArrowRight className="h-5 w-5 text-zinc-600 mt-4" weight="bold" />
               <div className="text-center">
                 <p className="text-[0.6rem] text-zinc-500 uppercase tracking-widest mb-1">Nuevo</p>
-                <p className="text-3xl font-black text-white tabular-nums">
+                <p className="text-3xl font-semibold text-[#7c3aed] tabular-nums">
                   {impacto.resumen.cantidadNueva.toLocaleString()}
                 </p>
               </div>
               <div className="ml-auto">
                 <span
-                  className={`text-sm font-black px-3 py-1.5 rounded-xl tabular-nums ${
+                  className={`text-sm font-semibold px-3 py-1.5 rounded-xl tabular-nums ${
                     impacto.resumen.diferencia > 0
-                      ? 'bg-zinc-800 text-white'
+                      ? 'border border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]'
                       : impacto.resumen.diferencia < 0
                       ? 'bg-rose-500 text-white'
-                      : 'bg-zinc-700 text-zinc-400'
+                      : 'border border-[#e7e7ef] bg-white text-zinc-500'
                   }`}
                 >
                   {impacto.resumen.diferencia > 0 ? '+' : ''}
@@ -114,7 +114,7 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
           </div>
 
           {/* ── Bloque 2: Resumen de stock afectado ── */}
-          <div className="rounded-2xl border border-zinc-100 bg-zinc-50 divide-y divide-zinc-100">
+          <div className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] divide-y divide-[#eeeef3]">
             {/* Vacunas */}
             <div className="flex items-center justify-between px-5 py-3.5">
               <p className="text-sm font-medium text-zinc-600">Vacunas</p>
@@ -127,7 +127,7 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
                   {impacto.impactoVacunas.stockTotalDespues.toLocaleString()}
                 </span>
                 <span
-                  className={`ml-1 text-xs font-black px-1.5 py-0.5 rounded-md ${
+                    className={`ml-1 text-xs font-semibold px-1.5 py-0.5 rounded-md ${
                     impacto.impactoVacunas.stockTotalDespues - impacto.impactoVacunas.stockTotalActual < 0
                       ? 'bg-rose-50 text-rose-600 ring-1 ring-rose-100'
                       : 'bg-zinc-100 text-zinc-600'
@@ -151,7 +151,7 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
                   {impacto.impactoJeringas.stockTotalDespues.toLocaleString()}
                 </span>
                 <span
-                  className={`ml-1 text-xs font-black px-1.5 py-0.5 rounded-md ${
+                    className={`ml-1 text-xs font-semibold px-1.5 py-0.5 rounded-md ${
                     impacto.impactoJeringas.stockTotalDespues - impacto.impactoJeringas.stockTotalActual < 0
                       ? 'bg-rose-50 text-rose-600 ring-1 ring-rose-100'
                       : 'bg-zinc-100 text-zinc-600'
@@ -170,7 +170,7 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
               <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-2 px-1">
                 Vales afectados
               </p>
-              <div className="rounded-2xl border border-zinc-100 divide-y divide-zinc-100">
+              <div className="rounded-[14px] border border-[#e7e7ef] divide-y divide-[#eeeef3]">
                 {impacto.valesAfectados.map((vale) => (
                   <div key={vale.id} className="flex items-center justify-between px-5 py-3">
                     <div>

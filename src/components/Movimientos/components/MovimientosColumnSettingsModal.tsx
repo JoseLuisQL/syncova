@@ -47,11 +47,11 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
             <div className={COMPONENT_STYLES.modal.header}>
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900 border border-zinc-900 text-white shadow-sm">
-                    <Faders className="h-6 w-6" weight="duotone" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                    <Faders className="h-5 w-5" weight="duotone" />
                   </div>
                   <div>
-                    <h2 className="text-[1.05rem] font-black tracking-tight text-zinc-900">Configuración de Columnas</h2>
+                    <h2 className="text-[1.05rem] font-semibold tracking-tight text-zinc-900">Configuración de columnas</h2>
                   </div>
                 </div>
                 <button
@@ -66,10 +66,10 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
             </div>
 
             <div className={COMPONENT_STYLES.modal.body}>
-              <div className="mb-5 flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 shadow-sm">
+              <div className="mb-5 flex items-center gap-3 rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
                 <div>
-                  <p className="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-zinc-500">Visibilidad global</p>
-                  <p className="mt-1 text-[0.95rem] font-black tracking-tight text-zinc-900">
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-zinc-500">Visibilidad global</p>
+                  <p className="mt-1 text-[0.95rem] font-semibold tracking-tight text-zinc-900">
                     {visibleCount} de {columnasConfigurablesPermitidas.length} columnas activas
                   </p>
                 </div>
@@ -84,24 +84,24 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
                       key={column.key}
                       type="button"
                       onClick={() => onToggleColumn(column.key)}
-                      className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left transition ${
+                      className={`flex items-center justify-between rounded-[12px] border px-4 py-3 text-left transition ${
                         active
-                          ? 'border-zinc-900 bg-zinc-900 shadow-md'
-                          : 'border-zinc-200 bg-white hover:border-zinc-300'
+                          ? 'border-[#c8bbff] bg-[#fbfafd]'
+                          : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
                       }`}
                     >
                       <div>
-                        <p className={`text-[0.85rem] font-black tracking-tight ${active ? 'text-white' : 'text-zinc-900'}`}>
+                        <p className={`text-[0.85rem] font-semibold tracking-tight ${active ? 'text-[#7c3aed]' : 'text-zinc-900'}`}>
                           {column.label}
                         </p>
-                        <p className={`mt-0.5 text-[0.65rem] font-semibold uppercase tracking-widest ${active ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                        <p className={`mt-0.5 text-[0.65rem] font-semibold uppercase tracking-widest ${active ? 'text-[#606571]' : 'text-zinc-500'}`}>
                           {active ? 'Visible en tabla' : 'Oculta'}
                         </p>
                       </div>
                       <span
                         className={`inline-flex h-6 w-6 items-center justify-center rounded-full border-2 ${
                           active
-                            ? 'border-white bg-white text-zinc-900'
+                            ? 'border-[#7c3aed] bg-[#7c3aed] text-white'
                             : 'border-zinc-200 bg-transparent text-transparent'
                         }`}
                       >
@@ -115,7 +115,7 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
 
             </div>
 
-            <div className={`${COMPONENT_STYLES.modal.footer} flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-zinc-100 bg-zinc-50/50`}>
+            <div className={`${COMPONENT_STYLES.modal.footer} flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-[#eeeef3] bg-white`}>
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={onSelectAll} className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-xs font-bold text-zinc-700 shadow-sm transition-all hover:bg-zinc-50 hover:text-zinc-900">
                   <Check className="h-4 w-4" weight="bold" />
@@ -126,8 +126,8 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
                   <span>Formato origen</span>
                 </button>
               </div>
-              <button type="button" onClick={onClose} className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-6 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-zinc-800">
-                Aprobar Vista
+              <button type="button" onClick={onClose} className={COMPONENT_STYLES.button.primary}>
+                Aplicar vista
               </button>
             </div>
           </div>

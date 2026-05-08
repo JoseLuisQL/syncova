@@ -57,6 +57,8 @@ export interface DatosAjusteEntregas {
   vacunaNombre: string;
   mes: number;
   anio: number;
+  mesEntrega: number;
+  anioEntrega: number;
   stockInicial: number;
   totalEntregas: number;
   deficit: number;

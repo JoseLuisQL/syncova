@@ -58,6 +58,8 @@ export interface DatosAjusteEntregas {
   vacunaNombre: string;
   mes: number;
   anio: number;
+  mesEntrega: number;
+  anioEntrega: number;
   stockInicial: number;
   totalEntregas: number;
   deficit: number;
@@ -83,6 +85,62 @@ export interface EjecutarAjusteDto {
  * Service for automatic delivery adjustments when deficit is detected
  */
 export class AjusteEntregasService {
+  private static obtenerPeriodoEntrega(mes: number, anio: number): { mes: number; anio: number } {
+    if (mes === 12) {
+      return { mes: 1, anio: anio + 1 };
+    }
+
+    return { mes: mes + 1, anio };
+  }
+
+  private static async obtenerValesBaseGenerados(
+    vacunaId: string,
+    periodo: { mes: number; anio: number },
+    establecimientoIds?: string[]
+  ): Promise<Map<string, string>> {
+    const detalleWhere: {
+      vacunaId: string;
+      cantidadProgramada: { gt: number };
+      establecimientoId?: { in: string[] };
+    } = {
+      vacunaId,
+      cantidadProgramada: { gt: 0 }
+    };
+
+    if (establecimientoIds && establecimientoIds.length > 0) {
+      detalleWhere.establecimientoId = { in: establecimientoIds };
+    }
+
+    const valesGenerados = await prisma.valeEntrega.findMany({
+      where: {
+        mes: periodo.mes,
+        anio: periodo.anio,
+        detalles: {
+          some: detalleWhere
+        }
+      },
+      select: {
+        numero: true,
+        detalles: {
+          where: detalleWhere,
+          select: {
+            establecimientoId: true
+          }
+        }
+      }
+    });
+
+    const establecimientosConVale = new Map<string, string>();
+    for (const vale of valesGenerados) {
+      for (const detalle of vale.detalles) {
+        if (!establecimientosConVale.has(detalle.establecimientoId)) {
+          establecimientosConVale.set(detalle.establecimientoId, vale.numero);
+        }
+      }
+    }
+
+    return establecimientosConVale;
+  }
   
   /**
    * Get data for the adjustment modal
@@ -112,6 +170,7 @@ export class AjusteEntregasService {
       }
 
       const { stockInicialHistorico, totalEntregas, stockDisponible } = stockResult.data;
+      const periodoEntrega = this.obtenerPeriodoEntrega(mes, anio);
 
       // If no deficit, return early
       if (stockDisponible >= 0) {
@@ -122,6 +181,8 @@ export class AjusteEntregasService {
             vacunaNombre: vacuna.nombre,
             mes,
             anio,
+            mesEntrega: periodoEntrega.mes,
+            anioEntrega: periodoEntrega.anio,
             stockInicial: stockInicialHistorico || 0,
             totalEntregas,
             deficit: 0,
@@ -134,26 +195,14 @@ export class AjusteEntregasService {
         };
       }
 
-      // Get vales generated for this period (by centro de acopio)
-      const valesGenerados = await prisma.valeEntrega.findMany({
-        where: { mes, anio },
-        select: { 
-          centroAcopioId: true, 
-          numero: true 
-        }
-      });
-
-      const centrosConVale = new Map<string, string>();
-      valesGenerados.forEach(vale => {
-        centrosConVale.set(vale.centroAcopioId, vale.numero);
-      });
+      const establecimientosConVale = await this.obtenerValesBaseGenerados(vacunaId, periodoEntrega);
 
       // Get all movements with deliveries > 0 for this vaccine/period
       const movimientos = await prisma.movimientoVacuna.findMany({
         where: {
           vacunaId,
-          mes,
-          anio,
+          mes: periodoEntrega.mes,
+          anio: periodoEntrega.anio,
           entrega: { gt: 0 }
         },
         include: {
@@ -176,16 +225,16 @@ export class AjusteEntregasService {
 
       for (const mov of movimientos) {
         const centro = mov.establecimiento.centroAcopio;
-        const tieneVale = centrosConVale.has(centro.id);
-        const valeNumero = centrosConVale.get(centro.id) || null;
+        const valeNumero = establecimientosConVale.get(mov.establecimientoId) || null;
+        const tieneVale = !!valeNumero;
 
         if (!centrosAgrupados.has(centro.id)) {
           centrosAgrupados.set(centro.id, {
             centroAcopioId: centro.id,
             centroAcopioNombre: centro.nombre,
             centroAcopioCodigo: centro.codigo || '',
-            tieneValeGenerado: tieneVale,
-            valeNumero,
+            tieneValeGenerado: false,
+            valeNumero: null,
             establecimientos: [],
             totalEntregas: 0
           });
@@ -210,26 +259,39 @@ export class AjusteEntregasService {
       }
 
       const centrosAcopio = Array.from(centrosAgrupados.values());
+      centrosAcopio.forEach(centro => {
+        const establecimientosConBloqueo = centro.establecimientos.filter(e => e.tieneValeGenerado);
+        centro.tieneValeGenerado = (
+          centro.establecimientos.length > 0 &&
+          establecimientosConBloqueo.length === centro.establecimientos.length
+        );
+        centro.valeNumero = establecimientosConBloqueo[0]?.valeNumero || null;
+      });
       
       // Count adjustable vs blocked
       let establecimientosAjustables = 0;
       let establecimientosBloqueados = 0;
       
       centrosAcopio.forEach(centro => {
-        if (centro.tieneValeGenerado) {
-          establecimientosBloqueados += centro.establecimientos.length;
-        } else {
-          establecimientosAjustables += centro.establecimientos.length;
-        }
+        centro.establecimientos.forEach(establecimiento => {
+          if (establecimiento.tieneValeGenerado) {
+            establecimientosBloqueados++;
+          } else {
+            establecimientosAjustables++;
+          }
+        });
       });
 
       // Determine if adjustment is possible
       let puedeAjustar = true;
       let motivoNoPuedeAjustar: string | null = null;
 
-      if (establecimientosAjustables === 0) {
+      if (movimientos.length === 0) {
         puedeAjustar = false;
-        motivoNoPuedeAjustar = 'Todos los centros de acopio ya tienen vales generados';
+        motivoNoPuedeAjustar = `No hay entregas base para ajustar en el periodo de entrega ${periodoEntrega.mes}/${periodoEntrega.anio}`;
+      } else if (establecimientosAjustables === 0) {
+        puedeAjustar = false;
+        motivoNoPuedeAjustar = `Todas las entregas del periodo ${periodoEntrega.mes}/${periodoEntrega.anio} ya tienen vales generados`;
       }
 
       console.log(`✅ [AjusteEntregasService] Datos obtenidos: ${centrosAcopio.length} centros, ${establecimientosAjustables} ajustables, ${establecimientosBloqueados} bloqueados`);
@@ -241,6 +303,8 @@ export class AjusteEntregasService {
           vacunaNombre: vacuna.nombre,
           mes,
           anio,
+          mesEntrega: periodoEntrega.mes,
+          anioEntrega: periodoEntrega.anio,
           stockInicial: stockInicialHistorico || 0,
           totalEntregas,
           deficit: stockDisponible,
@@ -271,8 +335,8 @@ export class AjusteEntregasService {
       
       // Get only adjustable establishments (without generated vale)
       const establecimientosAjustables = datos.centrosAcopio
-        .filter(c => !c.tieneValeGenerado)
-        .flatMap(c => c.establecimientos);
+        .flatMap(c => c.establecimientos)
+        .filter(e => !e.tieneValeGenerado);
 
       if (establecimientosAjustables.length === 0) {
         return {
@@ -285,11 +349,19 @@ export class AjusteEntregasService {
         (sum, e) => sum + e.entregaActual, 0
       );
 
-      // If adjustable deliveries cannot cover the deficit
+      // If adjustable deliveries cannot cover the deficit, still return the safest partial option.
       if (totalEntregasAjustables < deficit) {
+        const opcionParcial = this.calcularReduccionACero(
+          establecimientosAjustables,
+          datos
+        );
+        opcionParcial.nombre = 'Reducir entregas ajustables';
+        opcionParcial.descripcion = `Reduce a 0 las entregas ajustables disponibles. Quedará un déficit pendiente porque existen entregas bloqueadas por vales.`;
+        opcionParcial.esRecomendada = true;
+
         return {
-          success: false,
-          error: `El déficit (${deficit}) excede el total de entregas ajustables (${totalEntregasAjustables}). No es posible eliminarlo completamente.`
+          success: true,
+          data: [opcionParcial]
         };
       }
 
@@ -616,21 +688,21 @@ export class AjusteEntregasService {
     ajustes: AjusteIndividual[],
     datos: DatosAjusteEntregas
   ): void {
-    const centrosBloqueados = datos.centrosAcopio.filter(c => c.tieneValeGenerado);
+    const establecimientosBloqueados = datos.centrosAcopio
+      .flatMap(c => c.establecimientos)
+      .filter(e => e.tieneValeGenerado);
     
-    for (const centro of centrosBloqueados) {
-      for (const est of centro.establecimientos) {
-        ajustes.push({
-          movimientoId: est.movimientoId,
-          establecimientoId: est.establecimientoId,
-          establecimientoNombre: est.establecimientoNombre,
-          centroAcopioId: est.centroAcopioId,
-          entregaAntes: est.entregaActual,
-          entregaDespues: est.entregaActual,
-          diferencia: 0,
-          bloqueado: true
-        });
-      }
+    for (const est of establecimientosBloqueados) {
+      ajustes.push({
+        movimientoId: est.movimientoId,
+        establecimientoId: est.establecimientoId,
+        establecimientoNombre: est.establecimientoNombre,
+        centroAcopioId: est.centroAcopioId,
+        entregaAntes: est.entregaActual,
+        entregaDespues: est.entregaActual,
+        diferencia: 0,
+        bloqueado: true
+      });
     }
   }
 
@@ -655,8 +727,8 @@ export class AjusteEntregasService {
 
     // If establishments have varied saldo anterior, recommend intelligent adjustment
     const saldos = datos.centrosAcopio
-      .filter(c => !c.tieneValeGenerado)
       .flatMap(c => c.establecimientos)
+      .filter(e => !e.tieneValeGenerado)
       .map(e => e.saldoAnterior);
     
     const maxSaldo = Math.max(...saldos, 0);
@@ -696,17 +768,16 @@ export class AjusteEntregasService {
         return { success: false, error: 'Ya no existe déficit para ajustar' };
       }
 
-      // Validate vales haven't been generated for affected centros
-      const valesGenerados = await prisma.valeEntrega.findMany({
-        where: { mes: dto.mes, anio: dto.anio },
-        select: { centroAcopioId: true }
-      });
-      const centrosConVale = new Set(valesGenerados.map(v => v.centroAcopioId));
-
       // Get movements to update
+      const periodoEntrega = this.obtenerPeriodoEntrega(dto.mes, dto.anio);
       const movimientoIds = dto.ajustes.map(a => a.movimientoId);
       const movimientos = await prisma.movimientoVacuna.findMany({
-        where: { id: { in: movimientoIds } },
+        where: {
+          id: { in: movimientoIds },
+          vacunaId: dto.vacunaId,
+          mes: periodoEntrega.mes,
+          anio: periodoEntrega.anio
+        },
         include: {
           establecimiento: {
             select: { centroAcopioId: true, nombre: true }
@@ -714,12 +785,26 @@ export class AjusteEntregasService {
         }
       });
 
+      if (movimientos.length !== movimientoIds.length) {
+        return {
+          success: false,
+          error: 'Algunos movimientos no corresponden al período de entrega seleccionado'
+        };
+      }
+
+      const establecimientoIds = movimientos.map(m => m.establecimientoId);
+      const establecimientosConVale = await this.obtenerValesBaseGenerados(
+        dto.vacunaId,
+        periodoEntrega,
+        establecimientoIds
+      );
+
       // Validate no blocked movements
       for (const mov of movimientos) {
-        if (centrosConVale.has(mov.establecimiento.centroAcopioId)) {
+        if (establecimientosConVale.has(mov.establecimientoId)) {
           return {
             success: false,
-            error: `El establecimiento "${mov.establecimiento.nombre}" pertenece a un centro con vale generado y no puede ser ajustado`
+            error: `El establecimiento "${mov.establecimiento.nombre}" ya tiene vale generado para esta vacuna y no puede ser ajustado`
           };
         }
       }
@@ -811,17 +896,13 @@ export class AjusteEntregasService {
       }
 
       // Check for available centros without vale
-      const valesGenerados = await prisma.valeEntrega.findMany({
-        where: { mes, anio },
-        select: { centroAcopioId: true }
-      });
-      const centrosConVale = new Set(valesGenerados.map(v => v.centroAcopioId));
+      const periodoEntrega = this.obtenerPeriodoEntrega(mes, anio);
 
       const movimientosConEntrega = await prisma.movimientoVacuna.findMany({
         where: {
           vacunaId,
-          mes,
-          anio,
+          mes: periodoEntrega.mes,
+          anio: periodoEntrega.anio,
           entrega: { gt: 0 }
         },
         include: {
@@ -831,8 +912,14 @@ export class AjusteEntregasService {
         }
       });
 
+      const establecimientosConVale = await this.obtenerValesBaseGenerados(
+        vacunaId,
+        periodoEntrega,
+        movimientosConEntrega.map(m => m.establecimientoId)
+      );
+
       const tieneAjustables = movimientosConEntrega.some(
-        m => !centrosConVale.has(m.establecimiento.centroAcopioId)
+        m => !establecimientosConVale.has(m.establecimientoId)
       );
 
       if (!tieneAjustables) {

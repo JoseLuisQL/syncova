@@ -43,16 +43,16 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
       <div className={COMPONENT_STYLES.filter.header}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-teal-600 to-cyan-600 p-2.5 rounded-xl shadow-lg">
-              <Settings className="h-5 w-5 text-white" aria-hidden="true" />
+            <div className="rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] p-2.5">
+              <Settings className="h-5 w-5 text-[#7c3aed]" aria-hidden="true" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">Filtros de Análisis</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Filtros de análisis</h3>
               <p className="text-sm text-gray-600">Configura los parámetros de consulta</p>
             </div>
           </div>
           {(isLoadingEstablecimientos || isLoadingVacunas) && (
-            <div className="flex items-center text-teal-600">
+            <div className="flex items-center text-[#7c3aed]">
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
               <span className="text-sm font-medium">Cargando...</span>
             </div>
@@ -66,7 +66,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
           {/* Centro de Acopio */}
           <div className="space-y-2">
             <label className="flex items-center text-sm font-semibold text-gray-700">
-              <Building2 className="h-4 w-4 mr-2 text-teal-600" />
+              <Building2 className="h-4 w-4 mr-2 text-[#7c3aed]" />
               Centro de Acopio
             </label>
             <select
@@ -87,7 +87,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
           {/* Vacuna */}
           <div className="space-y-2">
             <label className="flex items-center text-sm font-semibold text-gray-700">
-              <Package className="h-4 w-4 mr-2 text-cyan-600" />
+              <Package className="h-4 w-4 mr-2 text-[#7c3aed]" />
               Vacuna
             </label>
             <select
@@ -110,7 +110,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
           {/* Mes */}
           <div className="space-y-2">
             <label className="flex items-center text-sm font-semibold text-gray-700">
-              <Calendar className="h-4 w-4 mr-2 text-teal-600" />
+              <Calendar className="h-4 w-4 mr-2 text-[#7c3aed]" />
               Período
             </label>
             <select
@@ -129,7 +129,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
           {/* Año */}
           <div className="space-y-2">
             <label className="flex items-center text-sm font-semibold text-gray-700">
-              <Calendar className="h-4 w-4 mr-2 text-cyan-600" />
+              <Calendar className="h-4 w-4 mr-2 text-[#7c3aed]" />
               Año
             </label>
             <select
@@ -151,7 +151,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
           <div className="mt-6 pt-6 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full animate-pulse" />
+                <div className="w-2.5 h-2.5 bg-[#7c3aed] rounded-full animate-pulse" />
                 <span className="text-sm font-semibold text-gray-800">
                   {datosTablaLength} establecimientos • {MESES[selectedMes - 1]} {selectedAnio}
                 </span>

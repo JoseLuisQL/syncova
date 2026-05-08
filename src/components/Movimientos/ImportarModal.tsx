@@ -182,14 +182,14 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 setTipoImportacion('vacuna');
                 resetForm();
               }}
-              className={`rounded-[16px] border p-5 text-left transition-all duration-200 ${
+              className={`rounded-[14px] border p-5 text-left transition-colors duration-200 ${
                 tipoImportacion === 'vacuna'
-                  ? 'border-zinc-900 bg-zinc-50 shadow-sm'
-                  : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50'
+                  ? 'border-[#c8bbff] bg-[#fbfafd]'
+                  : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${tipoImportacion === 'vacuna' ? 'border-zinc-900 bg-zinc-900 text-white' : 'border-zinc-200 bg-zinc-50 text-zinc-500'}`}>
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border ${tipoImportacion === 'vacuna' ? 'border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]' : 'border-[#e7e7ef] bg-[#fbfafd] text-[#606571]'}`}>
                   <Syringe className="h-5 w-5" weight={tipoImportacion === 'vacuna' ? 'fill' : 'duotone'} />
                 </div>
                 <span className={`text-[0.95rem] font-bold tracking-tight ${tipoImportacion === 'vacuna' ? 'text-zinc-900' : 'text-zinc-600'}`}>Por vacuna</span>
@@ -203,14 +203,14 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 setTipoImportacion('masivo');
                 resetForm();
               }}
-              className={`rounded-[16px] border p-5 text-left transition-all duration-200 ${
+              className={`rounded-[14px] border p-5 text-left transition-colors duration-200 ${
                 tipoImportacion === 'masivo'
-                  ? 'border-zinc-900 bg-zinc-50 shadow-sm'
-                  : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50'
+                  ? 'border-[#c8bbff] bg-[#fbfafd]'
+                  : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${tipoImportacion === 'masivo' ? 'border-zinc-900 bg-zinc-900 text-white' : 'border-zinc-200 bg-zinc-50 text-zinc-500'}`}>
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border ${tipoImportacion === 'masivo' ? 'border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]' : 'border-[#e7e7ef] bg-[#fbfafd] text-[#606571]'}`}>
                   <Stack className="h-5 w-5" weight={tipoImportacion === 'masivo' ? 'fill' : 'duotone'} />
                 </div>
                 <span className={`text-[0.95rem] font-bold tracking-tight ${tipoImportacion === 'masivo' ? 'text-zinc-900' : 'text-zinc-600'}`}>Masivo</span>
@@ -219,14 +219,14 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
             </button>
           </section>
 
-          <section className="grid gap-4 sm:grid-cols-2 rounded-[16px] border border-zinc-200 bg-zinc-50/50 p-5">
+          <section className="grid gap-4 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-5 sm:grid-cols-2">
             {tipoImportacion === 'vacuna' ? (
               <label className="sm:col-span-2">
                 <span className={COMPONENT_STYLES.input.label}>Vacuna Destino</span>
                 <select
                   value={selectedVacuna}
                   onChange={(event) => setSelectedVacuna(event.target.value)}
-                  className={COMPONENT_STYLES.input.base + ' focus:ring-zinc-900 focus:border-zinc-900'}
+                  className={COMPONENT_STYLES.input.base}
                 >
                   <option value="">Seleccione una vacuna</option>
                   {vacunas.map((vacuna) => (
@@ -243,7 +243,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
               <select
                 value={selectedAnio}
                 onChange={(event) => setSelectedAnio(parseInt(event.target.value, 10))}
-                className={COMPONENT_STYLES.input.base + ' focus:ring-zinc-900 focus:border-zinc-900'}
+                className={COMPONENT_STYLES.input.base}
               >
                 {[2024, 2025, 2026].map((anio) => (
                   <option key={anio} value={anio}>
@@ -254,7 +254,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
             </label>
           </section>
 
-          <section className="rounded-[16px] border border-zinc-200 bg-white p-5">
+          <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-[0.95rem] font-bold text-zinc-900 tracking-tight">Paso 1. Descargar plantilla</p>
@@ -274,13 +274,13 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
             </div>
           </section>
 
-          <section className="rounded-[16px] border border-zinc-200 bg-white p-5">
+          <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
             <div>
               <p className="text-[0.95rem] font-bold text-zinc-900 tracking-tight">Paso 2. Subir archivo completo</p>
               <p className="mt-1 text-sm text-zinc-500">Asegúrate de no alterar las cabeceras del formato original.</p>
             </div>
-            <label className="mt-5 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-[16px] border border-dashed border-zinc-300 bg-zinc-50/50 px-6 py-10 text-center transition hover:border-zinc-400 hover:bg-zinc-100">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-700 shadow-sm transition-transform hover:scale-105">
+            <label className="mt-5 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-[14px] border border-dashed border-[#d7d8e2] bg-[#fbfafd] px-6 py-10 text-center transition hover:border-[#c8bbff] hover:bg-[#f8f5ff]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-white text-[#606571]">
                 <UploadSimple className="h-6 w-6" weight="duotone" />
               </div>
               <p className="text-[0.95rem] font-bold tracking-tight text-zinc-900">
@@ -299,41 +299,41 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="flex items-center gap-3 rounded-2xl bg-zinc-50 px-5 py-4 border border-zinc-200">
-            <CheckCircle className="h-6 w-6 text-zinc-900" weight="fill" />
+          <div className="flex items-center gap-3 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] px-5 py-4">
+            <CheckCircle className="h-6 w-6 text-[#7c3aed]" weight="fill" />
             <h3 className="text-[0.95rem] font-bold text-zinc-900 tracking-tight">Proceso de Importación Completado</h3>
           </div>
 
           {tipoImportacion === 'vacuna' ? (
             <section className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[16px] border border-zinc-200 bg-white p-5 shadow-sm">
+              <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Filas Creadas</p>
-                <p className="mt-2 text-3xl font-black tracking-tight text-zinc-900">{resultadoImportacion?.creadas || 0}</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">{resultadoImportacion?.creadas || 0}</p>
               </div>
-              <div className="rounded-[16px] border border-zinc-200 bg-white p-5 shadow-sm">
+              <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Filas Actualizadas</p>
-                <p className="mt-2 text-3xl font-black tracking-tight text-zinc-900">{resultadoImportacion?.actualizadas || 0}</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">{resultadoImportacion?.actualizadas || 0}</p>
               </div>
             </section>
           ) : (
             <section className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-[16px] border border-zinc-200 bg-white p-5 shadow-sm">
+              <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Creadas</p>
-                <p className="mt-2 text-3xl font-black tracking-tight text-zinc-900">{resultadoImportacion?.totalCreadas || 0}</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">{resultadoImportacion?.totalCreadas || 0}</p>
               </div>
-              <div className="rounded-[16px] border border-zinc-200 bg-white p-5 shadow-sm">
+              <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Actualizadas</p>
-                <p className="mt-2 text-3xl font-black tracking-tight text-zinc-900">{resultadoImportacion?.totalActualizadas || 0}</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">{resultadoImportacion?.totalActualizadas || 0}</p>
               </div>
-              <div className="rounded-[16px] border border-zinc-200 bg-white p-5 shadow-sm">
+              <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Vacunas Prcsds.</p>
-                <p className="mt-2 text-3xl font-black tracking-tight text-zinc-900">{resultadoImportacion?.vacunasProcesadas || 0}</p>
+                <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">{resultadoImportacion?.vacunasProcesadas || 0}</p>
               </div>
             </section>
           )}
 
           {hasErrors ? (
-            <section className="rounded-[16px] border border-rose-200 bg-rose-50/50 p-5 mt-4">
+            <section className="mt-4 rounded-[14px] border border-rose-200 bg-rose-50/50 p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-center gap-3">
                   <WarningCircle className="h-5 w-5 text-rose-600" weight="duotone" />

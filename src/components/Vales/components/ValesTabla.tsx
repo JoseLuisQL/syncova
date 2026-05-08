@@ -125,9 +125,9 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
               <tr>
                 <td colSpan={7} className="px-6 py-16 text-center">
                   <Receipt weight="duotone" className="mx-auto h-12 w-12 text-zinc-200 mb-4" />
-                  <p className="text-base font-black tracking-tight text-zinc-900">Cuadrícula vacía</p>
+                  <p className="text-base font-semibold tracking-tight text-zinc-900">Sin vales generados</p>
                   <p className="mt-1 text-sm text-zinc-500">
-                    Seleccione filtros o inyecte un nuevo vale
+                    Use el botón Generar Vale para crear el documento de este centro y periodo.
                   </p>
                 </td>
               </tr>

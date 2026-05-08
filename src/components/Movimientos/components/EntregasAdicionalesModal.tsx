@@ -28,15 +28,15 @@ const SummaryMetric: React.FC<{
 }> = ({ label, value, tone = 'base' }) => {
   const className =
     tone === 'alt'
-      ? 'border-teal-200 bg-teal-50 text-teal-900'
+      ? 'border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]'
       : tone === 'base'
-      ? 'border-teal-600 bg-teal-600 text-white shadow-sm'
-      : 'border-zinc-200 bg-white text-zinc-800 shadow-sm';
+      ? 'border-[#c8bbff] bg-[#fbfafd] text-[#7c3aed]'
+      : 'border-[#e7e7ef] bg-white text-zinc-800';
 
   return (
-    <div className={`rounded-2xl border px-5 py-4 ${className}`}>
-      <p className={`text-[0.65rem] font-bold uppercase tracking-widest ${tone === 'base' ? 'text-zinc-400' : 'text-zinc-500'}`}>{label}</p>
-      <p className={`mt-2 text-2xl font-black tracking-tight ${tone === 'base' ? 'text-white' : 'text-zinc-900'}`}>{value}</p>
+    <div className={`rounded-[14px] border px-5 py-4 ${className}`}>
+      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-zinc-500">{label}</p>
+      <p className={`mt-2 text-2xl font-semibold tracking-tight ${tone === 'base' ? 'text-[#7c3aed]' : 'text-zinc-900'}`}>{value}</p>
     </div>
   );
 };
@@ -67,14 +67,14 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
     <Modal
       isOpen
       onClose={onClose}
-      title="Inyecciones Múltiples"
-      subtitle="Detalle de split allocations y entregas fraccionadas para el hub seleccionado."
+      title="Entregas adicionales"
+      subtitle="Detalle de entregas fraccionadas para el establecimiento seleccionado."
       icon={Package}
       size="xl"
       footer={
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
           <button type="button" onClick={onClose} className={COMPONENT_STYLES.button.secondary}>
-            Retornar
+            Volver
           </button>
           <button
             type="button"
@@ -83,40 +83,40 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
             className={COMPONENT_STYLES.button.primary}
           >
             {isProcessing ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <Plus className="h-4 w-4" weight="bold" />}
-            <span>Nueva Inyección</span>
+            <span>Nueva entrega</span>
           </button>
         </div>
       }
     >
       <div className="space-y-6">
-        <section className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 shadow-sm">
+        <section className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-5">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-white border border-zinc-200 rounded-xl shadow-sm">
+            <div className="rounded-[12px] border border-[#e7e7ef] bg-white p-3">
               <Package className="h-5 w-5 text-zinc-900" weight="duotone" />
             </div>
             <div>
-              <p className="text-[0.95rem] font-black tracking-tight text-zinc-900">{movimiento.establecimiento.nombre}</p>
+              <p className="text-[0.95rem] font-semibold tracking-tight text-zinc-900">{movimiento.establecimiento.nombre}</p>
               <p className="text-[0.7rem] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">{movimiento.establecimiento.codigo}</p>
             </div>
           </div>
         </section>
 
         <section className="grid gap-4 sm:grid-cols-3">
-          <SummaryMetric label="Core Allocation" value={entregaBase.toLocaleString()} tone="neutral" />
-          <SummaryMetric label="Split (Adicional)" value={totalAdicionales.toLocaleString()} tone="alt" />
-          <SummaryMetric label="Gross Total" value={movimiento.entrega.toLocaleString()} tone="base" />
+          <SummaryMetric label="Entrega base" value={entregaBase.toLocaleString()} tone="neutral" />
+          <SummaryMetric label="Adicionales" value={totalAdicionales.toLocaleString()} tone="alt" />
+          <SummaryMetric label="Total" value={movimiento.entrega.toLocaleString()} tone="base" />
         </section>
 
-        <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3 mb-5 border-b border-zinc-100 pb-4">
+        <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+          <div className="mb-5 flex items-center justify-between gap-3 border-b border-[#eeeef3] pb-4">
             <div>
-              <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Bitácora Lineal</h3>
+              <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Entregas registradas</h3>
               <p className="mt-1 text-xs text-zinc-500">
-                Punteros directos a la matriz. Tienen control independiente por ticket.
+                Cada entrega adicional se controla de forma independiente.
               </p>
             </div>
-            <span className="rounded-md bg-teal-600 px-2.5 py-1 text-[0.7rem] font-black tracking-widest text-white uppercase">
-              {movimiento.entregasAdicionales?.length || 0} Traces
+            <span className="rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] px-2.5 py-1 text-[0.7rem] font-semibold tracking-widest text-[#606571] uppercase">
+              {movimiento.entregasAdicionales?.length || 0} registros
             </span>
           </div>
 
@@ -125,7 +125,7 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
               {movimiento.entregasAdicionales.map((entrega) => (
                 <div
                   key={entrega.id}
-                  className={`rounded-2xl border px-5 py-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between transition-colors ${
+                  className={`flex flex-col gap-4 rounded-[14px] border px-5 py-4 transition-colors lg:flex-row lg:items-center lg:justify-between ${
                     entrega.tieneValeGenerado
                       ? 'border-zinc-300 bg-zinc-50/50'
                       : 'border-zinc-200 bg-white hover:border-zinc-300'
@@ -133,11 +133,11 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="text-[0.85rem] font-black text-zinc-900 tracking-tight">Segmento #{entrega.numeroEntrega}</span>
+                      <span className="text-[0.85rem] font-semibold text-zinc-900 tracking-tight">Entrega #{entrega.numeroEntrega}</span>
                       <ValeIndicator tieneVale={Boolean(entrega.tieneValeGenerado)} valeNumero={entrega.valeNumero} />
                     </div>
                     <div className="mt-2 text-[0.65rem] font-bold uppercase tracking-widest text-zinc-400">
-                      SYS_TIMESTAMP: {new Date(entrega.fechaEntrega).toLocaleDateString('en-CA')}
+                      Fecha: {new Date(entrega.fechaEntrega).toLocaleDateString('es-PE')}
                     </div>
                     {entrega.motivo ? (
                       <div className="mt-2 text-xs font-medium text-zinc-600 border-l-2 border-zinc-200 pl-2">
@@ -155,16 +155,16 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
                         onChange={(event) => onTempValueChange(entrega.id, parseInt(event.target.value, 10) || 0)}
                         onBlur={() => onBlur(entrega.id)}
                         disabled={isCreating || isUpdating || isProcessing}
-                        className={`w-28 rounded-xl border px-3 py-2.5 text-center text-[0.95rem] font-black tabular-nums transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-60 ${
+                        className={`w-28 rounded-[10px] border px-3 py-2.5 text-center text-[0.95rem] font-semibold tabular-nums transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-60 ${
                           entrega.tieneValeGenerado
                             ? 'border-zinc-200 bg-zinc-100 text-zinc-700 cursor-not-allowed shadow-inner'
                             : hasPendingEntregaChange(entrega.id)
-                            ? 'border-teal-600 bg-teal-50 text-teal-900 focus:ring-teal-600'
-                            : 'border-zinc-300 bg-white text-zinc-900 focus:border-teal-600 focus:ring-teal-600/30 shadow-sm'
+                            ? 'border-[#c8bbff] bg-[#fbfafd] text-[#7c3aed] focus:ring-[#7c3aed]/20'
+                            : 'border-[#e7e7ef] bg-white text-zinc-900 focus:border-[#babdca] focus:ring-[#dedfea]/70'
                         }`}
                       />
                       {hasPendingEntregaChange(entrega.id) && !entrega.tieneValeGenerado ? (
-                        <span className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full border-2 border-white bg-teal-600 animate-pulse" />
+                        <span className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full border-2 border-white bg-[#7c3aed] animate-pulse" />
                       ) : null}
                     </div>
 
@@ -186,10 +186,10 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-zinc-50/50 px-4 py-12 text-center">
+            <div className="flex flex-col items-center justify-center rounded-[14px] border border-dashed border-[#d7d8e2] bg-[#fbfafd] px-4 py-12 text-center">
               <Package className="mb-4 h-8 w-8 text-zinc-300" weight="duotone" />
-              <p className="text-[0.95rem] font-bold text-zinc-900 tracking-tight">Memoria fragmentada limpia</p>
-              <p className="mt-1 text-sm text-zinc-500">Agrega una inyección adicional para segmentar la entrega base.</p>
+              <p className="text-[0.95rem] font-bold text-zinc-900 tracking-tight">Sin entregas adicionales</p>
+              <p className="mt-1 text-sm text-zinc-500">Agrega una entrega adicional para completar la distribución.</p>
             </div>
           )}
         </section>

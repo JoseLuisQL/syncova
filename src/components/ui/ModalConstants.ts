@@ -19,7 +19,7 @@ export const MODAL_STYLES = {
   },
 
   modal: {
-    overlay: 'fixed inset-0 z-[100] bg-gray-900/50 backdrop-blur-sm',
+    overlay: 'fixed inset-0 z-[300] bg-gray-900/50 backdrop-blur-sm',
     container: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-4 sm:items-center sm:p-6',
     panel:
       'relative w-full rounded-t-2xl bg-white shadow-xl ring-1 ring-gray-900/5 sm:max-h-[90vh] sm:rounded-xl',

@@ -42,20 +42,20 @@ const SummaryCard: React.FC<{
 }> = ({ label, value, tone = 'base', icon }) => {
   const className =
     tone === 'alert'
-      ? 'border-rose-200 bg-white text-rose-900 shadow-sm'
+      ? 'border-rose-200 bg-white text-rose-900'
       : tone === 'alt'
-      ? 'border-teal-200 bg-teal-50 text-teal-900 shadow-sm'
-      : 'border-teal-600 bg-teal-600 text-white shadow-sm';
+      ? 'border-[#e7e7ef] bg-[#fbfafd] text-zinc-900'
+      : 'border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]';
 
   return (
-    <div className={`rounded-[16px] border px-5 py-4 ${className}`}>
+    <div className={`rounded-[14px] border px-5 py-4 ${className}`}>
       <div className="flex items-center gap-2 mb-3">
-        <div className={`p-1.5 rounded-lg ${tone === 'alert' ? 'bg-rose-50 border border-rose-100' : tone === 'base' ? 'bg-white/10' : 'bg-white border border-zinc-200'}`}>
+        <div className={`p-1.5 rounded-[8px] ${tone === 'alert' ? 'bg-rose-50 border border-rose-100' : 'bg-white border border-[#e7e7ef]'}`}>
           {icon}
         </div>
-        <p className={`text-[0.65rem] font-bold uppercase tracking-widest ${tone === 'base' ? 'text-zinc-400' : tone === 'alert' ? 'text-rose-500' : 'text-zinc-500'}`}>{label}</p>
+        <p className={`text-[0.65rem] font-bold uppercase tracking-widest ${tone === 'alert' ? 'text-rose-500' : 'text-zinc-500'}`}>{label}</p>
       </div>
-      <p className="text-2xl font-black tracking-tight">{value}</p>
+      <p className="text-2xl font-semibold tracking-tight">{value}</p>
     </div>
   );
 };
@@ -80,14 +80,13 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
 
   const [datos, setDatos] = useState<DatosAjusteEntregas | null>(null);
   const [opciones, setOpciones] = useState<OpcionAjuste[]>([]);
+  const [opcionesError, setOpcionesError] = useState<string | null>(null);
   const [opcionSeleccionada, setOpcionSeleccionada] = useState<string | null>(null);
   const [centrosExpandidos, setCentrosExpandidos] = useState<Set<string>>(new Set());
+  const mesEntrega = datos?.mesEntrega ?? (mes === 12 ? 1 : mes + 1);
+  const anioEntrega = datos?.anioEntrega ?? (mes === 12 ? anio + 1 : anio);
 
   const getErrorMessage = (error: unknown, fallback: string) => {
-    if (error instanceof Error && error.message) {
-      return error.message;
-    }
-
     if (
       typeof error === 'object' &&
       error !== null &&
@@ -98,23 +97,71 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
       return (error as { response?: { data?: { message?: string } } }).response?.data?.message || fallback;
     }
 
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+
     return fallback;
   };
 
+  const crearOpcionParcial = (datosActuales: DatosAjusteEntregas): OpcionAjuste | null => {
+    const ajustes: AjusteIndividual[] = datosActuales.centrosAcopio.flatMap((centro) =>
+      centro.establecimientos.map((establecimiento) => {
+        const bloqueado = establecimiento.tieneValeGenerado;
+        return {
+          movimientoId: establecimiento.movimientoId,
+          establecimientoId: establecimiento.establecimientoId,
+          establecimientoNombre: establecimiento.establecimientoNombre,
+          centroAcopioId: establecimiento.centroAcopioId,
+          entregaAntes: establecimiento.entregaActual,
+          entregaDespues: bloqueado ? establecimiento.entregaActual : 0,
+          diferencia: bloqueado ? 0 : -establecimiento.entregaActual,
+          bloqueado,
+        };
+      }),
+    );
+
+    const reduccionTotal = ajustes.reduce(
+      (total, ajuste) => total + Math.max(0, ajuste.entregaAntes - ajuste.entregaDespues),
+      0,
+    );
+
+    if (reduccionTotal <= 0) {
+      return null;
+    }
+
+    const totalDespues = ajustes.reduce((total, ajuste) => total + ajuste.entregaDespues, 0);
+
+    return {
+      id: 'reduccion_parcial_disponible',
+      nombre: 'Reducir entregas ajustables',
+      descripcion: 'Reduce a cero las entregas que aún no tienen vale generado. Si quedan vales bloqueados, el déficit restante se mantiene informado.',
+      esRecomendada: true,
+      resultadoDeficit: datosActuales.stockInicial - totalDespues,
+      ajustes,
+      totalAntes: datosActuales.totalEntregas,
+      totalDespues,
+      reduccionTotal,
+    };
+  };
 
   const cargarDatos = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
+      setOpcionesError(null);
+      setOpciones([]);
+      setOpcionSeleccionada(null);
 
       const response = await AjusteEntregasService.obtenerDatosParaAjuste(vacunaId, mes, anio);
 
       if (response.success && response.data) {
-        setDatos(response.data);
-        setCentrosExpandidos(new Set(response.data.centrosAcopio.map((centro: any) => centro.centroAcopioId)));
+        const datosAjuste = response.data;
+        setDatos(datosAjuste);
+        setCentrosExpandidos(new Set(datosAjuste.centrosAcopio.map((centro) => centro.centroAcopioId)));
 
-        if (response.data.puedeAjustar) {
-          await calcularOpciones(response.data);
+        if (datosAjuste.puedeAjustar) {
+          await calcularOpciones(datosAjuste);
         }
       } else {
         setError(response.message || 'Error al compilar el pipeline de ajuste');
@@ -135,17 +182,34 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
   const calcularOpciones = async (datosActuales: DatosAjusteEntregas) => {
     try {
       setIsCalculating(true);
+      setOpcionesError(null);
       const response = await AjusteEntregasService.calcularOpcionesAjuste(datosActuales);
 
-      if (response.success && response.data) {
-        setOpciones(response.data);
-        const recomendada = response.data.find((opcion: any) => opcion.esRecomendada);
-        if (recomendada) {
-          setOpcionSeleccionada(recomendada.id);
-        }
+      const opcionesCalculadas = response.success && response.data?.length
+        ? response.data
+        : [crearOpcionParcial(datosActuales)].filter((opcion): opcion is OpcionAjuste => Boolean(opcion));
+
+      if (opcionesCalculadas.length) {
+        setOpciones(opcionesCalculadas);
+        const recomendada = opcionesCalculadas.find((opcion) => opcion.esRecomendada);
+        setOpcionSeleccionada((recomendada || opcionesCalculadas[0]).id);
+        setOpcionesError(null);
+      } else {
+        setOpciones([]);
+        setOpcionSeleccionada(null);
+        setOpcionesError(response.message || 'No se pudieron generar opciones de corrección para este déficit.');
       }
     } catch (err) {
-      console.error('Error inyectando perfiles heúristicos:', err);
+      const opcionParcial = crearOpcionParcial(datosActuales);
+      if (opcionParcial) {
+        setOpciones([opcionParcial]);
+        setOpcionSeleccionada(opcionParcial.id);
+        setOpcionesError(null);
+      } else {
+        setOpciones([]);
+        setOpcionSeleccionada(null);
+        setOpcionesError(getErrorMessage(err, 'No se pudieron cargar las opciones de corrección.'));
+      }
     } finally {
       setIsCalculating(false);
     }
@@ -224,8 +288,8 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
       onClose={() => {
         if (!isExecuting) onClose();
       }}
-      title="Corrección Heurística de Déficit"
-      subtitle={`${vacunaNombre} | Target: ${MESES[mes - 1]} ${anio} | Balance Cero: ${Math.abs(deficit).toLocaleString()} U`}
+      title="Corrección de déficit"
+      subtitle={`${vacunaNombre} | Entrega: ${MESES[mesEntrega - 1]} ${anioEntrega} | Déficit: ${Math.abs(deficit).toLocaleString()} U`}
       icon={TrendDown}
       size="xl"
       footer={
@@ -236,7 +300,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
             disabled={isExecuting}
             className={COMPONENT_STYLES.button.secondary}
           >
-            Abortar Inyección
+            Cancelar
           </button>
           <button
             type="button"
@@ -245,19 +309,19 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
             className={COMPONENT_STYLES.button.primary}
           >
             {isExecuting ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <CheckCircle className="h-4 w-4" weight="bold" />}
-            <span>{isExecuting ? 'Compilando Delta...' : 'Firmar Corrección'}</span>
+            <span>{isExecuting ? 'Aplicando ajuste...' : 'Aplicar corrección'}</span>
           </button>
         </div>
       }
     >
       {isLoading ? (
-        <div className="rounded-[16px] border border-zinc-200 bg-white p-8 flex flex-col items-center justify-center text-center shadow-sm">
+        <div className="flex flex-col items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-white p-8 text-center">
           <CircleNotch className="h-8 w-8 text-zinc-900 animate-spin mb-4" weight="bold" />
-          <p className="text-[0.95rem] font-bold tracking-tight text-zinc-900">Extrayendo topología de transacciones</p>
-          <p className="mt-1 text-sm text-zinc-500">Montando el árbol de asignaciones para calcular la heurística óptima.</p>
+          <p className="text-[0.95rem] font-bold tracking-tight text-zinc-900">Calculando opciones de ajuste</p>
+          <p className="mt-1 text-sm text-zinc-500">Revisando entregas disponibles para estabilizar el déficit.</p>
         </div>
       ) : error ? (
-        <div className="rounded-[16px] border border-rose-200 bg-rose-50 p-5 shadow-sm">
+        <div className="rounded-[14px] border border-rose-200 bg-rose-50 p-5">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-rose-200 text-rose-600 shadow-sm">
               <Warning className="h-5 w-5" weight="duotone" />
@@ -269,14 +333,14 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
           </div>
         </div>
       ) : datos && !datos.puedeAjustar ? (
-        <div className="rounded-[16px] border border-teal-600 bg-teal-600 p-5 shadow-sm">
+        <div className="rounded-[14px] border border-[#dedfea] bg-[#f3f0ff] p-5">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white border border-white/20">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] border border-[#dedfea] bg-white text-[#7c3aed]">
               <LockKey className="h-6 w-6" weight="fill" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[0.95rem] font-bold text-white tracking-tight">Capa Bloqueada</p>
-              <p className="mt-1 text-sm text-zinc-400">{datos.motivoNoPuedeAjustar}</p>
+              <p className="text-[0.95rem] font-bold text-[#15171d] tracking-tight">Ajuste bloqueado</p>
+              <p className="mt-1 text-sm text-[#606571]">{datos.motivoNoPuedeAjustar}</p>
             </div>
           </div>
         </div>
@@ -290,99 +354,127 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
               tone="alt"
             />
             <SummaryCard
-              label="Outflow actual"
+              label="Entregas actuales"
               value={datos.totalEntregas.toLocaleString()}
               icon={<Truck className="h-4 w-4" weight="duotone" />}
               tone="base"
             />
             <SummaryCard
-              label="Fractura (Déficit)"
+              label="Déficit"
               value={Math.abs(datos.deficit).toLocaleString()}
               icon={<TrendDown className="h-4 w-4" weight="bold" />}
               tone="alert"
             />
           </section>
 
-          <section className="rounded-[16px] border border-zinc-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-3 mb-5 border-b border-zinc-100 pb-3">
-              <div className="p-2 bg-zinc-50 border border-zinc-200 rounded-lg">
+          <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-[0.8rem] font-semibold text-[#606571]">
+            <span>Filtro: {MESES[mes - 1]} {anio}</span>
+            <span className="text-zinc-300">→</span>
+            <span className="text-[#15171d]">Se ajustan entregas de {MESES[mesEntrega - 1]} {anioEntrega}</span>
+          </div>
+
+          <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+            <div className="mb-5 flex items-center gap-3 border-b border-[#eeeef3] pb-3">
+              <div className="rounded-[10px] border border-[#e7e7ef] bg-[#fbfafd] p-2">
                 <Sparkle className="h-4 w-4 text-zinc-900" weight="fill" />
               </div>
-              <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Modelos de Resolución</h3>
+              <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Opciones de corrección</h3>
               {isCalculating ? <CircleNotch className="h-4 w-4 animate-spin text-zinc-900 ml-auto" weight="bold" /> : null}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              {opciones.map((opcion) => (
-                <button
-                  key={opcion.id}
-                  type="button"
-                  onClick={() => setOpcionSeleccionada(opcion.id)}
-                  className={`rounded-[16px] border p-5 text-left transition-all ${
-                    opcionSeleccionada === opcion.id
-                      ? 'border-teal-600 bg-teal-600 text-white shadow-md'
-                      : 'border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100 text-zinc-900'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                        <p className={`text-[0.95rem] font-black tracking-tight ${opcionSeleccionada === opcion.id ? 'text-white' : 'text-zinc-900'}`}>{opcion.nombre}</p>
-                        {opcion.esRecomendada ? (
-                          <span className={`rounded-md px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-widest ${
-                            opcionSeleccionada === opcion.id ? 'bg-white text-teal-700' : 'bg-teal-600 text-white'
-                          }`}>
-                            Priority
-                          </span>
-                        ) : null}
+            {isCalculating ? (
+              <div className="rounded-[12px] border border-dashed border-[#d7d8e2] bg-[#fbfafd] px-4 py-6 text-center">
+                <CircleNotch className="mx-auto h-5 w-5 animate-spin text-[#7c3aed]" weight="bold" />
+                <p className="mt-2 text-sm font-semibold text-[#15171d]">Generando opciones de corrección...</p>
+              </div>
+            ) : opcionesError ? (
+              <div className="rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-4">
+                <div className="flex items-start gap-3">
+                  <Warning className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" weight="duotone" />
+                  <div>
+                    <p className="text-sm font-semibold text-amber-900">No se pudieron cargar opciones</p>
+                    <p className="mt-1 text-sm text-amber-800">{opcionesError}</p>
+                  </div>
+                </div>
+              </div>
+            ) : opciones.length === 0 ? (
+              <div className="rounded-[12px] border border-dashed border-[#d7d8e2] bg-[#fbfafd] px-4 py-6 text-center">
+                <p className="text-sm font-semibold text-[#15171d]">Sin opciones disponibles</p>
+                <p className="mt-1 text-sm text-[#606571]">No hay entregas ajustables para este período.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {opciones.map((opcion) => (
+                  <button
+                    key={opcion.id}
+                    type="button"
+                    onClick={() => setOpcionSeleccionada(opcion.id)}
+                    className={`rounded-[14px] border p-5 text-left transition-colors ${
+                      opcionSeleccionada === opcion.id
+                        ? 'border-[#c8bbff] bg-[#fbfafd] text-[#15171d]'
+                        : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd] text-zinc-900'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                          <p className="text-[0.95rem] font-semibold tracking-tight text-zinc-900">{opcion.nombre}</p>
+                          {opcion.esRecomendada ? (
+                            <span className={`rounded-[7px] px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-widest ${
+                              opcionSeleccionada === opcion.id ? 'bg-[#f3f0ff] text-[#7c3aed] border border-[#dedfea]' : 'bg-[#7c3aed] text-white'
+                            }`}>
+                              Recomendado
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="text-[0.75rem] font-medium leading-relaxed text-zinc-500">{opcion.descripcion}</p>
                       </div>
-                      <p className={`text-[0.75rem] font-medium leading-relaxed ${opcionSeleccionada === opcion.id ? 'text-zinc-400' : 'text-zinc-500'}`}>{opcion.descripcion}</p>
+                      <div
+                        className={`flex h-6 w-6 mt-1 shrink-0 items-center justify-center rounded-full border-2 ${
+                          opcionSeleccionada === opcion.id ? 'bg-[#7c3aed] border-[#7c3aed]' : 'bg-transparent border-zinc-300'
+                        }`}
+                      >
+                        {opcionSeleccionada === opcion.id ? <CheckCircle className="h-5 w-5 text-white" weight="fill" /> : null}
+                      </div>
                     </div>
-                    <div
-                      className={`flex h-6 w-6 mt-1 shrink-0 items-center justify-center rounded-full border-2 ${
-                        opcionSeleccionada === opcion.id ? 'bg-white border-white' : 'bg-transparent border-zinc-300'
-                      }`}
-                    >
-                      {opcionSeleccionada === opcion.id ? <CheckCircle className="h-5 w-5 text-zinc-900" weight="fill" /> : null}
-                    </div>
-                  </div>
 
-                  <div className="mt-5 grid grid-cols-2 gap-4">
-                    <div>
-                      <p className={`text-[0.6rem] font-bold uppercase tracking-widest ${opcionSeleccionada === opcion.id ? 'text-zinc-400' : 'text-zinc-500'}`}>Descuento</p>
-                      <p className={`mt-1 text-lg font-black tracking-tight ${opcionSeleccionada === opcion.id ? 'text-rose-400' : 'text-rose-600'}`}>-{opcion.reduccionTotal.toLocaleString()}</p>
+                    <div className="mt-5 grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-500">Reducción</p>
+                        <p className="mt-1 text-lg font-semibold tracking-tight text-rose-600">-{opcion.reduccionTotal.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-500">Déficit restante</p>
+                        <p className={`mt-1 text-lg font-semibold tracking-tight ${
+                          opcion.resultadoDeficit === 0 
+                            ? 'text-zinc-900'
+                            : 'text-amber-600'
+                        }`}>
+                          {Math.abs(opcion.resultadoDeficit).toLocaleString()}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className={`text-[0.6rem] font-bold uppercase tracking-widest ${opcionSeleccionada === opcion.id ? 'text-zinc-400' : 'text-zinc-500'}`}>Defect remanente</p>
-                      <p className={`mt-1 text-lg font-black tracking-tight ${
-                        opcion.resultadoDeficit === 0 
-                          ? opcionSeleccionada === opcion.id ? 'text-white' : 'text-zinc-900' 
-                          : opcionSeleccionada === opcion.id ? 'text-amber-400' : 'text-amber-600'
-                      }`}>
-                        {opcion.resultadoDeficit.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
 
           {opcionActual ? (
-            <section className="rounded-[16px] border border-zinc-200 bg-white p-5 shadow-sm">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-5 border-b border-zinc-100 pb-3">
+            <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+              <div className="mb-5 flex flex-col gap-4 border-b border-[#eeeef3] pb-3 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-zinc-50 border border-zinc-200 rounded-lg">
+                  <div className="rounded-[10px] border border-[#e7e7ef] bg-[#fbfafd] p-2">
                     <Buildings className="h-4 w-4 text-zinc-900" weight="duotone" />
                   </div>
-                  <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Jerarquía Distributiva</h3>
+                  <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Distribución afectada</h3>
                 </div>
                 <div className="flex flex-wrap gap-2 text-[0.65rem] font-bold uppercase tracking-widest">
-                  <span className="rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-zinc-900 shadow-sm">
-                    {datos.establecimientosAjustables} Nodos Flex
+                  <span className="rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-zinc-900">
+                    {datos.establecimientosAjustables} ajustables
                   </span>
-                  <span className="rounded-md border border-zinc-900 bg-zinc-900 px-2.5 py-1 text-white shadow-sm">
-                    {datos.establecimientosBloqueados} Nodos Locked
+                  <span className="rounded-[8px] border border-[#dedfea] bg-[#f3f0ff] px-2.5 py-1 text-[#7c3aed]">
+                    {datos.establecimientosBloqueados} bloqueados
                   </span>
                 </div>
               </div>
@@ -395,8 +487,8 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                   return (
                     <div
                       key={centro.centroAcopioId}
-                      className={`overflow-hidden rounded-xl border transition-all ${
-                        centro.tieneValeGenerado ? 'border-zinc-300 bg-zinc-50/70 p-1' : 'border-zinc-200 bg-white shadow-sm hover:border-zinc-300 hover:shadow'
+                      className={`overflow-hidden rounded-[12px] border transition-colors ${
+                        centro.tieneValeGenerado ? 'border-[#e7e7ef] bg-[#fbfafd] p-1' : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2]'
                       }`}
                     >
                       <button
@@ -405,14 +497,14 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                         className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left ${centro.tieneValeGenerado ? 'opacity-80' : ''}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${centro.tieneValeGenerado ? 'bg-zinc-200 text-zinc-500' : 'bg-teal-600 text-white'}`}>
+                          <div className={`flex h-8 w-8 items-center justify-center rounded-[9px] ${centro.tieneValeGenerado ? 'bg-zinc-200 text-zinc-500' : 'bg-[#f3f0ff] text-[#7c3aed] border border-[#dedfea]'}`}>
                             {centro.tieneValeGenerado ? <LockKey className="h-4 w-4" weight="fill" /> : <Buildings className="h-4 w-4" weight="duotone" />}
                           </div>
                           <div>
-                            <p className="text-[0.85rem] font-black tracking-tight text-zinc-900">{centro.centroAcopioNombre}</p>
+                            <p className="text-[0.85rem] font-semibold tracking-tight text-zinc-900">{centro.centroAcopioNombre}</p>
                             {centro.tieneValeGenerado ? (
-                              <span className="mt-1 inline-flex items-center gap-1 rounded bg-zinc-200 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-widest text-zinc-700">
-                                Ticket Lock: {centro.valeNumero}
+                              <span className="mt-1 inline-flex items-center gap-1 rounded-[6px] bg-zinc-200 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-widest text-zinc-700">
+                                Vale bloqueado: {centro.valeNumero}
                               </span>
                             ) : null}
                           </div>
@@ -429,14 +521,14 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                       </button>
 
                       {isExpanded ? (
-                        <div className="space-y-1.5 border-t border-zinc-100 bg-zinc-50/50 p-3">
+                        <div className="space-y-1.5 border-t border-[#eeeef3] bg-[#fbfafd] p-3">
                           {ajustesCentro.map((ajuste) => (
                             <div
                               key={ajuste.movimientoId}
-                              className={`rounded-xl border px-4 py-3 flex items-center justify-between transition-colors ${
+                              className={`flex items-center justify-between rounded-[10px] border px-4 py-3 transition-colors ${
                                 ajuste.bloqueado
-                                  ? 'border-zinc-200 bg-zinc-100/50'
-                                  : 'border-zinc-200 bg-white hover:border-zinc-300 shadow-sm'
+                                  ? 'border-[#e7e7ef] bg-zinc-100/50'
+                                  : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2]'
                               }`}
                             >
                               <div className="flex items-center gap-3">
@@ -451,16 +543,16 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                               </div>
                               
                               <div className="flex items-center gap-3 text-[0.85rem]">
-                                <span className={`font-black ${ajuste.bloqueado ? 'text-zinc-400' : 'text-zinc-600'}`}>{ajuste.entregaAntes.toLocaleString()}</span>
+                                <span className={`font-semibold ${ajuste.bloqueado ? 'text-zinc-400' : 'text-zinc-600'}`}>{ajuste.entregaAntes.toLocaleString()}</span>
                                 {!ajuste.bloqueado && ajuste.diferencia !== 0 ? (
                                   <>
                                     <span className="text-zinc-300 font-bold">&rarr;</span>
-                                    <span className="font-black text-zinc-900">{ajuste.entregaDespues.toLocaleString()}</span>
+                                    <span className="font-semibold text-zinc-900">{ajuste.entregaDespues.toLocaleString()}</span>
                                     <span
-                                      className={`ml-2 rounded-md border px-2 py-0.5 text-[0.7rem] font-black ${
+                                      className={`ml-2 rounded-[7px] border px-2 py-0.5 text-[0.7rem] font-semibold ${
                                         ajuste.diferencia < 0
                                           ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                          : 'bg-teal-600 text-white border-teal-600'
+                                          : 'bg-[#f3f0ff] text-[#7c3aed] border-[#dedfea]'
                                       }`}
                                     >
                                       {ajuste.diferencia > 0 ? '+' : ''}
@@ -468,7 +560,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                                     </span>
                                   </>
                                 ) : (
-                                  <span className="ml-2 text-[0.65rem] font-bold uppercase tracking-widest text-zinc-400 border border-zinc-200 bg-zinc-50 px-2 py-0.5 rounded-md">Static</span>
+                                  <span className="ml-2 rounded-[7px] border border-[#e7e7ef] bg-zinc-50 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-widest text-zinc-400">Sin cambios</span>
                                 )}
                               </div>
                             </div>
@@ -480,18 +572,18 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                 })}
               </div>
 
-              <div className="mt-5 grid gap-4 grid-cols-3 pt-5 border-t border-zinc-100">
-                <div className="p-4 rounded-xl border border-zinc-200 bg-zinc-50">
-                  <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">Base Allocation</p>
-                  <p className="mt-1 text-xl font-black tracking-tight text-zinc-900">{opcionActual.totalAntes.toLocaleString()}</p>
+              <div className="mt-5 grid grid-cols-3 gap-4 border-t border-[#eeeef3] pt-5">
+                <div className="rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] p-4">
+                  <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">Entrega actual</p>
+                  <p className="mt-1 text-xl font-semibold tracking-tight text-zinc-900">{opcionActual.totalAntes.toLocaleString()}</p>
                 </div>
-                <div className="p-4 rounded-xl border border-rose-200 bg-white shadow-sm ring-1 ring-inset ring-rose-50">
+                <div className="rounded-[12px] border border-rose-200 bg-white p-4">
                   <p className="text-[0.65rem] font-bold uppercase tracking-widest text-rose-500">Delta</p>
-                  <p className="mt-1 text-xl font-black tracking-tight text-rose-600">-{opcionActual.reduccionTotal.toLocaleString()}</p>
+                  <p className="mt-1 text-xl font-semibold tracking-tight text-rose-600">-{opcionActual.reduccionTotal.toLocaleString()}</p>
                 </div>
-                <div className="p-4 rounded-xl border border-teal-600 bg-teal-600 shadow-md">
-                  <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-400">Target Resolved</p>
-                  <p className="mt-1 text-xl font-black tracking-tight text-white">{opcionActual.totalDespues.toLocaleString()}</p>
+                <div className="rounded-[12px] border border-[#dedfea] bg-[#f3f0ff] p-4">
+                  <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">Entrega ajustada</p>
+                  <p className="mt-1 text-xl font-semibold tracking-tight text-[#7c3aed]">{opcionActual.totalDespues.toLocaleString()}</p>
                 </div>
               </div>
             </section>

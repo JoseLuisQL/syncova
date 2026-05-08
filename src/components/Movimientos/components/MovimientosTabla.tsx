@@ -3,7 +3,6 @@ import { Package, Plus, Faders, X, CheckCircle } from '@phosphor-icons/react';
 import { DataTable } from '../../Establecimientos/components';
 import {
   COLUMNAS_CONFIGURABLES,
-  COMPONENT_STYLES,
   INPUT_FIELD_STYLES,
   MESES,
   TABLA_COLUMNAS,
@@ -99,7 +98,7 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = memo(({
     : `${styles.normal} ${styles.focus}`;
 
   const indicatorClassName = typing
-    ? 'bg-teal-600 animate-pulse'
+    ? 'bg-[#7c3aed] animate-pulse'
     : pending
     ? 'bg-amber-400 animate-pulse'
     : '';
@@ -148,7 +147,7 @@ const MetricPill: React.FC<{
       : tone === 'cyan'
       ? 'bg-transparent text-zinc-900 font-bold'
       : tone === 'teal'
-      ? 'bg-teal-600 text-white shadow-sm font-black'
+      ? 'border border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed] font-semibold'
       : 'bg-transparent text-zinc-600 font-semibold';
 
   return (
@@ -179,12 +178,28 @@ const AvailabilityBadge: React.FC<{ value: number }> = memo(({ value }) => {
 AvailabilityBadge.displayName = 'AvailabilityBadge';
 
 const IciPill: React.FC<{ value: number }> = memo(({ value }) => (
-  <span className="inline-flex min-w-[3.5rem] items-center justify-center rounded-[6px] bg-indigo-50/80 px-2 py-1 text-[0.75rem] font-black tabular-nums tracking-tight text-indigo-700 ring-1 ring-inset ring-indigo-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)]">
+  <span className="inline-flex min-w-[3.5rem] items-center justify-center rounded-[6px] border border-indigo-100 bg-indigo-50 px-2 py-1 text-[0.75rem] font-semibold tabular-nums tracking-tight text-indigo-700">
     {value === 0 ? <span className="text-indigo-300 opacity-60">-</span> : value.toLocaleString()}
   </span>
 ));
 
 IciPill.displayName = 'IciPill';
+
+const TotalValue: React.FC<{ value?: number; accent?: boolean }> = memo(({ value, accent = false }) => (
+  <span
+    className={`inline-flex min-w-[3.25rem] items-center justify-center rounded-[7px] px-2 py-1 text-[0.76rem] font-semibold tabular-nums tracking-tight ${
+      value && value !== 0
+        ? accent
+          ? 'bg-[#f3f0ff] text-[#7c3aed]'
+          : 'text-[#15171d]'
+        : 'text-zinc-300'
+    }`}
+  >
+    {value && value !== 0 ? value.toLocaleString() : '-'}
+  </span>
+));
+
+TotalValue.displayName = 'TotalValue';
 
 // ============================================================================
 // MOBILE METRIC ROW
@@ -304,7 +319,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
   const visibleEditableFields = [
     visibleColumns.transIngreso ? (
       <div key="transIngreso" className="flex flex-col items-center gap-1">
-        <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-teal-600">T. Ingreso</span>
+        <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-[#606571]">T. Ingreso</span>
         <EditableNumberField
           readOnly={readOnly}
           value={getCurrentValue(movimiento.establecimientoId, 'transIngreso', movimiento.transIngreso)}
@@ -322,7 +337,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
     ) : null,
     visibleColumns.salida ? (
       <div key="salida" className="flex flex-col items-center gap-1">
-        <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-cyan-600">Salida</span>
+        <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-[#606571]">Salida</span>
         <EditableNumberField
           readOnly={readOnly}
           value={getCurrentValue(movimiento.establecimientoId, 'salida', movimiento.salida)}
@@ -363,7 +378,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
       onClick={() => onRowSelect(movimiento.establecimientoId)}
       className={`rounded-xl border p-3 transition-all ${
         isSelected
-          ? 'border-teal-400 bg-teal-50/50 shadow-sm ring-1 ring-teal-300'
+          ? 'border-[#c8bbff] bg-[#fbfafd] ring-1 ring-[#dedfea]'
           : `border-slate-200 ${colores.bg} hover:border-slate-300 hover:shadow-sm`
       }`}
     >
@@ -372,10 +387,10 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
         <span
           className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
             movimiento.tieneMovimiento ? 'bg-emerald-500' : 'bg-slate-300'
-          } ${isSelected ? 'ring-3 ring-teal-300' : 'ring-2 ring-white/80'}`}
+          } ${isSelected ? 'ring-2 ring-[#dedfea]' : 'ring-2 ring-white/80'}`}
         />
         <div className="min-w-0 flex-1">
-          <p className={`truncate text-sm font-semibold ${isSelected ? 'text-teal-800' : colores.text}`}>
+          <p className={`truncate text-sm font-semibold ${isSelected ? 'text-[#15171d]' : colores.text}`}>
             {movimiento.establecimiento.nombre}
           </p>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-slate-500">
@@ -452,7 +467,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
               <button
                 type="button"
                 onClick={(event) => { event.stopPropagation(); onAgregarEntregaAdicional(movimiento.establecimientoId); }}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-dashed border-teal-300 bg-white text-teal-600 transition hover:border-teal-400 hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-[9px] border border-dashed border-[#d7d8e2] bg-white text-[#606571] transition hover:border-[#c8bbff] hover:bg-[#fbfafd] hover:text-[#7c3aed] disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isDisabled}
                 title="Agregar entrega adicional"
               >
@@ -550,7 +565,7 @@ const MobileTotalesSummary: React.FC<{
           </span>
         ) : null}
         {visibleColumns.totalSaldo ? (
-          <span className="rounded-lg bg-teal-50 px-2 py-1 text-[0.65rem] font-semibold text-teal-700">
+          <span className="rounded-lg border border-[#dedfea] bg-[#f3f0ff] px-2 py-1 text-[0.65rem] font-semibold text-[#7c3aed]">
             Total: {totalesGenerales.totalSaldo.toLocaleString()}
           </span>
         ) : null}
@@ -565,7 +580,7 @@ const MobileTotalesSummary: React.FC<{
           </span>
         ) : null}
         {visibleColumns.stock ? (
-          <span className="rounded-lg bg-cyan-50 px-2 py-1 text-[0.65rem] font-semibold text-cyan-700">
+          <span className="rounded-lg bg-zinc-50 px-2 py-1 text-[0.65rem] font-semibold text-zinc-700">
             Stock: {totalesGenerales.stock.toLocaleString()}
           </span>
         ) : null}
@@ -726,7 +741,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
               <button
                 type="button"
                 onClick={() => onAgregarEntregaAdicional(movimiento.establecimientoId)}
-                className={`inline-flex w-full ${totalEntregaAdicional > 0 ? 'h-5' : 'h-11'} items-center justify-center rounded-lg border border-dashed border-teal-300 bg-teal-50/50 text-teal-600 transition hover:border-teal-400 hover:bg-teal-100 focus:outline-none focus:ring-2 focus:ring-teal-500/30 disabled:cursor-not-allowed disabled:opacity-50`}
+                className={`inline-flex w-full ${totalEntregaAdicional > 0 ? 'h-5' : 'h-11'} items-center justify-center rounded-lg border border-dashed border-[#d7d8e2] bg-white text-[#606571] transition hover:border-[#c8bbff] hover:bg-[#fbfafd] hover:text-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 disabled:cursor-not-allowed disabled:opacity-50`}
                 disabled={isDisabled}
                 title="Agregar entrega adicional"
               >
@@ -828,37 +843,37 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
   const renderTotalCell = (key: string) => {
     switch (key) {
       case 'saldoAnterior':
-        return <MetricPill value={totalesGenerales.saldoAnterior} tone="neutral" />;
+        return <TotalValue value={totalesGenerales.saldoAnterior} />;
       case 'transIngreso':
-        return <MetricPill value={totalesGenerales.transIngreso} tone="neutral" />;
+        return <TotalValue value={totalesGenerales.transIngreso} />;
       case 'totalSaldo':
-        return <MetricPill value={totalesGenerales.totalSaldo} tone="teal" />;
+        return <TotalValue value={totalesGenerales.totalSaldo} accent />;
       case 'salida':
-        return <MetricPill value={totalesGenerales.salida} tone="neutral" />;
+        return <TotalValue value={totalesGenerales.salida} />;
       case 'transSalida':
-        return <MetricPill value={totalesGenerales.transSalida} tone="neutral" />;
+        return <TotalValue value={totalesGenerales.transSalida} />;
       case 'saldo':
-        return <MetricPill value={totalesGenerales.saldo} tone="teal" />;
+        return <TotalValue value={totalesGenerales.saldo} accent />;
       case 'ici':
-        return <IciPill value={totalesGenerales.ici ?? 0} />;
+        return <TotalValue value={totalesGenerales.ici ?? 0} />;
       case 'entrega':
-        return <MetricPill value={totalesGenerales.entrega} tone="teal" />;
+        return <TotalValue value={totalesGenerales.entrega} accent />;
       case 'stock':
-        return <MetricPill value={totalesGenerales.stock} tone="teal" />;
+        return <TotalValue value={totalesGenerales.stock} accent />;
       case 'promedioConsumo':
       case 'disponibilidad':
-        return <span className="text-sm text-slate-400">-</span>;
+        return <TotalValue />;
       default:
         return null;
     }
   };
 
   return (
-    <section className="relative flex h-full flex-1 flex-col bg-transparent" aria-label="Tabla de movimientos">
+    <section className="relative flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-transparent" aria-label="Tabla de movimientos">
       <button
         type="button"
         onClick={onOpenColumnSettings}
-        className="absolute right-2 top-2 z-30 inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-white/95 text-[#15171d] shadow-sm backdrop-blur transition hover:bg-[#fbfafd] sm:right-3 sm:top-3"
+        className="absolute right-3 top-3 z-[90] inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#d7d8e2] bg-white text-[#15171d] shadow-[0_12px_30px_-20px_rgba(12,15,24,0.65)] backdrop-blur transition hover:border-[#c8bbff] hover:bg-[#fbfafd] hover:text-[#7c3aed]"
         title={`Configurar columnas (${visibleCount}/${configurableColumnsAllowed.length})`}
         aria-label="Configurar columnas visibles"
       >
@@ -874,20 +889,20 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         {/* ============================================================== */}
         {/* DESKTOP TABLE (hidden on mobile) */}
         {/* ============================================================== */}
-        <div className="hidden min-h-0 flex-1 overflow-auto md:block selection:bg-zinc-200">
-          <table className="w-max min-w-full table-fixed border-collapse" role="table" aria-label="Matriz de datos">
-            <thead className="sticky top-0 z-20">
-              <tr className="bg-[#fbfafd]">
+        <div className="hidden h-full min-h-0 flex-1 overflow-auto overscroll-contain rounded-[14px] border border-[#e7e7ef] bg-white shadow-[0_16px_40px_-34px_rgba(12,15,24,0.5)] md:block selection:bg-zinc-200">
+          <table className="w-max min-w-full table-fixed border-separate border-spacing-0" role="table" aria-label="Matriz de datos">
+            <thead className="sticky top-0 z-40 bg-white shadow-[0_18px_34px_-30px_rgba(12,15,24,0.58)]">
+              <tr className="bg-white">
                 {columnasVisibles.map((column, index) => {
                   const isFirst = index === 0;
 
                   return (
                     <th
                       key={column.key}
-                      className={`${COMPONENT_STYLES.table.headerCell} ${column.width} ${
+                      className={`h-12 border-b border-[#eef0f6] bg-white px-3 py-2 align-middle text-[0.68rem] font-semibold uppercase tracking-[0.11em] text-[#747986] ${column.width} ${
                         isFirst
-                          ? 'sticky left-0 z-30 bg-[#fbfafd] border-r border-[#e7e7ef]'
-                          : 'border-r border-[#eeeef3]'
+                          ? 'sticky left-0 z-50 shadow-[12px_0_24px_-26px_rgba(12,15,24,0.62)]'
+                          : ''
                       } ${
                         column.align === 'center'
                           ? 'text-center'
@@ -895,9 +910,9 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                       }`}
                     >
                       {column.key === 'entrega' ? (
-                        <div className="flex flex-col items-center gap-0.5">
+                        <div className="flex flex-col items-center gap-0.5 leading-tight">
                           <span>{column.label}</span>
-                          <span className="text-[10px] font-semibold normal-case tracking-normal text-emerald-600">{periodoEntrega}</span>
+                          <span className="text-[0.62rem] font-semibold normal-case tracking-normal text-[#7c3aed]">{periodoEntrega}</span>
                         </div>
                       ) : (
                         column.label
@@ -906,18 +921,20 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                   );
                 })}
               </tr>
-              {/* Totales Macro movidos aquí al thead para sticky automático sin gaps */}
-              <tr className="border-b border-[#eeeef3] bg-white/95 shadow-sm backdrop-blur-sm">
-                <th className="sticky left-0 z-30 border-r border-[#e7e7ef] bg-white/95 px-3 py-2 text-left font-normal">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[0.65rem] font-black uppercase tracking-widest text-zinc-600">Total Macro</span>
-                    <span className="text-xs font-bold text-zinc-400">{datosTabla.length} un.</span>
+              <tr className="bg-[#fbfafd]">
+                <th className="sticky left-0 z-50 h-11 border-b border-[#e7e7ef] bg-[#fbfafd] px-3 py-2 text-left font-normal shadow-[12px_0_24px_-26px_rgba(12,15,24,0.62)]">
+                  <div className="flex items-center gap-2">
+                    <span className="h-6 w-1 rounded-full bg-[#7c3aed]" />
+                    <div className="min-w-0">
+                      <p className="text-[0.64rem] font-bold uppercase tracking-[0.16em] text-[#15171d]">Total general</p>
+                      <p className="text-[0.68rem] font-semibold text-[#8b8f9b]">{datosTabla.length} establecimientos</p>
+                    </div>
                   </div>
                 </th>
                 {columnasVisibles
                   .filter((column) => column.key !== 'establecimiento')
                   .map((column) => (
-                    <th key={column.key} className={`border-r border-[#eeeef3] bg-white/95 px-1 py-1 font-normal ${column.key === 'entrega' ? 'align-top text-center' : 'text-center align-middle'}`}>
+                    <th key={column.key} className={`h-11 border-b border-[#e7e7ef] bg-[#fbfafd] px-2 py-1 font-normal ${column.key === 'entrega' ? 'align-middle text-center' : 'text-center align-middle'}`}>
                       {renderTotalCell(column.key)}
                     </th>
                   ))}
@@ -930,7 +947,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 <tr>
                   <td colSpan={columnasVisibles.length} className="px-6 py-12 text-center">
                     <div className="mx-auto flex max-w-md flex-col items-center">
-                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-300">
+                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] text-slate-300">
                         <Package className="h-6 w-6" />
                       </div>
                       <p className="text-sm font-semibold text-slate-800">No hay establecimientos para mostrar</p>
@@ -946,18 +963,19 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 const estiloEstablecimiento = getEstiloEstablecimiento(movimiento.establecimiento as Establecimiento);
                 const { colores, centro } = estiloEstablecimiento;
                 const isSelected = selectedRowId === movimiento.establecimientoId;
-                const rowBg = isSelected ? 'bg-zinc-100/60' : colores.bg;
+                const rowBg = colores.bg;
+                const selectedRowRing = isSelected ? 'ring-inset ring-[1.5px] ring-[#7c3aed]/35' : '';
 
                 return (
                   <tr
                     key={`${movimiento.establecimientoId}-${selectedMes}-${selectedAnio}`}
                     onClick={() => onRowSelect(movimiento.establecimientoId)}
-                    className={`${rowBg} cursor-pointer border-b border-[#eeeef3] transition-colors ${!isSelected && 'hover:brightness-[0.99]'}`}
+                    className={`${rowBg} ${selectedRowRing} cursor-pointer border-b border-white/70 transition hover:brightness-[0.98]`}
                   >
-                    <td className={`sticky left-0 z-10 box-border border-r border-zinc-200 px-3 py-2.5 ${isSelected ? 'bg-teal-50/70 ring-inset ring-[1.5px] ring-teal-600' : colores.bg}`}>
+                    <td className={`sticky left-0 z-10 box-border px-3 py-2.5 ${rowBg} ${isSelected ? 'ring-inset ring-[1.5px] ring-[#7c3aed]/35' : ''}`}>
                       <div className="min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className={`truncate text-xs font-black tracking-tight ${isSelected ? 'text-zinc-900' : 'text-zinc-700'}`}>
+                          <p className={`truncate text-xs font-semibold tracking-tight ${isSelected ? 'text-zinc-900' : colores.text}`}>
                             {movimiento.establecimiento.nombre}
                           </p>
                           {!movimiento.tieneMovimiento && <span className="ml-2 h-1.5 w-1.5 rounded-full bg-amber-400"></span>}
@@ -967,7 +985,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                              <span className="font-mono text-[0.6rem] font-bold text-zinc-400">{movimiento.establecimiento.codigo}</span>
                            )}
                            <span
-                             className={`inline-flex items-center rounded-sm px-1.5 py-[2px] text-[0.55rem] font-black uppercase tracking-[0.1em] ${
+                             className={`inline-flex items-center rounded-sm px-1.5 py-[2px] text-[0.55rem] font-semibold uppercase tracking-[0.1em] ${
                                movimiento.tieneMovimiento
                                  ? 'border border-zinc-300 bg-white text-zinc-800'
                                  : 'border border-zinc-200 bg-zinc-100 text-zinc-400'
@@ -976,7 +994,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                              {movimiento.tieneMovimiento ? 'Con mov' : 'Pendiente'}
                            </span>
                            {selectedCentroAcopio === 'todos' ? (
-                             <span className={`inline-flex rounded-sm border px-1.5 py-[2px] text-[0.55rem] font-black uppercase tracking-[0.1em] ${colores.border} text-zinc-500`}>
+                             <span className={`inline-flex rounded-sm border px-1.5 py-[2px] text-[0.55rem] font-semibold uppercase tracking-[0.1em] ${colores.border} text-zinc-500`}>
                                {centro !== 'DEFAULT' ? centro : 'Base'}
                              </span>
                            ) : null}
@@ -992,9 +1010,9 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                         return (
                           <td
                             key={column.key}
-                            className={`border-r border-zinc-100 align-middle ${isEditable ? 'p-0' : 'px-2 py-1'} ${isSelected ? 'border-y border-y-teal-600 border-r-teal-200' : ''} ${
+                            className={`align-middle ${isEditable ? 'p-0' : 'px-2 py-1'} ${
                               column.key === 'entrega' ? 'align-top' : 'text-center'
-                            } ${column.key === 'totalSaldo' || column.key === 'saldo' ? 'bg-zinc-50/50' : ''}`}
+                            } bg-transparent`}
                           >
                             {renderCellContent(movimiento, column.key)}
                           </td>

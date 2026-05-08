@@ -9,16 +9,16 @@ import { DESIGN_COLOR_SCALES, DESIGN_TOKENS } from '../../styles/designTokens';
 
 export const COLORS = {
   primary: {
-    gradient: DESIGN_COLOR_SCALES.primary.gradient,
-    gradientHover: 'from-teal-700 to-cyan-700',
-    bg: DESIGN_COLOR_SCALES.primary.surface,
-    bgSoft: DESIGN_COLOR_SCALES.primary.surfaceSoft,
-    border: DESIGN_COLOR_SCALES.primary.border,
-    text: DESIGN_COLOR_SCALES.primary.text,
-    textDark: DESIGN_COLOR_SCALES.primary.textStrong,
-    icon: DESIGN_COLOR_SCALES.primary.icon,
-    badge: 'bg-teal-100 text-teal-800',
-    focus: 'focus:ring-teal-500/20 focus:border-teal-500',
+    gradient: 'from-[#7c3aed] to-[#6d28d9]',
+    gradientHover: 'from-[#6d28d9] to-[#5b21b6]',
+    bg: 'bg-[#f3f0ff]',
+    bgSoft: 'bg-[#fbfafd]',
+    border: 'border-[#dedfea]',
+    text: 'text-[#7c3aed]',
+    textDark: 'text-[#5b21b6]',
+    icon: 'text-[#7c3aed]',
+    badge: 'bg-[#f3f0ff] text-[#7c3aed]',
+    focus: 'focus:ring-[#7c3aed]/20 focus:border-[#7c3aed]',
   },
   secondary: {
     gradient: DESIGN_COLOR_SCALES.secondary.gradient,
@@ -83,33 +83,33 @@ export const COLORS = {
 } as const;
 
 export const COMPONENT_STYLES = {
-  pageBackground: 'min-h-screen bg-[#f0eff4]',
-  shell: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
-  surface: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
-  panel: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
+  pageBackground: 'min-h-screen bg-white',
+  shell: 'rounded-none border-0 bg-transparent shadow-none',
+  surface: 'rounded-none border-0 bg-transparent shadow-none',
+  panel: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
   mutedPanel: 'rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd]',
-  card: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
+  card: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
   header: {
     container: 'sticky top-0 z-20 backdrop-blur-md bg-white/80',
     title: 'text-[1.42rem] font-semibold tracking-tight text-zinc-900 sm:text-[1.54rem]',
     subtitle: 'text-[0.92rem] text-zinc-500',
     iconWrapper:
-      'flex h-12 w-12 items-center justify-center rounded-[18px] bg-teal-600 text-white shadow-sm',
+      'flex h-12 w-12 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]',
   },
 
   button: {
     primary:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     secondary:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 py-1.5 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     success:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     warning:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     danger:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-rose-200 bg-rose-50 px-3.5 py-1.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     ghost:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#e7e7ef] bg-white px-3 py-2 text-sm font-semibold text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3 py-1.5 text-sm font-semibold text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     icon:
       'inline-flex h-9 w-9 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
     iconEdit: 'border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:ring-zinc-900',
@@ -120,8 +120,8 @@ export const COMPONENT_STYLES = {
 
   input: {
     base:
-      'w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-600/10',
-    normal: 'border-zinc-200 hover:border-zinc-300 focus:border-teal-600',
+      'w-full rounded-[10px] border bg-white px-4 py-2.5 text-sm text-[#15171d] shadow-sm transition placeholder:text-[#8b8f9b] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
+    normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     error: 'border-rose-300 bg-rose-50/60 focus:border-rose-500 focus:ring-rose-500/20',
     pending: 'border-zinc-300 bg-zinc-50 focus:border-zinc-400 focus:ring-zinc-500/20',
     label: 'mb-1 block text-[0.84rem] font-medium text-zinc-700',
@@ -131,14 +131,14 @@ export const COMPONENT_STYLES = {
 
   select: {
     base:
-      'w-full appearance-none rounded-xl border bg-white px-4 py-2.5 text-sm text-zinc-900 shadow-sm transition focus:outline-none focus:ring-2',
+      'w-full appearance-none rounded-[10px] border bg-white px-4 py-2.5 text-sm text-[#15171d] shadow-sm transition focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
     teal: 'border-zinc-200 hover:border-zinc-300 focus:border-zinc-900 focus:ring-zinc-900/10',
-    cyan: 'border-zinc-200 hover:border-zinc-300 focus:border-teal-600 focus:ring-teal-600/10',
-    emerald: 'border-zinc-200 hover:border-zinc-300 focus:border-teal-600 focus:ring-teal-600/10',
+    cyan: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
+    emerald: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
   },
 
   table: {
-    container: 'overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
+    container: 'overflow-visible rounded-none border-0 bg-transparent shadow-none',
     header: 'bg-[#fbfafd]',
     headerCell: 'px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]',
     row: 'transition-colors duration-150 border-b border-[#eeeef3] hover:bg-[#fbfafd]',
@@ -156,20 +156,20 @@ export const COMPONENT_STYLES = {
   },
 
   modal: {
-    overlay: 'fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm',
+    overlay: 'fixed inset-0 z-[240] bg-zinc-950/60 backdrop-blur-sm',
     container: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6',
     containerLarge: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6',
     containerFullscreen: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-2 sm:items-center sm:p-4',
     panel:
-      'w-full rounded-[24px] bg-white shadow-2xl ring-1 ring-zinc-200/50 sm:max-h-[90vh]',
-    header: 'border-b border-zinc-100 px-5 py-4 sm:px-6',
+      'w-full rounded-[24px] bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] ring-1 ring-zinc-200/50 sm:max-h-[90vh]',
+    header: 'border-b border-[#eeeef3] px-5 py-4 sm:px-6',
     body: 'max-h-[calc(100vh-170px)] overflow-y-auto px-5 py-5 sm:max-h-[calc(90vh-156px)] sm:px-6',
-    footer: 'border-t border-zinc-100 bg-zinc-50/50 px-5 py-4 sm:px-6',
+    footer: 'border-t border-[#eeeef3] bg-white px-5 py-4 sm:px-6',
   },
 
   stats: {
     card:
-      'min-h-[88px] rounded-2xl border border-zinc-200 px-4 py-4 transition hover:border-zinc-300 hover:shadow-sm bg-white',
+      'min-h-[88px] rounded-[14px] border border-[#e7e7ef] bg-white px-4 py-4 transition hover:bg-[#fbfafd]',
     value: 'mt-2 text-[1.5rem] font-bold leading-none tracking-tight text-zinc-900',
     label: 'text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-zinc-500',
     sublabel: 'mt-1.5 text-[0.72rem] text-zinc-400',
@@ -177,8 +177,8 @@ export const COMPONENT_STYLES = {
   },
 
   filter: {
-    container: 'rounded-[18px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] sm:p-4',
-    header: 'border-b border-zinc-100 px-5 py-4 sm:px-6',
+    container: 'bg-transparent p-0',
+    header: 'border-b border-[#eeeef3] px-5 py-4 sm:px-6',
     body: 'px-5 py-4 sm:px-6',
     searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400',
     searchInput:
@@ -195,8 +195,8 @@ export const COMPONENT_STYLES = {
   },
 
   section: {
-    container: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
-    header: 'border-b border-zinc-100 px-5 py-4 sm:px-6',
+    container: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
+    header: 'border-b border-[#eeeef3] px-5 py-4 sm:px-6',
     headerTitle: 'text-base font-semibold text-zinc-900',
     headerSubtitle: 'mt-1 text-sm text-zinc-500',
     body: 'px-5 py-5 sm:px-6',
