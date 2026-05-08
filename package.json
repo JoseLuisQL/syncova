@@ -7,11 +7,17 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "design:lint": "node scripts/sync-design-md.mjs --check",
+    "design:sync": "node scripts/sync-design-md.mjs",
+    "design:export:tailwind": "node scripts/sync-design-md.mjs --print-tailwind",
+    "design:export:dtcg": "node scripts/sync-design-md.mjs --print-dtcg"
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.148",
-    "@fontsource/geist-sans": "^5.2.5",
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "@fontsource/ibm-plex-sans": "^5.2.8",
+    "@google/design.md": "^0.1.1",
     "@phosphor-icons/react": "^2.1.10",
     "axios": "^1.11.0",
     "date-fns": "^2.30.0",

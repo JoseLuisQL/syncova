@@ -1,0 +1,59 @@
+{
+  "colors": {
+    "primary": "#0f2a3b",
+    "secondary": "#4f6b7c",
+    "tertiary": "#0e9f8e",
+    "neutral": "#f1f5f7",
+    "surface": "#ffffff",
+    "on-primary": "#ffffff"
+  },
+  "fontFamily": {
+    "display": [
+      "IBM Plex Sans"
+    ],
+    "h1": [
+      "IBM Plex Sans"
+    ],
+    "body": [
+      "IBM Plex Sans"
+    ],
+    "label": [
+      "IBM Plex Mono"
+    ]
+  },
+  "fontSize": {
+    "display": [
+      "3.5rem",
+      {
+        "letterSpacing": "-0.02em",
+        "fontWeight": "600"
+      }
+    ],
+    "h1": [
+      "2rem",
+      {
+        "fontWeight": "600"
+      }
+    ],
+    "body": [
+      "0.95rem",
+      {}
+    ],
+    "label": [
+      "0.72rem",
+      {
+        "letterSpacing": "0.04em"
+      }
+    ]
+  },
+  "borderRadius": {
+    "sm": "4px",
+    "md": "8px",
+    "lg": "12px"
+  },
+  "spacing": {
+    "sm": "8px",
+    "md": "16px",
+    "lg": "32px"
+  }
+}

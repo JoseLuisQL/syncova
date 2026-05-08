@@ -12,8 +12,8 @@ export const DESIGN_TOKENS = {
     muted: 'text-zinc-500',
     subtle: 'text-zinc-400',
     inverse: 'text-white',
-    brand: 'text-teal-800',
-    brandStrong: 'text-teal-900',
+    brand: 'text-tertiary',
+    brandStrong: 'text-primary',
   },
   border: {
     default: 'border-zinc-200',
@@ -22,7 +22,7 @@ export const DESIGN_TOKENS = {
     brand: 'border-teal-300',
   },
   interactive: {
-    primary: 'bg-teal-600 text-white hover:bg-teal-700 focus:ring-teal-600',
+    primary: 'bg-tertiary text-primary hover:bg-primary hover:text-on-primary focus:ring-tertiary',
     secondary: 'bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 focus:ring-zinc-300',
     ghost: 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 focus:ring-zinc-300',
   },
@@ -79,25 +79,25 @@ export const DESIGN_TOKENS = {
     },
   },
   chart: {
-    primary: '#090b0bff',
-    secondary: '#27272a',
-    tertiary: '#52525b',
-    quaternary: '#a1a1aa',
-    success: '#059669',
-    info: '#2563eb',
-    warning: '#d97706',
-    danger: '#e11d48',
-    muted: '#d4d4d8',
+    primary: '#0F2A3B',
+    secondary: '#4F6B7C',
+    tertiary: '#0E9F8E',
+    quaternary: '#F1F5F7',
+    success: '#0E9F8E',
+    info: '#4F6B7C',
+    warning: '#4F6B7C',
+    danger: '#0F2A3B',
+    muted: '#F1F5F7',
   },
 } as const;
 
 export const DESIGN_GRADIENTS = {
-  primary: 'from-teal-600 to-teal-700',
-  secondary: 'from-zinc-600 to-zinc-700',
-  success: 'from-emerald-600 to-emerald-700',
-  warning: 'from-amber-500 to-amber-600',
-  danger: 'from-rose-600 to-rose-700',
-  info: 'from-blue-600 to-blue-700',
+  primary: 'from-tertiary to-tertiary',
+  secondary: 'from-primary to-primary',
+  success: 'from-tertiary to-tertiary',
+  warning: 'from-secondary to-secondary',
+  danger: 'from-primary to-primary',
+  info: 'from-secondary to-secondary',
 } as const;
 
 export const DESIGN_COLOR_SCALES = {
