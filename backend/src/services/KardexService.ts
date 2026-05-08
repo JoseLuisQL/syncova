@@ -345,7 +345,7 @@ export class KardexService {
       await this.validateKardexData(data);
 
       // Calcular saldo actual basado en el tipo de movimiento
-      const saldoAnterior = data.saldoAnterior || await this.calcularSaldoAnterior(data.tipo, data.itemId, data.loteId);
+      const saldoAnterior = data.saldoAnterior ?? await this.calcularSaldoAnterior(data.tipo, data.itemId, data.loteId);
       const saldoActual = this.calcularSaldoActual(saldoAnterior, data.cantidad, data.tipoMovimiento);
 
       const movimiento = await prisma.kardex.create({
@@ -996,47 +996,44 @@ export class KardexService {
       throw new Error('Las salidas no deben tener establecimiento destino');
     }
 
-    // Validar cantidad
-    if (data.cantidad <= 0) {
+    if (typeof data.cantidad !== 'number' || !Number.isFinite(data.cantidad)) {
+      throw new Error('La cantidad debe ser un número válido');
+    }
+
+    if (data.tipoMovimiento === 'ajuste') {
+      if (data.cantidad === 0) {
+        throw new Error('La cantidad del ajuste no puede ser cero');
+      }
+    } else if (data.cantidad <= 0) {
       throw new Error('La cantidad debe ser mayor a cero');
     }
   }
 
   /**
-   * Calcular saldo anterior basado en el stock total actual de todos los lotes del mismo tipo de item
-   * Para vacunas: suma de cantidadActual de todos los lotes de la misma vacuna
-   * Para jeringas: suma de cantidadActual de todos los lotes de la misma jeringa
+   * Calcular saldo anterior basado en el stock actual del lote específico.
    */
   private static async calcularSaldoAnterior(tipo: string, itemId: string, loteId: string): Promise<number> {
     try {
       if (tipo === 'vacuna') {
-        // Para vacunas: sumar cantidadActual de todos los lotes de la misma vacuna
-        const stockTotal = await prisma.loteVacuna.aggregate({
+        const loteVacuna = await prisma.loteVacuna.findFirst({
           where: {
-            vacunaId: itemId,
-            estado: 'disponible', // Solo lotes disponibles
-            cantidadActual: { gt: 0 } // Solo lotes con stock positivo
+            id: loteId,
+            vacunaId: itemId
           },
-          _sum: {
-            cantidadActual: true
-          }
+          select: { cantidadActual: true }
         });
 
-        return stockTotal._sum.cantidadActual || 0;
+        return loteVacuna?.cantidadActual || 0;
       } else if (tipo === 'jeringa') {
-        // Para jeringas: sumar cantidadActual de todos los lotes de la misma jeringa
-        const stockTotal = await prisma.loteJeringa.aggregate({
+        const loteJeringa = await prisma.loteJeringa.findFirst({
           where: {
-            jeringaId: itemId,
-            estado: 'disponible', // Solo lotes disponibles
-            cantidadActual: { gt: 0 } // Solo lotes con stock positivo
+            id: loteId,
+            jeringaId: itemId
           },
-          _sum: {
-            cantidadActual: true
-          }
+          select: { cantidadActual: true }
         });
 
-        return stockTotal._sum.cantidadActual || 0;
+        return loteJeringa?.cantidadActual || 0;
       } else {
         // Fallback para otros tipos: usar el método anterior
         const ultimoMovimiento = await prisma.kardex.findFirst({

@@ -196,8 +196,8 @@ export class KardexController {
         return;
       }
 
-      if (!data.cantidad || data.cantidad <= 0) {
-        ResponseUtil.error(res, 'La cantidad debe ser mayor a cero', 400);
+      if (typeof data.cantidad !== 'number' || !Number.isFinite(data.cantidad) || data.cantidad === 0 || (data.tipoMovimiento !== 'ajuste' && data.cantidad < 0)) {
+        ResponseUtil.error(res, data.tipoMovimiento === 'ajuste' ? 'La cantidad del ajuste no puede ser cero' : 'La cantidad debe ser mayor a cero', 400);
         return;
       }
 
@@ -527,8 +527,8 @@ export class KardexController {
         return;
       }
 
-      if (!data.cantidad || data.cantidad <= 0) {
-        ResponseUtil.error(res, 'La cantidad debe ser mayor a cero', 400);
+      if (typeof data.cantidad !== 'number' || !Number.isFinite(data.cantidad) || data.cantidad === 0 || (data.tipoMovimiento !== 'ajuste' && data.cantidad < 0)) {
+        ResponseUtil.error(res, data.tipoMovimiento === 'ajuste' ? 'La cantidad del ajuste no puede ser cero' : 'La cantidad debe ser mayor a cero', 400);
         return;
       }
 
