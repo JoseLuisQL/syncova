@@ -8,7 +8,7 @@ import {
   StatusBadge,
   StockProgress,
 } from './components/SharedComponents';
-import { DataTable, FilterBar, TableHeader } from './components/FilterAndTable';
+import { DataTable, FilterBar, TableCell, TableHeader, TableRow } from './components/FilterAndTable';
 import {
   DateInput,
   DeleteConfirmModal,
@@ -177,12 +177,12 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
           skeletonColumns={columns.length}
           loadingVariant="table"
         >
-          <table className="min-w-full">
+          <table className="min-w-full border-separate border-spacing-0">
             <TableHeader columns={columns} />
             <tbody className="bg-white">
               {filteredLotes.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length}>
+                  <td colSpan={columns.length + 1}>
                     <EmptyState
                       icon={tipo === 'vacuna' ? Archive : Syringe}
                       title="No se encontraron lotes"
@@ -198,22 +198,22 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
                 filteredLotes.map((lote) => {
                   const daysToExpire = getDaysToExpire('fechaVencimiento' in lote ? lote.fechaVencimiento : undefined);
                   return (
-                    <tr key={lote.id} className={COMPONENT_STYLES.table.row}>
-                      <td className={COMPONENT_STYLES.table.cell}>
+                    <TableRow key={lote.id}>
+                      <TableCell>
                         <div className="space-y-0.5">
-                          <p className="text-sm font-semibold text-slate-900">{lote.numero}</p>
-                          <p className="text-xs text-slate-500">Ingreso {lote.fechaIngreso.toLocaleDateString()}</p>
+                          <p className="text-sm font-medium text-[#15171d]">{lote.numero}</p>
+                          <p className="text-xs text-[#8b8f9b]">Ingreso {lote.fechaIngreso.toLocaleDateString()}</p>
                         </div>
-                      </td>
-                      <td className={COMPONENT_STYLES.table.cell}>
+                      </TableCell>
+                      <TableCell>
                         <p className="text-sm font-medium text-slate-900">{getProductName(lote)}</p>
                         <p className="text-xs text-slate-500">{formatFormaIngreso(lote.formaIngreso)}</p>
-                      </td>
-                      <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                      </TableCell>
+                      <TableCell align="center">
                         <StockProgress current={lote.cantidadActual} initial={lote.cantidadInicial} />
-                      </td>
+                      </TableCell>
                       {tipo === 'vacuna' ? (
-                        <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                        <TableCell align="center">
                           {'fechaVencimiento' in lote && lote.fechaVencimiento ? (
                             <div className="space-y-1.5">
                               <p className="text-sm font-medium text-slate-900">{lote.fechaVencimiento.toLocaleDateString()}</p>
@@ -222,23 +222,23 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
                           ) : (
                             <span className="text-sm text-slate-500">Sin fecha</span>
                           )}
-                        </td>
+                        </TableCell>
                       ) : null}
-                      <td className={COMPONENT_STYLES.table.cell}>
+                      <TableCell>
                         <p className="text-sm font-medium text-slate-900">{lote.comprobanteClase}</p>
                         <p className="text-xs text-slate-500">{lote.numeroComprobante}</p>
-                      </td>
-                      <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                      </TableCell>
+                      <TableCell align="center">
                         <StatusBadge status={lote.estado} />
-                      </td>
-                      <td className={COMPONENT_STYLES.table.cell}>
+                      </TableCell>
+                      <TableCell align="right">
                         <ActionButtons
                           onEdit={() => setEditingLote(lote)}
                           onDelete={() => setDeleteTarget(lote)}
                           isLoading={isUpdating || isDeleting}
                         />
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })
               )}

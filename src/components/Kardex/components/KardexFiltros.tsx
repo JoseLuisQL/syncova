@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { CalendarBlank, CaretDown, CaretUp, MagnifyingGlass, X } from '@phosphor-icons/react';
+import { CalendarBlank, CaretDown, MagnifyingGlass, SlidersHorizontal, X } from '@phosphor-icons/react';
 import { Establecimiento, Jeringa, Vacuna } from '../../../types';
 import {
   COMPONENT_STYLES,
@@ -248,8 +248,6 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
   onEstablecimientoDestinoChange,
   onLimpiarFiltros,
 }) => {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
   const itemOptions = useMemo<SelectOption[]>(() => {
     if (selectedTipo === 'vacuna') {
       return vacunas.map((vacuna) => ({
@@ -395,15 +393,14 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
   ]);
 
   return (
-    <section aria-label="Filtros del kardex" className="w-full">
-      <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-sm p-5 space-y-5">
-        <div className="grid gap-x-5 gap-y-6 lg:grid-cols-12">
-          {/* Fila 1: Búsqueda y Fechas */}
-          <div className="lg:col-span-6 xl:col-span-6">
-            <label htmlFor="kardex-search" className={COMPONENT_STYLES.input.label}>
+    <section aria-label="Filtros del kardex" className={COMPONENT_STYLES.filter.container}>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            <div className="relative w-full sm:w-[260px]">
+              <label htmlFor="kardex-search" className="sr-only">
               Buscar
             </label>
-            <div className="relative mt-1">
               <MagnifyingGlass className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
               <input
                 id="kardex-search"
@@ -414,181 +411,152 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
                 className={COMPONENT_STYLES.filter.searchInput}
               />
             </div>
+
+            <details className="group relative">
+              <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 [&::-webkit-details-marker]:hidden">
+                <SlidersHorizontal className="h-4 w-4 text-[#606571]" />
+                Filtros
+              </summary>
+
+              <div className="absolute left-0 top-11 z-40 max-h-[70vh] w-[min(760px,calc(100vw-3rem))] overflow-y-auto rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  <div>
+                    <label htmlFor="kardex-fecha-inicio" className="mb-1 block text-xs font-medium text-[#747986]">
+                      Desde
+                    </label>
+                    <div className="relative">
+                      <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" />
+                      <input
+                        id="kardex-fecha-inicio"
+                        type="date"
+                        value={fechaInicio}
+                        onChange={(event) => onFechaInicioChange(event.target.value)}
+                        className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pl-9 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="kardex-fecha-fin" className="mb-1 block text-xs font-medium text-[#747986]">
+                      Hasta
+                    </label>
+                    <div className="relative">
+                      <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" />
+                      <input
+                        id="kardex-fecha-fin"
+                        type="date"
+                        value={fechaFin}
+                        onChange={(event) => onFechaFinChange(event.target.value)}
+                        className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pl-9 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="kardex-tipo-movimiento" className="mb-1 block text-xs font-medium text-[#747986]">
+                      Movimiento
+                    </label>
+                    <select
+                      id="kardex-tipo-movimiento"
+                      value={tipoMovimiento}
+                      onChange={(event) => onTipoMovimientoChange(event.target.value)}
+                      className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pr-8 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                    >
+                      {MOVIMIENTO_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="kardex-tipo-item" className="mb-1 block text-xs font-medium text-[#747986]">
+                      Tipo de producto
+                    </label>
+                    <select
+                      id="kardex-tipo-item"
+                      value={selectedTipo}
+                      onChange={(event) => onTipoChange(event.target.value as 'vacuna' | 'jeringa' | 'todos')}
+                      className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pr-8 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                    >
+                      {TIPO_ITEM_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <SearchableSelect
+                    id="kardex-item"
+                    label="Producto específico"
+                    value={selectedItem}
+                    options={itemOptions}
+                    placeholder={selectedTipo === 'todos' ? 'Seleccione antes el tipo' : 'Todos los productos'}
+                    disabled={selectedTipo === 'todos'}
+                    onChange={(value) => onItemChange(value)}
+                  />
+
+                  <SearchableSelect
+                    id="kardex-lote"
+                    label="Lote"
+                    value={selectedLote}
+                    options={loteOptions}
+                    placeholder={selectedItem ? 'Todos los lotes' : 'Seleccione antes un producto'}
+                    disabled={!selectedItem}
+                    onChange={(value) => onLoteChange(value)}
+                  />
+
+                  <SearchableSelect
+                    id="kardex-origen"
+                    label="Establecimiento origen"
+                    value={establecimientoOrigenId}
+                    options={establecimientoOptions}
+                    placeholder="Todos los orígenes"
+                    onChange={(value) => onEstablecimientoOrigenChange(value)}
+                  />
+
+                  <SearchableSelect
+                    id="kardex-destino"
+                    label="Establecimiento destino"
+                    value={establecimientoDestinoId}
+                    options={establecimientoOptions}
+                    placeholder="Todos los destinos"
+                    onChange={(value) => onEstablecimientoDestinoChange(value)}
+                  />
+                </div>
+              </div>
+            </details>
+
+            {activeFilters.length > 0 ? (
+              <button type="button" onClick={onLimpiarFiltros} className={COMPONENT_STYLES.button.ghost}>
+                <X className="h-4 w-4" />
+                <span>Limpiar</span>
+              </button>
+            ) : null}
           </div>
 
-          <div className="lg:col-span-3 xl:col-span-3">
-            <label htmlFor="kardex-fecha-inicio" className={COMPONENT_STYLES.input.label}>
-              Desde
-            </label>
-            <div className="relative mt-1">
-              <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-              <input
-                id="kardex-fecha-inicio"
-                type="date"
-                value={fechaInicio}
-                onChange={(event) => onFechaInicioChange(event.target.value)}
-                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} pl-9`}
-              />
-            </div>
-          </div>
-
-          <div className="lg:col-span-3 xl:col-span-3">
-            <label htmlFor="kardex-fecha-fin" className={COMPONENT_STYLES.input.label}>
-              Hasta
-            </label>
-            <div className="relative mt-1">
-              <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-              <input
-                id="kardex-fecha-fin"
-                type="date"
-                value={fechaFin}
-                onChange={(event) => onFechaFinChange(event.target.value)}
-                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} pl-9`}
-              />
-            </div>
-          </div>
-
-          {/* Fila 2: Tipo de Movimiento (Full Width Segmented Control) */}
-          <div className="lg:col-span-12 border-b border-zinc-100/80 pb-5">
-            <label className={COMPONENT_STYLES.input.label}>Filtro de Movimiento</label>
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-              {MOVIMIENTO_OPTIONS.map((option) => {
-                const isSelected = tipoMovimiento === option.value;
-
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => onTipoMovimientoChange(option.value)}
-                    className={`transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 rounded-xl border px-5 py-2.5 ${
-                      isSelected
-                        ? 'border-teal-200 bg-teal-50 shadow-sm ring-1 ring-teal-100/50 text-teal-900 font-semibold text-sm tracking-tight'
-                        : 'border-zinc-200/80 bg-white hover:border-zinc-300 hover:bg-zinc-50 hover:shadow-sm text-zinc-600 hover:text-zinc-900 font-medium text-sm tracking-tight'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <span className={`text-xs font-medium ${fechaInicio && fechaFin ? 'text-emerald-700' : 'text-amber-700'}`}>
+            {exportHint}
+          </span>
         </div>
 
-        <div className="grid gap-x-5 gap-y-6 lg:grid-cols-12 pt-2">
-          {/* Fila 3: Productos y Lotes */}
-          <div className="lg:col-span-4 xl:col-span-3">
-            <label htmlFor="kardex-tipo-item" className={COMPONENT_STYLES.input.label}>
-              Tipo de producto
-            </label>
-            <div className="mt-1">
-              <select
-                id="kardex-tipo-item"
-                value={selectedTipo}
-                onChange={(event) => onTipoChange(event.target.value as 'vacuna' | 'jeringa' | 'todos')}
-                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
+        {activeFilters.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {activeFilters.map((filter) => (
+              <button
+                key={filter.key}
+                type="button"
+                onClick={filter.clear}
+                className="inline-flex items-center gap-2 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] transition hover:bg-[#fbfafd]"
               >
-                {TIPO_ITEM_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="lg:col-span-4 xl:col-span-5">
-            <div className="mt-1">
-              <SearchableSelect
-                id="kardex-item"
-                label="Producto específico"
-                value={selectedItem}
-                options={itemOptions}
-                placeholder={selectedTipo === 'todos' ? 'Seleccione antes el tipo' : 'Todos los productos'}
-                disabled={selectedTipo === 'todos'}
-                onChange={(value) => onItemChange(value)}
-              />
-            </div>
-          </div>
-
-          <div className="lg:col-span-4 xl:col-span-4">
-            <div className="mt-1">
-              <SearchableSelect
-                id="kardex-lote"
-                label="Lote"
-                value={selectedLote}
-                options={loteOptions}
-                placeholder={selectedItem ? 'Todos los lotes' : 'Seleccione antes un producto'}
-                disabled={!selectedItem}
-                onChange={(value) => onLoteChange(value)}
-              />
-            </div>
-          </div>
-        </div>
-
-        {showAdvanced ? (
-          <div className="grid gap-3 border-t border-zinc-100 pt-3 md:grid-cols-2">
-            <SearchableSelect
-              id="kardex-origen"
-              label="Establecimiento origen"
-              value={establecimientoOrigenId}
-              options={establecimientoOptions}
-              placeholder="Todos los orígenes"
-              onChange={(value) => onEstablecimientoOrigenChange(value)}
-            />
-
-            <SearchableSelect
-              id="kardex-destino"
-              label="Establecimiento destino"
-              value={establecimientoDestinoId}
-              options={establecimientoOptions}
-              placeholder="Todos los destinos"
-              onChange={(value) => onEstablecimientoDestinoChange(value)}
-            />
+                <span>{filter.label}</span>
+                <X className="h-3.5 w-3.5" />
+              </button>
+            ))}
           </div>
         ) : null}
-
-        <div className="flex flex-col gap-3 border-t border-zinc-100 pt-3">
-          {activeFilters.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {activeFilters.map((filter) => (
-                <button
-                  key={filter.key}
-                  type="button"
-                  onClick={filter.clear}
-                  className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-white"
-                >
-                  <span>{filter.label}</span>
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          <div className="flex items-center justify-between">
-            <span className={`text-xs font-medium ${fechaInicio && fechaFin ? 'text-emerald-700' : 'text-amber-700'}`}>
-              {exportHint}
-            </span>
-
-            <div className="flex items-center gap-2">
-              {activeFilters.length > 0 ? (
-                <button type="button" onClick={onLimpiarFiltros} className={COMPONENT_STYLES.button.ghost}>
-                  <X className="h-4 w-4" />
-                  <span>Limpiar</span>
-                </button>
-              ) : null}
-
-              <button
-                type="button"
-                onClick={() => setShowAdvanced((current) => !current)}
-                className={COMPONENT_STYLES.button.ghost}
-                aria-expanded={showAdvanced}
-              >
-                {showAdvanced ? <CaretUp className="h-4 w-4" /> : <CaretDown className="h-4 w-4" />}
-                <span>{showAdvanced ? 'Ocultar filtros' : 'Más filtros'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );

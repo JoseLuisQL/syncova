@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Package, Plus, ArrowsClockwise, ThermometerCold } from '@phosphor-icons/react';
+import { Package, Plus, ThermometerCold } from '@phosphor-icons/react';
 import { CreateVacunaDto, UpdateVacunaDto, Vacuna } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useVacunas } from '../../hooks/useVacunas';
@@ -11,7 +11,7 @@ import {
   StatusBadge,
   KeyValueGrid,
 } from './components/SharedComponents';
-import { DataTable, FilterBar, Pagination, TableHeader } from './components/FilterAndTable';
+import { DataTable, FilterBar, Pagination, TableCell, TableHeader, TableRow } from './components/FilterAndTable';
 import {
   DeleteConfirmModal,
   FormSection,
@@ -192,12 +192,12 @@ const GestionVacunas: React.FC = () => {
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full">
+      <table className="min-w-full border-separate border-spacing-0">
         <TableHeader columns={TABLE_COLUMNS} />
         <tbody className="bg-white">
           {vacunas.length === 0 ? (
             <tr>
-              <td colSpan={6}>
+              <td colSpan={TABLE_COLUMNS.length + 1}>
                 <EmptyState
                   icon={Package}
                   title="No se encontraron vacunas"
@@ -210,32 +210,29 @@ const GestionVacunas: React.FC = () => {
             vacunas.map((vacuna) => {
               const stockInfo = getStockInfo(vacuna);
               return (
-                <tr key={vacuna.id} className={COMPONENT_STYLES.table.row}>
-                  <td className={COMPONENT_STYLES.table.cell}>
+                <TableRow key={vacuna.id}>
+                  <TableCell>
                     <button
                       type="button"
                       onClick={() => setSelectedVacuna(vacuna)}
-                      className="flex items-center gap-3 text-left"
+                      className="min-w-0 text-left"
                     >
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900 border border-zinc-200/80">
-                        <Package className="h-5 w-5" weight="duotone" />
-                      </div>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-900">{vacuna.nombre}</p>
-                        <p className="text-xs text-slate-500">{vacuna.dosisPorFrasco} dosis por frasco</p>
+                        <p className="truncate text-sm font-medium text-[#15171d]">{vacuna.nombre}</p>
+                        <p className="text-xs text-[#8b8f9b]">{vacuna.dosisPorFrasco} dosis por frasco</p>
                       </div>
                     </button>
-                  </td>
-                  <td className={COMPONENT_STYLES.table.cell}>
+                  </TableCell>
+                  <TableCell>
                     <p className="text-sm font-medium text-slate-900">{vacuna.tipo}</p>
                     <p className="text-xs text-slate-500">{vacuna.presentacion}</p>
-                  </td>
-                  <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                  </TableCell>
+                  <TableCell align="center">
                     <span className={`text-lg font-semibold ${stockInfo.stockTotal > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
                       {stockInfo.stockTotal.toLocaleString()}
                     </span>
-                  </td>
-                  <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                  </TableCell>
+                  <TableCell align="center">
                     <div className="flex flex-wrap items-center justify-center gap-1.5 text-[0.78rem]">
                       <span className={COMPONENT_STYLES.badge.count}>
                         {stockInfo.lotesActivos} act.
@@ -247,19 +244,19 @@ const GestionVacunas: React.FC = () => {
                         {stockInfo.lotesVencidos} venc.
                       </span>
                     </div>
-                  </td>
-                  <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                  </TableCell>
+                  <TableCell align="center">
                     <StatusBadge status={vacuna.estado} />
-                  </td>
-                  <td className={COMPONENT_STYLES.table.cell}>
+                  </TableCell>
+                  <TableCell align="right">
                     <ActionButtons
                       onView={() => setSelectedVacuna(vacuna)}
                       onEdit={() => handleEdit(vacuna)}
                       onDelete={() => setDeleteTarget(vacuna)}
                       isLoading={isUpdating || isDeleting}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })
           )}
@@ -288,16 +285,10 @@ const GestionVacunas: React.FC = () => {
             filters={filters}
             onClear={handleClearFilters}
             actions={
-              <>
-                <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={refresh} disabled={isLoading}>
-                  <ArrowsClockwise className="h-4 w-4" weight="bold" />
-                  <span>Actualizar</span>
-                </button>
-                <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleCreate} disabled={isCreating}>
-                  <Plus className="h-4 w-4" weight="bold" />
-                  <span>Nueva vacuna</span>
-                </button>
-              </>
+              <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleCreate} disabled={isCreating}>
+                <Plus className="h-4 w-4" weight="bold" />
+                <span>Nueva vacuna</span>
+              </button>
             }
           />
 

@@ -24,21 +24,21 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
   const isRefreshing = loading || loadingEstadisticas || loadingFiltros;
 
   return (
-    <section className="bg-transparent pb-2">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <section className="border-b border-[#eeeef3] bg-white px-5 py-4 sm:px-6">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Kardex de Movimientos</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-[1.05rem] font-semibold tracking-tight text-[#15171d]">Kardex de Movimientos</h1>
+          <p className="text-sm text-[#747986]">
             Consulta de ingresos, salidas, ajustes y transferencias del inventario general.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onRefresh}
             disabled={isRefreshing}
-            className={`${COMPONENT_STYLES.button.secondary} px-4 py-2 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 transition-colors shadow-sm focus:ring-teal-500/20`}
+            className={COMPONENT_STYLES.button.secondary}
             aria-busy={isRefreshing}
           >
             {isRefreshing ? (
@@ -53,7 +53,7 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
             type="button"
             onClick={onExport}
             disabled={!isExportEnabled || exportando}
-            className={`${COMPONENT_STYLES.button.primary} px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition-colors focus:ring-teal-500/20`}
+            className={COMPONENT_STYLES.button.primary}
             aria-busy={exportando}
           >
             {exportando ? (

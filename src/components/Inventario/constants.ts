@@ -115,10 +115,10 @@ export const INVENTORY_SECTIONS = [
 ] as const;
 
 export const COMPONENT_STYLES = {
-  pageBackground: 'min-h-screen bg-zinc-50/50',
-  surface: 'rounded-[20px] border border-zinc-200/70 bg-white shadow-sm',
-  panel: 'rounded-[16px] border border-zinc-200/60 bg-white shadow-sm',
-  mutedPanel: 'rounded-[16px] border border-zinc-200 bg-zinc-50/80',
+  pageBackground: 'min-h-screen bg-white',
+  surface: 'rounded-none border-0 bg-transparent shadow-none',
+  panel: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
+  mutedPanel: 'rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd]',
 
   header: {
     title: 'text-[1.35rem] font-bold tracking-tight text-zinc-900 sm:text-[1.45rem]',
@@ -129,11 +129,11 @@ export const COMPONENT_STYLES = {
 
   button: {
     primary:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     secondary:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 py-1.5 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     ghost:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#e7e7ef] bg-white px-3 py-2 text-sm font-semibold text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3 py-1.5 text-sm font-semibold text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     success:
       'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-sm',
     icon:
@@ -154,11 +154,11 @@ export const COMPONENT_STYLES = {
   },
 
   table: {
-    container: 'overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
-    header: 'bg-[#fbfafd] border-y border-[#e7e7ef]',
-    headerCell: 'px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]',
-    row: 'transition-colors hover:bg-[#fbfafd] border-b border-[#eeeef3] last:border-0',
-    cell: 'px-4 py-3.5 align-middle text-sm text-[#15171d]',
+    container: 'overflow-visible rounded-none border-0 bg-transparent shadow-none',
+    header: 'bg-transparent',
+    headerCell: 'border-y border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-left text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]',
+    row: 'transition-colors hover:bg-[#fbfafd]',
+    cell: 'border-b border-[#eeeef3] px-4 py-3.5 align-middle text-sm text-[#15171d]',
     emptyIcon: 'mx-auto mb-4 h-11 w-11 text-zinc-300',
   },
 
@@ -190,14 +190,14 @@ export const COMPONENT_STYLES = {
   },
 
   filter: {
-    container: 'rounded-[18px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] sm:p-4',
+    container: 'bg-transparent p-0',
     searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]',
     searchInput:
-      'w-full rounded-[10px] border border-[#e7e7ef] bg-white py-2 pl-10 pr-4 text-sm text-[#15171d] shadow-sm transition placeholder:text-[#8b8f9b] hover:border-[#d7d8e2] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
+      'h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white py-1.5 pl-9 pr-3 text-sm text-[#15171d] shadow-sm transition placeholder:text-[#8b8f9b] hover:border-[#d7d8e2] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
   },
 
   pagination: {
-    container: 'border-t border-[#eeeef3] bg-white px-4 py-4 sm:px-5',
+    container: 'border-t border-[#eeeef3] bg-white px-4 py-5 sm:px-5',
     info: 'text-sm font-medium text-[#747986]',
     button:
       'min-h-9 min-w-9 rounded-[10px] border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40',
@@ -206,11 +206,11 @@ export const COMPONENT_STYLES = {
   },
 
   nav: {
-    shell: 'rounded-[20px] border border-zinc-200/80 bg-white shadow-sm',
+    shell: 'rounded-[28px] border border-zinc-200/90 bg-white shadow-sm',
     tab:
-      'inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-zinc-500/20',
-    tabActive: 'bg-zinc-100 text-zinc-900',
-    tabInactive: 'text-zinc-500 hover:bg-zinc-100/60 hover:text-zinc-900',
+      'inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-teal-500/20',
+    tabActive: 'bg-teal-50 text-teal-700 shadow-[inset_0_0_0_1px_rgba(45,212,191,0.28)]',
+    tabInactive: 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900',
   },
 } as const;
 

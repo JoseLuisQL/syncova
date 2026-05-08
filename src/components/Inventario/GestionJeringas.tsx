@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, ArrowsClockwise, Syringe } from '@phosphor-icons/react';
+import { Plus, Syringe } from '@phosphor-icons/react';
 import { CreateJeringaDto, Jeringa, UpdateJeringaDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useInventorySearch } from '../../hooks/useInventorySearch';
@@ -11,7 +11,7 @@ import {
   StatusBadge,
   KeyValueGrid,
 } from './components/SharedComponents';
-import { DataTable, FilterBar, Pagination, TableHeader } from './components/FilterAndTable';
+import { DataTable, FilterBar, Pagination, TableCell, TableHeader, TableRow } from './components/FilterAndTable';
 import {
   DeleteConfirmModal,
   FormSection,
@@ -195,12 +195,12 @@ const GestionJeringas: React.FC = () => {
       skeletonColumns={TABLE_COLUMNS.length}
       loadingVariant="table"
     >
-      <table className="min-w-full">
+      <table className="min-w-full border-separate border-spacing-0">
         <TableHeader columns={TABLE_COLUMNS} />
         <tbody className="bg-white">
           {jeringas.length === 0 ? (
             <tr>
-              <td colSpan={6}>
+              <td colSpan={TABLE_COLUMNS.length + 1}>
                 <EmptyState
                   icon={Syringe}
                   title="No se encontraron jeringas"
@@ -213,19 +213,16 @@ const GestionJeringas: React.FC = () => {
             jeringas.map((jeringa) => {
               const stockInfo = getStockInfo(jeringa);
               return (
-                <tr key={jeringa.id} className={COMPONENT_STYLES.table.row}>
-                  <td className={COMPONENT_STYLES.table.cell}>
-                    <button type="button" onClick={() => setSelectedJeringa(jeringa)} className="flex items-center gap-3 text-left">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900 border border-zinc-200/80">
-                        <Syringe className="h-5 w-5" weight="duotone" />
-                      </div>
+                <TableRow key={jeringa.id}>
+                  <TableCell>
+                    <button type="button" onClick={() => setSelectedJeringa(jeringa)} className="min-w-0 text-left">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-900">{jeringa.tipo}</p>
-                        <p className="text-xs text-slate-500">Uso operativo</p>
+                        <p className="truncate text-sm font-medium text-[#15171d]">{jeringa.tipo}</p>
+                        <p className="text-xs text-[#8b8f9b]">Uso operativo</p>
                       </div>
                     </button>
-                  </td>
-                  <td className={COMPONENT_STYLES.table.cell}>
+                  </TableCell>
+                  <TableCell>
                     <div className="flex items-center gap-2">
                       <span className={`h-3.5 w-3.5 rounded-full border border-slate-300 ${getColorClass(jeringa.color)}`} />
                       <div>
@@ -233,13 +230,13 @@ const GestionJeringas: React.FC = () => {
                         <p className="text-xs text-slate-500">{jeringa.color}</p>
                       </div>
                     </div>
-                  </td>
-                  <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                  </TableCell>
+                  <TableCell align="center">
                     <span className={`text-lg font-semibold ${stockInfo.stockTotal > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
                       {stockInfo.stockTotal.toLocaleString()}
                     </span>
-                  </td>
-                  <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                  </TableCell>
+                  <TableCell align="center">
                     <div className="flex flex-wrap items-center justify-center gap-1.5 text-[0.78rem]">
                       <span className={COMPONENT_STYLES.badge.count}>
                         {stockInfo.lotesActivos} act.
@@ -248,19 +245,19 @@ const GestionJeringas: React.FC = () => {
                         {stockInfo.lotesAgotados} agot.
                       </span>
                     </div>
-                  </td>
-                  <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
+                  </TableCell>
+                  <TableCell align="center">
                     <StatusBadge status={jeringa.estado} />
-                  </td>
-                  <td className={COMPONENT_STYLES.table.cell}>
+                  </TableCell>
+                  <TableCell align="right">
                     <ActionButtons
                       onView={() => setSelectedJeringa(jeringa)}
                       onEdit={() => handleEdit(jeringa)}
                       onDelete={() => setDeleteTarget(jeringa)}
                       isLoading={isUpdating || isDeleting}
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })
           )}
@@ -289,16 +286,10 @@ const GestionJeringas: React.FC = () => {
             filters={filters}
             onClear={handleClearFilters}
             actions={
-              <>
-                <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={refresh} disabled={isLoading}>
-                  <ArrowsClockwise className="h-4 w-4" weight="bold" />
-                  <span>Actualizar</span>
-                </button>
-                <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleCreate} disabled={isCreating}>
-                  <Plus className="h-4 w-4" weight="bold" />
-                  <span>Nueva jeringa</span>
-                </button>
-              </>
+              <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleCreate} disabled={isCreating}>
+                <Plus className="h-4 w-4" weight="bold" />
+                <span>Nueva jeringa</span>
+              </button>
             }
           />
 

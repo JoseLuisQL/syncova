@@ -115,7 +115,7 @@ export function ReportResultsTable<T>({
           skeletonColumns={columns.length}
         >
           {rows.length > 0 ? (
-            <table className="min-w-full table-auto">
+            <table className="min-w-full table-auto border-separate border-spacing-0">
               <TableHeader columns={columns.map((column) => ({
                 key: column.key,
                 label: column.label,

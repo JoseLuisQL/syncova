@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Package, ArrowsClockwise, SlidersHorizontal, Syringe, ToggleLeft, ToggleRight, Trash } from '@phosphor-icons/react';
+import { ArrowRight, Package, SlidersHorizontal, Syringe, ToggleLeft, ToggleRight, Trash } from '@phosphor-icons/react';
 import { apiClient } from '../../config/api';
 import { useToastContext } from '../../contexts/ToastContext';
 import { COMPONENT_STYLES } from './constants';
@@ -358,10 +358,6 @@ const ConfiguracionJeringas: React.FC = () => {
             </div>
 
             <div className="flex flex-wrap items-center justify-end gap-2">
-              <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={handleRefresh} disabled={isLoading}>
-                <ArrowsClockwise className="h-4 w-4" weight="bold" />
-                <span>Actualizar</span>
-              </button>
               <button
                 type="button"
                 className={COMPONENT_STYLES.button.primary}

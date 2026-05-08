@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { MagnifyingGlass as Search, X } from '@phosphor-icons/react';
+import { MagnifyingGlass, SlidersHorizontal, X } from '@phosphor-icons/react';
 import { COMPONENT_STYLES } from '../constants';
 
 const SkeletonBlock: React.FC<{ className?: string }> = ({ className = '' }) => (
@@ -37,149 +37,41 @@ export const FilterBar: React.FC<FilterBarProps> = memo(({
   filters = [],
   onClear,
   actions,
-  layout = 'default',
 }) => {
-  const hasActiveFilters = Boolean(searchValue.trim()) || filters.some((filter) => filter.value && filter.value !== 'todos');
-  const isSingleFilter = filters.length === 1;
+  const hasActiveFilters =
+    Boolean(searchValue.trim()) ||
+    filters.some((filter) => filter.value && filter.value !== 'todos');
 
   return (
     <section aria-label="Filtros" className={COMPONENT_STYLES.filter.container}>
-      {layout === 'inline' ? (
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-end">
-          <div className="min-w-0 xl:flex-1">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <div className="relative w-full sm:w-[220px]">
             <label htmlFor="inventory-search" className="sr-only">
               Buscar
             </label>
-            <div className="relative">
-              <Search className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
-              <input
-                id="inventory-search"
-                type="text"
-                placeholder={searchPlaceholder}
-                value={searchValue}
-                onChange={(event) => onSearchChange(event.target.value)}
-                className={COMPONENT_STYLES.filter.searchInput}
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2 xl:flex xl:flex-wrap xl:items-end xl:justify-end">
-            {filters.map((filter) => (
-              <div key={filter.id} className="min-w-0 xl:w-[210px]">
-                <label htmlFor={filter.id} className={COMPONENT_STYLES.input.label}>
-                  {filter.label}
-                </label>
-                <select
-                  id={filter.id}
-                  value={filter.value}
-                  onChange={(event) => filter.onChange(event.target.value)}
-                  disabled={filter.disabled}
-                  className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
-                >
-                  {filter.options.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ))}
-
-            <div className={`flex flex-wrap items-end gap-2 ${filters.length > 0 ? 'sm:col-span-2' : ''} xl:justify-end`}>
-              {hasActiveFilters && onClear ? (
-                <button type="button" onClick={onClear} className={COMPONENT_STYLES.button.ghost}>
-                  <X className="h-4 w-4" weight="bold" />
-                  <span>Limpiar</span>
-                </button>
-              ) : null}
-              {actions}
-            </div>
-          </div>
-        </div>
-      ) : isSingleFilter ? (
-        <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_250px_auto] xl:items-end">
-          <div className="min-w-0">
-            <label htmlFor="inventory-search" className="sr-only">
-              Buscar
-            </label>
-            <div className="relative">
-              <Search className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
-              <input
-                id="inventory-search"
-                type="text"
-                placeholder={searchPlaceholder}
-                value={searchValue}
-                onChange={(event) => onSearchChange(event.target.value)}
-                className={COMPONENT_STYLES.filter.searchInput}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor={filters[0].id} className={COMPONENT_STYLES.input.label}>
-              {filters[0].label}
-            </label>
-            <select
-              id={filters[0].id}
-              value={filters[0].value}
-              onChange={(event) => filters[0].onChange(event.target.value)}
-              disabled={filters[0].disabled}
-              className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
-            >
-              {filters[0].options.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-            {hasActiveFilters && onClear ? (
-              <button type="button" onClick={onClear} className={COMPONENT_STYLES.button.ghost}>
-                <X className="h-4 w-4" />
-                <span>Limpiar</span>
-              </button>
-            ) : null}
-            {actions}
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-            <div className="min-w-0 flex-1">
-              <label htmlFor="inventory-search" className="sr-only">
-                Buscar
-              </label>
-              <div className="relative">
-                <Search className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
-                <input
-                  id="inventory-search"
-                  type="text"
-                  placeholder={searchPlaceholder}
-                  value={searchValue}
-                  onChange={(event) => onSearchChange(event.target.value)}
-                  className={COMPONENT_STYLES.filter.searchInput}
-                />
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-              {hasActiveFilters && onClear ? (
-                <button type="button" onClick={onClear} className={COMPONENT_STYLES.button.ghost}>
-                  <X className="h-4 w-4" />
-                  <span>Limpiar</span>
-                </button>
-              ) : null}
-              {actions}
-            </div>
+            <MagnifyingGlass className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
+            <input
+              id="inventory-search"
+              type="text"
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={(event) => onSearchChange(event.target.value)}
+              className={COMPONENT_STYLES.filter.searchInput}
+            />
           </div>
 
           {filters.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-12">
-              <div className={`grid gap-3 ${filters.length >= 3 ? 'xl:col-span-12 xl:grid-cols-3' : filters.length === 2 ? 'xl:col-span-12 xl:grid-cols-2' : 'xl:col-span-4 xl:grid-cols-1'}`}>
+            <details className="group relative">
+              <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 [&::-webkit-details-marker]:hidden">
+                <SlidersHorizontal className="h-4 w-4 text-[#606571]" />
+                Filtros
+              </summary>
+              <div className="absolute left-0 top-11 z-30 w-[280px] rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
+                <div className="space-y-3">
                 {filters.map((filter) => (
                   <div key={filter.id}>
-                    <label htmlFor={filter.id} className={COMPONENT_STYLES.input.label}>
+                    <label htmlFor={filter.id} className="mb-1 block text-xs font-medium text-[#747986]">
                       {filter.label}
                     </label>
                     <select
@@ -187,7 +79,7 @@ export const FilterBar: React.FC<FilterBarProps> = memo(({
                       value={filter.value}
                       onChange={(event) => filter.onChange(event.target.value)}
                       disabled={filter.disabled}
-                      className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
+                      className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pr-8 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {filter.options.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -197,11 +89,25 @@ export const FilterBar: React.FC<FilterBarProps> = memo(({
                     </select>
                   </div>
                 ))}
+                </div>
               </div>
-            </div>
+            </details>
+          ) : null}
+
+          {hasActiveFilters && onClear ? (
+            <button type="button" onClick={onClear} className={COMPONENT_STYLES.button.ghost}>
+              <X className="h-4 w-4" />
+              <span>Limpiar</span>
+            </button>
           ) : null}
         </div>
-      )}
+
+        {actions ? (
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+            {actions}
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 });
@@ -312,7 +218,7 @@ export const DataTable: React.FC<DataTableProps> = memo(({
   skeletonColumns = 5,
   loadingVariant = 'table',
 }) => (
-  <div className={COMPONENT_STYLES.table.container}>
+  <div className={`${COMPONENT_STYLES.table.container} flex min-h-0 flex-1 flex-col`}>
     {isLoading ? (
       <div className="inventory-loading-shell p-4 sm:p-5">
         <div className="flex items-center gap-3 pb-4 text-slate-700">
@@ -351,7 +257,7 @@ export const DataTable: React.FC<DataTableProps> = memo(({
             ))}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-[20px] border border-slate-200 bg-white/95">
+          <div className="overflow-hidden rounded-[20px] border border-zinc-200 bg-white/95">
             <table className="min-w-full table-fixed">
               <tbody className="bg-white">
                 {Array.from({ length: skeletonRows }).map((_, rowIndex) => (
@@ -374,7 +280,7 @@ export const DataTable: React.FC<DataTableProps> = memo(({
         )}
       </div>
     ) : (
-      <div className="inventory-reveal overflow-x-auto">{children}</div>
+      <div className="inventory-reveal flex min-h-0 flex-1 flex-col overflow-x-auto">{children}</div>
     )}
   </div>
 ));
@@ -393,10 +299,19 @@ interface TableHeaderProps {
 export const TableHeader: React.FC<TableHeaderProps> = memo(({ columns }) => (
   <thead className={COMPONENT_STYLES.table.header}>
     <tr>
-      {columns.map((column) => (
+      <th className="w-10 rounded-l-[14px] border-y border-l border-[#e7e7ef] bg-[#fbfafd] px-3 py-3 text-center">
+        <input
+          type="checkbox"
+          className="h-4 w-4 rounded-[5px] border-[#e0e2ea] text-[#7c3aed] focus:ring-[#7c3aed]/20"
+          aria-label="Seleccionar todos"
+        />
+      </th>
+      {columns.map((column, index) => (
         <th
           key={column.key}
           className={`${COMPONENT_STYLES.table.headerCell} ${
+            index === columns.length - 1 ? 'rounded-r-[14px] border-r' : ''
+          } ${
             column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : 'text-left'
           } ${column.className || ''}`}
         >
@@ -416,7 +331,18 @@ interface TableRowProps {
 }
 
 export const TableRow: React.FC<TableRowProps> = memo(({ children, onClick, isSelected = false }) => (
-  <tr className={`${COMPONENT_STYLES.table.row} ${isSelected ? 'bg-zinc-100' : ''} ${onClick ? 'cursor-pointer' : ''}`} onClick={onClick}>
+  <tr
+    className={`${COMPONENT_STYLES.table.row} ${isSelected ? 'bg-zinc-100/60' : ''} ${onClick ? 'cursor-pointer' : ''}`}
+    onClick={onClick}
+  >
+    <td className="w-10 border-b border-[#eeeef3] px-3 py-3 text-center align-middle">
+      <input
+        type="checkbox"
+        className="h-4 w-4 rounded-[5px] border-[#e0e2ea] text-[#7c3aed] focus:ring-[#7c3aed]/20"
+        aria-label="Seleccionar fila"
+        onClick={(event) => event.stopPropagation()}
+      />
+    </td>
     {children}
   </tr>
 ));

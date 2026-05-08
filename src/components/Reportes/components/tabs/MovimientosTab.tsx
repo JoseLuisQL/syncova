@@ -153,14 +153,14 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
     >
       <div className="space-y-6">
         <section className={COMPONENT_STYLES.filter.container}>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="hidden">
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Rango operativo</h3>
             </div>
             <span className={COMPONENT_STYLES.badge.neutral}>Filtros sincronizados</span>
           </div>
 
-          <div className="mt-4 grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-2 lg:grid-cols-3">
             <div>
               <label className={COMPONENT_STYLES.input.label}>Fecha inicio</label>
               <input

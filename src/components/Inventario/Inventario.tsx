@@ -23,7 +23,7 @@ const Inventario: React.FC = () => {
   const activeSection = (currentSubModule as typeof INVENTORY_SECTIONS[number]['id'] | null) || firstSection;
 
   return (
-    <InventoryShell activeSection={activeSection}>
+    <InventoryShell activeSection={activeSection} sections={allowedSections}>
       <Routes>
         <Route path="/" element={<Navigate to={firstSection} replace />} />
         <Route path="vacunas" element={<GestionVacunas />} />

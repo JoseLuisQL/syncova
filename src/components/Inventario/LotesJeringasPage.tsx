@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Plus, ArrowsClockwise } from '@phosphor-icons/react';
+import { Plus } from '@phosphor-icons/react';
 import GestionLotes from './GestionLotes';
 import NuevoIngreso, { NuevoIngresoPayload, NuevoIngresoSubmitResult } from './NuevoIngreso';
 import { useLotesJeringas } from '../../hooks/useLotesJeringas';
@@ -160,16 +160,10 @@ const LotesJeringasPage: React.FC = () => {
           onDelete={handleDeleteLote}
           tipo="jeringa"
           toolbarActions={
-            <>
-              <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={refresh} disabled={isLoading}>
-                <ArrowsClockwise className="h-4 w-4" weight="bold" />
-                <span>Actualizar</span>
-              </button>
-              <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleOpenNuevoIngreso} disabled={isCreating}>
-                <Plus className="h-4 w-4" weight="bold" />
-                <span>Nuevo lote</span>
-              </button>
-            </>
+            <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleOpenNuevoIngreso} disabled={isCreating}>
+              <Plus className="h-4 w-4" weight="bold" />
+              <span>Nuevo lote</span>
+            </button>
           }
           isLoading={isLoading}
           isUpdating={isUpdating}

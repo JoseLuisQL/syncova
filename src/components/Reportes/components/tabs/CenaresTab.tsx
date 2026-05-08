@@ -41,8 +41,8 @@ const CenaresTab: React.FC<CenaresTabProps> = memo(({ centrosAcopio }) => {
       showHeader={false}
     >
       <div className="space-y-6">
-        <section className={`${COMPONENT_STYLES.filter.container} border-zinc-200 bg-zinc-50/50`}>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <section className={COMPONENT_STYLES.filter.container}>
+          <div className="hidden">
             <div>
               <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-800">Contexto de seguimiento</h3>
               <p className="mt-1 text-sm text-zinc-900/80">Filtra el año, el centro y el tipo de item antes de editar o exportar.</p>
@@ -50,7 +50,7 @@ const CenaresTab: React.FC<CenaresTabProps> = memo(({ centrosAcopio }) => {
             <span className={COMPONENT_STYLES.badge.count}>Seguimiento anual</span>
           </div>
 
-          <div className="mt-4 grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-2 lg:grid-cols-3">
             <div>
               <label className={COMPONENT_STYLES.input.label}>
                 <CalendarBlank className="mr-1.5 inline h-3.5 w-3.5 text-zinc-600" />
