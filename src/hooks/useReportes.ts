@@ -383,7 +383,7 @@ export const useReportes = (): UseReportesReturn => {
   }, [ejecutarConCarga]);
 
   const exportarMovimientosPorEESS = useCallback(async (
-    filtros: { fechaInicio: string; fechaFin: string; centroAcopioId?: string },
+    filtros: { fechaInicio: string; fechaFin: string; centroAcopioId?: string; acumularSalidasDesdeInicioAnio?: boolean },
     config: ConfiguracionExportacion
   ) => {
     await ejecutarConCarga(

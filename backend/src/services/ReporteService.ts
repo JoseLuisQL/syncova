@@ -70,6 +70,13 @@ export interface MovimientosPorEESSFilters {
   incluirInactivos?: boolean;
   usarSaldoSinEntregaParaStock?: boolean;
   usarTotalUltimoMesParaEntrega?: boolean;
+  /**
+   * Si es true, la columna "Salidas" se calcula como el acumulado desde
+   * enero del año del fechaFin hasta el mes seleccionado (Year-To-Date).
+   * Útil para reportes mensuales acumulados. Las columnas Entrega y Stock
+   * mantienen el comportamiento normal (datos del último mes del rango).
+   */
+  acumularSalidasDesdeInicioAnio?: boolean;
 }
 
 export interface StockVacunasEESSFilters {
@@ -1781,18 +1788,23 @@ export class ReporteService {
   /**
    * Generar reporte de movimientos por EESS
    *
-   * Modelo de datos de MovimientoVacuna:
-   * - El campo `salida` en mes=N registra el consumo real del mes N-1
-   *   (en febrero se registran las salidas de enero)
-   * - El campo `entrega` en mes=N corresponde a la entrega del propio mes N
-   * - El stock en el modulo principal se calcula como:
+   * Convención SIVAC (consistente con MovimientosQueryService.getAll):
+   * - El módulo principal SIEMPRE desplaza +1 mes al consultar:
+   *   "al seleccionar Enero el sistema carga datos de Febrero"
+   * - Razón: la actividad de un mes (saldoAnterior, ingresos, salidas, entregas)
+   *   se reporta en la fila del mes siguiente. Es decir, los movimientos
+   *   reales de Enero están almacenados en la fila mes=2.
+   *
+   * Por lo tanto, para un rango del usuario (ej: Ene-Feb 2026):
+   * - Se consultan los meses desplazados +1 (Feb-Mar 2026) y TODOS los campos
+   *   (saldoAnterior, transIngreso, salida, transSalida, entrega) provienen
+   *   de esas filas, porque representan los movimientos de Ene-Feb.
+   * - El stock se calcula con la misma fórmula del módulo principal:
    *   stock = saldoAnterior + transIngreso - salida - transSalida + entrega
    *
-   * Por lo tanto, para un rango de fechas del usuario (ej: Ene-Feb 2026):
-   * - Salidas: se consultan los meses desplazados +1 (Feb-Mar) para obtener
-   *   las salidas reales de Ene-Feb
-   * - Entregas: se consultan los meses originales (Ene-Feb)
-   * - Stock: se usa el ultimo mes desplazado, con la misma formula del modulo principal
+   * IMPORTANTE: NO se debe consultar la fila sin desplazar (mes=N) para
+   * obtener entregas o stock del mes N, porque esa fila contiene los
+   * movimientos del mes N-1 (ej: la fila de Enero contiene datos de Diciembre).
    */
   static async generarMovimientosPorEESS(
     filters: MovimientosPorEESSFilters
@@ -1806,7 +1818,8 @@ export class ReporteService {
         centroAcopioId,
         incluirInactivos = false,
         usarSaldoSinEntregaParaStock = false,
-        usarTotalUltimoMesParaEntrega = false
+        usarTotalUltimoMesParaEntrega = false,
+        acumularSalidasDesdeInicioAnio = false
       } = filters;
 
       if (!fechaInicio || !fechaFin) {
@@ -1851,7 +1864,7 @@ export class ReporteService {
       const finDesp = desplazarMes(mesFinUsuario, anioFinUsuario);
 
       console.log(`Usuario: ${mesInicioUsuario}/${anioInicioUsuario} - ${mesFinUsuario}/${anioFinUsuario}`);
-      console.log(`Desplazado (salidas/stock): ${inicioDesp.mes}/${inicioDesp.anio} - ${finDesp.mes}/${finDesp.anio}`);
+      console.log(`Desplazado (entregas/salidas/stock): ${inicioDesp.mes}/${inicioDesp.anio} - ${finDesp.mes}/${finDesp.anio}`);
 
       // Filtros comunes de establecimiento/vacuna
       const filtrosRelacion: any = {};
@@ -1879,7 +1892,9 @@ export class ReporteService {
         return or;
       };
 
-      // 1) Consulta DESPLAZADA (+1 mes): para obtener las salidas reales
+      // Consulta DESPLAZADA (+1 mes): única fuente de verdad para entregas, salidas y stock.
+      // Las filas de mes=N+1 contienen los movimientos REALES del mes N que el usuario eligió,
+      // siguiendo la convención de SIVAC (ver MovimientosQueryService.getAll).
       const movimientosDesplazados = await prisma.movimientoVacuna.findMany({
         where: {
           OR: buildMesesOR(inicioDesp.mes, inicioDesp.anio, finDesp.mes, finDesp.anio),
@@ -1905,34 +1920,18 @@ export class ReporteService {
         ]
       });
 
-      // 2) Consulta ORIGINAL (sin desplazar): para entregas y stock
-      const movimientosOriginales = await prisma.movimientoVacuna.findMany({
-        where: {
-          OR: buildMesesOR(mesInicioUsuario, anioInicioUsuario, mesFinUsuario, anioFinUsuario),
-          ...filtrosRelacion
-        },
-        select: {
-          establecimientoId: true,
-          vacunaId: true,
-          mes: true,
-          anio: true,
-          entrega: true,
-          saldoAnterior: true,
-          transIngreso: true,
-          salida: true,
-          transSalida: true
-        }
-      });
-
-      // Mapa de entregas acumuladas (meses originales)
+      // Mapa de entregas acumuladas en el rango del usuario (sumadas desde las filas desplazadas)
       const entregasMap = new Map<string, number>();
-      // Mapa de datos base del ultimo mes por establecimiento/vacuna (para stock/total)
+      // Mapa de datos base del último mes desplazado por establecimiento/vacuna (para stock/total)
       const baseStockMap = new Map<string, { mes: number; anio: number; saldoAnterior: number; transIngreso: number; salida: number; transSalida: number }>();
+      // Estructura jerárquica de establecimientos → vacunas con total de salidas acumulado
+      const establecimientosMap = new Map<string, any>();
 
-      for (const mov of movimientosOriginales) {
+      for (const mov of movimientosDesplazados) {
         const key = `${mov.establecimientoId}-${mov.vacunaId}`;
+
+        // Acumular entregas y mantener última base de stock por establecimiento/vacuna
         entregasMap.set(key, (entregasMap.get(key) || 0) + mov.entrega);
-        // Guardar datos base del ultimo mes para calcular stock despues
         const prev = baseStockMap.get(key);
         if (!prev || mov.anio > prev.anio || (mov.anio === prev.anio && mov.mes >= prev.mes)) {
           baseStockMap.set(key, {
@@ -1941,6 +1940,37 @@ export class ReporteService {
             salida: mov.salida, transSalida: mov.transSalida
           });
         }
+
+        // Construir estructura jerárquica EESS → vacunas y acumular salidas del rango
+        const estId = mov.establecimientoId;
+        if (!establecimientosMap.has(estId)) {
+          const ca = mov.establecimiento.centroAcopio;
+          const mr = ca?.microred;
+          const red = mr?.red;
+          establecimientosMap.set(estId, {
+            establecimientoId: estId,
+            establecimientoNombre: mov.establecimiento.nombre,
+            centroAcopioId: ca?.id || '',
+            centroAcopioNombre: ca?.nombre || 'Sin Centro',
+            microredId: mr?.id || null,
+            microredNombre: mr?.nombre || null,
+            redId: red?.id || null,
+            redNombre: red?.nombre || null,
+            vacunas: new Map<string, any>()
+          });
+        }
+
+        const est = establecimientosMap.get(estId)!;
+        const vacId = mov.vacunaId;
+        if (!est.vacunas.has(vacId)) {
+          est.vacunas.set(vacId, {
+            vacunaId: mov.vacunaId,
+            vacunaNombre: mov.vacuna.nombre,
+            totalSalidas: 0
+          });
+        }
+        // Acumular salidas del rango (sin transferencias de salida)
+        est.vacunas.get(vacId)!.totalSalidas += mov.salida;
       }
 
       // 3) Consulta de entregas con vale generado para el ultimo mes de cada establecimiento/vacuna
@@ -2006,44 +2036,40 @@ export class ReporteService {
         totalUltimoMesMap.set(key, base.saldoAnterior + base.transIngreso);
       }
 
-      // Agrupar datos desplazados por establecimiento/vacuna
-      const establecimientosMap = new Map<string, any>();
+      // Salidas acumuladas YTD: desde enero del año del fin hasta el mes seleccionado
+      // (en términos desplazados: febrero del año hasta finDesp)
+      // Solo se ejecuta esta consulta si el flag está activo y el inicio del rango YTD
+      // es realmente anterior al inicio del rango actual (evita query redundante).
+      let salidasYTDMap: Map<string, number> | null = null;
+      if (acumularSalidasDesdeInicioAnio) {
+        const inicioYTDDesp = desplazarMes(1, anioFinUsuario);
+        const yaCubreInicioAnio =
+          inicioDesp.anio < inicioYTDDesp.anio ||
+          (inicioDesp.anio === inicioYTDDesp.anio && inicioDesp.mes <= inicioYTDDesp.mes);
 
-      for (const mov of movimientosDesplazados) {
-        const estId = mov.establecimientoId;
-
-        if (!establecimientosMap.has(estId)) {
-          const ca = mov.establecimiento.centroAcopio;
-          const mr = ca?.microred;
-          const red = mr?.red;
-          establecimientosMap.set(estId, {
-            establecimientoId: estId,
-            establecimientoNombre: mov.establecimiento.nombre,
-            centroAcopioId: ca?.id || '',
-            centroAcopioNombre: ca?.nombre || 'Sin Centro',
-            microredId: mr?.id || null,
-            microredNombre: mr?.nombre || null,
-            redId: red?.id || null,
-            redNombre: red?.nombre || null,
-            vacunas: new Map<string, any>()
+        if (!yaCubreInicioAnio) {
+          const movimientosYTD = await prisma.movimientoVacuna.findMany({
+            where: {
+              OR: buildMesesOR(inicioYTDDesp.mes, inicioYTDDesp.anio, finDesp.mes, finDesp.anio),
+              ...filtrosRelacion
+            },
+            select: {
+              establecimientoId: true,
+              vacunaId: true,
+              salida: true
+            }
           });
+
+          salidasYTDMap = new Map<string, number>();
+          for (const mov of movimientosYTD) {
+            const key = `${mov.establecimientoId}-${mov.vacunaId}`;
+            salidasYTDMap.set(key, (salidasYTDMap.get(key) || 0) + mov.salida);
+          }
+
+          console.log(
+            `📊 Salidas YTD calculadas (desde ${inicioYTDDesp.mes}/${inicioYTDDesp.anio} desplazado): ${salidasYTDMap.size} combinaciones est/vacuna`
+          );
         }
-
-        const est = establecimientosMap.get(estId)!;
-        const vacId = mov.vacunaId;
-
-        if (!est.vacunas.has(vacId)) {
-          est.vacunas.set(vacId, {
-            vacunaId: mov.vacunaId,
-            vacunaNombre: mov.vacuna.nombre,
-            totalSalidas: 0
-          });
-        }
-
-        const vd = est.vacunas.get(vacId)!;
-
-        // Acumular salidas de los meses desplazados (sin transferencias de salida)
-        vd.totalSalidas += mov.salida;
       }
 
       // Construir resultado final
@@ -2054,13 +2080,17 @@ export class ReporteService {
 
         for (const [vacId, vd] of est.vacunas) {
           const key = `${estId}-${vacId}`;
+          const totalSalidasFinal = salidasYTDMap !== null
+            ? (salidasYTDMap.get(key) ?? vd.totalSalidas)
+            : vd.totalSalidas;
+
           vacunasProcessed[vacId] = {
             vacunaId: vd.vacunaId,
             vacunaNombre: vd.vacunaNombre,
             totalEntrega: usarTotalUltimoMesParaEntrega
               ? (totalUltimoMesMap.get(key) || 0)
               : (entregasMap.get(key) || 0),
-            totalSalidas: vd.totalSalidas,
+            totalSalidas: totalSalidasFinal,
             stock: stockMap.get(key) || 0
           };
         }
