@@ -70,13 +70,6 @@ export interface MovimientosPorEESSFilters {
   incluirInactivos?: boolean;
   usarSaldoSinEntregaParaStock?: boolean;
   usarTotalUltimoMesParaEntrega?: boolean;
-  /**
-   * Si es true, la columna "Salidas" se calcula como el acumulado desde
-   * enero del año del fechaFin hasta el mes seleccionado (Year-To-Date).
-   * Útil para reportes mensuales acumulados. Las columnas Entrega y Stock
-   * mantienen el comportamiento normal (datos del último mes del rango).
-   */
-  acumularSalidasDesdeInicioAnio?: boolean;
 }
 
 export interface StockVacunasEESSFilters {
@@ -1818,8 +1811,7 @@ export class ReporteService {
         centroAcopioId,
         incluirInactivos = false,
         usarSaldoSinEntregaParaStock = false,
-        usarTotalUltimoMesParaEntrega = false,
-        acumularSalidasDesdeInicioAnio = false
+        usarTotalUltimoMesParaEntrega = false
       } = filters;
 
       if (!fechaInicio || !fechaFin) {
@@ -1892,6 +1884,9 @@ export class ReporteService {
         return or;
       };
 
+      const buildValeKey = (establecimientoId: string, vacunaId: string, mes: number, anio: number) =>
+        `${establecimientoId}-${vacunaId}-${mes}-${anio}`;
+
       // Consulta DESPLAZADA (+1 mes): única fuente de verdad para entregas, salidas y stock.
       // Las filas de mes=N+1 contienen los movimientos REALES del mes N que el usuario eligió,
       // siguiendo la convención de SIVAC (ver MovimientosQueryService.getAll).
@@ -1924,7 +1919,7 @@ export class ReporteService {
       const entregasMap = new Map<string, number>();
       // Mapa de datos base del último mes desplazado por establecimiento/vacuna (para stock/total)
       const baseStockMap = new Map<string, { mes: number; anio: number; saldoAnterior: number; transIngreso: number; salida: number; transSalida: number }>();
-      // Estructura jerárquica de establecimientos → vacunas con total de salidas acumulado
+      // Estructura jerárquica de establecimientos → vacunas con salidas por periodo
       const establecimientosMap = new Map<string, any>();
 
       for (const mov of movimientosDesplazados) {
@@ -1941,7 +1936,7 @@ export class ReporteService {
           });
         }
 
-        // Construir estructura jerárquica EESS → vacunas y acumular salidas del rango
+        // Construir estructura jerárquica EESS → vacunas y registrar salidas del periodo
         const estId = mov.establecimientoId;
         if (!establecimientosMap.has(estId)) {
           const ca = mov.establecimiento.centroAcopio;
@@ -1966,20 +1961,24 @@ export class ReporteService {
           est.vacunas.set(vacId, {
             vacunaId: mov.vacunaId,
             vacunaNombre: mov.vacuna.nombre,
-            totalSalidas: 0
+            salidasPorPeriodo: new Map<string, number>()
           });
         }
-        // Acumular salidas del rango (sin transferencias de salida)
-        est.vacunas.get(vacId)!.totalSalidas += mov.salida;
+        const vacunaData = est.vacunas.get(vacId)!;
+        const valeKey = buildValeKey(mov.establecimientoId, mov.vacunaId, mov.mes, mov.anio);
+        vacunaData.salidasPorPeriodo.set(
+          valeKey,
+          (vacunaData.salidasPorPeriodo.get(valeKey) || 0) + mov.salida
+        );
       }
 
-      // 3) Consulta de entregas con vale generado para el ultimo mes de cada establecimiento/vacuna
+      // 3) Consulta de entregas/salidas con vale generado para los meses del rango
       // Recopilar todos los meses unicos que necesitamos consultar
       const mesesParaVales = new Map<string, { mes: number; anio: number }>();
-      for (const base of baseStockMap.values()) {
-        const mesAnioKey = `${base.mes}-${base.anio}`;
+      for (const mov of movimientosDesplazados) {
+        const mesAnioKey = `${mov.mes}-${mov.anio}`;
         if (!mesesParaVales.has(mesAnioKey)) {
-          mesesParaVales.set(mesAnioKey, { mes: base.mes, anio: base.anio });
+          mesesParaVales.set(mesAnioKey, { mes: mov.mes, anio: mov.anio });
         }
       }
 
@@ -2012,9 +2011,16 @@ export class ReporteService {
 
       // Mapa de entregas con vale: key = estId-vacId-mes-anio
       const entregasConValeMap = new Map<string, number>();
+      const valesGeneradosSet = new Set<string>();
       for (const detalle of valeDetalles) {
-        const key = `${detalle.establecimientoId}-${detalle.vacunaId}-${detalle.valeEntrega.mes}-${detalle.valeEntrega.anio}`;
+        const key = buildValeKey(
+          detalle.establecimientoId,
+          detalle.vacunaId,
+          detalle.valeEntrega.mes,
+          detalle.valeEntrega.anio
+        );
         const cantidad = (detalle.cantidadProgramada || 0) + (detalle.cantidadAdicional || 0);
+        valesGeneradosSet.add(key);
         entregasConValeMap.set(key, (entregasConValeMap.get(key) || 0) + cantidad);
       }
 
@@ -2036,42 +2042,6 @@ export class ReporteService {
         totalUltimoMesMap.set(key, base.saldoAnterior + base.transIngreso);
       }
 
-      // Salidas acumuladas YTD: desde enero del año del fin hasta el mes seleccionado
-      // (en términos desplazados: febrero del año hasta finDesp)
-      // Solo se ejecuta esta consulta si el flag está activo y el inicio del rango YTD
-      // es realmente anterior al inicio del rango actual (evita query redundante).
-      let salidasYTDMap: Map<string, number> | null = null;
-      if (acumularSalidasDesdeInicioAnio) {
-        const inicioYTDDesp = desplazarMes(1, anioFinUsuario);
-        const yaCubreInicioAnio =
-          inicioDesp.anio < inicioYTDDesp.anio ||
-          (inicioDesp.anio === inicioYTDDesp.anio && inicioDesp.mes <= inicioYTDDesp.mes);
-
-        if (!yaCubreInicioAnio) {
-          const movimientosYTD = await prisma.movimientoVacuna.findMany({
-            where: {
-              OR: buildMesesOR(inicioYTDDesp.mes, inicioYTDDesp.anio, finDesp.mes, finDesp.anio),
-              ...filtrosRelacion
-            },
-            select: {
-              establecimientoId: true,
-              vacunaId: true,
-              salida: true
-            }
-          });
-
-          salidasYTDMap = new Map<string, number>();
-          for (const mov of movimientosYTD) {
-            const key = `${mov.establecimientoId}-${mov.vacunaId}`;
-            salidasYTDMap.set(key, (salidasYTDMap.get(key) || 0) + mov.salida);
-          }
-
-          console.log(
-            `📊 Salidas YTD calculadas (desde ${inicioYTDDesp.mes}/${inicioYTDDesp.anio} desplazado): ${salidasYTDMap.size} combinaciones est/vacuna`
-          );
-        }
-      }
-
       // Construir resultado final
       const reporteData: MovimientosPorEESSItem[] = [];
 
@@ -2080,9 +2050,12 @@ export class ReporteService {
 
         for (const [vacId, vd] of est.vacunas) {
           const key = `${estId}-${vacId}`;
-          const totalSalidasFinal = salidasYTDMap !== null
-            ? (salidasYTDMap.get(key) ?? vd.totalSalidas)
-            : vd.totalSalidas;
+          let totalSalidasFinal = 0;
+          for (const [valeKey, salidas] of (vd.salidasPorPeriodo as Map<string, number>)) {
+            if (valesGeneradosSet.has(valeKey)) {
+              totalSalidasFinal += salidas;
+            }
+          }
 
           vacunasProcessed[vacId] = {
             vacunaId: vd.vacunaId,

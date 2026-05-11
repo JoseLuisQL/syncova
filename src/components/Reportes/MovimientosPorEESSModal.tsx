@@ -26,11 +26,6 @@ interface MovimientosPorEESSFiltros {
   centroAcopioId?: string;
   fechaInicio: string;
   fechaFin: string;
-  /**
-   * Si es true, la columna "Salidas" del Excel acumulará desde enero del año
-   * de fechaFin hasta el mes de fechaFin (YTD). Solo se activa en modo "Por mes".
-   */
-  acumularSalidasDesdeInicioAnio?: boolean;
 }
 
 type ModoFiltro = 'rango' | 'mes';
@@ -105,15 +100,6 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
     return `${nombreMes} ${anioNum} · del 01/${padZero(mesNum)}/${anioNum} al ${padZero(ultimoDia)}/${padZero(mesNum)}/${anioNum}`;
   }, [modoFiltro, mes, anio]);
 
-  const salidasAcumuladasResumen = useMemo(() => {
-    if (modoFiltro !== 'mes') return null;
-    const mesNum = parseInt(mes, 10);
-    const anioNum = parseInt(anio, 10);
-    if (isNaN(mesNum) || isNaN(anioNum) || mesNum <= 1) return null;
-    const nombreMes = MESES.find((m) => m.value === mes)?.label ?? '';
-    return `Enero a ${nombreMes} ${anioNum}`;
-  }, [modoFiltro, mes, anio]);
-
   const validarFormulario = () => {
     const nuevosErrores: Record<string, string> = {};
 
@@ -157,8 +143,6 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
         centroAcopioId: centroAcopioId || undefined,
         fechaInicio: formatYMD(anioNum, mesNum, 1),
         fechaFin: formatYMD(anioNum, mesNum, ultimoDia),
-        // En modo "Por mes" la columna Salidas se acumula YTD (enero → mes elegido)
-        acumularSalidasDesdeInicioAnio: true,
       };
     }
 
@@ -302,11 +286,9 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
                   Cubrirá <span className="font-medium text-[#15171d]">{periodoResumen}</span>.
                 </p>
               ) : null}
-              <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2 text-[12px] leading-5 text-amber-900">
-                <span className="font-semibold">Salidas acumuladas:</span>{' '}
-                {salidasAcumuladasResumen
-                  ? <>la columna <span className="font-medium">Salidas</span> sumará todas las salidas desde <span className="font-medium">{salidasAcumuladasResumen}</span> (acumulado anual hasta el mes seleccionado). Entrega y Stock se mantienen del mes elegido.</>
-                  : <>en este mes la columna <span className="font-medium">Salidas</span> incluye solo el mes seleccionado (es el primer mes del año, no hay meses previos que acumular).</>}
+              <div className="rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-2 text-[12px] leading-5 text-sky-900">
+                <span className="font-semibold">Salidas del mes:</span>{' '}
+                la columna <span className="font-medium">Salidas</span> mostrará solo el mes seleccionado y únicamente cuando exista un vale generado para el EESS y vacuna.
               </div>
             </div>
           )}

@@ -84,12 +84,6 @@ export interface MovimientosPorEESSFilters {
   fechaInicio: string;
   fechaFin: string;
   centroAcopioId?: string;
-  /**
-   * Si es true, la columna "Salidas" mostrará el acumulado desde enero
-   * del año del fechaFin hasta el mes seleccionado (Year-To-Date).
-   * Las columnas Entrega y Stock mantienen el valor del último mes del rango.
-   */
-  acumularSalidasDesdeInicioAnio?: boolean;
 }
 
 export interface StockVacunasEESSFilters {
