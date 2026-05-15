@@ -1919,7 +1919,7 @@ export class ReporteService {
       const entregasMap = new Map<string, number>();
       // Mapa de datos base del último mes desplazado por establecimiento/vacuna (para stock/total)
       const baseStockMap = new Map<string, { mes: number; anio: number; saldoAnterior: number; transIngreso: number; salida: number; transSalida: number }>();
-      // Estructura jerárquica de establecimientos → vacunas con salidas por periodo
+      // Estructura jerárquica de establecimientos → vacunas con salidas del periodo
       const establecimientosMap = new Map<string, any>();
 
       for (const mov of movimientosDesplazados) {
@@ -1961,15 +1961,11 @@ export class ReporteService {
           est.vacunas.set(vacId, {
             vacunaId: mov.vacunaId,
             vacunaNombre: mov.vacuna.nombre,
-            salidasPorPeriodo: new Map<string, number>()
+            totalSalidas: 0
           });
         }
         const vacunaData = est.vacunas.get(vacId)!;
-        const valeKey = buildValeKey(mov.establecimientoId, mov.vacunaId, mov.mes, mov.anio);
-        vacunaData.salidasPorPeriodo.set(
-          valeKey,
-          (vacunaData.salidasPorPeriodo.get(valeKey) || 0) + mov.salida
-        );
+        vacunaData.totalSalidas += mov.salida;
       }
 
       // 3) Consulta de entregas/salidas con vale generado para los meses del rango
@@ -2011,7 +2007,6 @@ export class ReporteService {
 
       // Mapa de entregas con vale: key = estId-vacId-mes-anio
       const entregasConValeMap = new Map<string, number>();
-      const valesGeneradosSet = new Set<string>();
       for (const detalle of valeDetalles) {
         const key = buildValeKey(
           detalle.establecimientoId,
@@ -2020,7 +2015,6 @@ export class ReporteService {
           detalle.valeEntrega.anio
         );
         const cantidad = (detalle.cantidadProgramada || 0) + (detalle.cantidadAdicional || 0);
-        valesGeneradosSet.add(key);
         entregasConValeMap.set(key, (entregasConValeMap.get(key) || 0) + cantidad);
       }
 
@@ -2050,12 +2044,6 @@ export class ReporteService {
 
         for (const [vacId, vd] of est.vacunas) {
           const key = `${estId}-${vacId}`;
-          let totalSalidasFinal = 0;
-          for (const [valeKey, salidas] of (vd.salidasPorPeriodo as Map<string, number>)) {
-            if (valesGeneradosSet.has(valeKey)) {
-              totalSalidasFinal += salidas;
-            }
-          }
 
           vacunasProcessed[vacId] = {
             vacunaId: vd.vacunaId,
@@ -2063,7 +2051,7 @@ export class ReporteService {
             totalEntrega: usarTotalUltimoMesParaEntrega
               ? (totalUltimoMesMap.get(key) || 0)
               : (entregasMap.get(key) || 0),
-            totalSalidas: totalSalidasFinal,
+            totalSalidas: vd.totalSalidas || 0,
             stock: stockMap.get(key) || 0
           };
         }

@@ -288,7 +288,7 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
               ) : null}
               <div className="rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-2 text-[12px] leading-5 text-sky-900">
                 <span className="font-semibold">Salidas del mes:</span>{' '}
-                la columna <span className="font-medium">Salidas</span> mostrará solo el mes seleccionado y únicamente cuando exista un vale generado para el EESS y vacuna.
+                la columna <span className="font-medium">Salidas</span> mostrará los movimientos registrados para el mes seleccionado.
               </div>
             </div>
           )}
