@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Package, SlidersHorizontal, Syringe, Warehouse } from '@phosphor-icons/react';
+import { Package, SlidersHorizontal, Stack, Syringe, Warehouse } from '@phosphor-icons/react';
 import { apiClient } from '../../config/api';
 import {
   FormSection,
   Modal,
   ModalFooter,
+  MultiSelectInput,
   SelectInput,
   TextInput,
 } from '../ui/ModalElements';
@@ -79,8 +80,8 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     centroAcopioId: '',
-    vacunaId: '',
-    jeringaId: '',
+    vacunaIds: [] as string[],
+    jeringaIds: [] as string[],
     multiplicador: '1',
     prioridad: '1',
     activo: 'true',
@@ -88,14 +89,16 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isEditing = Boolean(editingConfig);
+
   useEffect(() => {
     if (!isOpen) return;
 
     if (editingConfig) {
       setFormData({
         centroAcopioId: 'centroAcopioId' in editingConfig ? editingConfig.centroAcopioId : '',
-        vacunaId: editingConfig.vacunaId,
-        jeringaId: editingConfig.jeringaId,
+        vacunaIds: [editingConfig.vacunaId],
+        jeringaIds: [editingConfig.jeringaId],
         multiplicador: String(editingConfig.multiplicador),
         prioridad: String(editingConfig.prioridad),
         activo: String(editingConfig.activo),
@@ -103,8 +106,8 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
     } else {
       setFormData({
         centroAcopioId: '',
-        vacunaId: '',
-        jeringaId: '',
+        vacunaIds: [],
+        jeringaIds: [],
         multiplicador: '1',
         prioridad: '1',
         activo: 'true',
@@ -114,9 +117,26 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
     setErrors({});
   }, [editingConfig, isOpen]);
 
-  const vacunaOptions = useMemo(() => vacunas.map((vacuna) => ({ value: vacuna.id, label: vacuna.nombre })), [vacunas]);
+  const vacunaOptions = useMemo(
+    () =>
+      vacunas
+        .slice()
+        .sort((a, b) => a.nombre.localeCompare(b.nombre))
+        .map((vacuna) => ({
+          value: vacuna.id,
+          label: vacuna.presentacion ? `${vacuna.nombre} · ${vacuna.presentacion}` : vacuna.nombre,
+        })),
+    [vacunas],
+  );
   const jeringaOptions = useMemo(
-    () => jeringas.map((jeringa) => ({ value: jeringa.id, label: `${jeringa.tipo} ${jeringa.capacidad} · ${jeringa.color}` })),
+    () =>
+      jeringas
+        .slice()
+        .sort((a, b) => `${a.tipo} ${a.capacidad}`.localeCompare(`${b.tipo} ${b.capacidad}`))
+        .map((jeringa) => ({
+          value: jeringa.id,
+          label: `${jeringa.tipo} ${jeringa.capacidad}${jeringa.color ? ` · ${jeringa.color}` : ''}`,
+        })),
     [jeringas],
   );
   const centroOptions = useMemo(
@@ -124,11 +144,19 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
     [centrosAcopio],
   );
 
-  const selectedVacuna = vacunas.find((vacuna) => vacuna.id === formData.vacunaId);
-  const selectedJeringa = jeringas.find((jeringa) => jeringa.id === formData.jeringaId);
+  const selectedVacunas = useMemo(() => {
+    const idSet = new Set(formData.vacunaIds);
+    return vacunas.filter((vacuna) => idSet.has(vacuna.id));
+  }, [formData.vacunaIds, vacunas]);
+  const selectedJeringas = useMemo(() => {
+    const idSet = new Set(formData.jeringaIds);
+    return jeringas.filter((jeringa) => idSet.has(jeringa.id));
+  }, [formData.jeringaIds, jeringas]);
   const selectedCentro = centrosAcopio.find((centro) => centro.id === formData.centroAcopioId);
 
-  const handleChange = useCallback((field: string, value: string) => {
+  const combinationsCount = formData.vacunaIds.length * formData.jeringaIds.length;
+
+  const handleChange = useCallback((field: string, value: string | string[]) => {
     setFormData((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: '' }));
   }, []);
@@ -139,57 +167,123 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
     const prioridad = Number(formData.prioridad);
 
     if (tipo === 'centro' && !formData.centroAcopioId) nextErrors.centroAcopioId = 'Seleccione un centro.';
-    if (!formData.vacunaId) nextErrors.vacunaId = 'Seleccione una vacuna.';
-    if (!formData.jeringaId) nextErrors.jeringaId = 'Seleccione una jeringa.';
+    if (formData.vacunaIds.length === 0) nextErrors.vacunaIds = isEditing ? 'Seleccione una vacuna.' : 'Seleccione al menos una vacuna.';
+    if (formData.jeringaIds.length === 0) nextErrors.jeringaIds = isEditing ? 'Seleccione una jeringa.' : 'Seleccione al menos una jeringa.';
     if (!Number.isFinite(multiplicador) || multiplicador < 0) nextErrors.multiplicador = 'Debe ser un número mayor o igual a 0.';
     if (!Number.isFinite(prioridad) || prioridad <= 0) nextErrors.prioridad = 'La prioridad debe ser mayor a 0.';
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
-  }, [formData, tipo]);
+  }, [formData, isEditing, tipo]);
 
   const handleSubmit = useCallback(async () => {
     if (!validate()) return;
 
     setIsSubmitting(true);
     try {
-      const endpoint = editingConfig
-        ? `/configuracion-jeringa-vacuna/${tipo}/${editingConfig.id}`
-        : `/configuracion-jeringa-vacuna/${tipo}`;
+      const basePayload = {
+        ...(tipo === 'centro' ? { centroAcopioId: formData.centroAcopioId } : {}),
+        multiplicador: Number(formData.multiplicador),
+        prioridad: Number(formData.prioridad),
+        activo: formData.activo === 'true',
+      };
 
-      const payload =
-        tipo === 'centro'
-          ? {
-              centroAcopioId: formData.centroAcopioId,
-              vacunaId: formData.vacunaId,
-              jeringaId: formData.jeringaId,
-              multiplicador: Number(formData.multiplicador),
-              prioridad: Number(formData.prioridad),
-              activo: formData.activo === 'true',
-            }
-          : {
-              vacunaId: formData.vacunaId,
-              jeringaId: formData.jeringaId,
-              multiplicador: Number(formData.multiplicador),
-              prioridad: Number(formData.prioridad),
-              activo: formData.activo === 'true',
-            };
+      if (isEditing && editingConfig) {
+        const endpoint = `/configuracion-jeringa-vacuna/${tipo}/${editingConfig.id}`;
+        const payload = {
+          ...basePayload,
+          vacunaId: formData.vacunaIds[0],
+          jeringaId: formData.jeringaIds[0],
+        };
 
-      const response = editingConfig ? await apiClient.put(endpoint, payload) : await apiClient.post(endpoint, payload);
+        const response = await apiClient.put(endpoint, payload);
+        if (!response.data.success) {
+          throw new Error(response.data.message || 'No se pudo guardar la configuración');
+        }
 
-      if (!response.data.success) {
-        throw new Error(response.data.message || 'No se pudo guardar la configuración');
+        onNotification('success', 'Configuración actualizada correctamente');
+        onSuccess();
+        return;
       }
 
-      onNotification('success', `Configuración ${editingConfig ? 'actualizada' : 'creada'} correctamente`);
-      onSuccess();
+      const endpoint = `/configuracion-jeringa-vacuna/${tipo}`;
+      const combinations = formData.vacunaIds.flatMap((vacunaId) =>
+        formData.jeringaIds.map((jeringaId) => ({ vacunaId, jeringaId })),
+      );
+
+      const results = await Promise.allSettled(
+        combinations.map((combo) => apiClient.post(endpoint, { ...basePayload, ...combo })),
+      );
+
+      const succeeded: typeof combinations = [];
+      const duplicated: typeof combinations = [];
+      const failed: Array<{ combo: (typeof combinations)[number]; message: string }> = [];
+
+      results.forEach((result, index) => {
+        const combo = combinations[index];
+        if (result.status === 'fulfilled' && result.value.data?.success) {
+          succeeded.push(combo);
+          return;
+        }
+
+        const errorMessage = result.status === 'fulfilled'
+          ? result.value.data?.message || 'Error desconocido'
+          : (result.reason?.response?.data?.message
+            || result.reason?.response?.data?.error
+            || result.reason?.message
+            || 'Error desconocido');
+
+        if (/ya existe/i.test(errorMessage)) {
+          duplicated.push(combo);
+        } else {
+          failed.push({ combo, message: errorMessage });
+        }
+      });
+
+      const total = combinations.length;
+      const successCount = succeeded.length;
+      const duplicatedCount = duplicated.length;
+      const failedCount = failed.length;
+
+      if (successCount === total) {
+        onNotification(
+          'success',
+          total === 1
+            ? 'Configuración creada correctamente'
+            : `Se crearon ${successCount} configuraciones correctamente`,
+        );
+        onSuccess();
+        return;
+      }
+
+      if (successCount > 0) {
+        const parts: string[] = [`${successCount} creada${successCount === 1 ? '' : 's'}`];
+        if (duplicatedCount > 0) parts.push(`${duplicatedCount} ya existía${duplicatedCount === 1 ? '' : 'n'}`);
+        if (failedCount > 0) parts.push(`${failedCount} con error`);
+        onNotification('info', parts.join(' · '));
+        onSuccess();
+        return;
+      }
+
+      if (duplicatedCount === total) {
+        onNotification(
+          'info',
+          total === 1
+            ? 'La configuración ya existe para esta combinación'
+            : `Las ${total} combinaciones ya están configuradas`,
+        );
+        return;
+      }
+
+      const firstError = failed[0]?.message || 'No se pudo crear ninguna configuración';
+      onNotification('error', firstError);
     } catch (error: any) {
       const message = error.response?.data?.message || error.response?.data?.error || error.message || 'No se pudo guardar la configuración';
       onNotification('error', message);
     } finally {
       setIsSubmitting(false);
     }
-  }, [editingConfig, formData, onNotification, onSuccess, tipo, validate]);
+  }, [editingConfig, formData, isEditing, onNotification, onSuccess, tipo, validate]);
 
   return (
     <Modal
@@ -203,7 +297,13 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
           onCancel={onClose}
           onSubmit={handleSubmit}
           submitType="button"
-          submitLabel={editingConfig ? 'Guardar cambios' : 'Crear configuración'}
+          submitLabel={
+            isEditing
+              ? 'Guardar cambios'
+              : combinationsCount > 1
+              ? `Crear ${combinationsCount} configuraciones`
+              : 'Crear configuración'
+          }
           isLoading={isSubmitting}
         />
       }
@@ -212,19 +312,45 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
         <div className="rounded-[18px] border border-zinc-200 bg-zinc-50/60 p-4">
           <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-zinc-700">Vista previa</p>
           <p className="mt-2 text-sm leading-6 text-slate-800">
-            {selectedVacuna ? (
+            {isEditing ? (
+              selectedVacunas[0] ? (
+                <>
+                  Para <span className="font-semibold text-slate-950">{selectedVacunas[0].nombre}</span>{' '}
+                  {selectedJeringas[0] ? (
+                    <>
+                      se usará{' '}
+                      <span className="font-semibold text-slate-950">
+                        {selectedJeringas[0].tipo} {selectedJeringas[0].capacidad}
+                      </span>
+                      .
+                    </>
+                  ) : (
+                    <>debe elegir una jeringa.</>
+                  )}
+                </>
+              ) : (
+                <>Seleccione una vacuna y una jeringa para construir la regla.</>
+              )
+            ) : combinationsCount === 0 ? (
+              <>Seleccione al menos una vacuna y una jeringa para construir las reglas.</>
+            ) : combinationsCount === 1 ? (
               <>
-                Para <span className="font-semibold text-slate-950">{selectedVacuna.nombre}</span>{' '}
-                {selectedJeringa ? (
-                  <>
-                    se usará <span className="font-semibold text-slate-950">{selectedJeringa.tipo} {selectedJeringa.capacidad}</span>.
-                  </>
-                ) : (
-                  <>debe elegir una jeringa.</>
-                )}
+                Para <span className="font-semibold text-slate-950">{selectedVacunas[0].nombre}</span> se usará{' '}
+                <span className="font-semibold text-slate-950">
+                  {selectedJeringas[0].tipo} {selectedJeringas[0].capacidad}
+                </span>
+                .
               </>
             ) : (
-              <>Seleccione una vacuna y una jeringa para construir la regla.</>
+              <>
+                Se crearán{' '}
+                <span className="font-semibold text-slate-950">{combinationsCount} configuraciones</span> ·{' '}
+                <span className="text-slate-700">
+                  {formData.vacunaIds.length} vacuna{formData.vacunaIds.length === 1 ? '' : 's'} × {formData.jeringaIds.length}{' '}
+                  jeringa{formData.jeringaIds.length === 1 ? '' : 's'}
+                </span>
+                .
+              </>
             )}
           </p>
           <p className="mt-1 text-xs text-slate-600">
@@ -234,52 +360,111 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
                 : 'Aplicará solo al centro seleccionado.'
               : 'Aplicará como regla general cuando no exista una regla específica por centro.'}
           </p>
+          {!isEditing && combinationsCount > 1 ? (
+            <p className="mt-2 text-[11px] leading-4 text-amber-700">
+              Si alguna combinación ya existe, se omitirá automáticamente y el resto se creará.
+            </p>
+          ) : null}
         </div>
 
         <FormSection title="Relación" description="Defina de forma directa qué jeringa corresponde a la vacuna.">
-          <div className="grid gap-4 md:grid-cols-2">
-            {tipo === 'centro' ? (
+          {tipo === 'centro' ? (
+            <SelectInput
+              id="config-centro"
+              label="Centro de acopio"
+              value={formData.centroAcopioId}
+              onChange={(value) => handleChange('centroAcopioId', value)}
+              options={centroOptions}
+              placeholder="Seleccionar centro..."
+              required
+              error={errors.centroAcopioId}
+            />
+          ) : null}
+
+          {isEditing ? (
+            <div className="grid gap-4 md:grid-cols-2">
               <SelectInput
-                id="config-centro"
-                label="Centro de acopio"
-                value={formData.centroAcopioId}
-                onChange={(value) => handleChange('centroAcopioId', value)}
-                options={centroOptions}
-                placeholder="Seleccionar centro..."
+                id="config-vacuna"
+                label="Vacuna"
+                value={formData.vacunaIds[0] || ''}
+                onChange={(value) => handleChange('vacunaIds', value ? [value] : [])}
+                options={vacunaOptions}
+                placeholder="Seleccionar vacuna..."
                 required
-                error={errors.centroAcopioId}
+                error={errors.vacunaIds}
               />
-            ) : null}
 
-            <SelectInput
-              id="config-vacuna"
-              label="Vacuna"
-              value={formData.vacunaId}
-              onChange={(value) => handleChange('vacunaId', value)}
-              options={vacunaOptions}
-              placeholder="Seleccionar vacuna..."
-              required
-              error={errors.vacunaId}
-            />
+              <SelectInput
+                id="config-jeringa"
+                label="Jeringa"
+                value={formData.jeringaIds[0] || ''}
+                onChange={(value) => handleChange('jeringaIds', value ? [value] : [])}
+                options={jeringaOptions}
+                placeholder="Seleccionar jeringa..."
+                required
+                error={errors.jeringaIds}
+              />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <MultiSelectInput
+                id="config-vacuna"
+                label="Vacunas"
+                values={formData.vacunaIds}
+                onChange={(values) => handleChange('vacunaIds', values)}
+                options={vacunaOptions}
+                placeholder="Seleccionar una o más vacunas..."
+                searchPlaceholder="Buscar vacuna..."
+                itemLabel="vacuna"
+                itemLabelPlural="vacunas"
+                required
+                error={errors.vacunaIds}
+                helpText="Puede seleccionar varias vacunas; se aplicará la misma regla a todas."
+              />
 
-            <SelectInput
-              id="config-jeringa"
-              label="Jeringa"
-              value={formData.jeringaId}
-              onChange={(value) => handleChange('jeringaId', value)}
-              options={jeringaOptions}
-              placeholder="Seleccionar jeringa..."
-              required
-              error={errors.jeringaId}
-            />
-          </div>
+              <MultiSelectInput
+                id="config-jeringa"
+                label="Jeringas"
+                values={formData.jeringaIds}
+                onChange={(values) => handleChange('jeringaIds', values)}
+                options={jeringaOptions}
+                placeholder="Seleccionar una o más jeringas..."
+                searchPlaceholder="Buscar jeringa..."
+                itemLabel="jeringa"
+                itemLabelPlural="jeringas"
+                required
+                error={errors.jeringaIds}
+                helpText="Cada vacuna seleccionada se relacionará con cada jeringa elegida."
+              />
+            </div>
+          )}
 
           <div className="grid gap-3 md:grid-cols-3">
             {tipo === 'centro' ? (
               <ResumeCard icon={Warehouse} label="Centro" value={selectedCentro?.nombre || 'Pendiente'} />
             ) : null}
-            <ResumeCard icon={Package} label="Vacuna" value={selectedVacuna?.nombre || 'Pendiente'} />
-            <ResumeCard icon={Syringe} label="Jeringa" value={selectedJeringa ? `${selectedJeringa.tipo} ${selectedJeringa.capacidad}` : 'Pendiente'} />
+            <ResumeCard
+              icon={Package}
+              label={isEditing || selectedVacunas.length <= 1 ? 'Vacuna' : 'Vacunas'}
+              value={
+                selectedVacunas.length === 0
+                  ? 'Pendiente'
+                  : selectedVacunas.length === 1
+                  ? selectedVacunas[0].nombre
+                  : `${selectedVacunas.length} seleccionadas`
+              }
+            />
+            <ResumeCard
+              icon={isEditing || selectedJeringas.length <= 1 ? Syringe : Stack}
+              label={isEditing || selectedJeringas.length <= 1 ? 'Jeringa' : 'Jeringas'}
+              value={
+                selectedJeringas.length === 0
+                  ? 'Pendiente'
+                  : selectedJeringas.length === 1
+                  ? `${selectedJeringas[0].tipo} ${selectedJeringas[0].capacidad}`
+                  : `${selectedJeringas.length} seleccionadas`
+              }
+            />
           </div>
         </FormSection>
 

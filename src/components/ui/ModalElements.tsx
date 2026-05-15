@@ -1,6 +1,6 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Warning, SpinnerGap, X } from '@phosphor-icons/react';
+import { CaretDown, Check, MagnifyingGlass, SpinnerGap, Warning, X } from '@phosphor-icons/react';
 import { MODAL_STYLES } from './ModalConstants';
 
 const renderOverlay = (node: React.ReactElement) => {
@@ -369,6 +369,255 @@ export const SelectInput: React.FC<SelectInputProps> = memo(({
   </FormField>
 ));
 SelectInput.displayName = 'SelectInput';
+
+interface MultiSelectInputProps {
+  id: string;
+  label: string;
+  values: string[];
+  onChange: (values: string[]) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  required?: boolean;
+  error?: string;
+  disabled?: boolean;
+  helpText?: string;
+  itemLabel?: string;
+  itemLabelPlural?: string;
+  searchPlaceholder?: string;
+  maxVisibleChips?: number;
+}
+
+export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
+  id,
+  label,
+  values,
+  onChange,
+  options,
+  placeholder = 'Seleccionar...',
+  required = false,
+  error,
+  disabled = false,
+  helpText,
+  itemLabel = 'elemento',
+  itemLabelPlural = 'elementos',
+  searchPlaceholder = 'Buscar...',
+  maxVisibleChips = 8,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [showAllChips, setShowAllChips] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSearch('');
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
+  const selectedSet = useMemo(() => new Set(values), [values]);
+
+  const filteredOptions = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return options;
+    return options.filter((option) => option.label.toLowerCase().includes(query));
+  }, [options, search]);
+
+  const selectedOptions = useMemo(() => {
+    const optionMap = new Map(options.map((option) => [option.value, option]));
+    return values
+      .map((value) => optionMap.get(value))
+      .filter((option): option is SelectOption => Boolean(option));
+  }, [options, values]);
+
+  const toggleOption = (value: string) => {
+    if (selectedSet.has(value)) {
+      onChange(values.filter((current) => current !== value));
+    } else {
+      onChange([...values, value]);
+    }
+  };
+
+  const selectAllVisible = () => {
+    const visibleValues = filteredOptions.map((option) => option.value);
+    const merged = Array.from(new Set([...values, ...visibleValues]));
+    onChange(merged);
+  };
+
+  const clearAll = () => {
+    onChange([]);
+  };
+
+  const triggerLabel = () => {
+    if (values.length === 0) return placeholder;
+    if (values.length === 1) {
+      return selectedOptions[0]?.label || `1 ${itemLabel} seleccionado`;
+    }
+    return `${values.length} ${itemLabelPlural} seleccionados`;
+  };
+
+  const visibleChips = showAllChips ? selectedOptions : selectedOptions.slice(0, maxVisibleChips);
+  const hiddenChipsCount = selectedOptions.length - visibleChips.length;
+  const allVisibleSelected = filteredOptions.length > 0 && filteredOptions.every((option) => selectedSet.has(option.value));
+
+  return (
+    <FormField id={id} label={label} required={required} error={error} helpText={helpText}>
+      <div ref={containerRef} className="relative">
+        <button
+          type="button"
+          id={id}
+          disabled={disabled}
+          onClick={() => setIsOpen((prev) => !prev)}
+          className={`${MODAL_STYLES.input.base} ${error ? MODAL_STYLES.input.error : MODAL_STYLES.input.normal} flex items-center justify-between gap-2 text-left`}
+          aria-invalid={Boolean(error)}
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+        >
+          <span className={`truncate ${values.length === 0 ? 'text-[#a0a4ae]' : 'text-[#15171d]'}`}>
+            {triggerLabel()}
+          </span>
+          <CaretDown
+            className={`h-3.5 w-3.5 shrink-0 text-[#8b8f9b] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            weight="bold"
+          />
+        </button>
+
+        {isOpen ? (
+          <div className="absolute left-0 right-0 z-[400] mt-1.5 overflow-hidden rounded-[7px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-26px_rgba(12,15,24,0.45)]">
+            <div className="border-b border-[#eeeef3] p-2">
+              <div className="relative">
+                <MagnifyingGlass className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8b8f9b]" weight="bold" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={searchPlaceholder}
+                  className="h-8 w-full rounded-[5px] border border-[#e7e7ef] bg-[#fbfafd] pl-7 pr-2 text-[12px] text-[#15171d] placeholder:text-[#a0a4ae] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-2 border-b border-[#eeeef3] bg-[#fbfafd] px-2.5 py-1.5">
+              <button
+                type="button"
+                onClick={selectAllVisible}
+                disabled={filteredOptions.length === 0 || allVisibleSelected}
+                className="text-[11px] font-semibold text-[#7c3aed] transition hover:text-[#6d28d9] disabled:cursor-not-allowed disabled:text-[#a0a4ae]"
+              >
+                {search.trim() ? 'Seleccionar resultados' : 'Seleccionar todo'}
+              </button>
+              <span className="text-[11px] font-medium text-[#8b8f9b]">
+                {values.length} de {options.length}
+              </span>
+              <button
+                type="button"
+                onClick={clearAll}
+                disabled={values.length === 0}
+                className="text-[11px] font-medium text-[#606571] transition hover:text-[#15171d] disabled:cursor-not-allowed disabled:text-[#c5c8d2]"
+              >
+                Limpiar
+              </button>
+            </div>
+
+            <div role="listbox" aria-multiselectable="true" className="max-h-60 overflow-y-auto py-1">
+              {filteredOptions.length === 0 ? (
+                <p className="px-3 py-4 text-center text-[12px] text-[#8b8f9b]">
+                  No se encontraron coincidencias
+                </p>
+              ) : (
+                filteredOptions.map((option) => {
+                  const isSelected = selectedSet.has(option.value);
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      onClick={() => toggleOption(option.value)}
+                      className={`flex w-full items-center gap-2.5 px-2.5 py-1.5 text-left text-[12.5px] transition ${
+                        isSelected ? 'bg-[#f5f0fd] text-[#15171d]' : 'text-[#424750] hover:bg-[#fbfafd]'
+                      }`}
+                    >
+                      <span
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition ${
+                          isSelected ? 'border-[#7c3aed] bg-[#7c3aed]' : 'border-[#d7d8e2] bg-white'
+                        }`}
+                      >
+                        {isSelected ? <Check className="h-3 w-3 text-white" weight="bold" /> : null}
+                      </span>
+                      <span className="truncate">{option.label}</span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        ) : null}
+
+        {selectedOptions.length > 0 ? (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {visibleChips.map((option) => (
+              <span
+                key={option.value}
+                className="inline-flex max-w-full items-center gap-1 rounded-[5px] border border-[#e7e7ef] bg-[#fbfafd] py-0.5 pl-2 pr-1 text-[11.5px] font-medium text-[#424750]"
+              >
+                <span className="truncate">{option.label}</span>
+                <button
+                  type="button"
+                  onClick={() => toggleOption(option.value)}
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] text-[#8b8f9b] transition hover:bg-[#fde7ec] hover:text-rose-600"
+                  aria-label={`Remover ${option.label}`}
+                >
+                  <X className="h-2.5 w-2.5" weight="bold" />
+                </button>
+              </span>
+            ))}
+            {hiddenChipsCount > 0 ? (
+              <button
+                type="button"
+                onClick={() => setShowAllChips(true)}
+                className="inline-flex items-center rounded-[5px] border border-dashed border-[#d7d8e2] bg-white px-2 py-0.5 text-[11.5px] font-medium text-[#606571] transition hover:border-[#babdca] hover:text-[#15171d]"
+              >
+                +{hiddenChipsCount} más
+              </button>
+            ) : null}
+            {showAllChips && selectedOptions.length > maxVisibleChips ? (
+              <button
+                type="button"
+                onClick={() => setShowAllChips(false)}
+                className="inline-flex items-center rounded-[5px] border border-dashed border-[#d7d8e2] bg-white px-2 py-0.5 text-[11.5px] font-medium text-[#606571] transition hover:border-[#babdca] hover:text-[#15171d]"
+              >
+                Mostrar menos
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </FormField>
+  );
+});
+MultiSelectInput.displayName = 'MultiSelectInput';
 
 interface DateInputProps {
   id: string;
