@@ -269,6 +269,7 @@ const Movimientos: React.FC = () => {
     establecimientoNombre: string;
     tipoEntrega: 'base' | 'adicional';
     entregaAdicionalId?: string;
+    disponibilidadRestante?: number;
   } | null>(null);
 
   // ============================================================================
@@ -978,7 +979,7 @@ const Movimientos: React.FC = () => {
         selectedAnio
       );
 
-      if (!disponibilidad.tieneDisponibilidad) {
+      if (!disponibilidad.tieneDisponibilidad || value > disponibilidad.disponibilidadRestante) {
         const establecimiento = establecimientosFiltradosMap.get(establecimientoId);
         const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
 
@@ -987,7 +988,8 @@ const Movimientos: React.FC = () => {
           campo,
           valor: value,
           establecimientoNombre: nombreEstablecimiento,
-          tipoEntrega: 'base'
+          tipoEntrega: 'base',
+          disponibilidadRestante: disponibilidad.disponibilidadRestante,
         });
         setShowSinDisponibilidadModal(true);
         return false;
@@ -1338,7 +1340,7 @@ const Movimientos: React.FC = () => {
         selectedAnio
       );
 
-      if (!disponibilidad.tieneDisponibilidad) {
+      if (!disponibilidad.tieneDisponibilidad || value > disponibilidad.disponibilidadRestante) {
         const establecimiento = establecimientosFiltradosMap.get(movimientoAsociado.establecimientoId);
         const nombreEstablecimiento = establecimiento?.nombre || 'Establecimiento';
 
@@ -1348,7 +1350,8 @@ const Movimientos: React.FC = () => {
           valor: value,
           establecimientoNombre: nombreEstablecimiento,
           tipoEntrega: 'adicional',
-          entregaAdicionalId: entregaId
+          entregaAdicionalId: entregaId,
+          disponibilidadRestante: disponibilidad.disponibilidadRestante
         });
         setShowSinDisponibilidadModal(true);
 
@@ -2128,8 +2131,8 @@ const Movimientos: React.FC = () => {
           establecimientoNombre={pendingSinDisponibilidad.establecimientoNombre}
           vacunaNombre={vacunasActivas.find(v => v.id === selectedVacuna)?.nombre || 'Vacuna'}
           cantidad={pendingSinDisponibilidad.valor}
-          mesActual={MESES[selectedMes - 1]}
-          anio={selectedAnio}
+          disponibilidadRestante={pendingSinDisponibilidad.disponibilidadRestante}
+          mesActual={MESES[(selectedMes === 12 ? 1 : selectedMes + 1) - 1]} anio={selectedMes === 12 ? selectedAnio + 1 : selectedAnio}
           isProcessing={isAutoSaving}
           tipoEntrega={pendingSinDisponibilidad.tipoEntrega}
         />
@@ -2172,3 +2175,9 @@ const Movimientos: React.FC = () => {
 };
 
 export default Movimientos;
+
+
+
+
+
+

@@ -1,7 +1,6 @@
 import React from 'react';
-import { Warning, ArrowSquareOut, CalendarBlank } from '@phosphor-icons/react';
+import { Warning, ShareNetwork } from '@phosphor-icons/react';
 import { Modal } from '../Establecimientos/components';
-import { COMPONENT_STYLES } from './constants';
 
 interface ConfirmacionSinDisponibilidadModalProps {
   isOpen: boolean;
@@ -10,6 +9,7 @@ interface ConfirmacionSinDisponibilidadModalProps {
   establecimientoNombre: string;
   vacunaNombre: string;
   cantidad: number;
+  disponibilidadRestante?: number;
   mesActual: string;
   anio: number;
   isProcessing?: boolean;
@@ -22,67 +22,82 @@ const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidad
   establecimientoNombre,
   vacunaNombre,
   cantidad,
+  disponibilidadRestante = 0,
   mesActual,
   anio,
-}) => (
-  <Modal
-    isOpen={isOpen}
-    onClose={onClose}
-    title="Sin planificación disponible"
-    subtitle={undefined}
-    icon={Warning}
-    size="md"
-    footer={
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={onClose}
-          className={COMPONENT_STYLES.button.secondary}
-        >
-          Entendido
-        </button>
-      </div>
-    }
-  >
-    <div className="space-y-4">
+}) => {
+  const isInsuficiente = disponibilidadRestante > 0;
+  const title = isInsuficiente ? "Planificación insuficiente" : "Sin planificación disponible";
 
-      {/* ── Mensaje principal ── */}
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
-        <p className="text-sm font-bold text-amber-900">{establecimientoNombre}</p>
-        <p className="mt-1 text-sm text-amber-700 leading-relaxed">
-          No tiene entregas programadas para {mesActual} {anio}. Para ingresar una entrega debes hacerlo desde el módulo de <strong>Planificaciones</strong>.
-        </p>
-      </div>
-
-      {/* ── Datos del intento ── */}
-      <div className="divide-y divide-zinc-100 rounded-2xl border border-zinc-100 bg-zinc-50">
-        <div className="flex items-center justify-between px-4 py-3">
-          <span className="text-sm text-zinc-500">Vacuna</span>
-          <span className="text-sm font-semibold text-zinc-900">{vacunaNombre}</span>
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      subtitle={undefined}
+      icon={Warning}
+      size="md"
+      footer={
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-[8px] bg-[#0E9F8E] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#0c8a7b] focus:outline-none"
+          >
+            Entendido
+          </button>
         </div>
-        <div className="flex items-center justify-between px-4 py-3">
-          <span className="text-sm text-zinc-500">Cantidad solicitada</span>
-          <span className="text-sm font-semibold text-zinc-900">{cantidad.toLocaleString()} unidades</span>
+      }
+    >
+      <div className="space-y-5">
+        {/* ── Banner Informativo ── */}
+        <div className="rounded-[8px] bg-[#F1F5F7] p-4 text-[#0F2A3B]">
+          <p className="text-sm">
+            {isInsuficiente ? (
+              <>
+                El establecimiento <strong className="font-semibold">{establecimientoNombre}</strong> cuenta con una planificación de solo <strong className="font-semibold">{disponibilidadRestante.toLocaleString()} unid.</strong> y está intentando asignar una cantidad mayor para el período detectado.
+              </>
+            ) : (
+              <>
+                El establecimiento <strong className="font-semibold">{establecimientoNombre}</strong> no cuenta con distribución aprobada en la planificación para el período detectado.
+              </>
+            )}
+          </p>
         </div>
-        <div className="flex items-center justify-between px-4 py-3">
-          <span className="flex items-center gap-1.5 text-sm text-zinc-500">
-            <CalendarBlank className="h-3.5 w-3.5" weight="duotone" />
-            Período
-          </span>
-          <span className="text-sm font-semibold text-zinc-900">{mesActual} {anio}</span>
+
+        {/* ── Tabla de Resumen ── */}
+        <div className="overflow-hidden rounded-[8px] border border-[#e5e7eb]">
+          <table className="w-full text-left text-sm text-[#0F2A3B]">
+            <thead className="bg-[#F1F5F7] font-mono text-[0.65rem] uppercase tracking-wider text-[#4F6B7C]">
+              <tr>
+                <th className="px-4 py-2 font-semibold border-b border-[#e5e7eb]">Vacuna</th>
+                <th className="px-4 py-2 font-semibold border-b border-[#e5e7eb]">Período Detectado</th>
+                {isInsuficiente && <th className="px-4 py-2 font-semibold text-right border-b border-[#e5e7eb]">Disponible</th>}
+                <th className="px-4 py-2 font-semibold text-right border-b border-[#e5e7eb]">Intento de Entrega</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#e5e7eb] bg-white">
+              <tr>
+                <td className="px-4 py-3 font-medium">{vacunaNombre}</td>
+                <td className="px-4 py-3 text-[#4F6B7C] font-mono text-[0.8rem] uppercase tracking-wider">{mesActual} {anio}</td>
+                {isInsuficiente && <td className="px-4 py-3 text-right font-medium text-[#4F6B7C] tabular-nums">{disponibilidadRestante.toLocaleString()} unid.</td>}
+                <td className={`px-4 py-3 text-right font-bold tabular-nums ${isInsuficiente ? 'text-[#f59e0b]' : 'text-[#0E9F8E]'}`}>{cantidad.toLocaleString()} unid.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
 
-      {/* ── Instrucción ── */}
-      <div className="flex items-start gap-2.5 rounded-2xl border border-zinc-200 bg-white px-4 py-3.5">
-        <ArrowSquareOut className="h-4 w-4 mt-0.5 shrink-0 text-zinc-400" weight="bold" />
-        <p className="text-sm text-zinc-500 leading-relaxed">
-          Ve al módulo de <strong className="text-zinc-800">Planificaciones</strong> y define la cantidad para este establecimiento antes de registrar una entrega.
-        </p>
-      </div>
+        {/* ── Call to action ── */}
+        <div className="flex items-start gap-3 mt-2 px-1">
+          <ShareNetwork className="h-5 w-5 text-[#4F6B7C] mt-0.5" weight="duotone" />
+          <p className="text-sm text-[#4F6B7C]">
+            Dirígete al módulo de <strong className="font-medium text-[#0F2A3B]">Planificaciones</strong> y define una cantidad base o edita la existente para autorizar futuras distribuciones a esta microred.
+          </p>
+        </div>
 
-    </div>
-  </Modal>
-);
+      </div>
+    </Modal>
+  );
+};
 
 export default ConfirmacionSinDisponibilidadModal;
