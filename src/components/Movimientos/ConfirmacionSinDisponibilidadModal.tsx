@@ -1,5 +1,5 @@
 import React from 'react';
-import { Warning, ShareNetwork } from '@phosphor-icons/react';
+import { Warning, Info, ArrowSquareOut } from '@phosphor-icons/react';
 import { Modal } from '../Establecimientos/components';
 
 interface ConfirmacionSinDisponibilidadModalProps {
@@ -27,7 +27,7 @@ const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidad
   anio,
 }) => {
   const isInsuficiente = disponibilidadRestante > 0;
-  const title = isInsuficiente ? "Planificación insuficiente" : "Sin planificación disponible";
+  const title = isInsuficiente ? "Límite planificado excedido" : "Sin planificación disponible";
 
   return (
     <Modal
@@ -49,49 +49,60 @@ const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidad
         </div>
       }
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
         {/* ── Banner Informativo ── */}
-        <div className="rounded-[8px] bg-[#F1F5F7] p-4 text-[#0F2A3B]">
-          <p className="text-sm">
-            {isInsuficiente ? (
-              <>
-                El establecimiento <strong className="font-semibold">{establecimientoNombre}</strong> cuenta con una planificación de solo <strong className="font-semibold">{disponibilidadRestante.toLocaleString()} unid.</strong> y está intentando asignar una cantidad mayor para el período detectado.
-              </>
-            ) : (
-              <>
-                El establecimiento <strong className="font-semibold">{establecimientoNombre}</strong> no cuenta con distribución aprobada en la planificación para el período detectado.
-              </>
-            )}
-          </p>
+        <div className={`rounded-[8px] border p-3 text-sm leading-relaxed ${isInsuficiente ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-rose-50 border-rose-200 text-rose-900'}`}>
+          {isInsuficiente ? (
+            <p>
+              La cantidad solicitada supera el límite de <strong>{disponibilidadRestante.toLocaleString()} unidades</strong> programado para <strong>{establecimientoNombre}</strong>.
+            </p>
+          ) : (
+            <p>
+              El establecimiento <strong>{establecimientoNombre}</strong> no cuenta con distribución aprobada en la planificación para el período detectado.
+            </p>
+          )}
         </div>
 
-        {/* ── Tabla de Resumen ── */}
-        <div className="overflow-hidden rounded-[8px] border border-[#e5e7eb]">
-          <table className="w-full text-left text-sm text-[#0F2A3B]">
-            <thead className="bg-[#F1F5F7] font-mono text-[0.65rem] uppercase tracking-wider text-[#4F6B7C]">
-              <tr>
-                <th className="px-4 py-2 font-semibold border-b border-[#e5e7eb]">Vacuna</th>
-                <th className="px-4 py-2 font-semibold border-b border-[#e5e7eb]">Período Detectado</th>
-                {isInsuficiente && <th className="px-4 py-2 font-semibold text-right border-b border-[#e5e7eb]">Disponible</th>}
-                <th className="px-4 py-2 font-semibold text-right border-b border-[#e5e7eb]">Intento de Entrega</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#e5e7eb] bg-white">
-              <tr>
-                <td className="px-4 py-3 font-medium">{vacunaNombre}</td>
-                <td className="px-4 py-3 text-[#4F6B7C] font-mono text-[0.8rem] uppercase tracking-wider">{mesActual} {anio}</td>
-                {isInsuficiente && <td className="px-4 py-3 text-right font-medium text-[#4F6B7C] tabular-nums">{disponibilidadRestante.toLocaleString()} unid.</td>}
-                <td className={`px-4 py-3 text-right font-bold tabular-nums ${isInsuficiente ? 'text-[#f59e0b]' : 'text-[#0E9F8E]'}`}>{cantidad.toLocaleString()} unid.</td>
-              </tr>
-            </tbody>
-          </table>
+        {/* ── Detalle Bento-style ── */}
+        <div className={`grid ${isInsuficiente ? 'grid-cols-4' : 'grid-cols-3'} gap-3 rounded-[8px] border border-[#e5e7eb] bg-[#F1F5F7] p-3 text-left`}>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4F6B7C] font-mono">Vacuna</span>
+            <span className="mt-1 text-sm font-bold text-[#0F2A3B]">{vacunaNombre}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4F6B7C] font-mono">Período</span>
+            <span className="mt-1 text-sm font-bold text-[#0F2A3B] uppercase">{mesActual} {anio}</span>
+          </div>
+          {isInsuficiente && (
+            <div className="flex flex-col">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4F6B7C] font-mono">Disponible</span>
+              <span className="mt-1 text-sm font-bold text-[#4F6B7C]">{disponibilidadRestante.toLocaleString()} u.</span>
+            </div>
+          )}
+          <div className="flex flex-col">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4F6B7C] font-mono">Solicitado</span>
+            <span className={`mt-1 text-sm font-bold ${isInsuficiente ? 'text-[#f59e0b]' : 'text-[#0E9F8E]'}`}>
+              {cantidad.toLocaleString()} u.
+            </span>
+          </div>
         </div>
 
         {/* ── Call to action ── */}
-        <div className="flex items-start gap-3 mt-2 px-1">
-          <ShareNetwork className="h-5 w-5 text-[#4F6B7C] mt-0.5" weight="duotone" />
-          <p className="text-sm text-[#4F6B7C]">
-            Dirígete al módulo de <strong className="font-medium text-[#0F2A3B]">Planificaciones</strong> y define una cantidad base o edita la existente para autorizar futuras distribuciones a esta microred.
+        <div className="flex items-start gap-2.5 rounded-[8px] border border-[#E2E8F0] bg-white p-3 shadow-sm">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#0E9F8E]" weight="duotone" />
+          <p className="text-xs leading-relaxed text-[#4F6B7C]">
+            Para autorizar esta entrega, dirígete al módulo de{' '}
+            <a
+              href="/planificacion"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-0.5 font-bold text-[#0E9F8E] hover:text-[#0c8a7b] hover:underline"
+              title="Abrir Planificaciones en una nueva pestaña"
+            >
+              Planificaciones
+              <ArrowSquareOut className="h-3.5 w-3.5 inline-block shrink-0" weight="bold" />
+            </a>{' '}
+            y define una cantidad base o edita la existente.
           </p>
         </div>
 

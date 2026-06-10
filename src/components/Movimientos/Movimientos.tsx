@@ -1044,14 +1044,29 @@ const Movimientos: React.FC = () => {
       if (errorMessage.includes('SIN_PLANIFICACION_DISPONIBLE') ||
         errorMessage.includes('No hay cantidades suficientes') ||
         errorMessage.includes('Faltan') ||
-        errorMessage.includes('redistribuir')) {
+        errorMessage.includes('redistribuir') ||
+        errorMessage.includes('no tiene planificación')) {
+
+        let disponibilidadRestante = 0;
+        try {
+          const disp = await PlanificacionService.verificarDisponibilidadEntregas(
+            establecimientoId,
+            selectedVacuna!,
+            selectedMes,
+            selectedAnio
+          );
+          disponibilidadRestante = disp.disponibilidadRestante;
+        } catch (e) {
+          // Ignorar si falla la verificación y quedará en 0
+        }
 
         setPendingSinDisponibilidad({
           establecimientoId,
           campo,
           valor: value,
           establecimientoNombre: nombreEstablecimiento,
-          tipoEntrega: 'base'
+          tipoEntrega: 'base',
+          disponibilidadRestante
         });
         setShowSinDisponibilidadModal(true);
         return;
@@ -1467,20 +1482,35 @@ const Movimientos: React.FC = () => {
       if (errorMessage.includes('No hay cantidades suficientes') ||
         errorMessage.includes('Faltan') ||
         errorMessage.includes('redistribuir') ||
-        errorMessage.includes('no tiene planificación')) {
+        errorMessage.includes('no tiene planificación') ||
+        errorMessage.includes('SIN_PLANIFICACION_DISPONIBLE')) {
 
-        const movimientoAsociado = movimientoPorEntregaId.get(entregaId);
-        const establecimiento = movimientoAsociado
-          ? establecimientosFiltradosMap.get(movimientoAsociado.establecimientoId)
+        let disponibilidadRestante = 0;
+        try {
+          const disp = await PlanificacionService.verificarDisponibilidadEntregas(
+            movimientoAsociado!.establecimientoId,
+            selectedVacuna!,
+            selectedMes,
+            selectedAnio
+          );
+          disponibilidadRestante = disp.disponibilidadRestante;
+        } catch (e) {
+          // Ignorar si falla
+        }
+
+        const movimientoAsociadoSafe = movimientoPorEntregaId.get(entregaId);
+        const establecimiento = movimientoAsociadoSafe
+          ? establecimientosFiltradosMap.get(movimientoAsociadoSafe.establecimientoId)
           : undefined;
 
         setPendingSinDisponibilidad({
-          establecimientoId: movimientoAsociado!.establecimientoId,
+          establecimientoId: movimientoAsociadoSafe!.establecimientoId,
           campo: 'entregaAdicional',
           valor: value,
           establecimientoNombre: establecimiento?.nombre || 'Establecimiento',
           tipoEntrega: 'adicional',
-          entregaAdicionalId: entregaId
+          entregaAdicionalId: entregaId,
+          disponibilidadRestante
         });
         setShowSinDisponibilidadModal(true);
         setIsProcessingEntrega(false);
