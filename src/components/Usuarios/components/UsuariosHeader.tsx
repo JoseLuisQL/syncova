@@ -3,7 +3,7 @@ import { Users, UserPlus, ArrowsClockwise, DownloadSimple, CircleNotch, Icon } f
 import { COMPONENT_STYLES, USER_SECTIONS, SectionId } from '../constants';
 
 interface SectionItem {
-  id: string;
+  id: SectionId;
   label: string;
   icon: Icon;
 }

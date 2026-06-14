@@ -317,7 +317,7 @@ export class ConfiguracionService {
         : null;
       const filename = filenameMatch?.[1] || `sivac-backup-${new Date().toISOString().slice(0, 10)}.${format}`;
       const blob = new Blob([response.data], {
-        type: response.headers['content-type'] || 'application/octet-stream',
+        type: (response.headers['content-type'] as string) || 'application/octet-stream',
       });
 
       return { blob, filename };

@@ -24,7 +24,9 @@ const isStoredMessage = (value: unknown): value is StoredMessage => {
   return Array.isArray(candidate.parts);
 };
 
-const normalizeStoredMessages = (value: unknown): StoredMessage[] | null => {
+const normalizeStoredMessages = (
+  value: unknown,
+): Array<{ id: string; role: 'user' | 'assistant' | 'system'; content: string }> | null => {
   if (!Array.isArray(value)) return null;
 
   const normalized = value

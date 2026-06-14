@@ -667,7 +667,10 @@ interface DeleteConfirmModalProps {
   onClose: () => void;
   onConfirm: () => void;
   itemName: string;
-  itemType: string;
+  itemType?: string;
+  title?: string;
+  description?: string;
+  confirmLabel?: string;
   isLoading?: boolean;
   warningMessage?: string;
 }
