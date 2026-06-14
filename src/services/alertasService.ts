@@ -1,7 +1,6 @@
 import {
   apiClient,
   ApiResponse,
-  PaginatedResponse,
   buildQueryParams,
   handleApiError
 } from '../config/api';
@@ -48,7 +47,7 @@ export class AlertasService {
 
       logger.debug('Obteniendo alertas', { url, filters });
 
-      const response = await apiClient.get<PaginatedResponse<Alerta>>(url);
+      const response = await apiClient.get<ApiResponse<{ alertas: Alerta[]; total: number }>>(url);
 
       logger.debug('Respuesta del backend recibida', {
         success: response.data.success,

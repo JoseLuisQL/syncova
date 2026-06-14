@@ -1,4 +1,4 @@
-import { ApiResponse } from '../types/api';
+import { ApiResponse } from '../types';
 import { apiClient } from '../config/api';
 import {
   MultiplicadorJeringa,

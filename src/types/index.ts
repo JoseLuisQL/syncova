@@ -910,6 +910,10 @@ export interface AuthUser {
   permissions?: string[];
 }
 
+// Reexportación de la envoltura de respuesta canónica (definida en config/api).
+// Mantiene una única fuente de verdad para el tipo ApiResponse en todo el front.
+export type { ApiResponse } from '../config/api';
+
 export interface AuthResponse {
   success: boolean;
   message: string;
