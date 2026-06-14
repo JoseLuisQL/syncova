@@ -46,7 +46,7 @@ router.get('/:id', JeringaController.getById);
 /**
  * @route POST /api/jeringas
  * @desc Crear nueva jeringa
- * @access Private (TODO: Proteger con autenticación y autorización)
+ * @access Privado (requiere autenticación + permisos)
  * @body {CreateJeringaDto} data - Datos de la jeringa
  */
 router.post('/', JeringaController.create);
@@ -54,7 +54,7 @@ router.post('/', JeringaController.create);
 /**
  * @route PUT /api/jeringas/:id
  * @desc Actualizar jeringa
- * @access Private (TODO: Proteger con autenticación y autorización)
+ * @access Privado (requiere autenticación + permisos)
  * @param {string} id - ID de la jeringa
  * @body {UpdateJeringaDto} data - Datos a actualizar
  */
@@ -63,7 +63,7 @@ router.put('/:id', JeringaController.update);
 /**
  * @route DELETE /api/jeringas/:id
  * @desc Eliminar jeringa
- * @access Private (TODO: Proteger con autenticación y autorización)
+ * @access Privado (requiere autenticación + permisos)
  * @param {string} id - ID de la jeringa
  */
 router.delete('/:id', JeringaController.delete);

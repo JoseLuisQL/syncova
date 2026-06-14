@@ -201,7 +201,7 @@ setupInterceptors(apiClientLongTimeout);
  * Unión discriminada por `success`: tras comprobar `response.success === true`
  * TypeScript estrecha el tipo y garantiza que `data` está presente.
  */
-export type ApiResponse<T = any> =
+export type ApiResponse<T = unknown> =
   | {
       success: true;
       data: T;
@@ -215,7 +215,7 @@ export type ApiResponse<T = any> =
       data?: undefined;
     };
 
-export interface PaginatedResponse<T = any> {
+export interface PaginatedResponse<T = unknown> {
   success: boolean;
   message: string;
   data: T[];
@@ -237,6 +237,7 @@ export interface QueryParams {
   page?: number;
   limit?: number;
   search?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 

@@ -65,7 +65,7 @@ router.get('/:id', requirePermissions(['establecimientos:read']), Establecimient
 /**
  * @route POST /api/establecimientos
  * @desc Crear nuevo establecimiento
- * @access Private (TODO: Proteger con autenticación y autorización)
+ * @access Privado (requiere autenticación + permisos)
  * @body {CreateEstablecimientoDto} data - Datos del establecimiento
  */
 router.post('/', requirePermissions(['establecimientos:write']), EstablecimientoController.create);
@@ -73,7 +73,7 @@ router.post('/', requirePermissions(['establecimientos:write']), Establecimiento
 /**
  * @route PUT /api/establecimientos/:id
  * @desc Actualizar establecimiento
- * @access Private (TODO: Proteger con autenticación y autorización)
+ * @access Privado (requiere autenticación + permisos)
  * @param {string} id - ID del establecimiento
  * @body {UpdateEstablecimientoDto} data - Datos a actualizar
  */
@@ -82,7 +82,7 @@ router.put('/:id', requirePermissions(['establecimientos:write']), Establecimien
 /**
  * @route DELETE /api/establecimientos/:id
  * @desc Eliminar establecimiento
- * @access Private (TODO: Proteger con autenticación y autorización)
+ * @access Privado (requiere autenticación + permisos)
  * @param {string} id - ID del establecimiento
  */
 router.delete('/:id', requirePermissions(['establecimientos:write']), EstablecimientoController.delete);

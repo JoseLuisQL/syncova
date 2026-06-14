@@ -6,6 +6,7 @@ import {
 import { useVales } from '../../hooks/useVales';
 import { useMultiplicadores } from '../../hooks/useMultiplicadores';
 import { useToastContext } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { Modal } from '../ui/ModalElements';
 
 interface GenerarValeModalProps {
@@ -28,6 +29,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
   onValeGenerado
 }) => {
   const { toast } = useToastContext();
+  const { user } = useAuth();
   const {
     isGenerating,
     isLoadingPreview,
@@ -116,7 +118,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
         centroAcopioId,
         mes,
         anio,
-        usuarioId: 'temp-user-id', // TODO: Obtener del contexto de usuario
+        usuarioId: user?.id ?? '',
         observaciones: observaciones || undefined,
         afectarStock: true
       });

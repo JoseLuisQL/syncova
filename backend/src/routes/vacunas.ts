@@ -49,7 +49,7 @@ router.get('/:id', requirePermissions(['vacunas:read']), VacunaController.getByI
 /**
  * @route POST /api/vacunas
  * @desc Crear nueva vacuna
- * @access Private (TODO: Proteger con autenticación y autorización)
+ * @access Privado (requiere autenticación + permisos)
  * @body {CreateVacunaDto} data - Datos de la vacuna
  */
 router.post('/', requirePermissions(['vacunas:write']), VacunaController.create);
@@ -57,7 +57,7 @@ router.post('/', requirePermissions(['vacunas:write']), VacunaController.create)
 /**
  * @route PUT /api/vacunas/:id
  * @desc Actualizar vacuna
- * @access Private (TODO: Proteger con autenticación y autorización)
+ * @access Privado (requiere autenticación + permisos)
  * @param {string} id - ID de la vacuna
  * @body {UpdateVacunaDto} data - Datos a actualizar
  */
@@ -66,7 +66,7 @@ router.put('/:id', requirePermissions(['vacunas:write']), VacunaController.updat
 /**
  * @route DELETE /api/vacunas/:id
  * @desc Eliminar vacuna
- * @access Private (TODO: Proteger con autenticación y autorización)
+ * @access Privado (requiere autenticación + permisos)
  * @param {string} id - ID de la vacuna
  */
 router.delete('/:id', requirePermissions(['vacunas:write']), VacunaController.delete);
