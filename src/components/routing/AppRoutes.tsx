@@ -1,25 +1,39 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../auth/ProtectedRoute';
 
-// Importar componentes de módulos
-import Dashboard from '../Dashboard/Dashboard';
-import EstablecimientosModule from '../Establecimientos/EstablecimientosModule';
-import Inventario from '../Inventario/Inventario';
-import Movimientos from '../Movimientos/Movimientos';
-import Planificacion from '../Planificacion/Planificacion';
-import IciDemid from '../IciDemid/IciDemid';
-import Kardex from '../Kardex/Kardex';
-import Reportes from '../Reportes/Reportes';
-import AlertasModule from '../Alertas/AlertasModule';
-import UsuariosModule from '../Usuarios/UsuariosModule';
-import Configuracion from '../Configuracion/Configuracion';
+// Carga diferida (code splitting) de los módulos: cada uno se descarga
+// solo cuando se navega a su ruta, reduciendo el bundle inicial.
+const Dashboard = lazy(() => import('../Dashboard/Dashboard'));
+const EstablecimientosModule = lazy(() => import('../Establecimientos/EstablecimientosModule'));
+const Inventario = lazy(() => import('../Inventario/Inventario'));
+const Movimientos = lazy(() => import('../Movimientos/Movimientos'));
+const Planificacion = lazy(() => import('../Planificacion/Planificacion'));
+const IciDemid = lazy(() => import('../IciDemid/IciDemid'));
+const Kardex = lazy(() => import('../Kardex/Kardex'));
+const Reportes = lazy(() => import('../Reportes/Reportes'));
+const AlertasModule = lazy(() => import('../Alertas/AlertasModule'));
+const UsuariosModule = lazy(() => import('../Usuarios/UsuariosModule'));
+const Configuracion = lazy(() => import('../Configuracion/Configuracion'));
+
+/**
+ * Fallback mostrado mientras se descarga el chunk del módulo.
+ */
+const RouteFallback: React.FC = () => (
+  <div className="flex min-h-[60vh] w-full items-center justify-center">
+    <div className="flex items-center gap-3 text-zinc-500">
+      <div className="h-5 w-5 rounded-full border-2 border-teal-600 border-t-transparent animate-spin" />
+      <span className="text-sm font-medium">Cargando módulo...</span>
+    </div>
+  </div>
+);
 
 /**
  * Componente de rutas principales de la aplicación
  */
 const AppRoutes: React.FC = () => {
   return (
+    <Suspense fallback={<RouteFallback />}>
     <Routes>
       {/* Ruta raíz - redirigir al dashboard */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -136,6 +150,7 @@ const AppRoutes: React.FC = () => {
       {/* Ruta 404 - redirigir al dashboard */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+    </Suspense>
   );
 };
 
