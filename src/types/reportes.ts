@@ -4,6 +4,16 @@
  */
 
 /**
+ * Forma mínima de centro de acopio usada en los selectores de reportes.
+ * Solo requiere id/nombre/codigo (lo que devuelve useKardexFiltros).
+ */
+export interface CentroAcopioOption {
+  id: string;
+  nombre: string;
+  codigo?: string;
+}
+
+/**
  * Tipos base para filtros de reportes
  */
 export interface FiltrosReporteBase {

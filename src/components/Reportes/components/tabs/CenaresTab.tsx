@@ -1,12 +1,13 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Buildings, CalendarBlank } from '@phosphor-icons/react';
-import { Establecimiento, Vacuna } from '../../../../types';
+import { Vacuna } from '../../../../types';
+import { CentroAcopioOption } from '../../../../types/reportes';
 import { COMPONENT_STYLES } from '../../constants';
 import { ReportSectionCard } from '../ReportPrimitives';
 import CenaresTable from './CenaresTable';
 
 interface CenaresTabProps {
-  centrosAcopio: Establecimiento[];
+  centrosAcopio: CentroAcopioOption[];
   vacunas: Vacuna[];
 }
 

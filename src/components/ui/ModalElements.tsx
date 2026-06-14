@@ -329,7 +329,7 @@ interface SelectInputProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: SelectOption[];
+  options: readonly SelectOption[];
   placeholder?: string;
   required?: boolean;
   error?: string;
@@ -375,7 +375,7 @@ interface MultiSelectInputProps {
   label: string;
   values: string[];
   onChange: (values: string[]) => void;
-  options: SelectOption[];
+  options: readonly SelectOption[];
   placeholder?: string;
   required?: boolean;
   error?: string;

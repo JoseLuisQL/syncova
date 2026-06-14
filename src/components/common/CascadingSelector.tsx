@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
 import { useMicroredes } from '../../hooks/useMicroredes';
 import { useRedes } from '../../hooks/useRedes';

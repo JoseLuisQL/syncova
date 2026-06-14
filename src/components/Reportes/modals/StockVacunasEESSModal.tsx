@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { CheckSquare, FileXls, Square } from '@phosphor-icons/react';
-import { Vacuna, Establecimiento } from '../../../types';
+import { Vacuna } from '../../../types';
+import { CentroAcopioOption } from '../../../types/reportes';
 import {
   DateInput,
   FormSection,
@@ -14,7 +15,7 @@ interface StockVacunasEESSModalProps {
   onClose: () => void;
   onExportar: (filtros: StockVacunasEESSFiltros) => Promise<void>;
   vacunas: Vacuna[];
-  centrosAcopio: Establecimiento[];
+  centrosAcopio: CentroAcopioOption[];
 }
 
 export interface StockVacunasEESSFiltros {
@@ -216,4 +217,3 @@ const StockVacunasEESSModal: React.FC<StockVacunasEESSModalProps> = ({
 };
 
 export default React.memo(StockVacunasEESSModal);
-export type { StockVacunasEESSFiltros };
