@@ -20,7 +20,7 @@ router.use(authenticate, requireCentroAcopioAssignment, requirePermissions(['val
 /**
  * @route POST /api/vales/generar
  * @desc Generar vale de entrega para un centro de acopio, mes y año específicos
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {GenerarValeDto} data - Datos para generar el vale
  * @example
  * {
@@ -37,7 +37,7 @@ router.post('/generar', requirePermissions(['vales:write']), denyResponsableAcop
 /**
  * @route POST /api/vales/validar-stock
  * @desc Validar stock disponible antes de generar vale
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {object} data - Datos para validación de stock
  * @example
  * {
@@ -52,7 +52,7 @@ router.post('/validar-stock', requirePermissions(['vales:write']), denyResponsab
 /**
  * @route POST /api/vales/vista-previa
  * @desc Obtener vista previa de vale sin generar ni afectar stocks
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {object} data - Datos para vista previa
  * @example
  * {
@@ -66,7 +66,7 @@ router.post('/vista-previa', requirePermissions(['vales:write']), denyResponsabl
 /**
  * @route GET /api/vales
  * @desc Obtener vales con filtros opcionales
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [centroAcopioId] - ID del centro de acopio
  * @query {number} [mes] - Mes (1-12)
  * @query {number} [anio] - Año
@@ -81,7 +81,7 @@ router.get('/', ValeController.getVales);
 /**
  * @route GET /api/vales/estadisticas
  * @desc Obtener estadísticas de vales
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [centroAcopioId] - ID del centro de acopio
  * @query {number} [anio] - Año (por defecto año actual)
  * @example GET /api/vales/estadisticas?centroAcopioId=uuid&anio=2024
@@ -91,7 +91,7 @@ router.get('/estadisticas', denyResponsableAcopio, ValeController.getEstadistica
 /**
  * @route GET /api/vales/tipos-generados
  * @desc Obtener tipos de vales ya generados para un período
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} centroAcopioId - ID del centro de acopio
  * @query {number} mes - Mes (1-12)
  * @query {number} anio - Año
@@ -102,7 +102,7 @@ router.get('/tipos-generados', denyResponsableAcopio, ValeController.getTiposVal
 /**
  * @route GET /api/vales/verificar-existencia
  * @desc Verificar si existen vales para un establecimiento específico
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} establecimientoId - ID del establecimiento
  * @query {string} vacunaId - ID de la vacuna
  * @query {number} mes - Mes (1-12)
@@ -126,7 +126,7 @@ router.post('/verificar-existencia-batch', denyResponsableAcopio, ValeController
 /**
  * @route GET /api/vales/grupos-entregas-generados
  * @desc Obtener números de grupos de entregas adicionales ya generados en vales
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} centroAcopioId - ID del centro de acopio
  * @query {number} mes - Mes (1-12)
  * @query {number} anio - Año
@@ -137,7 +137,7 @@ router.get('/grupos-entregas-generados', denyResponsableAcopio, ValeController.g
 /**
  * @route GET /api/vales/entregas-adicionales-disponibles
  * @desc Obtener entregas adicionales disponibles para un centro de acopio y período
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} centroAcopioId - ID del centro de acopio
  * @query {number} mes - Mes (1-12)
  * @query {number} anio - Año
@@ -148,7 +148,7 @@ router.get('/entregas-adicionales-disponibles', denyResponsableAcopio, ValeContr
 /**
  * @route GET /api/vales/calcular-impacto-modificacion
  * @desc Calcular el impacto de modificar una entrega sobre stocks y vales
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} establecimientoId - ID del establecimiento
  * @query {string} vacunaId - ID de la vacuna
  * @query {number} mes - Mes (1-12)
@@ -162,7 +162,7 @@ router.get('/calcular-impacto-modificacion', denyResponsableAcopio, ValeControll
 /**
  * @route GET /api/vales/:id
  * @desc Obtener vale por ID con todos sus detalles
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del vale
  * @example GET /api/vales/uuid-del-vale
  */
@@ -171,7 +171,7 @@ router.get('/:id', ValeController.getValeById);
 /**
  * @route PATCH /api/vales/:id/estado
  * @desc Cambiar estado de un vale
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del vale
  * @body {object} data - Nuevo estado y usuario
  * @example
@@ -185,7 +185,7 @@ router.patch('/:id/estado', requirePermissions(['vales:write']), denyResponsable
 /**
  * @route GET /api/vales/:id/diagnostico
  * @desc Diagnosticar estado de vale para reversión
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del vale a diagnosticar
  * @example GET /api/vales/uuid-del-vale/diagnostico
  */
@@ -194,7 +194,7 @@ router.get('/:id/diagnostico', denyResponsableAcopio, ValeController.diagnostica
 /**
  * @route POST /api/vales/:id/limpiar-reversion
  * @desc Limpiar estado inconsistente de reversión
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del vale a limpiar
  * @example POST /api/vales/uuid-del-vale/limpiar-reversion
  */
@@ -203,7 +203,7 @@ router.post('/:id/limpiar-reversion', requirePermissions(['vales:write']), denyR
 /**
  * @route POST /api/vales/:id/revertir
  * @desc Revertir vale y restaurar stocks afectados
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del vale a revertir
  * @example POST /api/vales/uuid-del-vale/revertir
  */
@@ -212,7 +212,7 @@ router.post('/:id/revertir', requirePermissions(['vales:write']), denyResponsabl
 /**
  * @route POST /api/vales/:id/sincronizar
  * @desc Sincronizar vale con movimientos actualizados
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del vale a sincronizar
  * @body {object} data - Usuario que realiza la sincronización
  * @example
@@ -225,7 +225,7 @@ router.post('/:id/sincronizar', requirePermissions(['vales:write']), denyRespons
 /**
  * @route GET /api/vales/:id/modificaciones
  * @desc Obtener historial de modificaciones de un vale
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del vale
  * @example GET /api/vales/uuid-del-vale/modificaciones
  */
@@ -238,7 +238,7 @@ router.get('/:id/modificaciones', ValeController.getModificaciones);
 /**
  * @route POST /api/vales/:id/export/excel
  * @desc Exportar vale a formato Excel
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del vale
  * @body {ValeExportConfig} config - Configuración de exportación
  * @example
@@ -254,7 +254,7 @@ router.post('/:id/export/excel', requirePermissions(['vales:write']), denyRespon
 /**
  * @route POST /api/vales/export/combined/excel
  * @desc Exportar múltiples vales combinados a formato Excel
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {object} data - Datos para exportación combinada
  * @example
  * {
@@ -272,7 +272,7 @@ router.post('/export/combined/excel', requirePermissions(['vales:write']), denyR
 /**
  * @route POST /api/vales/:id/export/pdf
  * @desc Exportar vale a formato PDF
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del vale
  * @body {ValeExportConfig} config - Configuración de exportación
  * @example
@@ -288,7 +288,7 @@ router.post('/:id/export/pdf', requirePermissions(['vales:write']), denyResponsa
 /**
  * @route POST /api/vales/:id/export/preview
  * @desc Obtener vista previa de exportación
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del vale
  * @body {Omit<ValeExportConfig, 'formatoExportacion'>} config - Configuración sin formato
  */
@@ -297,7 +297,7 @@ router.post('/:id/export/preview', requirePermissions(['vales:write']), denyResp
 /**
  * @route POST /api/vales/auto-sync
  * @desc Sincronización automática en tiempo real
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {object} data - Datos para sincronización automática
  * @example
  * {

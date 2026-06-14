@@ -15,7 +15,7 @@ router.use(authenticate, denyResponsableAcopio);
 /**
  * @route GET /api/kardex/estadisticas
  * @desc Obtener estadísticas del kardex
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [tipo] - Tipo de item (vacuna|jeringa)
  * @query {string} [itemId] - ID del item
  * @query {string} [loteId] - ID del lote
@@ -30,14 +30,14 @@ router.get('/estadisticas', KardexController.getEstadisticas);
 /**
  * @route GET /api/kardex/consultas-predefinidas
  * @desc Obtener consultas predefinidas del kardex
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  */
 router.get('/consultas-predefinidas', KardexController.getConsultasPredefinidas);
 
 /**
  * @route GET /api/kardex/export/stats
  * @desc Obtener estadísticas de exportación del kardex
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [tipo] - Tipo de item (vacuna|jeringa)
  * @query {string} [itemId] - ID del item
  * @query {string} [loteId] - ID del lote
@@ -53,7 +53,7 @@ router.get('/export/stats', KardexController.getExportStats);
 /**
  * @route POST /api/kardex/export/excel
  * @desc Exportar kardex a Excel
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {boolean} [incluirDetalleCompleto=true] - Incluir detalle completo
  * @body {boolean} [incluirTrazabilidad=false] - Incluir trazabilidad
  * @body {boolean} [incluirEstadisticas=true] - Incluir estadísticas
@@ -64,7 +64,7 @@ router.post('/export/excel', KardexController.exportToExcel);
 /**
  * @route POST /api/kardex/export/pdf
  * @desc Exportar kardex a PDF
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {boolean} [incluirDetalleCompleto=true] - Incluir detalle completo
  * @body {boolean} [incluirTrazabilidad=false] - Incluir trazabilidad
  * @body {boolean} [incluirEstadisticas=false] - Incluir estadísticas
@@ -75,7 +75,7 @@ router.post('/export/pdf', KardexController.exportToPDF);
 /**
  * @route POST /api/kardex/export/csv
  * @desc Exportar kardex a CSV
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {boolean} [incluirDetalleCompleto=true] - Incluir detalle completo
  * @body {object} [filtros] - Filtros para la exportación
  */
@@ -84,7 +84,7 @@ router.post('/export/csv', KardexController.exportToCSV);
 /**
  * @route GET /api/kardex/trazabilidad/:loteId
  * @desc Obtener trazabilidad completa de un lote específico
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} loteId - ID del lote
  */
 router.get('/trazabilidad/:loteId', KardexController.getTrazabilidadLote);
@@ -92,7 +92,7 @@ router.get('/trazabilidad/:loteId', KardexController.getTrazabilidadLote);
 /**
  * @route POST /api/kardex/generar-automatico
  * @desc Generar movimiento de kardex automáticamente (para uso interno del sistema)
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {string} tipo - Tipo de item (vacuna|jeringa)
  * @body {string} itemId - ID del item
  * @body {string} loteId - ID del lote
@@ -111,7 +111,7 @@ router.post('/generar-automatico', KardexController.generarMovimientoAutomatico)
 /**
  * @route GET /api/kardex
  * @desc Obtener todos los movimientos de kardex con filtros opcionales
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [tipo] - Tipo de item (vacuna|jeringa)
  * @query {string} [itemId] - ID del item
  * @query {string} [loteId] - ID del lote
@@ -129,7 +129,7 @@ router.get('/', KardexController.getAll);
 /**
  * @route POST /api/kardex
  * @desc Crear nuevo movimiento de kardex
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {string} tipo - Tipo de item (vacuna|jeringa)
  * @body {string} itemId - ID del item
  * @body {string} loteId - ID del lote
@@ -149,7 +149,7 @@ router.post('/', KardexController.create);
 /**
  * @route GET /api/kardex/:id
  * @desc Obtener movimiento de kardex por ID
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del movimiento de kardex
  */
 router.get('/:id', KardexController.getById);
@@ -157,7 +157,7 @@ router.get('/:id', KardexController.getById);
 /**
  * @route PUT /api/kardex/:id
  * @desc Actualizar movimiento de kardex
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del movimiento de kardex
  * @body {number} [cantidad] - Nueva cantidad del movimiento
  * @body {number} [saldoAnterior] - Nuevo saldo anterior
@@ -173,7 +173,7 @@ router.put('/:id', KardexController.update);
 /**
  * @route DELETE /api/kardex/:id
  * @desc Eliminar movimiento de kardex
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del movimiento de kardex
  */
 router.delete('/:id', KardexController.delete);

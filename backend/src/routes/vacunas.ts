@@ -14,7 +14,7 @@ router.use(authenticate, requireCentroAcopioAssignment);
 /**
  * @route GET /api/vacunas
  * @desc Obtener todas las vacunas con filtros opcionales
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [estado] - Estado de la vacuna (activo, inactivo, todos)
  * @query {string} [search] - Búsqueda por nombre, tipo o presentación
  * @query {string} [tipo] - Filtro por tipo de vacuna
@@ -26,14 +26,14 @@ router.get('/', requirePermissions(['vacunas:read']), VacunaController.getAll);
 /**
  * @route GET /api/vacunas/activas
  * @desc Obtener todas las vacunas activas (para selects y formularios)
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  */
 router.get('/activas', requirePermissions(['vacunas:read']), VacunaController.getActivas);
 
 /**
  * @route GET /api/vacunas/stats/stock
  * @desc Obtener estadísticas de stock de vacunas
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [vacunaId] - ID de vacuna específica (opcional)
  */
 router.get('/stats/stock', requirePermissions(['vacunas:read']), VacunaController.getStockStats);
@@ -41,7 +41,7 @@ router.get('/stats/stock', requirePermissions(['vacunas:read']), VacunaControlle
 /**
  * @route GET /api/vacunas/:id
  * @desc Obtener vacuna por ID
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la vacuna
  */
 router.get('/:id', requirePermissions(['vacunas:read']), VacunaController.getById);

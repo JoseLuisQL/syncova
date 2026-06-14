@@ -14,7 +14,7 @@ router.use(authenticate, requireCentroAcopioAssignment);
 /**
  * @route GET /api/establecimientos
  * @desc Obtener todos los establecimientos con filtros opcionales
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [tipo] - Tipo de establecimiento (centro_acopio, centro_salud, puesto_salud)
  * @query {string} [estado] - Estado del establecimiento (activo, inactivo, todos)
  * @query {string} [search] - Búsqueda por nombre, código o responsable
@@ -27,21 +27,21 @@ router.get('/', requirePermissions(['establecimientos:read']), EstablecimientoCo
 /**
  * @route GET /api/establecimientos/centros-acopio
  * @desc Obtener todos los centros de acopio
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  */
 router.get('/centros-acopio', requirePermissions(['establecimientos:read']), EstablecimientoController.getCentrosAcopio);
 
 /**
  * @route GET /api/establecimientos/opciones-jerarquicas
  * @desc Obtener opciones jerárquicas para formularios (redes, microredes, centros de acopio)
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  */
 router.get('/opciones-jerarquicas', requirePermissions(['establecimientos:read']), EstablecimientoController.getOpcionesJerarquicas);
 
 /**
  * @route GET /api/establecimientos/centro-acopio/:centroAcopioId
  * @desc Obtener establecimientos por centro de acopio
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} centroAcopioId - ID del centro de acopio
  */
 router.get('/centro-acopio/:centroAcopioId', requirePermissions(['establecimientos:read']), EstablecimientoController.getByCentroAcopio);
@@ -49,7 +49,7 @@ router.get('/centro-acopio/:centroAcopioId', requirePermissions(['establecimient
 /**
  * @route GET /api/establecimientos/codigo/:codigo
  * @desc Obtener establecimiento por código
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} codigo - Código del establecimiento
  */
 router.get('/codigo/:codigo', requirePermissions(['establecimientos:read']), EstablecimientoController.getByCodigo);
@@ -57,7 +57,7 @@ router.get('/codigo/:codigo', requirePermissions(['establecimientos:read']), Est
 /**
  * @route GET /api/establecimientos/:id
  * @desc Obtener establecimiento por ID
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del establecimiento
  */
 router.get('/:id', requirePermissions(['establecimientos:read']), EstablecimientoController.getById);

@@ -103,14 +103,14 @@ router.use(authenticate, requireCentroAcopioAssignment, requirePermissions(['pla
 /**
  * @route GET /api/planificacion/anios-disponibles
  * @desc Obtener años disponibles con planificaciones registradas
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  */
 router.get('/anios-disponibles', PlanificacionController.getAniosDisponibles);
 
 /**
  * @route GET /api/planificacion/estadisticas
  * @desc Obtener estadísticas de planificación
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {number} [anio] - Año para filtrar estadísticas
  */
 router.get('/estadisticas', PlanificacionController.getEstadisticas);
@@ -118,7 +118,7 @@ router.get('/estadisticas', PlanificacionController.getEstadisticas);
 /**
  * @route GET /api/planificacion/vacuna/:vacunaId/anio/:anio
  * @desc Obtener planificaciones por vacuna y año
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} vacunaId - ID de la vacuna
  * @param {number} anio - Año de planificación
  * @query {string} [centroAcopioId] - ID del centro de acopio o 'todos'
@@ -128,7 +128,7 @@ router.get('/vacuna/:vacunaId/anio/:anio', PlanificacionController.getByVacunaAn
 /**
  * @route POST /api/planificacion/importar
  * @desc Importar planificaciones desde datos estructurados
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {ImportarPlanificacionDto} data - Datos de planificación a importar
  */
 router.post('/importar', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.importar);
@@ -136,7 +136,7 @@ router.post('/importar', requirePermissions(['planificacion:write']), denyRespon
 /**
  * @route POST /api/planificacion/distribucion-automatica
  * @desc Generar distribución automática de planificación
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {DistribucionAutomaticaDto} data - Parámetros para distribución automática
  */
 router.post('/distribucion-automatica', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.distribucionAutomatica);
@@ -144,7 +144,7 @@ router.post('/distribucion-automatica', requirePermissions(['planificacion:write
 /**
  * @route GET /api/planificacion
  * @desc Obtener todas las planificaciones con filtros opcionales
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [establecimientoId] - ID del establecimiento
  * @query {string} [vacunaId] - ID de la vacuna
  * @query {number} [anio] - Año de planificación
@@ -159,7 +159,7 @@ router.get('/', PlanificacionController.getAll);
 /**
  * @route GET /api/planificacion/:id
  * @desc Obtener planificación por ID
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la planificación
  */
 router.get('/:id', PlanificacionController.getById);
@@ -167,7 +167,7 @@ router.get('/:id', PlanificacionController.getById);
 /**
  * @route POST /api/planificacion
  * @desc Crear nueva planificación
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {CreatePlanificacionDto} data - Datos de la nueva planificación
  */
 router.post('/', requirePermissions(['planificacion:write']), denyResponsableUnlessPlanificacionEdicion, PlanificacionController.create);
@@ -175,7 +175,7 @@ router.post('/', requirePermissions(['planificacion:write']), denyResponsableUnl
 /**
  * @route PUT /api/planificacion/:id
  * @desc Actualizar planificación existente
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la planificación
  * @body {UpdatePlanificacionDto} data - Datos a actualizar
  */
@@ -186,7 +186,7 @@ router.put('/:id', requirePermissions(['planificacion:write']), denyResponsableU
 /**
  * @route DELETE /api/planificacion/:id
  * @desc Eliminar planificación
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la planificación
  */
 router.delete('/:id', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.delete);
@@ -194,7 +194,7 @@ router.delete('/:id', requirePermissions(['planificacion:write']), denyResponsab
 /**
  * @route GET /api/planificacion/plantilla/vacuna/:vacunaId/anio/:anio
  * @desc Descargar plantilla Excel para importación por vacuna específica
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} vacunaId - ID de la vacuna
  * @param {number} anio - Año de planificación
  */
@@ -203,7 +203,7 @@ router.get('/plantilla/vacuna/:vacunaId/anio/:anio', requirePermissions(['planif
 /**
  * @route GET /api/planificacion/plantilla/masiva/anio/:anio
  * @desc Descargar plantilla Excel masiva para todas las vacunas de un año
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {number} anio - Año de planificación
  */
 router.get('/plantilla/masiva/anio/:anio', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.descargarPlantillaMasiva);
@@ -211,7 +211,7 @@ router.get('/plantilla/masiva/anio/:anio', requirePermissions(['planificacion:wr
 /**
  * @route POST /api/planificacion/importar/vacuna/:vacunaId/anio/:anio
  * @desc Importar planificaciones desde archivo Excel por vacuna específica
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} vacunaId - ID de la vacuna
  * @param {number} anio - Año de planificación
  * @body {file} archivo - Archivo Excel con la programación
@@ -227,7 +227,7 @@ router.post('/importar/vacuna/:vacunaId/anio/:anio',
 /**
  * @route POST /api/planificacion/importar/masivo/anio/:anio
  * @desc Importar planificaciones masivas desde archivo Excel (múltiples hojas)
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {number} anio - Año de planificación
  * @body {file} archivo - Archivo Excel con múltiples hojas de programación
  */
@@ -242,7 +242,7 @@ router.post('/importar/masivo/anio/:anio',
 /**
  * @route POST /api/planificacion/:id/sincronizar-movimientos
  * @desc Sincronizar planificación con movimientos de vacunas
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la planificación
  */
 router.post('/:id/sincronizar-movimientos', requirePermissions(['planificacion:write']), denyResponsableAcopio, PlanificacionController.sincronizarConMovimientos);
@@ -250,7 +250,7 @@ router.post('/:id/sincronizar-movimientos', requirePermissions(['planificacion:w
 /**
  * @route GET /api/planificacion/verificar/:establecimientoId/:vacunaId/:anio
  * @desc Verificar existencia de planificación para un establecimiento específico
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} establecimientoId - ID del establecimiento
  * @param {string} vacunaId - ID de la vacuna
  * @param {number} anio - Año de planificación
@@ -260,7 +260,7 @@ router.get('/verificar/:establecimientoId/:vacunaId/:anio', requirePermissions([
 /**
  * @route GET /api/planificacion/verificar-disponibilidad/:establecimientoId/:vacunaId/:mes/:anio
  * @desc Verificar disponibilidad de entregas en próximos meses
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} establecimientoId - ID del establecimiento
  * @param {string} vacunaId - ID de la vacuna
  * @param {number} mes - Mes actual (1-12)
@@ -271,7 +271,7 @@ router.get('/verificar-disponibilidad/:establecimientoId/:vacunaId/:mes/:anio', 
 /**
  * @route POST /api/planificacion/registrar-mes-actual
  * @desc Registrar entrega en mes actual cuando no hay disponibilidad futura
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {string} establecimientoId - ID del establecimiento
  * @body {string} vacunaId - ID de la vacuna
  * @body {number} mesActual - Mes actual (1-12)
@@ -284,7 +284,7 @@ router.post('/registrar-mes-actual', requirePermissions(['planificacion:write'])
 /**
  * @route POST /api/planificacion/exportar/vacuna/:vacunaId
  * @desc Exportar planificación por vacuna específica a Excel
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} vacunaId - ID de la vacuna
  * @body {number} anio - Año de planificación
  * @body {string} [centroAcopioId] - ID del centro de acopio (opcional)
@@ -297,7 +297,7 @@ router.post('/exportar/vacuna/:vacunaId', requirePlanificacionExportAccess, deny
 /**
  * @route POST /api/planificacion/exportar/todas-vacunas
  * @desc Exportar todas las vacunas a Excel (hojas separadas)
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {number} anio - Año de planificación
  * @body {string} [centroAcopioId] - ID del centro de acopio (opcional)
  * @body {boolean} [incluirEstablecimientosSinProgramacion] - Incluir establecimientos sin programación

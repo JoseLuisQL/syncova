@@ -13,7 +13,7 @@ const router = Router();
 /**
  * @route GET /api/configuracion-jeringa-vacuna/defecto
  * @desc Obtener todas las configuraciones por defecto con filtros opcionales
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [vacunaId] - ID de la vacuna
  * @query {string} [jeringaId] - ID de la jeringa
  * @query {boolean} [activo] - Estado activo/inactivo
@@ -26,7 +26,7 @@ router.get('/defecto', ConfiguracionJeringaVacunaController.getAllDefecto);
 /**
  * @route POST /api/configuracion-jeringa-vacuna/defecto
  * @desc Crear nueva configuración por defecto
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {string} vacunaId - ID de la vacuna (requerido)
  * @body {string} jeringaId - ID de la jeringa (requerido)
  * @body {number} multiplicador - Multiplicador para el cálculo (requerido)
@@ -38,7 +38,7 @@ router.post('/defecto', ConfiguracionJeringaVacunaController.createDefecto);
 /**
  * @route PUT /api/configuracion-jeringa-vacuna/defecto/:id
  * @desc Actualizar configuración por defecto
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la configuración
  * @body {number} [multiplicador] - Nuevo multiplicador
  * @body {number} [prioridad] - Nueva prioridad
@@ -49,7 +49,7 @@ router.put('/defecto/:id', ConfiguracionJeringaVacunaController.updateDefecto);
 /**
  * @route DELETE /api/configuracion-jeringa-vacuna/defecto/:id
  * @desc Eliminar configuración por defecto
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la configuración
  */
 router.delete('/defecto/:id', ConfiguracionJeringaVacunaController.deleteDefecto);
@@ -61,7 +61,7 @@ router.delete('/defecto/:id', ConfiguracionJeringaVacunaController.deleteDefecto
 /**
  * @route GET /api/configuracion-jeringa-vacuna/centro
  * @desc Obtener todas las configuraciones por centro de acopio con filtros opcionales
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [centroAcopioId] - ID del centro de acopio
  * @query {string} [vacunaId] - ID de la vacuna
  * @query {string} [jeringaId] - ID de la jeringa
@@ -75,7 +75,7 @@ router.get('/centro', ConfiguracionJeringaVacunaController.getAllCentro);
 /**
  * @route POST /api/configuracion-jeringa-vacuna/centro
  * @desc Crear nueva configuración por centro de acopio
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {string} centroAcopioId - ID del centro de acopio (requerido)
  * @body {string} vacunaId - ID de la vacuna (requerido)
  * @body {string} jeringaId - ID de la jeringa (requerido)
@@ -88,7 +88,7 @@ router.post('/centro', ConfiguracionJeringaVacunaController.createCentro);
 /**
  * @route PUT /api/configuracion-jeringa-vacuna/centro/:id
  * @desc Actualizar configuración por centro de acopio
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la configuración
  * @body {number} [multiplicador] - Nuevo multiplicador
  * @body {number} [prioridad] - Nueva prioridad
@@ -99,7 +99,7 @@ router.put('/centro/:id', ConfiguracionJeringaVacunaController.updateCentro);
 /**
  * @route DELETE /api/configuracion-jeringa-vacuna/centro/:id
  * @desc Eliminar configuración por centro de acopio
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la configuración
  */
 router.delete('/centro/:id', ConfiguracionJeringaVacunaController.deleteCentro);
@@ -111,7 +111,7 @@ router.delete('/centro/:id', ConfiguracionJeringaVacunaController.deleteCentro);
 /**
  * @route GET /api/configuracion-jeringa-vacuna/efectiva/:vacunaId
  * @desc Obtener configuración efectiva para una vacuna (con fallback)
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} vacunaId - ID de la vacuna
  * @query {string} [centroAcopioId] - ID del centro de acopio para configuración específica
  */
@@ -120,7 +120,7 @@ router.get('/efectiva/:vacunaId', ConfiguracionJeringaVacunaController.getConfig
 /**
  * @route GET /api/configuracion-jeringa-vacuna/calcular
  * @desc Calcular jeringas necesarias para una cantidad de vacunas (GET)
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} vacunaId - ID de la vacuna (requerido)
  * @query {number} cantidadVacunas - Cantidad de vacunas (requerido)
  * @query {string} [centroAcopioId] - ID del centro de acopio para configuración específica
@@ -131,7 +131,7 @@ router.get('/calcular', ConfiguracionJeringaVacunaController.calcularJeringasGet
 /**
  * @route POST /api/configuracion-jeringa-vacuna/calcular
  * @desc Calcular jeringas necesarias para una cantidad de vacunas (POST)
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {string} vacunaId - ID de la vacuna (requerido)
  * @body {number} cantidadVacunas - Cantidad de vacunas (requerido)
  * @body {string} [centroAcopioId] - ID del centro de acopio para configuración específica
