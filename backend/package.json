@@ -26,7 +26,7 @@
     "fix:lotes-dt": "tsx scripts/run-lote-correction.ts -- --caso-dt",
     "lint": "node ../node_modules/eslint/bin/eslint.js src/**/*.ts",
     "lint:fix": "node ../node_modules/eslint/bin/eslint.js src/**/*.ts --fix",
-    "test": "jest",
+    "test": "jest --forceExit",
     "test:watch": "jest --watch"
   },
   "keywords": [
