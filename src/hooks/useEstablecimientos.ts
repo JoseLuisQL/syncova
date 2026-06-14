@@ -153,10 +153,6 @@ export function useEstablecimientos(
       if (result) {
         // Recargar la lista después de crear
         await loadEstablecimientos(undefined, { force: true });
-        // Si es un centro de acopio, recargar también la lista de centros
-        if (data.tipo === 'centro_acopio') {
-          await loadCentrosAcopio({ force: true });
-        }
         return true;
       }
       return false;
@@ -164,7 +160,7 @@ export function useEstablecimientos(
       console.error('Error al crear establecimiento:', error);
       return false;
     }
-  }, [crudApi.create, loadEstablecimientos, loadCentrosAcopio]);
+  }, [crudApi.create, loadEstablecimientos]);
 
   /**
    * Actualizar establecimiento
@@ -180,11 +176,6 @@ export function useEstablecimientos(
         setEstablecimientos(prev =>
           prev.map(est => est.id === id ? { ...est, ...result } : est)
         );
-
-        // Si cambió a centro de acopio o desde centro de acopio, recargar centros
-        if (data.tipo === 'centro_acopio' || result.tipo === 'centro_acopio') {
-          await loadCentrosAcopio({ force: true });
-        }
         return true;
       }
       return false;
@@ -192,14 +183,12 @@ export function useEstablecimientos(
       console.error('Error al actualizar establecimiento:', error);
       return false;
     }
-  }, [crudApi.update, loadCentrosAcopio]);
+  }, [crudApi.update]);
 
   /**
    * Eliminar establecimiento
    */
   const deleteEstablecimiento = useCallback(async (id: string): Promise<boolean> => {
-    const establecimiento = establecimientos.find(est => est.id === id);
-
     try {
       const result = await crudApi.delete.execute(() =>
         EstablecimientoService.delete(id)
@@ -208,11 +197,6 @@ export function useEstablecimientos(
       if (result !== null) {
         // Remover de la lista local
         setEstablecimientos(prev => prev.filter(est => est.id !== id));
-
-        // Si era un centro de acopio, recargar la lista de centros
-        if (establecimiento?.tipo === 'centro_acopio') {
-          await loadCentrosAcopio({ force: true });
-        }
         return true;
       }
       return false;

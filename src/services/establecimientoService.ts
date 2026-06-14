@@ -159,11 +159,6 @@ export class EstablecimientoService {
       // Limpiar datos antes de enviar
       const cleanData = { ...data };
 
-      // Para centros de acopio, asegurar que no se envíe centroAcopioId
-      if (cleanData.tipo === 'centro_acopio') {
-        delete cleanData.centroAcopioId;
-      }
-
       // El campo estado NO se permite en creación (solo en actualización)
       delete (cleanData as any).estado;
 
@@ -196,11 +191,6 @@ export class EstablecimientoService {
     try {
       // Limpiar datos antes de enviar
       const cleanData = { ...data };
-
-      // Para centros de acopio, asegurar que no se envíe centroAcopioId
-      if (cleanData.tipo === 'centro_acopio') {
-        delete cleanData.centroAcopioId;
-      }
 
       // Limpiar campos vacíos opcionales
       if (cleanData.telefono === '') {

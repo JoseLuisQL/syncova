@@ -1,10 +1,10 @@
 import React from 'react';
-import { SpinnerGap, IconProps } from '@phosphor-icons/react';
+import { SpinnerGap, Icon } from '@phosphor-icons/react';
 import { ColorScheme, COLORS, COMPONENT_STYLES } from '../constants';
 
 interface ReportCardAction {
   label: string;
-  icon: IconProps;
+  icon: Icon;
   onClick: () => void;
   variant?: 'primary' | 'secondary' | 'ghost';
   disabled?: boolean;
@@ -14,7 +14,7 @@ interface ReportCardAction {
 interface ReporteCardProps {
   title: string;
   description: string;
-  icon: IconProps;
+  icon: Icon;
   tone?: ColorScheme;
   statusLabel?: string;
   helperText?: string;

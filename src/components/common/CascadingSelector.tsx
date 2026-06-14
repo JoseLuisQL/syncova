@@ -33,8 +33,6 @@ interface CascadingSelectorProps {
   };
 }
 
-const _selectorCardBase = 'rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition';
-
 const CascadingSelector: React.FC<CascadingSelectorProps> = ({
   selectedRedId = '',
   selectedMicroredId = '',
@@ -110,23 +108,6 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
   useEffect(() => {
     setLocalCentroAcopioId(selectedCentroAcopioId);
   }, [selectedCentroAcopioId]);
-
-  const _selectedRedLabel = useMemo(
-    () => redes.find((red) => red.id === localRedId)?.nombre || 'Sin red seleccionada',
-    [localRedId, redes],
-  );
-
-  const _selectedMicroredLabel = useMemo(
-    () => filteredMicroredes.find((microred) => microred.id === localMicroredId)?.nombre || 'Sin microred seleccionada',
-    [filteredMicroredes, localMicroredId],
-  );
-
-  const _selectedCentroLabel = useMemo(
-    () =>
-      filteredCentrosAcopio.find((centroAcopio) => centroAcopio.id === localCentroAcopioId)?.nombre ||
-      'Sin centro de acopio seleccionado',
-    [filteredCentrosAcopio, localCentroAcopioId],
-  );
 
   const handleRedChange = (redId: string) => {
     setLocalRedId(redId);

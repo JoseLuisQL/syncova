@@ -394,6 +394,8 @@ export interface UseReportesReturn {
   exportarConsumoHistorico: (filtros: FiltrosConsumoHistorico, config: ConfiguracionExportacion) => Promise<void>;
   exportarEntregasPorEstablecimiento: (filtros: FiltrosEntregasPorEstablecimiento, config: ConfiguracionExportacion) => Promise<void>;
   exportarEficienciaDistribucion: (filtros: FiltrosEficienciaDistribucion, config: ConfiguracionExportacion) => Promise<void>;
+  exportarMovimientosPorEESS: (filtros: { fechaInicio: string; fechaFin: string; centroAcopioId?: string }, config: ConfiguracionExportacion) => Promise<void>;
+  exportarStockVacunasEESS: (filtros: { fechaInicio: string; fechaFin: string; centroAcopioId?: string; vacunaIds: string[] }, config: ConfiguracionExportacion) => Promise<void>;
   limpiarReportes: () => void;
   actualizarFiltros: (tipo: TipoReporte, filtros: any) => void;
 
