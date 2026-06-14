@@ -51,12 +51,19 @@ PORT=3001
 # Generar cliente Prisma
 npm run db:generate
 
-# Aplicar esquema a la base de datos
-npm run db:push
+# Aplicar migraciones formales (recomendado: reproducible y versionado)
+npx prisma migrate deploy
 
 # Ejecutar seeders (opcional)
 npm run db:seed
 ```
+
+> ⚠️ **Importante:** usa `prisma migrate deploy` (migraciones formales), NO `db push`.
+> El esquema completo se reconstruye de forma reproducible aplicando las
+> migraciones en orden. `db push` solo debe usarse para prototipado local
+> rápido, nunca para inicializar producción.
+>
+> Para reconstruir desde cero (¡borra datos!): `npx prisma migrate reset`.
 
 ### 5. Iniciar servidor
 ```bash
