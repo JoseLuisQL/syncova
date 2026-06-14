@@ -43,10 +43,10 @@ class UsuarioService {
       logger.debug('URL construida para usuarios:', url);
       logger.debug('Query params:', queryParams);
 
-      const response = await apiClient.get<PaginatedResponse<Usuario[]>>(url);
+      const response = await apiClient.get<PaginatedResponse<Usuario>>(url);
 
       if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.error || 'Error al obtener usuarios');
+        throw new Error(response.data.message || 'Error al obtener usuarios');
       }
 
       // Convertir fechas de string a Date

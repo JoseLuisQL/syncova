@@ -5,7 +5,7 @@ import { useToastContext } from '../../contexts/ToastContext';
 import { useMicroredes } from '../../hooks/useMicroredes';
 import { useRedes } from '../../hooks/useRedes';
 import { sanitizeInput, validateMicrored } from '../../utils/validation';
-import { ColorScheme, COMPONENT_STYLES, STATS_CONFIG } from '../Establecimientos/constants';
+import { COMPONENT_STYLES } from '../Establecimientos/constants';
 import {
   ActionButtons,
   CountBadge,
@@ -109,28 +109,6 @@ const Microredes: React.FC<MicroredesProps> = ({
 
     return () => window.clearTimeout(timeoutId);
   }, [filterEstado, filterRedId, searchTerm, setFilters]);
-
-  const _stats = useMemo(
-    () => [
-      { ...STATS_CONFIG.microredes[0], value: total, color: STATS_CONFIG.microredes[0].color as ColorScheme },
-      {
-        ...STATS_CONFIG.microredes[1],
-        value: microredes.filter((microred) => microred.estado === 'activo').length,
-        color: STATS_CONFIG.microredes[1].color as ColorScheme,
-      },
-      {
-        ...STATS_CONFIG.microredes[2],
-        value: microredes.filter((microred) => (microred._count?.centrosAcopio || 0) > 0).length,
-        color: STATS_CONFIG.microredes[2].color as ColorScheme,
-      },
-      {
-        ...STATS_CONFIG.microredes[3],
-        value: microredes.filter((microred) => microred.estado === 'inactivo').length,
-        color: STATS_CONFIG.microredes[3].color as ColorScheme,
-      },
-    ],
-    [microredes, total],
-  );
 
   const redesOptions = useMemo(
     () => [{ value: '', label: 'Todas las redes' }, ...redes.map((red) => ({ value: red.id, label: red.nombre }))],

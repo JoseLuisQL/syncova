@@ -9,7 +9,8 @@ import {
   Package,
   ShieldWarning,
 } from '@phosphor-icons/react';
-import { Establecimiento, Vacuna } from '../../../../types';
+import { Vacuna } from '../../../../types';
+import { CentroAcopioOption } from '../../../../types/reportes';
 import { useReportes } from '../../../../hooks/useReportes';
 import { useToastContext } from '../../../../contexts/ToastContext';
 import {
@@ -32,7 +33,7 @@ import VisualizarReporteModal from '../../modals/VisualizarReporteModal';
 import { formatCompactDate, formatLastUpdated } from '../../utils';
 
 interface InventarioTabProps {
-  centrosAcopio: Establecimiento[];
+  centrosAcopio: CentroAcopioOption[];
   vacunas: Vacuna[];
 }
 

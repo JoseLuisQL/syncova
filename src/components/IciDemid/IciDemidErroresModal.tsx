@@ -1,13 +1,13 @@
 import React from 'react';
 import { Warning, WarningCircle } from '@phosphor-icons/react';
-import { IciDemidImportPreview } from '../../types';
+import { IciDemidImportPreview, IciDemidImportResult } from '../../types';
 import { Modal } from '../ui/ModalElements';
 import { COMPONENT_STYLES } from '../Establecimientos/constants';
 
 interface IciDemidErroresModalProps {
   isOpen: boolean;
   onClose: () => void;
-  errores: IciDemidImportPreview | null;
+  errores: IciDemidImportPreview | IciDemidImportResult | null;
 }
 
 const IciDemidErroresModal: React.FC<IciDemidErroresModalProps> = ({ isOpen, onClose, errores }) => {

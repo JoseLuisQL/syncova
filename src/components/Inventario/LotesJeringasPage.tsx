@@ -4,7 +4,7 @@ import GestionLotes from './GestionLotes';
 import NuevoIngreso, { NuevoIngresoPayload, NuevoIngresoSubmitResult } from './NuevoIngreso';
 import { useLotesJeringas } from '../../hooks/useLotesJeringas';
 import { useJeringas } from '../../hooks/useJeringas';
-import { CreateLoteJeringaDto, LoteJeringa } from '../../types';
+import { CreateLoteJeringaDto, LoteJeringa, Lote } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { ErrorAlert, LoadingSpinner } from './components/SharedComponents';
 import { COMPONENT_STYLES } from './constants';
@@ -89,7 +89,8 @@ const LotesJeringasPage: React.FC = () => {
     }
   }, [createLote, createError, toast]);
 
-  const handleUpdateLote = useCallback(async (lote: LoteJeringa) => {
+  const handleUpdateLote = useCallback(async (loteInput: Lote | LoteJeringa) => {
+    const lote = loteInput as LoteJeringa;
     try {
       const success = await updateLote(lote.id, {
         numero: lote.numero,

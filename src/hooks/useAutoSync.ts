@@ -6,14 +6,13 @@ import { useCallback, useEffect, useRef } from 'react';
  */
 export const useAutoSync = () => {
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const _lastSyncRef = useRef<{ [key: string]: number }>({});
 
   /**
    * Trigger para cuando cambia una entrega base
    */
   const onEntregaBaseChanged = useCallback((
     establecimientoId: string,
-    vacunaId: string,
+    _vacunaId: string,
     mes: number,
     anio: number
   ) => {
@@ -26,7 +25,7 @@ export const useAutoSync = () => {
    */
   const onEntregaAdicionalChanged = useCallback((
     establecimientoId: string,
-    vacunaId: string,
+    _vacunaId: string,
     mes: number,
     anio: number
   ) => {
@@ -39,7 +38,7 @@ export const useAutoSync = () => {
    */
   const onDataChanged = useCallback((
     establecimientoId: string,
-    vacunaId: string,
+    _vacunaId: string,
     mes: number,
     anio: number
   ) => {
@@ -52,7 +51,7 @@ export const useAutoSync = () => {
    */
   const triggerAutoSync = useCallback(async (
     establecimientoId: string,
-    vacunaId: string,
+    _vacunaId: string,
     mes: number,
     anio: number,
     _showNotification: boolean = true

@@ -4,7 +4,7 @@ import { CreateRedDto, Red, UpdateRedDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useRedes } from '../../hooks/useRedes';
 import { sanitizeInput, validateRed } from '../../utils/validation';
-import { ColorScheme, COMPONENT_STYLES, STATS_CONFIG } from '../Establecimientos/constants';
+import { COMPONENT_STYLES } from '../Establecimientos/constants';
 import {
   ActionButtons,
   CountBadge,
@@ -93,28 +93,6 @@ const Redes: React.FC<RedesProps> = ({ onNavigateToMicroredes }) => {
 
     return () => window.clearTimeout(timeoutId);
   }, [filterEstado, searchTerm, setFilters]);
-
-  const _stats = useMemo(
-    () => [
-      { ...STATS_CONFIG.redes[0], value: total, color: STATS_CONFIG.redes[0].color as ColorScheme },
-      {
-        ...STATS_CONFIG.redes[1],
-        value: redes.filter((red) => red.estado === 'activo').length,
-        color: STATS_CONFIG.redes[1].color as ColorScheme,
-      },
-      {
-        ...STATS_CONFIG.redes[2],
-        value: redes.filter((red) => (red._count?.microredes || 0) > 0).length,
-        color: STATS_CONFIG.redes[2].color as ColorScheme,
-      },
-      {
-        ...STATS_CONFIG.redes[3],
-        value: redes.filter((red) => red.estado === 'inactivo').length,
-        color: STATS_CONFIG.redes[3].color as ColorScheme,
-      },
-    ],
-    [redes, total],
-  );
 
   const filtersConfig = useMemo(
     () => [

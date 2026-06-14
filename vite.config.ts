@@ -14,10 +14,18 @@ export default defineConfig({
     include: ['lucide-react'],
   },
   build: {
+    chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {
         manualChunks: {
+          // Vendor pesado separado del código de la app para mejorar el cacheo
+          // y reducir el bundle inicial.
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'charts': ['recharts'],
+          'excel': ['exceljs'],
+          'motion': ['motion'],
           'lucide': ['lucide-react'],
+          'phosphor': ['@phosphor-icons/react'],
         },
       },
     },

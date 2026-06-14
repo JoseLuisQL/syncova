@@ -1,5 +1,5 @@
 import { apiClient } from '../config/api';
-import { ApiResponse } from '../types/api';
+import { ApiResponse } from '../types';
 
 /**
  * Interfaces for Ajuste de Entregas

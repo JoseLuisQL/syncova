@@ -204,7 +204,7 @@ export const Pagination: React.FC<PaginationProps> = memo(({
 Pagination.displayName = 'Pagination';
 
 interface DataTableProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   isLoading?: boolean;
   loadingMessage?: string;
   skeletonRows?: number;
@@ -343,7 +343,7 @@ export const TableHeader: React.FC<TableHeaderProps> = memo(({ columns }) => (
 TableHeader.displayName = 'TableHeader';
 
 interface TableRowProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   onClick?: () => void;
   isSelected?: boolean;
 }
@@ -370,7 +370,7 @@ export const TableRow: React.FC<TableRowProps> = memo(({ children, onClick, isSe
 TableRow.displayName = 'TableRow';
 
 interface TableCellProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   align?: 'left' | 'center' | 'right';
   className?: string;
 }

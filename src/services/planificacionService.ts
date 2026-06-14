@@ -1,7 +1,6 @@
 import {
   apiClient,
   ApiResponse,
-  PaginatedResponse,
   buildQueryParams,
   handleApiError
 } from '../config/api';
@@ -44,7 +43,10 @@ export class PlanificacionService {
       const queryParams = filters ? buildQueryParams(filters) : '';
       const url = queryParams ? `${this.BASE_PATH}?${queryParams}` : this.BASE_PATH;
 
-      const response = await apiClient.get<PaginatedResponse<PlanificacionConRelaciones>>(url);
+      const response = await apiClient.get<ApiResponse<{
+        planificaciones: PlanificacionConRelaciones[];
+        pagination?: { page: number; limit: number; total: number; totalPages: number };
+      }>>(url);
 
       if (!response.data.success) {
         throw new Error(response.data.message || 'Error al obtener planificaciones');

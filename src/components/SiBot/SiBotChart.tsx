@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion, useReducedMotion, type MotionProps } from 'motion/react';
 import {
   BarChart,
   Bar,
@@ -251,7 +251,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
     ? 320
     : Math.max(420, dataPoints * (resolvedChartType === 'bar' ? 88 : 84));
   const plotHeight = resolvedChartType === 'pie' ? 300 : 292;
-  const cardMotion = shouldReduceMotion
+  const cardMotion: MotionProps = shouldReduceMotion
     ? {}
     : {
         initial: { opacity: 0, y: 10 },
@@ -259,7 +259,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
         transition: { duration: 0.34, ease: [0.22, 1, 0.36, 1] },
       };
 
-  const plotMotion = shouldReduceMotion
+  const plotMotion: MotionProps = shouldReduceMotion
     ? {}
     : {
         initial: { opacity: 0, scale: 0.985 },

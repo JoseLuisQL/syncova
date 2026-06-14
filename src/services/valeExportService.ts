@@ -1,5 +1,5 @@
 import { apiClient, formatRateLimitMessage } from '../config/api';
-import { ApiResponse } from '../types/api';
+import { ApiResponse } from '../types';
 import { ValeEntrega } from './valesService';
 
 /**

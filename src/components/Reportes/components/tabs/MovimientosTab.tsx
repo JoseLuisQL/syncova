@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { ArrowsLeftRight, DownloadSimple, Eye, FileXls } from '@phosphor-icons/react';
-import { Establecimiento } from '../../../../types';
+import { CentroAcopioOption } from '../../../../types/reportes';
 import { useReportes } from '../../../../hooks/useReportes';
 import { useToastContext } from '../../../../contexts/ToastContext';
 import { ItemMovimientoMensual } from '../../../../types/reportes';
@@ -12,7 +12,7 @@ import VisualizarReporteModal from '../../modals/VisualizarReporteModal';
 import { formatCompactDate } from '../../utils';
 
 interface MovimientosTabProps {
-  centrosAcopio: Establecimiento[];
+  centrosAcopio: CentroAcopioOption[];
   filtrosFechas: {
     fechaInicio: string;
     fechaFin: string;

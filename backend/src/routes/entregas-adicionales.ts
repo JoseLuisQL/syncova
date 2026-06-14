@@ -10,7 +10,7 @@ const router = Router();
 /**
  * @route GET /api/entregas-adicionales/movimiento/:movimientoId
  * @desc Obtener entregas adicionales por movimiento
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} movimientoId - ID del movimiento de vacuna
  */
 router.get('/movimiento/:movimientoId', EntregaAdicionalController.getByMovimiento);
@@ -18,7 +18,7 @@ router.get('/movimiento/:movimientoId', EntregaAdicionalController.getByMovimien
 /**
  * @route GET /api/entregas-adicionales/movimiento/:movimientoId/estadisticas
  * @desc Obtener estadísticas de entregas adicionales por movimiento
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} movimientoId - ID del movimiento de vacuna
  */
 router.get('/movimiento/:movimientoId/estadisticas', EntregaAdicionalController.getEstadisticasByMovimiento);
@@ -26,7 +26,7 @@ router.get('/movimiento/:movimientoId/estadisticas', EntregaAdicionalController.
 /**
  * @route GET /api/entregas-adicionales/:id
  * @desc Obtener entrega adicional por ID
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la entrega adicional
  */
 router.get('/:id', EntregaAdicionalController.getById);
@@ -34,7 +34,7 @@ router.get('/:id', EntregaAdicionalController.getById);
 /**
  * @route POST /api/entregas-adicionales
  * @desc Crear nueva entrega adicional
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @body {CreateEntregaAdicionalDto} data - Datos de la entrega adicional a crear
  */
 router.post('/', EntregaAdicionalController.create);
@@ -42,7 +42,7 @@ router.post('/', EntregaAdicionalController.create);
 /**
  * @route PUT /api/entregas-adicionales/:id
  * @desc Actualizar entrega adicional existente
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la entrega adicional
  * @body {UpdateEntregaAdicionalDto} data - Datos de la entrega adicional a actualizar
  */
@@ -51,7 +51,7 @@ router.put('/:id', EntregaAdicionalController.update);
 /**
  * @route DELETE /api/entregas-adicionales/:id
  * @desc Eliminar entrega adicional
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID de la entrega adicional
  */
 router.delete('/:id', EntregaAdicionalController.delete);

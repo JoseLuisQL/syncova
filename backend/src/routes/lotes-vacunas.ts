@@ -10,14 +10,14 @@ const router = Router();
 /**
  * @route GET /api/lotes-vacunas/stats
  * @desc Obtener estadísticas de lotes de vacunas
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  */
 router.get('/stats', LoteVacunaController.getStats);
 
 /**
  * @route GET /api/lotes-vacunas/proximos-vencer
  * @desc Obtener lotes próximos a vencer
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {number} [dias=30] - Número de días para considerar próximo a vencer
  */
 router.get('/proximos-vencer', LoteVacunaController.getProximosAVencer);
@@ -25,7 +25,7 @@ router.get('/proximos-vencer', LoteVacunaController.getProximosAVencer);
 /**
  * @route GET /api/lotes-vacunas/vacuna/:vacunaId
  * @desc Obtener lotes por vacuna específica
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} vacunaId - ID de la vacuna
  */
 router.get('/vacuna/:vacunaId', LoteVacunaController.getByVacuna);
@@ -33,7 +33,7 @@ router.get('/vacuna/:vacunaId', LoteVacunaController.getByVacuna);
 /**
  * @route GET /api/lotes-vacunas
  * @desc Obtener todos los lotes de vacunas con filtros opcionales
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @query {string} [estado] - Estado del lote (disponible, vencido, agotado, todos)
  * @query {string} [search] - Búsqueda por número de lote o comprobante
  * @query {string} [vacunaId] - Filtro por vacuna específica
@@ -46,7 +46,7 @@ router.get('/', LoteVacunaController.getAll);
 /**
  * @route GET /api/lotes-vacunas/:id
  * @desc Obtener lote de vacuna por ID
- * @access Public (TODO: Proteger con autenticación)
+ * @access Privado (requiere autenticación)
  * @param {string} id - ID del lote de vacuna
  */
 router.get('/:id', LoteVacunaController.getById);
@@ -54,7 +54,7 @@ router.get('/:id', LoteVacunaController.getById);
 /**
  * @route POST /api/lotes-vacunas
  * @desc Crear nuevo lote de vacuna
- * @access Public (TODO: Proteger con autenticación y permisos)
+ * @access Privado (requiere autenticación + permisos)
  * @body {CreateLoteVacunaDto} data - Datos del lote de vacuna
  */
 router.post('/', LoteVacunaController.create);
@@ -71,7 +71,7 @@ router.put('/:id', authenticate, LoteVacunaController.update);
 /**
  * @route DELETE /api/lotes-vacunas/:id
  * @desc Eliminar lote de vacuna
- * @access Public (TODO: Proteger con autenticación y permisos)
+ * @access Privado (requiere autenticación + permisos)
  * @param {string} id - ID del lote de vacuna
  */
 router.delete('/:id', LoteVacunaController.delete);

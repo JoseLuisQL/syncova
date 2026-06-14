@@ -86,11 +86,6 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
       : options;
   }, [formData.rol, roles]);
 
-  const _selectedCentros = useMemo(
-    () => centrosActivos.filter((centro) => formData.centroAcopioIds.includes(centro.id)),
-    [centrosActivos, formData.centroAcopioIds],
-  );
-
   const handleChange = (field: keyof UsuarioFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {

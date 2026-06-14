@@ -195,14 +195,27 @@ setupInterceptors(apiClientLongTimeout);
 /**
  * Tipos para respuestas estándar del backend
  */
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
+/**
+ * Envoltura genérica de respuesta del backend SIVAC.
+ *
+ * Unión discriminada por `success`: tras comprobar `response.success === true`
+ * TypeScript estrecha el tipo y garantiza que `data` está presente.
+ */
+export type ApiResponse<T = unknown> =
+  | {
+      success: true;
+      data: T;
+      message?: string;
+      error?: string;
+    }
+  | {
+      success: false;
+      error?: string;
+      message?: string;
+      data?: undefined;
+    };
 
-export interface PaginatedResponse<T = any> {
+export interface PaginatedResponse<T = unknown> {
   success: boolean;
   message: string;
   data: T[];
@@ -224,6 +237,7 @@ export interface QueryParams {
   page?: number;
   limit?: number;
   search?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 

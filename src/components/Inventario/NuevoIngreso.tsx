@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { CaretRight, Package, Syringe, MagicWand } from '@phosphor-icons/react';
+import { CaretRight, Package, Syringe, MagicWand, Icon } from '@phosphor-icons/react';
 import { Jeringa, Vacuna } from '../../types';
 import { COMPONENT_STYLES, FILTER_OPTIONS } from './constants';
 import {
@@ -403,7 +403,7 @@ interface TipoCardProps {
   title: string;
   description: string;
   selected: boolean;
-  icon: React.ComponentType<{ className?: string; weight?: string }>;
+  icon: Icon;
   onClick: () => void;
 }
 

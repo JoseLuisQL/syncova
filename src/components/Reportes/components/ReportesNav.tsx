@@ -1,11 +1,11 @@
 import React from 'react';
 import { REPORTS_SECTIONS, COMPONENT_STYLES } from '../constants';
-import { IconProps } from '@phosphor-icons/react';
+import { Icon } from '@phosphor-icons/react';
 
 interface SectionItem {
   id: string;
   label: string;
-  icon: IconProps;
+  icon: Icon;
   path: string;
   description: string;
 }

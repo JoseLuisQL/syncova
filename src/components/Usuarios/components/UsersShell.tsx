@@ -30,7 +30,7 @@ const UsersShell: React.FC<UsersShellProps> = ({ activeSection, children }) => {
                       : 'border-transparent text-[#747986] hover:text-[#15171d]'
                   }`}
                   aria-current={isActive ? 'page' : undefined}
-                  title={section.contextLabel || section.label}
+                  title={section.label}
                 >
                   {section.label}
                 </button>

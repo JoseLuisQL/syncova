@@ -24,6 +24,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     estado: 'activo',
     ultimoAcceso: new Date(),
     createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   });
   
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

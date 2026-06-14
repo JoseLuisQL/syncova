@@ -1,5 +1,5 @@
 import React from 'react';
-import { Warning, IconProps } from '@phosphor-icons/react';
+import { Warning, Icon } from '@phosphor-icons/react';
 import { Modal, ModalFooter } from '../../ui/ModalElements';
 
 interface ActionConfirmationDialogProps {
@@ -11,7 +11,7 @@ interface ActionConfirmationDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   isLoading?: boolean;
-  icon?: IconProps;
+  icon?: Icon;
 }
 
 const ActionConfirmationDialog: React.FC<ActionConfirmationDialogProps> = ({

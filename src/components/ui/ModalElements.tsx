@@ -153,6 +153,7 @@ interface ModalFooterProps {
   isLoading?: boolean;
   isSubmitDisabled?: boolean;
   submitType?: 'button' | 'submit';
+  submitClassName?: string;
 }
 
 export const ModalFooter: React.FC<ModalFooterProps> = memo(({
@@ -163,12 +164,13 @@ export const ModalFooter: React.FC<ModalFooterProps> = memo(({
   isLoading = false,
   isSubmitDisabled = false,
   submitType = 'submit',
+  submitClassName,
 }) => (
   <div className="flex w-full flex-col gap-2 sm:flex-row-reverse sm:gap-2">
     <button
       type={submitType}
       onClick={submitType === 'button' ? onSubmit : undefined}
-      className={`${MODAL_STYLES.button.primary} sm:w-auto w-full`}
+      className={submitClassName ?? `${MODAL_STYLES.button.primary} sm:w-auto w-full`}
       disabled={isLoading || isSubmitDisabled}
       aria-busy={isLoading}
     >
@@ -329,7 +331,7 @@ interface SelectInputProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: SelectOption[];
+  options: readonly SelectOption[];
   placeholder?: string;
   required?: boolean;
   error?: string;
@@ -375,7 +377,7 @@ interface MultiSelectInputProps {
   label: string;
   values: string[];
   onChange: (values: string[]) => void;
-  options: SelectOption[];
+  options: readonly SelectOption[];
   placeholder?: string;
   required?: boolean;
   error?: string;
@@ -667,7 +669,10 @@ interface DeleteConfirmModalProps {
   onClose: () => void;
   onConfirm: () => void;
   itemName: string;
-  itemType: string;
+  itemType?: string;
+  title?: string;
+  description?: string;
+  confirmLabel?: string;
   isLoading?: boolean;
   warningMessage?: string;
 }

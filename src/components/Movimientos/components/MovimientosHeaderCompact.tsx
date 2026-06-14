@@ -16,28 +16,11 @@ import {
   UploadSimple,
 } from '@phosphor-icons/react';
 import { MESES, COMPONENT_STYLES } from '../constants';
-import { Vacuna, CentroAcopio } from '../../../types';
+import { Vacuna } from '../../../types';
 import { EntregasProgressBadge } from './EntregasProgressBadge';
 import { ProgresoValesResponse } from '../../../services/movimientosService';
 
-interface StockInfo {
-  stockInicialHistorico: number | null;
-  stockInicialOriginal: number | null;
-  ingresosLotesDelMes: number;
-  fechaCapturaStockInicial: Date | null;
-  stockActual: number;
-  totalEntregas: number;
-  stockDisponible: number;
-  estado: 'bueno' | 'medio' | 'critico';
-  tieneHistorialInicial: boolean;
-  lotes: Array<{
-    id: string;
-    numero: string;
-    cantidadActual: number;
-    fechaVencimiento: Date;
-    estado: string;
-  }>;
-}
+import type { StockInfo, CentroAcopioFilterOption } from '../types';
 
 interface MovimientosHeaderCompactProps {
   isReadOnly?: boolean;
@@ -53,7 +36,7 @@ interface MovimientosHeaderCompactProps {
   selectedVacuna: string;
   selectedMes: number;
   selectedAnio: number;
-  centrosAcopio: CentroAcopio[];
+  centrosAcopio: CentroAcopioFilterOption[];
   vacunasActivas: Vacuna[];
   aniosDisponibles: number[];
   isLoadingEstablecimientos: boolean;
@@ -304,7 +287,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                     </div>
                     <div className="rounded-[10px] border border-[#e7e7ef] bg-white px-3 py-2">
                       <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-[#8b8f9b]">Nuevos ingresos</p>
-                      <p className="mt-1 text-sm font-semibold text-[#15171d]">{stockInfo.ingresosLotesDelMes.toLocaleString()}</p>
+                      <p className="mt-1 text-sm font-semibold text-[#15171d]">{(stockInfo.ingresosLotesDelMes ?? 0).toLocaleString()}</p>
                     </div>
                   </div>
                   {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial ? (

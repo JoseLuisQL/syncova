@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
+import { MultiplicadoresService } from '../services/multiplicadoresService';
 import {
-  MultiplicadoresService,
   MultiplicadorJeringa,
   CreateMultiplicadorDto,
   UpdateMultiplicadorDto,
@@ -8,7 +8,7 @@ import {
   ConfiguracionMultiplicadores,
   CalculoJeringas,
   Jeringa
-} from '../services/multiplicadoresService';
+} from '../types/multiplicadores';
 import { useApi } from './useApi';
 import { logger } from '../utils/debug';
 

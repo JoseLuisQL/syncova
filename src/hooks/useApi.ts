@@ -123,10 +123,10 @@ export function useApi<T = any>() {
 /**
  * Hook específico para operaciones CRUD
  */
-export function useCrudApi<T = any>() {
+export function useCrudApi<T = any, D = void>() {
   const createApi = useApi<T>();
   const updateApi = useApi<T>();
-  const deleteApi = useApi<void>();
+  const deleteApi = useApi<D>();
   const fetchApi = useApi<T>();
   const getByIdApi = useApi<T>();
 

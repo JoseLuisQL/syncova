@@ -38,7 +38,7 @@ export const useUsuarios = () => {
     total: number;
     pagination: any;
   }>();
-  const crudApi = useCrudApi<Usuario>();
+  const crudApi = useCrudApi<Usuario, boolean>();
   const activosApi = useApi<Usuario[]>();
   const statsApi = useApi<any>();
   const passwordApi = useApi<void>();

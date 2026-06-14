@@ -44,30 +44,7 @@ import { AjusteEntregasService } from '../../services/ajusteEntregasService';
 import IciDemidService from '../../services/iciDemidService';
 import { PermisoOperativoService, MisPermisos } from '../../services/permisoOperativoService';
 
-interface StockInfo {
-  stockInicialHistorico: number | null;
-  stockInicialOriginal: number | null;
-  ingresosLotesDelMes: number;
-  fechaCapturaStockInicial: Date | null;
-  stockActual: number;
-  totalEntregas: number;
-  stockDisponible: number;
-  estado: 'bueno' | 'medio' | 'critico';
-  tieneHistorialInicial: boolean;
-  lotes: Array<{
-    id: string;
-    numero: string;
-    cantidadActual: number;
-    fechaVencimiento: Date;
-    estado: string;
-  }>;
-}
-
-interface CentroAcopioFilterOption {
-  id: string;
-  nombre: string;
-  codigo?: string;
-}
+import type { StockInfo, CentroAcopioFilterOption } from './types';
 
 const MOVIMIENTOS_VISIBLE_COLUMNS_STORAGE_KEY = 'sivac_movimientos_visible_columns';
 
@@ -1485,10 +1462,12 @@ const Movimientos: React.FC = () => {
         errorMessage.includes('no tiene planificación') ||
         errorMessage.includes('SIN_PLANIFICACION_DISPONIBLE')) {
 
+        const movimientoAsociadoSafe = movimientoPorEntregaId.get(entregaId);
+
         let disponibilidadRestante = 0;
         try {
           const disp = await PlanificacionService.verificarDisponibilidadEntregas(
-            movimientoAsociado!.establecimientoId,
+            movimientoAsociadoSafe!.establecimientoId,
             selectedVacuna!,
             selectedMes,
             selectedAnio
@@ -1498,7 +1477,6 @@ const Movimientos: React.FC = () => {
           // Ignorar si falla
         }
 
-        const movimientoAsociadoSafe = movimientoPorEntregaId.get(entregaId);
         const establecimiento = movimientoAsociadoSafe
           ? establecimientosFiltradosMap.get(movimientoAsociadoSafe.establecimientoId)
           : undefined;

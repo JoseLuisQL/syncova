@@ -6,7 +6,7 @@ import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
 import { useMicroredes } from '../../hooks/useMicroredes';
 import { useRedes } from '../../hooks/useRedes';
 import { sanitizeInput, validateCentroAcopio } from '../../utils/validation';
-import { ColorScheme, COMPONENT_STYLES, STATS_CONFIG } from '../Establecimientos/constants';
+import { COMPONENT_STYLES } from '../Establecimientos/constants';
 import {
   ActionButtons,
   CountBadge,
@@ -132,28 +132,6 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
 
     return () => window.clearTimeout(timeoutId);
   }, [filterEstado, filterMicroredId, filterRedId, searchTerm, setFilters]);
-
-  const _stats = useMemo(
-    () => [
-      { ...STATS_CONFIG.centrosAcopio[0], value: total, color: STATS_CONFIG.centrosAcopio[0].color as ColorScheme },
-      {
-        ...STATS_CONFIG.centrosAcopio[1],
-        value: centrosAcopio.filter((centro) => centro.estado === 'activo').length,
-        color: STATS_CONFIG.centrosAcopio[1].color as ColorScheme,
-      },
-      {
-        ...STATS_CONFIG.centrosAcopio[2],
-        value: centrosAcopio.filter((centro) => (centro._count?.establecimientos || 0) > 0).length,
-        color: STATS_CONFIG.centrosAcopio[2].color as ColorScheme,
-      },
-      {
-        ...STATS_CONFIG.centrosAcopio[3],
-        value: centrosAcopio.filter((centro) => centro.estado === 'inactivo').length,
-        color: STATS_CONFIG.centrosAcopio[3].color as ColorScheme,
-      },
-    ],
-    [centrosAcopio, total],
-  );
 
   const redesOptions = useMemo(
     () => [{ value: '', label: 'Todas las redes' }, ...redes.map((red) => ({ value: red.id, label: red.nombre }))],

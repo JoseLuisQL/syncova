@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '../config/api';
-import { ConfiguracionExportacion } from '../types/reportes';
+import { ConfiguracionExportacion, EstadisticasReportes } from '../types/reportes';
 
 /**
  * Interfaces para filtros de reportes
@@ -177,14 +177,7 @@ export interface KardexDetalladoItem {
   usuario: string;
 }
 
-export interface EstadisticasReportes {
-  totalVacunas: number;
-  totalStock: number;
-  vacunasCriticas: number;
-  lotesProximosVencer: number;
-  movimientosUltimoMes: number;
-  ultimaActualizacion: Date;
-}
+// EstadisticasReportes se importa desde ../types/reportes (fuente única de verdad).
 
 /**
  * Interfaces para resultados de reportes de movimientos

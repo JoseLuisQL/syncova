@@ -4,6 +4,7 @@ import { config } from '@/config/env';
 import { ResponseUtil } from '@/utils/response';
 import { AuthenticatedRequest, RolUsuario } from '@/types';
 import { prisma } from '@/config/database';
+import { logger } from '@/utils/logger';
 
 /**
  * Interface para el payload del JWT
@@ -154,7 +155,7 @@ export const authenticate = async (
 
     next();
   } catch (error) {
-    console.error('Error en middleware de autenticación:', error);
+    logger.error('Error en middleware de autenticación', error);
     ResponseUtil.internalError(res, 'Error interno de autenticación');
   }
 };
@@ -268,68 +269,9 @@ export const optionalAuth = async (
 
     next();
   } catch (error) {
-    console.error('Error en middleware de autenticación opcional:', error);
+    logger.error('Error en middleware de autenticación opcional', error);
     next();
   }
-};
-
-/**
- * Middleware para verificar permisos específicos basados en el contexto
- */
-export const checkPermissions = (permission: string) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-    if (!req.user) {
-      ResponseUtil.unauthorized(res, 'Usuario no autenticado');
-      return;
-    }
-
-    const { rol } = req.user;
-
-    // Definir permisos por rol
-    const permissions: Record<RolUsuario, string[]> = {
-      administrador: ['*'], // Acceso total
-      coordinador: [
-        'read:establecimientos',
-        'read:vacunas',
-        'read:usuarios',
-        'read:planificacion',
-        'read:movimientos',
-        'read:reportes',
-        'read:alertas',
-        'write:planificacion',
-        'write:alertas',
-      ],
-      responsable_acopio: [
-        'read:establecimientos',
-        'read:vacunas',
-        'read:planificacion',
-        'read:movimientos',
-        'write:movimientos',
-        'write:entregas',
-        'read:kardex',
-        'write:kardex',
-        'read:vales',
-        'write:vales',
-      ],
-      operador: [
-        'read:establecimientos',
-        'read:vacunas',
-        'read:planificacion',
-        'read:movimientos',
-        'read:kardex',
-      ],
-    };
-
-    const userPermissions = permissions[rol] || [];
-
-    // Verificar si tiene el permiso específico o acceso total
-    if (!userPermissions.includes('*') && !userPermissions.includes(permission)) {
-      ResponseUtil.forbidden(res, `No tiene permisos para: ${permission}`);
-      return;
-    }
-
-    next();
-  };
 };
 
 // Alias para compatibilidad con rutas existentes
@@ -341,5 +283,4 @@ export default {
   authorize,
   checkEstablecimiento,
   optionalAuth,
-  checkPermissions,
 };

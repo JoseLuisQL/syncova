@@ -1,4 +1,4 @@
-import { ApiResponse } from '../types/api';
+import { ApiResponse } from '../types';
 import { apiClient, apiClientLongTimeout } from '../config/api';
 
 /**
@@ -548,7 +548,7 @@ export class ValesService {
    */
   static async verificarYSincronizarAutomaticamente(
     establecimientoId: string,
-    vacunaId: string,
+    _vacunaId: string,
     mes: number,
     anio: number
   ): Promise<ApiResponse<{ valesSincronizados: number; modificaciones: number }>> {

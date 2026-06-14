@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Archive } from '@phosphor-icons/react';
-import { Vacuna, Establecimiento } from '../../../types';
+import { Vacuna } from '../../../types';
+import { CentroAcopioOption } from '../../../types/reportes';
 import { FiltrosKardexDetallado } from '../../../types/reportes';
 import { KardexService } from '../../../services/KardexService';
 import {
@@ -17,7 +18,7 @@ interface KardexDetalladoModalProps {
   onClose: () => void;
   onExportar: (filtros: FiltrosKardexDetallado) => Promise<void> | void;
   vacunas: Vacuna[];
-  centrosAcopio: Establecimiento[];
+  centrosAcopio: CentroAcopioOption[];
 }
 
 const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
@@ -42,7 +43,7 @@ const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
       setLoadingJeringas(true);
       try {
         const jeringasData = await KardexService.getJeringas();
-        setJeringas(jeringasData);
+        setJeringas(jeringasData.map((j) => ({ id: j.id, nombre: `${j.tipo} ${j.capacidad}`.trim() })));
       } catch (error) {
         console.error('Error al cargar jeringas:', error);
         setJeringas([]);

@@ -99,7 +99,6 @@ export class ConfiguracionJeringasService {
       console.error('❌ [ConfiguracionJeringasService] Error al calcular jeringas:', error);
       return {
         success: false,
-        data: [],
         error: error.response?.data?.error || 'Error al obtener configuración de jeringas'
       };
     }
@@ -196,7 +195,6 @@ export class ConfiguracionJeringasService {
     } catch (error: any) {
       return {
         success: false,
-        data: {},
         error: error.message || 'Error al obtener configuraciones consolidadas'
       };
     }

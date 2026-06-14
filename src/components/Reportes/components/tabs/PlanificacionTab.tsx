@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { DownloadSimple, Eye, Target } from '@phosphor-icons/react';
-import { Establecimiento, Vacuna } from '../../../../types';
+import { Vacuna } from '../../../../types';
+import { CentroAcopioOption } from '../../../../types/reportes';
 import { usePlanificacionReportes } from '../../../../hooks/usePlanificacionReportes';
 import { useToastContext } from '../../../../contexts/ToastContext';
 import { ProgramacionAnualData } from '../../../../services/planificacionReportesService';
@@ -11,7 +12,7 @@ import VisualizarReporteModal from '../../modals/VisualizarReporteModal';
 import { formatCompactDate } from '../../utils';
 
 interface PlanificacionTabProps {
-  centrosAcopio: Establecimiento[];
+  centrosAcopio: CentroAcopioOption[];
   vacunas: Vacuna[];
 }
 
