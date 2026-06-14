@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { logger } from '@/utils/logger';
 
 // Configuración global de Prisma
 const globalForPrisma = globalThis as unknown as {
@@ -20,9 +21,9 @@ if (process.env['NODE_ENV'] !== 'production') {
 export const connectDatabase = async (): Promise<void> => {
   try {
     await prisma.$connect();
-    console.log('✅ Conexión a PostgreSQL establecida correctamente');
+    logger.info('Conexión a PostgreSQL establecida correctamente');
   } catch (error) {
-    console.error('❌ Error al conectar con PostgreSQL:', error);
+    logger.error('Error al conectar con PostgreSQL', error);
     process.exit(1);
   }
 };
@@ -31,9 +32,9 @@ export const connectDatabase = async (): Promise<void> => {
 export const disconnectDatabase = async (): Promise<void> => {
   try {
     await prisma.$disconnect();
-    console.log('✅ Desconexión de PostgreSQL exitosa');
+    logger.info('Desconexión de PostgreSQL exitosa');
   } catch (error) {
-    console.error('❌ Error al desconectar de PostgreSQL:', error);
+    logger.error('Error al desconectar de PostgreSQL', error);
   }
 };
 
@@ -43,7 +44,7 @@ export const checkDatabaseHealth = async (): Promise<boolean> => {
     await prisma.$queryRaw`SELECT 1`;
     return true;
   } catch (error) {
-    console.error('❌ Error en verificación de salud de la base de datos:', error);
+    logger.error('Error en verificación de salud de la base de datos', error);
     return false;
   }
 };

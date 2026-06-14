@@ -6,6 +6,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { createHash } from 'crypto';
 import { config } from '@/config/env';
+import { logger } from '@/utils/logger';
 import { errorHandler, notFoundHandler } from './errorHandler';
 import { sanitizeInput } from './validation';
 
@@ -25,7 +26,7 @@ const getGlobalRateLimitKey = (req: express.Request): string => {
 
 const createRateLimitHandler = (limiterName: string, message: string, retryAfter: number) => {
   return (req: express.Request, res: express.Response): void => {
-    console.warn(`[RateLimit:${limiterName}] ${req.method} ${req.originalUrl}`, {
+    logger.warn(`[RateLimit:${limiterName}] ${req.method} ${req.originalUrl}`, {
       ip: req.ip,
       forwardedFor: req.headers['x-forwarded-for'],
       realIp: req.headers['x-real-ip'],
@@ -190,7 +191,7 @@ export const requestLogger = (req: express.Request, res: express.Response, next:
   if (config.env === 'development') {
     // No se registra req.body para evitar filtrar datos sensibles (contraseñas,
     // tokens, PII) en los logs. Solo método, ruta y metadatos no sensibles.
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`, {
+    logger.debug(`${req.method} ${req.path}`, {
       params: req.params,
       hasBody: req.body && Object.keys(req.body).length > 0,
     });
@@ -209,7 +210,7 @@ export const responseTime = (req: express.Request, res: express.Response, next: 
     res.setHeader('X-Response-Time', `${duration}ms`);
     
     if (config.env === 'development') {
-      console.log(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
+      logger.debug(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
     }
   });
 

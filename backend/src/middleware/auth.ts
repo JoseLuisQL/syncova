@@ -4,6 +4,7 @@ import { config } from '@/config/env';
 import { ResponseUtil } from '@/utils/response';
 import { AuthenticatedRequest, RolUsuario } from '@/types';
 import { prisma } from '@/config/database';
+import { logger } from '@/utils/logger';
 
 /**
  * Interface para el payload del JWT
@@ -154,7 +155,7 @@ export const authenticate = async (
 
     next();
   } catch (error) {
-    console.error('Error en middleware de autenticación:', error);
+    logger.error('Error en middleware de autenticación', error);
     ResponseUtil.internalError(res, 'Error interno de autenticación');
   }
 };
@@ -268,7 +269,7 @@ export const optionalAuth = async (
 
     next();
   } catch (error) {
-    console.error('Error en middleware de autenticación opcional:', error);
+    logger.error('Error en middleware de autenticación opcional', error);
     next();
   }
 };
