@@ -13,28 +13,8 @@ import {
   MovimientoDetalleModal,
 } from './components';
 
-interface KardexMovimiento {
-  id: string;
-  tipo: 'vacuna' | 'jeringa';
-  itemId: string;
-  loteId: string;
-  tipoMovimiento: string;
-  cantidad: number;
-  saldoAnterior: number;
-  saldoActual: number;
-  fechaMovimiento: string | Date;
-  documento: string;
-  numeroDocumento: string;
-  observaciones?: string;
-  establecimientoOrigenId?: string;
-  establecimientoDestinoId?: string;
-  usuarioId: string;
-  item?: { nombre: string; tipo?: string };
-  lote?: { numero: string; fechaVencimiento?: string | Date | null };
-  usuario?: { nombres: string; apellidos: string; email?: string };
-  establecimientoOrigen?: { nombre: string };
-  establecimientoDestino?: { nombre: string };
-}
+import type { KardexMovimientoUI } from './types';
+type KardexMovimiento = KardexMovimientoUI;
 
 interface KardexUiFilters {
   selectedTipo: 'vacuna' | 'jeringa' | 'todos';
@@ -72,11 +52,13 @@ const toUiFilters = (filtros: KardexFilters): KardexUiFilters => ({
   establecimientoDestinoId: filtros.establecimientoDestinoId || '',
 });
 
-const buildRequestFilters = (uiFilters: KardexUiFilters, limit: number) => ({
+const buildRequestFilters = (uiFilters: KardexUiFilters, limit: number): KardexFilters => ({
   tipo: uiFilters.selectedTipo !== 'todos' ? uiFilters.selectedTipo : undefined,
   itemId: uiFilters.selectedItem || undefined,
   loteId: uiFilters.selectedLote || undefined,
-  tipoMovimiento: uiFilters.tipoMovimiento !== 'todos' ? uiFilters.tipoMovimiento : undefined,
+  tipoMovimiento: uiFilters.tipoMovimiento !== 'todos'
+    ? (uiFilters.tipoMovimiento as KardexFilters['tipoMovimiento'])
+    : undefined,
   fechaInicio: uiFilters.fechaInicio || undefined,
   fechaFin: uiFilters.fechaFin || undefined,
   search: uiFilters.searchTerm.trim() || undefined,

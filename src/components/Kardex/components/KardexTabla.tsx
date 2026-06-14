@@ -13,26 +13,8 @@ import {
 import { Establecimiento, Jeringa, Vacuna } from '../../../types';
 import { COMPONENT_STYLES, getMovimientoConfig } from '../constants';
 
-interface KardexMovimiento {
-  id: string;
-  tipo: 'vacuna' | 'jeringa';
-  itemId: string;
-  loteId: string;
-  tipoMovimiento: string;
-  cantidad: number;
-  saldoAnterior: number;
-  saldoActual: number;
-  fechaMovimiento: string | Date;
-  documento: string;
-  numeroDocumento: string;
-  observaciones?: string;
-  establecimientoOrigenId?: string;
-  establecimientoDestinoId?: string;
-  item?: { nombre: string; tipo?: string };
-  lote?: { numero: string; fechaVencimiento?: string | Date | null };
-  establecimientoOrigen?: { nombre: string };
-  establecimientoDestino?: { nombre: string };
-}
+import type { KardexMovimientoUI } from '../types';
+type KardexMovimiento = KardexMovimientoUI;
 
 interface KardexTablaProps {
   movimientos: KardexMovimiento[];
