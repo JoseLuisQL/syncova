@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Filter,
+  Funnel,
   ChartBar
 } from '@phosphor-icons/react';
 import { Establecimiento, Vacuna } from '../../types';
@@ -46,7 +46,7 @@ const ProgramacionSeguimientoAnualTab: React.FC<ProgramacionSeguimientoAnualTabP
       {/* Filters Premium */}
       <div className="rounded-xl border border-teal-200 bg-teal-50/60 p-6 shadow-sm">
         <h3 className="mb-4 flex items-center text-lg font-semibold text-zinc-900">
-          <Filter className="mr-2 h-5 w-5 text-teal-600" />
+          <Funnel className="mr-2 h-5 w-5 text-teal-600" />
           Filtros de Programación
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

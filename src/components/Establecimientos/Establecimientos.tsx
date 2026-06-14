@@ -20,7 +20,7 @@ import {
   SelectInput,
   TextInput,
 } from './components';
-import { ColorScheme, COMPONENT_STYLES, STATS_CONFIG, TIPO_ESTABLECIMIENTO_CONFIG } from './constants';
+import { COMPONENT_STYLES, TIPO_ESTABLECIMIENTO_CONFIG } from './constants';
 import { sanitizeInput } from '../../utils/validation';
 
 interface EstablecimientosProps {
@@ -116,32 +116,6 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
 
     return () => window.clearTimeout(timeoutId);
   }, [applyFilters, contextFilters, filterEstado, filterTipo, searchTerm]);
-
-  const _stats = useMemo(
-    () => [
-      {
-        ...STATS_CONFIG.establecimientos[0],
-        value: establecimientos.filter((establecimiento) => establecimiento.tipo === 'centro_salud').length,
-        color: STATS_CONFIG.establecimientos[0].color as ColorScheme,
-      },
-      {
-        ...STATS_CONFIG.establecimientos[1],
-        value: establecimientos.filter((establecimiento) => establecimiento.tipo === 'puesto_salud').length,
-        color: STATS_CONFIG.establecimientos[1].color as ColorScheme,
-      },
-      {
-        ...STATS_CONFIG.establecimientos[2],
-        value: establecimientos.filter((establecimiento) => establecimiento.tipo === 'hospital').length,
-        color: STATS_CONFIG.establecimientos[2].color as ColorScheme,
-      },
-      {
-        ...STATS_CONFIG.establecimientos[3],
-        value: establecimientos.filter((establecimiento) => establecimiento.estado === 'activo').length,
-        color: STATS_CONFIG.establecimientos[3].color as ColorScheme,
-      },
-    ],
-    [establecimientos],
-  );
 
   const filtersConfig = useMemo(
     () => [
