@@ -920,6 +920,7 @@ export interface AuthResponse {
   data: {
     user: AuthUser;
     token: string;
+    refreshToken?: string;
     expiresIn: string;
   };
   timestamp: string;

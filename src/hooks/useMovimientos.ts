@@ -75,7 +75,7 @@ export const useMovimientos = () => {
         logger.info(`✅ useMovimientos.loadMovimientos - Movimientos cargados: ${result.movimientos.length} de ${result.total}`);
 
         // Log detallado de establecimientos con movimientos
-        const establecimientosConMovimientos = [...new Set(result.movimientos.map(m => m.establecimiento.nombre))];
+        const establecimientosConMovimientos = [...new Set(result.movimientos.map((m: MovimientoConRelaciones) => m.establecimiento.nombre))];
         logger.debug(`🏥 Establecimientos con movimientos: ${establecimientosConMovimientos.length}`, establecimientosConMovimientos);
 
         setMovimientos(result.movimientos);
@@ -331,7 +331,7 @@ export const useMovimientos = () => {
    */
   const updateEntregaAdicional = useCallback(async (
     id: string,
-    data: Partial<CreateEntregaAdicionalDto>
+    data: { cantidad: number; motivo?: string }
   ): Promise<EntregaAdicional | null> => {
     logger.debug('Actualizando entrega adicional:', { id, data });
 

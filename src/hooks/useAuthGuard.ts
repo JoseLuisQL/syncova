@@ -34,7 +34,7 @@ export const useAuthGuard = (options: UseAuthGuardOptions = {}): UseAuthGuardRes
   } = options;
 
   const { user, isAuthenticated, isLoading } = useAuth();
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   /**
    * Verificar si el usuario tiene un rol específico
@@ -74,10 +74,7 @@ export const useAuthGuard = (options: UseAuthGuardOptions = {}): UseAuthGuardRes
   useEffect(() => {
     if (!isLoading && isAuthenticated && !isAuthorized()) {
       if (showUnauthorizedMessage) {
-        showToast(
-          'No tienes permisos para acceder a esta sección',
-          'error'
-        );
+        toast.error('No tienes permisos para acceder a esta sección');
       }
 
       if (redirectOnUnauthorized) {

@@ -30,7 +30,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logger.error('Error capturado por ErrorBoundary:', error, errorInfo);
+    logger.error('Error capturado por ErrorBoundary:', { error, errorInfo });
     
     this.setState({
       error,
@@ -145,7 +145,7 @@ class ErrorBoundary extends Component<Props, State> {
 // Hook para usar ErrorBoundary de forma funcional
 export const useErrorHandler = () => {
   return (error: Error, errorInfo?: ErrorInfo) => {
-    logger.error('Error manejado por useErrorHandler:', error, errorInfo);
+    logger.error('Error manejado por useErrorHandler:', { error, errorInfo });
     // Aquí podrías enviar el error a un servicio de monitoreo
   };
 };
