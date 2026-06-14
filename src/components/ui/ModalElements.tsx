@@ -153,6 +153,7 @@ interface ModalFooterProps {
   isLoading?: boolean;
   isSubmitDisabled?: boolean;
   submitType?: 'button' | 'submit';
+  submitClassName?: string;
 }
 
 export const ModalFooter: React.FC<ModalFooterProps> = memo(({
@@ -163,12 +164,13 @@ export const ModalFooter: React.FC<ModalFooterProps> = memo(({
   isLoading = false,
   isSubmitDisabled = false,
   submitType = 'submit',
+  submitClassName,
 }) => (
   <div className="flex w-full flex-col gap-2 sm:flex-row-reverse sm:gap-2">
     <button
       type={submitType}
       onClick={submitType === 'button' ? onSubmit : undefined}
-      className={`${MODAL_STYLES.button.primary} sm:w-auto w-full`}
+      className={submitClassName ?? `${MODAL_STYLES.button.primary} sm:w-auto w-full`}
       disabled={isLoading || isSubmitDisabled}
       aria-busy={isLoading}
     >

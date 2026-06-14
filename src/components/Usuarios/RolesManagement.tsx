@@ -525,7 +525,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
         onConfirm={() => void confirmDelete()}
         title="Eliminar rol"
         description="El rol será retirado del sistema y dejará de estar disponible para nuevas asignaciones."
-        itemName={deleteRoleState.role?.nombre}
+        itemName={deleteRoleState.role?.nombre ?? ''}
         confirmLabel="Eliminar rol"
         isLoading={isDeleting}
         warningMessage={

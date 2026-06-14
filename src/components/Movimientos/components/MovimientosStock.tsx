@@ -7,25 +7,7 @@ import {
   CircleNotch
 } from '@phosphor-icons/react';
 import { STOCK_ESTADOS, MESES } from '../constants';
-
-interface StockInfo {
-  stockInicialHistorico: number | null;
-  stockInicialOriginal: number | null;
-  ingresosLotesDelMes: number;
-  fechaCapturaStockInicial: Date | null;
-  stockActual: number;
-  totalEntregas: number;
-  stockDisponible: number;
-  estado: 'bueno' | 'medio' | 'critico';
-  tieneHistorialInicial: boolean;
-  lotes: Array<{
-    id: string;
-    numero: string;
-    cantidadActual: number;
-    fechaVencimiento: Date;
-    estado: string;
-  }>;
-}
+import type { StockInfo } from '../types';
 
 interface MovimientosStockProps {
   stockInfo: StockInfo | null;
@@ -50,9 +32,13 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
   onRetry,
   onActualizarStockSiguienteMes,
 }) => {
-  const getEstadoConfig = (stockDisponible: number, estado: string) => {
+  const getEstadoConfig = (
+    stockDisponible: number,
+    estado: string,
+  ): { bg: string; border: string; text: string; textLight: string; iconBg: string; icon: React.ElementType } => {
     if (stockDisponible < 0) return STOCK_ESTADOS.deficit;
-    return STOCK_ESTADOS[estado as keyof typeof STOCK_ESTADOS] || STOCK_ESTADOS.bueno;
+    return (STOCK_ESTADOS as Record<string, { bg: string; border: string; text: string; textLight: string; iconBg: string; icon: React.ElementType }>)[estado]
+      || STOCK_ESTADOS.bueno;
   };
 
   return (
@@ -97,14 +83,14 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
                       Fecha: {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString('es-PE')}
                     </div>
                   )}
-                  {stockInfo.tieneHistorialInicial && stockInfo.ingresosLotesDelMes > 0 && (
+                  {stockInfo.tieneHistorialInicial && (stockInfo.ingresosLotesDelMes ?? 0) > 0 && (
                     <div className="mt-3 pt-3 border-t border-zinc-200">
                       <div className="text-[0.7rem] font-semibold text-zinc-600">
                         Base: {stockInfo.stockInicialOriginal?.toLocaleString()}
                       </div>
                       <div className="text-[0.7rem] font-semibold text-zinc-900 mt-0.5 flex items-center gap-1">
                         <span>+ Ingresos:</span>
-                        <span className="bg-zinc-200 px-1 py-0.5 rounded-sm line-clamp-1 truncate">{stockInfo.ingresosLotesDelMes.toLocaleString()}</span>
+                        <span className="bg-zinc-200 px-1 py-0.5 rounded-sm line-clamp-1 truncate">{(stockInfo.ingresosLotesDelMes ?? 0).toLocaleString()}</span>
                       </div>
                     </div>
                   )}

@@ -317,7 +317,7 @@ const IciDemid: React.FC = () => {
             <span className={ESTABLECIMIENTOS_STYLES.badge.neutral}>
               Stock fin total: {totalStockFin.toLocaleString()}
             </span>
-            <span className={ESTABLECIMIENTOS_STYLES.badge.info}>
+            <span className={ESTABLECIMIENTOS_STYLES.badge.neutral}>
               Meses: {mesesDelAnio.map((month) => MESES_CORTOS[month - 1]).join(', ') || 'Sin datos'}
             </span>
           </div>
