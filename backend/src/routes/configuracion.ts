@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { ConfiguracionController } from '@/controllers/ConfiguracionController';
-import { authenticate, authorize, checkPermissions } from '@/middleware/auth';
+import { authenticate, authorize } from '@/middleware/auth';
+import { requirePermissions } from '@/middleware/permissions';
 import { validate, validateParams, validateUUID, sanitizeInput } from '@/middleware/validation';
 import { uploadSingleLogo, handleLogoUploadError } from '@/middleware/uploadLogo';
 import Joi from 'joi';
@@ -118,7 +119,7 @@ router.use(authenticate);
  */
 router.get('/',
   authorize(['administrador']),
-  checkPermissions('read:configuracion'),
+  requirePermissions(['config_general:read']),
   sanitizeInput,
   ConfiguracionController.getAllConfigurations
 );
@@ -130,7 +131,7 @@ router.get('/',
  */
 router.get('/categoria/:categoria',
   authorize(['administrador', 'coordinador']),
-  checkPermissions('read:configuracion'),
+  requirePermissions(['config_general:read']),
   sanitizeInput,
   validateParams(categoriaParamSchema),
   ConfiguracionController.getByCategory
@@ -143,7 +144,7 @@ router.get('/categoria/:categoria',
  */
 router.get('/:clave',
   authorize(['administrador', 'coordinador']),
-  checkPermissions('read:configuracion'),
+  requirePermissions(['config_general:read']),
   sanitizeInput,
   validateParams(claveParamSchema),
   ConfiguracionController.getByKey
@@ -156,7 +157,7 @@ router.get('/:clave',
  */
 router.post('/',
   authorize(['administrador']),
-  checkPermissions('write:configuracion'),
+  requirePermissions(['config_general:write']),
   sanitizeInput,
   validate(createConfigSchema),
   ConfiguracionController.create
@@ -169,7 +170,7 @@ router.post('/',
  */
 router.post('/logo',
   authorize(['administrador']),
-  checkPermissions('write:configuracion'),
+  requirePermissions(['config_general:write']),
   uploadSingleLogo,
   handleLogoUploadError,
   ConfiguracionController.uploadLogo
@@ -182,7 +183,7 @@ router.post('/logo',
  */
 router.delete('/logo',
   authorize(['administrador']),
-  checkPermissions('delete:configuracion'),
+  requirePermissions(['config_general:write']),
   ConfiguracionController.deleteLogo
 );
 
@@ -193,7 +194,7 @@ router.delete('/logo',
  */
 router.post('/backup/export',
   authorize(['administrador']),
-  checkPermissions('write:configuracion'),
+  requirePermissions(['config_general:write']),
   ConfiguracionController.exportDatabaseBackup
 );
 
@@ -204,7 +205,7 @@ router.post('/backup/export',
  */
 router.put('/bulk',
   authorize(['administrador']),
-  checkPermissions('write:configuracion'),
+  requirePermissions(['config_general:write']),
   sanitizeInput,
   validate(bulkUpdateSchema),
   ConfiguracionController.bulkUpdate
@@ -217,7 +218,7 @@ router.put('/bulk',
  */
 router.put('/:id',
   authorize(['administrador']),
-  checkPermissions('write:configuracion'),
+  requirePermissions(['config_general:write']),
   sanitizeInput,
   validateUUID('id'),
   validate(updateConfigSchema),
@@ -231,7 +232,7 @@ router.put('/:id',
  */
 router.patch('/:clave/valor',
   authorize(['administrador']),
-  checkPermissions('write:configuracion'),
+  requirePermissions(['config_general:write']),
   sanitizeInput,
   validateParams(claveParamSchema),
   validate(updateValueSchema),
@@ -245,7 +246,7 @@ router.patch('/:clave/valor',
  */
 router.delete('/:id',
   authorize(['administrador']),
-  checkPermissions('delete:configuracion'),
+  requirePermissions(['config_general:write']),
   sanitizeInput,
   validateUUID('id'),
   ConfiguracionController.delete

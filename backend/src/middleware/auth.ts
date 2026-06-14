@@ -273,65 +273,6 @@ export const optionalAuth = async (
   }
 };
 
-/**
- * Middleware para verificar permisos específicos basados en el contexto
- */
-export const checkPermissions = (permission: string) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-    if (!req.user) {
-      ResponseUtil.unauthorized(res, 'Usuario no autenticado');
-      return;
-    }
-
-    const { rol } = req.user;
-
-    // Definir permisos por rol
-    const permissions: Record<RolUsuario, string[]> = {
-      administrador: ['*'], // Acceso total
-      coordinador: [
-        'read:establecimientos',
-        'read:vacunas',
-        'read:usuarios',
-        'read:planificacion',
-        'read:movimientos',
-        'read:reportes',
-        'read:alertas',
-        'write:planificacion',
-        'write:alertas',
-      ],
-      responsable_acopio: [
-        'read:establecimientos',
-        'read:vacunas',
-        'read:planificacion',
-        'read:movimientos',
-        'write:movimientos',
-        'write:entregas',
-        'read:kardex',
-        'write:kardex',
-        'read:vales',
-        'write:vales',
-      ],
-      operador: [
-        'read:establecimientos',
-        'read:vacunas',
-        'read:planificacion',
-        'read:movimientos',
-        'read:kardex',
-      ],
-    };
-
-    const userPermissions = permissions[rol] || [];
-
-    // Verificar si tiene el permiso específico o acceso total
-    if (!userPermissions.includes('*') && !userPermissions.includes(permission)) {
-      ResponseUtil.forbidden(res, `No tiene permisos para: ${permission}`);
-      return;
-    }
-
-    next();
-  };
-};
-
 // Alias para compatibilidad con rutas existentes
 export const authenticateToken = authenticate;
 
@@ -341,5 +282,4 @@ export default {
   authorize,
   checkEstablecimiento,
   optionalAuth,
-  checkPermissions,
 };

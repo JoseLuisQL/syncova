@@ -188,10 +188,11 @@ export const healthCheck = (req: express.Request, res: express.Response): void =
  */
 export const requestLogger = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
   if (config.env === 'development') {
+    // No se registra req.body para evitar filtrar datos sensibles (contraseñas,
+    // tokens, PII) en los logs. Solo método, ruta y metadatos no sensibles.
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`, {
-      body: req.body,
-      query: req.query,
       params: req.params,
+      hasBody: req.body && Object.keys(req.body).length > 0,
     });
   }
   next();

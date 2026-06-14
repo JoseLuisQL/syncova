@@ -195,16 +195,20 @@ async function startServer(): Promise<void> {
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-    // Manejo de errores no capturados
+    // Manejo de errores no capturados.
+    // uncaughtException deja el proceso en estado indefinido: registramos y
+    // salimos de forma controlada para que el supervisor (Docker/PM2) reinicie.
     process.on('uncaughtException', (error) => {
       console.error('❌ Excepción no capturada:', error);
-      process.exit(1);
+      gracefulShutdown('uncaughtException');
     });
 
+    // unhandledRejection NO debe tumbar el servidor: una sola promesa rechazada
+    // no manejada no justifica cortar el servicio a todos los usuarios. Solo se
+    // registra para diagnóstico.
     process.on('unhandledRejection', (reason, promise) => {
       console.error('❌ Promesa rechazada no manejada:', reason);
       console.error('En promesa:', promise);
-      process.exit(1);
     });
 
   } catch (error) {
