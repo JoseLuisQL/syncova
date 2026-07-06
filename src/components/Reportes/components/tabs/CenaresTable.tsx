@@ -9,6 +9,7 @@ import {
   ArrowsClockwise,
   FloppyDisk,
   Syringe,
+  ArrowsLeftRight,
 } from '@phosphor-icons/react';
 import { toast } from 'react-hot-toast';
 import { ProgramacionAnualCenaresService } from '../../../../services/programacionAnualCenaresService';
@@ -336,7 +337,12 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
       </div>
 
       <div className="relative">
-        <div className="max-h-[620px] overflow-x-auto overflow-y-auto">
+        {/* Indicador de scroll horizontal para móvil */}
+        <div className="mb-2 flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 md:hidden">
+          <ArrowsLeftRight className="h-3.5 w-3.5" weight="bold" />
+          <span>Desliza horizontalmente para ver todas las columnas</span>
+        </div>
+        <div className="max-h-[620px] overflow-x-auto overflow-y-auto rounded-lg border border-zinc-200 md:border-0">
           <table className="w-full min-w-[1600px] border-collapse">
             <thead className="sticky top-0 z-20">
               <tr className="bg-[#fbfafd] text-[#8b8f9b]">

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { SpinnerGap, FloppyDisk, WarningCircle, Package, Syringe, FileXls, DownloadSimple } from '@phosphor-icons/react';
+import { SpinnerGap, FloppyDisk, WarningCircle, Package, Syringe, FileXls, DownloadSimple, ArrowsLeftRight } from '@phosphor-icons/react';
 import { ProgramacionAnualCenaresService } from '../../services/programacionAnualCenaresService';
 import { ProgramacionSeguimientoAnualExportService } from '../../services/programacionSeguimientoAnualExportService';
 import { toast } from 'react-hot-toast';
@@ -412,7 +412,11 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       </div>
 
       {/* Table Container with Horizontal Scroll */}
-      <div className="overflow-x-auto">
+      <div className="mb-2 flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 md:hidden">
+        <ArrowsLeftRight className="h-3.5 w-3.5" weight="bold" />
+        <span>Desliza horizontalmente para ver todas las columnas</span>
+      </div>
+      <div className="overflow-x-auto rounded-lg border border-zinc-200 md:border-0">
         <table className="w-full min-w-[1400px]">
           <thead className="bg-[#fbfafd]">
             <tr>

@@ -41,10 +41,10 @@ const StockAvailabilitySection: React.FC<StockAvailabilitySectionProps> = ({ dat
           
           return (
             <div key={i} className="flex items-center py-3 text-[13px] font-medium text-primary">
-              <div className="w-1/3 truncate pr-2">{item.vacunaNombre}</div>
+              <div className="w-1/3 min-w-0 truncate pr-2">{item.vacunaNombre}</div>
               <div className="w-1/3 text-center font-mono tabular-nums">{item.stockTotal.toLocaleString()}</div>
-              <div className="flex w-1/3 items-center justify-end gap-3">
-                <div className="h-1.5 w-16 flex-shrink-0 overflow-hidden rounded-full bg-[#eef3f6]">
+              <div className="flex w-1/3 items-center justify-end gap-2 sm:gap-3">
+                <div className="h-1.5 w-12 flex-shrink-0 overflow-hidden rounded-full bg-[#eef3f6] sm:w-16">
                   <div 
                     className="h-full rounded-full bg-[#35bfa8]" 
                     style={{ width: `${pct}%` }} 

@@ -476,7 +476,7 @@ const TabButton: React.FC<TabButtonProps> = ({ label, count, active, onClick }) 
   <button
     type="button"
     onClick={onClick}
-    className={`${COMPONENT_STYLES.nav.tab} ${active ? COMPONENT_STYLES.nav.tabActive : COMPONENT_STYLES.nav.tabInactive} min-w-[150px] justify-between`}
+    className={`${COMPONENT_STYLES.nav.tab} ${active ? COMPONENT_STYLES.nav.tabActive : COMPONENT_STYLES.nav.tabInactive} min-w-[130px] justify-between sm:min-w-[150px]`}
   >
     <span>{label}</span>
     <span className={active ? COMPONENT_STYLES.badge.count : COMPONENT_STYLES.badge.inactive}>{count}</span>

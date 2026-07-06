@@ -23,28 +23,28 @@ const CentrosAcopioSection: React.FC = memo(() => {
         ) : data.length === 0 ? (
           <EmptyState title="Sin centros" description="No hay datos disponibles." icon={<MapPin />} />
         ) : (
-          <table className="w-full min-w-[400px] border-collapse text-left">
+          <table className="w-full min-w-[360px] border-collapse text-left">
             <thead>
               <tr className="bg-[#fbfafd]">
-                <th className="whitespace-nowrap px-5 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Centro logístico</th>
-                <th className="whitespace-nowrap px-5 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Inst.</th>
-                <th className="whitespace-nowrap px-5 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Stock total</th>
-                <th className="whitespace-nowrap px-5 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Estado</th>
+                <th className="whitespace-nowrap px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Centro logístico</th>
+                <th className="whitespace-nowrap px-3 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Inst.</th>
+                <th className="whitespace-nowrap px-3 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Stock total</th>
+                <th className="whitespace-nowrap px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Estado</th>
               </tr>
             </thead>
             <tbody className="bg-white">
               {data.map((centro) => (
                 <tr key={centro.id} className="border-b border-[#eeeef3] transition-colors hover:bg-[#fbfafd]">
-                  <td className="whitespace-nowrap px-5 py-3.5 text-[13px] font-semibold text-[#171b22]">
+                  <td className="whitespace-nowrap px-3 py-3.5 text-[13px] font-semibold text-[#171b22] sm:px-5">
                     {centro.nombre}
                   </td>
-                  <td className="px-5 py-3.5 text-center font-mono text-[13px] font-medium text-secondary">
+                  <td className="px-3 py-3.5 text-center font-mono text-[13px] font-medium text-secondary sm:px-5">
                     {centro.establecimientos}
                   </td>
-                  <td className="px-5 py-3.5 text-right font-mono text-[13px] font-semibold text-primary tabular-nums">
+                  <td className="px-3 py-3.5 text-right font-mono text-[13px] font-semibold text-primary tabular-nums sm:px-5">
                     {centro.stockTotal.toLocaleString()}
                   </td>
-                  <td className="whitespace-nowrap px-5 py-3.5">
+                  <td className="whitespace-nowrap px-3 py-3.5 sm:px-5">
                     <div className="flex items-center gap-1.5">
                       <span className={`h-1.5 w-1.5 ${centro.estado === 'activo' ? 'bg-tertiary' : centro.estado === 'alerta' ? 'bg-secondary' : 'bg-primary'}`} />
                       <span className="text-[12px] font-medium capitalize text-secondary">

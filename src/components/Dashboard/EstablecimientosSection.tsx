@@ -23,28 +23,28 @@ const EstablecimientosSection: React.FC = memo(() => {
         ) : data.length === 0 ? (
           <EmptyState title="Sin establecimientos" description="No hay datos disponibles." icon={<Hospital />} />
         ) : (
-          <table className="w-full min-w-[400px] border-collapse text-left">
+          <table className="w-full min-w-[360px] border-collapse text-left">
             <thead>
               <tr className="bg-[#fbfafd]">
-                <th className="whitespace-nowrap px-5 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Establecimiento</th>
-                <th className="whitespace-nowrap px-5 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Código</th>
-                <th className="whitespace-nowrap px-5 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Tipo</th>
-                <th className="whitespace-nowrap px-5 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Estado</th>
+                <th className="whitespace-nowrap px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Establecimiento</th>
+                <th className="whitespace-nowrap px-3 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Código</th>
+                <th className="whitespace-nowrap px-3 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Tipo</th>
+                <th className="whitespace-nowrap px-3 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Estado</th>
               </tr>
             </thead>
             <tbody className="bg-white">
               {data.map((est) => (
                 <tr key={est.id} className="border-b border-[#eeeef3] transition-colors hover:bg-[#fbfafd]">
-                  <td className="whitespace-nowrap px-5 py-3.5 text-[13px] font-semibold text-[#171b22]">
+                  <td className="whitespace-nowrap px-3 py-3.5 text-[13px] font-semibold text-[#171b22] sm:px-5">
                     {est.nombre}
                   </td>
-                  <td className="px-5 py-3.5 text-center font-mono text-[13px] font-medium text-secondary">
+                  <td className="px-3 py-3.5 text-center font-mono text-[13px] font-medium text-secondary sm:px-5">
                     {est.codigo}
                   </td>
-                  <td className="px-5 py-3.5 text-right text-[13px] font-medium capitalize text-secondary">
+                  <td className="px-3 py-3.5 text-right text-[13px] font-medium capitalize text-secondary sm:px-5">
                     {est.tipo.replace('_', ' ')}
                   </td>
-                  <td className="whitespace-nowrap px-5 py-3.5 text-right">
+                  <td className="whitespace-nowrap px-3 py-3.5 text-right sm:px-5">
                     <div className="flex items-center justify-end gap-1.5">
                       <span className={`h-1.5 w-1.5 ${est.estado === 'activo' ? 'bg-tertiary' : 'bg-secondary'}`} />
                       <span className="text-[12px] font-medium capitalize text-secondary">
