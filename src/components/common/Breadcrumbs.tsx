@@ -21,17 +21,22 @@ const Breadcrumbs: React.FC = memo(() => {
         <House className={BREADCRUMBS_STYLES.homeIcon} weight="duotone" />
       </button>
 
-      {breadcrumbs.map((crumb) => (
-        <React.Fragment key={crumb.path}>
-          <CaretRight className={BREADCRUMBS_STYLES.separator} weight="bold" aria-hidden="true" />
-          <span
-            className={crumb.isLast ? BREADCRUMBS_STYLES.itemLast : BREADCRUMBS_STYLES.item}
-            aria-current={crumb.isLast ? 'page' : undefined}
-          >
-            {crumb.label}
-          </span>
-        </React.Fragment>
-      ))}
+      {breadcrumbs.map((crumb, idx) => {
+        // En móvil, ocultar breadcrumbs intermedios: mostrar solo el último
+        // para evitar que el header se comprima. En sm+ se ven todos.
+        const isIntermediate = idx < breadcrumbs.length - 1;
+        return (
+          <React.Fragment key={crumb.path}>
+            <CaretRight className={`${BREADCRUMBS_STYLES.separator} ${isIntermediate ? 'hidden sm:block' : ''}`} weight="bold" aria-hidden="true" />
+            <span
+              className={`${crumb.isLast ? BREADCRUMBS_STYLES.itemLast : BREADCRUMBS_STYLES.item} ${isIntermediate ? 'hidden sm:inline' : ''} truncate`}
+              aria-current={crumb.isLast ? 'page' : undefined}
+            >
+              {crumb.label}
+            </span>
+          </React.Fragment>
+        );
+      })}
     </nav>
   );
 });

@@ -8,7 +8,7 @@ const Header: React.FC = memo(() => {
   const { toggleMobileMenu } = useApp();
 
   return (
-    <header className="sticky top-4 z-30 mx-4 mb-4 mt-4 rounded-[24px] border border-white/90 bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] transition-all duration-300">
+    <header className="sticky top-3 z-30 mx-3 mb-3 mt-3 rounded-[18px] border border-white/90 bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] transition-all duration-300 sm:top-4 sm:mx-4 sm:mb-4 sm:mt-4 sm:rounded-[24px]">
       <div className="grid h-[64px] w-full grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
           <button

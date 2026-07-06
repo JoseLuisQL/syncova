@@ -142,10 +142,11 @@ const Sidebar: React.FC = memo(() => {
 
       <aside
         className={`
-          fixed bottom-4 left-4 top-4 z-50 flex flex-col overflow-visible
-          rounded-[24px] border border-white/90 bg-white
+          fixed bottom-3 left-3 top-3 z-50 flex flex-col overflow-visible
+          rounded-[18px] border border-white/90 bg-white
           shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]
           transition-all duration-300 ease-out
+          sm:bottom-4 sm:left-4 sm:top-4 sm:rounded-[24px]
           ${isCollapsed ? 'lg:w-[68px]' : 'lg:w-[254px]'}
           ${mobileMenuOpen ? 'w-[254px] translate-x-0' : 'w-[254px] -translate-x-[calc(100%+2rem)]'}
           lg:translate-x-0
@@ -222,8 +223,8 @@ const Sidebar: React.FC = memo(() => {
                 placeholder="Search..."
                 className="min-w-0 flex-1 bg-transparent text-[13px] font-medium text-[#111318] outline-none placeholder:text-[#8b8f9b]"
               />
-              <span className="rounded-[6px] border border-[#e3e4ed] bg-[#f8f7fb] px-1.5 py-0.5 text-[10px] font-semibold text-[#686d78]">⌘</span>
-              <span className="rounded-[6px] border border-[#e3e4ed] bg-[#f8f7fb] px-1.5 py-0.5 text-[10px] font-semibold text-[#686d78]">F</span>
+              <span className="hidden rounded-[6px] border border-[#e3e4ed] bg-[#f8f7fb] px-1.5 py-0.5 text-[10px] font-semibold text-[#686d78] sm:inline-block">⌘</span>
+              <span className="hidden rounded-[6px] border border-[#e3e4ed] bg-[#f8f7fb] px-1.5 py-0.5 text-[10px] font-semibold text-[#686d78] sm:inline-block">F</span>
             </label>
           )}
         </div>
@@ -258,7 +259,7 @@ const Sidebar: React.FC = memo(() => {
 
           <div className="relative" ref={userMenuRef}>
             {isUserMenuOpen && !isCollapsed && (
-              <div className="absolute bottom-[calc(100%+0.5rem)] left-0 z-[70] w-[320px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[18px] border border-white/90 bg-white shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]">
+              <div className="absolute bottom-[calc(100%+0.5rem)] left-0 z-[70] w-[min(320px,calc(100vw-2rem))] overflow-hidden rounded-[18px] border border-white/90 bg-white shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]">
                 <div className="border-b border-[#e7e7ef] p-4">
                   <div className="flex items-start gap-3">
                     <span className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#ffd1de] text-[12px] font-semibold text-[#111318]">
