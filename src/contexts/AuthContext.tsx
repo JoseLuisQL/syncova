@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { AuthContextType, AuthUser, LoginDto, ChangePasswordDto } from '../types';
 import AuthService from '../services/authService';
 import { logger } from '../utils/debug';
@@ -177,7 +177,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   /**
    * Función de login
    */
-  const login = async (credentials: LoginDto): Promise<void> => {
+  const login = useCallback(async (credentials: LoginDto): Promise<void> => {
     try {
       console.log('🔐 Iniciando login en contexto...');
       dispatch({ type: 'AUTH_START' });
@@ -213,12 +213,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
   /**
    * Función de logout
    */
-  const logout = async (): Promise<void> => {
+  const logout = useCallback(async (): Promise<void> => {
     try {
       await AuthService.logout();
       dispatch({ type: 'AUTH_LOGOUT' });
@@ -228,12 +228,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Asegurar logout local incluso si falla el del servidor
       dispatch({ type: 'AUTH_LOGOUT' });
     }
-  };
+  }, []);
 
   /**
    * Función para refrescar token
    */
-  const refreshToken = async (): Promise<void> => {
+  const refreshToken = useCallback(async (): Promise<void> => {
     try {
       const currentRefreshToken = AuthService.getRefreshToken();
       
@@ -264,12 +264,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       dispatch({ type: 'AUTH_LOGOUT' });
       throw error;
     }
-  };
+  }, [state.user]);
 
   /**
    * Función para cambiar contraseña
    */
-  const changePassword = async (data: ChangePasswordDto): Promise<void> => {
+  const changePassword = useCallback(async (data: ChangePasswordDto): Promise<void> => {
     try {
       await AuthService.changePassword(data);
       logger.debug('Contraseña cambiada exitosamente en contexto');
@@ -277,12 +277,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       logger.error('Error al cambiar contraseña en contexto:', error);
       throw error;
     }
-  };
+  }, []);
 
   /**
-   * Valor del contexto
+   * Valor del contexto (memoizado para evitar re-renders en cascada)
    */
-  const contextValue: AuthContextType = {
+  const contextValue: AuthContextType = useMemo(() => ({
     user: state.user,
     token: state.token,
     isAuthenticated: state.isAuthenticated,
@@ -291,7 +291,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     refreshToken,
     changePassword,
-  };
+  }), [state.user, state.token, state.isAuthenticated, state.isLoading, login, logout, refreshToken, changePassword]);
 
   return (
     <AuthContext.Provider value={contextValue}>

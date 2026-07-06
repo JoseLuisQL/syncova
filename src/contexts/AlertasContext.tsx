@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef, useMemo, ReactNode } from 'react';
 import { Alerta } from '../types';
 import { AlertasService } from '../services/alertasService';
 import { useAuth } from './AuthContext';
@@ -74,6 +74,10 @@ export const AlertasProvider: React.FC<AlertasProviderProps> = ({ children }) =>
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const isRefreshingRef = useRef(false);
+  // Ref espejo de alertasNoLeidas para que markAllAsRead tenga identidad estable
+  // y no cambie en cada update del reducer (evita re-renders en consumidores).
+  const alertasRef = useRef<Alerta[]>(state.alertasNoLeidas);
+  alertasRef.current = state.alertasNoLeidas;
 
   const emitAlertasUpdated = useCallback((reason: string) => {
     window.dispatchEvent(new CustomEvent('alertas:updated', {
@@ -118,10 +122,9 @@ export const AlertasProvider: React.FC<AlertasProviderProps> = ({ children }) =>
   }, [emitAlertasUpdated, refresh]);
 
   const markAllAsRead = useCallback(async (): Promise<boolean> => {
-    if (state.alertasNoLeidas.length === 0) return true;
+    const ids = alertasRef.current.map(a => a.id);
+    if (ids.length === 0) return true;
 
-    const ids = state.alertasNoLeidas.map(a => a.id);
-    
     // Actualización optimista
     dispatch({ type: 'CLEAR_ALL' });
 
@@ -134,7 +137,7 @@ export const AlertasProvider: React.FC<AlertasProviderProps> = ({ children }) =>
       refresh();
       return false;
     }
-  }, [emitAlertasUpdated, refresh, state.alertasNoLeidas]);
+  }, [emitAlertasUpdated, refresh]);
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
@@ -179,7 +182,9 @@ export const AlertasProvider: React.FC<AlertasProviderProps> = ({ children }) =>
     };
   }, [isAuthenticated, refresh, token]);
 
-  const value: AlertasContextType = {
+  // Valor memoizado: solo cambia cuando cambian los datos reales, no en cada
+  // render del provider. Evita re-renders en cascada de Sidebar/NotificationBell.
+  const value: AlertasContextType = useMemo(() => ({
     alertasNoLeidas: state.alertasNoLeidas,
     count: state.alertasNoLeidas.length,
     isLoading: state.isLoading,
@@ -187,7 +192,7 @@ export const AlertasProvider: React.FC<AlertasProviderProps> = ({ children }) =>
     refresh,
     markAsRead,
     markAllAsRead
-  };
+  }), [state.alertasNoLeidas, state.isLoading, state.error, refresh, markAsRead, markAllAsRead]);
 
   return (
     <AlertasContext.Provider value={value}>

@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { Bell, Check, Warning as AlertTriangle, Info, WarningCircle as AlertOctagon, CheckCircle } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { useAlertasGlobal } from '../../contexts/AlertasContext';
-import { NivelAlerta } from '../../types';
+import { Alerta, NivelAlerta } from '../../types';
 import { sileo, SileoState } from 'sileo';
 
 const NIVEL_CONFIG: Record<NivelAlerta, { icon: React.ElementType; color: string; bgColor: string; sileoState: SileoState }> = {
@@ -59,6 +59,74 @@ const playNotificationSound = () => {
     // Ignorar errores (policy del navegador o falta de intearcción del usuario)
   }
 };
+
+interface AlertaRowProps {
+  alerta: Alerta;
+  isMarking: boolean;
+  onMarkAsRead: (id: string, e: React.MouseEvent) => void;
+  onClick: () => void;
+}
+
+// Fila de alerta aislada y memoizada: solo re-renderiza cuando cambian sus
+// propias props (la alerta o su estado de marcado), no cuando cambia el
+// conjunto de markingIds de otra alerta.
+const AlertaRow: React.FC<AlertaRowProps> = memo(({ alerta, isMarking, onMarkAsRead, onClick }) => {
+  const config = NIVEL_CONFIG[alerta.nivel] || NIVEL_CONFIG.info;
+  const Icon = config.icon;
+
+  return (
+    <div
+      onClick={onClick}
+      className={`
+        group relative flex items-start gap-3.5 px-5 py-3.5
+        cursor-pointer border-b border-[#e7e7ef] last:border-0
+        transition-colors duration-150
+        hover:bg-[#fbfafd]
+        ${isMarking ? 'opacity-50 pointer-events-none' : ''}
+      `}
+    >
+      <div className={`p-1.5 rounded-[9px] ${config.bgColor} flex-shrink-0 mt-0.5 border border-[#e7e7ef]`}>
+        <Icon className={`w-4 h-4 ${config.color}`} weight="fill" />
+      </div>
+      
+      <div className="flex-1 min-w-0 pt-0.5">
+        <div className="flex items-center justify-between gap-3 mb-1">
+          <p className="text-[13px] font-semibold text-[#111318] truncate pr-4">
+            {alerta.titulo}
+          </p>
+          <span className="text-[11px] font-medium text-[#8b8f9b] flex-shrink-0 tabular-nums">
+            {formatTimeAgo(alerta.fechaCreacion)}
+          </span>
+        </div>
+        <p className="text-[13px] text-[#747986] leading-snug line-clamp-2 pr-6">
+          {alerta.descripcion}
+        </p>
+      </div>
+
+      <button
+        onClick={(e) => onMarkAsRead(alerta.id, e)}
+        disabled={isMarking}
+        className={`
+          absolute right-4 top-1/2 -translate-y-1/2
+          p-1.5 rounded-[7px] transition-all
+          opacity-0 group-hover:opacity-100 sm:focus-visible:opacity-100
+          ${isMarking 
+            ? 'text-zinc-300 cursor-not-allowed' 
+            : 'text-[#8b8f9b] hover:text-[#111318] hover:bg-[#f8f7fb] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dedfea]/70'
+          }
+        `}
+        title="Marcar como leída"
+      >
+        {isMarking ? (
+          <div className="w-4 h-4 border-2 border-zinc-300 border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <Check className="w-4 h-4" weight="bold" />
+        )}
+      </button>
+    </div>
+  );
+});
+AlertaRow.displayName = 'AlertaRow';
 
 const NotificationBell: React.FC = memo(() => {
   const navigate = useNavigate();
@@ -143,7 +211,8 @@ const NotificationBell: React.FC = memo(() => {
   }, [navigate]);
 
   const displayCount = count > 99 ? '99+' : count;
-  const recentAlertas = alertasNoLeidas.slice(0, 5);
+  // Memoizar el slice para que no se cree un array nuevo en cada render.
+  const recentAlertas = useMemo(() => alertasNoLeidas.slice(0, 5), [alertasNoLeidas]);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -219,64 +288,15 @@ const NotificationBell: React.FC = memo(() => {
               </div>
             ) : (
               <div className="flex flex-col">
-                {recentAlertas.map((alerta) => {
-                  const config = NIVEL_CONFIG[alerta.nivel] || NIVEL_CONFIG.info;
-                  const Icon = config.icon;
-                  const isMarking = markingIds.has(alerta.id);
-                  
-                  return (
-                    <div
-                      key={alerta.id}
-                      onClick={handleAlertClick}
-                      className={`
-                        group relative flex items-start gap-3.5 px-5 py-3.5
-                        cursor-pointer border-b border-[#e7e7ef] last:border-0
-                        transition-colors duration-150
-                        hover:bg-[#fbfafd]
-                        ${isMarking ? 'opacity-50 pointer-events-none' : ''}
-                      `}
-                    >
-                      <div className={`p-1.5 rounded-[9px] ${config.bgColor} flex-shrink-0 mt-0.5 border border-[#e7e7ef]`}>
-                        <Icon className={`w-4 h-4 ${config.color}`} weight="fill" />
-                      </div>
-                      
-                      <div className="flex-1 min-w-0 pt-0.5">
-                        <div className="flex items-center justify-between gap-3 mb-1">
-                          <p className="text-[13px] font-semibold text-[#111318] truncate pr-4">
-                            {alerta.titulo}
-                          </p>
-                          <span className="text-[11px] font-medium text-[#8b8f9b] flex-shrink-0 tabular-nums">
-                            {formatTimeAgo(alerta.fechaCreacion)}
-                          </span>
-                        </div>
-                        <p className="text-[13px] text-[#747986] leading-snug line-clamp-2 pr-6">
-                          {alerta.descripcion}
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={(e) => handleMarkAsRead(alerta.id, e)}
-                        disabled={isMarking}
-                        className={`
-                          absolute right-4 top-1/2 -translate-y-1/2
-                          p-1.5 rounded-[7px] transition-all
-                          opacity-0 group-hover:opacity-100 sm:focus-visible:opacity-100
-                          ${isMarking 
-                            ? 'text-zinc-300 cursor-not-allowed' 
-                            : 'text-[#8b8f9b] hover:text-[#111318] hover:bg-[#f8f7fb] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dedfea]/70'
-                          }
-                        `}
-                        title="Marcar como leída"
-                      >
-                        {isMarking ? (
-                          <div className="w-4 h-4 border-2 border-zinc-300 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Check className="w-4 h-4" weight="bold" />
-                        )}
-                      </button>
-                    </div>
-                  );
-                })}
+                {recentAlertas.map((alerta) => (
+                  <AlertaRow
+                    key={alerta.id}
+                    alerta={alerta}
+                    isMarking={markingIds.has(alerta.id)}
+                    onMarkAsRead={handleMarkAsRead}
+                    onClick={handleAlertClick}
+                  />
+                ))}
               </div>
             )}
           </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { DotsThree, Package, Syringe, Users, Warning } from '@phosphor-icons/react';
 import type { DashboardStats } from '../../services/dashboardService';
 
@@ -12,16 +12,20 @@ interface MetricCardProps {
   value: string | number;
   trend?: string;
   trendUp?: boolean;
-  icon: React.ReactNode;
+  icon: React.ElementType;
   subtitle?: string;
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({ title, value, trend, trendUp, icon, subtitle }) => (
+// Alturas del mini-gráfico de barras — constante a nivel módulo para que no
+// se cree un array nuevo en cada render.
+const BAR_HEIGHTS = [42, 70, 38, 78, 55, 88, 64, 96];
+
+const MetricCard: React.FC<MetricCardProps> = memo(({ title, value, trend, trendUp, icon: Icon, subtitle }) => (
   <article className="min-h-[128px] rounded-[18px] border border-[#e3e9f0] bg-white p-4 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_45px_-32px_rgba(15,42,59,0.65)]">
     <div className="mb-3 flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
         <div className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e4edf2] bg-[#f8fbfd] text-[#35bfa8]">
-          {icon}
+          <Icon size={15} weight="bold" />
         </div>
         <h3 className="text-[12px] font-medium text-[#556575]">{title}</h3>
       </div>
@@ -45,7 +49,7 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, trend, trendUp, i
     </div>
 
     <div className="mt-3 flex h-8 items-end gap-1 overflow-hidden">
-      {[42, 70, 38, 78, 55, 88, 64, 96].map((height, index) => (
+      {BAR_HEIGHTS.map((height, index) => (
         <div
           key={index}
           className={`w-2 rounded-sm ${trendUp === false ? 'bg-[#f0c05a]' : 'bg-[#44c4dd]'}`}
@@ -54,7 +58,8 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, trend, trendUp, i
       ))}
       </div>
   </article>
-);
+));
+MetricCard.displayName = 'MetricCard';
 
 const MetricsSection: React.FC<MetricsSectionProps> = ({ stats, isLoading }) => {
   if (isLoading || !stats) {
@@ -78,7 +83,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({ stats, isLoading }) => 
         trend="12.4%"
         trendUp={true}
         subtitle="Incremento respecto al mes anterior"
-        icon={<Package size={15} weight="bold" />}
+        icon={Package}
       />
       <MetricCard 
         title="Dosis Aplicadas"
@@ -86,7 +91,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({ stats, isLoading }) => 
         trend="9.8%"
         trendUp={true}
         subtitle="Datos de los últimos 7 días"
-        icon={<Syringe size={15} weight="bold" />}
+        icon={Syringe}
       />
       <MetricCard 
         title="Cobertura Acumulada"
@@ -94,7 +99,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({ stats, isLoading }) => 
         trend="4.7 pp"
         trendUp={true}
         subtitle="Promedio de cumplimiento"
-        icon={<Users size={15} weight="bold" />}
+        icon={Users}
       />
       <MetricCard 
         title="Alertas Activas"
@@ -102,7 +107,7 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({ stats, isLoading }) => 
         trend="2"
         trendUp={false}
         subtitle="vs. mes anterior"
-        icon={<Warning size={15} weight="bold" />}
+        icon={Warning}
       />
     </div>
   );

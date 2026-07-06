@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 import { Usuario } from '../types';
 
 interface AppContextType {
@@ -34,16 +34,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setMobileMenuOpen(prev => !prev);
   }, []);
 
+  // Valor memoizado para que el provider no provoque re-renders en cascada
+  // de todos los consumidores cuando nada relevante cambió.
+  const value = useMemo<AppContextType>(() => ({
+    currentUser,
+    setCurrentUser,
+    sidebarCollapsed,
+    setSidebarCollapsed,
+    mobileMenuOpen,
+    setMobileMenuOpen,
+    toggleMobileMenu,
+  }), [currentUser, sidebarCollapsed, mobileMenuOpen, toggleMobileMenu]);
+
   return (
-    <AppContext.Provider value={{
-      currentUser,
-      setCurrentUser,
-      sidebarCollapsed,
-      setSidebarCollapsed,
-      mobileMenuOpen,
-      setMobileMenuOpen,
-      toggleMobileMenu,
-    }}>
+    <AppContext.Provider value={value}>
       {children}
     </AppContext.Provider>
   );
