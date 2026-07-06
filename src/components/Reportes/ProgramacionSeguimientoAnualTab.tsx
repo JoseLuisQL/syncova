@@ -22,10 +22,11 @@ const ProgramacionSeguimientoAnualTab: React.FC<ProgramacionSeguimientoAnualTabP
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
 
-  // Handle year change
+  // Handle year change.
+  // La recarga de datos la dispara automáticamente ProgramacionSeguimientoAnualTable
+  // vía su useEffect con dependencia [anio], así que aquí solo actualizamos el estado.
   const handleYearChange = (year: number) => {
     setSelectedAnio(year);
-    // TODO: Load data for the selected year
   };
 
   return (
@@ -89,10 +90,6 @@ const ProgramacionSeguimientoAnualTab: React.FC<ProgramacionSeguimientoAnualTabP
       {/* Dynamic Table */}
       <ProgramacionSeguimientoAnualTable
         anio={selectedAnio}
-        onDataChange={() => {
-          // Handle data changes if needed
-          console.log('Data changed for year:', selectedAnio);
-        }}
       />
     </div>
   );

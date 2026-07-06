@@ -1033,7 +1033,7 @@ const Movimientos: React.FC = () => {
             selectedAnio
           );
           disponibilidadRestante = disp.disponibilidadRestante;
-        } catch (e) {
+        } catch {
           // Ignorar si falla la verificación y quedará en 0
         }
 
@@ -1453,9 +1453,6 @@ const Movimientos: React.FC = () => {
     } catch (redistributionError: any) {
       const errorMessage = redistributionError?.response?.data?.message || redistributionError?.response?.data?.error || redistributionError?.message || '';
 
-      console.log('[DEBUG] Error completo:', redistributionError?.response?.data);
-      console.log('[DEBUG] Mensaje de error:', errorMessage);
-
       if (errorMessage.includes('No hay cantidades suficientes') ||
         errorMessage.includes('Faltan') ||
         errorMessage.includes('redistribuir') ||
@@ -1473,7 +1470,7 @@ const Movimientos: React.FC = () => {
             selectedAnio
           );
           disponibilidadRestante = disp.disponibilidadRestante;
-        } catch (e) {
+        } catch {
           // Ignorar si falla
         }
 

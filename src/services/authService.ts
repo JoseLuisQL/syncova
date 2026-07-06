@@ -41,7 +41,7 @@ class AuthService {
       });
       this.setUser(response.data.data.user);
 
-      console.log('Usuario guardado:', response.data.data.user);
+      if (import.meta.env.DEV) console.log('Usuario guardado:', response.data.data.user);
 
       logger.debug('Login exitoso para usuario:', credentials.usuario);
       return response.data;

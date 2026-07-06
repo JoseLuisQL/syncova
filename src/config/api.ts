@@ -25,8 +25,9 @@ export const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
-// Debug: mostrar la URL que se está usando
-console.log('🔗 API Base URL configurada:', API_BASE_URL);
+if (import.meta.env.DEV) {
+  console.log('🔗 API Base URL configurada:', API_BASE_URL);
+}
 
 let refreshTokenPromise: Promise<string> | null = null;
 
@@ -247,21 +248,15 @@ export interface QueryParams {
 export const buildQueryParams = (params?: QueryParams): string => {
   if (!params) return '';
 
-  console.log('🔧 buildQueryParams - Parámetros recibidos:', params);
-
   const searchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
-      console.log(`🔧 buildQueryParams - Agregando: ${key} = ${value}`);
       searchParams.append(key, value.toString());
-    } else {
-      console.log(`🔧 buildQueryParams - Omitiendo: ${key} = ${value} (undefined/null/empty)`);
     }
   });
 
   const queryString = searchParams.toString();
-  console.log('🔧 buildQueryParams - Query string final:', queryString);
   return queryString ? `?${queryString}` : '';
 };
 
@@ -290,4 +285,3 @@ export const handleApiError = (error: AxiosError): string => {
 };
 
 export default apiClient;
-console.log('API Base URL:', getApiBaseUrl());

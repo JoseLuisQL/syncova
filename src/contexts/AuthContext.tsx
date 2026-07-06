@@ -119,12 +119,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const checkExistingAuth = async () => {
       try {
-        console.log('🔍 Verificando autenticación existente...');
+        if (import.meta.env.DEV) console.log('🔍 Verificando autenticación existente...');
         const token = AuthService.getToken();
         const user = AuthService.getUser();
 
-        console.log('Token encontrado:', !!token);
-        console.log('Usuario encontrado:', user);
+        if (import.meta.env.DEV) {
+          console.log('Token encontrado:', !!token);
+          console.log('Usuario encontrado:', user);
+        }
 
         if (token && user) {
           // Configurar header de autorización
@@ -133,7 +135,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Verificar que el token siga siendo válido y obtener datos actualizados
           const verification = await AuthService.verifyAuth();
 
-          console.log('Verificación de token:', verification);
+          if (import.meta.env.DEV) console.log('Verificación de token:', verification);
 
           if (verification.authenticated && verification.user) {
             // Usar los datos actualizados del servidor en lugar del localStorage
@@ -150,7 +152,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         } else {
           // No hay datos de autenticación
-          console.log('❌ No hay datos de autenticación, mostrando login');
+          if (import.meta.env.DEV) console.log('❌ No hay datos de autenticación, mostrando login');
           dispatch({ type: 'AUTH_LOGOUT' });
         }
       } catch (error) {
@@ -179,15 +181,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    */
   const login = useCallback(async (credentials: LoginDto): Promise<void> => {
     try {
-      console.log('🔐 Iniciando login en contexto...');
+      if (import.meta.env.DEV) console.log('🔐 Iniciando login en contexto...');
       dispatch({ type: 'AUTH_START' });
 
       const response = await AuthService.login(credentials);
 
-      console.log('📥 Respuesta de login:', response);
+      if (import.meta.env.DEV) console.log('📥 Respuesta de login:', response);
 
       if (response.success && response.data) {
-        console.log('✅ Login exitoso, usuario:', response.data.user);
+        if (import.meta.env.DEV) console.log('✅ Login exitoso, usuario:', response.data.user);
 
         // Configurar header de autorización
         AuthService.setupAuthHeader();
@@ -205,7 +207,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error(response.message || 'Error al iniciar sesión');
       }
     } catch (error: any) {
-      console.error('❌ Error en login del contexto:', error);
+      if (import.meta.env.DEV) console.error('❌ Error en login del contexto:', error);
       logger.error('Error en login del contexto:', error);
       dispatch({
         type: 'AUTH_FAILURE',
