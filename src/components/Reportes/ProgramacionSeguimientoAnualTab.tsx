@@ -30,9 +30,9 @@ const ProgramacionSeguimientoAnualTab: React.FC<ProgramacionSeguimientoAnualTabP
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
       {/* Header Premium */}
-      <div className="rounded-xl border border-teal-200 bg-gradient-to-r from-teal-50 via-white to-cyan-50 p-6 shadow-sm">
+      <div className="rounded-xl border border-teal-200 bg-gradient-to-r from-teal-50 via-white to-cyan-50 p-4 shadow-sm sm:p-6">
         <div className="flex items-center mb-4">
           <div className="rounded-xl bg-teal-600 p-3 shadow-lg shadow-teal-500/20">
             <ChartBar weight="duotone" className="h-8 w-8 text-white" />
@@ -45,12 +45,12 @@ const ProgramacionSeguimientoAnualTab: React.FC<ProgramacionSeguimientoAnualTabP
       </div>
 
       {/* Filters Premium */}
-      <div className="rounded-xl border border-teal-200 bg-teal-50/60 p-6 shadow-sm">
+      <div className="rounded-xl border border-teal-200 bg-teal-50/60 p-4 shadow-sm sm:p-6">
         <h3 className="mb-4 flex items-center text-lg font-semibold text-zinc-900">
           <Funnel className="mr-2 h-5 w-5 text-teal-600" />
           Filtros de Programación
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-zinc-700">Año de Programación</label>
             <select

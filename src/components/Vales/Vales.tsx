@@ -621,9 +621,9 @@ const Vales: React.FC<ValesProps> = ({
       />
 
       {showDiagnostico && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-[#111318]/20 p-4 backdrop-blur-[2px]">
-          <div className="max-h-[95vh] w-full max-w-6xl overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
-            <div className="flex items-center justify-between border-b border-[#eeeef3] bg-white px-5 py-3.5">
+        <div className="fixed inset-0 z-[300] flex items-end justify-center bg-[#111318]/20 p-3 backdrop-blur-[2px] sm:items-center sm:p-4">
+          <div className="max-h-[95vh] w-full max-w-6xl overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-[10px]">
+            <div className="flex items-center justify-between border-b border-[#eeeef3] bg-white px-4 py-3.5 sm:px-5">
               <div className="flex items-center space-x-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-amber-600">
                   <Gear weight="bold" className="h-4 w-4" />
@@ -640,7 +640,7 @@ const Vales: React.FC<ValesProps> = ({
                 <X weight="bold" className="h-4 w-4 text-zinc-500" />
               </button>
             </div>
-            <div className="max-h-[calc(95vh-120px)] overflow-y-auto px-5 py-4">
+            <div className="max-h-[calc(95vh-120px)] overflow-y-auto px-4 py-4 sm:px-5">
               <ValesConnectionTest />
             </div>
           </div>
@@ -674,9 +674,9 @@ const Vales: React.FC<ValesProps> = ({
       )}
 
       {showModificacionesModal && valeSeleccionado && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-[#111318]/20 p-4 backdrop-blur-[2px]">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
-            <div className="flex items-center justify-between border-b border-[#eeeef3] px-5 py-3.5">
+        <div className="fixed inset-0 z-[300] flex items-end justify-center bg-[#111318]/20 p-3 backdrop-blur-[2px] sm:items-center sm:p-4">
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-[10px]">
+            <div className="flex items-center justify-between border-b border-[#eeeef3] px-4 py-3.5 sm:px-5">
               <div className="flex items-center space-x-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
                   <ArrowsClockwise weight="bold" className="h-4 w-4" />
@@ -701,7 +701,7 @@ const Vales: React.FC<ValesProps> = ({
               </button>
             </div>
 
-            <div className="max-h-[calc(90vh-140px)] overflow-y-auto px-5 py-4">
+            <div className="max-h-[calc(90vh-140px)] overflow-y-auto px-4 py-4 sm:px-5">
               <div className="mb-5 rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] p-3">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>

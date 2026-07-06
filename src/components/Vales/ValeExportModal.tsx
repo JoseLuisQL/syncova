@@ -431,7 +431,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
                 <Eye className="h-5 w-5 text-zinc-600" />
                 <span className="font-medium text-teal-800">Vista Previa</span>
               </div>
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-1 gap-4 text-center sm:grid-cols-3">
                 <div>
                   <div className="text-2xl font-bold text-zinc-900">{estadisticas.totalVacunas.toLocaleString()}</div>
                   <div className="text-sm text-zinc-600">Vacunas</div>

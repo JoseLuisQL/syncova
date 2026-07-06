@@ -84,7 +84,7 @@ const AlertasModule: React.FC = () => {
     return (
       <main className={COMPONENT_STYLES.pageBackground}>
         <div className="flex min-h-screen items-center justify-center">
-          <div className="flex flex-col items-center gap-4 rounded-[24px] border border-zinc-200 bg-white px-8 py-10 shadow-sm">
+          <div className="flex flex-col items-center gap-4 rounded-[24px] border border-zinc-200 bg-white px-4 py-8 shadow-sm sm:px-8 sm:py-10">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900">
               <CircleNotch className="h-6 w-6 animate-spin" weight="bold" />
             </div>

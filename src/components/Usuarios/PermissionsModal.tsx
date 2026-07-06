@@ -301,7 +301,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="h-9 min-w-[180px] rounded-[7px] border border-[#e7e7ef] bg-white px-3 pr-8 text-[13px] font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                className="h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 pr-8 text-[13px] font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70 sm:w-auto sm:min-w-[180px]"
                 aria-label="Filtrar por categoría"
               >
                 <option value="todas">Todas las categorías</option>

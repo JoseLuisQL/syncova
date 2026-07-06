@@ -438,7 +438,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                       </div>
                     </div>
 
-                    <div className="mt-5 grid grid-cols-2 gap-4">
+                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
                         <p className="text-[0.6rem] font-bold uppercase tracking-widest text-zinc-500">Reducción</p>
                         <p className="mt-1 text-lg font-semibold tracking-tight text-rose-600">-{opcion.reduccionTotal.toLocaleString()}</p>
@@ -572,7 +572,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                 })}
               </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-4 border-t border-[#eeeef3] pt-5">
+              <div className="mt-5 grid grid-cols-1 gap-4 border-t border-[#eeeef3] pt-5 sm:grid-cols-3">
                 <div className="rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] p-4">
                   <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">Entrega actual</p>
                   <p className="mt-1 text-xl font-semibold tracking-tight text-zinc-900">{opcionActual.totalAntes.toLocaleString()}</p>

@@ -276,7 +276,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                 <Faders className="h-4 w-4 text-[#606571]" aria-hidden="true" />
                 Filtros
               </summary>
-              <div className="absolute left-0 top-11 z-30 w-[260px] rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
+              <div className="absolute left-0 top-11 z-30 w-[min(260px,calc(100vw-3rem))] rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
                 <div className="space-y-3">
                   <div>
                     <label htmlFor="roles-estado" className="mb-1 block text-xs font-medium text-[#747986]">

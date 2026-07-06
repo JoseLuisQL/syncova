@@ -10,7 +10,7 @@ interface ChartSectionProps {
 }
 
 const ChartSkeleton: React.FC = () => (
-  <div className="flex h-full animate-pulse flex-col rounded-[18px] border border-[#e3e9f0] bg-white p-5">
+  <div className="flex h-full animate-pulse flex-col rounded-[18px] border border-[#e3e9f0] bg-white p-4 sm:p-5">
     <div className="mb-8 h-5 w-64 rounded bg-[#eef3f6]" />
     <div className="flex-1 rounded-[14px] bg-[#eef3f6]" />
   </div>
@@ -41,7 +41,7 @@ const ChartSection: React.FC<ChartSectionProps> = memo(({ movimientosMensuales, 
   if (isLoading) return <ChartSkeleton />;
 
   return (
-    <section className="flex h-full flex-col rounded-[18px] border border-[#e3e9f0] bg-white p-5 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
+    <section className="flex h-full flex-col rounded-[18px] border border-[#e3e9f0] bg-white p-4 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)] sm:p-5">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <div className="mb-1 flex items-center gap-2">

@@ -278,7 +278,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               </button>
 
               {showStockInicialDropdown ? (
-                <div className="absolute left-0 top-full z-[180] mt-2 min-w-[260px] rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:min-w-[280px]">
+                <div className="absolute left-0 top-full z-[180] mt-2 w-[min(280px,calc(100vw-3rem))] rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[280px]">
                   <h4 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-widest text-[#8b8f9b]">Volumen desglosado</h4>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-[10px] border border-[#e7e7ef] bg-[#fbfafd] px-3 py-2">
@@ -369,7 +369,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               </button>
 
               {showStockActualDropdown ? (
-                <div className="absolute right-0 top-full z-[180] mt-2 min-w-[280px] rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:min-w-[300px]">
+                <div className="absolute right-0 top-full z-[180] mt-2 w-[min(300px,calc(100vw-3rem))] rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[300px]">
                   <h4 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-widest text-[#8b8f9b]">
                     Lotes disponibles ({lotesDisponibles.length})
                   </h4>

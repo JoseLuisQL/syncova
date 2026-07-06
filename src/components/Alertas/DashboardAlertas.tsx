@@ -104,7 +104,7 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = memo(({
                 <div className="h-5 w-5 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
               </div>
             ) : alertasRecientes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-[18px] border border-dashed border-zinc-200 bg-zinc-50/70 px-6 py-10 text-center">
+              <div className="flex flex-col items-center justify-center rounded-[18px] border border-dashed border-zinc-200 bg-zinc-50/70 px-4 py-8 text-center sm:px-6 sm:py-10">
                 <Bell className="h-8 w-8 text-zinc-300" weight="duotone" />
                 <p className="mt-3 text-sm font-semibold text-zinc-900">No hay alertas recientes</p>
                 <p className="mt-1 text-sm text-zinc-500">Cuando se registren eventos aparecerán aquí.</p>
