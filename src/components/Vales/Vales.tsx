@@ -182,11 +182,15 @@ const Vales: React.FC<ValesProps> = ({
   useEffect(() => {
     const isCurrentlyGenerating = isGenerating || generandoVale;
     if (!isCurrentlyGenerating && wasGeneratingRef.current) {
-      setTimeout(() => handleValeGenerado(), 300);
+      const t = setTimeout(() => handleValeGenerado(), 300);
       wasGeneratingRef.current = false;
+      return () => clearTimeout(t);
     } else if (isCurrentlyGenerating) {
       wasGeneratingRef.current = true;
     }
+    // handleValeGenerado es estable (definido más abajo con useCallback);
+    // se omite de las deps para evitar usarlo antes de su declaración.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isGenerating, generandoVale]);
 
   // Datos derivados

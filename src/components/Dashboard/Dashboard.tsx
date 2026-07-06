@@ -71,7 +71,7 @@ const Dashboard: React.FC = () => {
           <DashboardLoader />
         </motion.div>
       ) : error && !hasData ? (
-        <motion.main key="error" {...fadeVariants} className="min-h-screen bg-neutral px-4 py-8 sm:px-6 lg:px-8">
+        <motion.main {...fadeVariants} key="error" className="min-h-screen bg-neutral px-4 py-8 sm:px-6 lg:px-8">
           <ErrorState error={error} onRetry={handleRefresh} />
         </motion.main>
       ) : (

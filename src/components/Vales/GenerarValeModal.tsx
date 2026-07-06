@@ -80,14 +80,17 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
     }
   };
 
-  // Limpiar al cerrar
-  useEffect(() => {
+  // Limpiar al cerrar (ajuste durante el render, sin useEffect — evita el
+  // flash de estado stale que marca react-doctor).
+  const [lastOpen, setLastOpen] = useState(isOpen);
+  if (isOpen !== lastOpen) {
+    setLastOpen(isOpen);
     if (!isOpen) {
       clearVistaPrevia();
       setShowVistaPrevia(false);
       setShowConfiguracionJeringas(false);
     }
-  }, [isOpen, clearVistaPrevia]);
+  }
 
 
 

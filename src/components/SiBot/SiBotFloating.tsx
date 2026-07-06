@@ -169,7 +169,7 @@ export const SiBotFloating: React.FC = () => {
                     return (
                       <SiBotMessage
                         key={msg.id}
-                        role={msg.role as any}
+                        messageRole={msg.role as any}
                         content={content}
                         onSuggestionSelect={handleSuggestion}
                         isStreaming={isStreamingMessage}
@@ -183,7 +183,7 @@ export const SiBotFloating: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }} 
                       className="flex w-full mb-6 justify-start"
                     >
-                      <SiBotMessage role="assistant" content="" />
+                      <SiBotMessage messageRole="assistant" content="" />
                     </motion.div>
                   )}
                   {error && (

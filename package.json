@@ -19,7 +19,7 @@
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/ibm-plex-sans": "^5.2.8",
     "@phosphor-icons/react": "^2.1.10",
-    "axios": "^1.11.0",
+    "axios": "^1.18.1",
     "date-fns": "^2.30.0",
     "exceljs": "^4.4.0",
     "lucide-react": "^0.344.0",

@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { Clock, Eye, EyeSlash, Key, Shield, User } from '@phosphor-icons/react';
 import { CentroAcopio, Role, Usuario } from '../../../types';
 import {
@@ -61,11 +61,19 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    setFormData(buildInitialFormData(usuario));
-    setShowPassword(false);
-    setErrors({});
-  }, [usuario, isOpen]);
+  // Sincronizar formData con el usuario cuando cambia (ajuste durante el render,
+  // sin useEffect — evita el flash de estado stale que marca react-doctor).
+  const [lastUsuarioId, setLastUsuarioId] = useState<string | undefined>(usuario?.id);
+  const [lastOpen, setLastOpen] = useState(isOpen);
+  if (usuario?.id !== lastUsuarioId || isOpen !== lastOpen) {
+    setLastUsuarioId(usuario?.id);
+    setLastOpen(isOpen);
+    if (isOpen) {
+      setFormData(buildInitialFormData(usuario));
+      setShowPassword(false);
+      setErrors({});
+    }
+  }
 
   const centrosActivos = useMemo(
     () => centrosAcopio.filter((centro) => centro.estado === 'activo'),

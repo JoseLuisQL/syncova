@@ -31,8 +31,13 @@ const RoleModal: React.FC<RoleModalProps> = ({
   const nombreInputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Resetear formulario cuando cambia el rol en edición
-  useEffect(() => {
+  // Resetear formulario cuando cambia el rol en edición o al abrir.
+  // Ajuste durante el render (sin useEffect) para evitar el flash de estado
+  // stale que marca react-doctor (no-adjust-state-on-prop-change).
+  const [lastKey, setLastKey] = useState<string | null>(null);
+  const currentKey = `${isOpen ? 'open' : 'closed'}:${editingRole?.id ?? 'new'}`;
+  if (currentKey !== lastKey) {
+    setLastKey(currentKey);
     if (isOpen) {
       if (editingRole) {
         setFormData({
@@ -51,9 +56,15 @@ const RoleModal: React.FC<RoleModalProps> = ({
       }
       setErrors({});
       setTouched({});
-      setTimeout(() => nombreInputRef.current?.focus(), 100);
     }
-  }, [editingRole, isOpen]);
+  }
+
+  // Foco al abrir: timer con cleanup para evitar memory leak.
+  useEffect(() => {
+    if (!isOpen) return;
+    const t = setTimeout(() => nombreInputRef.current?.focus(), 100);
+    return () => clearTimeout(t);
+  }, [isOpen]);
 
   // Manejar tecla Escape
   useEffect(() => {

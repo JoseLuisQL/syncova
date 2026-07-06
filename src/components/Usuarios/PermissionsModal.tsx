@@ -120,15 +120,25 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
     }, {} as Record<string, Permission[]>);
   }, [filteredPermissions]);
 
-  // Expandir todas las categorías al abrir
-  useEffect(() => {
+  // Expandir todas las categorías al abrir.
+  // Ajuste durante el render (sin useEffect) para evitar el flash de estado
+  // stale que marca react-doctor (no-adjust-state-on-prop-change).
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
     if (isOpen) {
       setExpandedCategories(new Set(categories));
       setSearchTerm('');
       setFilterCategory('todas');
-      setTimeout(() => searchInputRef.current?.focus(), 100);
     }
-  }, [isOpen, categories]);
+  }
+
+  // Foco al abrir: timer con cleanup para evitar memory leak.
+  useEffect(() => {
+    if (!isOpen) return;
+    const t = setTimeout(() => searchInputRef.current?.focus(), 100);
+    return () => clearTimeout(t);
+  }, [isOpen]);
 
   // Manejar tecla Escape
   useEffect(() => {

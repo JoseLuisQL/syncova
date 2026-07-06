@@ -8,21 +8,21 @@ import { SiBotLogo } from './SiBotLogo';
 import { SiBotTable } from './SiBotTable';
 
 interface SiBotMessageProps {
-  role: 'user' | 'assistant' | 'system' | 'data';
+  messageRole: 'user' | 'assistant' | 'system' | 'data';
   content: string;
   onSuggestionSelect?: (text: string) => void;
   isStreaming?: boolean;
 }
 
 export const SiBotMessage: React.FC<SiBotMessageProps> = ({
-  role,
+  messageRole,
   content,
   onSuggestionSelect,
   isStreaming = false,
 }) => {
-  if (role === 'system' || role === 'data') return null;
+  if (messageRole === 'system' || messageRole === 'data') return null;
 
-  const isUser = role === 'user';
+  const isUser = messageRole === 'user';
   
   const suggestionRegex = /---\s*\n*\s*\*\*(?:💡\s*)?Sugerencias:\*\*\s*\n([\s\S]*)/i;
   const match = content.match(suggestionRegex);

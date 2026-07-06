@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Package, SlidersHorizontal, Stack, Syringe, Warehouse } from '@phosphor-icons/react';
 import { apiClient } from '../../config/api';
 import {
@@ -91,31 +91,35 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
 
   const isEditing = Boolean(editingConfig);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    if (editingConfig) {
-      setFormData({
-        centroAcopioId: 'centroAcopioId' in editingConfig ? editingConfig.centroAcopioId : '',
-        vacunaIds: [editingConfig.vacunaId],
-        jeringaIds: [editingConfig.jeringaId],
-        multiplicador: String(editingConfig.multiplicador),
-        prioridad: String(editingConfig.prioridad),
-        activo: String(editingConfig.activo),
-      });
-    } else {
-      setFormData({
-        centroAcopioId: '',
-        vacunaIds: [],
-        jeringaIds: [],
-        multiplicador: '1',
-        prioridad: '1',
-        activo: 'true',
-      });
+  // Sincronizar formData con editingConfig al abrir (ajuste durante el render,
+  // sin useEffect — evita el flash de estado stale que marca react-doctor).
+  const [lastKey, setLastKey] = useState<string | null>(null);
+  const currentKey = `${isOpen ? 'open' : 'closed'}:${editingConfig ? ('id' in editingConfig ? editingConfig.id : 'edit') : 'new'}`;
+  if (currentKey !== lastKey) {
+    setLastKey(currentKey);
+    if (isOpen) {
+      if (editingConfig) {
+        setFormData({
+          centroAcopioId: 'centroAcopioId' in editingConfig ? editingConfig.centroAcopioId : '',
+          vacunaIds: [editingConfig.vacunaId],
+          jeringaIds: [editingConfig.jeringaId],
+          multiplicador: String(editingConfig.multiplicador),
+          prioridad: String(editingConfig.prioridad),
+          activo: String(editingConfig.activo),
+        });
+      } else {
+        setFormData({
+          centroAcopioId: '',
+          vacunaIds: [],
+          jeringaIds: [],
+          multiplicador: '1',
+          prioridad: '1',
+          activo: 'true',
+        });
+      }
+      setErrors({});
     }
-
-    setErrors({});
-  }, [editingConfig, isOpen]);
+  }
 
   const vacunaOptions = useMemo(
     () =>

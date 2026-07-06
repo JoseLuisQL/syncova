@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useState } from 'react';
 import { Eye, EyeSlash, Key, ShieldCheck } from '@phosphor-icons/react';
 import { Usuario } from '../../../types';
 import { COMPONENT_STYLES } from '../constants';
@@ -25,7 +25,11 @@ const CambiarPasswordModal: React.FC<CambiarPasswordModalProps> = memo(({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
+  // Resetear el formulario cuando el modal se abre (ajuste durante el render,
+  // sin useEffect — evita el flash de estado stale que marca react-doctor).
+  const [lastOpen, setLastOpen] = useState(isOpen);
+  if (isOpen !== lastOpen) {
+    setLastOpen(isOpen);
     if (isOpen) {
       setPassword('');
       setConfirmPassword('');
@@ -33,7 +37,7 @@ const CambiarPasswordModal: React.FC<CambiarPasswordModalProps> = memo(({
       setShowConfirmPassword(false);
       setErrors({});
     }
-  }, [isOpen, usuario.id]);
+  }
 
   const validateForm = () => {
     const nextErrors: Record<string, string> = {};
