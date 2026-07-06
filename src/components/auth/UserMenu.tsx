@@ -70,7 +70,7 @@ const UserMenu: React.FC = memo(() => {
     <>
       <div className="relative" ref={menuRef}>
         {/* User Button */}
-        <button
+        <button type="button"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className={`
             flex h-10 items-center gap-2 rounded-[9px] border bg-white p-1 pr-2
@@ -173,7 +173,7 @@ const UserMenu: React.FC = memo(() => {
 
             {/* Menu Actions */}
             <div className="p-2 bg-white flex flex-col gap-1">
-              <button
+              <button type="button"
                 onClick={() => {
                   setIsChangePasswordModalOpen(true);
                   setIsMenuOpen(false);
@@ -192,7 +192,7 @@ const UserMenu: React.FC = memo(() => {
               
               <div className="h-px bg-[#e7e7ef] my-1 mx-2" />
               
-              <button
+              <button type="button"
                 onClick={handleLogout}
                 className="
                   flex items-center gap-3 w-full px-3 py-2 rounded-[9px]

@@ -103,7 +103,7 @@ const AlertaRow: React.FC<AlertaRowProps> = memo(({ alerta, isMarking, onMarkAsR
         </p>
       </div>
 
-      <button
+      <button type="button"
         onClick={(e) => onMarkAsRead(alerta.id, e)}
         disabled={isMarking}
         className={`
@@ -216,7 +216,7 @@ const NotificationBell: React.FC = memo(() => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
+      <button type="button"
         onClick={handleToggle}
         className={`
           relative flex h-10 w-10 items-center justify-center rounded-[9px] border
@@ -259,7 +259,7 @@ const NotificationBell: React.FC = memo(() => {
               )}
             </div>
             {count > 0 && (
-              <button
+              <button type="button"
                 onClick={handleMarkAllAsRead}
                 className="rounded-[6px] px-1 text-[11px] font-semibold text-[#747986] transition-colors hover:text-[#111318] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dedfea]/70"
               >
@@ -303,7 +303,7 @@ const NotificationBell: React.FC = memo(() => {
 
           {/* Footer */}
             <div className="p-2 border-t border-[#e7e7ef] bg-white">
-              <button
+              <button type="button"
                 onClick={handleViewAll}
                 className="
                   w-full py-2.5 text-[12px] font-semibold text-[#606571]

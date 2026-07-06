@@ -241,7 +241,7 @@ const AyudaConfiguracion: React.FC<AyudaConfiguracionProps> = ({ isOpen, onClose
               <Question className="h-5 w-5 mr-2 text-zinc-700" weight="duotone" />
               Documentación
             </h3>
-            <button
+            <button type="button"
               onClick={onClose}
               className="text-zinc-400 hover:text-zinc-900 hover:bg-zinc-200/50 p-1.5 rounded-lg transition-colors"
             >
@@ -255,7 +255,7 @@ const AyudaConfiguracion: React.FC<AyudaConfiguracionProps> = ({ isOpen, onClose
               const isActive = activeSection === section.id;
               
               return (
-                <button
+                <button type="button"
                   key={section.id}
                   onClick={() => setActiveSection(section.id)}
                   className={`w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${

@@ -13,7 +13,7 @@ const Breadcrumbs: React.FC = memo(() => {
 
   return (
     <nav className={BREADCRUMBS_STYLES.nav} aria-label="Breadcrumb">
-      <button
+      <button type="button"
         onClick={navigateToHome}
         className={BREADCRUMBS_STYLES.homeButton}
         aria-label="Ir al Dashboard"

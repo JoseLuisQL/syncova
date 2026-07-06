@@ -64,7 +64,7 @@ export const AlertaEstado: React.FC<AlertaEstadoProps> = memo(({
           </div>
         </div>
         {accion && (
-          <button
+          <button type="button"
             onClick={accion.onClick}
             className={`text-sm font-bold ${estilo.text} hover:underline transition-all`}
           >

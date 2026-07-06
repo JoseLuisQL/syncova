@@ -131,7 +131,7 @@ const EstadisticasConfiguracion: React.FC<EstadisticasConfiguracionProps> = ({
     <div className={COMPONENT_STYLES.panel}>
       <div className="p-4 border-b border-zinc-200">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <button
+          <button type="button"
             onClick={() => setShowStats(!showStats)}
             className="flex items-center gap-2 text-lg font-semibold text-zinc-900 transition-colors hover:text-zinc-600"
           >
@@ -140,7 +140,7 @@ const EstadisticasConfiguracion: React.FC<EstadisticasConfiguracionProps> = ({
           </button>
           
           {showStats && (
-            <button
+            <button type="button"
               onClick={loadEstadisticas}
               disabled={isLoading}
               className={COMPONENT_STYLES.button.secondary}

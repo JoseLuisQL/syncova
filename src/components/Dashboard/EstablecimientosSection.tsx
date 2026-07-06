@@ -60,7 +60,7 @@ const EstablecimientosSection: React.FC = memo(() => {
       </div>
 
       <div className="mt-auto border-t border-zinc-100 px-5 py-4">
-        <button className="flex items-center gap-1 text-[13px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b]">
+        <button type="button" className="flex items-center gap-1 text-[13px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b]">
           Ver todos los establecimientos <span className="text-lg leading-none">→</span>
         </button>
       </div>

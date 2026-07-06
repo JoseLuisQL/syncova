@@ -303,52 +303,53 @@ export class ProgramacionAnualCenaresService {
    */
   static async getDatosTablaCompleta(anio: number): Promise<ServiceResult<any>> {
     try {
-      // Obtener todas las vacunas activas ordenadas alfabéticamente
-      const vacunas = await prisma.vacuna.findMany({
-        where: { estado: 'activo' },
-        orderBy: { nombre: 'asc' },
-        select: {
-          id: true,
-          nombre: true,
-          tipo: true,
-          presentacion: true
-        }
-      });
-
-      // Obtener todas las jeringas activas ordenadas alfabéticamente
-      const jeringas = await prisma.jeringa.findMany({
-        where: { estado: 'activo' },
-        orderBy: { tipo: 'asc' },
-        select: {
-          id: true,
-          tipo: true,
-          capacidad: true,
-          color: true
-        }
-      });
-
-      // Obtener programaciones existentes para el año
-      const programaciones = await prisma.programacionAnualCenares.findMany({
-        where: { anio },
-        include: {
-          vacuna: {
-            select: {
-              id: true,
-              nombre: true,
-              tipo: true,
-              presentacion: true
-            }
-          },
-          jeringa: {
-            select: {
-              id: true,
-              tipo: true,
-              capacidad: true,
-              color: true
+      // Las 3 queries son independientes entre sí: paralelizar con Promise.all.
+      const [vacunas, jeringas, programaciones] = await Promise.all([
+        // Obtener todas las vacunas activas ordenadas alfabéticamente
+        prisma.vacuna.findMany({
+          where: { estado: 'activo' },
+          orderBy: { nombre: 'asc' },
+          select: {
+            id: true,
+            nombre: true,
+            tipo: true,
+            presentacion: true
+          }
+        }),
+        // Obtener todas las jeringas activas ordenadas alfabéticamente
+        prisma.jeringa.findMany({
+          where: { estado: 'activo' },
+          orderBy: { tipo: 'asc' },
+          select: {
+            id: true,
+            tipo: true,
+            capacidad: true,
+            color: true
+          }
+        }),
+        // Obtener programaciones existentes para el año
+        prisma.programacionAnualCenares.findMany({
+          where: { anio },
+          include: {
+            vacuna: {
+              select: {
+                id: true,
+                nombre: true,
+                tipo: true,
+                presentacion: true
+              }
+            },
+            jeringa: {
+              select: {
+                id: true,
+                tipo: true,
+                capacidad: true,
+                color: true
             }
           }
         }
-      });
+      }),
+      ]);
 
       // Crear mapa de programaciones por ítem
       const programacionesMap = new Map();
@@ -363,13 +364,12 @@ export class ProgramacionAnualCenaresService {
       // La función ya maneja automáticamente:
       // - 2024: Usa saldos estáticos
       // - 2025+: Calcula en cascada
-      const saldosAnteriores = await this.obtenerSaldosAnoAnterior(anio - 1);
-
-      // Obtener entregas CENARES por trimestre
-      const entregasCenares = await this.obtenerEntregasCenaresPorTrimestre(anio);
-
-      // Obtener datos de consumo de planificación
-      const consumoPlanificacion = await this.obtenerConsumoPlanificacion(anio);
+      // Las 3 llamadas son independientes entre sí: paralelizar.
+      const [saldosAnteriores, entregasCenares, consumoPlanificacion] = await Promise.all([
+        this.obtenerSaldosAnoAnterior(anio - 1),
+        this.obtenerEntregasCenaresPorTrimestre(anio),
+        this.obtenerConsumoPlanificacion(anio),
+      ]);
 
       // Construir datos de la tabla
       const datosTabla = [];
@@ -472,9 +472,11 @@ export class ProgramacionAnualCenaresService {
     try {
       console.log(`📊 Calculando saldos Q4 para año ${anioAnterior}...`);
 
-      // Obtener todas las vacunas y jeringas activas
-      const todasVacunas = await prisma.vacuna.findMany({ where: { estado: 'activo' } });
-      const todasJeringas = await prisma.jeringa.findMany({ where: { estado: 'activo' } });
+      // Obtener todas las vacunas y jeringas activas (independientes: paralelizar)
+      const [todasVacunas, todasJeringas] = await Promise.all([
+        prisma.vacuna.findMany({ where: { estado: 'activo' } }),
+        prisma.jeringa.findMany({ where: { estado: 'activo' } }),
+      ]);
 
       // CASO ESPECIAL: Si es 2024, usar saldos estáticos
       if (anioAnterior === 2024) {
@@ -488,15 +490,12 @@ export class ProgramacionAnualCenaresService {
       // 1. El saldo inicial del año (Q4 del año anterior al anterior)
       // 2. Las entregas del año
       // 3. El consumo del año
-
-      // Obtener saldo inicial (Q4 del año anterior-1)
-      const saldosIniciales = await this.obtenerSaldosAnoAnterior(anioAnterior - 1);
-
-      // Obtener entregas CENARES del año
-      const entregasAnio = await this.obtenerEntregasCenaresPorTrimestre(anioAnterior);
-
-      // Obtener consumo de planificación del año
-      const consumoAnio = await this.obtenerConsumoPlanificacion(anioAnterior);
+      // Las 3 llamadas son independientes entre sí: paralelizar.
+      const [saldosIniciales, entregasAnio, consumoAnio] = await Promise.all([
+        this.obtenerSaldosAnoAnterior(anioAnterior - 1),
+        this.obtenerEntregasCenaresPorTrimestre(anioAnterior),
+        this.obtenerConsumoPlanificacion(anioAnterior),
+      ]);
 
       // Calcular saldo Q4 para cada vacuna
       for (const vacuna of todasVacunas) {
@@ -619,35 +618,35 @@ export class ProgramacionAnualCenaresService {
     const entregasMap = new Map<string, any>();
 
     try {
-      // Obtener lotes de vacunas del año
-      const lotesVacunas = await prisma.loteVacuna.findMany({
-        where: {
-          fechaIngreso: {
-            gte: new Date(`${anio}-01-01`),
-            lte: new Date(`${anio}-12-31`)
+      // Obtener lotes de vacunas y jeringas del año (independientes: paralelizar)
+      const [lotesVacunas, lotesJeringas] = await Promise.all([
+        prisma.loteVacuna.findMany({
+          where: {
+            fechaIngreso: {
+              gte: new Date(`${anio}-01-01`),
+              lte: new Date(`${anio}-12-31`)
+            }
+          },
+          select: {
+            vacunaId: true,
+            cantidadInicial: true,
+            formaIngreso: true
           }
-        },
-        select: {
-          vacunaId: true,
-          cantidadInicial: true,
-          formaIngreso: true
-        }
-      });
-
-      // Obtener lotes de jeringas del año
-      const lotesJeringas = await prisma.loteJeringa.findMany({
-        where: {
-          fechaIngreso: {
-            gte: new Date(`${anio}-01-01`),
-            lte: new Date(`${anio}-12-31`)
+        }),
+        prisma.loteJeringa.findMany({
+          where: {
+            fechaIngreso: {
+              gte: new Date(`${anio}-01-01`),
+              lte: new Date(`${anio}-12-31`)
+            }
+          },
+          select: {
+            jeringaId: true,
+            cantidadInicial: true,
+            formaIngreso: true
           }
-        },
-        select: {
-          jeringaId: true,
-          cantidadInicial: true,
-          formaIngreso: true
-        }
-      });
+        }),
+      ]);
 
       // Procesar lotes de vacunas
       for (const lote of lotesVacunas) {
@@ -784,11 +783,13 @@ export class ProgramacionAnualCenaresService {
       console.log(`🔄 Sincronizando saldos anteriores para año ${anio}...`);
 
       // Forzar recálculo de saldos del año anterior
-      const saldosCalculados = await this.obtenerSaldosAnoAnterior(anio - 1);
-
-      // Obtener nombres para el reporte
-      const vacunas = await prisma.vacuna.findMany({ where: { estado: 'activo' } });
-      const jeringas = await prisma.jeringa.findMany({ where: { estado: 'activo' } });
+      // Forzar recálculo de saldos del año anterior y obtener nombres para el
+      // reporte (las 3 llamadas son independientes: paralelizar).
+      const [saldosCalculados, vacunas, jeringas] = await Promise.all([
+        this.obtenerSaldosAnoAnterior(anio - 1),
+        prisma.vacuna.findMany({ where: { estado: 'activo' } }),
+        prisma.jeringa.findMany({ where: { estado: 'activo' } }),
+      ]);
 
       const detalles: Array<{ id: string; nombre: string; tipo: string; saldoAnterior: number }> = [];
 

@@ -248,7 +248,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
               Generado: {new Date(vale.fechaGeneracion).toLocaleString('es-PE')}
             </div>
             <div className="flex items-center gap-2">
-              <button
+              <button type="button"
                 onClick={handleRevertir}
                 disabled={isReverting}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors disabled:opacity-50"
@@ -256,7 +256,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                 {isReverting ? <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" /> : <ArrowCounterClockwise weight="bold" className="h-4 w-4" />}
                 Revertir
               </button>
-              <button
+              <button type="button"
                 onClick={() => setShowExportModal(true)}
                 className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 rounded-lg shadow-md transition-all"
               >
@@ -286,7 +286,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                  { id: 'consolidado', label: 'Consolidado', icon: Package },
                  { id: 'detalle', label: 'Por Establecimiento', icon: Buildings },
                ].map(tab => (
-                 <button
+                 <button type="button"
                    key={tab.id}
                    onClick={() => setActiveTab(tab.id as 'consolidado' | 'detalle')}
                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${

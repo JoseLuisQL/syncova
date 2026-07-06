@@ -240,7 +240,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
           <span className="font-medium">Error al cargar roles</span>
         </div>
         <p className="mt-2 text-rose-700">{error}</p>
-        <button
+        <button type="button"
           onClick={() => void loadRoles()}
           className={`${COMPONENT_STYLES.button.secondary} mt-4`}
         >
@@ -327,7 +327,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
 
           <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
             {onNavigateToPermissions ? (
-              <button
+              <button type="button"
                 onClick={onNavigateToPermissions}
                 className={COMPONENT_STYLES.button.secondary}
               >
@@ -335,7 +335,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                 <span>Ver permisos</span>
               </button>
             ) : null}
-            <button
+            <button type="button"
               onClick={() => setShowModal(true)}
               className={COMPONENT_STYLES.button.primary}
             >
@@ -431,7 +431,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                     </td>
                     <td className={`${COMPONENT_STYLES.table.cell} text-right`}>
                       <div className="flex items-center justify-end gap-2">
-                        <button
+                        <button type="button"
                           onClick={() => void handleManagePermissions(role)}
                           className={`${COMPONENT_STYLES.button.icon} text-zinc-600 bg-zinc-50 hover:bg-zinc-100 focus:ring-zinc-500`}
                           title="Gestionar permisos"
@@ -439,7 +439,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                           <Key className="h-4 w-4" />
                         </button>
 
-                        <button
+                        <button type="button"
                           onClick={() => handleEdit(role)}
                           className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconEdit}`}
                           title={role.esDefault ? 'Rol protegido del sistema' : 'Editar rol'}
@@ -448,7 +448,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                           <PencilSimple className="h-4 w-4" />
                         </button>
 
-                        <button
+                        <button type="button"
                           onClick={() => void handleToggleEstado(role)}
                           className={`${COMPONENT_STYLES.button.icon} ${
                             role.estado === 'activo'
@@ -462,7 +462,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                         </button>
 
                         {!role.esDefault ? (
-                          <button
+                          <button type="button"
                             onClick={() => handleDelete(role)}
                             className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconDelete}`}
                             title="Eliminar rol"

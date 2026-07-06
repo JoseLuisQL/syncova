@@ -56,7 +56,7 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
             </div>
 
             <div className="flex items-center gap-2">
-              <button
+              <button type="button"
                 onClick={onRefresh}
                 disabled={isLoading}
                 className={COMPONENT_STYLES.button.secondary}
@@ -71,7 +71,7 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
               </button>
 
               {canExportUsers && (
-                <button
+                <button type="button"
                   onClick={onExportar}
                   className={COMPONENT_STYLES.button.secondary}
                   title="Exportar usuarios"
@@ -82,7 +82,7 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
               )}
 
               {canCreateUser && (
-                <button
+                <button type="button"
                   onClick={onNuevoUsuario}
                   disabled={isCreating}
                   className={COMPONENT_STYLES.button.primary}
@@ -109,7 +109,7 @@ const UsuariosHeader: React.FC<UsuariosHeaderProps> = memo(({
               const isActive = activeSection === section.id;
 
               return (
-                <button
+                <button type="button"
                   key={section.id}
                   onClick={() => onSectionChange(section.id)}
                   className={`${COMPONENT_STYLES.nav.tab} ${

@@ -217,7 +217,7 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
                   Se registrarán <span className="text-zinc-900 font-semibold">{stockInfo.stockDisponible.toLocaleString()}</span> unidades
                   como stock inicial de <span className="bg-zinc-100 px-1.5 py-0.5 rounded-sm border border-zinc-200">{MESES[mesSiguiente - 1]} {anioSiguiente}</span>
                 </p>
-                <button
+                <button type="button"
                   onClick={onActualizarStockSiguienteMes}
                   disabled={isUpdatingStockSiguienteMes}
                   className="inline-flex h-9 items-center justify-center gap-2 rounded-[9px] bg-[#7c3aed] px-4 text-xs font-bold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
@@ -245,7 +245,7 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
             </div>
             <div className="text-[0.95rem] font-semibold text-rose-900 tracking-tight">No se pudo sincronizar el stock</div>
             <div className="text-[0.7rem] font-medium text-rose-800/80 mt-1 max-w-md text-center">No se pudo acceder al stock del sistema principal.</div>
-            <button
+            <button type="button"
               onClick={onRetry}
               className="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-xl border border-rose-200 bg-white text-rose-700 font-bold text-xs hover:bg-rose-50 transition-colors shadow-sm"
             >

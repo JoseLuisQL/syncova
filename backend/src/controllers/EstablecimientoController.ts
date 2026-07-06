@@ -198,9 +198,11 @@ export class EstablecimientoController {
   static async getOpcionesJerarquicas(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       // Importar servicios dinámicamente para evitar dependencias circulares
-      const { RedService } = await import('@/services/RedService');
-      const { MicroredService } = await import('@/services/MicroredService');
-      const { CentroAcopioService } = await import('@/services/CentroAcopioService');
+      const [{ RedService }, { MicroredService }, { CentroAcopioService }] = await Promise.all([
+        import('@/services/RedService'),
+        import('@/services/MicroredService'),
+        import('@/services/CentroAcopioService'),
+      ]);
 
       const [redesResult, microredesResult, centrosResult] = await Promise.all([
         RedService.getAll({ estado: 'activo', limit: 1000 }),

@@ -80,7 +80,7 @@ const Pagination: React.FC<PaginationProps> = memo(({
       </p>
 
       <div className="flex items-center gap-1">
-        <button
+        <button type="button"
           onClick={handlePrevious}
           disabled={currentPage === 1}
           className={`${buttonBaseClass} ${inactiveClass} ${currentPage === 1 ? disabledClass : ''}`}
@@ -90,7 +90,7 @@ const Pagination: React.FC<PaginationProps> = memo(({
         </button>
 
         {visiblePages.map((page) => (
-          <button
+          <button type="button"
             key={page}
             onClick={() => onPageChange(page)}
             className={`${buttonBaseClass} min-w-[32px] ${page === currentPage ? activeClass : inactiveClass}`}
@@ -101,7 +101,7 @@ const Pagination: React.FC<PaginationProps> = memo(({
           </button>
         ))}
 
-        <button
+        <button type="button"
           onClick={handleNext}
           disabled={currentPage === totalPages}
           className={`${buttonBaseClass} ${inactiveClass} ${currentPage === totalPages ? disabledClass : ''}`}

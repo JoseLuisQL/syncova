@@ -42,7 +42,7 @@ export const ValesHeader: React.FC<ValesHeaderProps> = memo(({
           {/* Acciones */}
           <div className="flex items-center gap-3">
             {/* Boton principal: Generar Vale */}
-            <button
+            <button type="button"
               onClick={onGenerarVale}
               disabled={!centroAcopioSeleccionado || isGenerating}
               className={COMPONENT_STYLES.button.success}
@@ -59,7 +59,7 @@ export const ValesHeader: React.FC<ValesHeaderProps> = memo(({
             </button>
 
             {/* Boton secundario: Sincronizar */}
-            <button
+            <button type="button"
               onClick={onSincronizar}
               disabled={!centroAcopioSeleccionado || isSyncing || isGenerating}
               className={COMPONENT_STYLES.button.secondary}
@@ -73,7 +73,7 @@ export const ValesHeader: React.FC<ValesHeaderProps> = memo(({
 
             {/* Boton cerrar (si aplica) */}
             {onClose && (
-              <button
+              <button type="button"
                 onClick={onClose}
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                 title="Cerrar"

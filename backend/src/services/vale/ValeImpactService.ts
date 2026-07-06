@@ -115,20 +115,11 @@ export class ValeImpactService {
       // Determine centro de acopio
       const centroAcopioId = establecimiento.centroAcopioId;
 
-      // Calculate vaccine stock impact
-      const impactoVacunas = await this.calcularImpactoVacunas(
-        vacunaId, 
-        cantidadAbsoluta, 
-        esRestauracion
-      );
-
-      // Calculate syringe stock impact
-      const impactoJeringas = await this.calcularImpactoJeringas(
-        vacunaId,
-        cantidadAbsoluta,
-        esRestauracion,
-        centroAcopioId
-      );
+      // Calculate vaccine and syringe stock impact (independientes: paralelizar)
+      const [impactoVacunas, impactoJeringas] = await Promise.all([
+        this.calcularImpactoVacunas(vacunaId, cantidadAbsoluta, esRestauracion),
+        this.calcularImpactoJeringas(vacunaId, cantidadAbsoluta, esRestauracion, centroAcopioId),
+      ]);
 
       // Get affected vales
       const valesAfectados = await this.obtenerValesAfectados(

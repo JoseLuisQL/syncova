@@ -123,7 +123,7 @@ const ValesConnectionTest: React.FC = () => {
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Estado de Conectividad</h2>
-          <button
+          <button type="button"
             onClick={runAllTests}
             disabled={isRunning}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
@@ -178,7 +178,7 @@ const ValesConnectionTest: React.FC = () => {
                   )}
                 </div>
               </div>
-              <button
+              <button type="button"
                 onClick={() => runTest(index)}
                 disabled={test.status === 'running' || isRunning}
                 className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50"

@@ -45,7 +45,7 @@ export const ErrorState: React.FC<ErrorStateProps> = memo(({ error, onRetry }) =
         Error al cargar Dashboard
       </h2>
       <p className="mb-6 text-sm text-secondary">{error}</p>
-      <button
+      <button type="button"
         onClick={onRetry}
         className="inline-flex items-center gap-2 px-5 py-2.5 
           border border-zinc-200 bg-white text-sm font-medium text-secondary

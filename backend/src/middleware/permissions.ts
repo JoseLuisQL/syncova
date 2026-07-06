@@ -137,10 +137,11 @@ export const validatePermissions = (allowedRoles: string[]) => {
 
       // Verificar si el rol del usuario está permitido
       let hasPermission = false;
-      
+
       for (const allowedRole of allowedRoles) {
         const mappedRoles = roleMapping[allowedRole] || [];
-        if (mappedRoles.includes(userRole)) {
+        const mappedRolesSet = new Set(mappedRoles);
+        if (mappedRolesSet.has(userRole)) {
           hasPermission = true;
           break;
         }

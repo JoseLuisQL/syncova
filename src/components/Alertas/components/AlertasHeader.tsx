@@ -54,7 +54,7 @@ export const AlertasHeader: React.FC<AlertasHeaderProps> = memo(({
                 </div>
               )}
               {onRefresh && (
-                <button
+                <button type="button"
                   onClick={onRefresh}
                   disabled={isLoading}
                   className={COMPONENT_STYLES.button.secondary}
@@ -80,7 +80,7 @@ export const AlertasHeader: React.FC<AlertasHeaderProps> = memo(({
               const isActive = activeSection === section.id;
 
               return (
-                <button
+                <button type="button"
                   key={section.id}
                   onClick={() => navigateToModule('alertas', section.id)}
                   className={`${COMPONENT_STYLES.nav.tab} ${

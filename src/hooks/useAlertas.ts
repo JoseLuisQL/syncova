@@ -176,10 +176,9 @@ export const useAlertas = (): UseAlertasResult => {
       
       logger.debug('✅ useAlertas.createAlerta - Alerta creada exitosamente', { id: result.id });
       
-      // Recargar datos para mantener sincronización
-      await loadAlertas();
-      await loadStats();
-      await loadUnreadAlertas();
+      // Recargar datos para mantener sincronización (las 3 cargas son
+      // independientes entre sí: paralelizar).
+      await Promise.all([loadAlertas(), loadStats(), loadUnreadAlertas()]);
     }
 
     return result;
@@ -299,11 +298,9 @@ export const useAlertas = (): UseAlertasResult => {
         ids 
       });
       
-      // Recargar datos
-      await loadAlertas();
-      await loadUnreadAlertas();
-      await loadStats();
-      
+      // Recargar datos (las 3 cargas son independientes: paralelizar)
+      await Promise.all([loadAlertas(), loadUnreadAlertas(), loadStats()]);
+
       return true;
     }
 

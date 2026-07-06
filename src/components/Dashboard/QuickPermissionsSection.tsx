@@ -117,7 +117,7 @@ const ScheduleModal: React.FC<{
               <p className="text-[12px] leading-4 text-[#606571]">{permisoLabel}</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]">
+          <button type="button" onClick={onClose} className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -161,13 +161,13 @@ const ScheduleModal: React.FC<{
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-[#eeeef3] bg-[#fbfafd] px-5 py-3">
-          <button
+          <button type="button"
             onClick={onClose}
             className="inline-flex h-9 items-center gap-1.5 rounded-[7px] border border-[#e7e7ef] bg-white px-3.5 text-[13px] font-semibold text-[#15171d] transition-colors hover:bg-white"
           >
             Cancelar
           </button>
-          <button
+          <button type="button"
             onClick={() => {
               if (!fechaActivacion) return;
               onSave(
@@ -363,7 +363,7 @@ const QuickPermissionsSection: React.FC = memo(() => {
                 <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
               </div>
 
-              <button
+              <button type="button"
                 onClick={() => void loadGlobales()}
                 disabled={loading}
                 className="flex items-center justify-center p-2 rounded-lg border border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900 hover:border-zinc-300 disabled:opacity-50 transition-all"
@@ -419,7 +419,7 @@ const QuickPermissionsSection: React.FC = memo(() => {
 
                   {/* Bottom: Schedule button + scheduled info */}
                   <div className="mt-4 flex items-center gap-2">
-                    <button
+                    <button type="button"
                       onClick={() => setScheduleModal({
                         isOpen: true,
                         tipo: config.tipo,

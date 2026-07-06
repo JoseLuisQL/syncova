@@ -158,7 +158,7 @@ const AdminUsersSection: React.FC = memo(() => {
           )}
         </h3>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={handleRefresh}
             disabled={loading}
             className="text-[12px] font-bold text-zinc-400 hover:text-zinc-900 disabled:opacity-50 
@@ -178,7 +178,7 @@ const AdminUsersSection: React.FC = memo(() => {
             <ShieldCheck className="mx-auto h-8 w-8 text-zinc-300 mb-2" weight="duotone" aria-hidden="true" />
             <p className="text-sm font-bold text-zinc-700 mb-1">Fallo de conexión</p>
             <p className="text-xs font-medium text-zinc-400 mb-4">{error}</p>
-            <button
+            <button type="button"
               onClick={handleRefresh}
               className="text-xs font-bold text-zinc-900 hover:underline"
             >
@@ -222,7 +222,7 @@ const AdminUsersSection: React.FC = memo(() => {
 
       {/* Footer: quick link to full users module */}
       <div className="border-t border-zinc-100 px-5 py-3 bg-zinc-50/30">
-        <button
+        <button type="button"
           onClick={() => navigate('/usuarios')}
           className="flex items-center justify-between w-full group"
         >

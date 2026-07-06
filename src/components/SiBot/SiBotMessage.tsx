@@ -136,7 +136,7 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
       {formattedSuggestions.length > 0 && !isUser && (
         <div className="ml-[38px] mt-2 flex max-w-[90%] flex-col gap-1.5">
           {formattedSuggestions.map((suggestionText, idx) => (
-             <button
+             <button type="button"
                 key={idx}
                 onClick={() => onSuggestionSelect && onSuggestionSelect(suggestionText)}
                 className="group flex w-fit max-w-full flex-row items-start gap-2 rounded-[10px] border border-[#e7e7ef] bg-white py-1.5 pl-2.5 pr-3 text-left text-[11.5px] font-medium text-[#606571] outline-none transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] active:scale-[0.99]"

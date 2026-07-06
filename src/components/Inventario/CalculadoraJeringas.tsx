@@ -85,7 +85,7 @@ const CalculadoraJeringas: React.FC<CalculadoraJeringasProps> = ({
   return (
     <div className={COMPONENT_STYLES.panel}>
       <div className="p-4 border-b border-zinc-200">
-        <button
+        <button type="button"
           onClick={() => setShowCalculator(!showCalculator)}
           className="flex items-center gap-2 text-lg font-semibold text-zinc-900 transition-colors hover:text-zinc-600"
         >
@@ -174,7 +174,7 @@ const CalculadoraJeringas: React.FC<CalculadoraJeringasProps> = ({
           )}
 
           <div className="flex justify-start">
-            <button
+            <button type="button"
               onClick={calcularJeringas}
               disabled={!selectedVacuna || cantidadVacunas <= 0 || isCalculating}
               className={COMPONENT_STYLES.button.primary}

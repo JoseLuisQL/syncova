@@ -351,7 +351,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Error al cargar datos</h3>
           <p className="text-gray-600 mb-6 text-center max-w-md">{error}</p>
-          <button
+          <button type="button"
             onClick={loadData}
             className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
           >
@@ -383,7 +383,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
           </div>
           <div className="flex items-center space-x-3">
             {/* Export Button */}
-            <button
+            <button type="button"
               onClick={handleExportarExcel}
               disabled={isExporting || loading || items.length === 0}
               className="flex items-center rounded-[10px] border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] shadow-sm transition-colors hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-50"
@@ -576,7 +576,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
 
             {/* Export Button - Centered and Prominent */}
             <div className="flex justify-center">
-              <button
+              <button type="button"
                 onClick={handleExportarExcel}
                 disabled={isExporting || loading || items.length === 0}
                 className="flex items-center justify-center rounded-lg bg-teal-600 px-8 py-3 text-lg font-medium text-white shadow-lg transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"

@@ -69,24 +69,26 @@ export class ValeGenerationService {
       throw createError('Centro de acopio no encontrado', 404);
     }
 
-    const valesExistentes = await prisma.valeEntrega.findMany({
-      where: {
-        centroAcopioId,
-        anio
-      },
-      select: { numero: true }
-    });
-
-    const numerosKardex = await prisma.kardex.findMany({
-      where: {
-        numeroDocumento: {
-          startsWith: `${centroAcopio.codigo}-${anio}-`
+    // Las 2 queries son independientes (no se usan entre sí): paralelizar.
+    const [valesExistentes, numerosKardex] = await Promise.all([
+      prisma.valeEntrega.findMany({
+        where: {
+          centroAcopioId,
+          anio
         },
-        documento: 'VALE_ENTREGA'
-      },
-      select: { numeroDocumento: true },
-      distinct: ['numeroDocumento']
-    });
+        select: { numero: true }
+      }),
+      prisma.kardex.findMany({
+        where: {
+          numeroDocumento: {
+            startsWith: `${centroAcopio.codigo}-${anio}-`
+          },
+          documento: 'VALE_ENTREGA'
+        },
+        select: { numeroDocumento: true },
+        distinct: ['numeroDocumento']
+      }),
+    ]);
 
     let maxNumero = 0;
     const prefijo = `${centroAcopio.codigo}-${anio}-`;

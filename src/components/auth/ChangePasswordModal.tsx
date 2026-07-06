@@ -152,7 +152,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                 <p className="mt-1 text-[12px] leading-4 text-[#606571]">Actualiza tu acceso permanentemente</p>
               </div>
             </div>
-            <button
+            <button type="button"
               onClick={handleClose}
               className="rounded-[7px] border border-transparent p-1.5 text-[#8b8f9b] transition-all hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
               aria-label="Cerrar"

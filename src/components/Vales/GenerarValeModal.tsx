@@ -186,7 +186,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
       size="xl"
       footer={
         <div className="flex w-full items-center justify-between">
-          <button
+          <button type="button"
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
           >
@@ -195,7 +195,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
 
           {!showVistaPrevia ? (
             <div className="flex gap-2">
-              <button
+              <button type="button"
                 onClick={handleObtenerVistaPrevia}
                 disabled={isLoadingPreview || !vistaPrevia}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
@@ -209,7 +209,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
                 Ver Detalle Completo
               </button>
 
-              <button
+              <button type="button"
                 onClick={handleGenerarVale}
                 disabled={isGenerating || !vistaPrevia}
                 className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-teal-600 border border-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm disabled:opacity-50"
@@ -224,7 +224,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
               </button>
             </div>
           ) : (
-            <button
+            <button type="button"
               onClick={handleGenerarVale}
               disabled={isGenerating || !vistaPrevia}
               className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-teal-600 border border-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors shadow-sm disabled:opacity-50"
@@ -380,7 +380,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
                   <Gear className="h-5 w-5 text-zinc-500" />
                   Asignación de Jeringas
                 </h4>
-                <button
+                <button type="button"
                   onClick={() => setShowConfiguracionJeringas(!showConfiguracionJeringas)}
                   className="px-3 py-1.5 bg-white border border-zinc-200 shadow-sm rounded-lg text-zinc-700 hover:text-zinc-900 hover:bg-zinc-50 text-xs font-semibold transition-colors"
                 >
@@ -435,7 +435,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
                 <Eye className="h-5 w-5 text-zinc-500" />
                 Desglose del Documento
               </h4>
-              <button
+              <button type="button"
                 onClick={() => setShowVistaPrevia(false)}
                 className="text-zinc-600 font-medium hover:text-zinc-900 text-sm flex items-center gap-1 bg-white border border-zinc-200 shadow-sm px-3 py-1.5 rounded-lg transition-colors"
               >

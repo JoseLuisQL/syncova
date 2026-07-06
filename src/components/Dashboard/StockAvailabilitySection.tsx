@@ -58,7 +58,7 @@ const StockAvailabilitySection: React.FC<StockAvailabilitySectionProps> = ({ dat
       </div>
 
       <div className="mt-5 border-t border-zinc-100 pt-4">
-        <button className="flex items-center gap-1 text-[13px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b]">
+        <button type="button" className="flex items-center gap-1 text-[13px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b]">
           Ver inventario completo <span className="text-lg leading-none">→</span>
         </button>
       </div>

@@ -376,36 +376,28 @@ export class ValeQueryService {
         };
       }
 
-      const tiposGenerados: string[] = [];
+      const tiposGeneradosSet = new Set<string>();
 
       for (const vale of valesExistentes) {
         if (vale.tipoVale) {
-          if (!tiposGenerados.includes(vale.tipoVale)) {
-            tiposGenerados.push(vale.tipoVale);
-          }
+          tiposGeneradosSet.add(vale.tipoVale);
         } else {
           const tieneEntregasBase = vale.detalles.some(detalle => detalle.cantidadProgramada > 0);
           const tieneEntregasAdicionales = vale.detalles.some(detalle => detalle.cantidadAdicional > 0);
 
           if (tieneEntregasBase && tieneEntregasAdicionales) {
-            if (!tiposGenerados.includes('completo')) {
-              tiposGenerados.push('completo');
-            }
+            tiposGeneradosSet.add('completo');
           } else if (tieneEntregasBase && !tieneEntregasAdicionales) {
-            if (!tiposGenerados.includes('solo_base')) {
-              tiposGenerados.push('solo_base');
-            }
+            tiposGeneradosSet.add('solo_base');
           } else if (!tieneEntregasBase && tieneEntregasAdicionales) {
-            if (!tiposGenerados.includes('solo_adicionales')) {
-              tiposGenerados.push('solo_adicionales');
-            }
+            tiposGeneradosSet.add('solo_adicionales');
           }
         }
       }
 
       return {
         success: true,
-        data: tiposGenerados
+        data: Array.from(tiposGeneradosSet)
       };
     } catch (error) {
       console.error('Error obteniendo tipos de vales generados:', error);

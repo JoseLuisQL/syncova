@@ -191,7 +191,7 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
                   {/* Acciones */}
                   <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
                     <div className="flex items-center justify-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity">
-                      <button
+                      <button type="button"
                         onClick={() => onVerDetalle(vale)}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
                         title="Ver detalle"
@@ -199,7 +199,7 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
                       >
                         <Eye weight="bold" className="h-4 w-4" />
                       </button>
-                      <button
+                      <button type="button"
                         onClick={() => onExportar(vale)}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
                         title="Exportar"
@@ -207,7 +207,7 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
                       >
                         <Download weight="bold" className="h-4 w-4" />
                       </button>
-                      <button
+                      <button type="button"
                         onClick={() => onRevertir(vale)}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-zinc-500 hover:bg-rose-50 hover:text-rose-600 transition-colors"
                         title="Revertir"

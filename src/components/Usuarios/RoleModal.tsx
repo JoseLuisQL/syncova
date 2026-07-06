@@ -257,7 +257,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
               </div>
             </div>
             
-            <button
+            <button type="button"
               onClick={onClose}
               disabled={isLoading || isSubmitting}
               className={COMPONENT_STYLES.button.ghost}

@@ -49,7 +49,7 @@ const ScheduleModal: React.FC<{
               <p className="text-[12px] leading-4 text-[#606571]">{permisoLabel}</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]">
+          <button type="button" onClick={onClose} className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]">
             <X className="h-4 w-4" weight="bold" />
           </button>
         </div>
@@ -97,13 +97,13 @@ const ScheduleModal: React.FC<{
         </div>
 
         <div className="mt-auto flex items-center justify-end gap-2 border-t border-[#eeeef3] bg-[#fbfafd] px-5 py-3">
-          <button
+          <button type="button"
             onClick={onClose}
             className="inline-flex h-9 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-white px-3.5 text-[13px] font-semibold text-[#15171d] transition-colors hover:bg-white"
           >
             Cancelar
           </button>
-          <button
+          <button type="button"
             onClick={() => {
               if (!fechaActivacion) return;
               onSave(
@@ -219,14 +219,14 @@ const PermisosPlanificacion: React.FC = () => {
         <div className="flex items-center justify-between mb-3">
           <h4 className="text-[13px] font-semibold text-primary">Mis permisos de acceso</h4>
           <div className="flex items-center gap-2">
-            <button 
+            <button type="button" 
               onClick={() => void loadGlobales()}
               disabled={loading}
               className={`text-secondary transition-colors hover:text-primary ${loading ? 'animate-spin' : ''}`}
             >
               <ArrowsClockwise size={14} weight="bold" />
             </button>
-            <button className="flex items-center gap-1 text-[12px] font-semibold text-tertiary hover:text-primary">
+            <button type="button" className="flex items-center gap-1 text-[12px] font-semibold text-tertiary hover:text-primary">
               Gestionar <ArrowSquareOut size={14} />
             </button>
           </div>
@@ -274,7 +274,7 @@ const PermisosPlanificacion: React.FC = () => {
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <h5 className="text-[13px] font-semibold text-primary">Editar Movimientos</h5>
-                <button 
+                <button type="button" 
                   onClick={() => handleToggle(TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo, !(movPermiso?.habilitado ?? false))}
                   disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
                   className={`relative flex h-5 w-9 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${movPermiso?.habilitado ? 'bg-[#35bfa8]' : 'bg-zinc-200'}`}
@@ -290,7 +290,7 @@ const PermisosPlanificacion: React.FC = () => {
               <p className="mb-2 text-[11px] text-secondary">Trans., Ingreso, Salida, Trans. Salida</p>
               
               <div className="flex items-center gap-3">
-                <button 
+                <button type="button" 
                   onClick={() => setScheduleModal({ isOpen: true, label: 'Editar Movimientos', tipo: TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo })}
                   disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
                   className="flex items-center gap-1 rounded-[10px] border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-[11px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b] disabled:opacity-50"
@@ -313,7 +313,7 @@ const PermisosPlanificacion: React.FC = () => {
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <h5 className="text-[13px] font-semibold text-primary">Editar Planificaciones</h5>
-                <button 
+                <button type="button" 
                   onClick={() => handleToggle(TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo, !(planPermiso?.habilitado ?? false))}
                   disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
                   className={`relative flex h-5 w-9 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${planPermiso?.habilitado ? 'bg-[#35bfa8]' : 'bg-zinc-200'}`}
@@ -329,7 +329,7 @@ const PermisosPlanificacion: React.FC = () => {
               <p className="mb-2 text-[11px] text-secondary">Modificar planificaciones anuales</p>
               
               <div className="flex items-center gap-3">
-                <button 
+                <button type="button" 
                   onClick={() => setScheduleModal({ isOpen: true, label: 'Editar Planificaciones', tipo: TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo })}
                   disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
                   className="flex items-center gap-1 rounded-[10px] border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-[11px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b] disabled:opacity-50"
@@ -372,7 +372,7 @@ const PermisosPlanificacion: React.FC = () => {
             </div>
           </div>
 
-          <button className="flex w-full items-center justify-center gap-2 rounded-[12px] border border-[#269b8b] bg-[#35bfa8] py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#269b8b]">
+          <button type="button" className="flex w-full items-center justify-center gap-2 rounded-[12px] border border-[#269b8b] bg-[#35bfa8] py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#269b8b]">
             <CalendarCheck size={16} />
             Abrir planificación
           </button>

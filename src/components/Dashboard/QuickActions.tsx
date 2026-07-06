@@ -41,7 +41,7 @@ const QuickActions: React.FC = memo(() => {
           const colors = DASHBOARD_COLORS[action.colorScheme];
           
           return (
-            <button
+            <button type="button"
               key={action.path}
               onClick={() => handleNavigation(action.path)}
               className={`flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 

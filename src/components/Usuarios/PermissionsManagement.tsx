@@ -111,7 +111,7 @@ const ScheduleModal: React.FC<{
               <p className="text-xs text-zinc-500">{permisoLabel}</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-[7px] p-1.5 text-zinc-400 transition-colors hover:bg-[#fbfafd] hover:text-zinc-600">
+          <button type="button" onClick={onClose} className="rounded-[7px] p-1.5 text-zinc-400 transition-colors hover:bg-[#fbfafd] hover:text-zinc-600">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -156,10 +156,10 @@ const ScheduleModal: React.FC<{
         </div>
 
         <div className={COMPONENT_STYLES.modal.footer}>
-          <button onClick={onClose} className={COMPONENT_STYLES.button.secondary}>
+          <button type="button" onClick={onClose} className={COMPONENT_STYLES.button.secondary}>
             Cancelar
           </button>
-          <button
+          <button type="button"
             onClick={() => {
               if (!fechaActivacion) return;
               onSave(
@@ -333,7 +333,7 @@ const PermissionsManagement: React.FC = () => {
               <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
             </div>
 
-            <button onClick={() => void loadData()} className={COMPONENT_STYLES.button.secondary}>
+            <button type="button" onClick={() => void loadData()} className={COMPONENT_STYLES.button.secondary}>
               <ArrowsClockwise className="h-4 w-4" />
             </button>
           </div>
@@ -385,7 +385,7 @@ const PermissionsManagement: React.FC = () => {
                 </div>
 
                 <div className="mt-3 flex items-center gap-2">
-                  <button
+                  <button type="button"
                     onClick={() => setScheduleModal({
                       isOpen: true,
                       tipo: config.tipo,
@@ -505,7 +505,7 @@ const PermissionsManagement: React.FC = () => {
 
                   {/* Actions */}
                   <div className="flex items-center justify-center">
-                    <button
+                    <button type="button"
                       onClick={() => setScheduleModal({
                         isOpen: true,
                         tipo: TIPOS_PERMISO.MOVIMIENTOS_EDICION,

@@ -637,7 +637,7 @@ const Vales: React.FC<ValesProps> = ({
                   <p className="mt-1 text-[12px] leading-4 text-[#606571]">Verificación del estado del sistema</p>
                 </div>
               </div>
-              <button
+              <button type="button"
                 onClick={() => setShowDiagnostico(false)}
                 className="rounded-[7px] p-1.5 transition-colors hover:bg-[#fbfafd]"
               >
@@ -694,7 +694,7 @@ const Vales: React.FC<ValesProps> = ({
                   </p>
                 </div>
               </div>
-              <button
+              <button type="button"
                 onClick={() => {
                   setShowModificacionesModal(false);
                   setValeSeleccionado(null);
@@ -728,7 +728,7 @@ const Vales: React.FC<ValesProps> = ({
               </div>
 
               <div className="mb-6">
-                <button
+                <button type="button"
                   onClick={() => sincronizarVale(valeSeleccionado.id)}
                   disabled={isSyncing}
                   className="flex h-9 w-full items-center justify-center space-x-2 rounded-[7px] bg-[#7c3aed] px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"

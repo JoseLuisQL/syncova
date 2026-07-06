@@ -28,7 +28,7 @@ const ReportesNav: React.FC<ReportesNavProps> = ({ activeSection, onSectionChang
             const isActive = activeSection === section.id;
 
             return (
-              <button
+              <button type="button"
                 key={section.id}
                 onClick={() => onSectionChange(section.id)}
                 className={`${COMPONENT_STYLES.nav.tab} ${

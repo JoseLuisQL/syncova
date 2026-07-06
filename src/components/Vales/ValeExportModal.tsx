@@ -127,7 +127,7 @@ const FormatOption = memo<{
   const Icon = config.icon;
 
   return (
-    <button
+    <button type="button"
       onClick={() => onExport(format)}
       disabled={isExporting}
       className={`p-6 border-2 rounded-xl ${config.colors} transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed`}
@@ -312,7 +312,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
 
           <div className="flex items-center gap-3">
             {currentStep > 1 && !(isFromTable && currentStep === 2) && (
-              <button
+              <button type="button"
                 onClick={handleBack}
                 disabled={isExporting}
                 className={MODAL_STYLES.button.secondary}
@@ -323,7 +323,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
             )}
 
             {currentStep < 3 && (
-              <button
+              <button type="button"
                 onClick={handleNext}
                 className={MODAL_STYLES.button.primary}
               >
@@ -332,7 +332,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
               </button>
             )}
 
-            <button
+            <button type="button"
               onClick={handleClose}
               disabled={isExporting}
               className={MODAL_STYLES.button.secondary}
@@ -381,7 +381,7 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
                         </span>
                       </div>
                       {entregasAdicionalesDisponibles.length > 1 && (
-                        <button
+                        <button type="button"
                           onClick={handleToggleTodas}
                           className="text-xs text-zinc-600 hover:text-amber-700 font-medium"
                         >
@@ -496,13 +496,13 @@ const ValeExportModal: React.FC<ValeExportModalProps> = ({
                 </div>
 
                 <div className="flex gap-3">
-                  <button
+                  <button type="button"
                     onClick={() => setConfig(prev => ({ ...prev, responsableRecojo: '' }))}
                     className="px-4 py-2 text-sm bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 transition-colors"
                   >
                     Limpiar
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => setConfig(prev => ({ ...prev, responsableRecojo: `${vale.usuario.nombres} ${vale.usuario.apellidos}` }))}
                     className="px-4 py-2 text-sm bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 transition-colors"
                   >

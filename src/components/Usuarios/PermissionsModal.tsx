@@ -271,7 +271,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
               </div>
             </div>
             
-            <button
+            <button type="button"
               onClick={onClose}
               disabled={isLoading || isSaving}
               className={COMPONENT_STYLES.button.ghost}
@@ -323,7 +323,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
 
             {/* Limpiar filtros */}
             {hasActiveFilters && (
-              <button
+              <button type="button"
                 onClick={clearFilters}
                 className={COMPONENT_STYLES.button.ghost}
               >
@@ -355,13 +355,13 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
 
             {!isReadOnly ? (
               <div className="flex items-center gap-2">
-                <button
+                <button type="button"
                   onClick={selectAll}
                   className="rounded-[8px] border border-[#e7e7ef] bg-white px-3 py-1.5 text-xs font-medium text-[#15171d] transition hover:bg-[#fbfafd]"
                 >
                   Seleccionar visibles
                 </button>
-                <button
+                <button type="button"
                   onClick={deselectAll}
                   className="px-3 py-1.5 text-xs font-medium text-zinc-600 bg-zinc-100 rounded-lg hover:bg-zinc-200 transition-colors"
                 >
@@ -382,7 +382,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
               <p className="text-zinc-600 font-medium">No se encontraron permisos</p>
               <p className="text-zinc-400 text-sm mt-1">Intenta ajustar los filtros de búsqueda</p>
               {hasActiveFilters && (
-                <button
+                <button type="button"
                   onClick={clearFilters}
                   className="mt-4 px-4 py-2 text-sm font-medium text-zinc-700 bg-zinc-50 rounded-xl hover:bg-zinc-100 transition-colors"
                 >
@@ -406,7 +406,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                     className="overflow-hidden rounded-[9px] border border-[#e7e7ef] bg-white shadow-none transition-colors duration-200 hover:bg-[#fbfafd]"
                   >
                     {/* Header de categoría */}
-                    <button
+                    <button type="button"
                       onClick={() => toggleCategory(category)}
                       className={`flex w-full items-center justify-between px-4 py-3 ${colors.bg} transition-colors duration-200`}
                       aria-expanded={isExpanded}
@@ -546,7 +546,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
 
             {/* Botones */}
             <div className="flex items-center gap-2">
-              <button
+              <button type="button"
                 onClick={onClose}
                 disabled={isLoading || isSaving}
                 className={COMPONENT_STYLES.button.secondary}
@@ -554,7 +554,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                 Cancelar
               </button>
               {!isReadOnly ? (
-                <button
+                <button type="button"
                   onClick={handleSave}
                   disabled={isLoading || isSaving}
                   className={COMPONENT_STYLES.button.primary}

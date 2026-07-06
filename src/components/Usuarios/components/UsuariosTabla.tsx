@@ -186,7 +186,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                     </div>
                   </td>
                   <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                    <button
+                    <button type="button"
                       onClick={() => onToggleEstado(usuario.id)}
                       className={usuario.estado === 'activo' 
                         ? COMPONENT_STYLES.badge.active 
@@ -208,21 +208,21 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                   </td>
                   <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
                     <div className="flex items-center justify-center gap-1">
-                      <button
+                      <button type="button"
                         onClick={() => onEdit(usuario)}
                         className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconEdit}`}
                         title="Editar usuario"
                       >
                         <PencilSimple className="h-4 w-4" />
                       </button>
-                      <button
+                      <button type="button"
                         onClick={() => onChangePassword(usuario)}
                         className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconKey}`}
                         title="Cambiar contraseña"
                       >
                         <Key className="h-4 w-4" />
                       </button>
-                      <button
+                      <button type="button"
                         onClick={() => onDelete(usuario.id)}
                         className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconDelete}`}
                         title="Eliminar usuario"
@@ -247,7 +247,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
               {pagination.total}
             </div>
             <div className="flex gap-2">
-              <button
+              <button type="button"
                 onClick={() => onChangePage(pagination.page - 1)}
                 disabled={!pagination.hasPrev}
                 className={`${COMPONENT_STYLES.pagination.button} ${COMPONENT_STYLES.pagination.buttonInactive}`}
@@ -260,7 +260,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                 if (pageNum > pagination.totalPages) return null;
 
                 return (
-                  <button
+                  <button type="button"
                     key={pageNum}
                     onClick={() => onChangePage(pageNum)}
                     className={`${COMPONENT_STYLES.pagination.button} ${
@@ -274,7 +274,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                 );
               })}
 
-              <button
+              <button type="button"
                 onClick={() => onChangePage(pagination.page + 1)}
                 disabled={!pagination.hasNext}
                 className={`${COMPONENT_STYLES.pagination.button} ${COMPONENT_STYLES.pagination.buttonInactive}`}

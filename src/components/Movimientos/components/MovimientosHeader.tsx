@@ -60,7 +60,7 @@ export const MovimientosHeader: React.FC<MovimientosHeaderProps> = memo(({
           <div className="flex flex-wrap items-center gap-2">
             {/* Guardar cambios pendientes */}
             {pendingChangesCount > 0 && (
-              <button
+              <button type="button"
                 onClick={onSaveChanges}
                 disabled={isAutoSaving}
                 className={COMPONENT_STYLES.button.warning}
@@ -75,7 +75,7 @@ export const MovimientosHeader: React.FC<MovimientosHeaderProps> = memo(({
             )}
 
             {/* Vales por Acopio */}
-            <button
+            <button type="button"
               onClick={onOpenVales}
               disabled={!selectedVacuna || selectedCentroAcopio === 'todos'}
               className={COMPONENT_STYLES.button.secondary}
@@ -88,7 +88,7 @@ export const MovimientosHeader: React.FC<MovimientosHeaderProps> = memo(({
             </button>
 
             {/* Actualizar */}
-            <button
+            <button type="button"
               onClick={onRefresh}
               disabled={isLoading || !selectedVacuna}
               className={COMPONENT_STYLES.button.secondary}
@@ -99,7 +99,7 @@ export const MovimientosHeader: React.FC<MovimientosHeaderProps> = memo(({
             </button>
 
             {/* Importar */}
-            <button
+            <button type="button"
               onClick={onImport}
               className={COMPONENT_STYLES.button.secondary}
               title="Importar movimientos desde Excel"
@@ -109,7 +109,7 @@ export const MovimientosHeader: React.FC<MovimientosHeaderProps> = memo(({
             </button>
 
             {/* Exportar */}
-            <button
+            <button type="button"
               onClick={onExport}
               disabled={isExporting || !selectedVacuna}
               className={COMPONENT_STYLES.button.primary}

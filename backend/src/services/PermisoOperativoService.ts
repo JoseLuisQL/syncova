@@ -57,33 +57,34 @@ export class PermisoOperativoService {
     mes: number,
     anio: number,
   ): Promise<{ usuarios: UsuarioConPermisos[]; globales: PermisosGlobales }> {
-    // Obtener usuarios responsables de acopio activos
-    const usuarios = await prisma.usuario.findMany({
-      where: {
-        rol: 'responsable_acopio',
-        estado: 'activo',
-      },
-      select: {
-        id: true,
-        nombres: true,
-        apellidos: true,
-        usuario: true,
-        email: true,
-        estado: true,
-        centroAcopio: { select: { id: true, nombre: true } },
-        centrosAcopioAsignados: {
-          select: {
-            centroAcopio: { select: { id: true, nombre: true } },
+    // Obtener usuarios responsables de acopio activos y permisos del período
+    // (las 2 queries son independientes: paralelizar).
+    const [usuarios, permisos] = await Promise.all([
+      prisma.usuario.findMany({
+        where: {
+          rol: 'responsable_acopio',
+          estado: 'activo',
+        },
+        select: {
+          id: true,
+          nombres: true,
+          apellidos: true,
+          usuario: true,
+          email: true,
+          estado: true,
+          centroAcopio: { select: { id: true, nombre: true } },
+          centrosAcopioAsignados: {
+            select: {
+              centroAcopio: { select: { id: true, nombre: true } },
+            },
           },
         },
-      },
-      orderBy: [{ apellidos: 'asc' }, { nombres: 'asc' }],
-    });
-
-    // Obtener todos los permisos para el período
-    const permisos = await prisma.permisoOperativo.findMany({
-      where: { mes, anio },
-    });
+        orderBy: [{ apellidos: 'asc' }, { nombres: 'asc' }],
+      }),
+      prisma.permisoOperativo.findMany({
+        where: { mes, anio },
+      }),
+    ]);
 
     // Separar permisos globales (sin usuarioId) e individuales
     const permisosGlobalesDb = permisos.filter(p => p.usuarioId === null);

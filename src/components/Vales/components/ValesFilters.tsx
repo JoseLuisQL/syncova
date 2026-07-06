@@ -110,7 +110,7 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
         </div>
 
         {/* Toggle filtros avanzados */}
-        <button
+        <button type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
           className="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-700 mt-3 transition-colors outline-none focus:ring-2 focus:ring-zinc-900/10 rounded-md px-2 py-1"
         >
@@ -173,7 +173,7 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
         <span className="text-sm text-gray-600">
           Periodo: <strong>{MESES[selectedMes - 1]} {selectedAnio}</strong>
         </span>
-        <button
+        <button type="button"
           onClick={onRefresh}
           disabled={isLoading}
           className={COMPONENT_STYLES.button.secondary}

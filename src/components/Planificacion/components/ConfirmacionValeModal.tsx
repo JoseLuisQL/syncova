@@ -52,7 +52,7 @@ const ConfirmacionValeModal: React.FC<ConfirmacionValeModalProps> = ({
       size="sm"
       footer={
         <div className="flex w-full flex-col gap-2 sm:flex-row-reverse">
-          <button
+          <button type="button"
             onClick={onConfirm}
             disabled={isProcessing}
             className={`${COMPONENT_STYLES.button.primary} flex-1`}
@@ -69,7 +69,7 @@ const ConfirmacionValeModal: React.FC<ConfirmacionValeModalProps> = ({
               </>
             )}
           </button>
-          <button
+          <button type="button"
             onClick={onCancel}
             disabled={isProcessing}
             className={`${COMPONENT_STYLES.button.secondary} flex-1`}

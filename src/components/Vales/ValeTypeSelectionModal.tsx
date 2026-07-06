@@ -409,7 +409,7 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
             )}
           </div>
           <div className="flex items-center gap-3">
-            <button
+            <button type="button"
               onClick={handleRefresh}
               disabled={isLoading}
               className="px-3 py-2 text-zinc-500 hover:text-zinc-800 disabled:opacity-50"
@@ -417,13 +417,13 @@ const ValeTypeSelectionModal: React.FC<ValeTypeSelectionModalProps> = ({
             >
               <ArrowsClockwise className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
-            <button
+            <button type="button"
               onClick={onClose}
               className={MODAL_STYLES.button.secondary}
             >
               Cancelar
             </button>
-            <button
+            <button type="button"
               onClick={handleConfirm}
               disabled={
                 isValidatingStock ||

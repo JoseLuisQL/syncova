@@ -65,7 +65,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           </div>
         )}
 
-        <button
+        <button type="button"
           onClick={onRefresh}
           disabled={isLoading}
           className={`flex h-10 items-center justify-center gap-2 rounded-[12px] border px-3 text-[12px] font-semibold
@@ -87,12 +87,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           </span>
         </button>
         
-        <button className="flex h-10 items-center justify-center gap-2 rounded-[12px] border border-[#dfe4eb] bg-white px-3 text-[12px] font-semibold text-[#111827] transition-colors hover:border-[#34bda6]">
+        <button type="button" className="flex h-10 items-center justify-center gap-2 rounded-[12px] border border-[#dfe4eb] bg-white px-3 text-[12px] font-semibold text-[#111827] transition-colors hover:border-[#34bda6]">
           <DownloadSimple className="h-4 w-4" weight="bold" />
           Exportar CSV
         </button>
 
-        <button className="flex h-10 items-center justify-center gap-2 rounded-[12px] border border-[#269b8b] bg-[#35bfa8] px-4 text-[12px] font-semibold text-white shadow-[0_10px_20px_-14px_rgba(53,191,168,0.75)] transition-colors hover:bg-[#269b8b]">
+        <button type="button" className="flex h-10 items-center justify-center gap-2 rounded-[12px] border border-[#269b8b] bg-[#35bfa8] px-4 text-[12px] font-semibold text-white shadow-[0_10px_20px_-14px_rgba(53,191,168,0.75)] transition-colors hover:bg-[#269b8b]">
           <Plus className="h-4 w-4" weight="bold" />
           Nuevo
         </button>

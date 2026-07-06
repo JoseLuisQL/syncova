@@ -56,7 +56,7 @@ export const SiBotFloating: React.FC = () => {
   return (
     <>
       <div className="fixed bottom-6 right-6 z-50">
-        <button
+        <button type="button"
           onClick={toggleOpen}
           className={`flex h-[58px] w-[58px] items-center justify-center rounded-full border transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.97] ${
             isOpen
@@ -126,7 +126,7 @@ export const SiBotFloating: React.FC = () => {
                     </button>
 
                     {messages.length > 0 && (
-                      <button 
+                      <button type="button" 
                         onClick={clearHistory}
                         className="rounded-[9px] p-2 text-[#8b8f9b] transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none"
                         title="Limpiar historial"

@@ -20,7 +20,7 @@ export const SiBotSuggestions: React.FC<SiBotSuggestionsProps> = ({ onSelect }) 
       </div>
       <div className="flex flex-col w-full space-y-1.5">
         {suggestions.map((text, idx) => (
-          <button
+          <button type="button"
             key={idx}
             onClick={() => onSelect(text)}
             className="flex w-full items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-white px-3 py-2 text-center text-[12px] font-medium leading-snug text-[#606571] outline-none transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] active:scale-[0.99]"

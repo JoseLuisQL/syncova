@@ -103,7 +103,7 @@ const ImportTypeCard = memo<{
   const isVacuna = type === 'vacuna';
 
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       className={`relative flex w-full flex-col items-center rounded-[14px] border p-6 transition-colors ${
         selected
@@ -360,7 +360,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 </p>
               </div>
             </div>
-            <button
+            <button type="button"
               onClick={handleClose}
               className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]"
               aria-label="Cerrar modal"
@@ -487,7 +487,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                       </p>
                     </div>
                   </div>
-                  <button
+                  <button type="button"
                     onClick={handleDescargarPlantilla}
                     disabled={isDownloadingTemplate || (tipoImportacion === 'vacuna' && !selectedVacuna)}
                     className={COMPONENT_STYLES.button.primary}
@@ -551,7 +551,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                         {(archivo.size / 1024).toFixed(1)} KB
                       </p>
                     </div>
-                    <button
+                    <button type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setArchivo(null);
@@ -709,7 +709,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
         <div className="flex items-center justify-between border-t border-[#eeeef3] bg-[#fbfafd] px-5 py-3">
           <div>
             {step > 1 && step < 4 && (
-              <button
+              <button type="button"
                 onClick={handlePrevStep}
                 className={COMPONENT_STYLES.button.ghost}
               >
@@ -718,7 +718,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
               </button>
             )}
             {step === 4 && (
-              <button
+              <button type="button"
                 onClick={resetForm}
                 className={COMPONENT_STYLES.button.secondary}
               >
@@ -729,7 +729,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <button type="button"
               onClick={handleClose}
               className={COMPONENT_STYLES.button.ghost}
             >
@@ -737,7 +737,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
             </button>
 
             {step < 4 && (
-              <button
+              <button type="button"
                 onClick={handleNextStep}
                 disabled={!canProceedToNextStep || isImportingExcel}
                 className={COMPONENT_STYLES.button.primary}
