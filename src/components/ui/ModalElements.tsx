@@ -63,8 +63,8 @@ export const Modal: React.FC<ModalProps> = memo(({
                 </div>
               )}
               <div className="min-w-0 text-left">
-                <h2 className="text-[15px] font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">{title}</h2>
-                {subtitle ? <p className="mt-1 text-[12px] leading-5 text-[#606571]">{subtitle}</p> : null}
+                <h2 className="text-md font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">{title}</h2>
+                {subtitle ? <p className="mt-1 text-sm leading-5 text-[#606571]">{subtitle}</p> : null}
               </div>
             </div>
             <button
@@ -131,8 +131,8 @@ export const SideSheet: React.FC<SideSheetProps> = memo(({
                 </div>
               )}
               <div className="min-w-0 text-left">
-                <h2 className="text-[15px] font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">{title}</h2>
-                {subtitle ? <p className="mt-1 text-[12px] leading-5 text-[#606571]">{subtitle}</p> : null}
+                <h2 className="text-md font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">{title}</h2>
+                {subtitle ? <p className="mt-1 text-sm leading-5 text-[#606571]">{subtitle}</p> : null}
               </div>
             </div>
           </div>
@@ -222,7 +222,7 @@ interface FormSectionProps {
 export const FormSection: React.FC<FormSectionProps> = memo(({ title, children }) => (
   <section className="mb-5 last:mb-0">
     {title && (
-      <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8b8f9b]">
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-[#8b8f9b]">
         {title}
       </h3>
     )}
@@ -514,7 +514,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder={searchPlaceholder}
-                  className="h-8 w-full rounded-[5px] border border-[#e7e7ef] bg-[#fbfafd] pl-7 pr-2 text-[12px] text-[#15171d] placeholder:text-[#a0a4ae] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
+                  className="h-8 w-full rounded-[5px] border border-[#e7e7ef] bg-[#fbfafd] pl-7 pr-2 text-sm text-[#15171d] placeholder:text-[#a0a4ae] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
                   autoFocus
                 />
               </div>
@@ -525,18 +525,18 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
                 type="button"
                 onClick={selectAllVisible}
                 disabled={filteredOptions.length === 0 || allVisibleSelected}
-                className="text-[11px] font-semibold text-[#7c3aed] transition hover:text-[#6d28d9] disabled:cursor-not-allowed disabled:text-[#a0a4ae]"
+                className="text-xs font-semibold text-[#7c3aed] transition hover:text-[#6d28d9] disabled:cursor-not-allowed disabled:text-[#a0a4ae]"
               >
                 {search.trim() ? 'Seleccionar resultados' : 'Seleccionar todo'}
               </button>
-              <span className="text-[11px] font-medium text-[#8b8f9b]">
+              <span className="text-xs font-medium text-[#8b8f9b]">
                 {values.length} de {options.length}
               </span>
               <button
                 type="button"
                 onClick={clearAll}
                 disabled={values.length === 0}
-                className="text-[11px] font-medium text-[#606571] transition hover:text-[#15171d] disabled:cursor-not-allowed disabled:text-[#c5c8d2]"
+                className="text-xs font-medium text-[#606571] transition hover:text-[#15171d] disabled:cursor-not-allowed disabled:text-[#c5c8d2]"
               >
                 Limpiar
               </button>
@@ -544,7 +544,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
 
             <div role="listbox" aria-multiselectable="true" className="max-h-60 overflow-y-auto py-1">
               {filteredOptions.length === 0 ? (
-                <p className="px-3 py-4 text-center text-[12px] text-[#8b8f9b]">
+                <p className="px-3 py-4 text-center text-sm text-[#8b8f9b]">
                   No se encontraron coincidencias
                 </p>
               ) : (
@@ -692,7 +692,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = memo(({
     <div className={MODAL_STYLES.modal.overlay} onClick={(event) => event.target === event.currentTarget && onClose()}>
       <div className={MODAL_STYLES.modal.container}>
         <div className="w-full sm:max-w-md">
-          <div className="relative w-full overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
+          <div className="relative w-full overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
             <div className="absolute right-3 top-3 hidden sm:block">
               <button
                 type="button"
@@ -719,9 +719,9 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = memo(({
                   <Warning className="h-4 w-4" weight="regular" />
                 </div>
                 <div className="min-w-0 text-left">
-                  <h3 className="text-[15px] font-semibold leading-5 text-[#15171d]">Eliminar {itemType}</h3>
+                  <h3 className="text-md font-semibold leading-5 text-[#15171d]">Eliminar {itemType}</h3>
                   <div className="mt-1">
-                    <p className="text-[12px] leading-5 text-[#606571]">
+                    <p className="text-sm leading-5 text-[#606571]">
                       Se eliminará <span className="font-semibold text-[#15171d]">"{itemName}"</span>. Esta acción no se puede deshacer.
                     </p>
                     {warningMessage ? <p className="mt-2 text-xs font-medium text-amber-700">{warningMessage}</p> : null}
@@ -735,7 +735,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = memo(({
                 type="button"
                 onClick={onConfirm}
                 disabled={isLoading}
-                className="inline-flex h-9 w-full items-center justify-center rounded-[7px] bg-rose-600 px-3.5 text-[13px] font-semibold text-white shadow-none transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:ring-offset-2 sm:ml-2 sm:w-auto disabled:opacity-50"
+                className="inline-flex h-9 w-full items-center justify-center rounded-[7px] bg-rose-600 px-3.5 text-base font-semibold text-white shadow-none transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:ring-offset-2 sm:ml-2 sm:w-auto disabled:opacity-50"
               >
                 {isLoading ? <SpinnerGap className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" weight="bold" /> : null}
                 <span>Eliminar</span>

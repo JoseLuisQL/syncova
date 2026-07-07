@@ -151,7 +151,7 @@ const MetricPill: React.FC<{
       : 'bg-transparent text-zinc-600 font-semibold';
 
   return (
-    <span className={`inline-flex min-w-[3.5rem] items-center justify-center rounded-[6px] px-2 py-1 text-[0.75rem] tabular-nums tracking-tight ${className}`}>
+    <span className={`inline-flex min-w-[3.5rem] items-center justify-center rounded-sm px-2 py-1 text-[0.75rem] tabular-nums tracking-tight ${className}`}>
       {value === 0 && tone !== 'teal' ? <span className="text-zinc-300">-</span> : value.toLocaleString()}
     </span>
   );
@@ -178,7 +178,7 @@ const AvailabilityBadge: React.FC<{ value: number }> = memo(({ value }) => {
 AvailabilityBadge.displayName = 'AvailabilityBadge';
 
 const IciPill: React.FC<{ value: number }> = memo(({ value }) => (
-  <span className="inline-flex min-w-[3.5rem] items-center justify-center rounded-[6px] border border-indigo-100 bg-indigo-50 px-2 py-1 text-[0.75rem] font-semibold tabular-nums tracking-tight text-indigo-700">
+  <span className="inline-flex min-w-[3.5rem] items-center justify-center rounded-sm border border-indigo-100 bg-indigo-50 px-2 py-1 text-[0.75rem] font-semibold tabular-nums tracking-tight text-indigo-700">
     {value === 0 ? <span className="text-indigo-300 opacity-60">-</span> : value.toLocaleString()}
   </span>
 ));
@@ -829,7 +829,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         return <MetricPill value={movimiento.stock} tone="teal" />;
       case 'promedioConsumo':
         return (
-          <span className="inline-flex min-w-[3.5rem] justify-center rounded-[6px] px-2 py-1 text-[0.75rem] font-bold tabular-nums text-zinc-700">
+          <span className="inline-flex min-w-[3.5rem] justify-center rounded-sm px-2 py-1 text-[0.75rem] font-bold tabular-nums text-zinc-700">
             {movimiento.promedioConsumo === 0 ? <span className="text-zinc-300">-</span> : movimiento.promedioConsumo.toLocaleString()}
           </span>
         );
@@ -873,7 +873,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
       <button
         type="button"
         onClick={onOpenColumnSettings}
-        className="absolute right-3 top-3 z-[90] inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#d7d8e2] bg-white text-[#15171d] shadow-[0_12px_30px_-20px_rgba(12,15,24,0.65)] backdrop-blur transition hover:border-[#c8bbff] hover:bg-[#fbfafd] hover:text-[#7c3aed]"
+        className="absolute right-3 top-3 z-[90] inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#d7d8e2] bg-white text-[#15171d] shadow-[0_12px_30px_-20px_rgba(12,15,24,0.65)] backdrop-blur transition hover:border-[#c8bbff] hover:bg-[#fbfafd] hover:text-[#7c3aed]"
         title={`Configurar columnas (${visibleCount}/${configurableColumnsAllowed.length})`}
         aria-label="Configurar columnas visibles"
       >
@@ -889,7 +889,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         {/* ============================================================== */}
         {/* DESKTOP TABLE (hidden on mobile) */}
         {/* ============================================================== */}
-        <div className="hidden h-full min-h-0 flex-1 overflow-auto overscroll-contain rounded-[14px] border border-[#e7e7ef] bg-white shadow-[0_16px_40px_-34px_rgba(12,15,24,0.5)] md:block selection:bg-zinc-200">
+        <div className="hidden h-full min-h-0 flex-1 overflow-auto overscroll-contain rounded-xl border border-[#e7e7ef] bg-white shadow-[0_16px_40px_-34px_rgba(12,15,24,0.5)] md:block selection:bg-zinc-200">
           <table className="w-max min-w-full table-fixed border-separate border-spacing-0" role="table" aria-label="Matriz de datos">
             <thead className="sticky top-0 z-40 bg-white shadow-[0_18px_34px_-30px_rgba(12,15,24,0.58)]">
               <tr className="bg-white">
@@ -947,7 +947,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 <tr>
                   <td colSpan={columnasVisibles.length} className="px-6 py-12 text-center">
                     <div className="mx-auto flex max-w-md flex-col items-center">
-                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] text-zinc-300">
+                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-[#e7e7ef] bg-[#fbfafd] text-zinc-300">
                         <Package className="h-6 w-6" />
                       </div>
                       <p className="text-sm font-semibold text-zinc-800">No hay establecimientos para mostrar</p>

@@ -10,22 +10,22 @@ interface ChartSectionProps {
 }
 
 const ChartSkeleton: React.FC = () => (
-  <div className="flex h-full animate-pulse flex-col rounded-[18px] border border-[#e3e9f0] bg-white p-4 sm:p-5">
+  <div className="flex h-full animate-pulse flex-col rounded-3xl border border-[#e3e9f0] bg-white p-4 sm:p-5">
     <div className="mb-8 h-5 w-64 rounded bg-[#eef3f6]" />
-    <div className="flex-1 rounded-[14px] bg-[#eef3f6]" />
+    <div className="flex-1 rounded-xl bg-[#eef3f6]" />
   </div>
 );
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-[14px] border border-[#e3e9f0] bg-white p-3 shadow-[0_12px_35px_-25px_rgba(15,42,59,0.5)]">
-      <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-secondary">{label}</p>
+    <div className="rounded-xl border border-[#e3e9f0] bg-white p-3 shadow-[0_12px_35px_-25px_rgba(15,42,59,0.5)]">
+      <p className="mb-2 font-mono text-xs font-semibold uppercase tracking-wider text-secondary">{label}</p>
       {payload.map((entry: any, i: number) => (
         <div key={i} className="flex items-center gap-3 mb-1">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
-          <span className="text-[12px] font-medium text-secondary">{entry.name}:</span>
-          <span className="text-[13px] font-semibold text-primary">{entry.value.toLocaleString()}</span>
+          <span className="text-sm font-medium text-secondary">{entry.name}:</span>
+          <span className="text-base font-semibold text-primary">{entry.value.toLocaleString()}</span>
         </div>
       ))}
     </div>
@@ -41,22 +41,22 @@ const ChartSection: React.FC<ChartSectionProps> = memo(({ movimientosMensuales, 
   if (isLoading) return <ChartSkeleton />;
 
   return (
-    <section className="flex h-full flex-col rounded-[18px] border border-[#e3e9f0] bg-white p-4 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)] sm:p-5">
+    <section className="flex h-full flex-col rounded-3xl border border-[#e3e9f0] bg-white p-4 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)] sm:p-5">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <div className="mb-1 flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#fff6d9] text-[12px]">☼</span>
-            <h3 className="text-[15px] font-semibold tracking-[-0.02em] text-[#171b22]">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#fff6d9] text-sm">☼</span>
+            <h3 className="text-md font-semibold tracking-[-0.02em] text-[#171b22]">
               Patient overview
             </h3>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-[11px] font-medium text-[#7a8797]">
+          <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-[#7a8797]">
             <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#0e9f8e]" /> Total pacientes</span>
             <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#44c4dd]" /> Prom. hospitalizados</span>
             <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#dfe4eb]" /> Atención ambulatoria</span>
           </div>
         </div>
-        <select className="rounded-[12px] border border-[#e3e9f0] bg-white px-3 py-2 text-[12px] font-medium text-[#556575] outline-none focus:border-[#0e9f8e]">
+        <select className="rounded-[12px] border border-[#e3e9f0] bg-white px-3 py-2 text-sm font-medium text-[#556575] outline-none focus:border-[#0e9f8e]">
           <option>Últimos 6 meses</option>
           <option>Mensual</option>
         </select>

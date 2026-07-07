@@ -17,7 +17,7 @@ const ReportsShell: React.FC<ReportsShellProps> = ({
   const { navigateToModule } = useAppNavigation();
 
   return (
-    <main className="min-h-[calc(100dvh-128px)] overflow-hidden rounded-[24px] border border-white/90 bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
+    <main className="min-h-[calc(100dvh-128px)] overflow-hidden rounded-4xl border border-white/90 bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
       <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col`}>
         <nav aria-label="Secciones de reportes" className="border-b border-[#eeeef3] bg-white">
           <div className="flex h-12 items-end gap-7 px-5 sm:px-6">
@@ -29,7 +29,7 @@ const ReportsShell: React.FC<ReportsShellProps> = ({
                   key={section.id}
                   type="button"
                   onClick={() => navigateToModule('reportes', section.routeSegment)}
-                  className={`-mb-px inline-flex h-12 shrink-0 items-center border-b-2 px-0 text-[13px] font-medium transition-colors focus:outline-none ${
+                  className={`-mb-px inline-flex h-12 shrink-0 items-center border-b-2 px-0 text-base font-medium transition-colors focus:outline-none ${
                     isActive
                       ? 'border-[#7c3aed] text-[#7c3aed]'
                       : 'border-transparent text-[#747986] hover:text-[#15171d]'

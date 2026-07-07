@@ -110,7 +110,7 @@ const Sidebar: React.FC = memo(() => {
         </span>
 
         {!isCollapsed && (
-          <span className="min-w-0 flex-1 truncate text-left text-[13px] font-medium tracking-[-0.015em]">
+          <span className="min-w-0 flex-1 truncate text-left text-base font-medium tracking-[-0.015em]">
             {item.label}
           </span>
         )}
@@ -122,7 +122,7 @@ const Sidebar: React.FC = memo(() => {
         )}
 
         {isCollapsed && (
-          <span className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-[8px] bg-[#111318] px-3 py-2 text-[12px] font-semibold text-white opacity-0 shadow-[0_18px_38px_-24px_rgba(0,0,0,0.9)] transition-opacity duration-150 group-hover/sidebar-item:opacity-100 lg:block">
+          <span className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-md bg-[#111318] px-3 py-2 text-sm font-semibold text-white opacity-0 shadow-[0_18px_38px_-24px_rgba(0,0,0,0.9)] transition-opacity duration-150 group-hover/sidebar-item:opacity-100 lg:block">
             {item.label}
           </span>
         )}
@@ -143,10 +143,10 @@ const Sidebar: React.FC = memo(() => {
       <aside
         className={`
           fixed bottom-3 left-3 top-3 z-50 flex flex-col overflow-visible
-          rounded-[18px] border border-white/90 bg-white
+          rounded-3xl border border-white/90 bg-white
           shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]
           transition-all duration-300 ease-out
-          sm:bottom-4 sm:left-4 sm:top-4 sm:rounded-[24px]
+          sm:bottom-4 sm:left-4 sm:top-4 sm:rounded-4xl
           ${isCollapsed ? 'lg:w-[68px]' : 'lg:w-[254px]'}
           ${mobileMenuOpen ? 'w-[254px] translate-x-0' : 'w-[254px] -translate-x-[calc(100%+2rem)]'}
           lg:translate-x-0
@@ -159,7 +159,7 @@ const Sidebar: React.FC = memo(() => {
             <button
               type="button"
               onClick={() => setSidebarCollapsed(false)}
-              className="group/logo-toggle relative flex h-10 w-10 items-center justify-center rounded-[10px] text-[#111318] transition-colors hover:bg-[#f7f6fb] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
+              className="group/logo-toggle relative flex h-10 w-10 items-center justify-center rounded-lg text-[#111318] transition-colors hover:bg-[#f7f6fb] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
               aria-label="Expandir menú"
               aria-expanded={false}
             >
@@ -174,7 +174,7 @@ const Sidebar: React.FC = memo(() => {
             <div className="flex min-w-0 items-center gap-3">
               <SivacLogo size={34} />
               <div className="min-w-0">
-                <p className="text-[18px] font-semibold leading-none tracking-[-0.03em] text-[#111318]">
+                <p className="text-xl font-semibold leading-none tracking-[-0.03em] text-[#111318]">
                   SIVAC
                 </p>
                 <p className="mt-1 truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8b8f9b]">
@@ -198,7 +198,7 @@ const Sidebar: React.FC = memo(() => {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(false)}
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-[8px] text-[#606571] transition-colors hover:bg-[#f7f6fb] hover:text-[#111318] lg:hidden"
+            className="ml-auto flex h-8 w-8 items-center justify-center rounded-md text-[#606571] transition-colors hover:bg-[#f7f6fb] hover:text-[#111318] lg:hidden"
             aria-label="Cerrar menú"
           >
             <X className="h-5 w-5" weight="bold" />
@@ -221,10 +221,10 @@ const Sidebar: React.FC = memo(() => {
               <input
                 type="search"
                 placeholder="Search..."
-                className="min-w-0 flex-1 bg-transparent text-[13px] font-medium text-[#111318] outline-none placeholder:text-[#8b8f9b]"
+                className="min-w-0 flex-1 bg-transparent text-base font-medium text-[#111318] outline-none placeholder:text-[#8b8f9b]"
               />
-              <span className="hidden rounded-[6px] border border-[#e3e4ed] bg-[#f8f7fb] px-1.5 py-0.5 text-[10px] font-semibold text-[#686d78] sm:inline-block">⌘</span>
-              <span className="hidden rounded-[6px] border border-[#e3e4ed] bg-[#f8f7fb] px-1.5 py-0.5 text-[10px] font-semibold text-[#686d78] sm:inline-block">F</span>
+              <span className="hidden rounded-sm border border-[#e3e4ed] bg-[#f8f7fb] px-1.5 py-0.5 text-[10px] font-semibold text-[#686d78] sm:inline-block">⌘</span>
+              <span className="hidden rounded-sm border border-[#e3e4ed] bg-[#f8f7fb] px-1.5 py-0.5 text-[10px] font-semibold text-[#686d78] sm:inline-block">F</span>
             </label>
           )}
         </div>
@@ -259,26 +259,26 @@ const Sidebar: React.FC = memo(() => {
 
           <div className="relative" ref={userMenuRef}>
             {isUserMenuOpen && !isCollapsed && (
-              <div className="absolute bottom-[calc(100%+0.5rem)] left-0 z-[70] w-[min(320px,calc(100vw-2rem))] overflow-hidden rounded-[18px] border border-white/90 bg-white shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]">
+              <div className="absolute bottom-[calc(100%+0.5rem)] left-0 z-[70] w-[min(320px,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-white/90 bg-white shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]">
                 <div className="border-b border-[#e7e7ef] p-4">
                   <div className="flex items-start gap-3">
-                    <span className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#ffd1de] text-[12px] font-semibold text-[#111318]">
+                    <span className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#ffd1de] text-sm font-semibold text-[#111318]">
                       {initials}
                       <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#ff3d73]" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="break-words text-[13px] font-semibold leading-snug text-[#111318]">{displayName}</p>
-                      <p className="break-all text-[11px] font-medium leading-snug text-[#747986]">{user?.email || user?.usuario}</p>
+                      <p className="break-words text-base font-semibold leading-snug text-[#111318]">{displayName}</p>
+                      <p className="break-all text-xs font-medium leading-snug text-[#747986]">{user?.email || user?.usuario}</p>
                       {(user?.centroAcopio || user?.establecimiento || user?.ultimoAcceso) && (
                         <div className="mt-3 space-y-1.5 border-t border-[#e7e7ef] pt-3">
                           {(user.centroAcopio || user.establecimiento) && (
-                            <div className="flex items-start gap-2 text-[11px] font-medium text-[#606571]">
+                            <div className="flex items-start gap-2 text-xs font-medium text-[#606571]">
                               <Buildings className="h-3.5 w-3.5 text-[#8b8f9b]" weight="duotone" />
                               <span className="min-w-0 break-words">{user.centroAcopio?.nombre || user.establecimiento?.nombre}</span>
                             </div>
                           )}
                           {user.ultimoAcceso && (
-                            <div className="flex items-center gap-2 text-[11px] font-medium text-[#747986]">
+                            <div className="flex items-center gap-2 text-xs font-medium text-[#747986]">
                               <Clock className="h-3.5 w-3.5 text-[#8b8f9b]" weight="duotone" />
                               <span>{new Date(user.ultimoAcceso).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
@@ -296,7 +296,7 @@ const Sidebar: React.FC = memo(() => {
                       setIsChangePasswordModalOpen(true);
                       setIsUserMenuOpen(false);
                     }}
-                    className="flex w-full items-center gap-3 rounded-[9px] px-3 py-2 text-left text-[12px] font-semibold text-[#606571] transition-colors hover:bg-[#f8f7fb] hover:text-[#111318]"
+                    className="flex w-full items-center gap-3 rounded-[9px] px-3 py-2 text-left text-sm font-semibold text-[#606571] transition-colors hover:bg-[#f8f7fb] hover:text-[#111318]"
                   >
                     <Key className="h-4 w-4 text-[#747986]" weight="duotone" />
                     Cambiar contraseña
@@ -307,7 +307,7 @@ const Sidebar: React.FC = memo(() => {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-[9px] px-3 py-2 text-left text-[12px] font-semibold text-rose-600 transition-colors hover:bg-rose-50 hover:text-rose-700"
+                    className="flex w-full items-center gap-3 rounded-[9px] px-3 py-2 text-left text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50 hover:text-rose-700"
                   >
                     <SignOut className="h-4 w-4" weight="bold" />
                     Cerrar sesión
@@ -329,14 +329,14 @@ const Sidebar: React.FC = memo(() => {
               aria-expanded={isUserMenuOpen}
               aria-haspopup="menu"
             >
-              <span className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#ffd1de] text-[12px] font-semibold text-[#111318]">
+              <span className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#ffd1de] text-sm font-semibold text-[#111318]">
                 {initials}
                 <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#ff3d73]" />
               </span>
               {!isCollapsed && (
                 <>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13px] font-semibold text-[#111318]">{displayName}</span>
+                    <span className="block truncate text-base font-semibold text-[#111318]">{displayName}</span>
                     <span className="block truncate text-[10px] font-medium capitalize text-[#747986]">{roleLabel}</span>
                   </span>
                   <CaretDown className={`h-4 w-4 text-[#7d828d] transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} weight="bold" />

@@ -47,7 +47,7 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
             <div className={COMPONENT_STYLES.modal.header}>
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
                     <Faders className="h-5 w-5" weight="duotone" />
                   </div>
                   <div>

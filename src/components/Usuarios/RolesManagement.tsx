@@ -218,7 +218,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
 
   if (loading) {
     return (
-      <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-6 shadow-none">
+      <div className="rounded-xl border border-[#e7e7ef] bg-white p-6 shadow-none">
         <div className="flex items-center gap-3 text-zinc-700">
           <div className="flex h-11 w-11 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
             <CircleNotch className="h-5 w-5 animate-spin" />
@@ -234,7 +234,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
 
   if (error) {
     return (
-      <div className="rounded-[24px] border border-rose-200 bg-rose-50/80 p-6">
+      <div className="rounded-4xl border border-rose-200 bg-rose-50/80 p-6">
         <div className="flex items-center gap-2 text-rose-800">
           <Warning className="h-5 w-5" />
           <span className="font-medium">Error al cargar roles</span>
@@ -276,7 +276,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                 <Faders className="h-4 w-4 text-[#606571]" aria-hidden="true" />
                 Filtros
               </summary>
-              <div className="absolute left-0 top-11 z-30 w-[min(260px,calc(100vw-3rem))] rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
+              <div className="absolute left-0 top-11 z-30 w-[min(260px,calc(100vw-3rem))] rounded-xl border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
                 <div className="space-y-3">
                   <div>
                     <label htmlFor="roles-estado" className="mb-1 block text-xs font-medium text-[#747986]">
@@ -397,17 +397,17 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                       </div>
                     </td>
                     <td className={COMPONENT_STYLES.table.cell}>
-                      <span className="inline-flex rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 font-mono text-sm text-[#15171d]">
+                      <span className="inline-flex rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 font-mono text-sm text-[#15171d]">
                         {role.codigo}
                       </span>
                     </td>
                     <td className={COMPONENT_STYLES.table.cell}>
-                      <span className="inline-flex rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
+                      <span className="inline-flex rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
                         {role.esDefault ? 'Sistema' : 'Personalizado'}
                       </span>
                     </td>
                     <td className={COMPONENT_STYLES.table.cell}>
-                      <span className={`inline-flex gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:mt-[5px] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full ${role.estado === 'activo' ? 'before:bg-emerald-500' : 'before:bg-rose-500'}`}>
+                      <span className={`inline-flex gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:mt-[5px] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full ${role.estado === 'activo' ? 'before:bg-emerald-500' : 'before:bg-rose-500'}`}>
                         {role.estado === 'activo' ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>

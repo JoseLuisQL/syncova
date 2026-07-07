@@ -36,7 +36,7 @@ const ScheduleModal: React.FC<{
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="flex w-full max-w-md flex-col overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]"
+        className="flex w-full max-w-md flex-col overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[#eeeef3] px-5 py-3.5">
@@ -45,8 +45,8 @@ const ScheduleModal: React.FC<{
               <Timer className="h-4 w-4" weight="bold" />
             </div>
             <div>
-              <h3 className="text-[15px] font-semibold leading-5 text-[#15171d]">Programar activación</h3>
-              <p className="text-[12px] leading-4 text-[#606571]">{permisoLabel}</p>
+              <h3 className="text-md font-semibold leading-5 text-[#15171d]">Programar activación</h3>
+              <p className="text-sm leading-4 text-[#606571]">{permisoLabel}</p>
             </div>
           </div>
           <button type="button" onClick={onClose} className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]">
@@ -56,18 +56,18 @@ const ScheduleModal: React.FC<{
 
         <div className="space-y-4 px-5 py-4">
           <div>
-            <label className="mb-1.5 block text-[12px] font-medium text-[#424750]">
+            <label className="mb-1.5 block text-sm font-medium text-[#424750]">
               Fecha y hora de activación
             </label>
             <input
               type="datetime-local"
               value={fechaActivacion}
               onChange={(e) => setFechaActivacion(e.target.value)}
-              className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-[13px] text-[#15171d] transition-colors focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
+              className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-base text-[#15171d] transition-colors focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
             />
           </div>
 
-          <div className="flex items-center gap-3 rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] p-3">
+          <div className="flex items-center gap-3 rounded-md border border-[#e7e7ef] bg-[#fbfafd] p-3">
             <button
               type="button"
               role="switch"
@@ -77,12 +77,12 @@ const ScheduleModal: React.FC<{
             >
               <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow ring-0 transition-transform duration-200 ease-in-out ${usarDesactivacion ? 'translate-x-4' : 'translate-x-0'}`} />
             </button>
-            <span className="text-[13px] font-semibold text-primary">Programar desactivación automática</span>
+            <span className="text-base font-semibold text-primary">Programar desactivación automática</span>
           </div>
 
           {usarDesactivacion && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-              <label className="mb-1.5 block text-[12px] font-medium text-[#424750]">
+              <label className="mb-1.5 block text-sm font-medium text-[#424750]">
                 Fecha y hora de desactivación
               </label>
               <input
@@ -90,7 +90,7 @@ const ScheduleModal: React.FC<{
                 value={fechaDesactivacion}
                 onChange={(e) => setFechaDesactivacion(e.target.value)}
                 min={fechaActivacion}
-                className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-[13px] text-[#15171d] transition-colors focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
+                className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-base text-[#15171d] transition-colors focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
               />
             </motion.div>
           )}
@@ -99,7 +99,7 @@ const ScheduleModal: React.FC<{
         <div className="mt-auto flex items-center justify-end gap-2 border-t border-[#eeeef3] bg-[#fbfafd] px-5 py-3">
           <button type="button"
             onClick={onClose}
-            className="inline-flex h-9 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-white px-3.5 text-[13px] font-semibold text-[#15171d] transition-colors hover:bg-white"
+            className="inline-flex h-9 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-white px-3.5 text-base font-semibold text-[#15171d] transition-colors hover:bg-white"
           >
             Cancelar
           </button>
@@ -113,7 +113,7 @@ const ScheduleModal: React.FC<{
               onClose();
             }}
             disabled={!fechaActivacion}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[7px] border border-[#7c3aed] bg-[#7c3aed] px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[7px] border border-[#7c3aed] bg-[#7c3aed] px-3.5 text-base font-semibold text-white transition-colors hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Timer className="h-4 w-4" weight="bold" />
             Programar
@@ -210,14 +210,14 @@ const PermisosPlanificacion: React.FC = () => {
 
   return (
     <>
-      <section className="relative flex h-full flex-col rounded-[18px] border border-[#e3e9f0] bg-white p-5 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
+      <section className="relative flex h-full flex-col rounded-3xl border border-[#e3e9f0] bg-white p-5 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
         <div className="mb-7">
           <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9aa4b2]">Control</p>
-          <h3 className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[#171b22]">Permisos y planificación</h3>
+          <h3 className="mt-1 text-md font-semibold tracking-[-0.02em] text-[#171b22]">Permisos y planificación</h3>
         </div>
 
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-[13px] font-semibold text-primary">Mis permisos de acceso</h4>
+          <h4 className="text-base font-semibold text-primary">Mis permisos de acceso</h4>
           <div className="flex items-center gap-2">
             <button type="button" 
               onClick={() => void loadGlobales()}
@@ -226,7 +226,7 @@ const PermisosPlanificacion: React.FC = () => {
             >
               <ArrowsClockwise size={14} weight="bold" />
             </button>
-            <button type="button" className="flex items-center gap-1 text-[12px] font-semibold text-tertiary hover:text-primary">
+            <button type="button" className="flex items-center gap-1 text-sm font-semibold text-tertiary hover:text-primary">
               Gestionar <ArrowSquareOut size={14} />
             </button>
           </div>
@@ -238,7 +238,7 @@ const PermisosPlanificacion: React.FC = () => {
               value={selectedMes}
               onChange={(e) => setSelectedMes(Number(e.target.value))}
               disabled={loading}
-              className="w-full appearance-none rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] py-1.5 pl-3 pr-8 text-[12px] font-semibold text-[#171b22] transition-colors focus:border-[#0e9f8e] focus:outline-none disabled:opacity-50"
+              className="w-full appearance-none rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] py-1.5 pl-3 pr-8 text-sm font-semibold text-[#171b22] transition-colors focus:border-[#0e9f8e] focus:outline-none disabled:opacity-50"
             >
               {MESES.map((mes, i) => (
                 <option key={i} value={i + 1}>{mes}</option>
@@ -251,7 +251,7 @@ const PermisosPlanificacion: React.FC = () => {
               value={selectedAnio}
               onChange={(e) => setSelectedAnio(Number(e.target.value))}
               disabled={loading}
-              className="w-full appearance-none rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] py-1.5 pl-3 pr-8 text-[12px] font-semibold text-[#171b22] transition-colors focus:border-[#0e9f8e] focus:outline-none disabled:opacity-50"
+              className="w-full appearance-none rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] py-1.5 pl-3 pr-8 text-sm font-semibold text-[#171b22] transition-colors focus:border-[#0e9f8e] focus:outline-none disabled:opacity-50"
             >
               {aniosDisponibles.map(anio => (
                 <option key={anio} value={anio}>{anio}</option>
@@ -273,7 +273,7 @@ const PermisosPlanificacion: React.FC = () => {
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h5 className="text-[13px] font-semibold text-primary">Editar Movimientos</h5>
+                <h5 className="text-base font-semibold text-primary">Editar Movimientos</h5>
                 <button type="button" 
                   onClick={() => handleToggle(TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo, !(movPermiso?.habilitado ?? false))}
                   disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
@@ -287,13 +287,13 @@ const PermisosPlanificacion: React.FC = () => {
                   />
                 </button>
               </div>
-              <p className="mb-2 text-[11px] text-secondary">Trans., Ingreso, Salida, Trans. Salida</p>
+              <p className="mb-2 text-xs text-secondary">Trans., Ingreso, Salida, Trans. Salida</p>
               
               <div className="flex items-center gap-3">
                 <button type="button" 
                   onClick={() => setScheduleModal({ isOpen: true, label: 'Editar Movimientos', tipo: TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo })}
                   disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
-                  className="flex items-center gap-1 rounded-[10px] border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-[11px] font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276] disabled:opacity-50"
+                  className="flex items-center gap-1 rounded-lg border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-xs font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276] disabled:opacity-50"
                 >
                   <Timer size={13} weight="bold" /> Programar
                 </button>
@@ -312,7 +312,7 @@ const PermisosPlanificacion: React.FC = () => {
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h5 className="text-[13px] font-semibold text-primary">Editar Planificaciones</h5>
+                <h5 className="text-base font-semibold text-primary">Editar Planificaciones</h5>
                 <button type="button" 
                   onClick={() => handleToggle(TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo, !(planPermiso?.habilitado ?? false))}
                   disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
@@ -326,13 +326,13 @@ const PermisosPlanificacion: React.FC = () => {
                   />
                 </button>
               </div>
-              <p className="mb-2 text-[11px] text-secondary">Modificar planificaciones anuales</p>
+              <p className="mb-2 text-xs text-secondary">Modificar planificaciones anuales</p>
               
               <div className="flex items-center gap-3">
                 <button type="button" 
                   onClick={() => setScheduleModal({ isOpen: true, label: 'Editar Planificaciones', tipo: TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo })}
                   disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
-                  className="flex items-center gap-1 rounded-[10px] border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-[11px] font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276] disabled:opacity-50"
+                  className="flex items-center gap-1 rounded-lg border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-xs font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276] disabled:opacity-50"
                 >
                   <Timer size={13} weight="bold" /> Programar
                 </button>
@@ -347,10 +347,10 @@ const PermisosPlanificacion: React.FC = () => {
         </div>
 
         <div className="mt-auto">
-          <h4 className="mb-2 text-[13px] font-semibold text-primary">Planificación anual 2026</h4>
+          <h4 className="mb-2 text-base font-semibold text-primary">Planificación anual 2026</h4>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[11px] font-medium text-secondary">Estado general</span>
-            <span className="font-mono text-[12px] font-semibold text-primary">64%</span>
+            <span className="text-xs font-medium text-secondary">Estado general</span>
+            <span className="font-mono text-sm font-semibold text-primary">64%</span>
           </div>
           
           <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-[#eef3f6]">
@@ -359,20 +359,20 @@ const PermisosPlanificacion: React.FC = () => {
 
           <div className="grid grid-cols-3 gap-2 mb-6 text-center">
             <div>
-              <div className="font-mono text-[15px] font-semibold text-primary">128</div>
+              <div className="font-mono text-md font-semibold text-primary">128</div>
               <div className="text-[10px] font-medium uppercase text-secondary">Programado</div>
             </div>
             <div>
-              <div className="font-mono text-[15px] font-semibold text-primary">82</div>
+              <div className="font-mono text-md font-semibold text-primary">82</div>
               <div className="text-[10px] font-medium uppercase text-secondary">Ejecutado</div>
             </div>
             <div>
-              <div className="font-mono text-[15px] font-semibold text-primary">46</div>
+              <div className="font-mono text-md font-semibold text-primary">46</div>
               <div className="text-[10px] font-medium uppercase text-secondary">Pendiente</div>
             </div>
           </div>
 
-          <button type="button" className="flex w-full items-center justify-center gap-2 rounded-[12px] border border-[#0a8276] bg-[#0e9f8e] py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#0a8276]">
+          <button type="button" className="flex w-full items-center justify-center gap-2 rounded-[12px] border border-[#0a8276] bg-[#0e9f8e] py-2.5 text-base font-semibold text-white transition-colors hover:bg-[#0a8276]">
             <CalendarCheck size={16} />
             Abrir planificación
           </button>

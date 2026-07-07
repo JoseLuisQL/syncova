@@ -22,14 +22,14 @@ const AlertasSection: React.FC = memo(() => {
   const { data, loading, error, pagination } = usePaginatedAlertas(4);
 
   return (
-    <section className="flex h-full flex-col rounded-[18px] border border-[#e3e9f0] bg-white shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
+    <section className="flex h-full flex-col rounded-3xl border border-[#e3e9f0] bg-white shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
       <header className="flex items-start justify-between border-b border-[#eef1f5] px-5 py-4">
         <div>
           <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9aa4b2]">Riesgo</p>
-          <h3 className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[#171b22]">Alertas</h3>
+          <h3 className="mt-1 text-md font-semibold tracking-[-0.02em] text-[#171b22]">Alertas</h3>
         </div>
         {pagination.total > 0 && (
-          <span className="rounded-full border border-[#dceeea] bg-[#effbf8] px-2 py-1 font-mono text-[11px] font-semibold text-[#0a8276]">
+          <span className="rounded-full border border-[#dceeea] bg-[#effbf8] px-2 py-1 font-mono text-xs font-semibold text-[#0a8276]">
             {pagination.total} activas
           </span>
         )}
@@ -58,11 +58,11 @@ const AlertasSection: React.FC = memo(() => {
                       {formatDate(alerta.fechaCreacion)}
                     </span>
                   </div>
-                  <p className="pr-4 text-[13px] font-medium leading-snug text-[#171b22]">
+                  <p className="pr-4 text-base font-medium leading-snug text-[#171b22]">
                     {alerta.mensaje}
                   </p>
                   {alerta.establecimiento && (
-                    <p className="mt-1 truncate text-[12px] font-medium text-secondary">
+                    <p className="mt-1 truncate text-sm font-medium text-secondary">
                       {alerta.establecimiento}
                     </p>
                   )}
@@ -74,7 +74,7 @@ const AlertasSection: React.FC = memo(() => {
       </div>
 
       <div className="mt-auto border-t border-zinc-100 px-5 py-4">
-        <button type="button" className="flex items-center gap-1 text-[13px] font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276]">
+        <button type="button" className="flex items-center gap-1 text-base font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276]">
           Centro de notificaciones <span className="text-lg leading-none">→</span>
         </button>
       </div>

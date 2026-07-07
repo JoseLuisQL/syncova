@@ -11,14 +11,14 @@ import { User, LockKey, Eye, EyeClosed, SpinnerGap, Clock as ClockIcon, WarningC
 // ============================================================================
 
 const INPUT_BASE_CLASSES =
-  'block h-10 w-full rounded-[8px] border bg-white py-2 pl-10 pr-3 text-[13px] font-medium ' +
+  'block h-10 w-full rounded-md border bg-white py-2 pl-10 pr-3 text-base font-medium ' +
   'text-[#15171d] shadow-none transition-colors duration-150 placeholder:text-[#a0a4ae] ' +
   'focus:outline-none focus:ring-2';
 
 const INPUT_NORMAL_CLASSES = 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-[#dedfea]/70';
 const INPUT_ERROR_CLASSES = 'border-rose-300 focus:ring-rose-500/10 focus:border-rose-500 bg-rose-50/30';
 
-const LABEL_CLASSES = 'mb-1.5 block text-[12px] font-medium text-[#424750]';
+const LABEL_CLASSES = 'mb-1.5 block text-sm font-medium text-[#424750]';
 const ERROR_TEXT_CLASSES = 'mt-1.5 text-xs font-medium text-rose-600 flex items-center gap-1.5';
 
 // ============================================================================
@@ -147,13 +147,13 @@ const RateLimitAlert: React.FC<RateLimitAlertProps> = ({ remainingTime }) => {
 
   return (
     <div
-      className="mt-4 animate-fade-in rounded-[8px] border border-amber-200 bg-amber-50 px-3 py-2.5"
+      className="mt-4 animate-fade-in rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5"
       role="alert"
     >
       <div className="flex items-start gap-3">
         <WarningCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" weight="fill" />
         <div>
-          <p className="text-[13px] font-semibold text-amber-900">
+          <p className="text-base font-semibold text-amber-900">
             Demasiados intentos
           </p>
           <p className="mt-0.5 text-xs font-medium leading-relaxed text-amber-800">
@@ -181,7 +181,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading, canRetry, remain
 
   const buttonClasses = useMemo(() => {
     const base =
-      'flex h-10 w-full items-center justify-center gap-2 rounded-[8px] px-4 text-[13px] ' +
+      'flex h-10 w-full items-center justify-center gap-2 rounded-md px-4 text-base ' +
       'font-semibold transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2';
 
     if (isDisabled) {
@@ -315,17 +315,17 @@ const LoginForm: React.FC = () => {
       </div>
 
       <div className="relative z-10 w-full max-w-[392px] animate-fade-in-up">
-        <div className="overflow-hidden rounded-[14px] border border-[#e7e7ef] bg-white shadow-[0_24px_64px_-42px_rgba(12,15,24,0.72)]">
+        <div className="overflow-hidden rounded-xl border border-[#e7e7ef] bg-white shadow-[0_24px_64px_-42px_rgba(12,15,24,0.72)]">
           <div className="border-b border-[#eeeef3] px-6 py-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-[#fbfafd]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#e7e7ef] bg-[#fbfafd]">
                 <SivacLogo size={30} />
               </div>
               <div>
-                <h1 className="text-[18px] font-semibold leading-6 tracking-[-0.02em] text-[#15171d]">
+                <h1 className="text-xl font-semibold leading-6 tracking-[-0.02em] text-[#15171d]">
                   SIVAC
                 </h1>
-                <p className="mt-0.5 text-[12px] font-medium text-[#606571]">
+                <p className="mt-0.5 text-sm font-medium text-[#606571]">
                   Acceso seguro al sistema
                 </p>
               </div>
@@ -361,8 +361,8 @@ const LoginForm: React.FC = () => {
             />
 
             {authError && (
-              <div className="rounded-[8px] border border-rose-200 bg-rose-50 px-3 py-2.5" role="alert">
-                <p className="flex items-center gap-2 text-[13px] font-medium text-rose-700">
+              <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5" role="alert">
+                <p className="flex items-center gap-2 text-base font-medium text-rose-700">
                   <XCircle className="h-4 w-4 flex-shrink-0" weight="fill" />
                   {authError}
                 </p>
@@ -384,7 +384,7 @@ const LoginForm: React.FC = () => {
         </div>
 
         <footer className="mt-5 text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/65">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/65">
             Sede • Disa Apurímac II
           </p>
         </footer>

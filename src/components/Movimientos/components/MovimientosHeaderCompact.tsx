@@ -215,23 +215,23 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   const stockPanelContent = hideStockMetrics ? null : (
     <div className="relative z-[90] overflow-visible border-t border-[#eeeef3] bg-white px-5 py-3 sm:px-6">
       {!selectedVacuna ? (
-        <div className="flex items-center gap-2.5 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-white text-[#606571]">
+        <div className="flex items-center gap-2.5 rounded-xl border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-white text-[#606571]">
             <Package className="h-4 w-4" weight="duotone" />
           </div>
           <p className="text-sm font-semibold tracking-tight text-[#15171d]">Selecciona una vacuna para visualizar el stock operativo.</p>
         </div>
       ) : isLoadingStock || isUpdatingStock ? (
-        <div className="flex items-center gap-2.5 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-white text-[#606571]">
+        <div className="flex items-center gap-2.5 rounded-xl border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-white text-[#606571]">
             <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
           </div>
           <p className="text-sm font-semibold tracking-tight text-[#15171d]">Sincronizando balances...</p>
         </div>
       ) : stockError ? (
-        <div className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3">
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
           <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-rose-200 bg-white text-rose-600">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rose-200 bg-white text-rose-600">
               <Warning className="h-4 w-4" weight="fill" />
             </div>
             <div className="min-w-0 flex-1">
@@ -248,7 +248,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
         <div className="relative z-[90] space-y-2 overflow-visible">
           <div className="relative z-[90] flex flex-wrap items-stretch gap-2 overflow-visible">
             <div className="flex min-h-14 items-center gap-2 rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] px-3 py-2">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-white text-[#606571]">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-white text-[#606571]">
                 <CalendarBlank className="h-4 w-4" weight="duotone" />
               </div>
               <div>
@@ -265,7 +265,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 onClick={() => setShowStockInicialDropdown((prev) => !prev)}
                 className="flex min-h-14 items-center gap-2 rounded-[12px] border border-[#e7e7ef] bg-white px-3 py-2 text-left transition hover:bg-[#fbfafd]"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
                   <Package className="h-4 w-4" weight="duotone" />
                 </div>
                 <div>
@@ -278,14 +278,14 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               </button>
 
               {showStockInicialDropdown ? (
-                <div className="absolute left-0 top-full z-[180] mt-2 w-[min(280px,calc(100vw-3rem))] rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[280px]">
+                <div className="absolute left-0 top-full z-[180] mt-2 w-[min(280px,calc(100vw-3rem))] rounded-xl border border-[#e7e7ef] bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[280px]">
                   <h4 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-widest text-[#8b8f9b]">Volumen desglosado</h4>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-[10px] border border-[#e7e7ef] bg-[#fbfafd] px-3 py-2">
+                    <div className="rounded-lg border border-[#e7e7ef] bg-[#fbfafd] px-3 py-2">
                       <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-[#8b8f9b]">Base histórica</p>
                       <p className="mt-1 text-sm font-semibold text-[#15171d]">{stockInfo.stockInicialOriginal?.toLocaleString() || 0}</p>
                     </div>
-                    <div className="rounded-[10px] border border-[#e7e7ef] bg-white px-3 py-2">
+                    <div className="rounded-lg border border-[#e7e7ef] bg-white px-3 py-2">
                       <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-[#8b8f9b]">Nuevos ingresos</p>
                       <p className="mt-1 text-sm font-semibold text-[#15171d]">{(stockInfo.ingresosLotesDelMes ?? 0).toLocaleString()}</p>
                     </div>
@@ -327,7 +327,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                   : 'border-[#e7e7ef] bg-white hover:bg-[#fbfafd] disabled:cursor-not-allowed disabled:opacity-60'
               }`}
             >
-              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border ${
+              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
                 stockInfo.stockDisponible < 0 ? 'border-rose-200 bg-white text-rose-600' : 'border-[#e7e7ef] bg-[#fbfafd] text-[#606571]'
               }`}>
                 {stockInfo.stockDisponible < 0
@@ -355,21 +355,21 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                 onClick={() => setShowStockActualDropdown((prev) => !prev)}
                 className="flex min-h-14 items-center gap-2 rounded-[12px] border border-[#e7e7ef] bg-white px-3 py-2 text-left transition hover:bg-[#fbfafd]"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
                   <Package className="h-4 w-4" weight="duotone" />
                 </div>
                 <div>
                   <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[#8b8f9b]">Stock actual</p>
                   <p className="text-sm font-semibold tracking-tight text-[#15171d]">{stockInfo.stockActual.toLocaleString()}</p>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] px-2 py-0.5 text-[0.65rem] font-semibold tracking-widest text-[#606571]">
+                <span className="inline-flex items-center gap-1 rounded-md border border-[#e7e7ef] bg-[#fbfafd] px-2 py-0.5 text-[0.65rem] font-semibold tracking-widest text-[#606571]">
                   {lotesDisponibles.length} lotes
                 </span>
                 <CaretDown className={`h-3.5 w-3.5 text-[#606571] transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} weight="bold" />
               </button>
 
               {showStockActualDropdown ? (
-                <div className="absolute right-0 top-full z-[180] mt-2 w-[min(300px,calc(100vw-3rem))] rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[300px]">
+                <div className="absolute right-0 top-full z-[180] mt-2 w-[min(300px,calc(100vw-3rem))] rounded-xl border border-[#e7e7ef] bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[300px]">
                   <h4 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-widest text-[#8b8f9b]">
                     Lotes disponibles ({lotesDisponibles.length})
                   </h4>
@@ -378,7 +378,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                       {lotesDisponibles.map((lote, index) => (
                         <div
                           key={lote.id}
-                          className={`rounded-[10px] border px-3 py-2.5 ${
+                          className={`rounded-lg border px-3 py-2.5 ${
                             index === 0
                               ? 'border-[#d7d8e2] bg-[#fbfafd] text-[#15171d]'
                               : 'border-[#e7e7ef] bg-white hover:bg-[#fbfafd] text-zinc-900'
@@ -391,7 +391,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                                 Vence: {new Date(lote.fechaVencimiento).toLocaleDateString()}
                               </p>
                             </div>
-                            <span className="shrink-0 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-[0.75rem] font-semibold tracking-tight text-[#15171d]">
+                            <span className="shrink-0 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-[0.75rem] font-semibold tracking-tight text-[#15171d]">
                               {lote.cantidadActual.toLocaleString()}
                             </span>
                           </div>
@@ -414,7 +414,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                   className="flex min-h-14 items-center gap-2 rounded-[12px] border border-[#e7e7ef] bg-white px-3 py-2 text-left text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-60"
                   title={`Actualizar stock de ${periodoSiguiente}`}
                 >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
                     {isUpdatingStockSiguienteMes ? (
                       <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
                     ) : (
@@ -465,7 +465,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               ) : (
                 <div>
                   <span className={COMPONENT_STYLES.input.label}>Centro asignado</span>
-                  <div className="flex min-h-[44px] items-center gap-2.5 rounded-[10px] border border-[#e7e7ef] bg-white px-4 py-2.5 text-sm font-semibold text-[#15171d] shadow-sm">
+                  <div className="flex min-h-[44px] items-center gap-2.5 rounded-lg border border-[#e7e7ef] bg-white px-4 py-2.5 text-sm font-semibold text-[#15171d] shadow-sm">
                     <Buildings className="h-4 w-4 shrink-0 text-zinc-500" weight="duotone" />
                     <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
                   </div>

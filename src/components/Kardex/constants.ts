@@ -32,7 +32,7 @@ export const MOVIMIENTO_CONFIG = {
     label: 'Ingreso',
     tone: 'success' as ColorScheme,
     icon: ArrowCircleUp,
-    badgeClassName: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
+    badgeClassName: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
     chipClassName: 'border-[#e7e7ef] bg-white text-[#15171d]',
   },
   salida: {
@@ -40,7 +40,7 @@ export const MOVIMIENTO_CONFIG = {
     label: 'Salida',
     tone: 'danger' as ColorScheme,
     icon: ArrowCircleDown,
-    badgeClassName: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    badgeClassName: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
     chipClassName: 'border-[#e7e7ef] bg-white text-[#15171d]',
   },
   transferencia: {
@@ -48,7 +48,7 @@ export const MOVIMIENTO_CONFIG = {
     label: 'Transferencia',
     tone: 'secondary' as ColorScheme,
     icon: ArrowsLeftRight,
-    badgeClassName: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-sky-500',
+    badgeClassName: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-sky-500',
     chipClassName: 'border-[#e7e7ef] bg-white text-[#15171d]',
   },
   ajuste: {
@@ -56,7 +56,7 @@ export const MOVIMIENTO_CONFIG = {
     label: 'Ajuste',
     tone: 'warning' as ColorScheme,
     icon: Faders,
-    badgeClassName: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
+    badgeClassName: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
     chipClassName: 'border-[#e7e7ef] bg-white text-[#15171d]',
   },
   default: {
@@ -64,7 +64,7 @@ export const MOVIMIENTO_CONFIG = {
     label: 'Movimiento',
     tone: 'neutral' as ColorScheme,
     icon: Package,
-    badgeClassName: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    badgeClassName: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
     chipClassName: 'border-[#e7e7ef] bg-white text-[#15171d]',
   },
 } as const;

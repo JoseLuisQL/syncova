@@ -159,9 +159,9 @@ export const SECTION_GROUPS = [
 export const COMPONENT_STYLES = {
   pageBackground: 'min-h-screen bg-white',
   surface: 'rounded-none border-0 bg-transparent shadow-none',
-  panel: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
+  panel: 'rounded-xl border border-[#e7e7ef] bg-white shadow-none',
   mutedPanel: 'rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd]',
-  card: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
+  card: 'rounded-xl border border-[#e7e7ef] bg-white shadow-none',
 
   header: {
     title: 'text-[1.45rem] font-semibold tracking-tight text-zinc-950 sm:text-[1.58rem]',
@@ -178,7 +178,7 @@ export const COMPONENT_STYLES = {
     ghost:
       'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3 py-1.5 text-sm font-semibold text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     success:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] border border-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-lg bg-[#7c3aed] border border-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
     icon:
       'inline-flex h-9 w-9 items-center justify-center rounded-xl transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
     iconEdit: 'border border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:ring-zinc-500',
@@ -188,44 +188,44 @@ export const COMPONENT_STYLES = {
 
   input: {
     base:
-      'min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-[13px] text-[#15171d] shadow-none transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
+      'min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-base text-[#15171d] shadow-none transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
     normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     error: 'border-rose-300 bg-rose-50/60 focus:border-rose-500 focus:ring-rose-500/20',
-    label: 'mb-1.5 block text-[12px] font-medium text-[#424750]',
+    label: 'mb-1.5 block text-sm font-medium text-[#424750]',
     errorText: 'mt-1 text-xs text-rose-600',
     helpText: 'mt-1 text-xs text-zinc-500',
   },
 
   select: {
     base:
-      'min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-[13px] text-[#15171d] shadow-none transition focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
+      'min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-base text-[#15171d] shadow-none transition focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
     normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
   },
 
   table: {
     container: 'overflow-visible rounded-none border-0 bg-transparent shadow-none',
     header: 'bg-transparent',
-    headerCell: 'bg-[#fbfafd] px-4 py-3 text-left text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]',
+    headerCell: 'bg-[#fbfafd] px-4 py-3 text-left text-sm font-medium tracking-[-0.01em] text-[#8b8f9b]',
     row: 'transition-colors hover:bg-[#fbfafd]',
     cell: 'border-b border-[#eeeef3] px-4 py-3.5 align-middle text-sm text-[#15171d]',
     emptyIcon: 'mx-auto mb-4 h-11 w-11 text-zinc-300',
   },
 
   badge: {
-    active: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
-    inactive: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
-    count: 'inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
-    warning: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
-    danger: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
-    info: 'inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
-    neutral: 'inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    active: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
+    inactive: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    count: 'inline-flex items-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    warning: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
+    danger: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    info: 'inline-flex items-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    neutral: 'inline-flex items-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
   },
 
   modal: {
     overlay: 'fixed inset-0 z-[300] bg-[#111318]/20 backdrop-blur-[2px]',
     container: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6',
     panel:
-      'w-full overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:max-h-[88vh] sm:rounded-[10px]',
+      'w-full overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:max-h-[88vh] sm:rounded-lg',
     header: 'border-b border-[#eeeef3] px-4 py-3.5 sm:px-5',
     body: 'max-h-[calc(100vh-150px)] overflow-y-auto px-4 py-4 sm:max-h-[calc(88vh-136px)] sm:px-5',
     footer: 'border-t border-[#eeeef3] bg-[#fbfafd] px-4 py-3 sm:px-5',
@@ -250,13 +250,13 @@ export const COMPONENT_STYLES = {
     container: 'border-t border-[#eeeef3] bg-white px-4 py-5 sm:px-5',
     info: 'text-sm font-medium text-[#747986]',
     button:
-      'min-h-9 min-w-9 rounded-[10px] border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40',
+      'min-h-9 min-w-9 rounded-lg border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40',
     buttonActive: 'border-[#e7e7ef] bg-white text-[#15171d] shadow-sm',
     buttonInactive: 'border-transparent bg-transparent text-[#606571] hover:bg-[#fbfafd] hover:text-[#15171d]',
   },
 
   nav: {
-    shell: 'rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
+    shell: 'rounded-3xl border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]',
     tab:
       'inline-flex items-center gap-2 rounded-2xl px-3.5 py-3 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-teal-500/20',
     tabActive: 'bg-teal-50 text-teal-700 shadow-sm',

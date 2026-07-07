@@ -42,7 +42,7 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
   };
 
   return (
-    <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-5" aria-label="Stock disponible">
+    <section className="rounded-xl border border-[#e7e7ef] bg-white p-5" aria-label="Stock disponible">
       {/* Header */}
       <div className="mb-5 flex flex-col gap-4 border-b border-[#eeeef3] pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">

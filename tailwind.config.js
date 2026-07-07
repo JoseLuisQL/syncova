@@ -121,7 +121,33 @@ export default {
       },
       fontSize: {
         ...designMdTheme.fontSize,
+        // Escala tipográfica canonica del design system de SIVAC.
+        // Reemplaza los 12+ valores text-[Npx] arbitrarios por una escala nombrada.
+        // Mapeo: xs=11px, sm=12px, base=13px, md=14px, lg=16px, xl=18px, 2xl=24px, display=34px.
+        xs: ['0.6875rem', { lineHeight: '1rem' }],
+        sm: ['0.75rem', { lineHeight: '1.1rem' }],
+        base: ['0.8125rem', { lineHeight: '1.25rem' }],
+        md: ['0.875rem', { lineHeight: '1.3rem' }],
+        lg: ['1rem', { lineHeight: '1.5rem' }],
+        xl: ['1.125rem', { lineHeight: '1.6rem' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem' }],
         body: ['0.95rem', { lineHeight: '1.6' }],
+        display: ['3.5rem', { letterSpacing: '-0.02em', fontWeight: '600' }],
+      },
+      borderRadius: {
+        ...designMdTheme.borderRadius,
+        // Escala de radios canonica del design system de SIVAC.
+        // Reemplaza los 20+ valores rounded-[Npx] arbitrarios por una escala nombrada.
+        // Mapeo: sm=6px, md=8px, lg=10px, xl=14px, 2xl=16px, 3xl=18px, 4xl=24px.
+        // 'full' se mantiene de Tailwind para avatares y pills.
+        DEFAULT: '8px',
+        sm: '6px',
+        md: '8px',
+        lg: '10px',
+        xl: '14px',
+        '2xl': '16px',
+        '3xl': '18px',
+        '4xl': '24px',
       },
     },
   },

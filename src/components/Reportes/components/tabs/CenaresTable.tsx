@@ -338,7 +338,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
 
       <div className="relative">
         {/* Indicador de scroll horizontal para móvil */}
-        <div className="mb-2 flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 md:hidden">
+        <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-zinc-400 md:hidden">
           <ArrowsLeftRight className="h-3.5 w-3.5" weight="bold" />
           <span>Desliza horizontalmente para ver todas las columnas</span>
         </div>

@@ -418,7 +418,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
                 Filtros
               </summary>
 
-              <div className="absolute left-0 top-11 z-40 max-h-[70vh] w-[min(760px,calc(100vw-3rem))] overflow-y-auto rounded-[14px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
+              <div className="absolute left-0 top-11 z-40 max-h-[70vh] w-[min(760px,calc(100vw-3rem))] overflow-y-auto rounded-xl border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                   <div>
                     <label htmlFor="kardex-fecha-inicio" className="mb-1 block text-xs font-medium text-[#747986]">
@@ -549,7 +549,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
                 key={filter.key}
                 type="button"
                 onClick={filter.clear}
-                className="inline-flex items-center gap-2 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] transition hover:bg-[#fbfafd]"
+                className="inline-flex items-center gap-2 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] transition hover:bg-[#fbfafd]"
               >
                 <span>{filter.label}</span>
                 <X className="h-3.5 w-3.5" />

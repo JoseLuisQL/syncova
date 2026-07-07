@@ -250,4 +250,13 @@
   .toast-progress-bar {
     transition: none;
   }
+
+  /* La barra de progreso inline (animation: progress-shrink) también se
+     desactiva bajo reduced-motion: el auto-dismiss por setTimeout sigue
+     funcionando, solo se omite la animación visual. El selector matchea
+     cualquier barra dentro de un role="alert" (contenedor Toast). */
+  [role="alert"] [style*="progress-shrink"] {
+    animation: none !important;
+    width: 100% !important;
+  }
 }

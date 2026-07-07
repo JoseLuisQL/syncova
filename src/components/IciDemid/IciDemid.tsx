@@ -30,7 +30,7 @@ const TotalPill: React.FC<{
         : 'border-[#e7e7ef] bg-white text-[#15171d]';
 
   return (
-    <span className={`inline-flex min-w-[4.6rem] justify-center rounded-[8px] border px-2.5 py-1.5 text-sm font-semibold tabular-nums ${className}`}>
+    <span className={`inline-flex min-w-[4.6rem] justify-center rounded-md border px-2.5 py-1.5 text-sm font-semibold tabular-nums ${className}`}>
       {typeof value === 'number' ? value.toLocaleString() : value}
     </span>
   );
@@ -40,9 +40,9 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
   const estilo = getEstiloEstablecimiento(registro.establecimiento);
 
   return (
-    <div className={`rounded-[14px] border p-3 transition-colors hover:brightness-[0.98] ${estilo.colores.bg} ${estilo.colores.border}`}>
+    <div className={`rounded-xl border p-3 transition-colors hover:brightness-[0.98] ${estilo.colores.bg} ${estilo.colores.border}`}>
       <div className="flex items-start gap-3">
-        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border bg-white ${estilo.colores.border}`}>
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-white ${estilo.colores.border}`}>
           <span className={`h-3 w-3 rounded-full ${estilo.colores.accent}`} aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
@@ -50,7 +50,7 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-[#606571]">
             {registro.establecimiento.codigo ? <span>{registro.establecimiento.codigo}</span> : null}
             {registro.establecimiento.codigo ? <span className="text-[#c4c7d0]">•</span> : null}
-            <span className={`rounded-[8px] border bg-white px-2 py-0.5 font-medium ${estilo.colores.border} ${estilo.colores.text}`}>
+            <span className={`rounded-md border bg-white px-2 py-0.5 font-medium ${estilo.colores.border} ${estilo.colores.text}`}>
               {registro.vacuna.nombre}
             </span>
           </div>
@@ -58,11 +58,11 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <div className="rounded-[10px] border border-[#e7e7ef] bg-white/90 p-2.5">
+        <div className="rounded-lg border border-[#e7e7ef] bg-white/90 p-2.5">
           <p className="text-xs font-medium text-[#8b8f9b]">Total distribuido</p>
           <p className="mt-1 text-sm font-semibold text-[#15171d] tabular-nums">{registro.totalDistribu.toLocaleString()}</p>
         </div>
-        <div className="rounded-[10px] border border-[#e7e7ef] bg-white/90 p-2.5">
+        <div className="rounded-lg border border-[#e7e7ef] bg-white/90 p-2.5">
           <p className="text-xs font-medium text-[#8b8f9b]">Situación</p>
           <p className="mt-1 text-xs font-semibold text-[#15171d]">{registro.situacion || '-'}</p>
         </div>
@@ -70,7 +70,7 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
 
       <div className="mt-3 grid grid-cols-3 gap-2">
         {mesesDelAnio.map((month) => (
-          <div key={`${registro.id}-${month}`} className="rounded-[10px] border border-[#e7e7ef] bg-white/90 p-2 text-center">
+          <div key={`${registro.id}-${month}`} className="rounded-lg border border-[#e7e7ef] bg-white/90 p-2 text-center">
             <p className="text-[0.58rem] font-semibold uppercase tracking-wider text-[#8b8f9b]">{MESES_CORTOS[month - 1]}</p>
             <p className="mt-1 text-sm font-semibold text-[#15171d] tabular-nums">
               {(registro.distribucionMensual[month - 1] || 0).toLocaleString()}
@@ -378,7 +378,7 @@ const IciDemid: React.FC = () => {
                         <tr key={registro.id} className={`transition-[filter] hover:brightness-[0.98] ${estilo.colores.bg}`}>
                           <td className={`sticky left-0 z-10 border-b border-r px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)] ${estilo.colores.border} ${estilo.colores.bg}`}>
                             <div className="flex items-start gap-3">
-                              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border bg-white ${estilo.colores.border}`}>
+                              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border bg-white ${estilo.colores.border}`}>
                                 <span className={`h-3 w-3 rounded-full ${estilo.colores.accent}`} aria-hidden="true" />
                               </div>
                               <div className="min-w-0">
@@ -407,7 +407,7 @@ const IciDemid: React.FC = () => {
 
             <div className="min-h-0 flex-1 overflow-auto bg-white p-2.5 md:hidden">
               {registrosFiltrados.length === 0 && !isLoading ? (
-                <div className="rounded-[14px] border border-[#e7e7ef] bg-white">
+                <div className="rounded-xl border border-[#e7e7ef] bg-white">
                   <EmptyState
                     icon={Warning}
                     title="Sin registros ICI DEMID"

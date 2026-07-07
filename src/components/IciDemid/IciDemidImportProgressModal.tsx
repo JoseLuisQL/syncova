@@ -39,7 +39,7 @@ const IciDemidImportProgressModal: React.FC<IciDemidImportProgressModalProps> = 
 
   return (
     <div className="fixed inset-0 z-[320] flex items-center justify-center bg-[#111318]/20 p-4 backdrop-blur-[2px]">
-      <div className="w-full max-w-2xl overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
+      <div className="w-full max-w-2xl overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
         <div className="border-b border-[#eeeef3] px-5 py-3.5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
@@ -47,12 +47,12 @@ const IciDemidImportProgressModal: React.FC<IciDemidImportProgressModalProps> = 
                 <MicrosoftExcelLogo className="h-4 w-4" weight="bold" />
               </div>
               <div>
-                <p className="mb-1 inline-flex items-center gap-1.5 rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] px-2 py-0.5 text-[11px] font-medium text-[#606571]">
+                <p className="mb-1 inline-flex items-center gap-1.5 rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] px-2 py-0.5 text-xs font-medium text-[#606571]">
                   <Sparkle className="h-3.5 w-3.5 text-[#7c3aed]" weight="bold" />
                   Proceso de importación
                 </p>
-                <h2 className="text-[15px] font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">{activeConfig.title}</h2>
-                <p className="mt-1 max-w-xl text-[12px] leading-5 text-[#606571]">{activeConfig.description}</p>
+                <h2 className="text-md font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">{activeConfig.title}</h2>
+                <p className="mt-1 max-w-xl text-sm leading-5 text-[#606571]">{activeConfig.description}</p>
                 {fileName ? (
                   <p className="mt-2 max-w-xl truncate text-xs font-medium text-[#8b8f9b]">
                     Archivo: {fileName}
@@ -90,7 +90,7 @@ const IciDemidImportProgressModal: React.FC<IciDemidImportProgressModalProps> = 
               return (
                 <div
                   key={step.key}
-                  className={`rounded-[8px] border px-3 py-3 transition-colors ${
+                  className={`rounded-md border px-3 py-3 transition-colors ${
                     isActive
                       ? 'border-[#c8bbff] bg-[#fbfafd]'
                       : 'border-[#e7e7ef] bg-white'

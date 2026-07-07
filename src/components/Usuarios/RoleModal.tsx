@@ -246,10 +246,10 @@ const RoleModal: React.FC<RoleModalProps> = ({
                 <Shield className="h-4 w-4" aria-hidden="true" />
               </div>
               <div>
-                <h2 id="role-modal-title" className="text-[15px] font-semibold leading-5 text-[#15171d]">
+                <h2 id="role-modal-title" className="text-md font-semibold leading-5 text-[#15171d]">
                   {isEditing ? 'Editar Rol' : 'Crear Nuevo Rol'}
                 </h2>
-                <p className="mt-1 text-[12px] leading-4 text-[#606571]">
+                <p className="mt-1 text-sm leading-4 text-[#606571]">
                   {isEditing 
                     ? `Modificando: ${editingRole.nombre}` 
                     : 'Define un nuevo rol para el sistema'}
@@ -270,10 +270,10 @@ const RoleModal: React.FC<RoleModalProps> = ({
 
         {/* Aviso de rol del sistema */}
         {isSystemRole && (
-          <div className="mx-5 mt-4 flex items-start gap-3 rounded-[8px] border border-amber-200 bg-amber-50/80 px-3 py-2.5">
+          <div className="mx-5 mt-4 flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50/80 px-3 py-2.5">
             <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
             <div>
-              <p className="text-[13px] font-medium text-amber-800">Rol del Sistema</p>
+              <p className="text-base font-medium text-amber-800">Rol del Sistema</p>
               <p className="mt-0.5 text-xs text-amber-700">
                 Este es un rol predefinido. El código no puede ser modificado.
               </p>
@@ -286,7 +286,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
           <div className="space-y-4">
             {/* Nombre */}
             <div>
-              <label htmlFor="nombre" className="mb-1.5 flex items-center gap-2 text-[12px] font-medium text-[#424750]">
+              <label htmlFor="nombre" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[#424750]">
                 <FileText className="h-3.5 w-3.5 text-zinc-400" />
                 Nombre del Rol
                 <span className="text-rose-500">*</span>
@@ -322,7 +322,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
 
             {/* Código */}
             <div>
-              <label htmlFor="codigo" className="mb-1.5 flex items-center gap-2 text-[12px] font-medium text-[#424750]">
+              <label htmlFor="codigo" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[#424750]">
                 <Code className="h-3.5 w-3.5 text-zinc-400" />
                 Código del Rol
                 <span className="text-rose-500">*</span>
@@ -363,7 +363,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
 
             {/* Descripción */}
             <div>
-              <label htmlFor="descripcion" className="mb-1.5 flex items-center gap-2 text-[12px] font-medium text-[#424750]">
+              <label htmlFor="descripcion" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[#424750]">
                 <FileText className="h-3.5 w-3.5 text-zinc-400" />
                 Descripción
                 <span className="ml-auto text-xs text-zinc-400">
@@ -396,7 +396,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
 
             {/* Estado */}
             <div>
-              <label className="mb-2 flex items-center gap-2 text-[12px] font-medium text-[#424750]">
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-[#424750]">
                 Estado del Rol
               </label>
               <div className="flex gap-3">
@@ -404,7 +404,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, estado: 'activo' }))}
                   disabled={isLoading || isSubmitting}
-                  className={`flex-1 flex items-center justify-center gap-2 rounded-[7px] border px-3 py-2 text-[13px] transition-colors duration-200 ${
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-[7px] border px-3 py-2 text-base transition-colors duration-200 ${
                     formData.estado === 'activo'
                       ? 'border-[#c8bbff] bg-[#fbfafd] text-[#7c3aed]'
                       : 'border-[#e7e7ef] bg-white text-zinc-600 hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
@@ -420,7 +420,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, estado: 'inactivo' }))}
                   disabled={isLoading || isSubmitting}
-                  className={`flex-1 flex items-center justify-center gap-2 rounded-[7px] border px-3 py-2 text-[13px] transition-colors duration-200 ${
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-[7px] border px-3 py-2 text-base transition-colors duration-200 ${
                     formData.estado === 'inactivo'
                       ? 'border-[#e7e7ef] bg-[#fbfafd] text-zinc-700'
                       : 'border-[#e7e7ef] bg-white text-zinc-600 hover:border-[#d7d8e2] hover:bg-[#fbfafd]'

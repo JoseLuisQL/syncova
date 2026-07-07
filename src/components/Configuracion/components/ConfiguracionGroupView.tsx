@@ -121,7 +121,7 @@ const ReadonlyRows: React.FC<{
   fields: ConfiguracionFieldDefinition[];
   values: Record<string, ConfiguracionFieldValue>;
 }> = ({ fields, values }) => (
-  <div className="overflow-hidden rounded-[14px] border border-[#e7e7ef] bg-white">
+  <div className="overflow-hidden rounded-xl border border-[#e7e7ef] bg-white">
     {fields.map((field, index) => (
       <div
         key={field.id}
@@ -145,7 +145,7 @@ const SectionShell: React.FC<{
   const Icon = category.icon;
 
   return (
-    <section className="rounded-[14px] border border-[#e7e7ef] bg-white shadow-none">
+    <section className="rounded-xl border border-[#e7e7ef] bg-white shadow-none">
       <div className="flex flex-col gap-2 border-b border-[#eeeef3] px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -356,7 +356,7 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
     <div className="space-y-3">
       {renderEditableCategory('general')}
 
-      <section className="rounded-[14px] border border-[#e7e7ef] bg-white shadow-none">
+      <section className="rounded-xl border border-[#e7e7ef] bg-white shadow-none">
         <div className="flex items-center gap-2 border-b border-[#eeeef3] px-4 py-3">
           <Image className="h-4 w-4 text-[#606571]" aria-hidden="true" />
           <h2 className="text-sm font-semibold text-zinc-950">Logo institucional</h2>
@@ -398,9 +398,9 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
             </div>
 
             <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
-              <span className="rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1">PNG o JPG</span>
-              <span className="rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1">Max 2 MB</span>
-              <span className="rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1">200x200 px</span>
+              <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">PNG o JPG</span>
+              <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">Max 2 MB</span>
+              <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">200x200 px</span>
             </div>
           </div>
         </div>
@@ -413,7 +413,7 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
       {renderEditableCategory('alertas')}
       {renderReadonlyCategory('notificaciones')}
 
-      <section className="rounded-[14px] border border-[#e7e7ef] bg-white shadow-none">
+      <section className="rounded-xl border border-[#e7e7ef] bg-white shadow-none">
         <div className="flex flex-col gap-2 border-b border-[#eeeef3] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -434,9 +434,9 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
             footer={
               lastGenerationResult ? (
                 <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
-                  <span className="rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1">Total {lastGenerationResult.alertasGeneradas}</span>
-                  <span className="rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1">Vencimiento {lastGenerationResult.alertasVencimiento}</span>
-                  <span className="rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1">Stock bajo {lastGenerationResult.alertasStockBajo}</span>
+                  <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">Total {lastGenerationResult.alertasGeneradas}</span>
+                  <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">Vencimiento {lastGenerationResult.alertasVencimiento}</span>
+                  <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">Stock bajo {lastGenerationResult.alertasStockBajo}</span>
                 </div>
               ) : null
             }
@@ -471,7 +471,7 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
   );
 
   const renderOperationDiagnostics = () => (
-    <section className="rounded-[14px] border border-[#e7e7ef] bg-white shadow-none">
+    <section className="rounded-xl border border-[#e7e7ef] bg-white shadow-none">
       <div className="flex items-center justify-between border-b border-[#eeeef3] px-4 py-3">
         <div className="flex items-center gap-2">
           <Database className="h-4 w-4 text-[#606571]" aria-hidden="true" />
@@ -505,9 +505,9 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
       {group.id === 'alertas' ? renderAlertsGroup() : null}
       {group.id === 'seguridad' ? renderReadonlyCategory('seguridad') : null}
       {group.id === 'seguridad' ? (
-        <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-4 shadow-none">
+        <section className="rounded-xl border border-[#e7e7ef] bg-white p-4 shadow-none">
           <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
             </div>
             <div>
@@ -548,7 +548,7 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
       {group.id === 'operacion' ? renderOperationDiagnostics() : null}
 
       {hasEditableFields ? (
-        <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-4 shadow-none">
+        <section className="rounded-xl border border-[#e7e7ef] bg-white p-4 shadow-none">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             {dirtyCount > 0 ? (
               <p className="text-sm text-zinc-500">

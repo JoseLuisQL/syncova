@@ -122,7 +122,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
           </div>
 
           <div className="mt-5 grid gap-4 md:grid-cols-3">
-            <div className="rounded-[18px] border border-zinc-200 bg-zinc-50/70 p-4">
+            <div className="rounded-3xl border border-zinc-200 bg-zinc-50/70 p-4">
               <label className="block text-sm font-medium text-zinc-700">Días de anticipación</label>
               <input
                 type="number"
@@ -135,7 +135,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
               <p className="mt-2 text-xs text-zinc-500">Controla cuándo se dispara una alerta de vencimiento.</p>
             </div>
 
-            <div className="rounded-[18px] border border-zinc-200 bg-zinc-50/70 p-4">
+            <div className="rounded-3xl border border-zinc-200 bg-zinc-50/70 p-4">
               <label className="block text-sm font-medium text-zinc-700">Stock mínimo</label>
               <input
                 type="number"
@@ -149,7 +149,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
               <p className="mt-2 text-xs text-zinc-500">Se usa para generar alertas automáticas de stock bajo.</p>
             </div>
 
-            <div className="rounded-[18px] border border-zinc-200 bg-zinc-50/70 p-4">
+            <div className="rounded-3xl border border-zinc-200 bg-zinc-50/70 p-4">
               <label className="block text-sm font-medium text-zinc-700">Retención de resueltas</label>
               <input
                 type="number"
@@ -185,15 +185,15 @@ const ConfiguracionAlertas: React.FC = memo(() => {
 
             {lastResult ? (
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[16px] border border-teal-200 bg-teal-50/70 p-4">
+                <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-4">
                   <p className="text-xs font-medium uppercase tracking-[0.08em] text-teal-700">Vencimiento</p>
                   <p className="mt-2 text-xl font-semibold text-teal-900">{lastResult.alertasVencimiento || 0}</p>
                 </div>
-                <div className="rounded-[16px] border border-rose-200 bg-rose-50/70 p-4">
+                <div className="rounded-2xl border border-rose-200 bg-rose-50/70 p-4">
                   <p className="text-xs font-medium uppercase tracking-[0.08em] text-rose-700">Stock bajo</p>
                   <p className="mt-2 text-xl font-semibold text-rose-900">{lastResult.alertasStockBajo || 0}</p>
                 </div>
-                <div className="rounded-[16px] border border-cyan-200 bg-zinc-100/70 p-4">
+                <div className="rounded-2xl border border-cyan-200 bg-zinc-100/70 p-4">
                   <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-900">Total</p>
                   <p className="mt-2 text-xl font-semibold text-cyan-900">{lastResult.alertasGeneradas || 0}</p>
                 </div>
@@ -219,7 +219,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
               </button>
             </div>
 
-            <div className="mt-5 rounded-[18px] border border-sky-200 bg-sky-50/80 p-4 text-sm leading-6 text-sky-900">
+            <div className="mt-5 rounded-3xl border border-sky-200 bg-sky-50/80 p-4 text-sm leading-6 text-sky-900">
               Se eliminarán únicamente alertas ya leídas con más de {config.diasRetencion} días de antigüedad.
             </div>
           </section>

@@ -245,7 +245,7 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
                   ]}
                 />
 
-                <div className="mt-4 overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white">
+                <div className="mt-4 overflow-hidden rounded-3xl border border-[#e7e7ef] bg-white">
                   <div className="overflow-x-auto">
                     <table className="min-w-full">
                       <thead className={COMPONENT_STYLES.table.header}>

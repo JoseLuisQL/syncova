@@ -200,10 +200,10 @@ const Configuracion: React.FC = () => {
         }
       >
         <div className="space-y-4">
-          <div className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-4 text-sm text-zinc-600">
+          <div className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-4 text-sm text-zinc-600">
             El bloque actual tiene <span className="font-semibold text-zinc-950">{activeDirtyCount}</span> cambio(s) sin guardar.
           </div>
-          <div className="rounded-[14px] border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-800">
+          <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-800">
             Si continuas, se restauraran los valores originales del bloque actual.
           </div>
         </div>

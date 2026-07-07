@@ -10,7 +10,7 @@ const ConfiguracionSkeleton: React.FC = () => (
     <div className={`${COMPONENT_STYLES.panel} inventory-loading-shell p-4`}>
       <div className="grid gap-4 xl:grid-cols-2">
         {Array.from({ length: 2 }).map((_, columnIndex) => (
-          <div key={`config-nav-skeleton-${columnIndex + 1}`} className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-3">
+          <div key={`config-nav-skeleton-${columnIndex + 1}`} className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-3">
             <div className="space-y-2">
               <SkeletonBlock className="h-4 w-28 rounded-full" />
               <SkeletonBlock className="h-3 w-44 rounded-full opacity-80" />
@@ -43,15 +43,15 @@ const ConfiguracionSkeleton: React.FC = () => (
             {Array.from({ length: 4 }).map((__, fieldIndex) => (
               <div key={`config-field-skeleton-${sectionIndex + 1}-${fieldIndex + 1}`} className="space-y-2">
                 <SkeletonBlock className="h-3 w-24 rounded-full" />
-                <SkeletonBlock className="h-11 w-full rounded-[10px]" />
+                <SkeletonBlock className="h-11 w-full rounded-lg" />
                 <SkeletonBlock className="h-3 w-3/4 rounded-full opacity-75" />
               </div>
             ))}
           </div>
 
           <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <SkeletonBlock className="h-11 w-full rounded-[10px] sm:w-28" />
-            <SkeletonBlock className="h-11 w-full rounded-[10px] sm:w-40" />
+            <SkeletonBlock className="h-11 w-full rounded-lg sm:w-28" />
+            <SkeletonBlock className="h-11 w-full rounded-lg sm:w-40" />
           </div>
         </section>
       ))}

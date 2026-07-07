@@ -20,11 +20,11 @@ const ActividadSection: React.FC = memo(() => {
   const { data, loading, error } = usePaginatedActividad(6);
 
   return (
-    <section className="flex h-full flex-col rounded-[18px] border border-[#e3e9f0] bg-white shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
+    <section className="flex h-full flex-col rounded-3xl border border-[#e3e9f0] bg-white shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
       <header className="border-b border-[#eef1f5] px-5 py-4">
         <div>
           <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9aa4b2]">Auditoría</p>
-          <h3 className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[#171b22]">Actividad reciente</h3>
+          <h3 className="mt-1 text-md font-semibold tracking-[-0.02em] text-[#171b22]">Actividad reciente</h3>
         </div>
       </header>
 
@@ -51,10 +51,10 @@ const ActividadSection: React.FC = memo(() => {
                       {formatTimeOnly(actividad.fecha)}
                     </time>
                   </div>
-                  <p className="line-clamp-2 text-[13px] font-medium text-[#171b22]">
+                  <p className="line-clamp-2 text-base font-medium text-[#171b22]">
                     {actividad.descripcion}
                   </p>
-                  <div className="mt-1 truncate text-[11px] font-medium text-secondary">
+                  <div className="mt-1 truncate text-xs font-medium text-secondary">
                     {actividad.usuario && <span>{actividad.usuario}</span>}
                   </div>
                 </div>
@@ -65,7 +65,7 @@ const ActividadSection: React.FC = memo(() => {
       </div>
 
       <div className="mt-auto border-t border-zinc-100 px-5 py-4">
-        <button type="button" className="flex items-center gap-1 text-[13px] font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276]">
+        <button type="button" className="flex items-center gap-1 text-base font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276]">
           Ver registro completo <span className="text-lg leading-none">→</span>
         </button>
       </div>

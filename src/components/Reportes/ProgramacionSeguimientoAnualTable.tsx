@@ -364,7 +364,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
   }
 
   return (
-    <div className="overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]">
+    <div className="overflow-hidden rounded-3xl border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]">
       {/* Header Minimal */}
       <div className="border-b border-[#eeeef3] bg-white px-5 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -386,7 +386,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
             <button type="button"
               onClick={handleExportarExcel}
               disabled={isExporting || loading || items.length === 0}
-              className="flex items-center rounded-[10px] border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] shadow-sm transition-colors hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center rounded-lg border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] shadow-sm transition-colors hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isExporting ? (
                 <>
@@ -412,7 +412,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       </div>
 
       {/* Table Container with Horizontal Scroll */}
-      <div className="mb-2 flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 md:hidden">
+      <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-zinc-400 md:hidden">
         <ArrowsLeftRight className="h-3.5 w-3.5" weight="bold" />
         <span>Desliza horizontalmente para ver todas las columnas</span>
       </div>

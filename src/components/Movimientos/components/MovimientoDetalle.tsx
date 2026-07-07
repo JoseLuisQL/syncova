@@ -75,7 +75,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
     >
       <div className="space-y-4">
         <section className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-4">
+          <div className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-4">
             <div className="flex items-center gap-2">
               <Buildings className="h-4 w-4 text-zinc-900" weight="duotone" />
               <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">Establecimiento</p>
@@ -84,14 +84,14 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
             <p className="mt-1 text-xs font-semibold text-zinc-500">{movimiento.establecimiento.codigo}</p>
           </div>
 
-          <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-4">
+          <div className="rounded-xl border border-[#e7e7ef] bg-white p-4">
             <div className="flex items-center gap-2">
               <Syringe className="h-4 w-4 text-zinc-900" weight="duotone" />
               <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">Vacuna</p>
             </div>
             <p className="mt-2 text-[0.95rem] font-semibold tracking-tight text-zinc-900">{movimiento.vacuna?.nombre || 'Sin vacuna'}</p>
             <span
-              className={`mt-2 inline-flex rounded-[8px] px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-widest ${
+              className={`mt-2 inline-flex rounded-md px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-widest ${
                 movimiento.tieneMovimiento ? 'border border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]' : 'bg-zinc-100 text-zinc-400 border border-zinc-200'
               }`}
             >
@@ -100,7 +100,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
           </div>
         </section>
 
-        <section className="space-y-3 rounded-[14px] border border-[#e7e7ef] bg-white p-4">
+        <section className="space-y-3 rounded-xl border border-[#e7e7ef] bg-white p-4">
           <div className="flex items-center gap-2 border-b border-[#eeeef3] pb-2">
             <TrendUp className="h-4 w-4 text-zinc-900" weight="bold" />
             <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Flujo principal</h3>
@@ -114,7 +114,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
         </section>
 
         <section className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-[14px] border border-rose-200 bg-white p-4">
+          <div className="rounded-xl border border-rose-200 bg-white p-4">
             <div className="flex items-center gap-2 border-b border-rose-100 pb-2">
               <TrendDown className="h-4 w-4 text-rose-600" weight="bold" />
               <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-rose-900">Salidas</h3>
@@ -126,7 +126,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
             </div>
           </div>
 
-          <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-4">
+          <div className="rounded-xl border border-[#e7e7ef] bg-white p-4">
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-2">
               <Package className="h-4 w-4 text-zinc-900" weight="bold" />
               <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Entregas</h3>
@@ -155,7 +155,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
         </section>
 
         {movimiento.observaciones ? (
-          <section className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-4">
+          <section className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-4">
             <div className="flex items-center gap-2">
               <Heartbeat className="h-4 w-4 text-zinc-500" weight="duotone" />
               <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Observaciones</h3>

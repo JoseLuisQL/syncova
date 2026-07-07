@@ -186,7 +186,7 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
                   {distribucionTipo.map((tipo) => {
                     const Icon = tipo.icon;
                     return (
-                      <div key={tipo.id} className="rounded-[16px] border border-zinc-200 bg-zinc-50/70 p-3">
+                      <div key={tipo.id} className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2">
                             <div className={`rounded-lg p-2 ${tipo.bgColor}`}>
@@ -208,15 +208,15 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
               <section className="rounded-[22px] border border-zinc-200 bg-white p-5 shadow-sm">
                 <h3 className="text-base font-semibold text-zinc-950">Resumen del período</h3>
                 <div className="mt-4 space-y-3">
-                  <div className="rounded-[16px] border border-zinc-200 bg-zinc-50/70 p-4">
+                  <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
                     <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">Total del período</p>
                     <p className="mt-2 text-2xl font-semibold text-zinc-950">{estadisticas.totalPeriodo}</p>
                   </div>
-                  <div className="rounded-[16px] border border-zinc-200 bg-zinc-50/70 p-4">
+                  <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
                     <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">Promedio diario</p>
                     <p className="mt-2 text-2xl font-semibold text-zinc-950">{estadisticas.promedioDiario}</p>
                   </div>
-                  <div className="rounded-[16px] border border-zinc-200 bg-zinc-50/70 p-4">
+                  <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
                     <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">Tipo dominante</p>
                     <p className="mt-2 text-lg font-semibold text-zinc-950">{estadisticas.tipoMasFrecuente.tipo}</p>
                     <p className="mt-1 text-sm text-zinc-500">{estadisticas.tipoMasFrecuente.cantidad} alerta(s)</p>

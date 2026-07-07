@@ -84,14 +84,14 @@ const UserMenu: React.FC = memo(() => {
         >
           {/* Avatar Neutro Superior */}
           <div className="w-8 h-8 rounded-full bg-[#ffd1de] flex items-center justify-center">
-            <span className="text-[12px] font-semibold text-[#111318] tracking-widest leading-none">
+            <span className="text-sm font-semibold text-[#111318] tracking-widest leading-none">
               {getUserInitials()}
             </span>
           </div>
           
           {/* User Info */}
           <div className="hidden md:block text-left max-w-[140px] pl-1">
-            <p className="text-[12px] font-semibold text-[#111318] truncate leading-none mb-1">
+            <p className="text-sm font-semibold text-[#111318] truncate leading-none mb-1">
               {displayName}
             </p>
             <p className="text-[10px] font-semibold text-[#747986] truncate leading-none uppercase tracking-widest">
@@ -114,7 +114,7 @@ const UserMenu: React.FC = memo(() => {
           <div 
             className="
               absolute right-0 mt-2 w-72
-              bg-white rounded-[18px] shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]
+              bg-white rounded-3xl shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]
               border border-white/90
               overflow-hidden
               z-50
@@ -126,15 +126,15 @@ const UserMenu: React.FC = memo(() => {
             <div className="p-5 bg-white border-b border-[#e7e7ef]">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-[#ffd1de] flex items-center justify-center flex-shrink-0">
-                  <span className="text-[15px] font-semibold tracking-wider text-[#111318]">
+                  <span className="text-md font-semibold tracking-wider text-[#111318]">
                     {getUserInitials()}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0 pt-0.5">
-                  <p className="text-[14px] font-semibold text-[#111318] leading-tight truncate">
+                  <p className="text-md font-semibold text-[#111318] leading-tight truncate">
                     {displayName}
                   </p>
-                  <p className="text-[12px] font-semibold text-[#747986] truncate mt-0.5">
+                  <p className="text-sm font-semibold text-[#747986] truncate mt-0.5">
                     {user.email || user.usuario}
                   </p>
                   <span className={`
@@ -151,13 +151,13 @@ const UserMenu: React.FC = memo(() => {
               {(user.establecimiento || user.centroAcopio || user.ultimoAcceso) && (
                 <div className="mt-4 pt-4 border-t border-[#e7e7ef] space-y-2.5">
                   {(user.centroAcopio || user.establecimiento) && (
-                    <div className="flex items-center gap-2.5 text-[12px] text-[#606571] font-semibold">
+                    <div className="flex items-center gap-2.5 text-sm text-[#606571] font-semibold">
                       <Buildings className="w-4 h-4 text-[#8b8f9b]" weight="duotone" />
                       <span className="truncate">{user.centroAcopio?.nombre || user.establecimiento?.nombre}</span>
                     </div>
                   )}
                   {user.ultimoAcceso && (
-                    <div className="flex items-center gap-2.5 text-[12px] text-[#747986] font-semibold">
+                    <div className="flex items-center gap-2.5 text-sm text-[#747986] font-semibold">
                       <Clock className="w-4 h-4 text-[#8b8f9b]" weight="duotone" />
                       <span>{new Date(user.ultimoAcceso).toLocaleDateString('es-PE', { 
                         day: '2-digit', 
@@ -180,7 +180,7 @@ const UserMenu: React.FC = memo(() => {
                 }}
                 className="
                   flex items-center gap-3 w-full px-3 py-2 rounded-[9px]
-                  text-[12px] font-semibold text-[#606571]
+                  text-sm font-semibold text-[#606571]
                   hover:bg-[#f8f7fb] hover:text-[#111318]
                   transition-colors duration-150
                 "
@@ -196,7 +196,7 @@ const UserMenu: React.FC = memo(() => {
                 onClick={handleLogout}
                 className="
                   flex items-center gap-3 w-full px-3 py-2 rounded-[9px]
-                  text-[12px] font-semibold text-rose-600
+                  text-sm font-semibold text-rose-600
                   hover:bg-rose-50 hover:text-rose-700
                   transition-colors duration-150
                 "

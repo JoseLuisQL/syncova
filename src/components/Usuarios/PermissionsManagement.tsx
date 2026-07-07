@@ -282,7 +282,7 @@ const PermissionsManagement: React.FC = () => {
   // ===== Render Loading =====
   if (loading) {
     return (
-      <div className="rounded-[14px] border border-[#e7e7ef] bg-white py-20">
+      <div className="rounded-xl border border-[#e7e7ef] bg-white py-20">
         <div className="flex items-center justify-center gap-3 text-zinc-600">
           <ArrowsClockwise className="h-5 w-5 animate-spin" />
           <span className="text-sm font-medium">Cargando permisos operativos...</span>
@@ -341,7 +341,7 @@ const PermissionsManagement: React.FC = () => {
       </section>
 
       {/* ═══ Global Switches ═══ */}
-      <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-4 shadow-none">
+      <section className="rounded-xl border border-[#e7e7ef] bg-white p-4 shadow-none">
         <div className="mb-4 flex items-center gap-2">
           <Users className="h-4 w-4 text-zinc-500" />
           <h4 className="text-sm font-semibold text-zinc-900">Permisos globales</h4>
@@ -358,7 +358,7 @@ const PermissionsManagement: React.FC = () => {
               <div
                 key={config.tipo}
                 className={`
-                  rounded-[14px] border p-4 transition-colors duration-200
+                  rounded-xl border p-4 transition-colors duration-200
                   ${permiso?.habilitado ? 'border-[#dedfea] bg-[#fbfafd]' : 'border-[#e7e7ef] bg-white'}
                 `}
               >
@@ -392,7 +392,7 @@ const PermissionsManagement: React.FC = () => {
                       usuarioId: null,
                       label: `${config.label} (Global)`,
                     })}
-                    className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1.5 text-xs font-medium text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d]"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1.5 text-xs font-medium text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d]"
                   >
                     <Timer className="h-3.5 w-3.5" />
                     Programar
@@ -444,7 +444,7 @@ const PermissionsManagement: React.FC = () => {
         ) : (
           <div>
             {/* Table header */}
-            <div className="hidden grid-cols-[1fr_repeat(2,140px)_80px] items-center gap-2 rounded-[14px] bg-[#fbfafd] px-5 py-3 text-xs font-medium tracking-[-0.01em] text-[#8b8f9b] lg:grid">
+            <div className="hidden grid-cols-[1fr_repeat(2,140px)_80px] items-center gap-2 rounded-xl bg-[#fbfafd] px-5 py-3 text-xs font-medium tracking-[-0.01em] text-[#8b8f9b] lg:grid">
               <span>Usuario</span>
               {PERMISO_CONFIG.map(c => (
                 <span key={c.tipo} className="text-center">{c.label.replace('Editar ', '')}</span>

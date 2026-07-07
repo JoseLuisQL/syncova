@@ -49,7 +49,7 @@ export const AlertInlineStatus: React.FC<{
   description: string;
 }> = ({ tone = 'info', title, description }) => {
   const classes = {
-    success: 'rounded-[18px] border border-emerald-200 bg-emerald-50/80 p-4 text-emerald-800',
+    success: 'rounded-3xl border border-emerald-200 bg-emerald-50/80 p-4 text-emerald-800',
     warning: COMPONENT_STYLES.alert.warning,
     danger: COMPONENT_STYLES.alert.error,
     info: COMPONENT_STYLES.alert.info,

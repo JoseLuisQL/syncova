@@ -166,7 +166,7 @@ function ChartLoadingState() {
       initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
       animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className="my-3 w-full rounded-[14px] border border-[#e7e7ef] bg-white"
+      className="my-3 w-full rounded-xl border border-[#e7e7ef] bg-white"
     >
       <div className="px-4 py-4">
         <div className="rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-5">
@@ -234,7 +234,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
     config = JSON.parse(payload);
   } catch {
     return (
-      <div className="my-4 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-[12px] font-medium text-[#606571]">
+      <div className="my-4 rounded-xl border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-sm font-medium text-[#606571]">
         No se pudo completar la visualización del gráfico.
       </div>
     );
@@ -452,7 +452,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
 
       default:
         return (
-          <div className="flex h-full items-center justify-center text-[12px] font-medium text-zinc-500">
+          <div className="flex h-full items-center justify-center text-sm font-medium text-zinc-500">
             Tipo de gráfico no soportado
           </div>
         );
@@ -462,7 +462,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
   return (
     <motion.section
       {...cardMotion}
-      className="my-3 w-full rounded-[14px] border border-[#e7e7ef] bg-white"
+      className="my-3 w-full rounded-xl border border-[#e7e7ef] bg-white"
     >
       <div className="bg-white py-3">
         <div className="overflow-x-auto overflow-y-hidden px-4 pb-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-200">

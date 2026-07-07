@@ -51,11 +51,11 @@ const StatCard: React.FC<StatCardProps> = memo(({
               {label}
             </p>
           </div>
-          <p className="text-3xl font-semibold leading-none tracking-[-0.03em] text-primary tabular-nums sm:text-[34px]">
+          <p className="text-3xl font-semibold leading-none tracking-[-0.03em] text-primary tabular-nums sm:text-display">
             {value.toLocaleString()}
           </p>
           {description && (
-            <p className="mt-1 hidden text-[12px] font-medium text-secondary sm:block">
+            <p className="mt-1 hidden text-sm font-medium text-secondary sm:block">
               {description}
             </p>
           )}

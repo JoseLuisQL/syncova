@@ -313,7 +313,7 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
       }
     >
       <div className="space-y-4">
-        <div className="rounded-[18px] border border-zinc-200 bg-zinc-50/60 p-4">
+        <div className="rounded-3xl border border-zinc-200 bg-zinc-50/60 p-4">
           <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-zinc-700">Vista previa</p>
           <p className="mt-2 text-sm leading-6 text-zinc-800">
             {isEditing ? (
@@ -365,7 +365,7 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
               : 'Aplicará como regla general cuando no exista una regla específica por centro.'}
           </p>
           {!isEditing && combinationsCount > 1 ? (
-            <p className="mt-2 text-[11px] leading-4 text-amber-700">
+            <p className="mt-2 text-xs leading-4 text-amber-700">
               Si alguna combinación ya existe, se omitirá automáticamente y el resto se creará.
             </p>
           ) : null}

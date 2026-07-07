@@ -105,7 +105,7 @@ const ImportTypeCard = memo<{
   return (
     <button type="button"
       onClick={onClick}
-      className={`relative flex w-full flex-col items-center rounded-[14px] border p-6 transition-colors ${
+      className={`relative flex w-full flex-col items-center rounded-xl border p-6 transition-colors ${
         selected
           ? 'border-[#c8bbff] bg-[#fbfafd]'
           : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
@@ -117,7 +117,7 @@ const ImportTypeCard = memo<{
         </div>
       )}
       <div
-        className={`mb-4 flex h-14 w-14 items-center justify-center rounded-[14px] border ${
+        className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl border ${
           selected ? 'border-[#e7e7ef] bg-white text-[#7c3aed]' : 'border-[#e7e7ef] bg-[#fbfafd] text-[#8b8f9b]'
         }`}
       >
@@ -154,7 +154,7 @@ const ResultCard = memo<{
   };
 
   return (
-    <div className={`rounded-[14px] border p-4 text-center ${colorClasses[color]}`}>
+    <div className={`rounded-xl border p-4 text-center ${colorClasses[color]}`}>
       <div className="text-2xl font-semibold tabular-nums">{value}</div>
       <div className="mt-1 text-xs font-medium text-[#8b8f9b]">{label}</div>
     </div>
@@ -344,7 +344,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
       <div 
-        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:max-h-[88vh] sm:rounded-[10px]"
+        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:max-h-[88vh] sm:rounded-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="border-b border-[#eeeef3] bg-white px-5 py-3.5">
@@ -354,8 +354,8 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 <UploadSimple className="h-4 w-4" weight="bold" />
               </div>
               <div>
-                <h2 className="text-[15px] font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">Importar planificación</h2>
-                <p className="mt-1 text-[12px] leading-4 text-[#606571]">
+                <h2 className="text-md font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">Importar planificación</h2>
+                <p className="mt-1 text-sm leading-4 text-[#606571]">
                   {step < 4 ? 'Carga matrices anuales desde Excel' : 'Resultado de la importación'}
                 </p>
               </div>
@@ -397,7 +397,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 />
               </div>
 
-              <div className="mt-6 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-4">
+              <div className="mt-6 rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-4">
                 <div className="flex items-start gap-3">
                   <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#606571]" weight="fill" />
                   <div className="text-sm font-medium leading-relaxed text-[#606571]">
@@ -472,7 +472,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
               </div>
 
               {/* Descargar plantilla */}
-              <div className="mt-6 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-5">
+              <div className="mt-6 rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-5">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-white text-[#606571]">
@@ -532,7 +532,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => !archivo && fileInputRef.current?.click()}
-                className={`relative cursor-pointer rounded-[14px] border border-dashed p-8 text-center transition-colors ${
+                className={`relative cursor-pointer rounded-xl border border-dashed p-8 text-center transition-colors ${
                   isDragging
                     ? 'border-[#c8bbff] bg-[#fbfafd]'
                     : archivo
@@ -542,7 +542,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
               >
                 {archivo ? (
                   <div className="flex items-center justify-center gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-white">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[#e7e7ef] bg-white">
                       <FileXls className="h-7 w-7 text-[#15171d]" weight="duotone" />
                     </div>
                     <div className="text-left">
@@ -564,7 +564,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-white">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl border border-[#e7e7ef] bg-white">
                       <UploadSimple className={`h-8 w-8 ${isDragging ? 'text-[#7c3aed]' : 'text-[#8b8f9b]'}`} weight="duotone" />
                     </div>
                     <div>
@@ -579,7 +579,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 )}
               </div>
 
-              <div className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-4">
+              <div className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-4">
                 <h4 className="mb-2 text-xs font-medium text-[#8b8f9b]">Resumen</h4>
                 <div className="flex flex-wrap gap-4 text-sm font-medium text-[#606571]">
                   <span className="flex items-center gap-1.5">
@@ -605,7 +605,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
           {step === 4 && resultadoImportacion && (
             <div className="space-y-6">
               <div className="mb-6 text-center">
-                <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[14px] border bg-white ${
+                <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl border bg-white ${
                   hasErrors ? 'border-amber-200 text-amber-500' : 'border-[#e7e7ef] text-[#7c3aed]'
                 }`}>
                   {hasErrors ? (
@@ -668,7 +668,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
 
               {/* Errores */}
               {tipoImportacion === 'vacuna' && resultadoImportacion.errores && resultadoImportacion.errores.length > 0 && (
-                <div className="rounded-[14px] border border-rose-200 bg-rose-50 p-4">
+                <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
                   <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-rose-900">
                     <Warning className="h-4 w-4" weight="bold" />
                     Errores encontrados ({resultadoImportacion.errores.length})
@@ -687,7 +687,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
               {tipoImportacion === 'masivo' && resultadoImportacion.erroresPorVacuna && resultadoImportacion.erroresPorVacuna.length > 0 && (
                 <div className="max-h-48 space-y-3 overflow-y-auto pr-2">
                   {resultadoImportacion.erroresPorVacuna.map((vacunaError, index: number) => (
-                    <div key={index} className="rounded-[14px] border border-amber-200 bg-amber-50 p-3">
+                    <div key={index} className="rounded-xl border border-amber-200 bg-amber-50 p-3">
                       <h5 className="mb-2 text-xs font-semibold text-amber-900">Vacuna: {vacunaError.vacuna}</h5>
                       <ul className="space-y-1 text-[0.75rem] font-medium text-amber-800">
                         {vacunaError.errores.map((error: string, errorIndex: number) => (

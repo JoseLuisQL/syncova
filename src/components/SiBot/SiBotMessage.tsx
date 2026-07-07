@@ -58,8 +58,8 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
         {/* Message Bubble */}
         <div className={`relative ${bubblePaddingClass} text-[12.5px] leading-relaxed min-w-0 w-full overflow-x-hidden
           ${isUser 
-            ? 'bg-[#15171d] text-zinc-50 rounded-[14px] rounded-br-[4px]' 
-            : 'bg-white border border-[#e7e7ef] text-[#15171d] rounded-[14px] rounded-bl-[4px]'
+            ? 'bg-[#15171d] text-zinc-50 rounded-xl rounded-br-[4px]' 
+            : 'bg-white border border-[#e7e7ef] text-[#15171d] rounded-xl rounded-bl-[4px]'
           }`}
         >
           {!mainContent.trim() && !isUser ? (
@@ -103,11 +103,11 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
                   }
                   
                   return !inline ? (
-                    <div className="my-3 max-w-full overflow-x-auto rounded-[12px] border border-[#2b2f37] bg-[#15171d] p-4 font-mono text-[13px] text-zinc-200">
+                    <div className="my-3 max-w-full overflow-x-auto rounded-[12px] border border-[#2b2f37] bg-[#15171d] p-4 font-mono text-base text-zinc-200">
                       <code className={className} {...props}>{children}</code>
                     </div>
                   ) : (
-                    <code className="rounded-md border border-[#e7e7ef] bg-[#fbfafd] px-1.5 py-0.5 font-mono text-[13px] font-medium text-[#15171d]" {...props}>
+                    <code className="rounded-md border border-[#e7e7ef] bg-[#fbfafd] px-1.5 py-0.5 font-mono text-base font-medium text-[#15171d]" {...props}>
                       {children}
                     </code>
                   );
@@ -116,8 +116,8 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
                 ul: ({children}) => <ul className="list-disc pl-5 mb-3 marker:text-[#8b8f9b] space-y-1">{children}</ul>,
                 ol: ({children}) => <ol className="list-decimal pl-5 mb-3 marker:text-[#8b8f9b] space-y-1 font-medium">{children}</ol>,
                 li: ({children}) => <li className="mb-1 leading-relaxed">{children}</li>,
-                h3: ({children}) => <h3 className="text-[15px] font-semibold mt-5 mb-2 tracking-tight text-[#15171d]">{children}</h3>,
-                h4: ({children}) => <h4 className="text-[13px] font-semibold mt-3 mb-1.5 tracking-tight text-[#15171d]">{children}</h4>,
+                h3: ({children}) => <h3 className="text-md font-semibold mt-5 mb-2 tracking-tight text-[#15171d]">{children}</h3>,
+                h4: ({children}) => <h4 className="text-base font-semibold mt-3 mb-1.5 tracking-tight text-[#15171d]">{children}</h4>,
                 table: ({children}) => <SiBotTable>{children}</SiBotTable>,
                 thead: ({children}) => <thead className="bg-[#fbfafd]">{children}</thead>,
                 tbody: ({children}) => <tbody className="bg-white">{children}</tbody>,
@@ -139,7 +139,7 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
              <button type="button"
                 key={idx}
                 onClick={() => onSuggestionSelect && onSuggestionSelect(suggestionText)}
-                className="group flex w-fit max-w-full flex-row items-start gap-2 rounded-[10px] border border-[#e7e7ef] bg-white py-1.5 pl-2.5 pr-3 text-left text-[11.5px] font-medium text-[#606571] outline-none transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] active:scale-[0.99]"
+                className="group flex w-fit max-w-full flex-row items-start gap-2 rounded-lg border border-[#e7e7ef] bg-white py-1.5 pl-2.5 pr-3 text-left text-[11.5px] font-medium text-[#606571] outline-none transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] active:scale-[0.99]"
              >
                 <Sparkle weight="bold" className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#7c3aed] transition-colors" />
                 <span className="whitespace-normal leading-snug">{suggestionText}</span>

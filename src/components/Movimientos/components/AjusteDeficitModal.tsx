@@ -48,9 +48,9 @@ const SummaryCard: React.FC<{
       : 'border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]';
 
   return (
-    <div className={`rounded-[14px] border px-5 py-4 ${className}`}>
+    <div className={`rounded-xl border px-5 py-4 ${className}`}>
       <div className="flex items-center gap-2 mb-3">
-        <div className={`p-1.5 rounded-[8px] ${tone === 'alert' ? 'bg-rose-50 border border-rose-100' : 'bg-white border border-[#e7e7ef]'}`}>
+        <div className={`p-1.5 rounded-md ${tone === 'alert' ? 'bg-rose-50 border border-rose-100' : 'bg-white border border-[#e7e7ef]'}`}>
           {icon}
         </div>
         <p className={`text-[0.65rem] font-bold uppercase tracking-widest ${tone === 'alert' ? 'text-rose-500' : 'text-zinc-500'}`}>{label}</p>
@@ -315,13 +315,13 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
       }
     >
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-white p-8 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-[#e7e7ef] bg-white p-8 text-center">
           <CircleNotch className="h-8 w-8 text-zinc-900 animate-spin mb-4" weight="bold" />
           <p className="text-[0.95rem] font-bold tracking-tight text-zinc-900">Calculando opciones de ajuste</p>
           <p className="mt-1 text-sm text-zinc-500">Revisando entregas disponibles para estabilizar el déficit.</p>
         </div>
       ) : error ? (
-        <div className="rounded-[14px] border border-rose-200 bg-rose-50 p-5">
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-5">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-rose-200 text-rose-600 shadow-sm">
               <Warning className="h-5 w-5" weight="duotone" />
@@ -333,7 +333,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
           </div>
         </div>
       ) : datos && !datos.puedeAjustar ? (
-        <div className="rounded-[14px] border border-[#dedfea] bg-[#f3f0ff] p-5">
+        <div className="rounded-xl border border-[#dedfea] bg-[#f3f0ff] p-5">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] border border-[#dedfea] bg-white text-[#7c3aed]">
               <LockKey className="h-6 w-6" weight="fill" />
@@ -373,9 +373,9 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
             <span className="text-[#15171d]">Se ajustan entregas de {MESES[mesEntrega - 1]} {anioEntrega}</span>
           </div>
 
-          <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+          <section className="rounded-xl border border-[#e7e7ef] bg-white p-5">
             <div className="mb-5 flex items-center gap-3 border-b border-[#eeeef3] pb-3">
-              <div className="rounded-[10px] border border-[#e7e7ef] bg-[#fbfafd] p-2">
+              <div className="rounded-lg border border-[#e7e7ef] bg-[#fbfafd] p-2">
                 <Sparkle className="h-4 w-4 text-zinc-900" weight="fill" />
               </div>
               <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Opciones de corrección</h3>
@@ -409,7 +409,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                     key={opcion.id}
                     type="button"
                     onClick={() => setOpcionSeleccionada(opcion.id)}
-                    className={`rounded-[14px] border p-5 text-left transition-colors ${
+                    className={`rounded-xl border p-5 text-left transition-colors ${
                       opcionSeleccionada === opcion.id
                         ? 'border-[#c8bbff] bg-[#fbfafd] text-[#15171d]'
                         : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd] text-zinc-900'
@@ -461,19 +461,19 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
           </section>
 
           {opcionActual ? (
-            <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+            <section className="rounded-xl border border-[#e7e7ef] bg-white p-5">
               <div className="mb-5 flex flex-col gap-4 border-b border-[#eeeef3] pb-3 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-[10px] border border-[#e7e7ef] bg-[#fbfafd] p-2">
+                  <div className="rounded-lg border border-[#e7e7ef] bg-[#fbfafd] p-2">
                     <Buildings className="h-4 w-4 text-zinc-900" weight="duotone" />
                   </div>
                   <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Distribución afectada</h3>
                 </div>
                 <div className="flex flex-wrap gap-2 text-[0.65rem] font-bold uppercase tracking-widest">
-                  <span className="rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-zinc-900">
+                  <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-zinc-900">
                     {datos.establecimientosAjustables} ajustables
                   </span>
-                  <span className="rounded-[8px] border border-[#dedfea] bg-[#f3f0ff] px-2.5 py-1 text-[#7c3aed]">
+                  <span className="rounded-md border border-[#dedfea] bg-[#f3f0ff] px-2.5 py-1 text-[#7c3aed]">
                     {datos.establecimientosBloqueados} bloqueados
                   </span>
                 </div>
@@ -503,7 +503,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                           <div>
                             <p className="text-[0.85rem] font-semibold tracking-tight text-zinc-900">{centro.centroAcopioNombre}</p>
                             {centro.tieneValeGenerado ? (
-                              <span className="mt-1 inline-flex items-center gap-1 rounded-[6px] bg-zinc-200 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-widest text-zinc-700">
+                              <span className="mt-1 inline-flex items-center gap-1 rounded-sm bg-zinc-200 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-widest text-zinc-700">
                                 Vale bloqueado: {centro.valeNumero}
                               </span>
                             ) : null}
@@ -525,7 +525,7 @@ export const AjusteDeficitModal: React.FC<AjusteDeficitModalProps> = ({
                           {ajustesCentro.map((ajuste) => (
                             <div
                               key={ajuste.movimientoId}
-                              className={`flex items-center justify-between rounded-[10px] border px-4 py-3 transition-colors ${
+                              className={`flex items-center justify-between rounded-lg border px-4 py-3 transition-colors ${
                                 ajuste.bloqueado
                                   ? 'border-[#e7e7ef] bg-zinc-100/50'
                                   : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2]'

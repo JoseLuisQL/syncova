@@ -39,7 +39,7 @@ export const SiBotTable: React.FC<SiBotTableProps> = ({ children }) => {
   };
 
   return (
-    <div className="relative my-3 overflow-hidden rounded-[14px] border border-[#e7e7ef] bg-white">
+    <div className="relative my-3 overflow-hidden rounded-xl border border-[#e7e7ef] bg-white">
       <div
         data-export-ignore="true"
         className="absolute right-3 top-3 z-10"

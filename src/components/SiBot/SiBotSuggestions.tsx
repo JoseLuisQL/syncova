@@ -23,7 +23,7 @@ export const SiBotSuggestions: React.FC<SiBotSuggestionsProps> = ({ onSelect }) 
           <button type="button"
             key={idx}
             onClick={() => onSelect(text)}
-            className="flex w-full items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-white px-3 py-2 text-center text-[12px] font-medium leading-snug text-[#606571] outline-none transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] active:scale-[0.99]"
+            className="flex w-full items-center justify-center rounded-lg border border-[#e7e7ef] bg-white px-3 py-2 text-center text-sm font-medium leading-snug text-[#606571] outline-none transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] active:scale-[0.99]"
           >
             {text}
           </button>

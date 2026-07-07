@@ -240,7 +240,7 @@ const Kardex: React.FC = () => {
   const isExportEnabled = Boolean(uiFilters.fechaInicio && uiFilters.fechaFin) && !exportando;
 
   return (
-    <main className="min-h-[calc(100dvh-128px)] overflow-hidden rounded-[24px] border border-white/90 bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
+    <main className="min-h-[calc(100dvh-128px)] overflow-hidden rounded-4xl border border-white/90 bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
       <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col`}>
         <KardexHeader
           loading={loading}

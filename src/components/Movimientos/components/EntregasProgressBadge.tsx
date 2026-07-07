@@ -159,7 +159,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
       </button>
 
       {showDropdown ? (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-[180] min-w-[340px] overflow-hidden rounded-[14px] border border-[#e7e7ef] bg-white shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)]">
+        <div className="absolute right-0 top-[calc(100%+8px)] z-[180] min-w-[340px] overflow-hidden rounded-xl border border-[#e7e7ef] bg-white shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)]">
           <div className="border-b border-[#eeeef3] bg-[#fbfafd] px-4 py-3">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -208,7 +208,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
               </div>
             ) : progresoVales.estado === 'completo' ? (
               <div className="flex flex-col items-center justify-center px-4 py-12 text-center bg-zinc-50">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-[14px] border border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]">
                   <CheckCircle className="h-6 w-6" weight="fill" />
                 </div>
                 <p className="text-[0.95rem] font-semibold tracking-tight text-zinc-900">Bloqueo completado</p>
@@ -254,7 +254,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
                         {isExpanded ? (
                           <div className="space-y-2 border-t border-zinc-100 bg-zinc-50/50 p-2.5">
                             {grupo.establecimientos.map((establecimiento) => (
-                              <div key={establecimiento.id} className="rounded-[10px] border border-[#e7e7ef] bg-white px-3 py-2.5">
+                              <div key={establecimiento.id} className="rounded-lg border border-[#e7e7ef] bg-white px-3 py-2.5">
                                 <div className="flex items-start gap-3">
                                   <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-400 mt-0.5">
                                     <MapPin className="h-3.5 w-3.5" weight="duotone" />

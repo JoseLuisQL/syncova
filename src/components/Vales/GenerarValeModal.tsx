@@ -490,7 +490,7 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
                             <span className="text-sm font-medium text-zinc-700">{vacData.vacuna.nombre}</span>
                             <div className="text-right flex flex-col items-end">
                               <span className="font-bold text-zinc-900">{vacData.cantidadTotal.toLocaleString()}</span>
-                              <span className="text-[11px] font-medium text-zinc-500 mt-0.5">
+                              <span className="text-xs font-medium text-zinc-500 mt-0.5">
                                 {vacData.jeringasNecesarias.toLocaleString()} jeringas estim.
                               </span>
                             </div>

@@ -57,32 +57,21 @@ const ICONS = {
 const Toast: React.FC<ToastProps> = memo(({ toast, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
-  const [progress, setProgress] = useState(100);
 
   useEffect(() => {
     requestAnimationFrame(() => setIsVisible(true));
   }, []);
 
+  // Auto-dismiss por timeout único. Antes esto usaba un requestAnimationFrame
+  // loop que llamaba setProgress en cada frame, causando re-renders constantes
+  // del árbol React (patrón prohibido). La barra de progreso ahora es una
+  // animación CSS (keyframe progress-shrink en toast.css) con duration dinámica
+  // vía style inline, que es GPU-acelerada y respetar prefers-reduced-motion.
   useEffect(() => {
     if (!toast.duration || toast.duration <= 0) return;
 
-    const start = Date.now();
-    let frameId: number;
-
-    const tick = () => {
-      const elapsed = Date.now() - start;
-      const remaining = Math.max(0, 100 - (elapsed / toast.duration!) * 100);
-      setProgress(remaining);
-      if (remaining > 0) frameId = requestAnimationFrame(tick);
-    };
-
-    frameId = requestAnimationFrame(tick);
     const timer = setTimeout(handleClose, toast.duration);
-
-    return () => {
-      cancelAnimationFrame(frameId);
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast.duration, toast.id]);
 
@@ -145,8 +134,13 @@ const Toast: React.FC<ToastProps> = memo(({ toast, onClose }) => {
       {toast.duration && toast.duration > 0 && (
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-100 overflow-hidden rounded-b-lg">
           <div
-            className={`h-full ${styles.progress} transition-none`}
-            style={{ width: `${progress}%` }}
+            className={`h-full ${styles.progress}`}
+            style={{
+              animationName: 'progress-shrink',
+              animationDuration: `${toast.duration}ms`,
+              animationTimingFunction: 'linear',
+              animationFillMode: 'forwards',
+            }}
           />
         </div>
       )}

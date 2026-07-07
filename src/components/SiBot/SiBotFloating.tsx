@@ -99,12 +99,12 @@ export const SiBotFloating: React.FC = () => {
             <div className="flex shrink-0 flex-col border-b border-[#eeeef3] bg-white px-5 py-4">
                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#e7e7ef] bg-white text-[#7c3aed]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e7e7ef] bg-white text-[#7c3aed]">
                       <SiBotLogo className="h-4 w-4" />
                     </div>
                     <div className="flex flex-col">
-                      <h3 className="text-[14px] font-semibold leading-none tracking-tight text-[#15171d]">SiBot</h3>
-                      <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-medium leading-none text-[#606571]">
+                      <h3 className="text-md font-semibold leading-none tracking-tight text-[#15171d]">SiBot</h3>
+                      <p className="mt-1.5 flex items-center gap-1.5 text-xs font-medium leading-none text-[#606571]">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                         En línea
                       </p>
@@ -146,12 +146,12 @@ export const SiBotFloating: React.FC = () => {
                     initial={{ scale: 0, opacity: 0 }} 
                     animate={{ scale: 1, opacity: 1 }} 
                     transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}
-                    className="mb-4 flex h-[56px] w-[56px] items-center justify-center rounded-[16px] border border-[#e7e7ef] bg-[#fbfafd] text-[#7c3aed]"
+                    className="mb-4 flex h-[56px] w-[56px] items-center justify-center rounded-2xl border border-[#e7e7ef] bg-[#fbfafd] text-[#7c3aed]"
                   >
                     <SiBotLogo className="h-7 w-7" />
                   </motion.div>
-                  <h4 className="mb-1.5 text-[15px] font-semibold tracking-tight text-[#15171d]">Hola, soy SiBot</h4>
-                  <p className="max-w-[250px] text-[12px] font-medium leading-relaxed text-[#606571]">
+                  <h4 className="mb-1.5 text-md font-semibold tracking-tight text-[#15171d]">Hola, soy SiBot</h4>
+                  <p className="max-w-[250px] text-sm font-medium leading-relaxed text-[#606571]">
                     Analizo tus datos de SIVAC, inventario de vacunas y planificaciones en tiempo real.
                   </p>
                   <SiBotSuggestions onSelect={handleSuggestion} />
@@ -190,7 +190,7 @@ export const SiBotFloating: React.FC = () => {
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className={`mx-auto mt-4 flex w-fit max-w-[90%] items-start gap-3 rounded-[14px] border px-4 py-3.5 text-[13px] ${
+                      className={`mx-auto mt-4 flex w-fit max-w-[90%] items-start gap-3 rounded-xl border px-4 py-3.5 text-base ${
                         error.message.includes('Límite') || error.message.includes('429') || error.message.toLowerCase().includes('quota')
                           ? 'border-amber-200 bg-amber-50 text-amber-800'
                           : 'border-rose-200 bg-rose-50 text-rose-700'
@@ -203,7 +203,7 @@ export const SiBotFloating: React.FC = () => {
                             ? 'Límite de Consultas (API Quota)' 
                             : 'Error de Red'}
                         </span>
-                        <span className="opacity-90 leading-relaxed text-[12px]">
+                        <span className="opacity-90 leading-relaxed text-sm">
                           {error.message.includes('Límite') || error.message.includes('429') || error.message.toLowerCase().includes('quota') 
                             ? 'Ocurrió un error (429) por agotamiento en la cuota de peticiones a la Inteligencia Artificial de Google. Por favor, espera 1 a 2 minutos o contacta a soporte para elevar tu nivel de acceso.'
                             : error.message || 'La respuesta del asistente falló. Intenta de nuevo.'}

@@ -59,7 +59,7 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
             type="button"
             onClick={onCancel}
             disabled={currentProcessing || isLoading}
-            className="rounded-[8px] bg-white px-4 py-2 text-sm font-medium text-[#4F6B7C] transition hover:bg-[#F1F5F7] disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-md bg-white px-4 py-2 text-sm font-medium text-[#4F6B7C] transition hover:bg-[#F1F5F7] disabled:cursor-not-allowed disabled:opacity-60"
           >
             Abortar
           </button>
@@ -71,7 +71,7 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
                handleConfirmInternal();
             }}
             disabled={currentProcessing || isLoading || !impacto}
-            className="flex items-center gap-2 rounded-[8px] bg-[#0E9F8E] px-5 py-2 text-sm font-semibold text-[#0F2A3B] transition hover:bg-[#0c8a7b] disabled:cursor-not-allowed disabled:opacity-60 text-white"
+            className="flex items-center gap-2 rounded-md bg-[#0E9F8E] px-5 py-2 text-sm font-semibold text-[#0F2A3B] transition hover:bg-[#0c8a7b] disabled:cursor-not-allowed disabled:opacity-60 text-white"
           >
             {currentProcessing && <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />}
             <span>{currentProcessing ? 'Guardando...' : 'Confirmar cambio'}</span>
@@ -89,7 +89,7 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
         <div className="space-y-6">
 
           {/* Main Action Banner */}
-          <div className="rounded-[8px] bg-[#F1F5F7] p-4 text-[#0F2A3B]">
+          <div className="rounded-md bg-[#F1F5F7] p-4 text-[#0F2A3B]">
             <p className="text-sm">
               Estás modificando la entrega de <strong className="font-semibold">{impacto.resumen.vacunaNombre}</strong> para el establecimiento <strong className="font-semibold">{impacto.resumen.establecimientoNombre}</strong>.
             </p>
@@ -116,7 +116,7 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
             {/* Stock Impact Table */}
             <div>
               <p className="mb-2 font-mono text-[0.7rem] font-bold uppercase tracking-wider text-[#4F6B7C]">Impacto en Kardex (Stock)</p>
-              <div className="overflow-hidden rounded-[8px] border border-[#e5e7eb]">
+              <div className="overflow-hidden rounded-md border border-[#e5e7eb]">
                 <table className="w-full text-left text-sm text-[#0F2A3B]">
                   <thead className="bg-[#F1F5F7] font-mono text-[0.65rem] uppercase tracking-wider text-[#4F6B7C]">
                     <tr>
@@ -168,7 +168,7 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
             {impacto.valesAfectados.length > 0 && (
               <div>
                 <p className="mb-2 font-mono text-[0.7rem] font-bold uppercase tracking-wider text-[#4F6B7C]">Vales a re-emitir</p>
-                <div className="overflow-hidden rounded-[8px] border border-[#e5e7eb]">
+                <div className="overflow-hidden rounded-md border border-[#e5e7eb]">
                   <table className="w-full text-left text-sm text-[#0F2A3B]">
                     <thead className="bg-[#F1F5F7] font-mono text-[0.65rem] uppercase tracking-wider text-[#4F6B7C]">
                       <tr>

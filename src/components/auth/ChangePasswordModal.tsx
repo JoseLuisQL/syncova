@@ -137,7 +137,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div className="w-full max-w-md overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] animate-in fade-in zoom-in-95 duration-200">
+      <div className="w-full max-w-md overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="border-b border-[#eeeef3] bg-white px-5 py-3.5">
           <div className="flex items-center justify-between">
@@ -146,10 +146,10 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                 <Shield className="h-4 w-4" weight="duotone" />
               </div>
               <div>
-                <h3 id="modal-title" className="text-[15px] font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">
+                <h3 id="modal-title" className="text-md font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">
                   Cambiar Contraseña
                 </h3>
-                <p className="mt-1 text-[12px] leading-4 text-[#606571]">Actualiza tu acceso permanentemente</p>
+                <p className="mt-1 text-sm leading-4 text-[#606571]">Actualiza tu acceso permanentemente</p>
               </div>
             </div>
             <button type="button"
@@ -166,7 +166,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
         <form onSubmit={handleSubmit} className="space-y-4 px-5 py-4">
           {/* Current Password */}
           <div>
-            <label htmlFor="currentPassword" className="mb-1.5 block text-[12px] font-medium text-[#424750]">
+            <label htmlFor="currentPassword" className="mb-1.5 block text-sm font-medium text-[#424750]">
               Contraseña Actual
             </label>
             <div className="relative group/input">
@@ -177,7 +177,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                 value={formData.currentPassword}
                 onChange={handleInputChange}
                 className={`
-                  min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 pr-10 text-[13px] font-medium
+                  min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 pr-10 text-base font-medium
                   transition-all duration-200
                   focus:outline-none focus:ring-2 focus:ring-offset-0
                   ${errors.currentPassword 
@@ -198,7 +198,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               </button>
             </div>
             {errors.currentPassword && (
-              <p className="mt-1.5 text-[13px] font-medium text-rose-600 flex items-center gap-1.5">
+              <p className="mt-1.5 text-base font-medium text-rose-600 flex items-center gap-1.5">
                 <WarningCircle className="w-4 h-4" weight="fill" />
                 {errors.currentPassword}
               </p>
@@ -207,7 +207,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
 
           {/* New Password */}
           <div>
-            <label htmlFor="newPassword" className="mb-1.5 block text-[12px] font-medium text-[#424750]">
+            <label htmlFor="newPassword" className="mb-1.5 block text-sm font-medium text-[#424750]">
               Nueva Contraseña
             </label>
             <div className="relative group/input">
@@ -218,7 +218,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                 value={formData.newPassword}
                 onChange={handleInputChange}
                 className={`
-                  min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 pr-10 text-[13px] font-medium
+                  min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 pr-10 text-base font-medium
                   transition-all duration-200
                   focus:outline-none focus:ring-2 focus:ring-offset-0
                   ${errors.newPassword 
@@ -248,7 +248,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                       style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
                     />
                   </div>
-                  <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                  <span className={`text-xs font-bold uppercase tracking-wider ${
                     passwordStrength.score <= 2 ? 'text-amber-600' : 'text-emerald-600'
                   }`}>
                     {getStrengthLabel(passwordStrength.score)}
@@ -258,7 +258,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
             )}
             
             {errors.newPassword && (
-              <p className="mt-1.5 text-[13px] font-medium text-rose-600 flex items-center gap-1.5">
+              <p className="mt-1.5 text-base font-medium text-rose-600 flex items-center gap-1.5">
                 <WarningCircle className="w-4 h-4" weight="fill" />
                 {errors.newPassword}
               </p>
@@ -267,7 +267,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
 
           {/* Confirm Password */}
           <div>
-            <label htmlFor="confirmPassword" className="mb-1.5 block text-[12px] font-medium text-[#424750]">
+            <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-[#424750]">
               Confirmar Nueva Contraseña
             </label>
             <div className="relative group/input">
@@ -278,7 +278,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                 value={confirmPassword}
                 onChange={handleInputChange}
                 className={`
-                  min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 pr-10 text-[13px] font-medium
+                  min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 pr-10 text-base font-medium
                   transition-all duration-200
                   focus:outline-none focus:ring-2 focus:ring-offset-0
                   ${errors.confirmPassword 
@@ -305,7 +305,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               )}
             </div>
             {errors.confirmPassword && (
-              <p className="mt-1.5 text-[13px] font-medium text-rose-600 flex items-center gap-1.5">
+              <p className="mt-1.5 text-base font-medium text-rose-600 flex items-center gap-1.5">
                 <WarningCircle className="w-4 h-4" weight="fill" />
                 {errors.confirmPassword}
               </p>
@@ -313,8 +313,8 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
           </div>
 
           {/* Password Requirements */}
-          <div className="rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] p-3">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-3">Requisitos obligatorios</p>
+          <div className="rounded-md border border-[#e7e7ef] bg-[#fbfafd] p-3">
+            <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">Requisitos obligatorios</p>
             <div className="grid grid-cols-2 gap-y-2 gap-x-2">
               {[
                 { key: 'length', label: '8+ caracteres' },
@@ -324,7 +324,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               ].map(({ key, label }) => (
                 <div 
                   key={key}
-                  className={`flex items-center gap-2 text-[13px] font-medium transition-colors duration-300 ${
+                  className={`flex items-center gap-2 text-base font-medium transition-colors duration-300 ${
                     passwordStrength.checks[key as keyof typeof passwordStrength.checks]
                       ? 'text-emerald-700'
                       : 'text-zinc-500'
@@ -351,7 +351,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               className="
                 h-9 flex-none rounded-[7px]
                 border border-[#e7e7ef] bg-white px-3.5
-                text-[13px] font-semibold text-[#15171d]
+                text-base font-semibold text-[#15171d]
                 hover:bg-[#fbfafd]
                 transition-all duration-200
                 focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70
@@ -364,7 +364,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               disabled={isLoading}
               className="
                 h-9 flex-1 rounded-[7px] px-3.5
-                text-[13px] font-semibold text-white
+                text-base font-semibold text-white
                 bg-[#7c3aed] hover:bg-[#6d28d9]
                 shadow-none
                 transition-all duration-200

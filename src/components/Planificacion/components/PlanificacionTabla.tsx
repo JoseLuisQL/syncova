@@ -97,7 +97,7 @@ const TotalPill: React.FC<{
       : 'border border-[#e7e7ef] bg-white text-[#15171d] font-semibold';
 
   return (
-    <span className={`inline-flex min-w-[3.5rem] items-center justify-center rounded-[8px] px-2 py-1 text-[0.75rem] font-semibold tabular-nums tracking-tight ${className}`}>
+    <span className={`inline-flex min-w-[3.5rem] items-center justify-center rounded-md px-2 py-1 text-[0.75rem] font-semibold tabular-nums tracking-tight ${className}`}>
       {value.toLocaleString()}
     </span>
   );
@@ -107,7 +107,7 @@ TotalPill.displayName = 'TotalPill';
 
 const EstadoBadge: React.FC<{ total: number }> = memo(({ total }) => (
   <span
-    className={`inline-flex items-center gap-1.5 rounded-[8px] border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${
+    className={`inline-flex items-center gap-1.5 rounded-md border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${
       total > 0
         ? 'border-[#e7e7ef] text-[#15171d] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500 before:content-[""]'
         : 'border-[#e7e7ef] text-[#606571] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400 before:content-[""]'
@@ -124,13 +124,13 @@ const MobileTotalesSummary: React.FC<{
   totalGeneral: number;
   calcularTotalMes: PlanificacionTablaProps['calcularTotalMes'];
 }> = memo(({ count, totalGeneral, calcularTotalMes }) => (
-  <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-3">
+  <div className="rounded-xl border border-[#e7e7ef] bg-white p-3">
     <div className="flex items-center justify-between gap-3 border-b border-[#eeeef3] pb-3">
       <div>
         <p className="text-xs font-medium text-[#8b8f9b]">Total anual</p>
         <p className="mt-0.5 text-sm font-semibold text-[#15171d]">{count} establecimientos</p>
       </div>
-      <span className="rounded-[8px] bg-[#7c3aed] px-3 py-1.5 text-[0.75rem] font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)]">
+      <span className="rounded-md bg-[#7c3aed] px-3 py-1.5 text-[0.75rem] font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)]">
         {totalGeneral.toLocaleString()}
       </span>
     </div>
@@ -187,14 +187,14 @@ const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
   return (
     <div
       onClick={() => onRowSelect(estData.establecimiento.id)}
-      className={`rounded-[14px] border p-3 transition-colors ${
+      className={`rounded-xl border p-3 transition-colors ${
         isSelected
           ? `${colores.bg} ${colores.border} ring-1 ring-[#7c3aed]/25`
           : `${colores.bg} ${colores.border} hover:brightness-[0.98]`
       }`}
     >
       <div className="flex items-start gap-2.5">
-        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border bg-white ${colores.border}`}>
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-white ${colores.border}`}>
           <span className={`h-3 w-3 rounded-full ${colores.accent}`} aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
@@ -203,7 +203,7 @@ const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {selectedCentroAcopio === 'todos' ? (
-              <span className={`inline-flex rounded-[8px] border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${colores.border} ${colores.text}`}>
+              <span className={`inline-flex rounded-md border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${colores.border} ${colores.text}`}>
                 {centro !== 'DEFAULT' ? centro : 'Base'}
               </span>
             ) : null}
@@ -284,15 +284,15 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
           <table className="w-full border-separate border-spacing-0" role="table" aria-label="Matriz de datos">
             <thead className="sticky top-0 z-20">
               <tr className="bg-[#fbfafd]">
-                <th className="sticky left-0 z-30 w-[260px] min-w-[260px] border-b border-r border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-left text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]">
+                <th className="sticky left-0 z-30 w-[260px] min-w-[260px] border-b border-r border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-left text-sm font-medium tracking-[-0.01em] text-[#8b8f9b]">
                   Establecimiento
                 </th>
                 {MESES_CORTOS.map((mes) => (
-                  <th key={mes} className="w-[70px] min-w-[70px] border-b border-r border-[#eeeef3] bg-[#fbfafd] px-2 py-3 text-center text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]">
+                  <th key={mes} className="w-[70px] min-w-[70px] border-b border-r border-[#eeeef3] bg-[#fbfafd] px-2 py-3 text-center text-sm font-medium tracking-[-0.01em] text-[#8b8f9b]">
                     {mes}
                   </th>
                 ))}
-                <th className="w-[90px] min-w-[90px] border-b border-[#eeeef3] bg-[#fbfafd] px-2 py-3 text-center text-[12px] font-medium tracking-[-0.01em] text-[#606571]">
+                <th className="w-[90px] min-w-[90px] border-b border-[#eeeef3] bg-[#fbfafd] px-2 py-3 text-center text-sm font-medium tracking-[-0.01em] text-[#606571]">
                   Total
                 </th>
               </tr>
@@ -348,7 +348,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                     <td className={`sticky left-0 z-10 box-border border-b border-r px-4 py-3 ${colores.border} ${rowBg} ${isSelected ? 'ring-inset ring-[1.5px] ring-[#7c3aed]' : ''}`}>
                       <div className="min-w-0">
                         <div className="flex items-start gap-3">
-                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border bg-white ${colores.border}`}>
+                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border bg-white ${colores.border}`}>
                             <span className={`h-3 w-3 rounded-full ${colores.accent}`} aria-hidden="true" />
                           </div>
                           <div className="min-w-0 flex-1">
@@ -363,7 +363,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                                 <span className="font-mono text-[0.68rem] font-medium text-[#8b8f9b]">{estData.establecimiento.codigo}</span>
                               )}
                               {selectedCentroAcopio === 'todos' ? (
-                                <span className={`inline-flex rounded-[8px] border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${colores.border} ${colores.text}`}>
+                                <span className={`inline-flex rounded-md border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${colores.border} ${colores.text}`}>
                                   {centro !== 'DEFAULT' ? centro : 'Regional'}
                                 </span>
                               ) : null}
@@ -420,7 +420,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
           />
 
           {establecimientos.length === 0 && !isLoading ? (
-            <div className="rounded-[14px] border border-[#e7e7ef] bg-white">
+            <div className="rounded-xl border border-[#e7e7ef] bg-white">
               <EmptyState
                 icon={Package}
                 title="Sin establecimientos"

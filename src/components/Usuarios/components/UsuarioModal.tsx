@@ -316,7 +316,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = memo(({
                       key={centro.id}
                       type="button"
                       onClick={() => handleToggleCentro(centro.id)}
-                      className={`rounded-[10px] border px-3 py-2 text-left transition-colors ${
+                      className={`rounded-lg border px-3 py-2 text-left transition-colors ${
                         isSelected
                           ? 'border-[#c8bbff] bg-[#fbfafd] text-[#7c3aed]'
                           : 'border-[#e7e7ef] bg-white text-zinc-600 hover:border-[#d7d8e2] hover:bg-[#fbfafd]'

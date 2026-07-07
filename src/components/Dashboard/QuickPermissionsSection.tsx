@@ -104,7 +104,7 @@ const ScheduleModal: React.FC<{
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-md overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]"
+        className="w-full max-w-md overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[#eeeef3] px-5 py-3.5">
@@ -113,8 +113,8 @@ const ScheduleModal: React.FC<{
               <Timer className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-[15px] font-semibold leading-5 text-[#15171d]">Programar activación</h3>
-              <p className="text-[12px] leading-4 text-[#606571]">{permisoLabel}</p>
+              <h3 className="text-md font-semibold leading-5 text-[#15171d]">Programar activación</h3>
+              <p className="text-sm leading-4 text-[#606571]">{permisoLabel}</p>
             </div>
           </div>
           <button type="button" onClick={onClose} className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]">
@@ -124,14 +124,14 @@ const ScheduleModal: React.FC<{
 
         <div className="space-y-4 px-5 py-4">
           <div>
-            <label className="mb-1.5 block text-[12px] font-medium text-[#424750]">
+            <label className="mb-1.5 block text-sm font-medium text-[#424750]">
               Fecha y hora de activación
             </label>
             <input
               type="datetime-local"
               value={fechaActivacion}
               onChange={(e) => setFechaActivacion(e.target.value)}
-              className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-[13px] text-[#15171d] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
+              className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-base text-[#15171d] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
             />
           </div>
 
@@ -146,7 +146,7 @@ const ScheduleModal: React.FC<{
 
           {usarDesactivacion && (
             <div>
-              <label className="mb-1.5 block text-[12px] font-medium text-[#424750]">
+              <label className="mb-1.5 block text-sm font-medium text-[#424750]">
                 Fecha y hora de desactivación
               </label>
               <input
@@ -154,7 +154,7 @@ const ScheduleModal: React.FC<{
                 value={fechaDesactivacion}
                 onChange={(e) => setFechaDesactivacion(e.target.value)}
                 min={fechaActivacion}
-                className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-[13px] text-[#15171d] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
+                className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-base text-[#15171d] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
               />
             </div>
           )}
@@ -163,7 +163,7 @@ const ScheduleModal: React.FC<{
         <div className="flex items-center justify-end gap-2 border-t border-[#eeeef3] bg-[#fbfafd] px-5 py-3">
           <button type="button"
             onClick={onClose}
-            className="inline-flex h-9 items-center gap-1.5 rounded-[7px] border border-[#e7e7ef] bg-white px-3.5 text-[13px] font-semibold text-[#15171d] transition-colors hover:bg-white"
+            className="inline-flex h-9 items-center gap-1.5 rounded-[7px] border border-[#e7e7ef] bg-white px-3.5 text-base font-semibold text-[#15171d] transition-colors hover:bg-white"
           >
             Cancelar
           </button>
@@ -177,7 +177,7 @@ const ScheduleModal: React.FC<{
               onClose();
             }}
             disabled={!fechaActivacion}
-            className="inline-flex h-9 items-center gap-1.5 rounded-[7px] bg-[#7c3aed] px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-9 items-center gap-1.5 rounded-[7px] bg-[#7c3aed] px-3.5 text-base font-semibold text-white transition-colors hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Timer className="h-3.5 w-3.5" />
             Programar
@@ -315,21 +315,21 @@ const QuickPermissionsSection: React.FC = memo(() => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-        className="bg-white rounded-[24px] border border-zinc-200/60 shadow-sm overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300"
+        className="bg-white rounded-4xl border border-zinc-200/60 shadow-sm overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300"
         aria-label="Permisos operativos globales"
       >
         {/* ═══ Header ═══ */}
         <header className="px-6 py-4 border-b border-zinc-100 bg-zinc-50/50">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-[14px] bg-teal-600 flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 rounded-xl bg-teal-600 flex items-center justify-center shadow-sm">
                 <ShieldCheck className="h-5 w-5 text-white" weight="bold" />
               </div>
               <div>
-                <h3 className="text-[15px] font-extrabold text-zinc-900 tracking-tight">
+                <h3 className="text-md font-extrabold text-zinc-900 tracking-tight">
                   Permisos Globales
                 </h3>
-                <p className="text-[12px] font-medium text-zinc-400 mt-0.5">
+                <p className="text-sm font-medium text-zinc-400 mt-0.5">
                   Aplican a todos los responsables de acopio
                 </p>
               </div>
@@ -341,7 +341,7 @@ const QuickPermissionsSection: React.FC = memo(() => {
                 <select
                   value={selectedMes}
                   onChange={(e) => setSelectedMes(Number(e.target.value))}
-                  className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-8 py-2 text-[13px] font-medium text-zinc-700 hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-400 transition-colors"
+                  className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-8 py-2 text-base font-medium text-zinc-700 hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-400 transition-colors"
                 >
                   {MESES.map((mes, i) => (
                     <option key={i} value={i + 1}>{mes}</option>
@@ -354,7 +354,7 @@ const QuickPermissionsSection: React.FC = memo(() => {
                 <select
                   value={selectedAnio}
                   onChange={(e) => setSelectedAnio(Number(e.target.value))}
-                  className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-8 py-2 text-[13px] font-medium text-zinc-700 hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-400 transition-colors"
+                  className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-8 py-2 text-base font-medium text-zinc-700 hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-400 transition-colors"
                 >
                   {aniosDisponibles.map(anio => (
                     <option key={anio} value={anio}>{anio}</option>
@@ -404,8 +404,8 @@ const QuickPermissionsSection: React.FC = memo(() => {
                         <Icon className="h-5 w-5" weight="fill" />
                       </div>
                       <div>
-                        <p className="text-[14px] font-bold text-zinc-900 tracking-tight">{config.label}</p>
-                        <p className="text-[12px] font-medium text-zinc-500 mt-0.5">{config.description}</p>
+                        <p className="text-md font-bold text-zinc-900 tracking-tight">{config.label}</p>
+                        <p className="text-sm font-medium text-zinc-500 mt-0.5">{config.description}</p>
                       </div>
                     </div>
 
@@ -425,14 +425,14 @@ const QuickPermissionsSection: React.FC = memo(() => {
                         tipo: config.tipo,
                         label: `${config.label} (Global)`,
                       })}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800 transition-colors uppercase tracking-wider"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-bold text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800 transition-colors uppercase tracking-wider"
                     >
                       <Timer className="h-3.5 w-3.5" />
                       Programar
                     </button>
 
                     {permiso?.programado && permiso.fechaActivacion && (
-                      <div className="inline-flex items-center gap-1 rounded-lg bg-amber-50 border border-amber-200 px-2 py-1 text-[11px] font-bold text-amber-700">
+                      <div className="inline-flex items-center gap-1 rounded-lg bg-amber-50 border border-amber-200 px-2 py-1 text-xs font-bold text-amber-700">
                         <Clock className="h-3 w-3" />
                         <span>
                           {new Date(permiso.fechaActivacion).toLocaleString('es-PE', {

@@ -22,7 +22,7 @@ const BulkActionsBar: React.FC<BulkActionsBarProps> = memo(({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-4">
+    <div className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-white text-[#606571]">

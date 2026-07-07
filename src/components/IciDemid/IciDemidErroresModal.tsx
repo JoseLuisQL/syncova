@@ -31,27 +31,27 @@ const IciDemidErroresModal: React.FC<IciDemidErroresModalProps> = ({ isOpen, onC
     >
           <div className="space-y-4">
             <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3">
+              <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
                 <p className="text-xs font-medium text-rose-600">Errores detectados</p>
                 <p className="mt-2 text-2xl font-semibold text-rose-700">{errores.erroresDetalle?.length || 0}</p>
               </div>
-              <div className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
+              <div className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
                 <p className="text-xs font-medium text-[#8b8f9b]">Establecimientos no mapeados</p>
                 <p className="mt-2 text-2xl font-semibold text-[#15171d]">{errores.establecimientosNoMapeados.length}</p>
               </div>
-              <div className="rounded-[14px] border border-[#e7e7ef] bg-white px-4 py-3">
+              <div className="rounded-xl border border-[#e7e7ef] bg-white px-4 py-3">
                 <p className="text-xs font-medium text-[#8b8f9b]">Vacunas no mapeadas</p>
                 <p className="mt-2 text-2xl font-semibold text-[#15171d]">{errores.vacunasNoMapeadas.length}</p>
               </div>
               {'omitidos' in errores ? (
-                <div className="rounded-[14px] border border-[#e7e7ef] bg-white px-4 py-3">
+                <div className="rounded-xl border border-[#e7e7ef] bg-white px-4 py-3">
                   <p className="text-xs font-medium text-[#8b8f9b]">Filas omitidas</p>
                   <p className="mt-2 text-2xl font-semibold text-[#15171d]">{errores.omitidos}</p>
                 </div>
               ) : null}
             </div>
 
-            <div className="overflow-hidden rounded-[14px] border border-[#e7e7ef] bg-white">
+            <div className="overflow-hidden rounded-xl border border-[#e7e7ef] bg-white">
               <div className="border-b border-[#eeeef3] px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Warning className="h-4 w-4 text-rose-500" />

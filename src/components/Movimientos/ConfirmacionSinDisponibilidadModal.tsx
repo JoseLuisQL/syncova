@@ -42,7 +42,7 @@ const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidad
           <button
             type="button"
             onClick={onClose}
-            className="rounded-[8px] bg-[#0E9F8E] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#0c8a7b] focus:outline-none"
+            className="rounded-md bg-[#0E9F8E] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#0c8a7b] focus:outline-none"
           >
             Entendido
           </button>
@@ -51,7 +51,7 @@ const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidad
     >
       <div className="space-y-4">
         {/* ── Banner Informativo ── */}
-        <div className={`rounded-[8px] border p-3 text-sm leading-relaxed ${isInsuficiente ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-rose-50 border-rose-200 text-rose-900'}`}>
+        <div className={`rounded-md border p-3 text-sm leading-relaxed ${isInsuficiente ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-rose-50 border-rose-200 text-rose-900'}`}>
           {isInsuficiente ? (
             <p>
               La cantidad solicitada supera el límite de <strong>{disponibilidadRestante.toLocaleString()} unidades</strong> programado para <strong>{establecimientoNombre}</strong>.
@@ -64,7 +64,7 @@ const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidad
         </div>
 
         {/* ── Detalle Bento-style ── */}
-        <div className={`grid ${isInsuficiente ? 'grid-cols-4' : 'grid-cols-3'} gap-3 rounded-[8px] border border-[#e5e7eb] bg-[#F1F5F7] p-3 text-left`}>
+        <div className={`grid ${isInsuficiente ? 'grid-cols-4' : 'grid-cols-3'} gap-3 rounded-md border border-[#e5e7eb] bg-[#F1F5F7] p-3 text-left`}>
           <div className="flex flex-col">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4F6B7C] font-mono">Vacuna</span>
             <span className="mt-1 text-sm font-bold text-[#0F2A3B]">{vacunaNombre}</span>
@@ -88,7 +88,7 @@ const ConfirmacionSinDisponibilidadModal: React.FC<ConfirmacionSinDisponibilidad
         </div>
 
         {/* ── Call to action ── */}
-        <div className="flex items-start gap-2.5 rounded-[8px] border border-[#E2E8F0] bg-white p-3 shadow-sm">
+        <div className="flex items-start gap-2.5 rounded-md border border-[#E2E8F0] bg-white p-3 shadow-sm">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#0E9F8E]" weight="duotone" />
           <p className="text-xs leading-relaxed text-[#4F6B7C]">
             Para autorizar esta entrega, dirígete al módulo de{' '}

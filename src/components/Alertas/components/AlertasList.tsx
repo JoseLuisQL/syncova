@@ -86,7 +86,7 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
       </div>
 
       {selectedAlertas.length > 0 ? (
-        <div className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
+        <div className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <span className="text-sm font-medium text-[#15171d]">
               {selectedAlertas.length} alerta{selectedAlertas.length === 1 ? '' : 's'} seleccionada{selectedAlertas.length === 1 ? '' : 's'}
@@ -171,12 +171,12 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                       </div>
                     </td>
                     <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                      <span className="inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
+                      <span className="inline-flex items-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
                         {tipoInfo?.label || alerta.tipo}
                       </span>
                     </td>
                     <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                      <span className="inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
+                      <span className="inline-flex items-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
                         {nivelInfo?.label || alerta.nivel}
                       </span>
                     </td>

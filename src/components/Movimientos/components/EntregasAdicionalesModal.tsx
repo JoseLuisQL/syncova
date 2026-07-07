@@ -34,7 +34,7 @@ const SummaryMetric: React.FC<{
       : 'border-[#e7e7ef] bg-white text-zinc-800';
 
   return (
-    <div className={`rounded-[14px] border px-5 py-4 ${className}`}>
+    <div className={`rounded-xl border px-5 py-4 ${className}`}>
       <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-zinc-500">{label}</p>
       <p className={`mt-2 text-2xl font-semibold tracking-tight ${tone === 'base' ? 'text-[#7c3aed]' : 'text-zinc-900'}`}>{value}</p>
     </div>
@@ -89,7 +89,7 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
       }
     >
       <div className="space-y-6">
-        <section className="rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-5">
+        <section className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-5">
           <div className="flex items-center gap-4">
             <div className="rounded-[12px] border border-[#e7e7ef] bg-white p-3">
               <Package className="h-5 w-5 text-zinc-900" weight="duotone" />
@@ -107,7 +107,7 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
           <SummaryMetric label="Total" value={movimiento.entrega.toLocaleString()} tone="base" />
         </section>
 
-        <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+        <section className="rounded-xl border border-[#e7e7ef] bg-white p-5">
           <div className="mb-5 flex items-center justify-between gap-3 border-b border-[#eeeef3] pb-4">
             <div>
               <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Entregas registradas</h3>
@@ -115,7 +115,7 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
                 Cada entrega adicional se controla de forma independiente.
               </p>
             </div>
-            <span className="rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] px-2.5 py-1 text-[0.7rem] font-semibold tracking-widest text-[#606571] uppercase">
+            <span className="rounded-md border border-[#e7e7ef] bg-[#fbfafd] px-2.5 py-1 text-[0.7rem] font-semibold tracking-widest text-[#606571] uppercase">
               {movimiento.entregasAdicionales?.length || 0} registros
             </span>
           </div>
@@ -125,7 +125,7 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
               {movimiento.entregasAdicionales.map((entrega) => (
                 <div
                   key={entrega.id}
-                  className={`flex flex-col gap-4 rounded-[14px] border px-5 py-4 transition-colors lg:flex-row lg:items-center lg:justify-between ${
+                  className={`flex flex-col gap-4 rounded-xl border px-5 py-4 transition-colors lg:flex-row lg:items-center lg:justify-between ${
                     entrega.tieneValeGenerado
                       ? 'border-zinc-300 bg-zinc-50/50'
                       : 'border-zinc-200 bg-white hover:border-zinc-300'
@@ -155,7 +155,7 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
                         onChange={(event) => onTempValueChange(entrega.id, parseInt(event.target.value, 10) || 0)}
                         onBlur={() => onBlur(entrega.id)}
                         disabled={isCreating || isUpdating || isProcessing}
-                        className={`w-28 rounded-[10px] border px-3 py-2.5 text-center text-[0.95rem] font-semibold tabular-nums transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-60 ${
+                        className={`w-28 rounded-lg border px-3 py-2.5 text-center text-[0.95rem] font-semibold tabular-nums transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-60 ${
                           entrega.tieneValeGenerado
                             ? 'border-zinc-200 bg-zinc-100 text-zinc-700 cursor-not-allowed shadow-inner'
                             : hasPendingEntregaChange(entrega.id)
@@ -186,7 +186,7 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-[14px] border border-dashed border-[#d7d8e2] bg-[#fbfafd] px-4 py-12 text-center">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#d7d8e2] bg-[#fbfafd] px-4 py-12 text-center">
               <Package className="mb-4 h-8 w-8 text-zinc-300" weight="duotone" />
               <p className="text-[0.95rem] font-bold text-zinc-900 tracking-tight">Sin entregas adicionales</p>
               <p className="mt-1 text-sm text-zinc-500">Agrega una entrega adicional para completar la distribución.</p>

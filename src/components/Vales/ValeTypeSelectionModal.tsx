@@ -34,7 +34,7 @@ const TipoValeOption = memo<{
 }>(({ titulo, descripcion, icon: Icon, isSelected, isDisabled, disabledReason, badge, badgeColor, onClick }) => (
   <div
     onClick={() => !isDisabled && onClick()}
-    className={`rounded-[14px] border p-4 transition-colors ${
+    className={`rounded-xl border p-4 transition-colors ${
       isDisabled
         ? 'border-[#e7e7ef] bg-[#fbfafd] cursor-not-allowed opacity-60'
         : isSelected
@@ -62,7 +62,7 @@ const TipoValeOption = memo<{
             {titulo}
           </h4>
           {badge && (
-            <span className={`rounded-[8px] border border-[#e7e7ef] bg-white px-2 py-0.5 text-xs font-medium text-[#15171d] ${badgeColor || ''}`}>
+            <span className={`rounded-md border border-[#e7e7ef] bg-white px-2 py-0.5 text-xs font-medium text-[#15171d] ${badgeColor || ''}`}>
               {badge}
             </span>
           )}
@@ -85,7 +85,7 @@ const GrupoEntregaCard = memo<{
 }>(({ grupo, isSelected, onToggle }) => (
   <div
     onClick={onToggle}
-    className={`cursor-pointer rounded-[14px] border p-4 transition-colors ${
+    className={`cursor-pointer rounded-xl border p-4 transition-colors ${
       isSelected
         ? 'border-[#c8bbff] bg-[#fbfafd]'
         : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
@@ -104,10 +104,10 @@ const GrupoEntregaCard = memo<{
           <h5 className="font-semibold text-[#15171d]">
             Entrega Adicional #{grupo.numeroEntrega}
           </h5>
-          <span className="rounded-[8px] border border-[#e7e7ef] bg-white px-2 py-0.5 text-xs font-medium text-[#15171d]">
+          <span className="rounded-md border border-[#e7e7ef] bg-white px-2 py-0.5 text-xs font-medium text-[#15171d]">
             {grupo.totalVacunas.toLocaleString()} vacunas
           </span>
-          <span className="rounded-[8px] border border-[#e7e7ef] bg-white px-2 py-0.5 text-xs font-medium text-[#15171d]">
+          <span className="rounded-md border border-[#e7e7ef] bg-white px-2 py-0.5 text-xs font-medium text-[#15171d]">
             {grupo.totalEstablecimientos} establec.
           </span>
         </div>

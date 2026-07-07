@@ -104,7 +104,7 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = memo(({
                 <div className="h-5 w-5 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
               </div>
             ) : alertasRecientes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-[18px] border border-dashed border-zinc-200 bg-zinc-50/70 px-4 py-8 text-center sm:px-6 sm:py-10">
+              <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-zinc-200 bg-zinc-50/70 px-4 py-8 text-center sm:px-6 sm:py-10">
                 <Bell className="h-8 w-8 text-zinc-300" weight="duotone" />
                 <p className="mt-3 text-sm font-semibold text-zinc-900">No hay alertas recientes</p>
                 <p className="mt-1 text-sm text-zinc-500">Cuando se registren eventos aparecerán aquí.</p>
@@ -119,7 +119,7 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = memo(({
                   return (
                     <article
                       key={alerta.id}
-                      className={`rounded-[16px] border px-3.5 py-3 transition ${
+                      className={`rounded-2xl border px-3.5 py-3 transition ${
                         alerta.leida
                           ? 'border-zinc-200 bg-zinc-50/70'
                           : 'border-zinc-200 bg-zinc-100/70'
@@ -167,7 +167,7 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = memo(({
                       const porcentaje = estadisticas.total > 0 ? (nivel.cantidad / estadisticas.total) * 100 : 0;
 
                       return (
-                        <div key={nivel.id} className="rounded-[14px] border border-zinc-200 bg-zinc-50/70 px-3 py-2.5">
+                        <div key={nivel.id} className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-3 py-2.5">
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
                               <div className={`rounded-lg p-2 ${nivel.bgColor}`}>
@@ -192,7 +192,7 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = memo(({
                     {distribucionTipo.map((tipo) => {
                       const Icon = tipo.icon;
                       return (
-                        <div key={tipo.id} className="flex items-center justify-between rounded-[14px] border border-zinc-200 bg-zinc-50/70 px-3 py-2.5">
+                        <div key={tipo.id} className="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50/70 px-3 py-2.5">
                           <div className="flex items-center gap-2">
                             <Icon className={`h-4 w-4 ${tipo.color}`} weight="fill" />
                             <span className="text-sm font-medium text-zinc-900">{tipo.label}</span>

@@ -82,13 +82,13 @@ export const COMPONENT_STYLES = {
     container: 'bg-white/80 backdrop-blur-sm border-b border-zinc-200/80 sticky top-0 z-20',
     title: 'text-[1.42rem] font-semibold tracking-tight text-zinc-900 sm:text-[1.54rem]',
     subtitle: 'text-[0.92rem] text-zinc-500 mt-0.5',
-    iconWrapper: 'flex h-12 w-12 items-center justify-center rounded-[18px] bg-teal-600 text-white shadow-sm',
+    iconWrapper: 'flex h-12 w-12 items-center justify-center rounded-3xl bg-teal-600 text-white shadow-sm',
   },
 
   button: {
-    primary: `inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
-    secondary: `inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
-    success: `inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
+    primary: `inline-flex min-h-[40px] items-center justify-center gap-2 rounded-lg bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
+    secondary: `inline-flex min-h-[40px] items-center justify-center gap-2 rounded-lg border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
+    success: `inline-flex min-h-[40px] items-center justify-center gap-2 rounded-lg bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
     warning: `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
     danger: `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
     icon: `inline-flex h-9 w-9 items-center justify-center rounded-lg border transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50`,
@@ -98,22 +98,22 @@ export const COMPONENT_STYLES = {
   },
 
   input: {
-    base: `min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-[13px] text-[#15171d] shadow-none transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70`,
+    base: `min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-base text-[#15171d] shadow-none transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70`,
     normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     error: 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30',
-    label: 'mb-1.5 block text-[12px] font-medium text-[#424750]',
+    label: 'mb-1.5 block text-sm font-medium text-[#424750]',
     errorText: 'mt-1 text-xs text-rose-600',
   },
 
   select: {
-    base: `min-h-9 w-full appearance-none rounded-[7px] border bg-white px-3 py-2 text-[13px] font-medium text-[#15171d] shadow-none transition focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 disabled:bg-zinc-50 disabled:cursor-not-allowed`,
+    base: `min-h-9 w-full appearance-none rounded-[7px] border bg-white px-3 py-2 text-base font-medium text-[#15171d] shadow-none transition focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 disabled:bg-zinc-50 disabled:cursor-not-allowed`,
     teal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     cyan: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     emerald: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
   },
 
   table: {
-    container: 'bg-white rounded-[18px] border border-[#e7e7ef] shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] overflow-hidden',
+    container: 'bg-white rounded-3xl border border-[#e7e7ef] shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] overflow-hidden',
     header: 'bg-[#fbfafd]',
     headerCell: 'px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]',
     row: 'transition-colors duration-150 border-b border-[#eeeef3] hover:bg-[#fbfafd] last:border-0',
@@ -122,11 +122,11 @@ export const COMPONENT_STYLES = {
   },
 
   badge: {
-    active: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
-    inactive: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
-    count: 'inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
-    warning: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
-    danger: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    active: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
+    inactive: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    count: 'inline-flex items-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    warning: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
+    danger: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
     info: 'inline-flex items-center rounded-full bg-cyan-50 border border-cyan-200/60 px-2.5 py-1 text-xs font-medium text-cyan-800',
   },
 
@@ -149,15 +149,15 @@ export const COMPONENT_STYLES = {
   },
 
   filter: {
-    container: 'rounded-[18px] border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] sm:p-4',
+    container: 'rounded-3xl border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)] sm:p-4',
     header: 'border-b border-zinc-100 px-5 py-4 sm:px-6',
     body: 'px-5 py-4 sm:px-6',
     searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]',
-    searchInput: 'w-full rounded-[10px] border border-[#e7e7ef] bg-white py-2 pl-10 pr-4 text-sm text-[#15171d] shadow-sm transition placeholder:text-[#8b8f9b] hover:border-[#d7d8e2] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
+    searchInput: 'w-full rounded-lg border border-[#e7e7ef] bg-white py-2 pl-10 pr-4 text-sm text-[#15171d] shadow-sm transition placeholder:text-[#8b8f9b] hover:border-[#d7d8e2] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
   },
 
   section: {
-    container: 'bg-white rounded-[16px] border border-zinc-200/90 shadow-sm overflow-hidden',
+    container: 'bg-white rounded-2xl border border-zinc-200/90 shadow-sm overflow-hidden',
     header: 'px-6 py-4 border-b border-zinc-100',
     headerTitle: 'text-base font-semibold text-zinc-900',
     headerSubtitle: 'text-sm text-zinc-500 mt-1',

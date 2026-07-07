@@ -316,7 +316,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                         <Package className="h-4 w-4 text-zinc-600" />
                         Biológicos
                       </h3>
-                      <div className="overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white">
+                      <div className="overflow-hidden rounded-3xl border border-[#e7e7ef] bg-white">
                         <table className="w-full text-sm">
                           <thead className="bg-[#fbfafd]">
                             <tr>
@@ -349,7 +349,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                         Jeringas
                         {isLoadingJeringas && <SpinnerGap weight="bold" className="h-4 w-4 animate-spin text-teal-600" />}
                       </h3>
-                      <div className="overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white">
+                      <div className="overflow-hidden rounded-3xl border border-[#e7e7ef] bg-white">
                         <table className="w-full text-sm">
                           <thead className="bg-[#fbfafd]">
                             <tr>
@@ -391,7 +391,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                 ) : (
                   <div className="space-y-4">
                     {establecimientosDetalle.map(est => (
-                      <div key={est.establecimiento.id} className="overflow-hidden rounded-[18px] border border-[#e7e7ef] bg-white">
+                      <div key={est.establecimiento.id} className="overflow-hidden rounded-3xl border border-[#e7e7ef] bg-white">
                         <div className="border-b border-[#eeeef3] bg-[#fbfafd] px-4 py-3">
                           <h4 className="font-semibold text-zinc-900">{est.establecimiento.nombre}</h4>
                           <p className="text-xs text-zinc-500">Código: {est.establecimiento.codigo}</p>

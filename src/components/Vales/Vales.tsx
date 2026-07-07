@@ -626,15 +626,15 @@ const Vales: React.FC<ValesProps> = ({
 
       {showDiagnostico && (
         <div className="fixed inset-0 z-[300] flex items-end justify-center bg-[#111318]/20 p-3 backdrop-blur-[2px] sm:items-center sm:p-4">
-          <div className="max-h-[95vh] w-full max-w-6xl overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-[10px]">
+          <div className="max-h-[95vh] w-full max-w-6xl overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-lg">
             <div className="flex items-center justify-between border-b border-[#eeeef3] bg-white px-4 py-3.5 sm:px-5">
               <div className="flex items-center space-x-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-amber-600">
                   <Gear weight="bold" className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-[15px] font-semibold leading-5 text-[#15171d]">Diagnóstico de Conectividad</h3>
-                  <p className="mt-1 text-[12px] leading-4 text-[#606571]">Verificación del estado del sistema</p>
+                  <h3 className="text-md font-semibold leading-5 text-[#15171d]">Diagnóstico de Conectividad</h3>
+                  <p className="mt-1 text-sm leading-4 text-[#606571]">Verificación del estado del sistema</p>
                 </div>
               </div>
               <button type="button"
@@ -679,17 +679,17 @@ const Vales: React.FC<ValesProps> = ({
 
       {showModificacionesModal && valeSeleccionado && (
         <div className="fixed inset-0 z-[300] flex items-end justify-center bg-[#111318]/20 p-3 backdrop-blur-[2px] sm:items-center sm:p-4">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-[10px]">
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-lg">
             <div className="flex items-center justify-between border-b border-[#eeeef3] px-4 py-3.5 sm:px-5">
               <div className="flex items-center space-x-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
                   <ArrowsClockwise weight="bold" className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-[15px] font-semibold leading-5 text-[#15171d]">
+                  <h3 className="text-md font-semibold leading-5 text-[#15171d]">
                     Modificaciones del Vale {valeSeleccionado.numero}
                   </h3>
-                  <p className="mt-1 text-[12px] leading-4 text-[#606571]">
+                  <p className="mt-1 text-sm leading-4 text-[#606571]">
                     Sincronización con datos actualizados
                   </p>
                 </div>
@@ -706,7 +706,7 @@ const Vales: React.FC<ValesProps> = ({
             </div>
 
             <div className="max-h-[calc(90vh-140px)] overflow-y-auto px-4 py-4 sm:px-5">
-              <div className="mb-5 rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] p-3">
+              <div className="mb-5 rounded-md border border-[#e7e7ef] bg-[#fbfafd] p-3">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-sm text-zinc-600">Centro de Acopio</p>
@@ -731,7 +731,7 @@ const Vales: React.FC<ValesProps> = ({
                 <button type="button"
                   onClick={() => sincronizarVale(valeSeleccionado.id)}
                   disabled={isSyncing}
-                  className="flex h-9 w-full items-center justify-center space-x-2 rounded-[7px] bg-[#7c3aed] px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full items-center justify-center space-x-2 rounded-[7px] bg-[#7c3aed] px-3.5 text-base font-semibold text-white transition-colors hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSyncing ? (
                     <>
@@ -754,7 +754,7 @@ const Vales: React.FC<ValesProps> = ({
                   </h4>
                   <div className="space-y-3">
                     {modificaciones.map((modificacion, index) => (
-                      <div key={index} className="rounded-[8px] border border-[#e7e7ef] bg-white p-3">
+                      <div key={index} className="rounded-md border border-[#e7e7ef] bg-white p-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">

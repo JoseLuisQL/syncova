@@ -167,15 +167,15 @@ export const NIVELES_ALERTA = [
 export const COMPONENT_STYLES = {
   pageBackground: 'min-h-screen bg-white',
   surface: 'rounded-none border-0 bg-transparent shadow-none',
-  panel: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none transition-colors hover:bg-[#fbfafd]',
+  panel: 'rounded-xl border border-[#e7e7ef] bg-white shadow-none transition-colors hover:bg-[#fbfafd]',
   mutedPanel: 'rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd]',
-  card: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
+  card: 'rounded-xl border border-[#e7e7ef] bg-white shadow-none',
 
   header: {
     title: 'text-[1.45rem] font-bold tracking-tight text-zinc-900 sm:text-[1.55rem]',
     subtitle: 'text-[0.85rem] font-medium text-zinc-500 mt-0.5',
     iconWrapper:
-      'flex h-12 w-12 items-center justify-center rounded-[16px] bg-teal-600 text-white shadow-sm',
+      'flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-sm',
   },
 
   button: {
@@ -194,12 +194,12 @@ export const COMPONENT_STYLES = {
 
   input: {
     base:
-      'min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-[13px] text-[#15171d] shadow-none transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
+      'min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-base text-[#15171d] shadow-none transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70',
     normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     error: 'border-rose-300 bg-rose-50/60 focus:border-rose-500 focus:ring-rose-500/20 text-rose-900 placeholder:text-rose-400',
-    label: 'mb-1.5 block text-[12px] font-medium text-[#424750]',
-    errorText: 'mt-1.5 text-[11px] font-bold text-rose-600',
-    helpText: 'mt-1.5 text-[11px] font-semibold text-zinc-500',
+    label: 'mb-1.5 block text-sm font-medium text-[#424750]',
+    errorText: 'mt-1.5 text-xs font-bold text-rose-600',
+    helpText: 'mt-1.5 text-xs font-semibold text-zinc-500',
   },
 
   filter: {
@@ -212,7 +212,7 @@ export const COMPONENT_STYLES = {
   table: {
     container: 'overflow-visible rounded-none border-0 bg-transparent shadow-none',
     header: 'bg-transparent',
-    headerCell: 'bg-[#fbfafd] px-4 py-3 text-left text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]',
+    headerCell: 'bg-[#fbfafd] px-4 py-3 text-left text-sm font-medium tracking-[-0.01em] text-[#8b8f9b]',
     row: 'transition-colors hover:bg-[#fbfafd]',
     cell: 'border-b border-[#eeeef3] px-4 py-3.5 align-middle text-sm text-[#15171d]',
     emptyIcon: 'mx-auto mb-4 h-11 w-11 text-zinc-300',
@@ -221,7 +221,7 @@ export const COMPONENT_STYLES = {
   nav: {
     shell: 'rounded-[28px] border border-zinc-200/90 bg-white shadow-sm',
     tab:
-      'inline-flex items-center gap-2 rounded-[14px] px-3.5 py-3 text-[13px] font-bold transition focus:outline-none',
+      'inline-flex items-center gap-2 rounded-xl px-3.5 py-3 text-base font-bold transition focus:outline-none',
     tabActive: 'bg-white text-zinc-900 shadow-sm border border-zinc-200/60',
     tabInactive: 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900',
   },
@@ -230,7 +230,7 @@ export const COMPONENT_STYLES = {
     overlay: 'fixed inset-0 z-[300] bg-[#111318]/20 backdrop-blur-[2px]',
     container: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6',
     panel:
-      'w-full overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:max-h-[88vh] sm:rounded-[10px]',
+      'w-full overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:max-h-[88vh] sm:rounded-lg',
     header: 'border-b border-[#eeeef3] px-4 py-3.5 sm:px-5',
     body: 'max-h-[calc(100vh-150px)] overflow-y-auto px-4 py-4 sm:max-h-[calc(88vh-136px)] sm:px-5 custom-scrollbar',
     footer: 'border-t border-[#eeeef3] bg-[#fbfafd] px-4 py-3 sm:px-5',
@@ -238,35 +238,35 @@ export const COMPONENT_STYLES = {
 
   stats: {
     card:
-      'min-h-[84px] rounded-[18px] border border-zinc-200/60 bg-white px-4 py-3.5 transition hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden',
-    value: 'mt-1 text-[22px] font-extrabold leading-none tracking-tight text-zinc-900 tabular-nums',
-    label: 'text-[11px] font-bold uppercase tracking-widest text-zinc-500',
+      'min-h-[84px] rounded-3xl border border-zinc-200/60 bg-white px-4 py-3.5 transition hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden',
+    value: 'mt-1 text-2xl font-extrabold leading-none tracking-tight text-zinc-900 tabular-nums',
+    label: 'text-xs font-bold uppercase tracking-widest text-zinc-500',
     iconWrapper: 'flex h-10 w-10 items-center justify-center rounded-[12px] bg-zinc-50 border border-zinc-200/60 text-zinc-600',
   },
 
   badge: {
-    active: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
-    inactive: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-zinc-400',
-    count: 'inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
-    warning: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
-    danger: 'inline-flex items-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
-    info: 'inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
-    neutral: 'inline-flex items-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    active: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
+    inactive: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-zinc-400',
+    count: 'inline-flex items-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    warning: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
+    danger: 'inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    info: 'inline-flex items-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    neutral: 'inline-flex items-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
   },
 
   pagination: {
     container: 'border-t border-[#eeeef3] bg-white px-4 py-5 sm:px-5',
     info: 'text-sm font-medium text-[#747986]',
     button:
-      'rounded-xl border border-zinc-200 bg-white px-3 py-2 text-[12px] font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-zinc-100 disabled:shadow-none',
+      'rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-zinc-100 disabled:shadow-none',
     buttonActive: 'border-teal-600 bg-teal-600 text-white shadow-sm hover:bg-teal-700',
     buttonInactive: 'text-zinc-700 border-zinc-200',
   },
 
   alert: {
-    info: 'rounded-[16px] border border-blue-200/60 bg-blue-50/50 p-4 text-blue-900',
-    error: 'rounded-[16px] border border-rose-200/60 bg-rose-50/50 p-4 text-rose-900',
-    warning: 'rounded-[16px] border border-amber-200/60 bg-amber-50/50 p-4 text-amber-900',
+    info: 'rounded-2xl border border-blue-200/60 bg-blue-50/50 p-4 text-blue-900',
+    error: 'rounded-2xl border border-rose-200/60 bg-rose-50/50 p-4 text-rose-900',
+    warning: 'rounded-2xl border border-amber-200/60 bg-amber-50/50 p-4 text-amber-900',
   },
 } as const;
 

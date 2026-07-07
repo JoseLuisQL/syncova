@@ -182,7 +182,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 setTipoImportacion('vacuna');
                 resetForm();
               }}
-              className={`rounded-[14px] border p-5 text-left transition-colors duration-200 ${
+              className={`rounded-xl border p-5 text-left transition-colors duration-200 ${
                 tipoImportacion === 'vacuna'
                   ? 'border-[#c8bbff] bg-[#fbfafd]'
                   : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
@@ -203,7 +203,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 setTipoImportacion('masivo');
                 resetForm();
               }}
-              className={`rounded-[14px] border p-5 text-left transition-colors duration-200 ${
+              className={`rounded-xl border p-5 text-left transition-colors duration-200 ${
                 tipoImportacion === 'masivo'
                   ? 'border-[#c8bbff] bg-[#fbfafd]'
                   : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
@@ -219,7 +219,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
             </button>
           </section>
 
-          <section className="grid gap-4 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] p-5 sm:grid-cols-2">
+          <section className="grid gap-4 rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-5 sm:grid-cols-2">
             {tipoImportacion === 'vacuna' ? (
               <label className="sm:col-span-2">
                 <span className={COMPONENT_STYLES.input.label}>Vacuna Destino</span>
@@ -254,7 +254,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
             </label>
           </section>
 
-          <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+          <section className="rounded-xl border border-[#e7e7ef] bg-white p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-[0.95rem] font-bold text-zinc-900 tracking-tight">Paso 1. Descargar plantilla</p>
@@ -274,13 +274,13 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
             </div>
           </section>
 
-          <section className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+          <section className="rounded-xl border border-[#e7e7ef] bg-white p-5">
             <div>
               <p className="text-[0.95rem] font-bold text-zinc-900 tracking-tight">Paso 2. Subir archivo completo</p>
               <p className="mt-1 text-sm text-zinc-500">Asegúrate de no alterar las cabeceras del formato original.</p>
             </div>
-            <label className="mt-5 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-[14px] border border-dashed border-[#d7d8e2] bg-[#fbfafd] px-6 py-10 text-center transition hover:border-[#c8bbff] hover:bg-[#f8f5ff]">
-              <div className="flex h-14 w-14 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-white text-[#606571]">
+            <label className="mt-5 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[#d7d8e2] bg-[#fbfafd] px-6 py-10 text-center transition hover:border-[#c8bbff] hover:bg-[#f8f5ff]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[#e7e7ef] bg-white text-[#606571]">
                 <UploadSimple className="h-6 w-6" weight="duotone" />
               </div>
               <p className="text-[0.95rem] font-bold tracking-tight text-zinc-900">
@@ -299,33 +299,33 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="flex items-center gap-3 rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] px-5 py-4">
+          <div className="flex items-center gap-3 rounded-xl border border-[#e7e7ef] bg-[#fbfafd] px-5 py-4">
             <CheckCircle className="h-6 w-6 text-[#7c3aed]" weight="fill" />
             <h3 className="text-[0.95rem] font-bold text-zinc-900 tracking-tight">Proceso de Importación Completado</h3>
           </div>
 
           {tipoImportacion === 'vacuna' ? (
             <section className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+              <div className="rounded-xl border border-[#e7e7ef] bg-white p-5">
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Filas Creadas</p>
                 <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">{resultadoImportacion?.creadas || 0}</p>
               </div>
-              <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+              <div className="rounded-xl border border-[#e7e7ef] bg-white p-5">
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Filas Actualizadas</p>
                 <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">{resultadoImportacion?.actualizadas || 0}</p>
               </div>
             </section>
           ) : (
             <section className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+              <div className="rounded-xl border border-[#e7e7ef] bg-white p-5">
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Creadas</p>
                 <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">{resultadoImportacion?.totalCreadas || 0}</p>
               </div>
-              <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+              <div className="rounded-xl border border-[#e7e7ef] bg-white p-5">
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Actualizadas</p>
                 <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">{resultadoImportacion?.totalActualizadas || 0}</p>
               </div>
-              <div className="rounded-[14px] border border-[#e7e7ef] bg-white p-5">
+              <div className="rounded-xl border border-[#e7e7ef] bg-white p-5">
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-zinc-500">Vacunas Prcsds.</p>
                 <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">{resultadoImportacion?.vacunasProcesadas || 0}</p>
               </div>
@@ -333,7 +333,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
           )}
 
           {hasErrors ? (
-            <section className="mt-4 rounded-[14px] border border-rose-200 bg-rose-50/50 p-5">
+            <section className="mt-4 rounded-xl border border-rose-200 bg-rose-50/50 p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-center gap-3">
                   <WarningCircle className="h-5 w-5 text-rose-600" weight="duotone" />

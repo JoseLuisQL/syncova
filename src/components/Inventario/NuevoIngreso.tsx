@@ -411,7 +411,7 @@ const TipoCard: React.FC<TipoCardProps> = ({ title, description, selected, icon:
   <button
     type="button"
     onClick={onClick}
-    className={`rounded-[24px] border p-5 text-left transition ${
+    className={`rounded-4xl border p-5 text-left transition ${
       selected ? 'border-zinc-900 bg-zinc-50 shadow-sm ring-1 ring-zinc-900' : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50'
     }`}
   >

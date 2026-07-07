@@ -261,10 +261,10 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                 <Key className="h-4 w-4" aria-hidden="true" />
               </div>
               <div>
-                <h2 id="permissions-modal-title" className="text-[15px] font-semibold leading-5 text-[#15171d]">
+                <h2 id="permissions-modal-title" className="text-md font-semibold leading-5 text-[#15171d]">
                   Gestionar Permisos
                 </h2>
-                <p className="mt-1 text-[12px] leading-4 text-[#606571]">
+                <p className="mt-1 text-sm leading-4 text-[#606571]">
                   Rol: <span className="font-semibold text-zinc-700">{role.nombre}</span>
                   {isReadOnly ? ' · consulta protegida' : ''}
                 </p>
@@ -283,7 +283,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
         </div>
 
         {isReadOnly && (
-          <div className="mx-5 mt-4 rounded-[8px] border border-amber-200 bg-amber-50/80 px-3 py-2.5 text-[13px] text-amber-800">
+          <div className="mx-5 mt-4 rounded-md border border-amber-200 bg-amber-50/80 px-3 py-2.5 text-base text-amber-800">
             Este rol es parte de la configuración base del sistema. Sus permisos se muestran solo para auditoría.
           </div>
         )}
@@ -311,7 +311,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 pr-8 text-[13px] font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70 sm:w-auto sm:min-w-[180px]"
+                className="h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 pr-8 text-base font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70 sm:w-auto sm:min-w-[180px]"
                 aria-label="Filtrar por categoría"
               >
                 <option value="todas">Todas las categorías</option>
@@ -357,7 +357,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
               <div className="flex items-center gap-2">
                 <button type="button"
                   onClick={selectAll}
-                  className="rounded-[8px] border border-[#e7e7ef] bg-white px-3 py-1.5 text-xs font-medium text-[#15171d] transition hover:bg-[#fbfafd]"
+                  className="rounded-md border border-[#e7e7ef] bg-white px-3 py-1.5 text-xs font-medium text-[#15171d] transition hover:bg-[#fbfafd]"
                 >
                   Seleccionar visibles
                 </button>
@@ -466,7 +466,7 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                             return (
                               <label
                                 key={permission.id}
-                                  className={`flex cursor-pointer items-start gap-3 rounded-[8px] border p-3 transition-colors duration-200 ${
+                                  className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors duration-200 ${
                                   isSelected
                                     ? 'border-[#c8bbff] bg-[#fbfafd]'
                                     : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd]'

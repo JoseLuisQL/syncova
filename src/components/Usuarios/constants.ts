@@ -98,7 +98,7 @@ export const USER_SECTIONS = [
 export const COMPONENT_STYLES = {
   pageBackground: 'min-h-screen bg-white',
 
-  card: 'rounded-[14px] border border-[#e7e7ef] bg-white shadow-none',
+  card: 'rounded-xl border border-[#e7e7ef] bg-white shadow-none',
   cardHover: 'hover:bg-[#fbfafd] transition-colors duration-200',
 
   header: {
@@ -145,17 +145,17 @@ export const COMPONENT_STYLES = {
   },
 
   input: {
-    base: `min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-[13px] text-[#15171d] shadow-none
+    base: `min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-base text-[#15171d] shadow-none
            transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70`,
     normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
     error: 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 text-rose-900',
-    label: 'mb-1.5 block text-[12px] font-medium text-[#424750]',
+    label: 'mb-1.5 block text-sm font-medium text-[#424750]',
     errorText: 'mt-1 text-xs text-rose-600 font-medium',
     helpText: 'mt-1 text-[0.7rem] text-zinc-500 leading-snug',
   },
 
   select: {
-    base: `w-full rounded-[10px] border bg-white px-4 py-2.5 text-sm font-medium text-[#15171d] shadow-sm
+    base: `w-full rounded-lg border bg-white px-4 py-2.5 text-sm font-medium text-[#15171d] shadow-sm
            transition focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70
            disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500`,
     normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
@@ -164,7 +164,7 @@ export const COMPONENT_STYLES = {
   table: {
     container: 'overflow-visible rounded-none border-0 bg-transparent shadow-none',
     header: 'bg-transparent',
-    headerCell: 'bg-[#fbfafd] px-4 py-3 text-left text-[12px] font-medium tracking-[-0.01em] text-[#8b8f9b]',
+    headerCell: 'bg-[#fbfafd] px-4 py-3 text-left text-sm font-medium tracking-[-0.01em] text-[#8b8f9b]',
     row: 'transition-colors duration-150 hover:bg-[#fbfafd]',
     rowSelected: 'bg-[#fbfafd]',
     cell: 'border-b border-[#eeeef3] px-4 py-3.5 text-sm text-[#15171d] tabular-nums align-middle',
@@ -172,23 +172,23 @@ export const COMPONENT_STYLES = {
   },
 
   badge: {
-    active: 'inline-flex items-center justify-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
-    inactive: 'inline-flex items-center justify-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
-    count: 'inline-flex items-center justify-center rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
-    warning: 'inline-flex items-center justify-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
-    danger: 'inline-flex items-center justify-center gap-1.5 rounded-[8px] border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    active: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
+    inactive: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    count: 'inline-flex items-center justify-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
+    warning: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
+    danger: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
     info: 'inline-flex items-center justify-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20',
     role: 'inline-flex items-center justify-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
   },
 
   modal: {
     overlay: 'fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-[#111318]/20 p-4 backdrop-blur-[2px] sm:p-6',
-    containerShell: 'mx-auto w-full overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    container: 'max-h-[88vh] w-full max-w-lg overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    containerMedium: 'max-h-[88vh] w-full max-w-2xl overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    containerLarge: 'max-h-[88vh] w-full max-w-5xl overflow-hidden rounded-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    containerShell: 'mx-auto w-full overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    container: 'max-h-[88vh] w-full max-w-lg overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    containerMedium: 'max-h-[88vh] w-full max-w-2xl overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    containerLarge: 'max-h-[88vh] w-full max-w-5xl overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
     header: 'flex items-center justify-between border-b border-[#eeeef3] bg-white px-4 py-3.5 sm:px-5',
-    headerTitle: 'text-[15px] font-semibold leading-5 text-[#15171d]',
+    headerTitle: 'text-md font-semibold leading-5 text-[#15171d]',
     body: 'max-h-[calc(88vh-130px)] overflow-y-auto px-4 py-4 sm:px-5',
     footer: 'flex justify-end gap-2 border-t border-[#eeeef3] bg-[#fbfafd] px-4 py-3 sm:px-5',
   },
@@ -220,7 +220,7 @@ export const COMPONENT_STYLES = {
   pagination: {
     container: 'border-t border-[#eeeef3] bg-white px-4 py-5 sm:px-5',
     info: 'text-sm font-medium text-[#747986]',
-    button: 'min-h-9 min-w-9 rounded-[10px] border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40',
+    button: 'min-h-9 min-w-9 rounded-lg border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40',
     buttonActive: 'bg-white border-[#e7e7ef] text-[#15171d] shadow-sm',
     buttonInactive: 'bg-transparent border-transparent text-[#606571] hover:bg-[#fbfafd]',
   },
