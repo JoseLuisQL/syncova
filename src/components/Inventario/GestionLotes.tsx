@@ -201,8 +201,8 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
                     <TableRow key={lote.id}>
                       <TableCell>
                         <div className="space-y-0.5">
-                          <p className="text-sm font-medium text-[#15171d]">{lote.numero}</p>
-                          <p className="text-xs text-[#8b8f9b]">Ingreso {lote.fechaIngreso.toLocaleDateString()}</p>
+                          <p className="text-sm font-medium text-ink">{lote.numero}</p>
+                          <p className="text-xs text-muted">Ingreso {lote.fechaIngreso.toLocaleDateString()}</p>
                         </div>
                       </TableCell>
                       <TableCell>

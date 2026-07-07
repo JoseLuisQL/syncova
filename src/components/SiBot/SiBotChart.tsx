@@ -166,10 +166,10 @@ function ChartLoadingState() {
       initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
       animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className="my-3 w-full rounded-xl border border-[#e7e7ef] bg-white"
+      className="my-3 w-full rounded-xl border border-line bg-white"
     >
       <div className="px-4 py-4">
-        <div className="rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-5">
+        <div className="rounded-[12px] border border-line bg-surface-soft px-4 py-5">
           <div className="mb-4 space-y-3">
             {[0, 1, 2, 3].map((line) => (
               <div key={line} className="h-px w-full bg-[linear-gradient(90deg,rgba(228,228,231,0),rgba(228,228,231,1),rgba(228,228,231,0))]" />
@@ -180,7 +180,7 @@ function ChartLoadingState() {
             {bars.map((bar, index) => (
               <div key={bar} className="flex flex-1 flex-col items-center justify-end gap-3">
                 <motion.div
-                  className="w-full max-w-[34px] rounded-b-[4px] rounded-t-[10px] bg-[#c8bbff]"
+                  className="w-full max-w-[34px] rounded-b-[4px] rounded-t-[10px] bg-brand-100"
                   animate={
                     shouldReduceMotion
                       ? undefined
@@ -199,7 +199,7 @@ function ChartLoadingState() {
                   style={{ height: 72 }}
                 />
                 <motion.div
-                  className="h-2 rounded-full bg-[#e7e7ef]"
+                  className="h-2 rounded-full bg-line"
                   animate={shouldReduceMotion ? undefined : { width: [18, 26, 18], opacity: [0.5, 0.9, 0.5] }}
                   transition={
                     shouldReduceMotion
@@ -234,7 +234,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
     config = JSON.parse(payload);
   } catch {
     return (
-      <div className="my-4 rounded-xl border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-sm font-medium text-[#606571]">
+      <div className="my-4 rounded-xl border border-line bg-surface-soft px-4 py-3 text-sm font-medium text-muted-2">
         No se pudo completar la visualización del gráfico.
       </div>
     );
@@ -462,7 +462,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
   return (
     <motion.section
       {...cardMotion}
-      className="my-3 w-full rounded-xl border border-[#e7e7ef] bg-white"
+      className="my-3 w-full rounded-xl border border-line bg-white"
     >
       <div className="bg-white py-3">
         <div className="overflow-x-auto overflow-y-hidden px-4 pb-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-200">

@@ -19,7 +19,7 @@ const InventoryShell: React.FC<InventoryShellProps> = ({
   return (
     <main className="min-h-[calc(100dvh-128px)] overflow-hidden rounded-4xl border border-white/90 bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
       <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col`}>
-        <nav aria-label="Secciones de inventario" className="border-b border-[#eeeef3] bg-white">
+        <nav aria-label="Secciones de inventario" className="border-b border-line-soft bg-white">
           <div className="flex h-12 items-end gap-7 px-5 sm:px-6">
             {sections.map((section) => {
               const isActive = section.id === activeSection;
@@ -31,8 +31,8 @@ const InventoryShell: React.FC<InventoryShellProps> = ({
                   onClick={() => navigateToModule('inventario', section.id)}
                   className={`-mb-px inline-flex h-12 shrink-0 items-center border-b-2 px-0 text-base font-medium transition-colors focus:outline-none ${
                     isActive
-                      ? 'border-[#7c3aed] text-[#7c3aed]'
-                      : 'border-transparent text-[#747986] hover:text-[#15171d]'
+                      ? 'border-brand text-brand'
+                      : 'border-transparent text-muted-3 hover:text-ink'
                   }`}
                   aria-current={isActive ? 'page' : undefined}
                   title={section.contextLabel}

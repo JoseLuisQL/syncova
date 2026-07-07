@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { SpinnerGap, WarningCircle, ArrowsClockwise } from '@phosphor-icons/react';
 
 interface LoadingStateProps {
   message?: string;
@@ -16,7 +16,7 @@ export const LoadingState: React.FC<LoadingStateProps> = memo(({
   >
     <div className="text-center">
       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center border border-zinc-200 bg-white">
-        <Loader2 className="h-6 w-6 animate-spin text-tertiary" aria-hidden="true" />
+        <SpinnerGap weight="bold" className="h-6 w-6 animate-spin text-tertiary" aria-hidden="true" />
       </div>
       <h2 className="mb-1 text-lg font-semibold text-primary">{message}</h2>
       <p className="text-sm text-secondary">Obteniendo datos del sistema...</p>
@@ -39,7 +39,7 @@ export const ErrorState: React.FC<ErrorStateProps> = memo(({ error, onRetry }) =
   >
     <div className="text-center max-w-md mx-auto px-4">
       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center border border-zinc-200 bg-white">
-        <AlertCircle className="h-6 w-6 text-primary" aria-hidden="true" />
+        <WarningCircle weight="fill" className="h-6 w-6 text-primary" aria-hidden="true" />
       </div>
       <h2 className="mb-2 text-lg font-semibold text-primary">
         Error al cargar Dashboard
@@ -53,7 +53,7 @@ export const ErrorState: React.FC<ErrorStateProps> = memo(({ error, onRetry }) =
           hover:border-tertiary hover:text-primary
           focus:outline-none focus:ring-2 focus:ring-tertiary/20 focus:ring-offset-1"
       >
-        <RefreshCw className="h-4 w-4" aria-hidden="true" />
+        <ArrowsClockwise weight="bold" className="h-4 w-4" aria-hidden="true" />
         Reintentar
       </button>
     </div>

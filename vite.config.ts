@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['lucide-react'],
+    include: ['@phosphor-icons/react'],
   },
   build: {
     chunkSizeWarningLimit: 900,
@@ -24,7 +24,6 @@ export default defineConfig({
           'charts': ['recharts'],
           'excel': ['exceljs'],
           'motion': ['motion'],
-          'lucide': ['lucide-react'],
           'phosphor': ['@phosphor-icons/react'],
         },
       },

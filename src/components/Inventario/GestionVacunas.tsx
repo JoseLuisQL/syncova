@@ -218,8 +218,8 @@ const GestionVacunas: React.FC = () => {
                       className="min-w-0 text-left"
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-[#15171d]">{vacuna.nombre}</p>
-                        <p className="text-xs text-[#8b8f9b]">{vacuna.dosisPorFrasco} dosis por frasco</p>
+                        <p className="truncate text-sm font-medium text-ink">{vacuna.nombre}</p>
+                        <p className="text-xs text-muted">{vacuna.dosisPorFrasco} dosis por frasco</p>
                       </div>
                     </button>
                   </TableCell>

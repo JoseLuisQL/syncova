@@ -233,9 +233,9 @@ const AyudaConfiguracion: React.FC<AyudaConfiguracionProps> = ({ isOpen, onClose
   const activeContent = sections.find(s => s.id === activeSection);
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-[#111318]/20 p-4 backdrop-blur-[2px] animate-in fade-in duration-200">
-      <div className="flex max-h-[85vh] w-full max-w-4xl overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
-        <div className="flex w-64 flex-col border-r border-[#eeeef3] bg-[#fbfafd] p-5">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-ink-soft/20 p-4 backdrop-blur-[2px] animate-in fade-in duration-200">
+      <div className="flex max-h-[85vh] w-full max-w-4xl overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
+        <div className="flex w-64 flex-col border-r border-line-soft bg-surface-soft p-5">
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-zinc-200/80">
             <h3 className="font-semibold text-zinc-900 flex items-center tracking-tight">
               <Question className="h-5 w-5 mr-2 text-zinc-700" weight="duotone" />

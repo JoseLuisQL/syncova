@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, memo } from 'react';
-import { CheckCircle, AlertTriangle, XCircle, Info, X } from 'lucide-react';
+import { CheckCircle, Warning, XCircle, Info, X } from '@phosphor-icons/react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -50,7 +50,7 @@ const TOAST_STYLES = {
 const ICONS = {
   success: CheckCircle,
   error: XCircle,
-  warning: AlertTriangle,
+  warning: Warning,
   info: Info,
 } as const;
 
@@ -100,7 +100,7 @@ const Toast: React.FC<ToastProps> = memo(({ toast, onClose }) => {
       aria-live="polite"
       className={`${baseClasses} ${animationClasses}`}
     >
-      <Icon className={`h-5 w-5 mt-0.5 flex-shrink-0 ${styles.icon}`} />
+      <Icon className={`h-5 w-5 mt-0.5 flex-shrink-0 ${styles.icon}`} weight="fill" aria-hidden="true" />
 
       <div className="flex-1 min-w-0">
         <p className={`text-sm font-medium ${styles.title}`}>

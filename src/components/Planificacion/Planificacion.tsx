@@ -1024,7 +1024,7 @@ const Planificacion: React.FC = () => {
   return (
     <main className="flex h-[calc(100vh-4rem)] flex-col bg-transparent" role="main">
       <div className="flex w-full flex-1 flex-col overflow-hidden p-0">
-        <section className="flex flex-1 flex-col overflow-hidden rounded-[22px] border border-[#e7e7ef] bg-white">
+        <section className="flex flex-1 flex-col overflow-hidden rounded-[22px] border border-line bg-white">
           <div className="shrink-0">
             <PlanificacionHeader
               isReadOnly={isReadOnlyMode}
@@ -1064,7 +1064,7 @@ const Planificacion: React.FC = () => {
           </div>
 
           {error ? (
-            <div className="shrink-0 border-b border-[#eeeef3] px-4 py-3">
+            <div className="shrink-0 border-b border-line-soft px-4 py-3">
               <ErrorAlert message={error} onRetry={loadPlanificacionesPorVacuna} />
             </div>
           ) : null}

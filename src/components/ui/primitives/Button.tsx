@@ -49,11 +49,11 @@ export interface ButtonProps
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    'bg-[#7c3aed] text-white hover:bg-[#6d28d9] focus-visible:ring-[#7c3aed]/30 shadow-sm',
+    'bg-brand text-white hover:bg-brand-600 focus-visible:ring-brand/30 shadow-sm',
   secondary:
-    'bg-white text-[#15171d] border border-[#e7e7ef] hover:bg-[#fbfafd] hover:border-[#d7d8e2] focus-visible:ring-zinc-300',
+    'bg-white text-ink border border-line hover:bg-surface-soft hover:border-line-strong focus-visible:ring-zinc-300',
   ghost:
-    'bg-white text-[#606571] border border-[#e7e7ef] hover:bg-[#fbfafd] hover:text-[#15171d] hover:border-[#d7d8e2] focus-visible:ring-zinc-300',
+    'bg-white text-muted-2 border border-line hover:bg-surface-soft hover:text-ink hover:border-line-strong focus-visible:ring-zinc-300',
   danger:
     'bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500/30 shadow-sm',
   success:

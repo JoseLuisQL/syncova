@@ -25,16 +25,16 @@ const CentrosAcopioSection: React.FC = memo(() => {
         ) : (
           <table className="w-full min-w-[360px] border-collapse text-left">
             <thead>
-              <tr className="bg-[#fbfafd]">
-                <th className="whitespace-nowrap px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Centro logístico</th>
-                <th className="whitespace-nowrap px-3 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Inst.</th>
-                <th className="whitespace-nowrap px-3 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Stock total</th>
-                <th className="whitespace-nowrap px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b] sm:px-5">Estado</th>
+              <tr className="bg-surface-soft">
+                <th className="whitespace-nowrap px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Centro logístico</th>
+                <th className="whitespace-nowrap px-3 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Inst.</th>
+                <th className="whitespace-nowrap px-3 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Stock total</th>
+                <th className="whitespace-nowrap px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Estado</th>
               </tr>
             </thead>
             <tbody className="bg-white">
               {data.map((centro) => (
-                <tr key={centro.id} className="border-b border-[#eeeef3] transition-colors hover:bg-[#fbfafd]">
+                <tr key={centro.id} className="border-b border-line-soft transition-colors hover:bg-surface-soft">
                   <td className="whitespace-nowrap px-3 py-3.5 text-base font-semibold text-[#171b22] sm:px-5">
                     {centro.nombre}
                   </td>

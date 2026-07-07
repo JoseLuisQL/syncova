@@ -42,12 +42,12 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
   };
 
   return (
-    <section className="rounded-xl border border-[#e7e7ef] bg-white p-5" aria-label="Stock disponible">
+    <section className="rounded-xl border border-line bg-white p-5" aria-label="Stock disponible">
       {/* Header */}
-      <div className="mb-5 flex flex-col gap-4 border-b border-[#eeeef3] pb-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-5 flex flex-col gap-4 border-b border-line-soft pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd]">
-            <Package className="h-5 w-5 text-[#7c3aed]" weight="duotone" aria-hidden="true" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-line bg-surface-soft">
+            <Package className="h-5 w-5 text-brand" weight="duotone" aria-hidden="true" />
           </div>
           <div>
             <h3 className="text-[0.95rem] font-semibold tracking-tight text-zinc-900">Stock disponible</h3>
@@ -56,7 +56,7 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
         </div>
         {(isLoadingStock || isUpdatingStock) && (
           <div className="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-1.5 border border-zinc-200">
-            <CircleNotch className="h-4 w-4 animate-spin text-[#7c3aed]" weight="bold" />
+            <CircleNotch className="h-4 w-4 animate-spin text-brand" weight="bold" />
             <span className="text-[0.7rem] font-bold uppercase tracking-widest text-zinc-900">Actualizando...</span>
           </div>
         )}
@@ -67,7 +67,7 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
         {stockInfo ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Stock Inicial */}
-            <div className="rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] p-4 transition hover:border-[#d7d8e2]">
+            <div className="rounded-[12px] border border-line bg-surface-soft p-4 transition hover:border-line-strong">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="text-2xl font-semibold tracking-tight text-zinc-900">
@@ -95,14 +95,14 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
                     </div>
                   )}
                 </div>
-                <div className="p-2 bg-white border border-[#e7e7ef] rounded-lg">
+                <div className="p-2 bg-white border border-line rounded-lg">
                   <Package className="h-4 w-4 text-zinc-600" weight="duotone" />
                 </div>
               </div>
             </div>
 
             {/* Total Entregas */}
-            <div className="rounded-[12px] border border-[#e7e7ef] bg-white p-4 transition hover:border-[#d7d8e2]">
+            <div className="rounded-[12px] border border-line bg-white p-4 transition hover:border-line-strong">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="text-2xl font-semibold tracking-tight text-zinc-900">
@@ -112,7 +112,7 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
                     Entregas
                   </div>
                 </div>
-                <div className="p-2 bg-[#fbfafd] border border-[#e7e7ef] rounded-lg">
+                <div className="p-2 bg-surface-soft border border-line rounded-lg">
                   <Truck className="h-4 w-4 text-zinc-600" weight="duotone" />
                 </div>
               </div>
@@ -142,11 +142,11 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
             })()}
 
             {/* Stock Actual con Lotes */}
-            <div className="rounded-[12px] border border-[#dedfea] bg-[#f3f0ff] p-4">
+            <div className="rounded-[12px] border border-line-focus bg-[#f3f0ff] p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center justify-between flex-1 min-w-0">
                   <div>
-                    <div className="text-2xl font-semibold tracking-tight text-[#7c3aed]">
+                    <div className="text-2xl font-semibold tracking-tight text-brand">
                       {stockInfo.stockActual.toLocaleString()}
                     </div>
                     <div className="mt-1 text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">
@@ -156,14 +156,14 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
                       {stockInfo.lotes.filter(l => l.cantidadActual > 0).length} lotes
                     </div>
                   </div>
-                  <div className="p-2 bg-white border border-[#dedfea] rounded-lg">
-                    <Package className="h-4 w-4 text-[#7c3aed]" weight="duotone" />
+                  <div className="p-2 bg-white border border-line-focus rounded-lg">
+                    <Package className="h-4 w-4 text-brand" weight="duotone" />
                   </div>
                 </div>
 
                 {/* Lista de Lotes */}
                 {stockInfo.lotes.filter(l => l.cantidadActual > 0).length > 0 && (
-                  <div className="flex-1 min-w-0 pl-4 border-l border-[#dedfea]">
+                  <div className="flex-1 min-w-0 pl-4 border-l border-line-focus">
                     <div className="text-[0.6rem] font-bold text-zinc-500 mb-2 uppercase tracking-widest">
                       Lotes activos (FEFO)
                     </div>
@@ -179,7 +179,7 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
                             <div
                               key={lote.id}
                               className={`flex items-center justify-between gap-2 px-2 py-1 rounded border text-xs ${
-                                esPrimero ? 'bg-white text-zinc-900 border-[#dedfea]' : 'bg-transparent text-zinc-500 border-[#dedfea]'
+                                esPrimero ? 'bg-white text-zinc-900 border-line-focus' : 'bg-transparent text-zinc-500 border-line-focus'
                               }`}
                             >
                               <span className={`font-bold truncate`} title={lote.numero}>
@@ -220,7 +220,7 @@ export const MovimientosStock: React.FC<MovimientosStockProps> = memo(({
                 <button type="button"
                   onClick={onActualizarStockSiguienteMes}
                   disabled={isUpdatingStockSiguienteMes}
-                  className="inline-flex h-9 items-center justify-center gap-2 rounded-[9px] bg-[#7c3aed] px-4 text-xs font-bold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-[9px] bg-brand px-4 text-xs font-bold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isUpdatingStockSiguienteMes ? (
                     <>

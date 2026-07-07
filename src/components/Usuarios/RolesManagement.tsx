@@ -218,9 +218,9 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-[#e7e7ef] bg-white p-6 shadow-none">
+      <div className="rounded-xl border border-line bg-white p-6 shadow-none">
         <div className="flex items-center gap-3 text-zinc-700">
-          <div className="flex h-11 w-11 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[12px] border border-line bg-surface-soft text-muted-2">
             <CircleNotch className="h-5 w-5 animate-spin" />
           </div>
           <div>
@@ -272,21 +272,21 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
             </div>
 
             <details className="group relative">
-              <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 [&::-webkit-details-marker]:hidden">
-                <Faders className="h-4 w-4 text-[#606571]" aria-hidden="true" />
+              <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-line bg-white px-3.5 text-sm font-semibold text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 [&::-webkit-details-marker]:hidden">
+                <Faders className="h-4 w-4 text-muted-2" aria-hidden="true" />
                 Filtros
               </summary>
-              <div className="absolute left-0 top-11 z-30 w-[min(260px,calc(100vw-3rem))] rounded-xl border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
+              <div className="absolute left-0 top-11 z-30 w-[min(260px,calc(100vw-3rem))] rounded-xl border border-line bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
                 <div className="space-y-3">
                   <div>
-                    <label htmlFor="roles-estado" className="mb-1 block text-xs font-medium text-[#747986]">
+                    <label htmlFor="roles-estado" className="mb-1 block text-xs font-medium text-muted-3">
                       Estado
                     </label>
                     <select
                       id="roles-estado"
                       value={filterEstado}
                       onChange={(event) => setFilterEstado(event.target.value as 'todos' | 'activo' | 'inactivo')}
-                      className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pr-8 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                      className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
                     >
                       <option value="todos">Todos los estados</option>
                       <option value="activo">Activos</option>
@@ -397,17 +397,17 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                       </div>
                     </td>
                     <td className={COMPONENT_STYLES.table.cell}>
-                      <span className="inline-flex rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 font-mono text-sm text-[#15171d]">
+                      <span className="inline-flex rounded-md border border-line bg-white px-2.5 py-1 font-mono text-sm text-ink">
                         {role.codigo}
                       </span>
                     </td>
                     <td className={COMPONENT_STYLES.table.cell}>
-                      <span className="inline-flex rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
+                      <span className="inline-flex rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink">
                         {role.esDefault ? 'Sistema' : 'Personalizado'}
                       </span>
                     </td>
                     <td className={COMPONENT_STYLES.table.cell}>
-                      <span className={`inline-flex gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:mt-[5px] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full ${role.estado === 'activo' ? 'before:bg-emerald-500' : 'before:bg-rose-500'}`}>
+                      <span className={`inline-flex gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:mt-[5px] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full ${role.estado === 'activo' ? 'before:bg-emerald-500' : 'before:bg-rose-500'}`}>
                         {role.estado === 'activo' ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>

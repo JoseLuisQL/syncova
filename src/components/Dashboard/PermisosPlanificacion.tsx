@@ -29,27 +29,27 @@ const ScheduleModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-[300] flex items-center justify-center bg-[#111318]/20 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[300] flex items-center justify-center bg-ink-soft/20 p-4 backdrop-blur-[2px]"
       onClick={onClose}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="flex w-full max-w-md flex-col overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]"
+        className="flex w-full max-w-md flex-col overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-[#eeeef3] px-5 py-3.5">
+        <div className="flex items-center justify-between border-b border-line-soft px-5 py-3.5">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-muted-2">
               <Timer className="h-4 w-4" weight="bold" />
             </div>
             <div>
-              <h3 className="text-md font-semibold leading-5 text-[#15171d]">Programar activación</h3>
-              <p className="text-sm leading-4 text-[#606571]">{permisoLabel}</p>
+              <h3 className="text-md font-semibold leading-5 text-ink">Programar activación</h3>
+              <p className="text-sm leading-4 text-muted-2">{permisoLabel}</p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]">
+          <button type="button" onClick={onClose} className="rounded-[7px] p-1.5 text-muted transition-colors hover:bg-surface-soft hover:text-ink">
             <X className="h-4 w-4" weight="bold" />
           </button>
         </div>
@@ -63,11 +63,11 @@ const ScheduleModal: React.FC<{
               type="datetime-local"
               value={fechaActivacion}
               onChange={(e) => setFechaActivacion(e.target.value)}
-              className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-base text-[#15171d] transition-colors focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
+              className="min-h-9 w-full rounded-[7px] border border-line bg-white px-3 py-2 text-base text-ink transition-colors focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70"
             />
           </div>
 
-          <div className="flex items-center gap-3 rounded-md border border-[#e7e7ef] bg-[#fbfafd] p-3">
+          <div className="flex items-center gap-3 rounded-md border border-line bg-surface-soft p-3">
             <button
               type="button"
               role="switch"
@@ -90,16 +90,16 @@ const ScheduleModal: React.FC<{
                 value={fechaDesactivacion}
                 onChange={(e) => setFechaDesactivacion(e.target.value)}
                 min={fechaActivacion}
-                className="min-h-9 w-full rounded-[7px] border border-[#e7e7ef] bg-white px-3 py-2 text-base text-[#15171d] transition-colors focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
+                className="min-h-9 w-full rounded-[7px] border border-line bg-white px-3 py-2 text-base text-ink transition-colors focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70"
               />
             </motion.div>
           )}
         </div>
 
-        <div className="mt-auto flex items-center justify-end gap-2 border-t border-[#eeeef3] bg-[#fbfafd] px-5 py-3">
+        <div className="mt-auto flex items-center justify-end gap-2 border-t border-line-soft bg-surface-soft px-5 py-3">
           <button type="button"
             onClick={onClose}
-            className="inline-flex h-9 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-white px-3.5 text-base font-semibold text-[#15171d] transition-colors hover:bg-white"
+            className="inline-flex h-9 items-center justify-center rounded-[7px] border border-line bg-white px-3.5 text-base font-semibold text-ink transition-colors hover:bg-white"
           >
             Cancelar
           </button>
@@ -113,7 +113,7 @@ const ScheduleModal: React.FC<{
               onClose();
             }}
             disabled={!fechaActivacion}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[7px] border border-[#7c3aed] bg-[#7c3aed] px-3.5 text-base font-semibold text-white transition-colors hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[7px] border border-brand bg-brand px-3.5 text-base font-semibold text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Timer className="h-4 w-4" weight="bold" />
             Programar

@@ -63,15 +63,15 @@ export const FilterBar: React.FC<FilterBarProps> = memo(({
 
           {filters.length > 0 ? (
             <details className="group relative">
-              <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 [&::-webkit-details-marker]:hidden">
-                <SlidersHorizontal className="h-4 w-4 text-[#606571]" />
+              <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-line bg-white px-3.5 text-sm font-semibold text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 [&::-webkit-details-marker]:hidden">
+                <SlidersHorizontal className="h-4 w-4 text-muted-2" />
                 Filtros
               </summary>
-              <div className="absolute left-0 top-11 z-30 w-[280px] rounded-xl border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
+              <div className="absolute left-0 top-11 z-30 w-[280px] rounded-xl border border-line bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
                 <div className="space-y-3">
                 {filters.map((filter) => (
                   <div key={filter.id}>
-                    <label htmlFor={filter.id} className="mb-1 block text-xs font-medium text-[#747986]">
+                    <label htmlFor={filter.id} className="mb-1 block text-xs font-medium text-muted-3">
                       {filter.label}
                     </label>
                     <select
@@ -79,7 +79,7 @@ export const FilterBar: React.FC<FilterBarProps> = memo(({
                       value={filter.value}
                       onChange={(event) => filter.onChange(event.target.value)}
                       disabled={filter.disabled}
-                      className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pr-8 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {filter.options.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -155,8 +155,8 @@ export const Pagination: React.FC<PaginationProps> = memo(({
     <nav aria-label="Paginacion" className={COMPONENT_STYLES.pagination.container}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className={COMPONENT_STYLES.pagination.info}>
-          <span className="font-semibold text-[#606571]">{startItem}-{endItem}</span> de{' '}
-          <span className="font-semibold text-[#606571]">{total}</span>
+          <span className="font-semibold text-muted-2">{startItem}-{endItem}</span> de{' '}
+          <span className="font-semibold text-muted-2">{total}</span>
         </p>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -299,10 +299,10 @@ interface TableHeaderProps {
 export const TableHeader: React.FC<TableHeaderProps> = memo(({ columns }) => (
   <thead className={COMPONENT_STYLES.table.header}>
     <tr>
-      <th className="w-10 rounded-l-[14px] bg-[#fbfafd] px-3 py-3 text-center">
+      <th className="w-10 rounded-l-[14px] bg-surface-soft px-3 py-3 text-center">
         <input
           type="checkbox"
-          className="h-4 w-4 rounded-[5px] border-[#e0e2ea] text-[#7c3aed] focus:ring-[#7c3aed]/20"
+          className="h-4 w-4 rounded-[5px] border-[#e0e2ea] text-brand focus:ring-brand/20"
           aria-label="Seleccionar todos"
         />
       </th>
@@ -335,10 +335,10 @@ export const TableRow: React.FC<TableRowProps> = memo(({ children, onClick, isSe
     className={`${COMPONENT_STYLES.table.row} ${isSelected ? 'bg-zinc-100/60' : ''} ${onClick ? 'cursor-pointer' : ''}`}
     onClick={onClick}
   >
-    <td className="w-10 border-b border-[#eeeef3] px-3 py-3 text-center align-middle">
+    <td className="w-10 border-b border-line-soft px-3 py-3 text-center align-middle">
       <input
         type="checkbox"
-        className="h-4 w-4 rounded-[5px] border-[#e0e2ea] text-[#7c3aed] focus:ring-[#7c3aed]/20"
+        className="h-4 w-4 rounded-[5px] border-[#e0e2ea] text-brand focus:ring-brand/20"
         aria-label="Seleccionar fila"
         onClick={(event) => event.stopPropagation()}
       />

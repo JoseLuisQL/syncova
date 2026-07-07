@@ -39,7 +39,7 @@ export const SiBotTable: React.FC<SiBotTableProps> = ({ children }) => {
   };
 
   return (
-    <div className="relative my-3 overflow-hidden rounded-xl border border-[#e7e7ef] bg-white">
+    <div className="relative my-3 overflow-hidden rounded-xl border border-line bg-white">
       <div
         data-export-ignore="true"
         className="absolute right-3 top-3 z-10"
@@ -48,7 +48,7 @@ export const SiBotTable: React.FC<SiBotTableProps> = ({ children }) => {
           type="button"
           onClick={() => void handleExcel()}
           disabled={isExporting}
-          className="inline-flex items-center gap-1.5 rounded-[9px] border border-[#e7e7ef] bg-white px-3 py-1.5 text-[10px] font-medium text-[#606571] transition-colors hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] disabled:cursor-not-allowed disabled:opacity-55"
+          className="inline-flex items-center gap-1.5 rounded-[9px] border border-line bg-white px-3 py-1.5 text-[10px] font-medium text-muted-2 transition-colors hover:border-line-strong hover:bg-surface-soft hover:text-ink disabled:cursor-not-allowed disabled:opacity-55"
         >
           {isExporting ? (
             <CircleNotch className="h-3.5 w-3.5 animate-spin" />

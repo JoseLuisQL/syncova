@@ -339,8 +339,8 @@ const EstablecimientoDesktopRow: React.FC<EstablecimientoRowProps> = memo(({
     <TableRow>
       <TableCell>
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-[#15171d]">{establecimiento.nombre}</p>
-          <p className="text-xs text-[#8b8f9b]">{establecimiento.codigo}</p>
+          <p className="truncate text-sm font-medium text-ink">{establecimiento.nombre}</p>
+          <p className="text-xs text-muted">{establecimiento.codigo}</p>
         </div>
       </TableCell>
       <TableCell>

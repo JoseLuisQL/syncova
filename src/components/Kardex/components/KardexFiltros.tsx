@@ -413,54 +413,54 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
             </div>
 
             <details className="group relative">
-              <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 [&::-webkit-details-marker]:hidden">
-                <SlidersHorizontal className="h-4 w-4 text-[#606571]" />
+              <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-line bg-white px-3.5 text-sm font-semibold text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 [&::-webkit-details-marker]:hidden">
+                <SlidersHorizontal className="h-4 w-4 text-muted-2" />
                 Filtros
               </summary>
 
-              <div className="absolute left-0 top-11 z-40 max-h-[70vh] w-[min(760px,calc(100vw-3rem))] overflow-y-auto rounded-xl border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
+              <div className="absolute left-0 top-11 z-40 max-h-[70vh] w-[min(760px,calc(100vw-3rem))] overflow-y-auto rounded-xl border border-line bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                   <div>
-                    <label htmlFor="kardex-fecha-inicio" className="mb-1 block text-xs font-medium text-[#747986]">
+                    <label htmlFor="kardex-fecha-inicio" className="mb-1 block text-xs font-medium text-muted-3">
                       Desde
                     </label>
                     <div className="relative">
-                      <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" />
+                      <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" />
                       <input
                         id="kardex-fecha-inicio"
                         type="date"
                         value={fechaInicio}
                         onChange={(event) => onFechaInicioChange(event.target.value)}
-                        className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pl-9 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                        className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pl-9 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="kardex-fecha-fin" className="mb-1 block text-xs font-medium text-[#747986]">
+                    <label htmlFor="kardex-fecha-fin" className="mb-1 block text-xs font-medium text-muted-3">
                       Hasta
                     </label>
                     <div className="relative">
-                      <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" />
+                      <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" />
                       <input
                         id="kardex-fecha-fin"
                         type="date"
                         value={fechaFin}
                         onChange={(event) => onFechaFinChange(event.target.value)}
-                        className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pl-9 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                        className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pl-9 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="kardex-tipo-movimiento" className="mb-1 block text-xs font-medium text-[#747986]">
+                    <label htmlFor="kardex-tipo-movimiento" className="mb-1 block text-xs font-medium text-muted-3">
                       Movimiento
                     </label>
                     <select
                       id="kardex-tipo-movimiento"
                       value={tipoMovimiento}
                       onChange={(event) => onTipoMovimientoChange(event.target.value)}
-                      className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pr-8 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                      className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
                     >
                       {MOVIMIENTO_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -471,14 +471,14 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
                   </div>
 
                   <div>
-                    <label htmlFor="kardex-tipo-item" className="mb-1 block text-xs font-medium text-[#747986]">
+                    <label htmlFor="kardex-tipo-item" className="mb-1 block text-xs font-medium text-muted-3">
                       Tipo de producto
                     </label>
                     <select
                       id="kardex-tipo-item"
                       value={selectedTipo}
                       onChange={(event) => onTipoChange(event.target.value as 'vacuna' | 'jeringa' | 'todos')}
-                      className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pr-8 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                      className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
                     >
                       {TIPO_ITEM_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -549,7 +549,7 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
                 key={filter.key}
                 type="button"
                 onClick={filter.clear}
-                className="inline-flex items-center gap-2 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] transition hover:bg-[#fbfafd]"
+                className="inline-flex items-center gap-2 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink transition hover:bg-surface-soft"
               >
                 <span>{filter.label}</span>
                 <X className="h-3.5 w-3.5" />

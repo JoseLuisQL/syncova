@@ -88,13 +88,13 @@ const SummaryBadge: React.FC<SummaryBadgeProps> = ({ icon: Icon, label, value, e
   <span
     className={`inline-flex min-h-9 items-center gap-2 rounded-[9px] border px-3 py-1.5 text-sm ${
       emphasis
-        ? 'border-[#c8bbff] bg-[#fbfafd] text-[#15171d]'
-        : 'border-[#e7e7ef] bg-white text-[#606571]'
+        ? 'border-brand-100 bg-surface-soft text-ink'
+        : 'border-line bg-white text-muted-2'
     }`}
   >
-    <Icon className={emphasis ? 'h-4 w-4 text-[#7c3aed]' : 'h-4 w-4 text-[#606571]'} weight="bold" />
-    <span className="text-xs font-medium text-[#8b8f9b]">{label}</span>
-    <strong className="font-semibold text-[#15171d]">{value}</strong>
+    <Icon className={emphasis ? 'h-4 w-4 text-brand' : 'h-4 w-4 text-muted-2'} weight="bold" />
+    <span className="text-xs font-medium text-muted">{label}</span>
+    <strong className="font-semibold text-ink">{value}</strong>
   </span>
 );
 
@@ -135,14 +135,14 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
     : centrosAcopio.find((centro) => centro.id === selectedCentroAcopio)?.nombre || lockedCentroAcopioLabel || allCentrosLabel;
 
   return (
-    <section className="border-b border-[#eeeef3] bg-white p-3 sm:p-4" aria-label="Filtros de planificación">
+    <section className="border-b border-line-soft bg-white p-3 sm:p-4" aria-label="Filtros de planificación">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <div className="flex min-w-0 flex-1 flex-wrap items-end gap-2">
           {shouldRenderCentroSelect ? (
             <label className="w-full sm:w-[230px]">
               <span className={COMPONENT_STYLES.input.label}>Centro de acopio</span>
               <div className="relative">
-                <Buildings className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" weight="bold" />
+                <Buildings className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" weight="bold" />
                 <select
                   value={selectedCentroAcopio}
                   onChange={(event) => onCentroAcopioChange(event.target.value)}
@@ -156,14 +156,14 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                     </option>
                   ))}
                 </select>
-                <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b8f9b]" weight="bold" />
+                <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" weight="bold" />
               </div>
             </label>
           ) : (
             <div className="w-full sm:w-[230px]">
               <span className={COMPONENT_STYLES.input.label}>Centro de acopio</span>
-              <div className="flex h-9 items-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3 text-sm font-semibold text-[#15171d] shadow-sm">
-                <Buildings className="h-4 w-4 shrink-0 text-[#606571]" weight="bold" />
+              <div className="flex h-9 items-center gap-2 rounded-[9px] border border-line bg-white px-3 text-sm font-semibold text-ink shadow-sm">
+                <Buildings className="h-4 w-4 shrink-0 text-muted-2" weight="bold" />
                 <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
               </div>
             </div>
@@ -172,7 +172,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
           <label className="w-full sm:w-[230px]">
             <span className={COMPONENT_STYLES.input.label}>Vacuna</span>
             <div className="relative">
-              <Package className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" weight="bold" />
+              <Package className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" weight="bold" />
               <select
                 value={selectedVacuna}
                 onChange={(event) => onVacunaChange(event.target.value)}
@@ -186,14 +186,14 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                   </option>
                 ))}
               </select>
-              <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b8f9b]" weight="bold" />
+              <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" weight="bold" />
             </div>
           </label>
 
           <label className="w-full sm:w-[150px]">
             <span className={COMPONENT_STYLES.input.label}>Año</span>
             <div className="relative">
-              <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" weight="bold" />
+              <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" weight="bold" />
               <select
                 value={selectedAnio}
                 onChange={(event) => onAnioChange(Number(event.target.value))}
@@ -206,7 +206,7 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
                   </option>
                 ))}
               </select>
-              <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b8f9b]" weight="bold" />
+              <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" weight="bold" />
             </div>
           </label>
         </div>
@@ -255,10 +255,10 @@ export const PlanificacionHeader: React.FC<PlanificacionHeaderProps> = memo(({
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#eeeef3] pt-3">
+      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line-soft pt-3">
         {!selectedVacuna ? (
-          <div className="flex min-h-9 items-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-[#fbfafd] px-3 py-1.5 text-sm font-medium text-[#606571]">
-            <Package className="h-4 w-4 text-[#606571]" weight="bold" />
+          <div className="flex min-h-9 items-center gap-2 rounded-[9px] border border-line bg-surface-soft px-3 py-1.5 text-sm font-medium text-muted-2">
+            <Package className="h-4 w-4 text-muted-2" weight="bold" />
             Selecciona una vacuna para cargar la matriz de planificación.
           </div>
         ) : (

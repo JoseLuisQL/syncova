@@ -47,7 +47,7 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
             <div className={COMPONENT_STYLES.modal.header}>
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-line bg-surface-soft text-muted-2">
                     <Faders className="h-5 w-5" weight="duotone" />
                   </div>
                   <div>
@@ -66,7 +66,7 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
             </div>
 
             <div className={COMPONENT_STYLES.modal.body}>
-              <div className="mb-5 flex items-center gap-3 rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
+              <div className="mb-5 flex items-center gap-3 rounded-[12px] border border-line bg-surface-soft px-4 py-3">
                 <div>
                   <p className="text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-zinc-500">Visibilidad global</p>
                   <p className="mt-1 text-[0.95rem] font-semibold tracking-tight text-zinc-900">
@@ -86,22 +86,22 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
                       onClick={() => onToggleColumn(column.key)}
                       className={`flex items-center justify-between rounded-[12px] border px-4 py-3 text-left transition ${
                         active
-                          ? 'border-[#c8bbff] bg-[#fbfafd]'
-                          : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
+                          ? 'border-brand-100 bg-surface-soft'
+                          : 'border-line bg-white hover:border-line-strong hover:bg-surface-soft'
                       }`}
                     >
                       <div>
-                        <p className={`text-[0.85rem] font-semibold tracking-tight ${active ? 'text-[#7c3aed]' : 'text-zinc-900'}`}>
+                        <p className={`text-[0.85rem] font-semibold tracking-tight ${active ? 'text-brand' : 'text-zinc-900'}`}>
                           {column.label}
                         </p>
-                        <p className={`mt-0.5 text-[0.65rem] font-semibold uppercase tracking-widest ${active ? 'text-[#606571]' : 'text-zinc-500'}`}>
+                        <p className={`mt-0.5 text-[0.65rem] font-semibold uppercase tracking-widest ${active ? 'text-muted-2' : 'text-zinc-500'}`}>
                           {active ? 'Visible en tabla' : 'Oculta'}
                         </p>
                       </div>
                       <span
                         className={`inline-flex h-6 w-6 items-center justify-center rounded-full border-2 ${
                           active
-                            ? 'border-[#7c3aed] bg-[#7c3aed] text-white'
+                            ? 'border-brand bg-brand text-white'
                             : 'border-zinc-200 bg-transparent text-transparent'
                         }`}
                       >
@@ -115,7 +115,7 @@ export const MovimientosColumnSettingsModal: React.FC<MovimientosColumnSettingsM
 
             </div>
 
-            <div className={`${COMPONENT_STYLES.modal.footer} flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-[#eeeef3] bg-white`}>
+            <div className={`${COMPONENT_STYLES.modal.footer} flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-line-soft bg-white`}>
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={onSelectAll} className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-xs font-bold text-zinc-700 shadow-sm transition-all hover:bg-zinc-50 hover:text-zinc-900">
                   <Check className="h-4 w-4" weight="bold" />

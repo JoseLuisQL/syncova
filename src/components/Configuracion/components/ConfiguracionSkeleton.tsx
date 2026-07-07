@@ -10,14 +10,14 @@ const ConfiguracionSkeleton: React.FC = () => (
     <div className={`${COMPONENT_STYLES.panel} inventory-loading-shell p-4`}>
       <div className="grid gap-4 xl:grid-cols-2">
         {Array.from({ length: 2 }).map((_, columnIndex) => (
-          <div key={`config-nav-skeleton-${columnIndex + 1}`} className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-3">
+          <div key={`config-nav-skeleton-${columnIndex + 1}`} className="rounded-xl border border-line bg-surface-soft p-3">
             <div className="space-y-2">
               <SkeletonBlock className="h-4 w-28 rounded-full" />
               <SkeletonBlock className="h-3 w-44 rounded-full opacity-80" />
             </div>
             <div className="mt-3 grid gap-2 min-[520px]:grid-cols-2">
               {Array.from({ length: 2 }).map((__, buttonIndex) => (
-                <div key={`config-button-skeleton-${columnIndex + 1}-${buttonIndex + 1}`} className="rounded-[12px] border border-[#e7e7ef] bg-white p-3">
+                <div key={`config-button-skeleton-${columnIndex + 1}-${buttonIndex + 1}`} className="rounded-[12px] border border-line bg-white p-3">
                   <SkeletonBlock className="h-4 w-20 rounded-full" />
                   <SkeletonBlock className="mt-2 h-3 w-full rounded-full opacity-80" />
                 </div>

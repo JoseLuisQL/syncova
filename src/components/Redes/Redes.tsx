@@ -308,8 +308,8 @@ const RedDesktopRow: React.FC<RedRowProps> = memo(({
     <TableRow>
       <TableCell>
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-[#15171d]">{red.nombre}</p>
-          <p className="text-xs text-[#8b8f9b]">{red.codigo || 'Sin código registrado'}</p>
+          <p className="truncate text-sm font-medium text-ink">{red.nombre}</p>
+          <p className="text-xs text-muted">{red.codigo || 'Sin código registrado'}</p>
         </div>
       </TableCell>
       <TableCell>

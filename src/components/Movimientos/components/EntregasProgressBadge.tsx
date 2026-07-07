@@ -93,10 +93,10 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
 
     if (progresoVales.estado === 'completo') {
       return {
-        card: 'border-[#dedfea] bg-[#f3f0ff]',
-        pill: 'bg-white text-[#7c3aed] border border-[#dedfea]',
-        bar: 'bg-[#7c3aed]',
-        icon: <CheckCircle className="h-4 w-4 text-[#7c3aed]" weight="fill" />,
+        card: 'border-line-focus bg-[#f3f0ff]',
+        pill: 'bg-white text-brand border border-line-focus',
+        bar: 'bg-brand',
+        icon: <CheckCircle className="h-4 w-4 text-brand" weight="fill" />,
         label: 'Completo',
       };
     }
@@ -137,13 +137,13 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
         }`}
       >
         <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-          progresoVales?.estado === 'completo' ? 'border border-[#dedfea] bg-white text-[#7c3aed]' : 'bg-white border border-zinc-200 shadow-sm'
+          progresoVales?.estado === 'completo' ? 'border border-line-focus bg-white text-brand' : 'bg-white border border-zinc-200 shadow-sm'
         }`}>
-          {isLoading ? <CircleNotch className={`h-4 w-4 animate-spin ${progresoVales?.estado === 'completo' ? 'text-[#7c3aed]' : 'text-zinc-900'}`} weight="bold" /> : <Truck className={`h-4 w-4 ${progresoVales?.estado === 'completo' ? 'text-[#7c3aed]' : 'text-zinc-900'}`} weight="duotone" />}
+          {isLoading ? <CircleNotch className={`h-4 w-4 animate-spin ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-zinc-900'}`} weight="bold" /> : <Truck className={`h-4 w-4 ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-zinc-900'}`} weight="duotone" />}
         </div>
         <div className="min-w-0">
-          <p className={`text-[0.6rem] font-bold uppercase tracking-[0.15em] ${progresoVales?.estado === 'completo' ? 'text-[#7c3aed]' : 'text-zinc-500'}`}>Entregas totales</p>
-          <p className={`text-[0.95rem] tracking-tight font-semibold ${progresoVales?.estado === 'completo' ? 'text-[#15171d]' : 'text-zinc-900'}`}>
+          <p className={`text-[0.6rem] font-bold uppercase tracking-[0.15em] ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-zinc-500'}`}>Entregas totales</p>
+          <p className={`text-[0.95rem] tracking-tight font-semibold ${progresoVales?.estado === 'completo' ? 'text-ink' : 'text-zinc-900'}`}>
             {totalEntregas.toLocaleString()}
           </p>
         </div>
@@ -154,13 +154,13 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
               : statusConfig.label}
             {progresoVales?.porcentajeProgreso ? ` ${progresoVales.porcentajeProgreso}%` : ''}
           </span>
-          <CaretDown className={`h-3 w-3 transition-transform ${showDropdown ? 'rotate-180' : ''} ${progresoVales?.estado === 'completo' ? 'text-[#7c3aed]' : 'text-zinc-400'}`} weight="bold" />
+          <CaretDown className={`h-3 w-3 transition-transform ${showDropdown ? 'rotate-180' : ''} ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-zinc-400'}`} weight="bold" />
         </div>
       </button>
 
       {showDropdown ? (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-[180] min-w-[340px] overflow-hidden rounded-xl border border-[#e7e7ef] bg-white shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)]">
-          <div className="border-b border-[#eeeef3] bg-[#fbfafd] px-4 py-3">
+        <div className="absolute right-0 top-[calc(100%+8px)] z-[180] min-w-[340px] overflow-hidden rounded-xl border border-line bg-white shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)]">
+          <div className="border-b border-line-soft bg-surface-soft px-4 py-3">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Validación de vales</h3>
@@ -208,7 +208,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
               </div>
             ) : progresoVales.estado === 'completo' ? (
               <div className="flex flex-col items-center justify-center px-4 py-12 text-center bg-zinc-50">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-line-focus bg-[#f3f0ff] text-brand">
                   <CheckCircle className="h-6 w-6" weight="fill" />
                 </div>
                 <p className="text-[0.95rem] font-semibold tracking-tight text-zinc-900">Bloqueo completado</p>
@@ -230,7 +230,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
                     const isExpanded = expandedCentros.has(grupo.centroAcopio.id);
 
                     return (
-                      <div key={grupo.centroAcopio.id} className="overflow-hidden rounded-[12px] border border-[#e7e7ef] bg-white transition-colors hover:border-[#d7d8e2]">
+                      <div key={grupo.centroAcopio.id} className="overflow-hidden rounded-[12px] border border-line bg-white transition-colors hover:border-line-strong">
                         <button
                           type="button"
                           onClick={() => toggleCentro(grupo.centroAcopio.id)}
@@ -246,7 +246,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
                             <p className="truncate text-[0.85rem] font-bold text-zinc-900 tracking-tight">{grupo.centroAcopio.nombre}</p>
                             <p className="text-[0.65rem] font-bold tracking-widest text-zinc-500 uppercase">{grupo.centroAcopio.codigo}</p>
                           </div>
-                          <span className="rounded-[7px] border border-[#e7e7ef] bg-zinc-100 px-2 py-0.5 text-[0.65rem] font-semibold text-zinc-900">
+                          <span className="rounded-[7px] border border-line bg-zinc-100 px-2 py-0.5 text-[0.65rem] font-semibold text-zinc-900">
                             {grupo.totalPendientes}
                           </span>
                         </button>
@@ -254,7 +254,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
                         {isExpanded ? (
                           <div className="space-y-2 border-t border-zinc-100 bg-zinc-50/50 p-2.5">
                             {grupo.establecimientos.map((establecimiento) => (
-                              <div key={establecimiento.id} className="rounded-lg border border-[#e7e7ef] bg-white px-3 py-2.5">
+                              <div key={establecimiento.id} className="rounded-lg border border-line bg-white px-3 py-2.5">
                                 <div className="flex items-start gap-3">
                                   <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-400 mt-0.5">
                                     <MapPin className="h-3.5 w-3.5" weight="duotone" />

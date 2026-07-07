@@ -1,13 +1,13 @@
 import React, { memo } from 'react';
 import {
-  BarChart3,
-  RefreshCw,
-  Download,
-  Upload,
+  ChartBar,
+  ArrowsClockwise,
+  DownloadSimple,
+  UploadSimple,
   Receipt,
-  Save,
-  Loader2
-} from 'lucide-react';
+  FloppyDisk,
+  SpinnerGap
+} from '@phosphor-icons/react';
 import { COMPONENT_STYLES } from '../constants';
 
 interface MovimientosHeaderProps {
@@ -44,7 +44,7 @@ export const MovimientosHeader: React.FC<MovimientosHeaderProps> = memo(({
           {/* Título */}
           <div className="flex items-center gap-4">
             <div className={COMPONENT_STYLES.header.iconWrapper}>
-              <BarChart3 className="h-7 w-7 text-white" aria-hidden="true" />
+              <ChartBar weight="bold" className="h-7 w-7 text-white" aria-hidden="true" />
             </div>
             <div>
               <h1 className={COMPONENT_STYLES.header.title}>
@@ -66,7 +66,7 @@ export const MovimientosHeader: React.FC<MovimientosHeaderProps> = memo(({
                 className={COMPONENT_STYLES.button.warning}
                 title={`Guardar ${pendingChangesCount} cambio(s) pendiente(s)`}
               >
-                <Save className={`h-4 w-4 ${isAutoSaving ? 'animate-spin' : ''}`} />
+                <FloppyDisk weight="bold" className={`h-4 w-4 ${isAutoSaving ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline">Guardar</span>
                 <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-white/20 text-xs">
                   {pendingChangesCount}
@@ -83,7 +83,7 @@ export const MovimientosHeader: React.FC<MovimientosHeaderProps> = memo(({
                 ? 'Seleccione un centro de acopio específico' 
                 : 'Ver vales de entrega'}
             >
-              <Receipt className="h-4 w-4" />
+              <Receipt weight="bold" className="h-4 w-4" />
               <span className="hidden lg:inline">Vales</span>
             </button>
 
@@ -94,7 +94,7 @@ export const MovimientosHeader: React.FC<MovimientosHeaderProps> = memo(({
               className={COMPONENT_STYLES.button.secondary}
               title="Actualizar datos"
             >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <ArrowsClockwise weight="bold" className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               <span className="hidden lg:inline">Actualizar</span>
             </button>
 
@@ -104,7 +104,7 @@ export const MovimientosHeader: React.FC<MovimientosHeaderProps> = memo(({
               className={COMPONENT_STYLES.button.secondary}
               title="Importar movimientos desde Excel"
             >
-              <Upload className="h-4 w-4" />
+              <UploadSimple weight="bold" className="h-4 w-4" />
               <span className="hidden lg:inline">Importar</span>
             </button>
 
@@ -118,9 +118,9 @@ export const MovimientosHeader: React.FC<MovimientosHeaderProps> = memo(({
                 : 'Exportar a Excel'}
             >
               {isExporting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" />
               ) : (
-                <Download className="h-4 w-4" />
+                <DownloadSimple weight="bold" className="h-4 w-4" />
               )}
               <span className="hidden sm:inline">
                 {isExporting ? 'Exportando...' : 'Exportar'}

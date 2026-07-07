@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 
 interface PaginationProps {
   currentPage: number;
@@ -86,7 +86,7 @@ const Pagination: React.FC<PaginationProps> = memo(({
           className={`${buttonBaseClass} ${inactiveClass} ${currentPage === 1 ? disabledClass : ''}`}
           aria-label="Página anterior"
         >
-          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          <CaretLeft weight="bold" className="h-4 w-4" aria-hidden="true" />
         </button>
 
         {visiblePages.map((page) => (
@@ -107,7 +107,7 @@ const Pagination: React.FC<PaginationProps> = memo(({
           className={`${buttonBaseClass} ${inactiveClass} ${currentPage === totalPages ? disabledClass : ''}`}
           aria-label="Página siguiente"
         >
-          <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          <CaretRight weight="bold" className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
     </nav>

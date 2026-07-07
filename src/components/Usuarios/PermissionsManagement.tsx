@@ -33,7 +33,7 @@ const PERMISO_CONFIG = [
     label: 'Editar Movimientos',
     description: 'Trans. Ingreso, Salida, Trans. Salida',
     icon: Table,
-    colorActive: 'bg-[#7c3aed]',
+    colorActive: 'bg-brand',
     colorBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   },
   {
@@ -41,7 +41,7 @@ const PERMISO_CONFIG = [
     label: 'Editar Planificaciones',
     description: 'Modificar planificaciones anuales',
     icon: Pencil,
-    colorActive: 'bg-[#7c3aed]',
+    colorActive: 'bg-brand',
     colorBadge: 'bg-blue-50 text-blue-700 border-blue-200',
   },
 ];
@@ -69,7 +69,7 @@ const ToggleSwitch: React.FC<{
       className={`
         relative inline-flex ${w} ${h} shrink-0 cursor-pointer rounded-full
         border-2 border-transparent transition-colors duration-200 ease-in-out
-        focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-brand/25 focus:ring-offset-2
         disabled:opacity-50 disabled:cursor-not-allowed
         ${checked ? colorClass : 'bg-zinc-200'}
       `}
@@ -103,7 +103,7 @@ const ScheduleModal: React.FC<{
       <div className={`${COMPONENT_STYLES.modal.containerShell} w-full max-w-md`} onClick={e => e.stopPropagation()}>
         <div className={COMPONENT_STYLES.modal.header}>
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-muted-2">
               <Timer className="h-4 w-4" />
             </div>
             <div>
@@ -111,7 +111,7 @@ const ScheduleModal: React.FC<{
               <p className="text-xs text-zinc-500">{permisoLabel}</p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="rounded-[7px] p-1.5 text-zinc-400 transition-colors hover:bg-[#fbfafd] hover:text-zinc-600">
+          <button type="button" onClick={onClose} className="rounded-[7px] p-1.5 text-zinc-400 transition-colors hover:bg-surface-soft hover:text-zinc-600">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -134,7 +134,7 @@ const ScheduleModal: React.FC<{
               checked={usarDesactivacion}
               onChange={setUsarDesactivacion}
               size="sm"
-              colorClass="bg-[#7c3aed]"
+              colorClass="bg-brand"
             />
             <span className="text-sm text-zinc-700">Programar desactivación automática</span>
           </div>
@@ -282,7 +282,7 @@ const PermissionsManagement: React.FC = () => {
   // ===== Render Loading =====
   if (loading) {
     return (
-      <div className="rounded-xl border border-[#e7e7ef] bg-white py-20">
+      <div className="rounded-xl border border-line bg-white py-20">
         <div className="flex items-center justify-center gap-3 text-zinc-600">
           <ArrowsClockwise className="h-5 w-5 animate-spin" />
           <span className="text-sm font-medium">Cargando permisos operativos...</span>
@@ -297,7 +297,7 @@ const PermissionsManagement: React.FC = () => {
       <section className={COMPONENT_STYLES.filter.container}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-line bg-surface-soft text-muted-2">
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
@@ -311,7 +311,7 @@ const PermissionsManagement: React.FC = () => {
               <select
                 value={selectedMes}
                 onChange={(e) => setSelectedMes(Number(e.target.value))}
-                className="h-9 appearance-none rounded-[9px] border border-[#e7e7ef] bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-[#15171d] shadow-sm outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                className="h-9 appearance-none rounded-[9px] border border-line bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-ink shadow-sm outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
               >
                 {MESES.map((mes, i) => (
                   <option key={i} value={i + 1}>{mes}</option>
@@ -324,7 +324,7 @@ const PermissionsManagement: React.FC = () => {
               <select
                 value={selectedAnio}
                 onChange={(e) => setSelectedAnio(Number(e.target.value))}
-                className="h-9 appearance-none rounded-[9px] border border-[#e7e7ef] bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-[#15171d] shadow-sm outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                className="h-9 appearance-none rounded-[9px] border border-line bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-ink shadow-sm outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
               >
                 {aniosDisponibles.map(anio => (
                   <option key={anio} value={anio}>{anio}</option>
@@ -341,7 +341,7 @@ const PermissionsManagement: React.FC = () => {
       </section>
 
       {/* ═══ Global Switches ═══ */}
-      <section className="rounded-xl border border-[#e7e7ef] bg-white p-4 shadow-none">
+      <section className="rounded-xl border border-line bg-white p-4 shadow-none">
         <div className="mb-4 flex items-center gap-2">
           <Users className="h-4 w-4 text-zinc-500" />
           <h4 className="text-sm font-semibold text-zinc-900">Permisos globales</h4>
@@ -359,14 +359,14 @@ const PermissionsManagement: React.FC = () => {
                 key={config.tipo}
                 className={`
                   rounded-xl border p-4 transition-colors duration-200
-                  ${permiso?.habilitado ? 'border-[#dedfea] bg-[#fbfafd]' : 'border-[#e7e7ef] bg-white'}
+                  ${permiso?.habilitado ? 'border-line-focus bg-surface-soft' : 'border-line bg-white'}
                 `}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className={`
                       flex h-9 w-9 items-center justify-center rounded-xl
-                      ${permiso?.habilitado ? 'bg-[#f3f0ff] text-[#7c3aed]' : 'bg-[#fbfafd] text-[#606571]'}
+                      ${permiso?.habilitado ? 'bg-[#f3f0ff] text-brand' : 'bg-surface-soft text-muted-2'}
                     `}>
                       <Icon className="h-4.5 w-4.5" />
                     </div>
@@ -392,7 +392,7 @@ const PermissionsManagement: React.FC = () => {
                       usuarioId: null,
                       label: `${config.label} (Global)`,
                     })}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1.5 text-xs font-medium text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d]"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1.5 text-xs font-medium text-muted-2 transition hover:border-line-strong hover:bg-surface-soft hover:text-ink"
                   >
                     <Timer className="h-3.5 w-3.5" />
                     Programar
@@ -444,7 +444,7 @@ const PermissionsManagement: React.FC = () => {
         ) : (
           <div>
             {/* Table header */}
-            <div className="hidden grid-cols-[1fr_repeat(2,140px)_80px] items-center gap-2 rounded-xl bg-[#fbfafd] px-5 py-3 text-xs font-medium tracking-[-0.01em] text-[#8b8f9b] lg:grid">
+            <div className="hidden grid-cols-[1fr_repeat(2,140px)_80px] items-center gap-2 rounded-xl bg-surface-soft px-5 py-3 text-xs font-medium tracking-[-0.01em] text-muted lg:grid">
               <span>Usuario</span>
               {PERMISO_CONFIG.map(c => (
                 <span key={c.tipo} className="text-center">{c.label.replace('Editar ', '')}</span>
@@ -455,13 +455,13 @@ const PermissionsManagement: React.FC = () => {
             {usuarios.map((usuario) => (
               <div
                 key={usuario.id}
-                className="border-b border-[#eeeef3] px-5 py-4 transition-colors duration-150 hover:bg-[#fbfafd]"
+                className="border-b border-line-soft px-5 py-4 transition-colors duration-150 hover:bg-surface-soft"
               >
                 {/* Desktop layout */}
                 <div className="hidden grid-cols-[1fr_repeat(2,140px)_80px] items-center gap-2 lg:grid">
                   {/* User info */}
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#e7e7ef] bg-[#fbfafd] text-sm font-bold text-[#606571]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface-soft text-sm font-bold text-muted-2">
                       {usuario.nombres[0]}{usuario.apellidos[0]}
                     </div>
                     <div className="min-w-0">
@@ -523,7 +523,7 @@ const PermissionsManagement: React.FC = () => {
                 {/* Mobile layout */}
                 <div className="lg:hidden space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#e7e7ef] bg-[#fbfafd] text-sm font-bold text-[#606571]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface-soft text-sm font-bold text-muted-2">
                       {usuario.nombres[0]}{usuario.apellidos[0]}
                     </div>
                     <div className="min-w-0 flex-1">

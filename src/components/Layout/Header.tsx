@@ -14,13 +14,13 @@ const Header: React.FC = memo(() => {
           <button
             type="button"
             onClick={toggleMobileMenu}
-            className="flex h-10 w-10 items-center justify-center rounded-[9px] border border-[#dedfea] bg-white text-[#606571] transition-colors duration-150 hover:border-[#c7c9d5] hover:text-[#111318] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 lg:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-[9px] border border-line-focus bg-white text-muted-2 transition-colors duration-150 hover:border-[#c7c9d5] hover:text-ink-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 lg:hidden"
             aria-label="Abrir menú"
           >
             <List className="h-5 w-5" weight="bold" />
           </button>
 
-          <div className="flex h-10 min-w-0 items-center rounded-[9px] border border-[#dedfea] bg-white px-3">
+          <div className="flex h-10 min-w-0 items-center rounded-[9px] border border-line-focus bg-white px-3">
             <Breadcrumbs />
           </div>
         </div>

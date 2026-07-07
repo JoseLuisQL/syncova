@@ -1,12 +1,12 @@
 import React, { memo } from 'react';
-import { LucideIcon } from 'lucide-react';
+import type { IconProps } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { DASHBOARD_COLORS } from './constants';
 
 interface StatCardProps {
   label: string;
   value: number;
-  icon: LucideIcon;
+  icon: React.ElementType<IconProps>;
   colorScheme: keyof typeof DASHBOARD_COLORS;
   description?: string;
   isLoading?: boolean;
@@ -64,7 +64,7 @@ const StatCard: React.FC<StatCardProps> = memo(({
         <div 
           className="border border-zinc-200 bg-white p-3 text-tertiary transition-colors duration-300 group-hover:border-tertiary"
         >
-          <Icon className="h-[22px] w-[22px]" strokeWidth={2.5} aria-hidden="true" />
+          <Icon className="h-[22px] w-[22px]" weight="bold" aria-hidden="true" />
         </div>
       </div>
     </motion.div>

@@ -60,8 +60,8 @@ export const SiBotFloating: React.FC = () => {
           onClick={toggleOpen}
           className={`flex h-[58px] w-[58px] items-center justify-center rounded-full border transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.97] ${
             isOpen
-              ? 'border-[#e7e7ef] bg-[#15171d] text-white shadow-[0_18px_44px_-26px_rgba(12,15,24,0.65)]'
-              : 'border-[#c8bbff] bg-[#7c3aed] text-white shadow-[0_18px_44px_-26px_rgba(124,58,237,0.9)]'
+              ? 'border-line bg-ink text-white shadow-[0_18px_44px_-26px_rgba(12,15,24,0.65)]'
+              : 'border-brand-100 bg-brand text-white shadow-[0_18px_44px_-26px_rgba(124,58,237,0.9)]'
           }`}
           aria-label="Toggle SiBot"
         >
@@ -94,17 +94,17 @@ export const SiBotFloating: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
               exit={{ opacity: 0, y: 12, scale: 0.96, filter: 'blur(3px)' }}
               transition={{ duration: 0.35, type: 'spring', damping: 24, stiffness: 280 }}
-              className={`fixed ${panelLayoutClass} z-50 flex flex-col overflow-hidden border border-[#e7e7ef] bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] transition-[width,height,max-width,max-height,bottom,right,border-radius] duration-300 ease-out`}
+              className={`fixed ${panelLayoutClass} z-50 flex flex-col overflow-hidden border border-line bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] transition-[width,height,max-width,max-height,bottom,right,border-radius] duration-300 ease-out`}
             >
-            <div className="flex shrink-0 flex-col border-b border-[#eeeef3] bg-white px-5 py-4">
+            <div className="flex shrink-0 flex-col border-b border-line-soft bg-white px-5 py-4">
                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e7e7ef] bg-white text-[#7c3aed]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-white text-brand">
                       <SiBotLogo className="h-4 w-4" />
                     </div>
                     <div className="flex flex-col">
-                      <h3 className="text-md font-semibold leading-none tracking-tight text-[#15171d]">SiBot</h3>
-                      <p className="mt-1.5 flex items-center gap-1.5 text-xs font-medium leading-none text-[#606571]">
+                      <h3 className="text-md font-semibold leading-none tracking-tight text-ink">SiBot</h3>
+                      <p className="mt-1.5 flex items-center gap-1.5 text-xs font-medium leading-none text-muted-2">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                         En línea
                       </p>
@@ -115,7 +115,7 @@ export const SiBotFloating: React.FC = () => {
                     <button
                       type="button"
                       onClick={toggleExpanded}
-                      className="hidden rounded-[9px] border border-transparent p-2 text-[#8b8f9b] transition hover:border-[#e7e7ef] hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none lg:inline-flex"
+                      className="hidden rounded-[9px] border border-transparent p-2 text-muted transition hover:border-line hover:bg-surface-soft hover:text-ink focus:outline-none lg:inline-flex"
                       title={isExpanded ? 'Volver a tamaño compacto' : 'Expandir panel'}
                     >
                       {isExpanded ? (
@@ -128,7 +128,7 @@ export const SiBotFloating: React.FC = () => {
                     {messages.length > 0 && (
                       <button type="button" 
                         onClick={clearHistory}
-                        className="rounded-[9px] p-2 text-[#8b8f9b] transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none"
+                        className="rounded-[9px] p-2 text-muted transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none"
                         title="Limpiar historial"
                       >
                         <Trash className="w-5 h-5" weight="duotone" />
@@ -146,12 +146,12 @@ export const SiBotFloating: React.FC = () => {
                     initial={{ scale: 0, opacity: 0 }} 
                     animate={{ scale: 1, opacity: 1 }} 
                     transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}
-                    className="mb-4 flex h-[56px] w-[56px] items-center justify-center rounded-2xl border border-[#e7e7ef] bg-[#fbfafd] text-[#7c3aed]"
+                    className="mb-4 flex h-[56px] w-[56px] items-center justify-center rounded-2xl border border-line bg-surface-soft text-brand"
                   >
                     <SiBotLogo className="h-7 w-7" />
                   </motion.div>
-                  <h4 className="mb-1.5 text-md font-semibold tracking-tight text-[#15171d]">Hola, soy SiBot</h4>
-                  <p className="max-w-[250px] text-sm font-medium leading-relaxed text-[#606571]">
+                  <h4 className="mb-1.5 text-md font-semibold tracking-tight text-ink">Hola, soy SiBot</h4>
+                  <p className="max-w-[250px] text-sm font-medium leading-relaxed text-muted-2">
                     Analizo tus datos de SIVAC, inventario de vacunas y planificaciones en tiempo real.
                   </p>
                   <SiBotSuggestions onSelect={handleSuggestion} />

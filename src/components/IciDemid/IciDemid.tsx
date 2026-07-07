@@ -14,7 +14,7 @@ import IciDemidErroresModal from './IciDemidErroresModal';
 import IciDemidImportProgressModal from './IciDemidImportProgressModal';
 
 const SELECT_CLASS =
-  'h-9 w-full appearance-none rounded-[9px] border border-[#e7e7ef] bg-white px-3 py-1.5 pr-8 text-sm font-medium text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-60';
+  'h-9 w-full appearance-none rounded-[9px] border border-line bg-white px-3 py-1.5 pr-8 text-sm font-medium text-ink shadow-sm transition hover:border-line-strong focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-60';
 
 const FILTER_LABEL_CLASS = 'mb-1 block text-[0.84rem] font-medium text-zinc-700';
 
@@ -24,10 +24,10 @@ const TotalPill: React.FC<{
 }> = ({ value, tone = 'neutral' }) => {
   const className =
     tone === 'purple'
-      ? 'border-[#c8bbff] bg-[#fbfafd] text-[#7c3aed]'
+      ? 'border-brand-100 bg-surface-soft text-brand'
       : tone === 'amber'
-        ? 'border-[#e7e7ef] bg-white text-amber-700'
-        : 'border-[#e7e7ef] bg-white text-[#15171d]';
+        ? 'border-line bg-white text-amber-700'
+        : 'border-line bg-white text-ink';
 
   return (
     <span className={`inline-flex min-w-[4.6rem] justify-center rounded-md border px-2.5 py-1.5 text-sm font-semibold tabular-nums ${className}`}>
@@ -46,8 +46,8 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
           <span className={`h-3 w-3 rounded-full ${estilo.colores.accent}`} aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-[#15171d]">{registro.establecimiento.nombre}</p>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-[#606571]">
+          <p className="truncate text-sm font-semibold text-ink">{registro.establecimiento.nombre}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-muted-2">
             {registro.establecimiento.codigo ? <span>{registro.establecimiento.codigo}</span> : null}
             {registro.establecimiento.codigo ? <span className="text-[#c4c7d0]">•</span> : null}
             <span className={`rounded-md border bg-white px-2 py-0.5 font-medium ${estilo.colores.border} ${estilo.colores.text}`}>
@@ -58,21 +58,21 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <div className="rounded-lg border border-[#e7e7ef] bg-white/90 p-2.5">
-          <p className="text-xs font-medium text-[#8b8f9b]">Total distribuido</p>
-          <p className="mt-1 text-sm font-semibold text-[#15171d] tabular-nums">{registro.totalDistribu.toLocaleString()}</p>
+        <div className="rounded-lg border border-line bg-white/90 p-2.5">
+          <p className="text-xs font-medium text-muted">Total distribuido</p>
+          <p className="mt-1 text-sm font-semibold text-ink tabular-nums">{registro.totalDistribu.toLocaleString()}</p>
         </div>
-        <div className="rounded-lg border border-[#e7e7ef] bg-white/90 p-2.5">
-          <p className="text-xs font-medium text-[#8b8f9b]">Situación</p>
-          <p className="mt-1 text-xs font-semibold text-[#15171d]">{registro.situacion || '-'}</p>
+        <div className="rounded-lg border border-line bg-white/90 p-2.5">
+          <p className="text-xs font-medium text-muted">Situación</p>
+          <p className="mt-1 text-xs font-semibold text-ink">{registro.situacion || '-'}</p>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-3 gap-2">
         {mesesDelAnio.map((month) => (
-          <div key={`${registro.id}-${month}`} className="rounded-lg border border-[#e7e7ef] bg-white/90 p-2 text-center">
-            <p className="text-[0.58rem] font-semibold uppercase tracking-wider text-[#8b8f9b]">{MESES_CORTOS[month - 1]}</p>
-            <p className="mt-1 text-sm font-semibold text-[#15171d] tabular-nums">
+          <div key={`${registro.id}-${month}`} className="rounded-lg border border-line bg-white/90 p-2 text-center">
+            <p className="text-[0.58rem] font-semibold uppercase tracking-wider text-muted">{MESES_CORTOS[month - 1]}</p>
+            <p className="mt-1 text-sm font-semibold text-ink tabular-nums">
               {(registro.distribucionMensual[month - 1] || 0).toLocaleString()}
             </p>
           </div>
@@ -235,14 +235,14 @@ const IciDemid: React.FC = () => {
 
   return (
     <div className="h-[calc(100vh-4rem)] overflow-hidden bg-transparent md:h-[calc(100vh-5rem)]">
-      <div className="flex h-full w-full flex-col overflow-hidden rounded-[22px] border border-[#e7e7ef] bg-white">
-        <section className="shrink-0 border-b border-[#eeeef3] bg-white p-3 sm:p-4">
+      <div className="flex h-full w-full flex-col overflow-hidden rounded-[22px] border border-line bg-white">
+        <section className="shrink-0 border-b border-line-soft bg-white p-3 sm:p-4">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
               <div className="grid flex-1 grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
                 <label>
                   <span className={FILTER_LABEL_CLASS}>Año</span>
                   <div className="relative">
-                    <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" weight="bold" />
+                    <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" weight="bold" />
                     <select value={selectedAnio} onChange={(e) => setSelectedAnio(Number(e.target.value))} className={`${SELECT_CLASS} pl-9`}>
                     {aniosDisponibles.map((anio) => (
                       <option key={anio} value={anio}>{anio}</option>
@@ -253,7 +253,7 @@ const IciDemid: React.FC = () => {
                 <label>
                   <span className={FILTER_LABEL_CLASS}>Centro de acopio</span>
                   <div className="relative">
-                    <Buildings className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" weight="bold" />
+                    <Buildings className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" weight="bold" />
                     <select value={selectedCentroAcopio} onChange={(e) => setSelectedCentroAcopio(e.target.value)} className={`${SELECT_CLASS} pl-9`}>
                     <option value="todos">Todos</option>
                     {centrosAcopio
@@ -267,7 +267,7 @@ const IciDemid: React.FC = () => {
                 <label>
                   <span className={FILTER_LABEL_CLASS}>Establecimiento</span>
                   <div className="relative">
-                    <Buildings className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" weight="bold" />
+                    <Buildings className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" weight="bold" />
                     <select value={selectedEstablecimiento} onChange={(e) => setSelectedEstablecimiento(e.target.value)} className={`${SELECT_CLASS} pl-9`}>
                     <option value="todos">Todos</option>
                     {establecimientosFiltrados.map((establecimiento) => (
@@ -279,7 +279,7 @@ const IciDemid: React.FC = () => {
                 <label>
                   <span className={FILTER_LABEL_CLASS}>Vacuna</span>
                   <div className="relative">
-                    <Syringe className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]" weight="bold" />
+                    <Syringe className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" weight="bold" />
                     <select value={selectedVacuna} onChange={(e) => setSelectedVacuna(e.target.value)} className={`${SELECT_CLASS} pl-9`}>
                     <option value="todos">Todas</option>
                     {vacunasActivas.map((vacuna) => (
@@ -305,10 +305,10 @@ const IciDemid: React.FC = () => {
               </div>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#eeeef3] pt-3">
-            <span className="inline-flex min-h-9 items-center gap-2 rounded-[9px] border border-[#c8bbff] bg-[#fbfafd] px-3 py-1.5 text-sm text-[#15171d]">
-              <MicrosoftExcelLogo className="h-4 w-4 text-[#7c3aed]" weight="bold" />
-              <span className="text-xs font-medium text-[#8b8f9b]">ICI DEMID</span>
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line-soft pt-3">
+            <span className="inline-flex min-h-9 items-center gap-2 rounded-[9px] border border-brand-100 bg-surface-soft px-3 py-1.5 text-sm text-ink">
+              <MicrosoftExcelLogo className="h-4 w-4 text-brand" weight="bold" />
+              <span className="text-xs font-medium text-muted">ICI DEMID</span>
               <strong className="font-semibold">{selectedAnio}</strong>
             </span>
             <span className={ESTABLECIMIENTOS_STYLES.badge.neutral}>
@@ -327,32 +327,32 @@ const IciDemid: React.FC = () => {
           <DataTable isLoading={isLoading} loadingMessage="Cargando registros ICI DEMID..." skeletonRows={8} skeletonColumns={16} loadingVariant="table">
             <div className="hidden min-h-0 flex-1 overflow-auto md:block">
               <table className="w-max min-w-full border-separate border-spacing-0 table-auto">
-                <thead className="sticky top-0 z-20 bg-[#fbfafd]">
+                <thead className="sticky top-0 z-20 bg-surface-soft">
                   <tr className={ESTABLECIMIENTOS_STYLES.table.header}>
-                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} sticky left-0 z-30 w-[280px] min-w-[280px] border-b border-r border-[#e7e7ef] bg-[#fbfafd] text-left shadow-[8px_0_14px_-12px_rgba(15,23,42,0.16)]`}>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} sticky left-0 z-30 w-[280px] min-w-[280px] border-b border-r border-line bg-surface-soft text-left shadow-[8px_0_14px_-12px_rgba(15,23,42,0.16)]`}>
                       <div className="flex items-center gap-2">
                         <Buildings className="h-4 w-4 text-zinc-500" />
                         Establecimiento
                       </div>
                     </th>
-                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[220px] min-w-[220px] border-b border-r border-[#eeeef3] text-left`}>Vacuna</th>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[220px] min-w-[220px] border-b border-r border-line-soft text-left`}>Vacuna</th>
                     {mesesDelAnio.map((month) => (
-                      <th key={month} className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[94px] min-w-[94px] border-b border-r border-[#eeeef3] text-center`}>{MESES_CORTOS[month - 1]}</th>
+                      <th key={month} className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[94px] min-w-[94px] border-b border-r border-line-soft text-center`}>{MESES_CORTOS[month - 1]}</th>
                     ))}
-                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[110px] min-w-[110px] border-b border-r border-[#eeeef3] text-center`}>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[110px] min-w-[110px] border-b border-r border-line-soft text-center`}>
                       <div className="flex items-center justify-center gap-2">
                         <Package className="h-4 w-4 text-zinc-500" />
                         Stock fin
                       </div>
                     </th>
-                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[128px] min-w-[128px] border-b border-r border-[#eeeef3] text-center`}>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[128px] min-w-[128px] border-b border-r border-line-soft text-center`}>
                       <div className="flex items-center justify-center gap-2">
                         <Calculator className="h-4 w-4 text-zinc-500" />
                         Total
                       </div>
                     </th>
-                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[140px] min-w-[140px] border-b border-r border-[#eeeef3] text-center`}>Situación</th>
-                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[140px] min-w-[140px] border-b border-[#eeeef3] text-center`}>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[140px] min-w-[140px] border-b border-r border-line-soft text-center`}>Situación</th>
+                    <th className={`${ESTABLECIMIENTOS_STYLES.table.headerCell} w-[140px] min-w-[140px] border-b border-line-soft text-center`}>
                       <div className="flex items-center justify-center gap-2">
                         <ShieldCheck className="h-4 w-4 text-zinc-500" />
                         Disponibilidad
@@ -382,21 +382,21 @@ const IciDemid: React.FC = () => {
                                 <span className={`h-3 w-3 rounded-full ${estilo.colores.accent}`} aria-hidden="true" />
                               </div>
                               <div className="min-w-0">
-                                <p className="truncate text-sm font-semibold text-[#15171d]">{registro.establecimiento.nombre}</p>
-                                <p className="mt-1 text-xs text-[#606571]">{registro.establecimiento.codigo}</p>
+                                <p className="truncate text-sm font-semibold text-ink">{registro.establecimiento.nombre}</p>
+                                <p className="mt-1 text-xs text-muted-2">{registro.establecimiento.codigo}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="border-b border-r border-[#eeeef3] px-4 py-3 text-sm font-medium text-[#15171d]">{registro.vacuna.nombre}</td>
+                          <td className="border-b border-r border-line-soft px-4 py-3 text-sm font-medium text-ink">{registro.vacuna.nombre}</td>
                           {mesesDelAnio.map((month) => (
-                            <td key={`${registro.id}-${month}`} className="border-b border-r border-[#eeeef3] px-3 py-3 text-center text-sm font-semibold text-[#15171d] tabular-nums">
+                            <td key={`${registro.id}-${month}`} className="border-b border-r border-line-soft px-3 py-3 text-center text-sm font-semibold text-ink tabular-nums">
                               {(registro.distribucionMensual[month - 1] || 0).toLocaleString()}
                             </td>
                           ))}
-                          <td className="border-b border-r border-[#eeeef3] px-3 py-3 text-center text-sm font-semibold text-[#7c3aed]">{registro.stockFin.toLocaleString()}</td>
-                          <td className="border-b border-r border-[#eeeef3] px-3 py-3 text-center text-sm font-semibold text-[#15171d]">{registro.totalDistribu.toLocaleString()}</td>
-                          <td className="border-b border-r border-[#eeeef3] px-3 py-3 text-center text-xs font-semibold text-[#606571]">{registro.situacion || '-'}</td>
-                          <td className="border-b border-[#eeeef3] px-3 py-3 text-center text-xs font-semibold text-[#606571]">{registro.disponibilidad || '-'}</td>
+                          <td className="border-b border-r border-line-soft px-3 py-3 text-center text-sm font-semibold text-brand">{registro.stockFin.toLocaleString()}</td>
+                          <td className="border-b border-r border-line-soft px-3 py-3 text-center text-sm font-semibold text-ink">{registro.totalDistribu.toLocaleString()}</td>
+                          <td className="border-b border-r border-line-soft px-3 py-3 text-center text-xs font-semibold text-muted-2">{registro.situacion || '-'}</td>
+                          <td className="border-b border-line-soft px-3 py-3 text-center text-xs font-semibold text-muted-2">{registro.disponibilidad || '-'}</td>
                         </tr>
                       );
                     })
@@ -407,7 +407,7 @@ const IciDemid: React.FC = () => {
 
             <div className="min-h-0 flex-1 overflow-auto bg-white p-2.5 md:hidden">
               {registrosFiltrados.length === 0 && !isLoading ? (
-                <div className="rounded-xl border border-[#e7e7ef] bg-white">
+                <div className="rounded-xl border border-line bg-white">
                   <EmptyState
                     icon={Warning}
                     title="Sin registros ICI DEMID"

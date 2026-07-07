@@ -121,11 +121,11 @@ const ReadonlyRows: React.FC<{
   fields: ConfiguracionFieldDefinition[];
   values: Record<string, ConfiguracionFieldValue>;
 }> = ({ fields, values }) => (
-  <div className="overflow-hidden rounded-xl border border-[#e7e7ef] bg-white">
+  <div className="overflow-hidden rounded-xl border border-line bg-white">
     {fields.map((field, index) => (
       <div
         key={field.id}
-        className={`grid gap-2 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start ${index > 0 ? 'border-t border-[#eeeef3]' : ''}`}
+        className={`grid gap-2 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start ${index > 0 ? 'border-t border-line-soft' : ''}`}
       >
         <div className="min-w-0">
           <p className="text-sm font-medium text-zinc-900">{field.label}</p>
@@ -145,11 +145,11 @@ const SectionShell: React.FC<{
   const Icon = category.icon;
 
   return (
-    <section className="rounded-xl border border-[#e7e7ef] bg-white shadow-none">
-      <div className="flex flex-col gap-2 border-b border-[#eeeef3] px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
+    <section className="rounded-xl border border-line bg-white shadow-none">
+      <div className="flex flex-col gap-2 border-b border-line-soft px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <Icon className="h-4 w-4 text-[#606571]" aria-hidden="true" />
+            <Icon className="h-4 w-4 text-muted-2" aria-hidden="true" />
             <h2 className="text-sm font-semibold text-zinc-950">{category.label}</h2>
           </div>
         </div>
@@ -168,7 +168,7 @@ const MinimalActionRow: React.FC<{
   isLoading: boolean;
   footer?: React.ReactNode;
 }> = ({ title, description, buttonLabel, onAction, isLoading, footer }) => (
-  <div className="rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] p-4">
+  <div className="rounded-[12px] border border-line bg-surface-soft p-4">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <p className="text-sm font-medium text-zinc-900">{title}</p>
@@ -356,14 +356,14 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
     <div className="space-y-3">
       {renderEditableCategory('general')}
 
-      <section className="rounded-xl border border-[#e7e7ef] bg-white shadow-none">
-        <div className="flex items-center gap-2 border-b border-[#eeeef3] px-4 py-3">
-          <Image className="h-4 w-4 text-[#606571]" aria-hidden="true" />
+      <section className="rounded-xl border border-line bg-white shadow-none">
+        <div className="flex items-center gap-2 border-b border-line-soft px-4 py-3">
+          <Image className="h-4 w-4 text-muted-2" aria-hidden="true" />
           <h2 className="text-sm font-semibold text-zinc-950">Logo institucional</h2>
         </div>
 
         <div className="grid gap-4 px-4 py-4 md:grid-cols-[140px_minmax(0,1fr)]">
-          <div className="overflow-hidden rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd]">
+          <div className="overflow-hidden rounded-[12px] border border-line bg-surface-soft">
             <div className="flex aspect-square items-center justify-center bg-white">
               {logo.isLoading ? (
                 <SpinnerGap className="h-6 w-6 animate-spin text-zinc-400" aria-hidden="true" />
@@ -398,9 +398,9 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
             </div>
 
             <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
-              <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">PNG o JPG</span>
-              <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">Max 2 MB</span>
-              <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">200x200 px</span>
+              <span className="rounded-md border border-line bg-white px-2.5 py-1">PNG o JPG</span>
+              <span className="rounded-md border border-line bg-white px-2.5 py-1">Max 2 MB</span>
+              <span className="rounded-md border border-line bg-white px-2.5 py-1">200x200 px</span>
             </div>
           </div>
         </div>
@@ -413,11 +413,11 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
       {renderEditableCategory('alertas')}
       {renderReadonlyCategory('notificaciones')}
 
-      <section className="rounded-xl border border-[#e7e7ef] bg-white shadow-none">
-        <div className="flex flex-col gap-2 border-b border-[#eeeef3] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <section className="rounded-xl border border-line bg-white shadow-none">
+        <div className="flex flex-col gap-2 border-b border-line-soft px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <BellRinging className="h-4 w-4 text-[#606571]" aria-hidden="true" />
+              <BellRinging className="h-4 w-4 text-muted-2" aria-hidden="true" />
               <h2 className="text-sm font-semibold text-zinc-950">Acciones operativas</h2>
             </div>
           </div>
@@ -434,9 +434,9 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
             footer={
               lastGenerationResult ? (
                 <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
-                  <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">Total {lastGenerationResult.alertasGeneradas}</span>
-                  <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">Vencimiento {lastGenerationResult.alertasVencimiento}</span>
-                  <span className="rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1">Stock bajo {lastGenerationResult.alertasStockBajo}</span>
+                  <span className="rounded-md border border-line bg-white px-2.5 py-1">Total {lastGenerationResult.alertasGeneradas}</span>
+                  <span className="rounded-md border border-line bg-white px-2.5 py-1">Vencimiento {lastGenerationResult.alertasVencimiento}</span>
+                  <span className="rounded-md border border-line bg-white px-2.5 py-1">Stock bajo {lastGenerationResult.alertasStockBajo}</span>
                 </div>
               ) : null
             }
@@ -471,10 +471,10 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
   );
 
   const renderOperationDiagnostics = () => (
-    <section className="rounded-xl border border-[#e7e7ef] bg-white shadow-none">
-      <div className="flex items-center justify-between border-b border-[#eeeef3] px-4 py-3">
+    <section className="rounded-xl border border-line bg-white shadow-none">
+      <div className="flex items-center justify-between border-b border-line-soft px-4 py-3">
         <div className="flex items-center gap-2">
-          <Database className="h-4 w-4 text-[#606571]" aria-hidden="true" />
+          <Database className="h-4 w-4 text-muted-2" aria-hidden="true" />
           <h2 className="text-sm font-semibold text-zinc-950">Diagnostico</h2>
         </div>
         <span className={subtleBadgeClassName}>Sistema</span>
@@ -496,7 +496,7 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col gap-1 border-b border-[#eeeef3] pb-3 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-1 border-b border-line-soft pb-3 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
         <span className="font-medium text-zinc-900">{group.contextLabel}</span>
         <span>{syncLabel}</span>
       </div>
@@ -505,9 +505,9 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
       {group.id === 'alertas' ? renderAlertsGroup() : null}
       {group.id === 'seguridad' ? renderReadonlyCategory('seguridad') : null}
       {group.id === 'seguridad' ? (
-        <section className="rounded-xl border border-[#e7e7ef] bg-white p-4 shadow-none">
+        <section className="rounded-xl border border-line bg-white p-4 shadow-none">
           <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2">
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
             </div>
             <div>
@@ -548,7 +548,7 @@ const ConfiguracionGroupView: React.FC<ConfiguracionGroupViewProps> = ({
       {group.id === 'operacion' ? renderOperationDiagnostics() : null}
 
       {hasEditableFields ? (
-        <section className="rounded-xl border border-[#e7e7ef] bg-white p-4 shadow-none">
+        <section className="rounded-xl border border-line bg-white p-4 shadow-none">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             {dirtyCount > 0 ? (
               <p className="text-sm text-zinc-500">

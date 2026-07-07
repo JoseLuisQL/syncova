@@ -36,18 +36,18 @@ const TipoValeOption = memo<{
     onClick={() => !isDisabled && onClick()}
     className={`rounded-xl border p-4 transition-colors ${
       isDisabled
-        ? 'border-[#e7e7ef] bg-[#fbfafd] cursor-not-allowed opacity-60'
+        ? 'border-line bg-surface-soft cursor-not-allowed opacity-60'
         : isSelected
-          ? 'border-[#c8bbff] bg-[#fbfafd] cursor-pointer'
-          : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd] cursor-pointer'
+          ? 'border-brand-100 bg-surface-soft cursor-pointer'
+          : 'border-line bg-white hover:border-line-strong hover:bg-surface-soft cursor-pointer'
     }`}
   >
     <div className="flex items-start gap-4">
       {/* Radio button */}
       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
         isSelected && !isDisabled
-          ? 'border-[#7c3aed] bg-[#7c3aed]'
-          : 'border-[#d7d8e2]'
+          ? 'border-brand bg-brand'
+          : 'border-line-strong'
       }`}>
         {isSelected && !isDisabled && (
           <div className="w-2 h-2 rounded-full bg-white" />
@@ -57,17 +57,17 @@ const TipoValeOption = memo<{
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <Icon className={`h-5 w-5 ${isDisabled ? 'text-[#8b8f9b]' : 'text-[#606571]'}`} />
-          <h4 className={`font-semibold ${isDisabled ? 'text-[#8b8f9b]' : 'text-[#15171d]'}`}>
+          <Icon className={`h-5 w-5 ${isDisabled ? 'text-muted' : 'text-muted-2'}`} />
+          <h4 className={`font-semibold ${isDisabled ? 'text-muted' : 'text-ink'}`}>
             {titulo}
           </h4>
           {badge && (
-            <span className={`rounded-md border border-[#e7e7ef] bg-white px-2 py-0.5 text-xs font-medium text-[#15171d] ${badgeColor || ''}`}>
+            <span className={`rounded-md border border-line bg-white px-2 py-0.5 text-xs font-medium text-ink ${badgeColor || ''}`}>
               {badge}
             </span>
           )}
         </div>
-        <p className={`text-sm mt-1 ${isDisabled ? 'text-[#8b8f9b]' : 'text-[#606571]'}`}>
+        <p className={`text-sm mt-1 ${isDisabled ? 'text-muted' : 'text-muted-2'}`}>
           {isDisabled && disabledReason ? disabledReason : descripcion}
         </p>
       </div>
@@ -87,8 +87,8 @@ const GrupoEntregaCard = memo<{
     onClick={onToggle}
     className={`cursor-pointer rounded-xl border p-4 transition-colors ${
       isSelected
-        ? 'border-[#c8bbff] bg-[#fbfafd]'
-        : 'border-[#e7e7ef] bg-white hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
+        ? 'border-brand-100 bg-surface-soft'
+        : 'border-line bg-white hover:border-line-strong hover:bg-surface-soft'
     }`}
   >
     <div className="flex items-start gap-3">
@@ -96,36 +96,36 @@ const GrupoEntregaCard = memo<{
         type="checkbox"
         checked={isSelected}
         onChange={onToggle}
-        className="mt-1 h-4 w-4 rounded border-[#d7d8e2] text-[#7c3aed] focus:ring-[#7c3aed]/20"
+        className="mt-1 h-4 w-4 rounded border-line-strong text-brand focus:ring-brand/20"
         onClick={e => e.stopPropagation()}
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <h5 className="font-semibold text-[#15171d]">
+          <h5 className="font-semibold text-ink">
             Entrega Adicional #{grupo.numeroEntrega}
           </h5>
-          <span className="rounded-md border border-[#e7e7ef] bg-white px-2 py-0.5 text-xs font-medium text-[#15171d]">
+          <span className="rounded-md border border-line bg-white px-2 py-0.5 text-xs font-medium text-ink">
             {grupo.totalVacunas.toLocaleString()} vacunas
           </span>
-          <span className="rounded-md border border-[#e7e7ef] bg-white px-2 py-0.5 text-xs font-medium text-[#15171d]">
+          <span className="rounded-md border border-line bg-white px-2 py-0.5 text-xs font-medium text-ink">
             {grupo.totalEstablecimientos} establec.
           </span>
         </div>
         {grupo.entregas.length > 0 && (
-          <div className="mt-2 text-sm text-[#606571]">
-            <p className="font-medium text-[#15171d] mb-1">Incluye:</p>
+          <div className="mt-2 text-sm text-muted-2">
+            <p className="font-medium text-ink mb-1">Incluye:</p>
             <div className="space-y-1">
               {grupo.entregas.slice(0, 2).map(entrega => (
                 <div key={entrega.id} className="flex items-center gap-1.5 text-xs">
-                  <span className="text-[#15171d] truncate max-w-[150px]">{entrega.establecimientoNombre}</span>
+                  <span className="text-ink truncate max-w-[150px]">{entrega.establecimientoNombre}</span>
                   <span className="text-[#c4c7d0]">•</span>
-                  <span className="text-[#606571] truncate max-w-[120px]">{entrega.vacunaNombre}</span>
+                  <span className="text-muted-2 truncate max-w-[120px]">{entrega.vacunaNombre}</span>
                   <span className="text-[#c4c7d0]">•</span>
-                  <span className="font-medium text-[#7c3aed]">{entrega.cantidad}</span>
+                  <span className="font-medium text-brand">{entrega.cantidad}</span>
                 </div>
               ))}
               {grupo.entregas.length > 2 && (
-                <p className="text-xs text-[#8b8f9b] italic">
+                <p className="text-xs text-muted italic">
                   +{grupo.entregas.length - 2} más...
                 </p>
               )}

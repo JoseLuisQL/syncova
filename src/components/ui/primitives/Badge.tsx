@@ -38,7 +38,7 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const VARIANT_CLASSES: Record<BadgeVariant, { wrapper: string; dot: string }> = {
   neutral: {
-    wrapper: 'bg-white border-[#e7e7ef] text-[#15171d]',
+    wrapper: 'bg-white border-line text-ink',
     dot: 'bg-zinc-400',
   },
   success: {

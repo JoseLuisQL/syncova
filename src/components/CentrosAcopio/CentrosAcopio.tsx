@@ -402,8 +402,8 @@ const CentroDesktopRow: React.FC<CentroRowProps> = memo(({
     <TableRow>
       <TableCell>
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-[#15171d]">{centro.nombre}</p>
-          <p className="text-xs text-[#8b8f9b]">{centro.codigo || 'Sin código registrado'}</p>
+          <p className="truncate text-sm font-medium text-ink">{centro.nombre}</p>
+          <p className="text-xs text-muted">{centro.codigo || 'Sin código registrado'}</p>
         </div>
       </TableCell>
       <TableCell>

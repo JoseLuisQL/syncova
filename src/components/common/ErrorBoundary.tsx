@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
+import { Warning, ArrowsClockwise, House, Bug } from '@phosphor-icons/react';
 import { logger } from '../../utils/debug';
 
 interface Props {
@@ -72,7 +72,7 @@ class ErrorBoundary extends Component<Props, State> {
           <div className="sm:mx-auto sm:w-full sm:max-w-md">
             <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
               <div className="text-center">
-                <AlertTriangle className="mx-auto h-16 w-16 text-red-500 mb-4" />
+                <Warning weight="fill" className="mx-auto h-16 w-16 text-red-500 mb-4" />
                 <h2 className="text-2xl font-bold text-zinc-900 mb-2">
                   ¡Oops! Algo salió mal
                 </h2>
@@ -85,7 +85,7 @@ class ErrorBoundary extends Component<Props, State> {
                     onClick={this.handleRetry}
                     className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
-                    <RefreshCw className="h-4 w-4 mr-2" />
+                    <ArrowsClockwise weight="bold" className="h-4 w-4 mr-2" />
                     Reintentar
                   </button>
                   
@@ -93,7 +93,7 @@ class ErrorBoundary extends Component<Props, State> {
                     onClick={this.handleReload}
                     className="w-full flex justify-center items-center px-4 py-2 border border-zinc-300 rounded-md shadow-sm text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
-                    <RefreshCw className="h-4 w-4 mr-2" />
+                    <ArrowsClockwise weight="bold" className="h-4 w-4 mr-2" />
                     Recargar página
                   </button>
                   
@@ -101,7 +101,7 @@ class ErrorBoundary extends Component<Props, State> {
                     onClick={this.handleGoHome}
                     className="w-full flex justify-center items-center px-4 py-2 border border-zinc-300 rounded-md shadow-sm text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
-                    <Home className="h-4 w-4 mr-2" />
+                    <House weight="bold" className="h-4 w-4 mr-2" />
                     Ir al inicio
                   </button>
                 </div>
@@ -110,7 +110,7 @@ class ErrorBoundary extends Component<Props, State> {
                 {import.meta.env.MODE === 'development' && this.state.error && (
                   <details className="mt-6 text-left">
                     <summary className="cursor-pointer text-sm font-medium text-zinc-700 hover:text-zinc-900 flex items-center">
-                      <Bug className="h-4 w-4 mr-2" />
+                      <Bug weight="bold" className="h-4 w-4 mr-2" />
                       Información de debug
                     </summary>
                     <div className="mt-3 p-3 bg-zinc-100 rounded-md text-xs">
@@ -166,7 +166,7 @@ export const SimpleError: React.FC<SimpleErrorProps> = ({
 }) => {
   return (
     <div className={`text-center py-8 ${className}`}>
-      <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+      <Warning weight="fill" className="mx-auto h-12 w-12 text-red-500 mb-4" />
       <h3 className="text-lg font-semibold text-zinc-900 mb-2">{title}</h3>
       <p className="text-zinc-600 mb-4">{message}</p>
       {onRetry && (
@@ -174,7 +174,7 @@ export const SimpleError: React.FC<SimpleErrorProps> = ({
           onClick={onRetry}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
         >
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <ArrowsClockwise weight="bold" className="h-4 w-4 mr-2" />
           Reintentar
         </button>
       )}
@@ -195,7 +195,7 @@ export const NetworkError: React.FC<NetworkErrorProps> = ({
   return (
     <div className={`text-center py-8 ${className}`}>
       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-        <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+        <Warning weight="fill" className="mx-auto h-12 w-12 text-red-500 mb-4" />
         <h3 className="text-lg font-semibold text-red-800 mb-2">
           Error de conexión
         </h3>
@@ -207,7 +207,7 @@ export const NetworkError: React.FC<NetworkErrorProps> = ({
             onClick={onRetry}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <ArrowsClockwise weight="bold" className="h-4 w-4 mr-2" />
             Reintentar conexión
           </button>
         )}

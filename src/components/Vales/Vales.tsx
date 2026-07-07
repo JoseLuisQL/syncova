@@ -557,8 +557,8 @@ const Vales: React.FC<ValesProps> = ({
 
               <div className={ESTABLECIMIENTOS_STYLES.pagination.container}>
                 <p className={ESTABLECIMIENTOS_STYLES.pagination.info}>
-                  <span className="font-semibold text-[#606571]">{valesFiltrados.length}</span> de{' '}
-                  <span className="font-semibold text-[#606571]">{total || valesFiltrados.length}</span> vales
+                  <span className="font-semibold text-muted-2">{valesFiltrados.length}</span> de{' '}
+                  <span className="font-semibold text-muted-2">{total || valesFiltrados.length}</span> vales
                 </p>
               </div>
             </DataTable>
@@ -625,21 +625,21 @@ const Vales: React.FC<ValesProps> = ({
       />
 
       {showDiagnostico && (
-        <div className="fixed inset-0 z-[300] flex items-end justify-center bg-[#111318]/20 p-3 backdrop-blur-[2px] sm:items-center sm:p-4">
-          <div className="max-h-[95vh] w-full max-w-6xl overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-lg">
-            <div className="flex items-center justify-between border-b border-[#eeeef3] bg-white px-4 py-3.5 sm:px-5">
+        <div className="fixed inset-0 z-[300] flex items-end justify-center bg-ink-soft/20 p-3 backdrop-blur-[2px] sm:items-center sm:p-4">
+          <div className="max-h-[95vh] w-full max-w-6xl overflow-hidden rounded-t-[10px] border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-lg">
+            <div className="flex items-center justify-between border-b border-line-soft bg-white px-4 py-3.5 sm:px-5">
               <div className="flex items-center space-x-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-amber-600">
+                <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-amber-600">
                   <Gear weight="bold" className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-md font-semibold leading-5 text-[#15171d]">Diagnóstico de Conectividad</h3>
-                  <p className="mt-1 text-sm leading-4 text-[#606571]">Verificación del estado del sistema</p>
+                  <h3 className="text-md font-semibold leading-5 text-ink">Diagnóstico de Conectividad</h3>
+                  <p className="mt-1 text-sm leading-4 text-muted-2">Verificación del estado del sistema</p>
                 </div>
               </div>
               <button type="button"
                 onClick={() => setShowDiagnostico(false)}
-                className="rounded-[7px] p-1.5 transition-colors hover:bg-[#fbfafd]"
+                className="rounded-[7px] p-1.5 transition-colors hover:bg-surface-soft"
               >
                 <X weight="bold" className="h-4 w-4 text-zinc-500" />
               </button>
@@ -678,18 +678,18 @@ const Vales: React.FC<ValesProps> = ({
       )}
 
       {showModificacionesModal && valeSeleccionado && (
-        <div className="fixed inset-0 z-[300] flex items-end justify-center bg-[#111318]/20 p-3 backdrop-blur-[2px] sm:items-center sm:p-4">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-t-[10px] border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-lg">
-            <div className="flex items-center justify-between border-b border-[#eeeef3] px-4 py-3.5 sm:px-5">
+        <div className="fixed inset-0 z-[300] flex items-end justify-center bg-ink-soft/20 p-3 backdrop-blur-[2px] sm:items-center sm:p-4">
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-t-[10px] border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-lg">
+            <div className="flex items-center justify-between border-b border-line-soft px-4 py-3.5 sm:px-5">
               <div className="flex items-center space-x-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-muted-2">
                   <ArrowsClockwise weight="bold" className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-md font-semibold leading-5 text-[#15171d]">
+                  <h3 className="text-md font-semibold leading-5 text-ink">
                     Modificaciones del Vale {valeSeleccionado.numero}
                   </h3>
-                  <p className="mt-1 text-sm leading-4 text-[#606571]">
+                  <p className="mt-1 text-sm leading-4 text-muted-2">
                     Sincronización con datos actualizados
                   </p>
                 </div>
@@ -699,14 +699,14 @@ const Vales: React.FC<ValesProps> = ({
                   setShowModificacionesModal(false);
                   setValeSeleccionado(null);
                 }}
-                className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d]"
+                className="rounded-[7px] p-1.5 text-muted transition-colors hover:bg-surface-soft hover:text-ink"
               >
                 <X weight="bold" className="h-4 w-4" />
               </button>
             </div>
 
             <div className="max-h-[calc(90vh-140px)] overflow-y-auto px-4 py-4 sm:px-5">
-              <div className="mb-5 rounded-md border border-[#e7e7ef] bg-[#fbfafd] p-3">
+              <div className="mb-5 rounded-md border border-line bg-surface-soft p-3">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-sm text-zinc-600">Centro de Acopio</p>
@@ -731,7 +731,7 @@ const Vales: React.FC<ValesProps> = ({
                 <button type="button"
                   onClick={() => sincronizarVale(valeSeleccionado.id)}
                   disabled={isSyncing}
-                  className="flex h-9 w-full items-center justify-center space-x-2 rounded-[7px] bg-[#7c3aed] px-3.5 text-base font-semibold text-white transition-colors hover:bg-[#6d28d9] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full items-center justify-center space-x-2 rounded-[7px] bg-brand px-3.5 text-base font-semibold text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSyncing ? (
                     <>
@@ -754,12 +754,12 @@ const Vales: React.FC<ValesProps> = ({
                   </h4>
                   <div className="space-y-3">
                     {modificaciones.map((modificacion, index) => (
-                      <div key={index} className="rounded-md border border-[#e7e7ef] bg-white p-3">
+                      <div key={index} className="rounded-md border border-line bg-white p-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
                               <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                modificacion.tipo === 'cantidad_programada_modificada' ? 'bg-[#f3f0ff] text-[#7c3aed]' :
+                                modificacion.tipo === 'cantidad_programada_modificada' ? 'bg-[#f3f0ff] text-brand' :
                                 modificacion.tipo === 'entrega_adicional_modificada' ? 'bg-amber-100 text-amber-800' :
                                 modificacion.tipo === 'entrega_adicional_agregada' ? 'bg-emerald-100 text-emerald-800' :
                                 modificacion.tipo === 'establecimiento_agregado' ? 'bg-cyan-100 text-cyan-800' :
@@ -907,14 +907,14 @@ const ValeDesktopRow: React.FC<ValeRowProps> = ({
   <TableRow>
     <TableCell>
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-[#15171d]">{vale.numero}</p>
-        <p className="text-xs text-[#8b8f9b]">{MESES[vale.mes - 1]} {vale.anio}</p>
+        <p className="truncate text-sm font-medium text-ink">{vale.numero}</p>
+        <p className="text-xs text-muted">{MESES[vale.mes - 1]} {vale.anio}</p>
       </div>
     </TableCell>
     <TableCell>
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-[#15171d]">{vale.centroAcopio.nombre}</p>
-        <p className="text-xs text-[#8b8f9b]">{vale.centroAcopio.codigo || 'Sin código'}</p>
+        <p className="truncate text-sm font-medium text-ink">{vale.centroAcopio.nombre}</p>
+        <p className="text-xs text-muted">{vale.centroAcopio.codigo || 'Sin código'}</p>
       </div>
     </TableCell>
     <TableCell align="center">
@@ -926,7 +926,7 @@ const ValeDesktopRow: React.FC<ValeRowProps> = ({
           <Package className="mr-1 h-3 w-3" weight="bold" aria-hidden="true" />
           {vale.totalVacunas.toLocaleString('es-PE')}
         </span>
-        <span className="text-xs text-[#8b8f9b]">
+        <span className="text-xs text-muted">
           {vale.totalEstablecimientos} establecimientos
         </span>
       </div>
@@ -935,7 +935,7 @@ const ValeDesktopRow: React.FC<ValeRowProps> = ({
       <ValeEstadoBadge estado={vale.estado} />
     </TableCell>
     <TableCell align="center">
-      <span className="text-sm text-[#606571]">
+      <span className="text-sm text-muted-2">
         {new Date(vale.fechaGeneracion).toLocaleDateString('es-PE', {
           day: '2-digit',
           month: '2-digit',
@@ -973,14 +973,14 @@ const ValeMobileCard: React.FC<ValeRowProps> = ({
     <div className="mt-4 grid grid-cols-2 gap-2.5">
       <div className={ESTABLECIMIENTOS_STYLES.mutedPanel}>
         <div className="p-3">
-          <p className="text-xs font-medium text-[#747986]">Periodo</p>
-          <p className="mt-1 text-sm font-semibold text-[#15171d]">{MESES[vale.mes - 1]} {vale.anio}</p>
+          <p className="text-xs font-medium text-muted-3">Periodo</p>
+          <p className="mt-1 text-sm font-semibold text-ink">{MESES[vale.mes - 1]} {vale.anio}</p>
         </div>
       </div>
       <div className={ESTABLECIMIENTOS_STYLES.mutedPanel}>
         <div className="p-3">
-          <p className="text-xs font-medium text-[#747986]">Total</p>
-          <p className="mt-1 text-sm font-semibold text-[#15171d]">{vale.totalVacunas.toLocaleString('es-PE')} vacunas</p>
+          <p className="text-xs font-medium text-muted-3">Total</p>
+          <p className="mt-1 text-sm font-semibold text-ink">{vale.totalVacunas.toLocaleString('es-PE')} vacunas</p>
         </div>
       </div>
     </div>

@@ -31,16 +31,16 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
 
   if (readOnly) {
     return (
-      <div className="border-t border-[#eeeef3] bg-[#fbfafd] px-4 py-3 text-sm font-medium text-[#606571]">
+      <div className="border-t border-line-soft bg-surface-soft px-4 py-3 text-sm font-medium text-muted-2">
         Modo solo lectura. Tu rol puede revisar la matriz, pero no modificarla desde este módulo.
       </div>
     );
   }
 
   return (
-    <div className="border-t border-[#eeeef3] bg-white px-4 py-3">
+    <div className="border-t border-line-soft bg-white px-4 py-3">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="text-sm text-[#606571]">
+        <div className="text-sm text-muted-2">
           {pendingChangesCount > 0 ? (
             <span className={COMPONENT_STYLES.badge.warning}>Cambios pendientes: {pendingChangesCount}</span>
           ) : (

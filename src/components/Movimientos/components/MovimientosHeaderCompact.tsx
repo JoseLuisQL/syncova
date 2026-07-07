@@ -213,20 +213,20 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   );
 
   const stockPanelContent = hideStockMetrics ? null : (
-    <div className="relative z-[90] overflow-visible border-t border-[#eeeef3] bg-white px-5 py-3 sm:px-6">
+    <div className="relative z-[90] overflow-visible border-t border-line-soft bg-white px-5 py-3 sm:px-6">
       {!selectedVacuna ? (
-        <div className="flex items-center gap-2.5 rounded-xl border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-white text-[#606571]">
+        <div className="flex items-center gap-2.5 rounded-xl border border-line bg-surface-soft px-4 py-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-muted-2">
             <Package className="h-4 w-4" weight="duotone" />
           </div>
-          <p className="text-sm font-semibold tracking-tight text-[#15171d]">Selecciona una vacuna para visualizar el stock operativo.</p>
+          <p className="text-sm font-semibold tracking-tight text-ink">Selecciona una vacuna para visualizar el stock operativo.</p>
         </div>
       ) : isLoadingStock || isUpdatingStock ? (
-        <div className="flex items-center gap-2.5 rounded-xl border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-white text-[#606571]">
+        <div className="flex items-center gap-2.5 rounded-xl border border-line bg-surface-soft px-4 py-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-muted-2">
             <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
           </div>
-          <p className="text-sm font-semibold tracking-tight text-[#15171d]">Sincronizando balances...</p>
+          <p className="text-sm font-semibold tracking-tight text-ink">Sincronizando balances...</p>
         </div>
       ) : stockError ? (
         <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
@@ -247,47 +247,47 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
       ) : stockInfo ? (
         <div className="relative z-[90] space-y-2 overflow-visible">
           <div className="relative z-[90] flex flex-wrap items-stretch gap-2 overflow-visible">
-            <div className="flex min-h-14 items-center gap-2 rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] px-3 py-2">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-white text-[#606571]">
+            <div className="flex min-h-14 items-center gap-2 rounded-[12px] border border-line bg-surface-soft px-3 py-2">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-muted-2">
                 <CalendarBlank className="h-4 w-4" weight="duotone" />
               </div>
               <div>
-                <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[#8b8f9b]">Periodo objetivo</p>
-                <p className="text-sm font-semibold tracking-tight text-[#15171d]">{periodoEntrega.etiqueta}</p>
+                <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-muted">Periodo objetivo</p>
+                <p className="text-sm font-semibold tracking-tight text-ink">{periodoEntrega.etiqueta}</p>
               </div>
             </div>
 
-            <ArrowRight className="hidden h-14 w-3 shrink-0 text-[#8b8f9b] lg:block" weight="bold" />
+            <ArrowRight className="hidden h-14 w-3 shrink-0 text-muted lg:block" weight="bold" />
 
             <div className="relative z-[110]" ref={stockInicialRef}>
               <button
                 type="button"
                 onClick={() => setShowStockInicialDropdown((prev) => !prev)}
-                className="flex min-h-14 items-center gap-2 rounded-[12px] border border-[#e7e7ef] bg-white px-3 py-2 text-left transition hover:bg-[#fbfafd]"
+                className="flex min-h-14 items-center gap-2 rounded-[12px] border border-line bg-white px-3 py-2 text-left transition hover:bg-surface-soft"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2">
                   <Package className="h-4 w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[#8b8f9b]">Apertura</p>
-                  <p className="text-sm font-semibold tracking-tight text-[#15171d]">
+                  <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-muted">Apertura</p>
+                  <p className="text-sm font-semibold tracking-tight text-ink">
                     {stockInfo.tieneHistorialInicial ? (stockInfo.stockInicialHistorico?.toLocaleString() || '0') : '—'}
                   </p>
                 </div>
-                <CaretDown className={`h-3.5 w-3.5 text-[#606571] transition-transform ${showStockInicialDropdown ? 'rotate-180' : ''}`} weight="bold" />
+                <CaretDown className={`h-3.5 w-3.5 text-muted-2 transition-transform ${showStockInicialDropdown ? 'rotate-180' : ''}`} weight="bold" />
               </button>
 
               {showStockInicialDropdown ? (
-                <div className="absolute left-0 top-full z-[180] mt-2 w-[min(280px,calc(100vw-3rem))] rounded-xl border border-[#e7e7ef] bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[280px]">
-                  <h4 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-widest text-[#8b8f9b]">Volumen desglosado</h4>
+                <div className="absolute left-0 top-full z-[180] mt-2 w-[min(280px,calc(100vw-3rem))] rounded-xl border border-line bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[280px]">
+                  <h4 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-widest text-muted">Volumen desglosado</h4>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-lg border border-[#e7e7ef] bg-[#fbfafd] px-3 py-2">
-                      <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-[#8b8f9b]">Base histórica</p>
-                      <p className="mt-1 text-sm font-semibold text-[#15171d]">{stockInfo.stockInicialOriginal?.toLocaleString() || 0}</p>
+                    <div className="rounded-lg border border-line bg-surface-soft px-3 py-2">
+                      <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-muted">Base histórica</p>
+                      <p className="mt-1 text-sm font-semibold text-ink">{stockInfo.stockInicialOriginal?.toLocaleString() || 0}</p>
                     </div>
-                    <div className="rounded-lg border border-[#e7e7ef] bg-white px-3 py-2">
-                      <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-[#8b8f9b]">Nuevos ingresos</p>
-                      <p className="mt-1 text-sm font-semibold text-[#15171d]">{(stockInfo.ingresosLotesDelMes ?? 0).toLocaleString()}</p>
+                    <div className="rounded-lg border border-line bg-white px-3 py-2">
+                      <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-muted">Nuevos ingresos</p>
+                      <p className="mt-1 text-sm font-semibold text-ink">{(stockInfo.ingresosLotesDelMes ?? 0).toLocaleString()}</p>
                     </div>
                   </div>
                   {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial ? (
@@ -299,7 +299,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               ) : null}
             </div>
 
-            <ArrowRight className="hidden h-14 w-3 shrink-0 text-[#8b8f9b] lg:block" weight="bold" />
+            <ArrowRight className="hidden h-14 w-3 shrink-0 text-muted lg:block" weight="bold" />
 
             <EntregasProgressBadge
               totalEntregas={stockInfo.totalEntregas}
@@ -308,7 +308,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               onRefresh={onRefreshProgresoVales}
             />
 
-            <ArrowRight className="hidden h-14 w-3 shrink-0 text-[#8b8f9b] lg:block" weight="bold" />
+            <ArrowRight className="hidden h-14 w-3 shrink-0 text-muted lg:block" weight="bold" />
 
             <button
               type="button"
@@ -324,21 +324,21 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               className={`flex min-h-14 items-center gap-2 rounded-[12px] border px-3 py-2 text-left transition ${
                 stockInfo.stockDisponible < 0
                   ? 'cursor-pointer border-rose-200 bg-rose-50 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60'
-                  : 'border-[#e7e7ef] bg-white hover:bg-[#fbfafd] disabled:cursor-not-allowed disabled:opacity-60'
+                  : 'border-line bg-white hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-60'
               }`}
             >
               <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
-                stockInfo.stockDisponible < 0 ? 'border-rose-200 bg-white text-rose-600' : 'border-[#e7e7ef] bg-[#fbfafd] text-[#606571]'
+                stockInfo.stockDisponible < 0 ? 'border-rose-200 bg-white text-rose-600' : 'border-line bg-surface-soft text-muted-2'
               }`}>
                 {stockInfo.stockDisponible < 0
                   ? <Warning className="h-4 w-4" weight="fill" />
                   : <CheckCircle className="h-4 w-4" weight="fill" />}
               </div>
               <div>
-                <p className={`text-[0.6rem] font-semibold uppercase tracking-[0.12em] ${stockInfo.stockDisponible < 0 ? 'text-rose-700' : 'text-[#8b8f9b]'}`}>
+                <p className={`text-[0.6rem] font-semibold uppercase tracking-[0.12em] ${stockInfo.stockDisponible < 0 ? 'text-rose-700' : 'text-muted'}`}>
                   {stockInfo.stockDisponible < 0 ? 'Déficit' : 'Disponible'}
                 </p>
-                <p className={`text-sm font-semibold tracking-tight ${stockInfo.stockDisponible < 0 ? 'text-rose-900' : 'text-[#15171d]'}`}>
+                <p className={`text-sm font-semibold tracking-tight ${stockInfo.stockDisponible < 0 ? 'text-rose-900' : 'text-ink'}`}>
                   {stockInfo.stockDisponible.toLocaleString()}
                 </p>
               </div>
@@ -347,30 +347,30 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               ) : null}
             </button>
 
-            <ArrowRight className="hidden h-14 w-3 shrink-0 text-[#8b8f9b] lg:block" weight="bold" />
+            <ArrowRight className="hidden h-14 w-3 shrink-0 text-muted lg:block" weight="bold" />
 
             <div className="relative z-[110]" ref={stockActualRef}>
               <button
                 type="button"
                 onClick={() => setShowStockActualDropdown((prev) => !prev)}
-                className="flex min-h-14 items-center gap-2 rounded-[12px] border border-[#e7e7ef] bg-white px-3 py-2 text-left transition hover:bg-[#fbfafd]"
+                className="flex min-h-14 items-center gap-2 rounded-[12px] border border-line bg-white px-3 py-2 text-left transition hover:bg-surface-soft"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2">
                   <Package className="h-4 w-4" weight="duotone" />
                 </div>
                 <div>
-                  <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-[#8b8f9b]">Stock actual</p>
-                  <p className="text-sm font-semibold tracking-tight text-[#15171d]">{stockInfo.stockActual.toLocaleString()}</p>
+                  <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-muted">Stock actual</p>
+                  <p className="text-sm font-semibold tracking-tight text-ink">{stockInfo.stockActual.toLocaleString()}</p>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-md border border-[#e7e7ef] bg-[#fbfafd] px-2 py-0.5 text-[0.65rem] font-semibold tracking-widest text-[#606571]">
+                <span className="inline-flex items-center gap-1 rounded-md border border-line bg-surface-soft px-2 py-0.5 text-[0.65rem] font-semibold tracking-widest text-muted-2">
                   {lotesDisponibles.length} lotes
                 </span>
-                <CaretDown className={`h-3.5 w-3.5 text-[#606571] transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} weight="bold" />
+                <CaretDown className={`h-3.5 w-3.5 text-muted-2 transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} weight="bold" />
               </button>
 
               {showStockActualDropdown ? (
-                <div className="absolute right-0 top-full z-[180] mt-2 w-[min(300px,calc(100vw-3rem))] rounded-xl border border-[#e7e7ef] bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[300px]">
-                  <h4 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-widest text-[#8b8f9b]">
+                <div className="absolute right-0 top-full z-[180] mt-2 w-[min(300px,calc(100vw-3rem))] rounded-xl border border-line bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[300px]">
+                  <h4 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-widest text-muted">
                     Lotes disponibles ({lotesDisponibles.length})
                   </h4>
                   {lotesDisponibles.length > 0 ? (
@@ -380,8 +380,8 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                           key={lote.id}
                           className={`rounded-lg border px-3 py-2.5 ${
                             index === 0
-                              ? 'border-[#d7d8e2] bg-[#fbfafd] text-[#15171d]'
-                              : 'border-[#e7e7ef] bg-white hover:bg-[#fbfafd] text-zinc-900'
+                              ? 'border-line-strong bg-surface-soft text-ink'
+                              : 'border-line bg-white hover:bg-surface-soft text-zinc-900'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
@@ -391,7 +391,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                                 Vence: {new Date(lote.fechaVencimiento).toLocaleDateString()}
                               </p>
                             </div>
-                            <span className="shrink-0 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-[0.75rem] font-semibold tracking-tight text-[#15171d]">
+                            <span className="shrink-0 rounded-md border border-line bg-white px-2.5 py-1 text-[0.75rem] font-semibold tracking-tight text-ink">
                               {lote.cantidadActual.toLocaleString()}
                             </span>
                           </div>
@@ -411,10 +411,10 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                   type="button"
                   onClick={onActualizarStockSiguienteMes}
                   disabled={isUpdatingStockSiguienteMes}
-                  className="flex min-h-14 items-center gap-2 rounded-[12px] border border-[#e7e7ef] bg-white px-3 py-2 text-left text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex min-h-14 items-center gap-2 rounded-[12px] border border-line bg-white px-3 py-2 text-left text-sm font-semibold text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-60"
                   title={`Actualizar stock de ${periodoSiguiente}`}
                 >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2">
                     {isUpdatingStockSiguienteMes ? (
                       <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
                     ) : (
@@ -423,7 +423,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                   </span>
                   <span className="flex flex-col leading-tight">
                     <span>Actualizar siguiente mes</span>
-                    <span className="mt-0.5 text-[0.65rem] font-semibold text-[#8b8f9b]">{periodoSiguiente}</span>
+                    <span className="mt-0.5 text-[0.65rem] font-semibold text-muted">{periodoSiguiente}</span>
                   </span>
                 </button>
               </div>
@@ -437,7 +437,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   return (
     <section className="relative z-[80] flex h-full flex-col overflow-visible bg-white">
       {/* Filtros + Acciones */}
-      <div className="border-b border-[#eeeef3] px-5 py-4 sm:px-6">
+      <div className="border-b border-line-soft px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end lg:gap-4">
           <div className="min-w-0 flex-1">
             <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
@@ -465,7 +465,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               ) : (
                 <div>
                   <span className={COMPONENT_STYLES.input.label}>Centro asignado</span>
-                  <div className="flex min-h-[44px] items-center gap-2.5 rounded-lg border border-[#e7e7ef] bg-white px-4 py-2.5 text-sm font-semibold text-[#15171d] shadow-sm">
+                  <div className="flex min-h-[44px] items-center gap-2.5 rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-sm">
                     <Buildings className="h-4 w-4 shrink-0 text-zinc-500" weight="duotone" />
                     <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
                   </div>
@@ -567,8 +567,8 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
             ) : (
               <span className={`inline-flex min-h-9 items-center rounded-[9px] border px-3.5 py-1.5 text-sm font-semibold ${
                 hasOperativeEditPermission
-                  ? 'border-[#e7e7ef] bg-white text-[#15171d]'
-                  : 'border-[#e7e7ef] bg-[#fbfafd] text-[#606571]'
+                  ? 'border-line bg-white text-ink'
+                  : 'border-line bg-surface-soft text-muted-2'
               }`}>
                 {hasOperativeEditPermission ? 'Edición habilitada' : 'Solo lectura'}
               </span>

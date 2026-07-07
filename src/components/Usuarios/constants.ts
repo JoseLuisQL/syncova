@@ -98,8 +98,8 @@ export const USER_SECTIONS = [
 export const COMPONENT_STYLES = {
   pageBackground: 'min-h-screen bg-white',
 
-  card: 'rounded-xl border border-[#e7e7ef] bg-white shadow-none',
-  cardHover: 'hover:bg-[#fbfafd] transition-colors duration-200',
+  card: 'rounded-xl border border-line bg-white shadow-none',
+  cardHover: 'hover:bg-surface-soft transition-colors duration-200',
 
   header: {
     container: 'bg-white border-b border-zinc-200 sticky top-0 z-20',
@@ -109,17 +109,17 @@ export const COMPONENT_STYLES = {
   },
 
   button: {
-    primary: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-[#7c3aed] px-4 py-1.5 text-sm font-semibold text-white
-              shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-[#6d28d9]
-              focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/25 focus:ring-offset-2
+    primary: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-brand px-4 py-1.5 text-sm font-semibold text-white
+              shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-brand-600
+              focus:outline-none focus:ring-2 focus:ring-brand/25 focus:ring-offset-2
               disabled:cursor-not-allowed disabled:opacity-60`,
-    secondary: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 py-1.5 text-sm font-semibold
-                text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd]
-                focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2
+    secondary: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-line bg-white px-3.5 py-1.5 text-sm font-semibold
+                text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft
+                focus:outline-none focus:ring-2 focus:ring-line-focus/70 focus:ring-offset-2
                 disabled:cursor-not-allowed disabled:opacity-60`,
-    ghost: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3 py-1.5
-            text-sm font-semibold text-[#606571] transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d]
-            focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
+    ghost: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-line bg-white px-3 py-1.5
+            text-sm font-semibold text-muted-2 transition hover:border-line-strong hover:bg-surface-soft hover:text-ink
+            focus:outline-none focus:ring-2 focus:ring-line-focus/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
     success: `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-emerald-800 
               bg-emerald-50 border border-emerald-200
               hover:bg-emerald-100 hover:border-emerald-300
@@ -145,9 +145,9 @@ export const COMPONENT_STYLES = {
   },
 
   input: {
-    base: `min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-base text-[#15171d] shadow-none
-           transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70`,
-    normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
+    base: `min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-base text-ink shadow-none
+           transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-line-focus/70`,
+    normal: 'border-line hover:border-line-strong focus:border-line-focus-strong',
     error: 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 text-rose-900',
     label: 'mb-1.5 block text-sm font-medium text-[#424750]',
     errorText: 'mt-1 text-xs text-rose-600 font-medium',
@@ -155,42 +155,42 @@ export const COMPONENT_STYLES = {
   },
 
   select: {
-    base: `w-full rounded-lg border bg-white px-4 py-2.5 text-sm font-medium text-[#15171d] shadow-sm
-           transition focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70
+    base: `w-full rounded-lg border bg-white px-4 py-2.5 text-sm font-medium text-ink shadow-sm
+           transition focus:outline-none focus:ring-2 focus:ring-line-focus/70
            disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500`,
-    normal: 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca]',
+    normal: 'border-line hover:border-line-strong focus:border-line-focus-strong',
   },
 
   table: {
     container: 'overflow-visible rounded-none border-0 bg-transparent shadow-none',
     header: 'bg-transparent',
-    headerCell: 'bg-[#fbfafd] px-4 py-3 text-left text-sm font-medium tracking-[-0.01em] text-[#8b8f9b]',
-    row: 'transition-colors duration-150 hover:bg-[#fbfafd]',
-    rowSelected: 'bg-[#fbfafd]',
-    cell: 'border-b border-[#eeeef3] px-4 py-3.5 text-sm text-[#15171d] tabular-nums align-middle',
+    headerCell: 'bg-surface-soft px-4 py-3 text-left text-sm font-medium tracking-[-0.01em] text-muted',
+    row: 'transition-colors duration-150 hover:bg-surface-soft',
+    rowSelected: 'bg-surface-soft',
+    cell: 'border-b border-line-soft px-4 py-3.5 text-sm text-ink tabular-nums align-middle',
     emptyIcon: 'mx-auto mb-3 h-10 w-10 text-zinc-300',
   },
 
   badge: {
-    active: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
-    inactive: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
-    count: 'inline-flex items-center justify-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]',
-    warning: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
-    danger: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    active: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
+    inactive: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    count: 'inline-flex items-center justify-center rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink',
+    warning: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
+    danger: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
     info: 'inline-flex items-center justify-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20',
     role: 'inline-flex items-center justify-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
   },
 
   modal: {
-    overlay: 'fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-[#111318]/20 p-4 backdrop-blur-[2px] sm:p-6',
-    containerShell: 'mx-auto w-full overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    container: 'max-h-[88vh] w-full max-w-lg overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    containerMedium: 'max-h-[88vh] w-full max-w-2xl overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    containerLarge: 'max-h-[88vh] w-full max-w-5xl overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    header: 'flex items-center justify-between border-b border-[#eeeef3] bg-white px-4 py-3.5 sm:px-5',
-    headerTitle: 'text-md font-semibold leading-5 text-[#15171d]',
+    overlay: 'fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-ink-soft/20 p-4 backdrop-blur-[2px] sm:p-6',
+    containerShell: 'mx-auto w-full overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    container: 'max-h-[88vh] w-full max-w-lg overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    containerMedium: 'max-h-[88vh] w-full max-w-2xl overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    containerLarge: 'max-h-[88vh] w-full max-w-5xl overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    header: 'flex items-center justify-between border-b border-line-soft bg-white px-4 py-3.5 sm:px-5',
+    headerTitle: 'text-md font-semibold leading-5 text-ink',
     body: 'max-h-[calc(88vh-130px)] overflow-y-auto px-4 py-4 sm:px-5',
-    footer: 'flex justify-end gap-2 border-t border-[#eeeef3] bg-[#fbfafd] px-4 py-3 sm:px-5',
+    footer: 'flex justify-end gap-2 border-t border-line-soft bg-surface-soft px-4 py-3 sm:px-5',
   },
 
   stats: {
@@ -203,14 +203,14 @@ export const COMPONENT_STYLES = {
 
   filter: {
     container: 'bg-transparent p-0',
-    searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#606571]',
-    searchInput: `h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white py-1.5 pl-9 pr-3 text-sm text-[#15171d] shadow-sm
-                  transition placeholder:text-[#8b8f9b] hover:border-[#d7d8e2] focus:border-[#babdca]
-                  focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70`,
+    searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2',
+    searchInput: `h-9 w-full rounded-[9px] border border-line bg-white py-1.5 pl-9 pr-3 text-sm text-ink shadow-sm
+                  transition placeholder:text-muted hover:border-line-strong focus:border-line-focus-strong
+                  focus:outline-none focus:ring-2 focus:ring-line-focus/70`,
   },
 
   nav: {
-    container: 'bg-[#fbfafd] border-b border-[#eeeef3] sticky top-0 z-10 px-4 pt-2 flex gap-1 overflow-x-auto scrollbar-hide',
+    container: 'bg-surface-soft border-b border-line-soft sticky top-0 z-10 px-4 pt-2 flex gap-1 overflow-x-auto scrollbar-hide',
     tab: `flex items-center gap-2 px-3 py-2 text-sm font-medium border-b-2
           transition-all duration-200 cursor-pointer whitespace-nowrap`,
     tabActive: 'text-teal-700 border-teal-600',
@@ -218,15 +218,15 @@ export const COMPONENT_STYLES = {
   },
 
   pagination: {
-    container: 'border-t border-[#eeeef3] bg-white px-4 py-5 sm:px-5',
-    info: 'text-sm font-medium text-[#747986]',
+    container: 'border-t border-line-soft bg-white px-4 py-5 sm:px-5',
+    info: 'text-sm font-medium text-muted-3',
     button: 'min-h-9 min-w-9 rounded-lg border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40',
-    buttonActive: 'bg-white border-[#e7e7ef] text-[#15171d] shadow-sm',
-    buttonInactive: 'bg-transparent border-transparent text-[#606571] hover:bg-[#fbfafd]',
+    buttonActive: 'bg-white border-line text-ink shadow-sm',
+    buttonInactive: 'bg-transparent border-transparent text-muted-2 hover:bg-surface-soft',
   },
 
   bulkActions: {
-    container: 'mb-4 flex items-center justify-between rounded-[12px] border border-[#7c3aed] bg-[#7c3aed] p-2.5 text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] animate-in fade-in slide-in-from-bottom-2',
+    container: 'mb-4 flex items-center justify-between rounded-[12px] border border-brand bg-brand p-2.5 text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] animate-in fade-in slide-in-from-bottom-2',
     text: 'text-sm font-medium ml-2',
   },
 } as const;

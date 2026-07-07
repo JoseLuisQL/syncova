@@ -239,17 +239,17 @@ const RoleModal: React.FC<RoleModalProps> = ({
         className={`${COMPONENT_STYLES.modal.containerShell} flex max-h-[88vh] max-w-lg flex-col`}
       >
         {/* Header */}
-        <div className="border-b border-[#eeeef3] bg-white px-5 py-3.5">
+        <div className="border-b border-line-soft bg-white px-5 py-3.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-[#606571]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-muted-2">
                 <Shield className="h-4 w-4" aria-hidden="true" />
               </div>
               <div>
-                <h2 id="role-modal-title" className="text-md font-semibold leading-5 text-[#15171d]">
+                <h2 id="role-modal-title" className="text-md font-semibold leading-5 text-ink">
                   {isEditing ? 'Editar Rol' : 'Crear Nuevo Rol'}
                 </h2>
-                <p className="mt-1 text-sm leading-4 text-[#606571]">
+                <p className="mt-1 text-sm leading-4 text-muted-2">
                   {isEditing 
                     ? `Modificando: ${editingRole.nombre}` 
                     : 'Define un nuevo rol para el sistema'}
@@ -406,8 +406,8 @@ const RoleModal: React.FC<RoleModalProps> = ({
                   disabled={isLoading || isSubmitting}
                   className={`flex-1 flex items-center justify-center gap-2 rounded-[7px] border px-3 py-2 text-base transition-colors duration-200 ${
                     formData.estado === 'activo'
-                      ? 'border-[#c8bbff] bg-[#fbfafd] text-[#7c3aed]'
-                      : 'border-[#e7e7ef] bg-white text-zinc-600 hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
+                      ? 'border-brand-100 bg-surface-soft text-brand'
+                      : 'border-line bg-white text-zinc-600 hover:border-line-strong hover:bg-surface-soft'
                   }`}
                 >
                   <ToggleRight className={`h-5 w-5 ${formData.estado === 'activo' ? 'text-emerald-600' : 'text-zinc-400'}`} />
@@ -422,8 +422,8 @@ const RoleModal: React.FC<RoleModalProps> = ({
                   disabled={isLoading || isSubmitting}
                   className={`flex-1 flex items-center justify-center gap-2 rounded-[7px] border px-3 py-2 text-base transition-colors duration-200 ${
                     formData.estado === 'inactivo'
-                      ? 'border-[#e7e7ef] bg-[#fbfafd] text-zinc-700'
-                      : 'border-[#e7e7ef] bg-white text-zinc-600 hover:border-[#d7d8e2] hover:bg-[#fbfafd]'
+                      ? 'border-line bg-surface-soft text-zinc-700'
+                      : 'border-line bg-white text-zinc-600 hover:border-line-strong hover:bg-surface-soft'
                   }`}
                 >
                   <ToggleLeft className={`h-5 w-5 ${formData.estado === 'inactivo' ? 'text-zinc-600' : 'text-zinc-400'}`} />
@@ -443,7 +443,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
         </form>
 
         {/* Footer */}
-        <div className="border-t border-[#eeeef3] bg-[#fbfafd] px-5 py-3">
+        <div className="border-t border-line-soft bg-surface-soft px-5 py-3">
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"

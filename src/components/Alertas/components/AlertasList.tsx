@@ -67,11 +67,11 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
 
   return (
     <section className="space-y-3">
-      <div className="border-b border-[#eeeef3] bg-white pb-3">
+      <div className="border-b border-line-soft bg-white pb-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h3 className="text-[1.05rem] font-semibold text-[#15171d]">Alertas filtradas</h3>
-            <p className="mt-1 text-sm text-[#747986]">{alertas.length} resultado(s) listos para revisión.</p>
+            <h3 className="text-[1.05rem] font-semibold text-ink">Alertas filtradas</h3>
+            <p className="mt-1 text-sm text-muted-3">{alertas.length} resultado(s) listos para revisión.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -86,9 +86,9 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
       </div>
 
       {selectedAlertas.length > 0 ? (
-        <div className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] px-4 py-3">
+        <div className="rounded-xl border border-line bg-surface-soft px-4 py-3">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <span className="text-sm font-medium text-[#15171d]">
+            <span className="text-sm font-medium text-ink">
               {selectedAlertas.length} alerta{selectedAlertas.length === 1 ? '' : 's'} seleccionada{selectedAlertas.length === 1 ? '' : 's'}
             </span>
             <div className="flex flex-wrap gap-2">
@@ -122,7 +122,7 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
           <table className="min-w-full table-auto border-separate border-spacing-0">
             <thead className={COMPONENT_STYLES.table.header}>
               <tr>
-                <th className="w-10 rounded-l-[14px] bg-[#fbfafd] px-3 py-3 text-center">
+                <th className="w-10 rounded-l-[14px] bg-surface-soft px-3 py-3 text-center">
                   <input
                     type="checkbox"
                     checked={alertas.length > 0 && selectedAlertas.length === alertas.length}
@@ -133,7 +133,7 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                       }
                       onSelectAll();
                     }}
-                    className="h-4 w-4 rounded-[5px] border-[#e0e2ea] text-[#7c3aed] focus:ring-[#7c3aed]/20"
+                    className="h-4 w-4 rounded-[5px] border-[#e0e2ea] text-brand focus:ring-brand/20"
                     aria-label="Seleccionar todas las alertas"
                   />
                 </th>
@@ -152,31 +152,31 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
 
                 return (
                   <tr key={alerta.id} className={`${COMPONENT_STYLES.table.row} ${selectedAlertas.includes(alerta.id) ? 'bg-zinc-100/60' : ''}`}>
-                    <td className="w-10 border-b border-[#eeeef3] px-3 py-3 text-center align-middle">
+                    <td className="w-10 border-b border-line-soft px-3 py-3 text-center align-middle">
                       <input
                         type="checkbox"
                         checked={selectedAlertas.includes(alerta.id)}
                         onChange={() => onToggleSelect(alerta.id)}
-                        className="h-4 w-4 rounded-[5px] border-[#e7e7ef] text-[#7c3aed] focus:ring-[#7c3aed]/20"
+                        className="h-4 w-4 rounded-[5px] border-line text-brand focus:ring-brand/20"
                         aria-label={`Seleccionar alerta: ${alerta.titulo}`}
                       />
                     </td>
                     <td className={COMPONENT_STYLES.table.cell}>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-[#15171d]">{alerta.titulo}</p>
-                          {!alerta.leida ? <span className="h-2 w-2 rounded-full bg-[#7c3aed]" /> : null}
+                          <p className="font-medium text-ink">{alerta.titulo}</p>
+                          {!alerta.leida ? <span className="h-2 w-2 rounded-full bg-brand" /> : null}
                         </div>
-                        <p className="mt-1 text-sm text-[#747986]">{alerta.descripcion}</p>
+                        <p className="mt-1 text-sm text-muted-3">{alerta.descripcion}</p>
                       </div>
                     </td>
                     <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                      <span className="inline-flex items-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
+                      <span className="inline-flex items-center rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink">
                         {tipoInfo?.label || alerta.tipo}
                       </span>
                     </td>
                     <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                      <span className="inline-flex items-center rounded-md border border-[#e7e7ef] bg-white px-2.5 py-1 text-xs font-medium text-[#15171d]">
+                      <span className="inline-flex items-center rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink">
                         {nivelInfo?.label || alerta.nivel}
                       </span>
                     </td>

@@ -39,11 +39,11 @@ export const ValeIndicator: React.FC<ValeIndicatorProps> = memo(({
       className={`
         ${sizeClasses[size]}
         inline-flex items-center justify-center
-        bg-[#f3f0ff] text-[#7c3aed]
+        bg-[#f3f0ff] text-brand
         rounded-md
         transition-transform duration-200
         hover:scale-105
-        cursor-default border border-[#dedfea]
+        cursor-default border border-line-focus
       `}
       title={showTooltip ? tooltipText : undefined}
       aria-label={tooltipText}

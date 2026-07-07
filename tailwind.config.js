@@ -113,6 +113,51 @@ export default {
         hh: designMdTheme.colors,
         clinical: designMdTheme.colors,
         ...clinicalPalette,
+        // Tokens semánticos del sistema purpura-grey de facto (Linear-like).
+        // Reemplazan los ~2000 hex literales dispersos en src/ por clases nombradas:
+        //   bg-brand / text-brand / border-line / bg-surface-soft / text-ink / text-muted
+        // Mapeo canonical:
+        //   brand   = #7c3aed (accent purpura, boton primario) + brand-600 hover #6d28d9
+        //   ink     = #15171d (texto primario)
+        //   ink-soft= #111318 (overlay, texto oscuro)
+        //   muted   = #8b8f9b (texto muted, placeholders)
+        //   muted-2 = #606571 (texto secundario)
+        //   muted-3 = #747986 (texto terciario)
+        //   line    = #e7e7ef (borde default)
+        //   line-soft = #eeeef3 (dividers)
+        //   line-strong = #d7d8e2 (borde hover)
+        //   line-focus = #dedfea (borde focus ring)
+        //   line-focus-strong = #babdca (borde focus strong)
+        //   surface = #ffffff (default, ya en Tailwind)
+        //   surface-soft = #fbfafd (hover, fondos suaves)
+        //   surface-tint = #f5f0fd (tinte purpura soft para seleccionados)
+        brand: {
+          DEFAULT: '#7c3aed',
+          600: '#6d28d9',
+          50: '#f5f0fd',
+          100: '#c8bbff',
+        },
+        ink: {
+          DEFAULT: '#15171d',
+          soft: '#111318',
+        },
+        muted: {
+          DEFAULT: '#8b8f9b',
+          2: '#606571',
+          3: '#747986',
+        },
+        line: {
+          DEFAULT: '#e7e7ef',
+          soft: '#eeeef3',
+          strong: '#d7d8e2',
+          focus: '#dedfea',
+          'focus-strong': '#babdca',
+        },
+        surface: {
+          DEFAULT: '#ffffff',
+          soft: '#fbfafd',
+          tint: '#f5f0fd',
+        },
       },
       fontFamily: {
         ...designMdTheme.fontFamily,

@@ -12,10 +12,10 @@ import { User, LockKey, Eye, EyeClosed, SpinnerGap, Clock as ClockIcon, WarningC
 
 const INPUT_BASE_CLASSES =
   'block h-10 w-full rounded-md border bg-white py-2 pl-10 pr-3 text-base font-medium ' +
-  'text-[#15171d] shadow-none transition-colors duration-150 placeholder:text-[#a0a4ae] ' +
+  'text-ink shadow-none transition-colors duration-150 placeholder:text-[#a0a4ae] ' +
   'focus:outline-none focus:ring-2';
 
-const INPUT_NORMAL_CLASSES = 'border-[#e7e7ef] hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-[#dedfea]/70';
+const INPUT_NORMAL_CLASSES = 'border-line hover:border-line-strong focus:border-line-focus-strong focus:ring-line-focus/70';
 const INPUT_ERROR_CLASSES = 'border-rose-300 focus:ring-rose-500/10 focus:border-rose-500 bg-rose-50/30';
 
 const LABEL_CLASSES = 'mb-1.5 block text-sm font-medium text-[#424750]';
@@ -95,11 +95,11 @@ const InputField: React.FC<InputFieldProps> = ({
   return (
     <div>
       <label htmlFor={id} className={LABEL_CLASSES}>
-        {label} <span className="text-[#8b8f9b]">*</span>
+        {label} <span className="text-muted">*</span>
       </label>
       <div className="group relative">
         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 transition-colors duration-150">
-          <span className={`${error ? 'text-rose-400' : 'text-[#8b8f9b] group-focus-within:text-[#606571]'}`}>
+          <span className={`${error ? 'text-rose-400' : 'text-muted group-focus-within:text-muted-2'}`}>
             {icon}
           </span>
         </div>
@@ -185,9 +185,9 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading, canRetry, remain
       'font-semibold transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2';
 
     if (isDisabled) {
-      return `${base} cursor-not-allowed border border-[#e7e7ef] bg-[#fbfafd] text-[#8b8f9b]`;
+      return `${base} cursor-not-allowed border border-line bg-surface-soft text-muted`;
     }
-    return `${base} border border-[#7c3aed] bg-[#7c3aed] text-white hover:bg-[#6d28d9] focus:ring-[#7c3aed]/20`;
+    return `${base} border border-brand bg-brand text-white hover:bg-brand-600 focus:ring-brand/20`;
   }, [isDisabled]);
 
   const renderContent = () => {
@@ -296,7 +296,7 @@ const LoginForm: React.FC = () => {
     <button
       type="button"
       onClick={togglePasswordVisibility}
-      className="rounded-[7px] p-1.5 text-[#8b8f9b] transition-colors hover:bg-[#fbfafd] hover:text-[#15171d] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70"
+      className="rounded-[7px] p-1.5 text-muted transition-colors hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
       aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
     >
       {showPassword ? <EyeClosed className="w-[18px] h-[18px]" weight="bold" /> : <Eye className="w-[18px] h-[18px]" weight="bold" />}
@@ -311,21 +311,21 @@ const LoginForm: React.FC = () => {
           alt="SIVAC Background"
           className="absolute inset-0 h-full w-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-[#111318]/35 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-ink-soft/35 backdrop-blur-[1px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-[392px] animate-fade-in-up">
-        <div className="overflow-hidden rounded-xl border border-[#e7e7ef] bg-white shadow-[0_24px_64px_-42px_rgba(12,15,24,0.72)]">
-          <div className="border-b border-[#eeeef3] px-6 py-5">
+        <div className="overflow-hidden rounded-xl border border-line bg-white shadow-[0_24px_64px_-42px_rgba(12,15,24,0.72)]">
+          <div className="border-b border-line-soft px-6 py-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#e7e7ef] bg-[#fbfafd]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-line bg-surface-soft">
                 <SivacLogo size={30} />
               </div>
               <div>
-                <h1 className="text-xl font-semibold leading-6 tracking-[-0.02em] text-[#15171d]">
+                <h1 className="text-xl font-semibold leading-6 tracking-[-0.02em] text-ink">
                   SIVAC
                 </h1>
-                <p className="mt-0.5 text-sm font-medium text-[#606571]">
+                <p className="mt-0.5 text-sm font-medium text-muted-2">
                   Acceso seguro al sistema
                 </p>
               </div>

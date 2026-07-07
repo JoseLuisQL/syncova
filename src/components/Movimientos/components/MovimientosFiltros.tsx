@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Settings, Building2, Package, Calendar, Loader2 } from 'lucide-react';
+import { Gear, Buildings, Package, CalendarBlank, SpinnerGap } from '@phosphor-icons/react';
 import { COMPONENT_STYLES, MESES } from '../constants';
 import { Vacuna, CentroAcopio } from '../../../types';
 
@@ -43,8 +43,8 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
       <div className={COMPONENT_STYLES.filter.header}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-[12px] border border-[#e7e7ef] bg-[#fbfafd] p-2.5">
-              <Settings className="h-5 w-5 text-[#7c3aed]" aria-hidden="true" />
+            <div className="rounded-[12px] border border-line bg-surface-soft p-2.5">
+              <Gear weight="bold" className="h-5 w-5 text-brand" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-zinc-900">Filtros de análisis</h3>
@@ -52,8 +52,8 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
             </div>
           </div>
           {(isLoadingEstablecimientos || isLoadingVacunas) && (
-            <div className="flex items-center text-[#7c3aed]">
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <div className="flex items-center text-brand">
+              <SpinnerGap weight="bold" className="h-4 w-4 animate-spin mr-2" />
               <span className="text-sm font-medium">Cargando...</span>
             </div>
           )}
@@ -66,7 +66,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
           {/* Centro de Acopio */}
           <div className="space-y-2">
             <label className="flex items-center text-sm font-semibold text-zinc-700">
-              <Building2 className="h-4 w-4 mr-2 text-[#7c3aed]" />
+              <Buildings weight="bold" className="h-4 w-4 mr-2 text-brand" />
               Centro de Acopio
             </label>
             <select
@@ -87,7 +87,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
           {/* Vacuna */}
           <div className="space-y-2">
             <label className="flex items-center text-sm font-semibold text-zinc-700">
-              <Package className="h-4 w-4 mr-2 text-[#7c3aed]" />
+              <Package weight="bold" className="h-4 w-4 mr-2 text-brand" />
               Vacuna
             </label>
             <select
@@ -110,7 +110,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
           {/* Mes */}
           <div className="space-y-2">
             <label className="flex items-center text-sm font-semibold text-zinc-700">
-              <Calendar className="h-4 w-4 mr-2 text-[#7c3aed]" />
+              <CalendarBlank weight="bold" className="h-4 w-4 mr-2 text-brand" />
               Período
             </label>
             <select
@@ -129,7 +129,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
           {/* Año */}
           <div className="space-y-2">
             <label className="flex items-center text-sm font-semibold text-zinc-700">
-              <Calendar className="h-4 w-4 mr-2 text-[#7c3aed]" />
+              <CalendarBlank weight="bold" className="h-4 w-4 mr-2 text-brand" />
               Año
             </label>
             <select
@@ -151,7 +151,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
           <div className="mt-6 pt-6 border-t border-zinc-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 bg-[#7c3aed] rounded-full animate-pulse" />
+                <div className="w-2.5 h-2.5 bg-brand rounded-full animate-pulse" />
                 <span className="text-sm font-semibold text-zinc-800">
                   {datosTablaLength} establecimientos • {MESES[selectedMes - 1]} {selectedAnio}
                 </span>

@@ -74,21 +74,21 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
           </div>
 
           <details className="group relative">
-            <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-[#e7e7ef] bg-white px-3.5 text-sm font-semibold text-[#15171d] shadow-sm transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:outline-none focus:ring-2 focus:ring-[#dedfea]/70 [&::-webkit-details-marker]:hidden">
-              <Faders className="h-4 w-4 text-[#606571]" aria-hidden="true" />
+            <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-line bg-white px-3.5 text-sm font-semibold text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 [&::-webkit-details-marker]:hidden">
+              <Faders className="h-4 w-4 text-muted-2" aria-hidden="true" />
               Filtros
             </summary>
-            <div className="absolute left-0 top-11 z-30 w-[min(300px,calc(100vw-3rem))] rounded-xl border border-[#e7e7ef] bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
+            <div className="absolute left-0 top-11 z-30 w-[min(300px,calc(100vw-3rem))] rounded-xl border border-line bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
               <div className="space-y-3">
                 <div>
-                  <label htmlFor="usuarios-filter-rol" className="mb-1 block text-xs font-medium text-[#747986]">
+                  <label htmlFor="usuarios-filter-rol" className="mb-1 block text-xs font-medium text-muted-3">
                     Rol
                   </label>
                   <select
                     id="usuarios-filter-rol"
                     value={filterRol}
                     onChange={(event) => onRolChange(event.target.value)}
-                    className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pr-8 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                    className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
                   >
                     <option value="todos">Todos los roles</option>
                     {rolesActivos.map((rol) => (
@@ -98,14 +98,14 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
                 </div>
 
                 <div>
-                  <label htmlFor="usuarios-filter-estado" className="mb-1 block text-xs font-medium text-[#747986]">
+                  <label htmlFor="usuarios-filter-estado" className="mb-1 block text-xs font-medium text-muted-3">
                     Estado
                   </label>
                   <select
                     id="usuarios-filter-estado"
                     value={filterEstado}
                     onChange={(event) => onEstadoChange(event.target.value)}
-                    className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pr-8 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                    className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
                   >
                     <option value="todos">Todos los estados</option>
                     <option value="activo">Activos</option>
@@ -114,14 +114,14 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
                 </div>
 
                 <div>
-                  <label htmlFor="usuarios-filter-centro" className="mb-1 block text-xs font-medium text-[#747986]">
+                  <label htmlFor="usuarios-filter-centro" className="mb-1 block text-xs font-medium text-muted-3">
                     Centro de acopio
                   </label>
                   <select
                     id="usuarios-filter-centro"
                     value={filterCentroAcopio}
                     onChange={(event) => onCentroAcopioChange(event.target.value)}
-                    className="h-9 w-full rounded-[9px] border border-[#e7e7ef] bg-white px-3 pr-8 text-sm font-medium text-[#15171d] outline-none transition hover:border-[#d7d8e2] focus:border-[#babdca] focus:ring-2 focus:ring-[#dedfea]/70"
+                    className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
                   >
                     <option value="todos">Todos los centros</option>
                     {centrosActivos.map((centro) => (

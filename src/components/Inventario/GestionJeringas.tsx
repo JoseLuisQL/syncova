@@ -217,8 +217,8 @@ const GestionJeringas: React.FC = () => {
                   <TableCell>
                     <button type="button" onClick={() => setSelectedJeringa(jeringa)} className="min-w-0 text-left">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-[#15171d]">{jeringa.tipo}</p>
-                        <p className="text-xs text-[#8b8f9b]">Uso operativo</p>
+                        <p className="truncate text-sm font-medium text-ink">{jeringa.tipo}</p>
+                        <p className="text-xs text-muted">Uso operativo</p>
                       </div>
                     </button>
                   </TableCell>

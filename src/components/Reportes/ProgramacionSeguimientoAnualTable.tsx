@@ -364,9 +364,9 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-[#e7e7ef] bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]">
+    <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]">
       {/* Header Minimal */}
-      <div className="border-b border-[#eeeef3] bg-white px-5 py-4">
+      <div className="border-b border-line-soft bg-white px-5 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
             <div className="flex items-center justify-center rounded-xl bg-teal-100 p-2">
@@ -386,7 +386,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
             <button type="button"
               onClick={handleExportarExcel}
               disabled={isExporting || loading || items.length === 0}
-              className="flex items-center rounded-lg border border-[#e7e7ef] bg-white px-4 py-2 text-sm font-semibold text-[#15171d] shadow-sm transition-colors hover:border-[#d7d8e2] hover:bg-[#fbfafd] focus:ring-2 focus:ring-[#dedfea]/70 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center rounded-lg border border-line bg-white px-4 py-2 text-sm font-semibold text-ink shadow-sm transition-colors hover:border-line-strong hover:bg-surface-soft focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isExporting ? (
                 <>
@@ -418,41 +418,41 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       </div>
       <div className="overflow-x-auto rounded-lg border border-zinc-200 md:border-0">
         <table className="w-full min-w-[1400px]">
-          <thead className="bg-[#fbfafd]">
+          <thead className="bg-surface-soft">
             <tr>
-              <th className="sticky left-0 z-10 border-r border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">
+              <th className="sticky left-0 z-10 border-r border-line bg-surface-soft px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">
                 <div className="flex items-center">
                   <Package className="h-4 w-4 mr-2" />
                   Descripción del Ítem
                 </div>
               </th>
-              <th className="border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">
+              <th className="border-r border-line bg-surface-soft px-3 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-muted">
                 Saldo {anio - 1}
               </th>
               {/* Q1 Columns */}
-              <th colSpan={5} className="border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
+              <th colSpan={5} className="border-r border-line bg-surface-soft px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted-2">
                 1° Trimestre
               </th>
               {/* Q2 Columns */}
-              <th colSpan={5} className="border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
+              <th colSpan={5} className="border-r border-line bg-surface-soft px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted-2">
                 2° Trimestre
               </th>
               {/* Q3 Columns */}
-              <th colSpan={5} className="border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
+              <th colSpan={5} className="border-r border-line bg-surface-soft px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted-2">
                 3° Trimestre
               </th>
               {/* Q4 Columns */}
-              <th colSpan={5} className="border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
+              <th colSpan={5} className="border-r border-line bg-surface-soft px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted-2">
                 4° Trimestre
               </th>
               {/* Annual Totals */}
-              <th colSpan={3} className="bg-[#fbfafd] px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
+              <th colSpan={3} className="bg-surface-soft px-3 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted-2">
                 Total Anual
               </th>
             </tr>
 
             {/* Sub-headers */}
-            <tr className="border-b border-[#eeeef3] bg-white text-[#8b8f9b]">
+            <tr className="border-b border-line-soft bg-white text-muted">
               <th className="px-4 py-2 sticky left-0 bg-white z-10 border-r border-zinc-200"></th>
               <th className="px-3 py-2 border-r border-zinc-200"></th>
 
@@ -479,7 +479,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
               const diferenciaTotal = totalProgramado - totalEntregado;
 
               return (
-                <tr key={item.id} className="border-b border-[#eeeef3] transition-colors duration-200 hover:bg-[#fbfafd]">
+                <tr key={item.id} className="border-b border-line-soft transition-colors duration-200 hover:bg-surface-soft">
                   {/* Item Description */}
                   <td className="px-6 py-4 text-sm font-semibold text-zinc-900 sticky left-0 bg-white z-10 border-r border-zinc-100">
                     <div className="flex items-center space-x-3">

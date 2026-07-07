@@ -83,12 +83,12 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
         <table className="min-w-full">
           <thead className={COMPONENT_STYLES.table.header}>
             <tr>
-              <th className="w-12 rounded-l-[14px] bg-[#fbfafd] px-4 py-3 text-left">
+              <th className="w-12 rounded-l-[14px] bg-surface-soft px-4 py-3 text-left">
                 <input
                   type="checkbox"
                   checked={selectedUsers.length === usuarios.length && usuarios.length > 0}
                   onChange={onSelectAll}
-                  className="h-4 w-4 rounded-[5px] border-[#e7e7ef] text-[#7c3aed] focus:ring-[#7c3aed]/20"
+                  className="h-4 w-4 rounded-[5px] border-line text-brand focus:ring-brand/20"
                 />
               </th>
               <th className={COMPONENT_STYLES.table.headerCell}>Usuario</th>
@@ -124,19 +124,19 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                     selectedUsers.includes(usuario.id) ? COMPONENT_STYLES.table.rowSelected : ''
                   }`}
                 >
-                  <td className="border-b border-[#eeeef3] px-4 py-4">
+                  <td className="border-b border-line-soft px-4 py-4">
                     <input
                       type="checkbox"
                       checked={selectedUsers.includes(usuario.id)}
                       onChange={() => onSelectUser(usuario.id)}
-                      className="h-4 w-4 rounded-[5px] border-[#e7e7ef] text-[#7c3aed] focus:ring-[#7c3aed]/20"
+                      className="h-4 w-4 rounded-[5px] border-line text-brand focus:ring-brand/20"
                     />
                   </td>
                   <td className={COMPONENT_STYLES.table.cell}>
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-full border border-[#e7e7ef] bg-[#f8f7fb] flex items-center justify-center">
-                          <User className="h-5 w-5 text-[#606571]" />
+                        <div className="h-10 w-10 rounded-full border border-line bg-[#f8f7fb] flex items-center justify-center">
+                          <User className="h-5 w-5 text-muted-2" />
                         </div>
                       </div>
                       <div className="ml-3">

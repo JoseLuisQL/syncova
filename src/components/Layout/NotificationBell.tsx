@@ -79,26 +79,26 @@ const AlertaRow: React.FC<AlertaRowProps> = memo(({ alerta, isMarking, onMarkAsR
       onClick={onClick}
       className={`
         group relative flex items-start gap-3.5 px-5 py-3.5
-        cursor-pointer border-b border-[#e7e7ef] last:border-0
+        cursor-pointer border-b border-line last:border-0
         transition-colors duration-150
-        hover:bg-[#fbfafd]
+        hover:bg-surface-soft
         ${isMarking ? 'opacity-50 pointer-events-none' : ''}
       `}
     >
-      <div className={`p-1.5 rounded-[9px] ${config.bgColor} flex-shrink-0 mt-0.5 border border-[#e7e7ef]`}>
+      <div className={`p-1.5 rounded-[9px] ${config.bgColor} flex-shrink-0 mt-0.5 border border-line`}>
         <Icon className={`w-4 h-4 ${config.color}`} weight="fill" />
       </div>
       
       <div className="flex-1 min-w-0 pt-0.5">
         <div className="flex items-center justify-between gap-3 mb-1">
-          <p className="text-base font-semibold text-[#111318] truncate pr-4">
+          <p className="text-base font-semibold text-ink-soft truncate pr-4">
             {alerta.titulo}
           </p>
-          <span className="text-xs font-medium text-[#8b8f9b] flex-shrink-0 tabular-nums">
+          <span className="text-xs font-medium text-muted flex-shrink-0 tabular-nums">
             {formatTimeAgo(alerta.fechaCreacion)}
           </span>
         </div>
-        <p className="text-base text-[#747986] leading-snug line-clamp-2 pr-6">
+        <p className="text-base text-muted-3 leading-snug line-clamp-2 pr-6">
           {alerta.descripcion}
         </p>
       </div>
@@ -112,7 +112,7 @@ const AlertaRow: React.FC<AlertaRowProps> = memo(({ alerta, isMarking, onMarkAsR
           opacity-0 group-hover:opacity-100 sm:focus-visible:opacity-100
           ${isMarking 
             ? 'text-zinc-300 cursor-not-allowed' 
-            : 'text-[#8b8f9b] hover:text-[#111318] hover:bg-[#f8f7fb] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dedfea]/70'
+            : 'text-muted hover:text-ink-soft hover:bg-[#f8f7fb] focus:outline-none focus-visible:ring-2 focus-visible:ring-line-focus/70'
           }
         `}
         title="Marcar como leída"
@@ -221,8 +221,8 @@ const NotificationBell: React.FC = memo(() => {
         className={`
           relative flex h-10 w-10 items-center justify-center rounded-[9px] border
           transition-colors duration-200
-          focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dedfea]/70
-          ${isOpen ? 'border-[#c7c9d5] bg-[#f8f7fb] text-[#111318]' : 'border-[#dedfea] bg-white text-[#606571] hover:border-[#c7c9d5] hover:text-[#111318]'}
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-line-focus/70
+          ${isOpen ? 'border-[#c7c9d5] bg-[#f8f7fb] text-ink-soft' : 'border-line-focus bg-white text-muted-2 hover:border-[#c7c9d5] hover:text-ink-soft'}
           ${hasNewAlerts ? 'text-[#ff3d73]' : ''}
         `}
         aria-label={`Notificaciones${count > 0 ? ` (${count} no leídas)` : ''}`}
@@ -249,9 +249,9 @@ const NotificationBell: React.FC = memo(() => {
           z-50 overflow-hidden rounded-3xl
           animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right
         ">
-          <div className="px-5 py-4 border-b border-[#e7e7ef] bg-white flex items-center justify-between">
+          <div className="px-5 py-4 border-b border-line bg-white flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-base text-[#111318] uppercase tracking-widest">Notificaciones</h3>
+              <h3 className="font-semibold text-base text-ink-soft uppercase tracking-widest">Notificaciones</h3>
               {count > 0 && (
                 <span className="px-2 py-0.5 text-[10px] font-semibold bg-[#ff3d73] text-white rounded-full">
                   {displayCount} nuevas
@@ -261,7 +261,7 @@ const NotificationBell: React.FC = memo(() => {
             {count > 0 && (
               <button type="button"
                 onClick={handleMarkAllAsRead}
-                className="rounded-sm px-1 text-xs font-semibold text-[#747986] transition-colors hover:text-[#111318] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dedfea]/70"
+                className="rounded-sm px-1 text-xs font-semibold text-muted-3 transition-colors hover:text-ink-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-line-focus/70"
               >
                 Marcar leídas
               </button>
@@ -276,15 +276,15 @@ const NotificationBell: React.FC = memo(() => {
           ">
             {isLoading && recentAlertas.length === 0 ? (
               <div className="flex items-center justify-center py-10">
-                <div className="w-5 h-5 border-2 border-[#111318] border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-ink-soft border-t-transparent rounded-full animate-spin" />
               </div>
             ) : recentAlertas.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-                <div className="w-10 h-10 rounded-[9px] bg-[#f8f7fb] flex items-center justify-center mb-3 border border-[#dedfea]">
-                  <Check className="w-5 h-5 text-[#8b8f9b]" weight="bold" />
+                <div className="w-10 h-10 rounded-[9px] bg-[#f8f7fb] flex items-center justify-center mb-3 border border-line-focus">
+                  <Check className="w-5 h-5 text-muted" weight="bold" />
                 </div>
-                <p className="text-sm font-medium text-[#111318] leading-tight">Estás al día</p>
-                <p className="text-base text-[#747986] mt-1">No tienes notificaciones pendientes por leer.</p>
+                <p className="text-sm font-medium text-ink-soft leading-tight">Estás al día</p>
+                <p className="text-base text-muted-3 mt-1">No tienes notificaciones pendientes por leer.</p>
               </div>
             ) : (
               <div className="flex flex-col">
@@ -302,13 +302,13 @@ const NotificationBell: React.FC = memo(() => {
           </div>
 
           {/* Footer */}
-            <div className="p-2 border-t border-[#e7e7ef] bg-white">
+            <div className="p-2 border-t border-line bg-white">
               <button type="button"
                 onClick={handleViewAll}
                 className="
-                  w-full py-2.5 text-sm font-semibold text-[#606571]
-                  hover:text-[#111318] hover:bg-[#f8f7fb] border border-transparent hover:border-[#dedfea]
-                  rounded-[9px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dedfea]/70
+                  w-full py-2.5 text-sm font-semibold text-muted-2
+                  hover:text-ink-soft hover:bg-[#f8f7fb] border border-transparent hover:border-line-focus
+                  rounded-[9px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-line-focus/70
                 "
               >
                 Ver todas las notificaciones

@@ -24,11 +24,11 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
   const isRefreshing = loading || loadingEstadisticas || loadingFiltros;
 
   return (
-    <section className="border-b border-[#eeeef3] bg-white px-5 py-4 sm:px-6">
+    <section className="border-b border-line-soft bg-white px-5 py-4 sm:px-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-[1.05rem] font-semibold tracking-tight text-[#15171d]">Kardex de Movimientos</h1>
-          <p className="text-sm text-[#747986]">
+          <h1 className="text-[1.05rem] font-semibold tracking-tight text-ink">Kardex de Movimientos</h1>
+          <p className="text-sm text-muted-3">
             Consulta de ingresos, salidas, ajustes y transferencias del inventario general.
           </p>
         </div>

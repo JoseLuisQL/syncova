@@ -339,8 +339,8 @@ const MicroredDesktopRow: React.FC<MicroredRowProps> = memo(({
     <TableRow>
       <TableCell>
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-[#15171d]">{microred.nombre}</p>
-          <p className="text-xs text-[#8b8f9b]">{microred.codigo || 'Sin código registrado'}</p>
+          <p className="truncate text-sm font-medium text-ink">{microred.nombre}</p>
+          <p className="text-xs text-muted">{microred.codigo || 'Sin código registrado'}</p>
         </div>
       </TableCell>
       <TableCell>

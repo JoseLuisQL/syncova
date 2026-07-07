@@ -36,9 +36,9 @@ export const AlertaEstado: React.FC<AlertaEstadoProps> = memo(({
       text: 'text-amber-800',
     },
     success: {
-      container: 'bg-[#f3f0ff] border border-[#dedfea]',
+      container: 'bg-[#f3f0ff] border border-line-focus',
       icon: null,
-      text: 'text-[#7c3aed]',
+      text: 'text-brand',
     },
   };
 

@@ -26,17 +26,17 @@ const DetailCard: React.FC<{
 }> = ({ label, value, tone = 'slate' }) => {
   const className =
     tone === 'base'
-      ? 'border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]'
+      ? 'border-line-focus bg-[#f3f0ff] text-brand'
       : tone === 'alt'
-      ? 'border-[#e7e7ef] bg-[#fbfafd] text-zinc-900'
+      ? 'border-line bg-surface-soft text-zinc-900'
       : tone === 'alert'
       ? 'border-rose-200 bg-rose-50 text-rose-900'
-      : 'border-[#e7e7ef] bg-white text-zinc-900';
+      : 'border-line bg-white text-zinc-900';
 
   return (
     <div className={`rounded-[12px] border px-4 py-3 ${className}`}>
       <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-zinc-500">{label}</p>
-      <p className={`mt-1 text-lg font-semibold tracking-tight ${tone === 'base' ? 'text-[#7c3aed]' : 'text-zinc-900'}`}>{value}</p>
+      <p className={`mt-1 text-lg font-semibold tracking-tight ${tone === 'base' ? 'text-brand' : 'text-zinc-900'}`}>{value}</p>
     </div>
   );
 };
@@ -67,7 +67,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
       size="lg"
       footer={
         <div className="flex justify-end">
-          <button type="button" onClick={onClose} className="inline-flex min-h-9 items-center justify-center rounded-[9px] border border-[#e7e7ef] bg-white px-4 py-1.5 text-sm font-semibold text-[#15171d] shadow-sm transition hover:bg-[#fbfafd] hover:border-[#d7d8e2]">
+          <button type="button" onClick={onClose} className="inline-flex min-h-9 items-center justify-center rounded-[9px] border border-line bg-white px-4 py-1.5 text-sm font-semibold text-ink shadow-sm transition hover:bg-surface-soft hover:border-line-strong">
             Volver
           </button>
         </div>
@@ -75,7 +75,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
     >
       <div className="space-y-4">
         <section className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-4">
+          <div className="rounded-xl border border-line bg-surface-soft p-4">
             <div className="flex items-center gap-2">
               <Buildings className="h-4 w-4 text-zinc-900" weight="duotone" />
               <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">Establecimiento</p>
@@ -84,7 +84,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
             <p className="mt-1 text-xs font-semibold text-zinc-500">{movimiento.establecimiento.codigo}</p>
           </div>
 
-          <div className="rounded-xl border border-[#e7e7ef] bg-white p-4">
+          <div className="rounded-xl border border-line bg-white p-4">
             <div className="flex items-center gap-2">
               <Syringe className="h-4 w-4 text-zinc-900" weight="duotone" />
               <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">Vacuna</p>
@@ -92,7 +92,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
             <p className="mt-2 text-[0.95rem] font-semibold tracking-tight text-zinc-900">{movimiento.vacuna?.nombre || 'Sin vacuna'}</p>
             <span
               className={`mt-2 inline-flex rounded-md px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-widest ${
-                movimiento.tieneMovimiento ? 'border border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed]' : 'bg-zinc-100 text-zinc-400 border border-zinc-200'
+                movimiento.tieneMovimiento ? 'border border-line-focus bg-[#f3f0ff] text-brand' : 'bg-zinc-100 text-zinc-400 border border-zinc-200'
               }`}
             >
               {movimiento.tieneMovimiento ? 'Registrado' : 'Pendiente'}
@@ -100,8 +100,8 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
           </div>
         </section>
 
-        <section className="space-y-3 rounded-xl border border-[#e7e7ef] bg-white p-4">
-          <div className="flex items-center gap-2 border-b border-[#eeeef3] pb-2">
+        <section className="space-y-3 rounded-xl border border-line bg-white p-4">
+          <div className="flex items-center gap-2 border-b border-line-soft pb-2">
             <TrendUp className="h-4 w-4 text-zinc-900" weight="bold" />
             <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Flujo principal</h3>
           </div>
@@ -126,7 +126,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#e7e7ef] bg-white p-4">
+          <div className="rounded-xl border border-line bg-white p-4">
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-2">
               <Package className="h-4 w-4 text-zinc-900" weight="bold" />
               <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Entregas</h3>
@@ -143,7 +143,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
         <section className="grid gap-3 md:grid-cols-3">
           <DetailCard label="Promedio consumo" value={movimiento.promedioConsumo.toLocaleString()} tone="slate" />
           <DetailCard label="Disponibilidad" value={`${movimiento.disponibilidad.toFixed(1)} meses`} tone={disponibilidadTone} />
-          <div className="rounded-[12px] border border-[#e7e7ef] bg-white px-4 py-3">
+          <div className="rounded-[12px] border border-line bg-white px-4 py-3">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-zinc-500" />
               <p className="text-[0.65rem] font-bold uppercase tracking-widest text-zinc-500">Período</p>
@@ -155,7 +155,7 @@ export const MovimientoDetalle: React.FC<MovimientoDetalleProps> = memo(({
         </section>
 
         {movimiento.observaciones ? (
-          <section className="rounded-xl border border-[#e7e7ef] bg-[#fbfafd] p-4">
+          <section className="rounded-xl border border-line bg-surface-soft p-4">
             <div className="flex items-center gap-2">
               <Heartbeat className="h-4 w-4 text-zinc-500" weight="duotone" />
               <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Observaciones</h3>

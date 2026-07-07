@@ -2,18 +2,18 @@ import React, { memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FileText, 
-  TrendingUp, 
+  TrendUp, 
   Package, 
-  AlertTriangle,
-  ChevronRight 
-} from 'lucide-react';
+  Warning,
+  CaretRight 
+} from '@phosphor-icons/react';
 import { QUICK_ACTIONS, DASHBOARD_COLORS } from './constants';
 
 const ICONS = {
   '/vales': FileText,
-  '/movimientos': TrendingUp,
+  '/movimientos': TrendUp,
   '/inventario': Package,
-  '/alertas': AlertTriangle,
+  '/alertas': Warning,
 } as const;
 
 const QuickActions: React.FC = memo(() => {
@@ -30,7 +30,7 @@ const QuickActions: React.FC = memo(() => {
     >
       <h2 className="text-base font-semibold text-zinc-900 mb-4 flex items-center gap-2">
         <span className="p-1.5 rounded-lg bg-gradient-to-br from-teal-600 to-cyan-600">
-          <ChevronRight className="h-4 w-4 text-white" aria-hidden="true" />
+          <CaretRight className="h-4 w-4 text-white" weight="bold" aria-hidden="true" />
         </span>
         Accesos Rápidos
       </h2>

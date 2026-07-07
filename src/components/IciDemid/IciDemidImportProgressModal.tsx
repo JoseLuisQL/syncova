@@ -38,44 +38,44 @@ const IciDemidImportProgressModal: React.FC<IciDemidImportProgressModalProps> = 
   const activeIndex = STEP_ORDER.findIndex((step) => step.key === currentStep);
 
   return (
-    <div className="fixed inset-0 z-[320] flex items-center justify-center bg-[#111318]/20 p-4 backdrop-blur-[2px]">
-      <div className="w-full max-w-2xl overflow-hidden rounded-lg border border-[#e7e7ef] bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
-        <div className="border-b border-[#eeeef3] px-5 py-3.5">
+    <div className="fixed inset-0 z-[320] flex items-center justify-center bg-ink-soft/20 p-4 backdrop-blur-[2px]">
+      <div className="w-full max-w-2xl overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
+        <div className="border-b border-line-soft px-5 py-3.5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] text-[#7c3aed]">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-brand">
                 <MicrosoftExcelLogo className="h-4 w-4" weight="bold" />
               </div>
               <div>
-                <p className="mb-1 inline-flex items-center gap-1.5 rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd] px-2 py-0.5 text-xs font-medium text-[#606571]">
-                  <Sparkle className="h-3.5 w-3.5 text-[#7c3aed]" weight="bold" />
+                <p className="mb-1 inline-flex items-center gap-1.5 rounded-[7px] border border-line bg-surface-soft px-2 py-0.5 text-xs font-medium text-muted-2">
+                  <Sparkle className="h-3.5 w-3.5 text-brand" weight="bold" />
                   Proceso de importación
                 </p>
-                <h2 className="text-md font-semibold leading-5 tracking-[-0.01em] text-[#15171d]">{activeConfig.title}</h2>
-                <p className="mt-1 max-w-xl text-sm leading-5 text-[#606571]">{activeConfig.description}</p>
+                <h2 className="text-md font-semibold leading-5 tracking-[-0.01em] text-ink">{activeConfig.title}</h2>
+                <p className="mt-1 max-w-xl text-sm leading-5 text-muted-2">{activeConfig.description}</p>
                 {fileName ? (
-                  <p className="mt-2 max-w-xl truncate text-xs font-medium text-[#8b8f9b]">
+                  <p className="mt-2 max-w-xl truncate text-xs font-medium text-muted">
                     Archivo: {fileName}
                   </p>
                 ) : null}
               </div>
             </div>
 
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-[#e7e7ef] bg-[#fbfafd]">
-              <SpinnerGap className="h-4 w-4 animate-spin text-[#7c3aed]" weight="bold" />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-line bg-surface-soft">
+              <SpinnerGap className="h-4 w-4 animate-spin text-brand" weight="bold" />
             </div>
           </div>
         </div>
 
         <div className="space-y-4 px-5 py-4">
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-medium text-[#606571]">
+            <div className="flex items-center justify-between text-xs font-medium text-muted-2">
               <span>Avance estimado</span>
               <span>{activeConfig.progress}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-[#eeeef3]">
+            <div className="h-2 overflow-hidden rounded-full bg-line-soft">
               <div
-                className="h-full rounded-full bg-[#7c3aed] transition-all duration-700 ease-out"
+                className="h-full rounded-full bg-brand transition-all duration-700 ease-out"
                 style={{ width: `${activeConfig.progress}%` }}
               />
             </div>
@@ -92,8 +92,8 @@ const IciDemidImportProgressModal: React.FC<IciDemidImportProgressModalProps> = 
                   key={step.key}
                   className={`rounded-md border px-3 py-3 transition-colors ${
                     isActive
-                      ? 'border-[#c8bbff] bg-[#fbfafd]'
-                      : 'border-[#e7e7ef] bg-white'
+                      ? 'border-brand-100 bg-surface-soft'
+                      : 'border-line bg-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -102,15 +102,15 @@ const IciDemidImportProgressModal: React.FC<IciDemidImportProgressModalProps> = 
                         isCompleted
                           ? 'border-emerald-200 bg-emerald-50 text-emerald-600'
                           : isActive
-                            ? 'border-[#c8bbff] bg-white text-[#7c3aed]'
-                            : 'border-[#e7e7ef] bg-[#fbfafd] text-[#8b8f9b]'
+                            ? 'border-brand-100 bg-white text-brand'
+                            : 'border-line bg-surface-soft text-muted'
                       }`}
                     >
                       {isCompleted ? <CheckCircle className="h-5 w-5" weight="bold" /> : <Icon className={`h-5 w-5 ${isActive ? 'animate-pulse' : ''}`} weight="bold" />}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-[#15171d]">{step.label}</p>
-                      <p className="text-xs text-[#606571]">
+                      <p className="text-sm font-semibold text-ink">{step.label}</p>
+                      <p className="text-xs text-muted-2">
                         {isCompleted ? 'Completado' : isActive ? 'En proceso...' : 'Pendiente'}
                       </p>
                     </div>

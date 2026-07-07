@@ -50,7 +50,7 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
       <div className={`flex w-full ${rowWidthClass} ${isUser ? 'flex-row-reverse' : 'flex-row'} items-end gap-2.5`}>
         {/* Avatar */}
         <div className={`relative flex h-7 w-7 flex-shrink-0 items-center justify-center overflow-hidden rounded-[9px] border
-          ${isUser ? 'border-[#e7e7ef] bg-[#fbfafd] text-[#606571]' : 'border-[#c8bbff] bg-[#fbfafd] text-[#7c3aed]'}`}
+          ${isUser ? 'border-line bg-surface-soft text-muted-2' : 'border-brand-100 bg-surface-soft text-brand'}`}
         >
           {isUser ? <User weight="bold" className="h-4 w-4" /> : <SiBotLogo className="absolute h-4 w-4" />}
         </div>
@@ -58,18 +58,18 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
         {/* Message Bubble */}
         <div className={`relative ${bubblePaddingClass} text-[12.5px] leading-relaxed min-w-0 w-full overflow-x-hidden
           ${isUser 
-            ? 'bg-[#15171d] text-zinc-50 rounded-xl rounded-br-[4px]' 
-            : 'bg-white border border-[#e7e7ef] text-[#15171d] rounded-xl rounded-bl-[4px]'
+            ? 'bg-ink text-zinc-50 rounded-xl rounded-br-[4px]' 
+            : 'bg-white border border-line text-ink rounded-xl rounded-bl-[4px]'
           }`}
         >
           {!mainContent.trim() && !isUser ? (
              <div className="flex items-center gap-3 h-[24px] px-1 py-0.5">
                <div className="flex gap-1.5 items-center">
-                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }} className="h-1.5 w-1.5 rounded-full bg-[#7c3aed]" />
-                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut", delay: 0.2 }} className="h-1.5 w-1.5 rounded-full bg-[#7c3aed]" />
-                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut", delay: 0.4 }} className="h-1.5 w-1.5 rounded-full bg-[#7c3aed]" />
+                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }} className="h-1.5 w-1.5 rounded-full bg-brand" />
+                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut", delay: 0.2 }} className="h-1.5 w-1.5 rounded-full bg-brand" />
+                 <motion.div animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut", delay: 0.4 }} className="h-1.5 w-1.5 rounded-full bg-brand" />
                </div>
-               <span className="animate-pulse text-[12.5px] font-medium tracking-wide text-[#7c3aed]">Analizando SIVAC...</span>
+               <span className="animate-pulse text-[12.5px] font-medium tracking-wide text-brand">Analizando SIVAC...</span>
              </div>
           ) : (
             <ReactMarkdown
@@ -103,27 +103,27 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
                   }
                   
                   return !inline ? (
-                    <div className="my-3 max-w-full overflow-x-auto rounded-[12px] border border-[#2b2f37] bg-[#15171d] p-4 font-mono text-base text-zinc-200">
+                    <div className="my-3 max-w-full overflow-x-auto rounded-[12px] border border-[#2b2f37] bg-ink p-4 font-mono text-base text-zinc-200">
                       <code className={className} {...props}>{children}</code>
                     </div>
                   ) : (
-                    <code className="rounded-md border border-[#e7e7ef] bg-[#fbfafd] px-1.5 py-0.5 font-mono text-base font-medium text-[#15171d]" {...props}>
+                    <code className="rounded-md border border-line bg-surface-soft px-1.5 py-0.5 font-mono text-base font-medium text-ink" {...props}>
                       {children}
                     </code>
                   );
                 },
                 p: ({children}) => <p className="mb-3 last:mb-0 tracking-tight">{children}</p>,
-                ul: ({children}) => <ul className="list-disc pl-5 mb-3 marker:text-[#8b8f9b] space-y-1">{children}</ul>,
-                ol: ({children}) => <ol className="list-decimal pl-5 mb-3 marker:text-[#8b8f9b] space-y-1 font-medium">{children}</ol>,
+                ul: ({children}) => <ul className="list-disc pl-5 mb-3 marker:text-muted space-y-1">{children}</ul>,
+                ol: ({children}) => <ol className="list-decimal pl-5 mb-3 marker:text-muted space-y-1 font-medium">{children}</ol>,
                 li: ({children}) => <li className="mb-1 leading-relaxed">{children}</li>,
-                h3: ({children}) => <h3 className="text-md font-semibold mt-5 mb-2 tracking-tight text-[#15171d]">{children}</h3>,
-                h4: ({children}) => <h4 className="text-base font-semibold mt-3 mb-1.5 tracking-tight text-[#15171d]">{children}</h4>,
+                h3: ({children}) => <h3 className="text-md font-semibold mt-5 mb-2 tracking-tight text-ink">{children}</h3>,
+                h4: ({children}) => <h4 className="text-base font-semibold mt-3 mb-1.5 tracking-tight text-ink">{children}</h4>,
                 table: ({children}) => <SiBotTable>{children}</SiBotTable>,
-                thead: ({children}) => <thead className="bg-[#fbfafd]">{children}</thead>,
+                thead: ({children}) => <thead className="bg-surface-soft">{children}</thead>,
                 tbody: ({children}) => <tbody className="bg-white">{children}</tbody>,
-                th: ({children}) => <th className="whitespace-nowrap border-b border-[#eeeef3] bg-[#fbfafd] px-3 py-2 text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">{children}</th>,
-                td: ({children}) => <td className="min-w-[100px] px-3 py-2 font-medium text-[#606571]">{children}</td>,
-                strong: ({children}) => <strong className={`font-semibold ${isUser ? 'text-white' : 'text-[#15171d]'}`}>{children}</strong>
+                th: ({children}) => <th className="whitespace-nowrap border-b border-line-soft bg-surface-soft px-3 py-2 text-[0.78rem] font-medium tracking-[-0.01em] text-muted">{children}</th>,
+                td: ({children}) => <td className="min-w-[100px] px-3 py-2 font-medium text-muted-2">{children}</td>,
+                strong: ({children}) => <strong className={`font-semibold ${isUser ? 'text-white' : 'text-ink'}`}>{children}</strong>
               }}
             >
               {mainContent}
@@ -139,9 +139,9 @@ export const SiBotMessage: React.FC<SiBotMessageProps> = ({
              <button type="button"
                 key={idx}
                 onClick={() => onSuggestionSelect && onSuggestionSelect(suggestionText)}
-                className="group flex w-fit max-w-full flex-row items-start gap-2 rounded-lg border border-[#e7e7ef] bg-white py-1.5 pl-2.5 pr-3 text-left text-[11.5px] font-medium text-[#606571] outline-none transition hover:border-[#d7d8e2] hover:bg-[#fbfafd] hover:text-[#15171d] active:scale-[0.99]"
+                className="group flex w-fit max-w-full flex-row items-start gap-2 rounded-lg border border-line bg-white py-1.5 pl-2.5 pr-3 text-left text-[11.5px] font-medium text-muted-2 outline-none transition hover:border-line-strong hover:bg-surface-soft hover:text-ink active:scale-[0.99]"
              >
-                <Sparkle weight="bold" className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#7c3aed] transition-colors" />
+                <Sparkle weight="bold" className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-brand transition-colors" />
                 <span className="whitespace-normal leading-snug">{suggestionText}</span>
              </button>
           ))}

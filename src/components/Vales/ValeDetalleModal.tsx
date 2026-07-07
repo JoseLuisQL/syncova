@@ -316,20 +316,20 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                         <Package className="h-4 w-4 text-zinc-600" />
                         Biológicos
                       </h3>
-                      <div className="overflow-hidden rounded-3xl border border-[#e7e7ef] bg-white">
+                      <div className="overflow-hidden rounded-3xl border border-line bg-white">
                         <table className="w-full text-sm">
-                          <thead className="bg-[#fbfafd]">
+                          <thead className="bg-surface-soft">
                             <tr>
-                              <th className="w-12 px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">#</th>
-                              <th className="px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Vacuna</th>
-                              <th className="w-28 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Cantidad</th>
-                              <th className="px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Presentación</th>
-                              <th className="w-24 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Dosis/Fr</th>
+                              <th className="w-12 px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">#</th>
+                              <th className="px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Vacuna</th>
+                              <th className="w-28 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Cantidad</th>
+                              <th className="px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Presentación</th>
+                              <th className="w-24 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Dosis/Fr</th>
                             </tr>
                           </thead>
                           <tbody className="bg-white">
                             {consolidadoVacunas.map((item, idx) => (
-                              <tr key={item.vacuna.id} className="border-b border-[#eeeef3] hover:bg-[#fbfafd]">
+                              <tr key={item.vacuna.id} className="border-b border-line-soft hover:bg-surface-soft">
                                 <td className="px-4 py-3 text-zinc-500">{idx + 1}</td>
                                 <td className="px-4 py-3 font-medium text-zinc-900">{item.vacuna.nombre}</td>
                                 <td className="px-4 py-3 text-center font-bold text-zinc-700">{formatNumber(item.cantidadTotal)}</td>
@@ -349,19 +349,19 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                         Jeringas
                         {isLoadingJeringas && <SpinnerGap weight="bold" className="h-4 w-4 animate-spin text-teal-600" />}
                       </h3>
-                      <div className="overflow-hidden rounded-3xl border border-[#e7e7ef] bg-white">
+                      <div className="overflow-hidden rounded-3xl border border-line bg-white">
                         <table className="w-full text-sm">
-                          <thead className="bg-[#fbfafd]">
+                          <thead className="bg-surface-soft">
                             <tr>
-                              <th className="px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Tipo</th>
-                              <th className="w-28 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Capacidad</th>
-                              <th className="w-28 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Cantidad</th>
+                              <th className="px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Tipo</th>
+                              <th className="w-28 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Capacidad</th>
+                              <th className="w-28 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Cantidad</th>
                             </tr>
                           </thead>
                           <tbody className="bg-white">
                             {consolidadoJeringas.length > 0 ? (
                               consolidadoJeringas.map((item, idx) => (
-                                <tr key={idx} className="border-b border-[#eeeef3] hover:bg-[#fbfafd]">
+                                <tr key={idx} className="border-b border-line-soft hover:bg-surface-soft">
                                   <td className="px-4 py-3 font-medium text-zinc-900">{item.tipo}</td>
                                   <td className="px-4 py-3 text-center text-zinc-600">{item.capacidad}</td>
                                   <td className="px-4 py-3 text-center font-bold text-teal-700">{formatNumber(item.cantidad)}</td>
@@ -391,23 +391,23 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                 ) : (
                   <div className="space-y-4">
                     {establecimientosDetalle.map(est => (
-                      <div key={est.establecimiento.id} className="overflow-hidden rounded-3xl border border-[#e7e7ef] bg-white">
-                        <div className="border-b border-[#eeeef3] bg-[#fbfafd] px-4 py-3">
+                      <div key={est.establecimiento.id} className="overflow-hidden rounded-3xl border border-line bg-white">
+                        <div className="border-b border-line-soft bg-surface-soft px-4 py-3">
                           <h4 className="font-semibold text-zinc-900">{est.establecimiento.nombre}</h4>
                           <p className="text-xs text-zinc-500">Código: {est.establecimiento.codigo}</p>
                         </div>
                         <table className="w-full text-sm">
-                          <thead className="bg-[#fbfafd]">
+                          <thead className="bg-surface-soft">
                             <tr>
-                              <th className="w-12 px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">#</th>
-                              <th className="px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Vacuna</th>
-                              <th className="w-28 px-4 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Cantidad</th>
-                              <th className="px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-[#8b8f9b]">Presentación</th>
+                              <th className="w-12 px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">#</th>
+                              <th className="px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Vacuna</th>
+                              <th className="w-28 px-4 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Cantidad</th>
+                              <th className="px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Presentación</th>
                             </tr>
                           </thead>
                           <tbody className="bg-white">
                             {Object.values(est.vacunas).map((vac, idx) => (
-                              <tr key={vac.vacuna.id} className="border-b border-[#eeeef3] hover:bg-[#fbfafd]">
+                              <tr key={vac.vacuna.id} className="border-b border-line-soft hover:bg-surface-soft">
                                 <td className="px-4 py-2 text-zinc-500">{idx + 1}</td>
                                 <td className="px-4 py-2">
                                   <span className="font-medium text-zinc-900">{vac.vacuna.nombre}</span>

@@ -345,30 +345,30 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
         <div className="max-h-[620px] overflow-x-auto overflow-y-auto rounded-lg border border-zinc-200 md:border-0">
           <table className="w-full min-w-[1600px] border-collapse">
             <thead className="sticky top-0 z-20">
-              <tr className="bg-[#fbfafd] text-[#8b8f9b]">
-                <th className="sticky left-0 z-30 min-w-[220px] border-r border-[#e7e7ef] bg-[#fbfafd] px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em]">
+              <tr className="bg-surface-soft text-muted">
+                <th className="sticky left-0 z-30 min-w-[220px] border-r border-line bg-surface-soft px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em]">
                   Item
                 </th>
-                <th className="sticky left-[220px] z-30 min-w-[90px] border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em]">
+                <th className="sticky left-[220px] z-30 min-w-[90px] border-r border-line bg-surface-soft px-3 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em]">
                   Saldo {anio - 1}
                 </th>
                 {TRIMESTRES.map((quarter) => (
                   <th
                     key={quarter}
                     colSpan={5}
-                    className="bg-[#fbfafd] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]"
+                    className="bg-surface-soft px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted-2"
                   >
                     {TRIMESTRE_LABELS[quarter]}
                   </th>
                 ))}
-                <th colSpan={3} className="bg-[#fbfafd] px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-[#606571]">
+                <th colSpan={3} className="bg-surface-soft px-2 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted-2">
                   Totales
                 </th>
               </tr>
 
-              <tr className="border-b border-[#eeeef3] bg-white font-medium text-[#8b8f9b]">
-                <th className="sticky left-0 z-30 border-r border-[#e7e7ef] bg-white" />
-                <th className="sticky left-[220px] z-30 border-r border-[#e7e7ef] bg-white" />
+              <tr className="border-b border-line-soft bg-white font-medium text-muted">
+                <th className="sticky left-0 z-30 border-r border-line bg-white" />
+                <th className="sticky left-[220px] z-30 border-r border-line bg-white" />
                 {TRIMESTRES.map((quarter) => (
                   <React.Fragment key={`sub-${quarter}`}>
                     <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Prog.</th>
@@ -391,8 +391,8 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
                 const totalDif = totalProg - totalEntr;
 
                 return (
-                  <tr key={item.id} className="group border-b border-[#eeeef3] transition-colors hover:bg-[#fbfafd]">
-                    <td className="sticky left-0 z-10 border-r border-[#e7e7ef] bg-white px-4 py-3 shadow-sm transition-colors group-hover:bg-[#fbfafd]">
+                  <tr key={item.id} className="group border-b border-line-soft transition-colors hover:bg-surface-soft">
+                    <td className="sticky left-0 z-10 border-r border-line bg-white px-4 py-3 shadow-sm transition-colors group-hover:bg-surface-soft">
                       <div className="flex items-center gap-2">
                         <span className={`flex-shrink-0 rounded p-1.5 ${item.tipo === 'vacuna' ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-100 text-zinc-700'}`}>
                           {item.tipo === 'vacuna' ? <Package className="h-3.5 w-3.5" /> : <Syringe weight="duotone" className="h-3.5 w-3.5" />}
@@ -403,7 +403,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
                       </div>
                     </td>
 
-                    <td className="sticky left-[220px] z-10 border-r border-[#e7e7ef] bg-[#fbfafd] px-3 py-3 text-center text-sm font-semibold text-[#15171d] shadow-sm transition-colors group-hover:bg-[#fbfafd]">
+                    <td className="sticky left-[220px] z-10 border-r border-line bg-surface-soft px-3 py-3 text-center text-sm font-semibold text-ink shadow-sm transition-colors group-hover:bg-surface-soft">
                       {item.saldoAnterior.toLocaleString()}
                     </td>
 

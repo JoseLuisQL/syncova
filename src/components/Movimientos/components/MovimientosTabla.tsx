@@ -98,7 +98,7 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = memo(({
     : `${styles.normal} ${styles.focus}`;
 
   const indicatorClassName = typing
-    ? 'bg-[#7c3aed] animate-pulse'
+    ? 'bg-brand animate-pulse'
     : pending
     ? 'bg-amber-400 animate-pulse'
     : '';
@@ -147,7 +147,7 @@ const MetricPill: React.FC<{
       : tone === 'cyan'
       ? 'bg-transparent text-zinc-900 font-bold'
       : tone === 'teal'
-      ? 'border border-[#dedfea] bg-[#f3f0ff] text-[#7c3aed] font-semibold'
+      ? 'border border-line-focus bg-[#f3f0ff] text-brand font-semibold'
       : 'bg-transparent text-zinc-600 font-semibold';
 
   return (
@@ -190,8 +190,8 @@ const TotalValue: React.FC<{ value?: number; accent?: boolean }> = memo(({ value
     className={`inline-flex min-w-[3.25rem] items-center justify-center rounded-[7px] px-2 py-1 text-[0.76rem] font-semibold tabular-nums tracking-tight ${
       value && value !== 0
         ? accent
-          ? 'bg-[#f3f0ff] text-[#7c3aed]'
-          : 'text-[#15171d]'
+          ? 'bg-[#f3f0ff] text-brand'
+          : 'text-ink'
         : 'text-zinc-300'
     }`}
   >
@@ -319,7 +319,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
   const visibleEditableFields = [
     visibleColumns.transIngreso ? (
       <div key="transIngreso" className="flex flex-col items-center gap-1">
-        <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-[#606571]">T. Ingreso</span>
+        <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-muted-2">T. Ingreso</span>
         <EditableNumberField
           readOnly={readOnly}
           value={getCurrentValue(movimiento.establecimientoId, 'transIngreso', movimiento.transIngreso)}
@@ -337,7 +337,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
     ) : null,
     visibleColumns.salida ? (
       <div key="salida" className="flex flex-col items-center gap-1">
-        <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-[#606571]">Salida</span>
+        <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-muted-2">Salida</span>
         <EditableNumberField
           readOnly={readOnly}
           value={getCurrentValue(movimiento.establecimientoId, 'salida', movimiento.salida)}
@@ -378,7 +378,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
       onClick={() => onRowSelect(movimiento.establecimientoId)}
       className={`rounded-xl border p-3 transition-all ${
         isSelected
-          ? 'border-[#c8bbff] bg-[#fbfafd] ring-1 ring-[#dedfea]'
+          ? 'border-brand-100 bg-surface-soft ring-1 ring-line-focus'
           : `border-zinc-200 ${colores.bg} hover:border-zinc-300 hover:shadow-sm`
       }`}
     >
@@ -387,10 +387,10 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
         <span
           className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
             movimiento.tieneMovimiento ? 'bg-emerald-500' : 'bg-zinc-300'
-          } ${isSelected ? 'ring-2 ring-[#dedfea]' : 'ring-2 ring-white/80'}`}
+          } ${isSelected ? 'ring-2 ring-line-focus' : 'ring-2 ring-white/80'}`}
         />
         <div className="min-w-0 flex-1">
-          <p className={`truncate text-sm font-semibold ${isSelected ? 'text-[#15171d]' : colores.text}`}>
+          <p className={`truncate text-sm font-semibold ${isSelected ? 'text-ink' : colores.text}`}>
             {movimiento.establecimiento.nombre}
           </p>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-zinc-500">
@@ -467,7 +467,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
               <button
                 type="button"
                 onClick={(event) => { event.stopPropagation(); onAgregarEntregaAdicional(movimiento.establecimientoId); }}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-[9px] border border-dashed border-[#d7d8e2] bg-white text-[#606571] transition hover:border-[#c8bbff] hover:bg-[#fbfafd] hover:text-[#7c3aed] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-[9px] border border-dashed border-line-strong bg-white text-muted-2 transition hover:border-brand-100 hover:bg-surface-soft hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isDisabled}
                 title="Agregar entrega adicional"
               >
@@ -565,7 +565,7 @@ const MobileTotalesSummary: React.FC<{
           </span>
         ) : null}
         {visibleColumns.totalSaldo ? (
-          <span className="rounded-lg border border-[#dedfea] bg-[#f3f0ff] px-2 py-1 text-[0.65rem] font-semibold text-[#7c3aed]">
+          <span className="rounded-lg border border-line-focus bg-[#f3f0ff] px-2 py-1 text-[0.65rem] font-semibold text-brand">
             Total: {totalesGenerales.totalSaldo.toLocaleString()}
           </span>
         ) : null}
@@ -741,7 +741,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
               <button
                 type="button"
                 onClick={() => onAgregarEntregaAdicional(movimiento.establecimientoId)}
-                className={`inline-flex w-full ${totalEntregaAdicional > 0 ? 'h-5' : 'h-11'} items-center justify-center rounded-lg border border-dashed border-[#d7d8e2] bg-white text-[#606571] transition hover:border-[#c8bbff] hover:bg-[#fbfafd] hover:text-[#7c3aed] focus:outline-none focus:ring-2 focus:ring-[#7c3aed]/20 disabled:cursor-not-allowed disabled:opacity-50`}
+                className={`inline-flex w-full ${totalEntregaAdicional > 0 ? 'h-5' : 'h-11'} items-center justify-center rounded-lg border border-dashed border-line-strong bg-white text-muted-2 transition hover:border-brand-100 hover:bg-surface-soft hover:text-brand focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:cursor-not-allowed disabled:opacity-50`}
                 disabled={isDisabled}
                 title="Agregar entrega adicional"
               >
@@ -873,7 +873,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
       <button
         type="button"
         onClick={onOpenColumnSettings}
-        className="absolute right-3 top-3 z-[90] inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#d7d8e2] bg-white text-[#15171d] shadow-[0_12px_30px_-20px_rgba(12,15,24,0.65)] backdrop-blur transition hover:border-[#c8bbff] hover:bg-[#fbfafd] hover:text-[#7c3aed]"
+        className="absolute right-3 top-3 z-[90] inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line-strong bg-white text-ink shadow-[0_12px_30px_-20px_rgba(12,15,24,0.65)] backdrop-blur transition hover:border-brand-100 hover:bg-surface-soft hover:text-brand"
         title={`Configurar columnas (${visibleCount}/${configurableColumnsAllowed.length})`}
         aria-label="Configurar columnas visibles"
       >
@@ -889,7 +889,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         {/* ============================================================== */}
         {/* DESKTOP TABLE (hidden on mobile) */}
         {/* ============================================================== */}
-        <div className="hidden h-full min-h-0 flex-1 overflow-auto overscroll-contain rounded-xl border border-[#e7e7ef] bg-white shadow-[0_16px_40px_-34px_rgba(12,15,24,0.5)] md:block selection:bg-zinc-200">
+        <div className="hidden h-full min-h-0 flex-1 overflow-auto overscroll-contain rounded-xl border border-line bg-white shadow-[0_16px_40px_-34px_rgba(12,15,24,0.5)] md:block selection:bg-zinc-200">
           <table className="w-max min-w-full table-fixed border-separate border-spacing-0" role="table" aria-label="Matriz de datos">
             <thead className="sticky top-0 z-40 bg-white shadow-[0_18px_34px_-30px_rgba(12,15,24,0.58)]">
               <tr className="bg-white">
@@ -899,7 +899,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                   return (
                     <th
                       key={column.key}
-                      className={`h-12 border-b border-[#eef0f6] bg-white px-3 py-2 align-middle text-[0.68rem] font-semibold uppercase tracking-[0.11em] text-[#747986] ${column.width} ${
+                      className={`h-12 border-b border-[#eef0f6] bg-white px-3 py-2 align-middle text-[0.68rem] font-semibold uppercase tracking-[0.11em] text-muted-3 ${column.width} ${
                         isFirst
                           ? 'sticky left-0 z-50 shadow-[12px_0_24px_-26px_rgba(12,15,24,0.62)]'
                           : ''
@@ -912,7 +912,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                       {column.key === 'entrega' ? (
                         <div className="flex flex-col items-center gap-0.5 leading-tight">
                           <span>{column.label}</span>
-                          <span className="text-[0.62rem] font-semibold normal-case tracking-normal text-[#7c3aed]">{periodoEntrega}</span>
+                          <span className="text-[0.62rem] font-semibold normal-case tracking-normal text-brand">{periodoEntrega}</span>
                         </div>
                       ) : (
                         column.label
@@ -921,20 +921,20 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                   );
                 })}
               </tr>
-              <tr className="bg-[#fbfafd]">
-                <th className="sticky left-0 z-50 h-11 border-b border-[#e7e7ef] bg-[#fbfafd] px-3 py-2 text-left font-normal shadow-[12px_0_24px_-26px_rgba(12,15,24,0.62)]">
+              <tr className="bg-surface-soft">
+                <th className="sticky left-0 z-50 h-11 border-b border-line bg-surface-soft px-3 py-2 text-left font-normal shadow-[12px_0_24px_-26px_rgba(12,15,24,0.62)]">
                   <div className="flex items-center gap-2">
-                    <span className="h-6 w-1 rounded-full bg-[#7c3aed]" />
+                    <span className="h-6 w-1 rounded-full bg-brand" />
                     <div className="min-w-0">
-                      <p className="text-[0.64rem] font-bold uppercase tracking-[0.16em] text-[#15171d]">Total general</p>
-                      <p className="text-[0.68rem] font-semibold text-[#8b8f9b]">{datosTabla.length} establecimientos</p>
+                      <p className="text-[0.64rem] font-bold uppercase tracking-[0.16em] text-ink">Total general</p>
+                      <p className="text-[0.68rem] font-semibold text-muted">{datosTabla.length} establecimientos</p>
                     </div>
                   </div>
                 </th>
                 {columnasVisibles
                   .filter((column) => column.key !== 'establecimiento')
                   .map((column) => (
-                    <th key={column.key} className={`h-11 border-b border-[#e7e7ef] bg-[#fbfafd] px-2 py-1 font-normal ${column.key === 'entrega' ? 'align-middle text-center' : 'text-center align-middle'}`}>
+                    <th key={column.key} className={`h-11 border-b border-line bg-surface-soft px-2 py-1 font-normal ${column.key === 'entrega' ? 'align-middle text-center' : 'text-center align-middle'}`}>
                       {renderTotalCell(column.key)}
                     </th>
                   ))}
@@ -947,7 +947,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 <tr>
                   <td colSpan={columnasVisibles.length} className="px-6 py-12 text-center">
                     <div className="mx-auto flex max-w-md flex-col items-center">
-                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-[#e7e7ef] bg-[#fbfafd] text-zinc-300">
+                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-line bg-surface-soft text-zinc-300">
                         <Package className="h-6 w-6" />
                       </div>
                       <p className="text-sm font-semibold text-zinc-800">No hay establecimientos para mostrar</p>
@@ -964,7 +964,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 const { colores, centro } = estiloEstablecimiento;
                 const isSelected = selectedRowId === movimiento.establecimientoId;
                 const rowBg = colores.bg;
-                const selectedRowRing = isSelected ? 'ring-inset ring-[1.5px] ring-[#7c3aed]/35' : '';
+                const selectedRowRing = isSelected ? 'ring-inset ring-[1.5px] ring-brand/35' : '';
 
                 return (
                   <tr
@@ -972,7 +972,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                     onClick={() => onRowSelect(movimiento.establecimientoId)}
                     className={`${rowBg} ${selectedRowRing} cursor-pointer border-b border-white/70 transition hover:brightness-[0.98]`}
                   >
-                    <td className={`sticky left-0 z-10 box-border px-3 py-2.5 ${rowBg} ${isSelected ? 'ring-inset ring-[1.5px] ring-[#7c3aed]/35' : ''}`}>
+                    <td className={`sticky left-0 z-10 box-border px-3 py-2.5 ${rowBg} ${isSelected ? 'ring-inset ring-[1.5px] ring-brand/35' : ''}`}>
                       <div className="min-w-0">
                         <div className="flex items-center justify-between">
                           <p className={`truncate text-xs font-semibold tracking-tight ${isSelected ? 'text-zinc-900' : colores.text}`}>
