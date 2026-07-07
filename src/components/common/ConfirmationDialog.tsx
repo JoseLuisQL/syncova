@@ -72,8 +72,8 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         />
       }
     >
-      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-        <p className="text-sm leading-6 text-gray-700">{message}</p>
+      <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+        <p className="text-sm leading-6 text-zinc-700">{message}</p>
       </div>
     </Modal>
   );

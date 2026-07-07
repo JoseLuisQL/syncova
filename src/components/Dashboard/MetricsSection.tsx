@@ -24,7 +24,7 @@ const MetricCard: React.FC<MetricCardProps> = memo(({ title, value, trend, trend
   <article className="min-h-[128px] rounded-[18px] border border-[#e3e9f0] bg-white p-4 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_45px_-32px_rgba(15,42,59,0.65)]">
     <div className="mb-3 flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e4edf2] bg-[#f8fbfd] text-[#35bfa8]">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e4edf2] bg-[#f8fbfd] text-[#0e9f8e]">
           <Icon size={15} weight="bold" />
         </div>
         <h3 className="text-[12px] font-medium text-[#556575]">{title}</h3>
@@ -41,7 +41,7 @@ const MetricCard: React.FC<MetricCardProps> = memo(({ title, value, trend, trend
       </div>
       {trend && (
         <span className={`mt-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
-          trendUp ? 'border-[#bdeee5] bg-[#effbf8] text-[#269b8b]' : 'border-[#f3d1d1] bg-[#fff5f5] text-[#c15d5d]'
+          trendUp ? 'border-[#bdeee5] bg-[#effbf8] text-[#0a8276]' : 'border-[#f3d1d1] bg-[#fff5f5] text-[#c15d5d]'
         }`}>
           {trendUp ? '↑' : '↓'} {trend}
         </span>

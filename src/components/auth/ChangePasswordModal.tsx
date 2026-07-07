@@ -191,7 +191,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               <button
                 type="button"
                 onClick={() => togglePassword('current')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors focus:outline-none rounded-md p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 transition-colors focus:outline-none rounded-md p-1"
                 aria-label={showPasswords.current ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
                 {showPasswords.current ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
@@ -232,7 +232,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               <button
                 type="button"
                 onClick={() => togglePassword('new')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors focus:outline-none rounded-md p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 transition-colors focus:outline-none rounded-md p-1"
               >
                 {showPasswords.new ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
               </button>
@@ -242,7 +242,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
             {formData.newPassword && (
               <div className="mt-3 space-y-2">
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1 bg-zinc-100 rounded-full overflow-hidden">
                     <div 
                       className={`h-full transition-all duration-300 ${getStrengthColor(passwordStrength.score)}`}
                       style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
@@ -294,7 +294,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
               <button
                 type="button"
                 onClick={() => togglePassword('confirm')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-900 transition-colors focus:outline-none rounded-md p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 transition-colors focus:outline-none rounded-md p-1"
               >
                 {showPasswords.confirm ? <EyeClosed className="w-5 h-5" weight="fill" /> : <Eye className="w-5 h-5" weight="fill" />}
               </button>
@@ -314,7 +314,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
 
           {/* Password Requirements */}
           <div className="rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] p-3">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-3">Requisitos obligatorios</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-3">Requisitos obligatorios</p>
             <div className="grid grid-cols-2 gap-y-2 gap-x-2">
               {[
                 { key: 'length', label: '8+ caracteres' },
@@ -327,13 +327,13 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = memo(({ isOpen, 
                   className={`flex items-center gap-2 text-[13px] font-medium transition-colors duration-300 ${
                     passwordStrength.checks[key as keyof typeof passwordStrength.checks]
                       ? 'text-emerald-700'
-                      : 'text-gray-500'
+                      : 'text-zinc-500'
                   }`}
                 >
                   <div className={`w-4 h-4 rounded-[4px] flex items-center justify-center transition-colors duration-300 ${
                     passwordStrength.checks[key as keyof typeof passwordStrength.checks]
                       ? 'bg-emerald-100/80 text-emerald-600'
-                      : 'bg-gray-200/50 text-gray-400'
+                      : 'bg-zinc-200/50 text-zinc-400'
                   }`}>
                     <Check className="w-3 h-3" weight="bold" />
                   </div>

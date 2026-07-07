@@ -95,12 +95,10 @@
 }
 
 @layer utilities {
-  .bg-teal-600.text-white,
-  .bg-teal-700.text-white,
-  .bg-teal-600 .text-white,
-  .bg-teal-700 .text-white {
-    color: var(--clinical-primary);
-  }
+  /* Botones teal con texto blanco: contraste correcto (WCAG AA pasa para blanco sobre #0e9f8e).
+     El hack anterior forzaba texto oscuro (#0f2a3b), contradiciendo el DESIGN.md y generando
+     contraste bajo. Si un boton teal especifico necesita texto oscuro, aplicar la clase
+     `text-primary` directamente en el componente en lugar de este override global. */
 }
 
 @media (prefers-reduced-motion: reduce) {

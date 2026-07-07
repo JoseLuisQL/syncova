@@ -224,10 +224,10 @@ const GestionJeringas: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className={`h-3.5 w-3.5 rounded-full border border-slate-300 ${getColorClass(jeringa.color)}`} />
+                      <span className={`h-3.5 w-3.5 rounded-full border border-zinc-300 ${getColorClass(jeringa.color)}`} />
                       <div>
-                        <p className="text-sm font-medium text-slate-900">{jeringa.capacidad}</p>
-                        <p className="text-xs text-slate-500">{jeringa.color}</p>
+                        <p className="text-sm font-medium text-zinc-900">{jeringa.capacidad}</p>
+                        <p className="text-xs text-zinc-500">{jeringa.color}</p>
                       </div>
                     </div>
                   </TableCell>
@@ -314,27 +314,27 @@ const GestionJeringas: React.FC = () => {
                   <article key={jeringa.id} className={`${COMPONENT_STYLES.panel} p-4`}>
                     <div className="flex items-start justify-between gap-3">
                       <button type="button" onClick={() => setSelectedJeringa(jeringa)} className="min-w-0 text-left">
-                        <p className="truncate text-base font-semibold text-slate-950">{jeringa.tipo}</p>
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="truncate text-base font-semibold text-zinc-950">{jeringa.tipo}</p>
+                        <p className="mt-1 text-sm text-zinc-500">
                           {jeringa.capacidad} · {jeringa.color}
                         </p>
                       </button>
                       <StatusBadge status={jeringa.estado} />
                     </div>
                 <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-                        <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Stock</p>
+                      <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+                        <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Stock</p>
                         <p className={`mt-2 text-lg font-semibold ${stockInfo.stockTotal > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
                           {stockInfo.stockTotal.toLocaleString()}
                         </p>
                       </div>
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-                        <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Lotes</p>
-                        <p className="mt-2 text-lg font-semibold text-slate-900">{jeringa._count?.lotes || 0}</p>
+                      <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+                        <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Lotes</p>
+                        <p className="mt-2 text-lg font-semibold text-zinc-900">{jeringa._count?.lotes || 0}</p>
                       </div>
                     </div>
                 <div className="mt-3 flex items-center justify-between">
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-zinc-500">
                     <p>{stockInfo.lotesActivos} disponibles</p>
                     <p>{stockInfo.lotesAgotados} agotados</p>
                       </div>
@@ -380,7 +380,7 @@ const GestionJeringas: React.FC = () => {
                   value: (
                     <div className="space-y-2 text-sm">
                       <p>
-                        <span className="font-semibold text-slate-900">{getStockInfo(selectedJeringa).stockTotal.toLocaleString()}</span>{' '}
+                        <span className="font-semibold text-zinc-900">{getStockInfo(selectedJeringa).stockTotal.toLocaleString()}</span>{' '}
                         unidades en stock total
                       </p>
                       <p>{getStockInfo(selectedJeringa).lotesActivos} lotes disponibles</p>
@@ -513,10 +513,10 @@ const JeringaModal: React.FC<JeringaModalProps> = ({ jeringa, onClose, onSubmit,
               />
             ) : null}
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
-            Se mostrará como <span className="font-medium text-slate-900">{formData.tipo}</span> ·{' '}
-            <span className="font-medium text-slate-900">{formData.capacidad}</span> ·{' '}
-            <span className="font-medium text-slate-900">{formData.color}</span>.
+          <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-600">
+            Se mostrará como <span className="font-medium text-zinc-900">{formData.tipo}</span> ·{' '}
+            <span className="font-medium text-zinc-900">{formData.capacidad}</span> ·{' '}
+            <span className="font-medium text-zinc-900">{formData.color}</span>.
           </div>
         </FormSection>
       </div>
@@ -544,7 +544,7 @@ const getColorClass = (color: string) => {
     morado: 'bg-purple-500',
   };
 
-  return colorMap[color.toLowerCase()] || 'bg-slate-400';
+  return colorMap[color.toLowerCase()] || 'bg-zinc-400';
 };
 
 export default memo(GestionJeringas);

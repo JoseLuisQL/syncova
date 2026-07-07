@@ -224,8 +224,8 @@ const GestionVacunas: React.FC = () => {
                     </button>
                   </TableCell>
                   <TableCell>
-                    <p className="text-sm font-medium text-slate-900">{vacuna.tipo}</p>
-                    <p className="text-xs text-slate-500">{vacuna.presentacion}</p>
+                    <p className="text-sm font-medium text-zinc-900">{vacuna.tipo}</p>
+                    <p className="text-xs text-zinc-500">{vacuna.presentacion}</p>
                   </TableCell>
                   <TableCell align="center">
                     <span className={`text-lg font-semibold ${stockInfo.stockTotal > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
@@ -313,27 +313,27 @@ const GestionVacunas: React.FC = () => {
                   <article key={vacuna.id} className={`${COMPONENT_STYLES.panel} p-4`}>
                     <div className="flex items-start justify-between gap-3">
                       <button type="button" onClick={() => setSelectedVacuna(vacuna)} className="min-w-0 text-left">
-                        <p className="truncate text-base font-semibold text-slate-950">{vacuna.nombre}</p>
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="truncate text-base font-semibold text-zinc-950">{vacuna.nombre}</p>
+                        <p className="mt-1 text-sm text-zinc-500">
                           {vacuna.tipo} · {vacuna.presentacion}
                         </p>
                       </button>
                       <StatusBadge status={vacuna.estado} />
                     </div>
                 <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-                        <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Stock</p>
+                      <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+                        <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Stock</p>
                         <p className={`mt-2 text-lg font-semibold ${stockInfo.stockTotal > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
                           {stockInfo.stockTotal.toLocaleString()}
                         </p>
                       </div>
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-                        <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Lotes activos</p>
-                        <p className="mt-2 text-lg font-semibold text-slate-900">{stockInfo.lotesActivos}</p>
+                      <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+                        <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Lotes activos</p>
+                        <p className="mt-2 text-lg font-semibold text-zinc-900">{stockInfo.lotesActivos}</p>
                       </div>
                     </div>
                 <div className="mt-3 flex items-center justify-between">
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-zinc-500">
                     <p>{stockInfo.lotesPorVencer} por vencer</p>
                     <p>{stockInfo.lotesVencidos} vencidos</p>
                   </div>
@@ -379,7 +379,7 @@ const GestionVacunas: React.FC = () => {
                   value: (
                     <div className="space-y-2 text-sm">
                       <p>
-                        <span className="font-semibold text-slate-900">{getStockInfo(selectedVacuna).stockTotal.toLocaleString()}</span>{' '}
+                        <span className="font-semibold text-zinc-900">{getStockInfo(selectedVacuna).stockTotal.toLocaleString()}</span>{' '}
                         dosis en stock total
                       </p>
                       <p>{getStockInfo(selectedVacuna).lotesActivos} lotes disponibles</p>
@@ -583,8 +583,8 @@ const VacunaModal: React.FC<VacunaModalProps> = ({ vacuna, onClose, onSubmit, is
               />
             ) : null}
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
-            <div className="flex items-center gap-2 text-slate-900">
+          <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-600">
+            <div className="flex items-center gap-2 text-zinc-900">
               <ThermometerCold className="h-4 w-4 text-zinc-600" weight="duotone" />
               <span className="font-medium">{formData.temperaturaAlmacenamiento}</span>
             </div>

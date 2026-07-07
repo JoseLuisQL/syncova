@@ -55,7 +55,7 @@ const EstadoBadge = memo<{ estado: string }>(({ estado }) => {
     generado: { bg: 'bg-cyan-100', text: 'text-cyan-800', icon: Clock },
     impreso: { bg: 'bg-amber-100', text: 'text-amber-800', icon: FileText },
     entregado: { bg: 'bg-emerald-100', text: 'text-emerald-800', icon: CheckCircle },
-  }[estado] || { bg: 'bg-gray-100', text: 'text-gray-800', icon: Clock };
+  }[estado] || { bg: 'bg-zinc-100', text: 'text-zinc-800', icon: Clock };
 
   const Icon = config.icon;
 
@@ -72,13 +72,13 @@ EstadoBadge.displayName = 'EstadoBadge';
 // Tarjeta de información
 const InfoCard = memo<{ icon: React.ElementType; label: string; value: string; subvalue?: string }>(
   ({ icon: Icon, label, value, subvalue }) => (
-    <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-      <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
+    <div className="bg-white rounded-xl p-4 border border-zinc-100 shadow-sm">
+      <div className="flex items-center gap-2 text-zinc-500 text-sm mb-1">
         <Icon className="h-4 w-4" />
         <span>{label}</span>
       </div>
-      <p className="text-lg font-bold text-gray-900 truncate">{value}</p>
-      {subvalue && <p className="text-xs text-gray-500 mt-0.5">{subvalue}</p>}
+      <p className="text-lg font-bold text-zinc-900 truncate">{value}</p>
+      {subvalue && <p className="text-xs text-zinc-500 mt-0.5">{subvalue}</p>}
     </div>
   )
 );

@@ -33,7 +33,7 @@ const StepIndicator = memo<{
     <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
       currentStep >= step
         ? 'bg-teal-600 border-teal-600 text-white'
-        : 'bg-white border-gray-300 text-gray-400'
+        : 'bg-white border-zinc-300 text-zinc-400'
     }`}>
       {currentStep > step ? (
         <CheckCircle weight="bold" className="h-5 w-5" />
@@ -42,11 +42,11 @@ const StepIndicator = memo<{
       )}
     </div>
     <span className={`ml-2 text-sm font-medium ${
-      currentStep >= step ? 'text-zinc-600' : 'text-gray-400'
+      currentStep >= step ? 'text-zinc-600' : 'text-zinc-400'
     }`}>
       {title}
     </span>
-    {!isLast && <ArrowRight className="h-4 w-4 text-gray-300 mx-4" />}
+    {!isLast && <ArrowRight className="h-4 w-4 text-zinc-300 mx-4" />}
   </div>
 ));
 
@@ -76,7 +76,7 @@ const CheckboxOption = memo<{
       </button>
       <div className="flex-1">
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-gray-900">{label}</span>
+          <span className="text-sm font-medium text-zinc-900">{label}</span>
           {badge && (
             <span className={`px-2 py-0.5 text-xs rounded-full ${badge.color}`}>
               {badge.text}
@@ -84,7 +84,7 @@ const CheckboxOption = memo<{
           )}
         </div>
         {description && (
-          <p className="text-sm text-gray-600 mt-0.5">{description}</p>
+          <p className="text-sm text-zinc-600 mt-0.5">{description}</p>
         )}
       </div>
     </label>
@@ -137,13 +137,13 @@ const FormatOption = memo<{
           <Icon className={`h-8 w-8 ${config.iconColor}`} />
         </div>
         <div>
-          <h4 className="text-lg font-semibold text-gray-900">{config.title}</h4>
-          <p className="text-sm text-gray-600">{config.description}</p>
+          <h4 className="text-lg font-semibold text-zinc-900">{config.title}</h4>
+          <p className="text-sm text-zinc-600">{config.description}</p>
           <div className="flex items-center space-x-2 mt-2">
             <span className={`px-2 py-1 text-xs rounded ${config.badgeColor}`}>
               {config.badge}
             </span>
-            <span className="text-xs text-gray-500">{config.extension}</span>
+            <span className="text-xs text-zinc-500">{config.extension}</span>
           </div>
         </div>
       </div>

@@ -66,11 +66,11 @@
 }
 
 .btn-enterprise-secondary {
-  @apply btn-enterprise bg-gray-100 text-gray-700 border border-gray-300;
+  @apply btn-enterprise bg-zinc-100 text-zinc-700 border border-zinc-300;
 }
 
 .btn-enterprise-secondary:hover {
-  @apply bg-gray-200 border-gray-400;
+  @apply bg-zinc-200 border-zinc-400;
 }
 
 .btn-enterprise-success {
@@ -91,7 +91,7 @@
 
 /* Cards empresariales */
 .card-enterprise {
-  @apply bg-white rounded-lg border border-gray-200 transition-smooth;
+  @apply bg-white rounded-lg border border-zinc-200 transition-smooth;
 }
 
 .card-enterprise:hover {
@@ -100,7 +100,7 @@
 
 /* Inputs empresariales */
 .input-enterprise {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-lg transition-smooth;
+  @apply w-full px-3 py-2 border border-zinc-300 rounded-lg transition-smooth;
 }
 
 .input-enterprise:focus {
@@ -113,19 +113,19 @@
 }
 
 .table-enterprise th {
-  @apply px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50;
+  @apply px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider bg-zinc-50;
 }
 
 .table-enterprise td {
-  @apply px-4 py-3 whitespace-nowrap text-sm text-gray-900;
+  @apply px-4 py-3 whitespace-nowrap text-sm text-zinc-900;
 }
 
 .table-enterprise tbody tr {
-  @apply border-b border-gray-200 transition-colors;
+  @apply border-b border-zinc-200 transition-colors;
 }
 
 .table-enterprise tbody tr:hover {
-  @apply bg-gray-50;
+  @apply bg-zinc-50;
 }
 
 /* Estados de vale empresariales */
@@ -191,7 +191,7 @@
 
 /* Iconos empresariales */
 .icon-enterprise {
-  @apply h-4 w-4 text-gray-500;
+  @apply h-4 w-4 text-zinc-500;
 }
 
 .icon-enterprise-primary {
@@ -227,19 +227,19 @@
 
 /* Tipografía empresarial */
 .text-enterprise-title {
-  @apply text-xl font-semibold text-gray-900;
+  @apply text-xl font-semibold text-zinc-900;
 }
 
 .text-enterprise-subtitle {
-  @apply text-sm text-gray-600;
+  @apply text-sm text-zinc-600;
 }
 
 .text-enterprise-body {
-  @apply text-sm text-gray-700;
+  @apply text-sm text-zinc-700;
 }
 
 .text-enterprise-caption {
-  @apply text-xs text-gray-500;
+  @apply text-xs text-zinc-500;
 }
 
 /* Colores empresariales consistentes */
@@ -248,7 +248,7 @@
 }
 
 .bg-enterprise-secondary {
-  @apply bg-gray-100;
+  @apply bg-zinc-100;
 }
 
 .bg-enterprise-success {
@@ -268,7 +268,7 @@
 }
 
 .text-enterprise-secondary {
-  @apply text-gray-600;
+  @apply text-zinc-600;
 }
 
 .text-enterprise-success {
@@ -285,7 +285,7 @@
 
 /* Bordes empresariales */
 .border-enterprise {
-  @apply border border-gray-200;
+  @apply border border-zinc-200;
 }
 
 .border-enterprise-primary {
@@ -333,7 +333,7 @@
 
 /* Layouts empresariales */
 .layout-enterprise-header {
-  @apply bg-white border-b border-gray-200 px-6 py-4;
+  @apply bg-white border-b border-zinc-200 px-6 py-4;
 }
 
 .layout-enterprise-content {
@@ -341,11 +341,11 @@
 }
 
 .layout-enterprise-sidebar {
-  @apply w-64 bg-white border-r border-gray-200;
+  @apply w-64 bg-white border-r border-zinc-200;
 }
 
 .layout-enterprise-main {
-  @apply flex-1 bg-gray-50;
+  @apply flex-1 bg-zinc-50;
 }
 
 /* Formularios empresariales */
@@ -354,7 +354,7 @@
 }
 
 .form-enterprise-label {
-  @apply block text-sm font-medium text-gray-700;
+  @apply block text-sm font-medium text-zinc-700;
 }
 
 .form-enterprise-input {
@@ -374,7 +374,7 @@
 }
 
 .form-enterprise-help {
-  @apply text-xs text-gray-500 mt-1;
+  @apply text-xs text-zinc-500 mt-1;
 }
 
 /* Navegación empresarial */
@@ -383,7 +383,7 @@
 }
 
 .nav-enterprise-item {
-  @apply px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors;
+  @apply px-3 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-700 transition-colors;
 }
 
 .nav-enterprise-item.active {
@@ -421,7 +421,7 @@
 }
 
 .badge-enterprise-secondary {
-  @apply badge-enterprise bg-gray-100 text-gray-800;
+  @apply badge-enterprise bg-zinc-100 text-zinc-800;
 }
 
 .badge-enterprise-success {

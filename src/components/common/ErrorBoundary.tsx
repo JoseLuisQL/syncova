@@ -68,15 +68,15 @@ class ErrorBoundary extends Component<Props, State> {
 
       // Fallback por defecto
       return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
           <div className="sm:mx-auto sm:w-full sm:max-w-md">
             <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
               <div className="text-center">
                 <AlertTriangle className="mx-auto h-16 w-16 text-red-500 mb-4" />
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl font-bold text-zinc-900 mb-2">
                   ¡Oops! Algo salió mal
                 </h2>
-                <p className="text-gray-600 mb-6">
+                <p className="text-zinc-600 mb-6">
                   Ha ocurrido un error inesperado. Por favor, intenta una de las siguientes opciones:
                 </p>
                 
@@ -91,7 +91,7 @@ class ErrorBoundary extends Component<Props, State> {
                   
                   <button type="button"
                     onClick={this.handleReload}
-                    className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    className="w-full flex justify-center items-center px-4 py-2 border border-zinc-300 rounded-md shadow-sm text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Recargar página
@@ -99,7 +99,7 @@ class ErrorBoundary extends Component<Props, State> {
                   
                   <button type="button"
                     onClick={this.handleGoHome}
-                    className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    className="w-full flex justify-center items-center px-4 py-2 border border-zinc-300 rounded-md shadow-sm text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                   >
                     <Home className="h-4 w-4 mr-2" />
                     Ir al inicio
@@ -109,11 +109,11 @@ class ErrorBoundary extends Component<Props, State> {
                 {/* Información de debug en desarrollo */}
                 {import.meta.env.MODE === 'development' && this.state.error && (
                   <details className="mt-6 text-left">
-                    <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900 flex items-center">
+                    <summary className="cursor-pointer text-sm font-medium text-zinc-700 hover:text-zinc-900 flex items-center">
                       <Bug className="h-4 w-4 mr-2" />
                       Información de debug
                     </summary>
-                    <div className="mt-3 p-3 bg-gray-100 rounded-md text-xs">
+                    <div className="mt-3 p-3 bg-zinc-100 rounded-md text-xs">
                       <div className="mb-2">
                         <strong>Error:</strong>
                         <pre className="mt-1 whitespace-pre-wrap text-red-600">
@@ -123,7 +123,7 @@ class ErrorBoundary extends Component<Props, State> {
                       {this.state.errorInfo && (
                         <div>
                           <strong>Stack trace:</strong>
-                          <pre className="mt-1 whitespace-pre-wrap text-gray-600 text-xs">
+                          <pre className="mt-1 whitespace-pre-wrap text-zinc-600 text-xs">
                             {this.state.errorInfo.componentStack}
                           </pre>
                         </div>
@@ -167,8 +167,8 @@ export const SimpleError: React.FC<SimpleErrorProps> = ({
   return (
     <div className={`text-center py-8 ${className}`}>
       <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-      <p className="text-gray-600 mb-4">{message}</p>
+      <h3 className="text-lg font-semibold text-zinc-900 mb-2">{title}</h3>
+      <p className="text-zinc-600 mb-4">{message}</p>
       {onRetry && (
         <button type="button"
           onClick={onRetry}

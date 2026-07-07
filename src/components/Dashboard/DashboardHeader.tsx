@@ -49,7 +49,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           <input
             type="search"
             placeholder="Buscar"
-            className="h-10 w-full rounded-[12px] border border-[#dfe4eb] bg-white pl-9 pr-12 text-[12px] font-medium text-[#111827] outline-none transition-colors placeholder:text-[#9aa4b2] focus:border-[#34bda6]"
+            className="h-10 w-full rounded-[12px] border border-[#dfe4eb] bg-white pl-9 pr-12 text-[12px] font-medium text-[#111827] outline-none transition-colors placeholder:text-[#9aa4b2] focus:border-[#0e9f8e]"
           />
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] text-[#9aa4b2]">⌘ K</span>
         </label>
@@ -69,10 +69,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           onClick={onRefresh}
           disabled={isLoading}
           className={`flex h-10 items-center justify-center gap-2 rounded-[12px] border px-3 text-[12px] font-semibold
-            transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#34bda6]/20
+            transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#0e9f8e]/20
             ${isLoading 
               ? 'cursor-not-allowed border-[#dfe4eb] bg-[#eef1f5] text-[#9aa4b2]' 
-              : 'border-[#dfe4eb] bg-white text-[#111827] hover:border-[#34bda6]'
+              : 'border-[#dfe4eb] bg-white text-[#111827] hover:border-[#0e9f8e]'
             }`}
           aria-label={isLoading ? 'Actualizando datos' : 'Actualizar datos'}
           aria-busy={isLoading}
@@ -87,12 +87,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           </span>
         </button>
         
-        <button type="button" className="flex h-10 items-center justify-center gap-2 rounded-[12px] border border-[#dfe4eb] bg-white px-3 text-[12px] font-semibold text-[#111827] transition-colors hover:border-[#34bda6]">
+        <button type="button" className="flex h-10 items-center justify-center gap-2 rounded-[12px] border border-[#dfe4eb] bg-white px-3 text-[12px] font-semibold text-[#111827] transition-colors hover:border-[#0e9f8e]">
           <DownloadSimple className="h-4 w-4" weight="bold" />
           Exportar CSV
         </button>
 
-        <button type="button" className="flex h-10 items-center justify-center gap-2 rounded-[12px] border border-[#269b8b] bg-[#35bfa8] px-4 text-[12px] font-semibold text-white shadow-[0_10px_20px_-14px_rgba(53,191,168,0.75)] transition-colors hover:bg-[#269b8b]">
+        <button type="button" className="flex h-10 items-center justify-center gap-2 rounded-[12px] border border-[#0a8276] bg-[#0e9f8e] px-4 text-[12px] font-semibold text-white shadow-sm transition-colors hover:bg-[#0a8276]">
           <Plus className="h-4 w-4" weight="bold" />
           Nuevo
         </button>

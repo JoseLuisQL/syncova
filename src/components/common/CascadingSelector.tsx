@@ -132,7 +132,7 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
 
   const getSelectClassName = (hasError?: string, isDisabled?: boolean) =>
     `${COMPONENT_STYLES.input.base} ${hasError ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal} ${
-      isDisabled ? 'cursor-not-allowed bg-gray-50 text-gray-500' : ''
+      isDisabled ? 'cursor-not-allowed bg-zinc-50 text-zinc-500' : ''
     }`;
 
   return (

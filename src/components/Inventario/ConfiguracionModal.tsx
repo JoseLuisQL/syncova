@@ -315,15 +315,15 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
       <div className="space-y-4">
         <div className="rounded-[18px] border border-zinc-200 bg-zinc-50/60 p-4">
           <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-zinc-700">Vista previa</p>
-          <p className="mt-2 text-sm leading-6 text-slate-800">
+          <p className="mt-2 text-sm leading-6 text-zinc-800">
             {isEditing ? (
               selectedVacunas[0] ? (
                 <>
-                  Para <span className="font-semibold text-slate-950">{selectedVacunas[0].nombre}</span>{' '}
+                  Para <span className="font-semibold text-zinc-950">{selectedVacunas[0].nombre}</span>{' '}
                   {selectedJeringas[0] ? (
                     <>
                       se usará{' '}
-                      <span className="font-semibold text-slate-950">
+                      <span className="font-semibold text-zinc-950">
                         {selectedJeringas[0].tipo} {selectedJeringas[0].capacidad}
                       </span>
                       .
@@ -339,8 +339,8 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
               <>Seleccione al menos una vacuna y una jeringa para construir las reglas.</>
             ) : combinationsCount === 1 ? (
               <>
-                Para <span className="font-semibold text-slate-950">{selectedVacunas[0].nombre}</span> se usará{' '}
-                <span className="font-semibold text-slate-950">
+                Para <span className="font-semibold text-zinc-950">{selectedVacunas[0].nombre}</span> se usará{' '}
+                <span className="font-semibold text-zinc-950">
                   {selectedJeringas[0].tipo} {selectedJeringas[0].capacidad}
                 </span>
                 .
@@ -348,8 +348,8 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
             ) : (
               <>
                 Se crearán{' '}
-                <span className="font-semibold text-slate-950">{combinationsCount} configuraciones</span> ·{' '}
-                <span className="text-slate-700">
+                <span className="font-semibold text-zinc-950">{combinationsCount} configuraciones</span> ·{' '}
+                <span className="text-zinc-700">
                   {formData.vacunaIds.length} vacuna{formData.vacunaIds.length === 1 ? '' : 's'} × {formData.jeringaIds.length}{' '}
                   jeringa{formData.jeringaIds.length === 1 ? '' : 's'}
                 </span>
@@ -357,7 +357,7 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
               </>
             )}
           </p>
-          <p className="mt-1 text-xs text-slate-600">
+          <p className="mt-1 text-xs text-zinc-600">
             {tipo === 'centro'
               ? selectedCentro
                 ? `Aplicará solo en ${selectedCentro.nombre}.`
@@ -520,12 +520,12 @@ interface ResumeCardProps {
 }
 
 const ResumeCard: React.FC<ResumeCardProps> = ({ icon: Icon, label, value }) => (
-  <div className="rounded-2xl border border-slate-200 bg-white p-4">
-    <div className="flex items-center gap-2 text-slate-500">
+  <div className="rounded-2xl border border-zinc-200 bg-white p-4">
+    <div className="flex items-center gap-2 text-zinc-500">
       <Icon className="h-4 w-4" />
       <span className="text-xs font-medium uppercase tracking-[0.08em]">{label}</span>
     </div>
-    <p className="mt-2 text-sm font-medium text-slate-900">{value}</p>
+    <p className="mt-2 text-sm font-medium text-zinc-900">{value}</p>
   </div>
 );
 

@@ -47,8 +47,8 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
               <Settings className="h-5 w-5 text-[#7c3aed]" aria-hidden="true" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Filtros de análisis</h3>
-              <p className="text-sm text-gray-600">Configura los parámetros de consulta</p>
+              <h3 className="text-lg font-semibold text-zinc-900">Filtros de análisis</h3>
+              <p className="text-sm text-zinc-600">Configura los parámetros de consulta</p>
             </div>
           </div>
           {(isLoadingEstablecimientos || isLoadingVacunas) && (
@@ -65,7 +65,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Centro de Acopio */}
           <div className="space-y-2">
-            <label className="flex items-center text-sm font-semibold text-gray-700">
+            <label className="flex items-center text-sm font-semibold text-zinc-700">
               <Building2 className="h-4 w-4 mr-2 text-[#7c3aed]" />
               Centro de Acopio
             </label>
@@ -86,7 +86,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
 
           {/* Vacuna */}
           <div className="space-y-2">
-            <label className="flex items-center text-sm font-semibold text-gray-700">
+            <label className="flex items-center text-sm font-semibold text-zinc-700">
               <Package className="h-4 w-4 mr-2 text-[#7c3aed]" />
               Vacuna
             </label>
@@ -109,7 +109,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
 
           {/* Mes */}
           <div className="space-y-2">
-            <label className="flex items-center text-sm font-semibold text-gray-700">
+            <label className="flex items-center text-sm font-semibold text-zinc-700">
               <Calendar className="h-4 w-4 mr-2 text-[#7c3aed]" />
               Período
             </label>
@@ -128,7 +128,7 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
 
           {/* Año */}
           <div className="space-y-2">
-            <label className="flex items-center text-sm font-semibold text-gray-700">
+            <label className="flex items-center text-sm font-semibold text-zinc-700">
               <Calendar className="h-4 w-4 mr-2 text-[#7c3aed]" />
               Año
             </label>
@@ -148,15 +148,15 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
 
         {/* Estado de selección */}
         {selectedVacuna && (
-          <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="mt-6 pt-6 border-t border-zinc-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-2.5 h-2.5 bg-[#7c3aed] rounded-full animate-pulse" />
-                <span className="text-sm font-semibold text-gray-800">
+                <span className="text-sm font-semibold text-zinc-800">
                   {datosTablaLength} establecimientos • {MESES[selectedMes - 1]} {selectedAnio}
                 </span>
               </div>
-              <span className="text-sm text-gray-600 font-medium">
+              <span className="text-sm text-zinc-600 font-medium">
                 {selectedCentroAcopio === 'todos' 
                   ? 'Todos los centros' 
                   : centrosAcopio.find(c => c.id === selectedCentroAcopio)?.nombre}

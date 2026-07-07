@@ -206,8 +206,8 @@ const NuevoIngreso: React.FC<NuevoIngresoProps> = ({
         {!tipoFijo && step === 1 ? (
           <section className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold text-slate-950">Que desea ingresar?</h3>
-              <p className="mt-1 text-sm text-slate-500">Seleccione el tipo de producto.</p>
+              <h3 className="text-lg font-semibold text-zinc-950">Que desea ingresar?</h3>
+              <p className="mt-1 text-sm text-zinc-500">Seleccione el tipo de producto.</p>
             </div>
 
             <div className="grid gap-3 md:grid-cols-2">
@@ -249,10 +249,10 @@ const NuevoIngreso: React.FC<NuevoIngresoProps> = ({
         ) : (
           <>
             <div>
-              <h3 className="text-lg font-semibold text-slate-950">
+              <h3 className="text-lg font-semibold text-zinc-950">
                 Datos del {tipo === 'vacuna' ? 'Lote de Vacuna' : 'Lote de Jeringa'}
               </h3>
-              <p className="mt-1 text-sm text-slate-500">Complete solo la información necesaria para registrar el lote.</p>
+              <p className="mt-1 text-sm text-zinc-500">Complete solo la información necesaria para registrar el lote.</p>
             </div>
 
             {serverError ? (
@@ -412,14 +412,14 @@ const TipoCard: React.FC<TipoCardProps> = ({ title, description, selected, icon:
     type="button"
     onClick={onClick}
     className={`rounded-[24px] border p-5 text-left transition ${
-      selected ? 'border-zinc-900 bg-zinc-50 shadow-sm ring-1 ring-zinc-900' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+      selected ? 'border-zinc-900 bg-zinc-50 shadow-sm ring-1 ring-zinc-900' : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50'
     }`}
   >
     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-900">
       <Icon className="h-6 w-6" weight="duotone" />
     </div>
-    <h4 className="text-lg font-semibold text-slate-950">{title}</h4>
-    <p className="mt-1 text-sm text-slate-500">{description}</p>
+    <h4 className="text-lg font-semibold text-zinc-950">{title}</h4>
+    <p className="mt-1 text-sm text-zinc-500">{description}</p>
   </button>
 );
 

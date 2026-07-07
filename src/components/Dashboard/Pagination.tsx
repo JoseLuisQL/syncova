@@ -64,14 +64,14 @@ const Pagination: React.FC<PaginationProps> = memo(({
   
   const disabledClass = 'opacity-40 cursor-not-allowed';
   const activeClass = 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-sm';
-  const inactiveClass = 'text-gray-600 hover:bg-gray-100 bg-white border border-gray-200';
+  const inactiveClass = 'text-zinc-600 hover:bg-zinc-100 bg-white border border-zinc-200';
 
   return (
     <nav
-      className={`flex items-center justify-between px-4 py-3 bg-gray-50/50 border-t border-gray-100 ${className}`}
+      className={`flex items-center justify-between px-4 py-3 bg-zinc-50/50 border-t border-zinc-100 ${className}`}
       aria-label="Paginación"
     >
-      <p className="text-xs text-gray-600">
+      <p className="text-xs text-zinc-600">
         <span className="font-medium">{startItem}</span>
         {' - '}
         <span className="font-medium">{endItem}</span>

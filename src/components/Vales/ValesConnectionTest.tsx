@@ -85,7 +85,7 @@ const ValesConnectionTest: React.FC = () => {
       case 'success': return <CheckCircle className="h-5 w-5 text-green-600" />;
       case 'error': return <Warning weight="duotone" className="h-5 w-5 text-red-600" />;
       case 'running': return <SpinnerGap weight="bold" className="h-5 w-5 text-blue-600 animate-spin" />;
-      default: return <HardDrives className="h-5 w-5 text-gray-400" />;
+      default: return <HardDrives className="h-5 w-5 text-zinc-400" />;
     }
   };
 
@@ -94,7 +94,7 @@ const ValesConnectionTest: React.FC = () => {
       case 'success': return 'bg-green-50 border-green-200';
       case 'error': return 'bg-red-50 border-red-200';
       case 'running': return 'bg-blue-50 border-blue-200';
-      default: return 'bg-gray-50 border-gray-200';
+      default: return 'bg-zinc-50 border-zinc-200';
     }
   };
 
@@ -110,19 +110,19 @@ const ValesConnectionTest: React.FC = () => {
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2 flex items-center justify-center">
+        <h1 className="text-2xl font-bold text-zinc-900 mb-2 flex items-center justify-center">
           <Database className="h-6 w-6 mr-2" />
           Diagnóstico de Conectividad - Módulo Vales
         </h1>
-        <p className="text-gray-600">
+        <p className="text-zinc-600">
           Verificación de conectividad con el backend y endpoints necesarios
         </p>
       </div>
 
       {/* Resumen */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Estado de Conectividad</h2>
+          <h2 className="text-lg font-semibold text-zinc-900">Estado de Conectividad</h2>
           <button type="button"
             onClick={runAllTests}
             disabled={isRunning}
@@ -134,9 +134,9 @@ const ValesConnectionTest: React.FC = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-gray-900">{tests.length}</div>
-            <div className="text-sm text-gray-600">Total Tests</div>
+          <div className="text-center p-4 bg-zinc-50 rounded-lg">
+            <div className="text-2xl font-bold text-zinc-900">{tests.length}</div>
+            <div className="text-sm text-zinc-600">Total Tests</div>
           </div>
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <div className="text-2xl font-bold text-green-600">{successCount}</div>
@@ -151,7 +151,7 @@ const ValesConnectionTest: React.FC = () => {
 
       {/* Tests Detallados */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Tests Detallados</h2>
+        <h2 className="text-lg font-semibold text-zinc-900">Tests Detallados</h2>
         
         {tests.map((test, index) => (
           <div
@@ -162,9 +162,9 @@ const ValesConnectionTest: React.FC = () => {
               <div className="flex items-center space-x-3">
                 {getStatusIcon(test.status)}
                 <div>
-                  <h3 className="font-medium text-gray-900">{test.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    <code className="bg-gray-100 px-2 py-1 rounded text-xs">
+                  <h3 className="font-medium text-zinc-900">{test.name}</h3>
+                  <p className="text-sm text-zinc-600">
+                    <code className="bg-zinc-100 px-2 py-1 rounded text-xs">
                       {apiClient.defaults.baseURL}{test.endpoint}
                     </code>
                   </p>
@@ -181,7 +181,7 @@ const ValesConnectionTest: React.FC = () => {
               <button type="button"
                 onClick={() => runTest(index)}
                 disabled={test.status === 'running' || isRunning}
-                className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="px-3 py-1 text-sm bg-white border border-zinc-300 rounded hover:bg-zinc-50 transition-colors disabled:opacity-50"
               >
                 {test.status === 'running' ? 'Probando...' : 'Probar'}
               </button>
@@ -190,10 +190,10 @@ const ValesConnectionTest: React.FC = () => {
             {/* Mostrar respuesta si existe */}
             {test.response && (
               <details className="mt-3">
-                <summary className="text-sm font-medium text-gray-700 cursor-pointer">
+                <summary className="text-sm font-medium text-zinc-700 cursor-pointer">
                   Ver respuesta del servidor
                 </summary>
-                <pre className="mt-2 text-xs bg-gray-100 p-3 rounded overflow-auto max-h-40">
+                <pre className="mt-2 text-xs bg-zinc-100 p-3 rounded overflow-auto max-h-40">
                   {JSON.stringify(test.response, null, 2)}
                 </pre>
               </details>

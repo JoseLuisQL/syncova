@@ -382,7 +382,7 @@ const ConfiguracionJeringas: React.FC = () => {
             actions={
               <div className="min-w-[152px] sm:min-w-[168px]">
                 <p className={COMPONENT_STYLES.input.label}>Resultados</p>
-                <div className="flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 shadow-sm">
+                <div className="flex min-h-[44px] items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-semibold text-zinc-700 shadow-sm">
                   {filteredConfiguraciones.length} resultado{filteredConfiguraciones.length === 1 ? '' : 's'}
                 </div>
               </div>
@@ -514,7 +514,7 @@ const ConfigCard: React.FC<ConfigCardProps> = memo(({ config, activeTab, onEdit,
           meta={config.vacuna?.presentacion || 'Sin presentación'}
         />
 
-        <div className="hidden items-center justify-center text-slate-300 xl:flex">
+        <div className="hidden items-center justify-center text-zinc-300 xl:flex">
           <ArrowRight className="h-4 w-4" weight="bold" />
         </div>
 
@@ -536,7 +536,7 @@ const ConfigCard: React.FC<ConfigCardProps> = memo(({ config, activeTab, onEdit,
 
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => onToggleActive(config)} className={COMPONENT_STYLES.button.ghost}>
-            {config.activo ? <ToggleRight className="h-5 w-5 text-emerald-600" weight="fill" /> : <ToggleLeft className="h-5 w-5 text-slate-400" />}
+            {config.activo ? <ToggleRight className="h-5 w-5 text-emerald-600" weight="fill" /> : <ToggleLeft className="h-5 w-5 text-zinc-400" />}
             <span>{config.activo ? 'Desactivar' : 'Activar'}</span>
           </button>
           <button type="button" onClick={() => onEdit(config)} className={COMPONENT_STYLES.button.ghost}>
@@ -562,13 +562,13 @@ interface RuleNodeProps {
 }
 
 const RuleNode: React.FC<RuleNodeProps> = ({ icon: Icon, title, value, meta }) => (
-  <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
-    <div className="flex items-center gap-2 text-slate-500">
+  <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-3.5">
+    <div className="flex items-center gap-2 text-zinc-500">
       <Icon className="h-4 w-4" />
       <span className="text-xs font-medium uppercase tracking-[0.08em]">{title}</span>
     </div>
-    <p className="mt-2 text-sm font-semibold text-slate-900">{value}</p>
-    <p className="mt-1 text-xs text-slate-500">{meta}</p>
+    <p className="mt-2 text-sm font-semibold text-zinc-900">{value}</p>
+    <p className="mt-1 text-xs text-zinc-500">{meta}</p>
   </div>
 );
 

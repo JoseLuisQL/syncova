@@ -206,8 +206,8 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <p className="text-sm font-medium text-slate-900">{getProductName(lote)}</p>
-                        <p className="text-xs text-slate-500">{formatFormaIngreso(lote.formaIngreso)}</p>
+                        <p className="text-sm font-medium text-zinc-900">{getProductName(lote)}</p>
+                        <p className="text-xs text-zinc-500">{formatFormaIngreso(lote.formaIngreso)}</p>
                       </TableCell>
                       <TableCell align="center">
                         <StockProgress current={lote.cantidadActual} initial={lote.cantidadInicial} />
@@ -216,17 +216,17 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
                         <TableCell align="center">
                           {'fechaVencimiento' in lote && lote.fechaVencimiento ? (
                             <div className="space-y-1.5">
-                              <p className="text-sm font-medium text-slate-900">{lote.fechaVencimiento.toLocaleDateString()}</p>
+                              <p className="text-sm font-medium text-zinc-900">{lote.fechaVencimiento.toLocaleDateString()}</p>
                               <ExpiryBadge daysToExpire={daysToExpire} />
                             </div>
                           ) : (
-                            <span className="text-sm text-slate-500">Sin fecha</span>
+                            <span className="text-sm text-zinc-500">Sin fecha</span>
                           )}
                         </TableCell>
                       ) : null}
                       <TableCell>
-                        <p className="text-sm font-medium text-slate-900">{lote.comprobanteClase}</p>
-                        <p className="text-xs text-slate-500">{lote.numeroComprobante}</p>
+                        <p className="text-sm font-medium text-zinc-900">{lote.comprobanteClase}</p>
+                        <p className="text-xs text-zinc-500">{lote.numeroComprobante}</p>
                       </TableCell>
                       <TableCell align="center">
                         <StatusBadge status={lote.estado} />
@@ -270,29 +270,29 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
               <article key={lote.id} className={`${COMPONENT_STYLES.panel} p-4`}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-base font-semibold text-slate-950">{lote.numero}</p>
-                    <p className="mt-1 text-sm text-slate-500">{getProductName(lote)}</p>
+                    <p className="text-base font-semibold text-zinc-950">{lote.numero}</p>
+                    <p className="mt-1 text-sm text-zinc-500">{getProductName(lote)}</p>
                   </div>
                   <StatusBadge status={lote.estado} />
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-                    <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Ingreso</p>
-                    <p className="mt-2 font-medium text-slate-900">{lote.fechaIngreso.toLocaleDateString()}</p>
+                  <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+                    <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Ingreso</p>
+                    <p className="mt-2 font-medium text-zinc-900">{lote.fechaIngreso.toLocaleDateString()}</p>
                   </div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-                    <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Comprobante</p>
-                    <p className="mt-2 font-medium text-slate-900">{lote.numeroComprobante}</p>
+                  <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
+                    <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Comprobante</p>
+                    <p className="mt-2 font-medium text-zinc-900">{lote.numeroComprobante}</p>
                   </div>
                 </div>
                 <div className="mt-3">
                   <StockProgress current={lote.cantidadActual} initial={lote.cantidadInicial} showPercentage={false} />
                 </div>
                 {tipo === 'vacuna' ? (
-                  <div className="mt-3 flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+                  <div className="mt-3 flex items-center justify-between rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Vencimiento</p>
-                      <p className="mt-2 font-medium text-slate-900">
+                      <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Vencimiento</p>
+                      <p className="mt-2 font-medium text-zinc-900">
                         {'fechaVencimiento' in lote && lote.fechaVencimiento ? lote.fechaVencimiento.toLocaleDateString() : 'Sin fecha'}
                       </p>
                     </div>
@@ -531,8 +531,8 @@ const LoteModal: React.FC<LoteModalProps> = ({ lote, tipo, onClose, onSubmit, is
               min={0}
             />
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
-            Estado calculado para guardar: <span className="font-semibold text-slate-900">{previewStatus}</span>.
+          <div className="rounded-2xl border border-zinc-200 bg-white p-4 text-sm text-zinc-600">
+            Estado calculado para guardar: <span className="font-semibold text-zinc-900">{previewStatus}</span>.
           </div>
         </FormSection>
 

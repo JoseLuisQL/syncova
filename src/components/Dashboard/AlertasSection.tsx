@@ -29,7 +29,7 @@ const AlertasSection: React.FC = memo(() => {
           <h3 className="mt-1 text-[15px] font-semibold tracking-[-0.02em] text-[#171b22]">Alertas</h3>
         </div>
         {pagination.total > 0 && (
-          <span className="rounded-full border border-[#dceeea] bg-[#effbf8] px-2 py-1 font-mono text-[11px] font-semibold text-[#269b8b]">
+          <span className="rounded-full border border-[#dceeea] bg-[#effbf8] px-2 py-1 font-mono text-[11px] font-semibold text-[#0a8276]">
             {pagination.total} activas
           </span>
         )}
@@ -74,7 +74,7 @@ const AlertasSection: React.FC = memo(() => {
       </div>
 
       <div className="mt-auto border-t border-zinc-100 px-5 py-4">
-        <button type="button" className="flex items-center gap-1 text-[13px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b]">
+        <button type="button" className="flex items-center gap-1 text-[13px] font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276]">
           Centro de notificaciones <span className="text-lg leading-none">→</span>
         </button>
       </div>

@@ -709,19 +709,19 @@ const Vales: React.FC<ValesProps> = ({
               <div className="mb-5 rounded-[8px] border border-[#e7e7ef] bg-[#fbfafd] p-3">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Centro de Acopio</p>
+                    <p className="text-sm text-zinc-600">Centro de Acopio</p>
                     <p className="font-medium">{valeSeleccionado.centroAcopio.nombre}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Período</p>
+                    <p className="text-sm text-zinc-600">Período</p>
                     <p className="font-medium">{valeSeleccionado.mes}/{valeSeleccionado.anio}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Total Vacunas</p>
+                    <p className="text-sm text-zinc-600">Total Vacunas</p>
                     <p className="font-medium">{valeSeleccionado.totalVacunas.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Establecimientos</p>
+                    <p className="text-sm text-zinc-600">Establecimientos</p>
                     <p className="font-medium">{valeSeleccionado.totalEstablecimientos}</p>
                   </div>
                 </div>
@@ -749,7 +749,7 @@ const Vales: React.FC<ValesProps> = ({
 
               {modificaciones.length > 0 ? (
                 <div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-4">
+                  <h4 className="text-lg font-medium text-zinc-900 mb-4">
                     Modificaciones Detectadas ({modificaciones.length})
                   </h4>
                   <div className="space-y-3">
@@ -768,10 +768,10 @@ const Vales: React.FC<ValesProps> = ({
                                 {modificacion.tipo.replace(/_/g, ' ').toUpperCase()}
                               </span>
                             </div>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-zinc-900">
                               {modificacion.establecimientoNombre} - {modificacion.vacunaNombre}
                             </p>
-                            <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                            <div className="flex items-center space-x-4 mt-2 text-sm text-zinc-600">
                               <span>Anterior: {modificacion.cantidadAnterior.toLocaleString()}</span>
                               <span>→</span>
                               <span>Nueva: {modificacion.cantidadNueva.toLocaleString()}</span>
@@ -779,7 +779,7 @@ const Vales: React.FC<ValesProps> = ({
                           </div>
                           <div className={`text-right ${
                             modificacion.diferencia > 0 ? 'text-emerald-600' :
-                            modificacion.diferencia < 0 ? 'text-rose-600' : 'text-gray-600'
+                            modificacion.diferencia < 0 ? 'text-rose-600' : 'text-zinc-600'
                           }`}>
                             <p className="font-medium">
                               {modificacion.diferencia > 0 ? '+' : ''}{modificacion.diferencia.toLocaleString()}
@@ -795,16 +795,16 @@ const Vales: React.FC<ValesProps> = ({
                   <div className="w-12 h-12 bg-emerald-50 border border-emerald-200/60 rounded-full flex items-center justify-center mx-auto mb-4">
                     <ArrowsClockwise weight="bold" className="h-6 w-6 text-emerald-600" />
                   </div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">Vale Sincronizado</h4>
-                  <p className="text-gray-600">
+                  <h4 className="text-lg font-medium text-zinc-900 mb-2">Vale Sincronizado</h4>
+                  <p className="text-zinc-600">
                     Este vale está actualizado con los datos más recientes.
                   </p>
                 </div>
               )}
 
               {ultimaSincronizacion && (
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-500">
+                <div className="mt-6 pt-4 border-t border-zinc-200">
+                  <p className="text-sm text-zinc-500">
                     Última sincronización: {ultimaSincronizacion.toLocaleString()}
                   </p>
                 </div>

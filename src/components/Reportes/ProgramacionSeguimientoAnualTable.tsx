@@ -330,13 +330,13 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl">
+      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-xl">
         <div className="flex flex-col justify-center items-center py-16">
           <div className="bg-blue-100 p-4 rounded-full mb-4">
             <SpinnerGap weight="bold" className="h-8 w-8 animate-spin text-blue-600" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Cargando Programación Anual</h3>
-          <p className="text-gray-600">Obteniendo datos de programación y seguimiento...</p>
+          <h3 className="text-lg font-semibold text-zinc-900 mb-2">Cargando Programación Anual</h3>
+          <p className="text-zinc-600">Obteniendo datos de programación y seguimiento...</p>
         </div>
       </div>
     );
@@ -344,13 +344,13 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl">
+      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-xl">
         <div className="flex flex-col items-center py-16">
           <div className="bg-red-100 p-4 rounded-full mb-4">
             <WarningCircle weight="duotone" className="h-8 w-8 text-red-600" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error al cargar datos</h3>
-          <p className="text-gray-600 mb-6 text-center max-w-md">{error}</p>
+          <h3 className="text-lg font-semibold text-zinc-900 mb-2">Error al cargar datos</h3>
+          <p className="text-zinc-600 mb-6 text-center max-w-md">{error}</p>
           <button type="button"
             onClick={loadData}
             className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
@@ -481,7 +481,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
               return (
                 <tr key={item.id} className="border-b border-[#eeeef3] transition-colors duration-200 hover:bg-[#fbfafd]">
                   {/* Item Description */}
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-900 sticky left-0 bg-white z-10 border-r border-gray-100">
+                  <td className="px-6 py-4 text-sm font-semibold text-zinc-900 sticky left-0 bg-white z-10 border-r border-zinc-100">
                     <div className="flex items-center space-x-3">
                       <div className={`p-2 rounded-lg border ${
                         item.tipo === 'vacuna'
@@ -491,10 +491,10 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
                         {item.tipo === 'vacuna' ? <Package className="h-4 w-4" /> : <Syringe weight="duotone" className="h-4 w-4" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-gray-900 truncate">
+                        <div className="font-semibold text-zinc-900 truncate">
                           {item.descripcion}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-zinc-500 mt-1">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                             item.tipo === 'vacuna'
                               ? 'bg-blue-100 text-blue-800 border border-blue-200'
@@ -561,7 +561,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       </div>
 
       {/* Export Section - Professional Design */}
-      <div className="border-t border-gray-200 bg-white p-6">
+      <div className="border-t border-zinc-200 bg-white p-6">
         <div className="flex items-center justify-center">
           <div className="w-full max-w-2xl rounded-xl border border-teal-200 bg-gradient-to-r from-teal-50 via-white to-cyan-50 p-6 shadow-sm">
             <div className="flex items-center mb-4">

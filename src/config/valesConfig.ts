@@ -138,10 +138,10 @@ export const STATUS_COLORS = {
     icon: 'text-green-600'
   },
   pendiente: {
-    bg: 'bg-gray-100',
-    text: 'text-gray-800',
-    border: 'border-gray-200',
-    icon: 'text-gray-600'
+    bg: 'bg-zinc-100',
+    text: 'text-zinc-800',
+    border: 'border-zinc-200',
+    icon: 'text-zinc-600'
   }
 } as const;
 

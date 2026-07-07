@@ -16,10 +16,10 @@ interface ProtectedRouteProps {
  * Componente de loading para autenticación
  */
 const AuthLoading: React.FC = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
+  <div className="min-h-screen flex items-center justify-center bg-zinc-100">
     <div className="text-center">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-      <p className="text-gray-600">Verificando autenticación...</p>
+      <p className="text-zinc-600">Verificando autenticación...</p>
     </div>
   </div>
 );
@@ -31,7 +31,7 @@ const AccessDenied: React.FC<{ userRole?: string; requiredRoles: string[] }> = (
   userRole, 
   requiredRoles 
 }) => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
+  <div className="min-h-screen flex items-center justify-center bg-zinc-100">
     <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
       <div className="mx-auto h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
         <svg
@@ -48,21 +48,21 @@ const AccessDenied: React.FC<{ userRole?: string; requiredRoles: string[] }> = (
           />
         </svg>
       </div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-2">
+      <h2 className="text-xl font-semibold text-zinc-900 mb-2">
         Acceso Denegado
       </h2>
-      <p className="text-gray-600 mb-4">
+      <p className="text-zinc-600 mb-4">
         No tienes permisos para acceder a esta sección del sistema.
       </p>
-      <div className="bg-gray-50 p-3 rounded-md mb-4">
-        <p className="text-sm text-gray-700">
+      <div className="bg-zinc-50 p-3 rounded-md mb-4">
+        <p className="text-sm text-zinc-700">
           <span className="font-medium">Tu rol:</span> {userRole || 'No definido'}
         </p>
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-zinc-700">
           <span className="font-medium">Roles requeridos:</span> {requiredRoles.join(', ')}
         </p>
       </div>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-zinc-500">
         Contacta al administrador del sistema si crees que esto es un error.
       </p>
     </div>

@@ -53,10 +53,10 @@ const SectionCard: React.FC<{
   icon: React.ElementType;
   children: React.ReactNode;
 }> = ({ title, icon: Icon, children }) => (
-  <section className="mt-8 border-t border-gray-100 pt-6 last:mb-0">
+  <section className="mt-8 border-t border-zinc-100 pt-6 last:mb-0">
     <header className="mb-4 flex items-center gap-2">
-      <Icon className="h-5 w-5 text-gray-400" />
-      <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+      <Icon className="h-5 w-5 text-zinc-400" />
+      <h3 className="text-sm font-semibold text-zinc-900">{title}</h3>
     </header>
     {children}
   </section>
@@ -159,24 +159,24 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
       }
     >
       <div className="space-y-6">
-        <div className="grid grid-cols-1 divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <div className="grid grid-cols-1 divide-y divide-zinc-100 rounded-lg border border-zinc-200 bg-white sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           <div className="px-5 py-4 sm:p-5">
-            <dt className="text-sm font-medium text-gray-500">Cantidad</dt>
+            <dt className="text-sm font-medium text-zinc-500">Cantidad</dt>
             <dd className={`mt-1 text-2xl font-semibold tracking-tight ${delta >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
               {delta >= 0 ? '+' : '-'}
               {Math.abs(delta).toLocaleString()}
             </dd>
           </div>
           <div className="px-5 py-4 sm:p-5">
-            <dt className="text-sm font-medium text-gray-500">Saldo final</dt>
-            <dd className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+            <dt className="text-sm font-medium text-zinc-500">Saldo final</dt>
+            <dd className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">
               {movimiento.saldoActual.toLocaleString()}
             </dd>
           </div>
           <div className="px-5 py-4 sm:p-5">
-            <dt className="text-sm font-medium text-gray-500">Fecha / hora</dt>
-            <dd className="mt-1 text-lg font-semibold tracking-tight text-gray-900">{fechaMovimiento.time}</dd>
-            <dd className="mt-0.5 text-xs text-gray-500">{fechaMovimiento.full}</dd>
+            <dt className="text-sm font-medium text-zinc-500">Fecha / hora</dt>
+            <dd className="mt-1 text-lg font-semibold tracking-tight text-zinc-900">{fechaMovimiento.time}</dd>
+            <dd className="mt-0.5 text-xs text-zinc-500">{fechaMovimiento.full}</dd>
           </div>
         </div>
 
@@ -231,7 +231,7 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
         {movimiento.tipoMovimiento === 'salida' ? (
           <SectionCard title="Distribución de entrega" icon={ArrowsLeftRight}>
             {loadingDelivery ? (
-              <div className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-5 text-sm text-gray-500">
+              <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-5 text-sm text-zinc-500">
                 Cargando distribución del vale...
               </div>
             ) : deliveryBreakdown ? (
@@ -289,7 +289,7 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
                 </div>
               </div>
             ) : (
-              <div className="rounded-lg border border-gray-100 bg-gray-50 px-4 py-5 text-sm text-gray-500">
+              <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-5 text-sm text-zinc-500">
                 No se encontró un desglose adicional para este movimiento.
               </div>
             )}
@@ -308,11 +308,11 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
             ]}
           />
 
-          <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <div className="mb-2 flex items-center gap-2 text-gray-500">
+          <div className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+            <div className="mb-2 flex items-center gap-2 text-zinc-500">
               <span className="text-sm font-medium">Observaciones</span>
             </div>
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-zinc-700">
               {movimiento.observaciones || 'Sin observaciones registradas para este movimiento.'}
             </p>
           </div>

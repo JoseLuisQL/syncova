@@ -75,7 +75,7 @@ export const ValesHeader: React.FC<ValesHeaderProps> = memo(({
             {onClose && (
               <button type="button"
                 onClick={onClose}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors"
                 title="Cerrar"
               >
                 <X weight="bold" className="h-5 w-5" />

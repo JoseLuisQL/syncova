@@ -45,7 +45,7 @@ const UserMenu: React.FC = memo(() => {
       administrador: 'bg-rose-100 text-rose-800 border bg-rose-50/50 border-rose-200',
       coordinador: 'bg-emerald-100 text-emerald-800 border bg-emerald-50/50 border-emerald-200',
       responsable_acopio: 'bg-blue-100 text-blue-800 border bg-blue-50/50 border-blue-200',
-      operador: 'bg-gray-100 text-gray-800 border bg-gray-50/50 border-gray-200',
+      operador: 'bg-zinc-100 text-zinc-800 border bg-zinc-50/50 border-zinc-200',
     };
     return roles[rol] || roles.operador;
   };

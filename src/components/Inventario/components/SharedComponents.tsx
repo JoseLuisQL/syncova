@@ -273,31 +273,31 @@ interface LoadingSpinnerProps {
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = memo(({ message = 'Cargando...' }) => (
   <div
-    className="inventory-loading-shell rounded-[24px] border border-slate-200/90 bg-white p-5 shadow-[0_10px_26px_-22px_rgba(15,23,42,0.22)]"
+    className="inventory-loading-shell rounded-[24px] border border-zinc-200/90 bg-white p-5 shadow-[0_10px_26px_-22px_rgba(15,23,42,0.22)]"
     role="status"
     aria-live="polite"
   >
-    <div className="flex items-center gap-3 text-slate-700">
+    <div className="flex items-center gap-3 text-zinc-700">
       <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-700 inventory-breathe">
         <CircleNotch className="h-5 w-5 animate-spin" aria-hidden="true" weight="bold" />
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-slate-900">{message}</p>
-        <p className="text-xs text-slate-500">Preparando la información para mostrarla de forma segura.</p>
+        <p className="text-sm font-semibold text-zinc-900">{message}</p>
+        <p className="text-xs text-zinc-500">Preparando la información para mostrarla de forma segura.</p>
       </div>
     </div>
 
     <div className="mt-5 grid gap-3 sm:grid-cols-3">
-      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+      <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
         <SkeletonBlock className="h-3 w-20 rounded-full" />
         <SkeletonBlock className="mt-3 h-7 w-14 rounded-2xl" />
       </div>
-      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+      <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
         <SkeletonBlock className="h-3 w-24 rounded-full" />
         <SkeletonBlock className="mt-3 h-4 w-full rounded-full" />
         <SkeletonBlock className="mt-2 h-4 w-3/4 rounded-full" />
       </div>
-      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+      <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
         <SkeletonBlock className="h-3 w-16 rounded-full" />
         <SkeletonBlock className="mt-3 h-10 w-full rounded-2xl" />
       </div>
@@ -324,11 +324,11 @@ export const EmptyState: React.FC<EmptyStateProps> = memo(({
   action,
 }) => (
   <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
-    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100">
       <Icon className="h-8 w-8 text-zinc-400" aria-hidden="true" weight="duotone" />
     </div>
-    <p className="text-lg font-medium text-slate-900">{title}</p>
-    {description ? <p className="mt-1 max-w-md text-sm text-slate-500">{description}</p> : null}
+    <p className="text-lg font-medium text-zinc-900">{title}</p>
+    {description ? <p className="mt-1 max-w-md text-sm text-zinc-500">{description}</p> : null}
     {action ? (
       <button type="button" onClick={action.onClick} className={`${COMPONENT_STYLES.button.primary} mt-5`}>
         {action.label}
@@ -439,13 +439,13 @@ export const StockProgress: React.FC<StockProgressProps> = memo(({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-3 text-sm">
-        <span className="font-semibold text-slate-900">{current.toLocaleString()}</span>
-        <span className="text-slate-500">de {initial.toLocaleString()}</span>
+        <span className="font-semibold text-zinc-900">{current.toLocaleString()}</span>
+        <span className="text-zinc-500">de {initial.toLocaleString()}</span>
       </div>
-      <div className="h-2 rounded-full bg-slate-200">
+      <div className="h-2 rounded-full bg-zinc-200">
         <div className={`h-2 rounded-full transition-all ${tone}`} style={{ width }} />
       </div>
-      {showPercentage ? <p className="text-xs text-slate-500">{percentage}% disponible</p> : null}
+      {showPercentage ? <p className="text-xs text-zinc-500">{percentage}% disponible</p> : null}
     </div>
   );
 });
@@ -480,8 +480,8 @@ export const KeyValueGrid: React.FC<KeyValueGridProps> = memo(({ items, columns 
   <dl className={`grid gap-x-4 gap-y-6 ${columns === 1 ? 'grid-cols-1' : columns === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
     {items.map((item) => (
       <div key={item.label} className="sm:col-span-1">
-        <dt className="text-xs font-medium text-gray-500">{item.label}</dt>
-        <dd className="mt-1 text-sm text-gray-900">{item.value}</dd>
+        <dt className="text-xs font-medium text-zinc-500">{item.label}</dt>
+        <dd className="mt-1 text-sm text-zinc-900">{item.value}</dd>
       </div>
     ))}
   </dl>

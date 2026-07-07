@@ -212,7 +212,7 @@ interface MobileMetricRowProps {
 
 const MobileMetricRow: React.FC<MobileMetricRowProps> = ({ label, children }) => (
   <div className="flex items-center justify-between gap-2">
-    <span className="text-[0.7rem] font-medium uppercase tracking-wide text-slate-500">{label}</span>
+    <span className="text-[0.7rem] font-medium uppercase tracking-wide text-zinc-500">{label}</span>
     {children}
   </div>
 );
@@ -379,23 +379,23 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
       className={`rounded-xl border p-3 transition-all ${
         isSelected
           ? 'border-[#c8bbff] bg-[#fbfafd] ring-1 ring-[#dedfea]'
-          : `border-slate-200 ${colores.bg} hover:border-slate-300 hover:shadow-sm`
+          : `border-zinc-200 ${colores.bg} hover:border-zinc-300 hover:shadow-sm`
       }`}
     >
       {/* Card header: nombre + estado */}
       <div className="flex items-start gap-2.5">
         <span
           className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
-            movimiento.tieneMovimiento ? 'bg-emerald-500' : 'bg-slate-300'
+            movimiento.tieneMovimiento ? 'bg-emerald-500' : 'bg-zinc-300'
           } ${isSelected ? 'ring-2 ring-[#dedfea]' : 'ring-2 ring-white/80'}`}
         />
         <div className="min-w-0 flex-1">
           <p className={`truncate text-sm font-semibold ${isSelected ? 'text-[#15171d]' : colores.text}`}>
             {movimiento.establecimiento.nombre}
           </p>
-          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-slate-500">
+          <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-zinc-500">
             <span>{movimiento.establecimiento.codigo}</span>
-            <span className="text-slate-300">•</span>
+            <span className="text-zinc-300">•</span>
             <span>{movimiento.tieneMovimiento ? 'Con movimiento' : 'Pendiente'}</span>
           </div>
           {selectedCentroAcopio === 'todos' ? (
@@ -408,7 +408,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
       </div>
 
       {/* Metrics grid */}
-      <div className="mt-3 space-y-1.5 rounded-lg border border-slate-100 bg-white/60 p-2.5">
+      <div className="mt-3 space-y-1.5 rounded-lg border border-zinc-100 bg-white/60 p-2.5">
         {visibleMetricRows.length > 0 ? (
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
             {visibleMetricRows}
@@ -418,7 +418,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
         {/* Editable fields */}
         {visibleEditableFields.length > 0 ? (
           <div
-            className={`grid gap-2 border-t border-slate-100 pt-2 ${
+            className={`grid gap-2 border-t border-zinc-100 pt-2 ${
               visibleEditableFields.length === 1
                 ? 'grid-cols-1'
                 : visibleEditableFields.length === 2
@@ -432,7 +432,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
 
         {/* Entrega section */}
         {visibleColumns.entrega ? (
-          <div className="border-t border-slate-100 pt-2">
+          <div className="border-t border-zinc-100 pt-2">
           <div className="flex flex-wrap items-center gap-2" onClick={(event) => { event.stopPropagation(); onRowSelect(movimiento.establecimientoId); }}>
             <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-emerald-600">Entrega</span>
             <EditableNumberField
@@ -502,7 +502,7 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
                     onChange={(v) => onTempEntregaValueChange(entrega.id, v)}
                     onBlur={() => onEntregaFieldBlur(entrega.id)}
                   />
-                  <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold text-slate-500">
+                  <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[9px] font-semibold text-zinc-500">
                     #{entrega.numeroEntrega}
                   </span>
                   {!entregaReadOnly ? (
@@ -529,9 +529,9 @@ const MobileMovimientoCard: React.FC<MobileMovimientoCardProps> = memo(({
 
         {/* Promedio */}
         {visibleColumns.promedioConsumo ? (
-          <div className="flex items-center justify-between border-t border-slate-100 pt-2">
-            <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-slate-500">Promedio</span>
-            <span className="inline-flex min-w-[4rem] justify-center rounded-xl border border-slate-200 bg-white/80 px-2 py-1.5 text-sm font-semibold text-slate-700 tabular-nums">
+          <div className="flex items-center justify-between border-t border-zinc-100 pt-2">
+            <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-zinc-500">Promedio</span>
+            <span className="inline-flex min-w-[4rem] justify-center rounded-xl border border-zinc-200 bg-white/80 px-2 py-1.5 text-sm font-semibold text-zinc-700 tabular-nums">
               {movimiento.promedioConsumo.toLocaleString()}
             </span>
           </div>
@@ -552,15 +552,15 @@ const MobileTotalesSummary: React.FC<{
   count: number;
   visibleColumns: VisibleColumnsState;
 }> = memo(({ totalesGenerales, count, visibleColumns }) => (
-  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+  <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">Totales</p>
-        <p className="text-[0.68rem] text-slate-500">{count} establecimientos</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-600">Totales</p>
+        <p className="text-[0.68rem] text-zinc-500">{count} establecimientos</p>
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
         {visibleColumns.saldoAnterior ? (
-          <span className="rounded-lg bg-slate-100 px-2 py-1 text-[0.65rem] font-semibold text-slate-600">
+          <span className="rounded-lg bg-zinc-100 px-2 py-1 text-[0.65rem] font-semibold text-zinc-600">
             Ant: {totalesGenerales.saldoAnterior.toLocaleString()}
           </span>
         ) : null}
@@ -779,7 +779,7 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 />
 
                 <div className="flex flex-col justify-center gap-1.5 w-[42px]">
-                  <span className="inline-flex w-full items-center justify-center rounded bg-white border border-slate-200/80 py-0.5 text-[0.6rem] font-bold text-slate-500 shadow-sm">
+                  <span className="inline-flex w-full items-center justify-center rounded bg-white border border-zinc-200/80 py-0.5 text-[0.6rem] font-bold text-zinc-500 shadow-sm">
                     #{entrega.numeroEntrega}
                   </span>
 
@@ -947,11 +947,11 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                 <tr>
                   <td colSpan={columnasVisibles.length} className="px-6 py-12 text-center">
                     <div className="mx-auto flex max-w-md flex-col items-center">
-                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] text-slate-300">
+                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[14px] border border-[#e7e7ef] bg-[#fbfafd] text-zinc-300">
                         <Package className="h-6 w-6" />
                       </div>
-                      <p className="text-sm font-semibold text-slate-800">No hay establecimientos para mostrar</p>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="text-sm font-semibold text-zinc-800">No hay establecimientos para mostrar</p>
+                      <p className="mt-1 text-sm text-zinc-500">
                         Ajusta los filtros para visualizar los movimientos del período.
                       </p>
                     </div>
@@ -1039,11 +1039,11 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
           {/* Card list */}
           {datosTabla.length === 0 && !isLoading ? (
             <div className="flex flex-col items-center py-10">
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-300">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-300">
                 <Package className="h-5 w-5" />
               </div>
-              <p className="text-sm font-semibold text-slate-800">No hay establecimientos</p>
-              <p className="mt-1 text-xs text-slate-500">Ajusta los filtros para ver los movimientos.</p>
+              <p className="text-sm font-semibold text-zinc-800">No hay establecimientos</p>
+              <p className="mt-1 text-xs text-zinc-500">Ajusta los filtros para ver los movimientos.</p>
             </div>
           ) : (
             <div className="mt-2.5 space-y-2">

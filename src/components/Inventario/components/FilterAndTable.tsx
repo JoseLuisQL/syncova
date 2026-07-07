@@ -221,13 +221,13 @@ export const DataTable: React.FC<DataTableProps> = memo(({
   <div className={`${COMPONENT_STYLES.table.container} flex min-h-0 flex-1 flex-col`}>
     {isLoading ? (
       <div className="inventory-loading-shell p-4 sm:p-5">
-        <div className="flex items-center gap-3 pb-4 text-slate-700">
+        <div className="flex items-center gap-3 pb-4 text-zinc-700">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 inventory-breathe">
             <div className="h-4 w-4 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-900">{loadingMessage}</p>
-            <p className="text-xs text-slate-500">Mostrando una vista previa mientras llega la información.</p>
+            <p className="text-sm font-semibold text-zinc-900">{loadingMessage}</p>
+            <p className="text-xs text-zinc-500">Mostrando una vista previa mientras llega la información.</p>
           </div>
         </div>
 
@@ -236,7 +236,7 @@ export const DataTable: React.FC<DataTableProps> = memo(({
             {Array.from({ length: skeletonRows }).map((_, index) => (
               <div
                 key={`card-skeleton-${index + 1}`}
-                className="inventory-reveal rounded-[22px] border border-slate-200 bg-white/90 p-4 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.14)]"
+                className="inventory-reveal rounded-[22px] border border-zinc-200 bg-white/90 p-4 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.14)]"
                 style={{ animationDelay: `${index * 45}ms` }}
               >
                 <div className="flex items-start justify-between gap-3">

@@ -69,12 +69,12 @@ class ValesErrorBoundary extends Component<Props, State> {
             </div>
 
             {/* Título */}
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-xl font-semibold text-zinc-900 mb-2">
               Error en el Módulo de Vales
             </h2>
 
             {/* Descripción */}
-            <p className="text-gray-600 mb-6">
+            <p className="text-zinc-600 mb-6">
               Ha ocurrido un error inesperado. Por favor, intenta nuevamente o contacta al soporte técnico.
             </p>
 
@@ -110,7 +110,7 @@ class ValesErrorBoundary extends Component<Props, State> {
               
               <button type="button"
                 onClick={this.handleGoHome}
-                className="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex items-center justify-center px-4 py-2 bg-zinc-600 text-white rounded-lg hover:bg-zinc-700 transition-colors"
               >
                 <House className="h-4 w-4 mr-2" />
                 Recargar Página
@@ -118,11 +118,11 @@ class ValesErrorBoundary extends Component<Props, State> {
             </div>
 
             {/* Información adicional */}
-            <div className="mt-6 pt-4 border-t border-gray-200">
-              <p className="text-xs text-gray-500">
+            <div className="mt-6 pt-4 border-t border-zinc-200">
+              <p className="text-xs text-zinc-500">
                 Si el problema persiste, por favor contacta al equipo de soporte técnico.
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-zinc-400 mt-1">
                 Error ID: {Date.now().toString(36)}
               </p>
             </div>
@@ -164,9 +164,9 @@ export const ValesErrorFallback: React.FC<{
 }> = ({ error, onRetry, message = "Ha ocurrido un error" }) => (
   <div className="p-6 text-center">
     <Warning weight="duotone" className="h-12 w-12 text-red-500 mx-auto mb-4" />
-    <h3 className="text-lg font-medium text-gray-900 mb-2">{message}</h3>
+    <h3 className="text-lg font-medium text-zinc-900 mb-2">{message}</h3>
     {error && (
-      <p className="text-sm text-gray-600 mb-4">{error.message}</p>
+      <p className="text-sm text-zinc-600 mb-4">{error.message}</p>
     )}
     {onRetry && (
       <button type="button"

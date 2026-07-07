@@ -51,12 +51,12 @@ const ChartSection: React.FC<ChartSectionProps> = memo(({ movimientosMensuales, 
             </h3>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-[11px] font-medium text-[#7a8797]">
-            <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#35bfa8]" /> Total pacientes</span>
+            <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#0e9f8e]" /> Total pacientes</span>
             <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#44c4dd]" /> Prom. hospitalizados</span>
             <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-[#dfe4eb]" /> Atención ambulatoria</span>
           </div>
         </div>
-        <select className="rounded-[12px] border border-[#e3e9f0] bg-white px-3 py-2 text-[12px] font-medium text-[#556575] outline-none focus:border-[#35bfa8]">
+        <select className="rounded-[12px] border border-[#e3e9f0] bg-white px-3 py-2 text-[12px] font-medium text-[#556575] outline-none focus:border-[#0e9f8e]">
           <option>Últimos 6 meses</option>
           <option>Mensual</option>
         </select>
@@ -94,8 +94,8 @@ const ChartSection: React.FC<ChartSectionProps> = memo(({ movimientosMensuales, 
             />
             <Area
               type="monotone" dataKey="recepciones" name="Dosis aplicadas"
-              stroke="#35bfa8" strokeWidth={2.5} fill="transparent" strokeDasharray="5 5"
-              activeDot={{ r: 4, fill: '#fff', stroke: '#35bfa8', strokeWidth: 2 }}
+              stroke="#0e9f8e" strokeWidth={2.5} fill="transparent" strokeDasharray="5 5"
+              activeDot={{ r: 4, fill: '#fff', stroke: '#0e9f8e', strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>

@@ -46,7 +46,7 @@ const StockAvailabilitySection: React.FC<StockAvailabilitySectionProps> = ({ dat
               <div className="flex w-1/3 items-center justify-end gap-2 sm:gap-3">
                 <div className="h-1.5 w-12 flex-shrink-0 overflow-hidden rounded-full bg-[#eef3f6] sm:w-16">
                   <div 
-                    className="h-full rounded-full bg-[#35bfa8]" 
+                    className="h-full rounded-full bg-[#0e9f8e]" 
                     style={{ width: `${pct}%` }} 
                   />
                 </div>
@@ -58,7 +58,7 @@ const StockAvailabilitySection: React.FC<StockAvailabilitySectionProps> = ({ dat
       </div>
 
       <div className="mt-5 border-t border-zinc-100 pt-4">
-        <button type="button" className="flex items-center gap-1 text-[13px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b]">
+        <button type="button" className="flex items-center gap-1 text-[13px] font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276]">
           Ver inventario completo <span className="text-lg leading-none">→</span>
         </button>
       </div>

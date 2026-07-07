@@ -48,7 +48,7 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Centro de Acopio */}
           <div className="md:col-span-2">
-            <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
+            <label className="flex items-center gap-1.5 text-sm font-medium text-zinc-700 mb-1.5">
               <Buildings weight="duotone" className="h-4 w-4 text-zinc-500" />
               Centro de Acopio
               <span className="text-rose-500">*</span>
@@ -74,7 +74,7 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
 
           {/* Mes */}
           <div>
-            <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
+            <label className="flex items-center gap-1.5 text-sm font-medium text-zinc-700 mb-1.5">
               <CalendarBlank weight="duotone" className="h-4 w-4 text-zinc-500" />
               Mes
             </label>
@@ -93,7 +93,7 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
 
           {/* Ano */}
           <div>
-            <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
+            <label className="flex items-center gap-1.5 text-sm font-medium text-zinc-700 mb-1.5">
               <CalendarBlank weight="duotone" className="h-4 w-4 text-zinc-500" />
               Ano
             </label>
@@ -129,10 +129,10 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
 
         {/* Filtros avanzados (colapsables) */}
         {showAdvanced && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-zinc-100">
             {/* Busqueda */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-zinc-700 mb-1.5">
                 Buscar
               </label>
               <div className="relative">
@@ -149,7 +149,7 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
 
             {/* Estado */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-zinc-700 mb-1.5">
                 Estado
               </label>
               <select
@@ -169,8 +169,8 @@ export const ValesFilters: React.FC<ValesFiltersProps> = memo(({
       </div>
 
       {/* Barra de acciones */}
-      <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-        <span className="text-sm text-gray-600">
+      <div className="px-4 py-3 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between">
+        <span className="text-sm text-zinc-600">
           Periodo: <strong>{MESES[selectedMes - 1]} {selectedAnio}</strong>
         </span>
         <button type="button"

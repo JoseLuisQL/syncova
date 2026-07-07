@@ -238,7 +238,7 @@ const PermisosPlanificacion: React.FC = () => {
               value={selectedMes}
               onChange={(e) => setSelectedMes(Number(e.target.value))}
               disabled={loading}
-              className="w-full appearance-none rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] py-1.5 pl-3 pr-8 text-[12px] font-semibold text-[#171b22] transition-colors focus:border-[#35bfa8] focus:outline-none disabled:opacity-50"
+              className="w-full appearance-none rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] py-1.5 pl-3 pr-8 text-[12px] font-semibold text-[#171b22] transition-colors focus:border-[#0e9f8e] focus:outline-none disabled:opacity-50"
             >
               {MESES.map((mes, i) => (
                 <option key={i} value={i + 1}>{mes}</option>
@@ -251,7 +251,7 @@ const PermisosPlanificacion: React.FC = () => {
               value={selectedAnio}
               onChange={(e) => setSelectedAnio(Number(e.target.value))}
               disabled={loading}
-              className="w-full appearance-none rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] py-1.5 pl-3 pr-8 text-[12px] font-semibold text-[#171b22] transition-colors focus:border-[#35bfa8] focus:outline-none disabled:opacity-50"
+              className="w-full appearance-none rounded-[12px] border border-[#e3e9f0] bg-[#f8fbfd] py-1.5 pl-3 pr-8 text-[12px] font-semibold text-[#171b22] transition-colors focus:border-[#0e9f8e] focus:outline-none disabled:opacity-50"
             >
               {aniosDisponibles.map(anio => (
                 <option key={anio} value={anio}>{anio}</option>
@@ -277,7 +277,7 @@ const PermisosPlanificacion: React.FC = () => {
                 <button type="button" 
                   onClick={() => handleToggle(TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo, !(movPermiso?.habilitado ?? false))}
                   disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
-                  className={`relative flex h-5 w-9 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${movPermiso?.habilitado ? 'bg-[#35bfa8]' : 'bg-zinc-200'}`}
+                  className={`relative flex h-5 w-9 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${movPermiso?.habilitado ? 'bg-[#0e9f8e]' : 'bg-zinc-200'}`}
                 >
                   <motion.div 
                     layout
@@ -293,7 +293,7 @@ const PermisosPlanificacion: React.FC = () => {
                 <button type="button" 
                   onClick={() => setScheduleModal({ isOpen: true, label: 'Editar Movimientos', tipo: TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo })}
                   disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
-                  className="flex items-center gap-1 rounded-[10px] border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-[11px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b] disabled:opacity-50"
+                  className="flex items-center gap-1 rounded-[10px] border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-[11px] font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276] disabled:opacity-50"
                 >
                   <Timer size={13} weight="bold" /> Programar
                 </button>
@@ -316,7 +316,7 @@ const PermisosPlanificacion: React.FC = () => {
                 <button type="button" 
                   onClick={() => handleToggle(TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo, !(planPermiso?.habilitado ?? false))}
                   disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
-                  className={`relative flex h-5 w-9 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${planPermiso?.habilitado ? 'bg-[#35bfa8]' : 'bg-zinc-200'}`}
+                  className={`relative flex h-5 w-9 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${planPermiso?.habilitado ? 'bg-[#0e9f8e]' : 'bg-zinc-200'}`}
                 >
                   <motion.div 
                     layout
@@ -332,7 +332,7 @@ const PermisosPlanificacion: React.FC = () => {
                 <button type="button" 
                   onClick={() => setScheduleModal({ isOpen: true, label: 'Editar Planificaciones', tipo: TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo })}
                   disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
-                  className="flex items-center gap-1 rounded-[10px] border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-[11px] font-semibold text-[#35bfa8] transition-colors hover:text-[#269b8b] disabled:opacity-50"
+                  className="flex items-center gap-1 rounded-[10px] border border-[#e3e9f0] bg-[#f8fbfd] px-2 py-1 text-[11px] font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276] disabled:opacity-50"
                 >
                   <Timer size={13} weight="bold" /> Programar
                 </button>
@@ -354,7 +354,7 @@ const PermisosPlanificacion: React.FC = () => {
           </div>
           
           <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-[#eef3f6]">
-            <div className="h-full rounded-full bg-[#35bfa8]" style={{ width: '64%' }} />
+            <div className="h-full rounded-full bg-[#0e9f8e]" style={{ width: '64%' }} />
           </div>
 
           <div className="grid grid-cols-3 gap-2 mb-6 text-center">
@@ -372,7 +372,7 @@ const PermisosPlanificacion: React.FC = () => {
             </div>
           </div>
 
-          <button type="button" className="flex w-full items-center justify-center gap-2 rounded-[12px] border border-[#269b8b] bg-[#35bfa8] py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#269b8b]">
+          <button type="button" className="flex w-full items-center justify-center gap-2 rounded-[12px] border border-[#0a8276] bg-[#0e9f8e] py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#0a8276]">
             <CalendarCheck size={16} />
             Abrir planificación
           </button>
