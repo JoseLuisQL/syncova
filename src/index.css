@@ -109,6 +109,17 @@
   }
 }
 
+/* React Bits — DotGrid drift (fondo de puntos del login). Muy lento y sutil. */
+@keyframes rb-dotgrid-drift {
+  from { background-position: 0 0; }
+  to   { background-position: 0 28px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-rb-dotgrid] {
+    animation: none !important;
+  }
+}
+
 [data-sileo-viewport] {
   z-index: 1000 !important;
 }

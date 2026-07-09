@@ -5,6 +5,8 @@ import { useToastContext } from '../../contexts/ToastContext';
 import { useRateLimitHandler } from '../../hooks/useRateLimitHandler';
 import { SivacLogo } from '../common/SivacLogo';
 import { User, LockKey, Eye, EyeClosed, SpinnerGap, Clock as ClockIcon, WarningCircle, XCircle } from '@phosphor-icons/react';
+import SplitText from '../ui/reactbits/text/SplitText';
+import DotGrid from '../ui/reactbits/backgrounds/DotGrid';
 
 // ============================================================================
 // CONSTANTS
@@ -306,11 +308,14 @@ const LoginForm: React.FC = () => {
   return (
     <div className="relative flex min-h-[100dvh] w-full items-center justify-center overflow-hidden bg-[#eef0f3] p-4 font-sans sm:p-8">
       <div className="absolute inset-0 z-0">
-        <img
-          src="/portada.png"
-          alt="SIVAC Background"
-          className="absolute inset-0 h-full w-full object-cover object-center"
+        <DotGrid
+          color="#0f2a3b"
+          dotSize={1.5}
+          gap={30}
+          opacity={0.12}
+          driftDuration={60}
         />
+        {/* Velo oscuro para asegurar contraste del formulario (acceso seguro). */}
         <div className="absolute inset-0 bg-ink-soft/35 backdrop-blur-[1px]" />
       </div>
 
@@ -323,7 +328,17 @@ const LoginForm: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-xl font-semibold leading-6 tracking-[-0.02em] text-ink">
-                  SIVAC
+                  <SplitText
+                    text="SIVAC"
+                    tag="span"
+                    splitType="chars"
+                    delay={70}
+                    duration={0.6}
+                    from={{ opacity: 0, y: 14 }}
+                    to={{ opacity: 1, y: 0 }}
+                    textAlign="left"
+                    className="text-xl font-semibold leading-6 tracking-[-0.02em] text-ink"
+                  />
                 </h1>
                 <p className="mt-0.5 text-sm font-medium text-muted-2">
                   Acceso seguro al sistema
