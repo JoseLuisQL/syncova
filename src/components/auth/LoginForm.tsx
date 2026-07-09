@@ -306,10 +306,10 @@ const LoginForm: React.FC = () => {
   ), [showPassword, togglePasswordVisibility]);
 
   return (
-    <div className="relative flex min-h-[100dvh] w-full items-center justify-center overflow-hidden bg-[#eef0f3] p-4 font-sans sm:p-8">
+    <div className="relative flex min-h-[100dvh] w-full items-center justify-center overflow-hidden bg-app p-4 font-sans sm:p-8">
       <div className="absolute inset-0 z-0">
         <DotGrid
-          color="#0f2a3b"
+          color="rgb(var(--color-ink))"
           dotSize={1.5}
           gap={30}
           opacity={0.12}

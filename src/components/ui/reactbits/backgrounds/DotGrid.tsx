@@ -55,7 +55,8 @@ const DotGrid: React.FC<DotGridProps> = ({
       style={{
         position: 'absolute',
         inset: 0,
-        backgroundColor: '#eef0f3',
+        // Fondo base: se adapta al tema via CSS var (--color-app) definida en index.css.
+        backgroundColor: 'rgb(var(--color-app))',
         backgroundImage: background,
         backgroundSize: `${gap}px ${gap}px`,
         opacity,

@@ -105,6 +105,7 @@ const clinicalPalette = {
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       ...designMdTheme,
@@ -113,51 +114,41 @@ export default {
         hh: designMdTheme.colors,
         clinical: designMdTheme.colors,
         ...clinicalPalette,
-        // Tokens semánticos del sistema purpura-grey de facto (Linear-like).
-        // Reemplazan los ~2000 hex literales dispersos en src/ por clases nombradas:
-        //   bg-brand / text-brand / border-line / bg-surface-soft / text-ink / text-muted
-        // Mapeo canonical:
-        //   brand   = #7c3aed (accent purpura, boton primario) + brand-600 hover #6d28d9
-        //   ink     = #15171d (texto primario)
-        //   ink-soft= #111318 (overlay, texto oscuro)
-        //   muted   = #8b8f9b (texto muted, placeholders)
-        //   muted-2 = #606571 (texto secundario)
-        //   muted-3 = #747986 (texto terciario)
-        //   line    = #e7e7ef (borde default)
-        //   line-soft = #eeeef3 (dividers)
-        //   line-strong = #d7d8e2 (borde hover)
-        //   line-focus = #dedfea (borde focus ring)
-        //   line-focus-strong = #babdca (borde focus strong)
-        //   surface = #ffffff (default, ya en Tailwind)
-        //   surface-soft = #fbfafd (hover, fondos suaves)
-        //   surface-tint = #f5f0fd (tinte purpura soft para seleccionados)
+        // Tokens semánticos del sistema. Implementados como CSS variables con
+        // soporte de alpha (<alpha-value>) para que `bg-ink/50`, `text-brand/70`
+        // etc. funcionen. Las variables se definen en index.css bajo :root
+        // (light) y .dark (dark mode), de modo que TODOS los componentes que
+        // usan estos tokens se adaptan automáticamente al tema sin tocar cada
+        // archivo. Ver DESIGN.md "Motion & React Bits" y la sección de theming.
         brand: {
-          DEFAULT: '#7c3aed',
-          600: '#6d28d9',
-          50: '#f5f0fd',
-          100: '#c8bbff',
+          DEFAULT: 'rgb(var(--color-brand) / <alpha-value>)',
+          600: 'rgb(var(--color-brand-600) / <alpha-value>)',
+          50: 'rgb(var(--color-brand-50) / <alpha-value>)',
+          100: 'rgb(var(--color-brand-100) / <alpha-value>)',
         },
         ink: {
-          DEFAULT: '#15171d',
-          soft: '#111318',
+          DEFAULT: 'rgb(var(--color-ink) / <alpha-value>)',
+          soft: 'rgb(var(--color-ink-soft) / <alpha-value>)',
         },
         muted: {
-          DEFAULT: '#8b8f9b',
-          2: '#606571',
-          3: '#747986',
+          DEFAULT: 'rgb(var(--color-muted) / <alpha-value>)',
+          2: 'rgb(var(--color-muted-2) / <alpha-value>)',
+          3: 'rgb(var(--color-muted-3) / <alpha-value>)',
         },
         line: {
-          DEFAULT: '#e7e7ef',
-          soft: '#eeeef3',
-          strong: '#d7d8e2',
-          focus: '#dedfea',
-          'focus-strong': '#babdca',
+          DEFAULT: 'rgb(var(--color-line) / <alpha-value>)',
+          soft: 'rgb(var(--color-line-soft) / <alpha-value>)',
+          strong: 'rgb(var(--color-line-strong) / <alpha-value>)',
+          focus: 'rgb(var(--color-line-focus) / <alpha-value>)',
+          'focus-strong': 'rgb(var(--color-line-focus-strong) / <alpha-value>)',
         },
         surface: {
-          DEFAULT: '#ffffff',
-          soft: '#fbfafd',
-          tint: '#f5f0fd',
+          DEFAULT: 'rgb(var(--color-surface) / <alpha-value>)',
+          soft: 'rgb(var(--color-surface-soft) / <alpha-value>)',
+          tint: 'rgb(var(--color-surface-tint) / <alpha-value>)',
         },
+        // Fondo de la app (page background), token dedicado para dark mode.
+        app: 'rgb(var(--color-app) / <alpha-value>)',
       },
       fontFamily: {
         ...designMdTheme.fontFamily,

@@ -70,8 +70,8 @@ class ErrorBoundary extends Component<Props, State> {
 
       // Fallback por defecto
       return (
-        <div className="relative min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-hidden bg-[#f0eff4]">
-          <DotGrid color="#0f2a3b" dotSize={1.5} gap={34} opacity={0.08} driftDuration={0} />
+        <div className="relative min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-hidden bg-app">
+          <DotGrid color="rgb(var(--color-ink))" dotSize={1.5} gap={34} opacity={0.08} driftDuration={0} />
           <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
             <div className="bg-white py-8 px-4 shadow-[0_24px_64px_-42px_rgba(12,15,24,0.5)] border border-line sm:rounded-xl sm:px-10">
               <div className="text-center">

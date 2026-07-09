@@ -4,6 +4,7 @@ import { AppProvider, useApp } from './contexts/AppContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { AlertasProvider } from './contexts/AlertasContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
@@ -15,16 +16,18 @@ import { SiBotFloating } from './components/SiBot/SiBotFloating';
 
 function App() {
   return (
-    <AppProvider>
-      <ToastProvider>
-        <AuthProvider>
-          <AlertasProvider>
-            <PageTitle />
-            <AppContent />
-          </AlertasProvider>
-        </AuthProvider>
-      </ToastProvider>
-    </AppProvider>
+    <ThemeProvider>
+      <AppProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <AlertasProvider>
+              <PageTitle />
+              <AppContent />
+            </AlertasProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </AppProvider>
+    </ThemeProvider>
   );
 }
 
@@ -54,7 +57,7 @@ const AppContent: React.FC = () => {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-[100dvh] bg-[#f0eff4]">
+      <div className="min-h-[100dvh] bg-app">
         {/* Sidebar */}
         <Sidebar />
         
