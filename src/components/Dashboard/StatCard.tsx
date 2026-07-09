@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import type { IconProps } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { DASHBOARD_COLORS } from './constants';
+import CountUp from '../ui/reactbits/text/CountUp';
 
 interface StatCardProps {
   label: string;
@@ -52,7 +53,13 @@ const StatCard: React.FC<StatCardProps> = memo(({
             </p>
           </div>
           <p className="text-3xl font-semibold leading-none tracking-[-0.03em] text-primary tabular-nums sm:text-display">
-            {value.toLocaleString()}
+            <CountUp
+              to={value}
+              from={0}
+              duration={0.8}
+              separator=","
+              className="tabular-nums"
+            />
           </p>
           {description && (
             <p className="mt-1 hidden text-sm font-medium text-secondary sm:block">

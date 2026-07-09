@@ -1,6 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import { ArrowsClockwise, DownloadSimple, MagnifyingGlass, Plus, WarningCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
+import SplitText from '../ui/reactbits/text/SplitText';
 
 interface DashboardHeaderProps {
   lastUpdated: Date | null;
@@ -34,7 +35,17 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
     <header className="flex min-h-16 flex-col gap-4 border-b border-[#dfe4eb] bg-[#f8fafc] px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="min-w-0">
         <h1 className="truncate text-xl font-semibold tracking-[-0.02em] text-[#111827]">
-          Hola {displayName}, bienvenido de vuelta
+          <SplitText
+            text={`Hola ${displayName}, bienvenido de vuelta`}
+            tag="span"
+            splitType="words"
+            delay={45}
+            duration={0.5}
+            from={{ opacity: 0, y: 10 }}
+            to={{ opacity: 1, y: 0 }}
+            textAlign="left"
+            className="text-xl font-semibold tracking-[-0.02em] text-[#111827]"
+          />
         </h1>
         {formattedTime && (
           <p className="mt-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-[#7a8797]">
