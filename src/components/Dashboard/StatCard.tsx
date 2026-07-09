@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import type { IconProps } from '@phosphor-icons/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { DASHBOARD_COLORS } from './constants';
 
 interface StatCardProps {

@@ -194,6 +194,41 @@ export default {
         '3xl': '18px',
         '4xl': '24px',
       },
+      // Tokens de animación clínicos (sobrios). Los componentes de React Bits
+      // (ui/reactbits/) y cualquier superficie animada DEBEN consumir estos
+      // tokens en lugar de duraciones/easings sueltos, para mantener la
+      // coherencia con DESIGN.md ("flat on purpose", legibilidad hospitalaria).
+      // Duraciones cortas (150-400ms), easings estándar, sin rebotes llamativos.
+      transitionDuration: {
+        ...designMdTheme.transitionDuration,
+        fast: '150ms',
+        base: '200ms',
+        slow: '300ms',
+        'motion-1': '600ms', // entradas de texto/hero (React Bits)
+        'motion-2': '800ms', // count-up de métricas
+      },
+      transitionTimingFunction: {
+        ...designMdTheme.transitionTimingFunction,
+        clinical: 'cubic-bezier(0.4, 0, 0.2, 1)', // Material standard, sobrio
+        'clinical-in': 'cubic-bezier(0.4, 0, 1, 1)',
+        'clinical-out': 'cubic-bezier(0, 0, 0.2, 1)',
+      },
+      keyframes: {
+        ...designMdTheme.keyframes,
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'fade-in-up': {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        ...designMdTheme.animation,
+        'fade-in': 'fade-in 200ms cubic-bezier(0, 0, 0.2, 1)',
+        'fade-in-up': 'fade-in-up 300ms cubic-bezier(0, 0, 0.2, 1)',
+      },
     },
   },
   plugins: [],

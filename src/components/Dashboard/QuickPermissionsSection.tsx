@@ -9,7 +9,7 @@ import {
   ArrowsClockwise,
   X,
 } from '@phosphor-icons/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useToastContext } from '../../contexts/ToastContext';
 import {
   PermisoOperativoService,

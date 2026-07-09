@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useRef, Suspense, lazy } from 'react';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'motion/react';
 import { useDashboard } from '../../hooks/useDashboard';
 import { useToastContext } from '../../contexts/ToastContext';
 

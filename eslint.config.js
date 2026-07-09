@@ -42,6 +42,22 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // Prohibido importar 'framer-motion' directamente: el motor de animación
+      // canónico de SIVAC es 'motion' (paquete v12, entry 'motion/react'), que
+      // reexporta la misma API. Importar 'framer-motion' generaba una dep
+      // transitiva frágil (no declarada en package.json). Ver Fase 0 del plan
+      // de integración de React Bits (docs/REACTBITS_INTEGRATION_PLAN.md).
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'framer-motion',
+              message: "Usa 'motion/react' (paquete 'motion') en su lugar.",
+            },
+          ],
+        },
+      ],
     },
   },
   {
