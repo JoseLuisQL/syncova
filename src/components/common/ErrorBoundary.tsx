@@ -1,6 +1,8 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Warning, ArrowsClockwise, House, Bug } from '@phosphor-icons/react';
 import { logger } from '../../utils/debug';
+import DecryptedText from '../ui/reactbits/text/DecryptedText';
+import DotGrid from '../ui/reactbits/backgrounds/DotGrid';
 
 interface Props {
   children: ReactNode;
@@ -68,38 +70,47 @@ class ErrorBoundary extends Component<Props, State> {
 
       // Fallback por defecto
       return (
-        <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-          <div className="sm:mx-auto sm:w-full sm:max-w-md">
-            <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="relative min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-hidden bg-[#f0eff4]">
+          <DotGrid color="#0f2a3b" dotSize={1.5} gap={34} opacity={0.08} driftDuration={0} />
+          <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
+            <div className="bg-white py-8 px-4 shadow-[0_24px_64px_-42px_rgba(12,15,24,0.5)] border border-line sm:rounded-xl sm:px-10">
               <div className="text-center">
-                <Warning weight="fill" className="mx-auto h-16 w-16 text-red-500 mb-4" />
-                <h2 className="text-2xl font-bold text-zinc-900 mb-2">
-                  ¡Oops! Algo salió mal
+                <Warning weight="fill" className="mx-auto h-14 w-14 text-rose-500 mb-4" aria-hidden="true" />
+                <h2 className="text-2xl font-bold text-ink mb-2">
+                  <DecryptedText
+                    text="¡Oops! Algo salió mal"
+                    animateOn="view"
+                    speed={40}
+                    maxIterations={6}
+                    sequential
+                    revealDirection="start"
+                    className="text-2xl font-bold text-ink"
+                  />
                 </h2>
-                <p className="text-zinc-600 mb-6">
+                <p className="text-muted-2 mb-6">
                   Ha ocurrido un error inesperado. Por favor, intenta una de las siguientes opciones:
                 </p>
-                
+
                 <div className="space-y-3">
                   <button type="button"
                     onClick={this.handleRetry}
-                    className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand/20 transition-colors"
                   >
                     <ArrowsClockwise weight="bold" className="h-4 w-4 mr-2" />
                     Reintentar
                   </button>
-                  
+
                   <button type="button"
                     onClick={this.handleReload}
-                    className="w-full flex justify-center items-center px-4 py-2 border border-zinc-300 rounded-md shadow-sm text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    className="w-full flex justify-center items-center px-4 py-2 border border-line rounded-md shadow-sm text-sm font-medium text-ink bg-white hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand/20 transition-colors"
                   >
                     <ArrowsClockwise weight="bold" className="h-4 w-4 mr-2" />
                     Recargar página
                   </button>
-                  
+
                   <button type="button"
                     onClick={this.handleGoHome}
-                    className="w-full flex justify-center items-center px-4 py-2 border border-zinc-300 rounded-md shadow-sm text-sm font-medium text-zinc-700 bg-white hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    className="w-full flex justify-center items-center px-4 py-2 border border-line rounded-md shadow-sm text-sm font-medium text-ink bg-white hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand/20 transition-colors"
                   >
                     <House weight="bold" className="h-4 w-4 mr-2" />
                     Ir al inicio
@@ -109,21 +120,21 @@ class ErrorBoundary extends Component<Props, State> {
                 {/* Información de debug en desarrollo */}
                 {import.meta.env.MODE === 'development' && this.state.error && (
                   <details className="mt-6 text-left">
-                    <summary className="cursor-pointer text-sm font-medium text-zinc-700 hover:text-zinc-900 flex items-center">
+                    <summary className="cursor-pointer text-sm font-medium text-muted-2 hover:text-ink flex items-center">
                       <Bug weight="bold" className="h-4 w-4 mr-2" />
                       Información de debug
                     </summary>
-                    <div className="mt-3 p-3 bg-zinc-100 rounded-md text-xs">
+                    <div className="mt-3 p-3 bg-surface-soft rounded-md text-xs">
                       <div className="mb-2">
                         <strong>Error:</strong>
-                        <pre className="mt-1 whitespace-pre-wrap text-red-600">
+                        <pre className="mt-1 whitespace-pre-wrap text-rose-600">
                           {this.state.error.toString()}
                         </pre>
                       </div>
                       {this.state.errorInfo && (
                         <div>
                           <strong>Stack trace:</strong>
-                          <pre className="mt-1 whitespace-pre-wrap text-zinc-600 text-xs">
+                          <pre className="mt-1 whitespace-pre-wrap text-muted-2 text-xs">
                             {this.state.errorInfo.componentStack}
                           </pre>
                         </div>
