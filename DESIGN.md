@@ -116,3 +116,39 @@ The palette is built around high-contrast neutrals and a single accent that driv
 - **Do** let Neutral carry the composition — negative space is a feature.
 - **Don't** introduce gradients. This system is flat on purpose.
 - **Don't** mix Tertiary with alternate accents; the single-accent rule is load-bearing.
+
+## Motion & React Bits
+
+SIVAC integra componentes de [React Bits](https://reactbits.dev) (copy-in en
+`src/components/ui/reactbits/`) para añadir profesionalismo en superficies de
+"momento" — **no** en superficies clínicas de datos. El motor de animación
+canónico es `motion` (paquete v12, entry `motion/react`); está **prohibido**
+importar `framer-motion` (regla ESLint `no-restricted-imports`).
+
+### Reglas
+1. **Máx. 2–3 componentes React Bits por página.**
+2. **Desactivar en móvil** (`useMobileDisable`) y con `prefers-reduced-motion`
+   (`usePrefersReducedMotion`) — WCAG 2.3.3, obligatorio en sistema de salud.
+3. **Re-tokenizar**: los componentes consumen `brand`/`ink`/`surface-soft`,
+   no colores sueltos. Donde React Bits impone gradiente, aplanar a solid.
+4. **No usar en tablas, formularios, inputs, modales** — mantenerlos flat.
+
+### Dónde se aplica
+| Superficie | Componente | Ubicación |
+|---|---|---|
+| Login | `DotGrid` (fondo) + `SplitText` (título) | `auth/LoginForm.tsx` |
+| Dashboard métricas | `CountUp` | `Dashboard/StatCard.tsx` |
+| Dashboard saludo | `SplitText` | `Dashboard/DashboardHeader.tsx` |
+| Estados vacíos | `SpotlightCard` (vía `EmptyState`) | `common/EmptyState.tsx` |
+| Error Boundary | `DecryptedText` + `DotGrid` | `common/ErrorBoundary.tsx` |
+| SiBot (admin) | `StarBorder` (botón flotante) | `SiBot/SiBotFloating.tsx` |
+
+### Tokens de animación (`tailwind.config.js`)
+- Duraciones: `fast` 150ms, `base` 200ms, `slow` 300ms, `motion-1` 600ms,
+  `motion-2` 800ms.
+- Easings clínicos: `clinical`, `clinical-in`, `clinical-out`
+  (`cubic-bezier(0.4, 0, 0.2, 1)` y variantes).
+- Keyframes: `fade-in`, `fade-in-up`, `rb-dotgrid-drift`,
+  `star-movement-top/bottom`.
+
+Ver `src/components/ui/reactbits/README.md` para detalles de mantenimiento.

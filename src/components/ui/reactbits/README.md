@@ -24,19 +24,30 @@ reexporta la misma API (`motion`, `AnimatePresence`, `Variants`).
 ## Dependencias externas
 
 Algunos componentes de React Bits requieren libs externas (gsap, lenis, ogl).
-Instalar **solo** la que exija el componente copiado y listarla aquí:
+En SIVAC se han **adaptado a `motion/react`** (ya presente) para no añadir
+deps pesadas en un sistema gubernamental de salud desplegado en hardware
+modesto. Estado actual:
 
-| Componente | Dep externa | Notas |
-|---|---|---|
-| _(por completar al copiar)_ | | |
+| Componente | Dep externa original | Adaptación SIVAC | Ubicación |
+|---|---|---|---|
+| SplitText | gsap, @gsap/react | motion/react (misma API de props) | `text/SplitText.tsx` |
+| CountUp | motion | copia fiel + gate reduced-motion | `text/CountUp.tsx` |
+| DecryptedText | motion | copia fiel | `text/DecryptedText.tsx` |
+| SpotlightCard | (ninguna) | copia re-tokenizada (clinical) | `components/SpotlightCard.tsx` |
+| StarBorder | (ninguna) | copia adaptada (transparente, brand) | `animations/StarBorder.tsx` |
+| DotGrid | gsap, InertiaPlugin | CSS/SVG (sin canvas/gsap) | `backgrounds/DotGrid.tsx` |
+
+**Resultado: cero dependencias nuevas en `package.json`.** Solo se usa `motion`
+(ya declarado) y CSS.
 
 ## Estructura
 
 ```
-_shared/   hooks utilitarios (reduced-motion, mobile)
-text/       animaciones de texto (SplitText, CountUp, ...)
-components/ tarjetas y elementos (SpotlightCard, TiltedCard, ...)
-backgrounds/ fondos (Aurora, DotGrid, ...)
+_shared/    hooks utilitarios (reduced-motion, mobile)
+text/       animaciones de texto (SplitText, CountUp, DecryptedText)
+components/ tarjetas y elementos (SpotlightCard)
+animations/ efectos de borde/movimiento (StarBorder)
+backgrounds/ fondos (DotGrid)
 ```
 
 ## Origen y licencia
