@@ -6,6 +6,7 @@ import { SiBotMessage } from './SiBotMessage';
 import { SiBotInput } from './SiBotInput';
 import { SiBotSuggestions } from './SiBotSuggestions';
 import { SiBotLogo } from './SiBotLogo';
+import StarBorder from '../ui/reactbits/animations/StarBorder';
 
 export const SiBotFloating: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,17 +57,25 @@ export const SiBotFloating: React.FC = () => {
   return (
     <>
       <div className="fixed bottom-6 right-6 z-50">
-        <button type="button"
-          onClick={toggleOpen}
-          className={`flex h-[58px] w-[58px] items-center justify-center rounded-full border transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.97] ${
-            isOpen
-              ? 'border-line bg-ink text-white shadow-[0_18px_44px_-26px_rgba(12,15,24,0.65)]'
-              : 'border-brand-100 bg-brand text-white shadow-[0_18px_44px_-26px_rgba(124,58,237,0.9)]'
-          }`}
-          aria-label="Toggle SiBot"
+        <StarBorder
+          as="div"
+          speed="5s"
+          color="#c8bbff"
+          thickness={2}
+          className={isOpen ? 'opacity-0 pointer-events-none' : ''}
         >
-          {isOpen ? <X className="h-[22px] w-[22px]" weight="bold" /> : <SiBotLogo className="h-8 w-8" />}
-        </button>
+          <button type="button"
+            onClick={toggleOpen}
+            className={`flex h-[58px] w-[58px] items-center justify-center rounded-full border transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.97] ${
+              isOpen
+                ? 'border-line bg-ink text-white shadow-[0_18px_44px_-26px_rgba(12,15,24,0.65)]'
+                : 'border-brand-100 bg-brand text-white shadow-[0_18px_44px_-26px_rgba(124,58,237,0.9)]'
+            }`}
+            aria-label="Toggle SiBot"
+          >
+            {isOpen ? <X className="h-[22px] w-[22px]" weight="bold" /> : <SiBotLogo className="h-8 w-8" />}
+          </button>
+        </StarBorder>
       </div>
 
       {/* Pane Slide-in Principal */}
