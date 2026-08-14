@@ -910,6 +910,13 @@ async function main() {
         nombre: 'VACUNA ANTIPAROTIDITIS RUBEOLA Y SARAMPION 5 DOSIS',
         numDosis: 3,
         estado: 1
+      },
+      {
+        codVacuna: 40,
+        sigla: 'ANTIRRABICA',
+        nombre: 'VACUNA ANTIRRABICA HUMANA INACTIVADA',
+        numDosis: 1,
+        estado: 1
       }
     ];
 

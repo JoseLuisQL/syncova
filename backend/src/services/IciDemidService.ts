@@ -8,35 +8,166 @@ import {
 } from '@/types';
 
 const EXCEL_ESTABLECIMIENTO_ALIASES: Record<string, string> = {
+  'CHOCCEPUQUIO': 'CHOCCEPUQUIO',
+  'LLIUPAPUQUIO': 'LLIUPAPUQUIO',
+  'CASCABAMBA': 'CASCABAMBA',
+  'MATAPUQUIO': 'MATAPUQUIO',
+  'KAQUIABAMBA': 'KAKIABAMBA',
+  'KAKIABAMBA': 'KAKIABAMBA',
   'C.S CHOCCEPUQUIO': 'P.S. CHOCCEPUQUIO',
+  'C.S. CHOCCEPUQUIO': 'P.S. CHOCCEPUQUIO',
   'C.S LLIUPAPUQUIO': 'P.S. LLIUPAPUQUIO',
+  'C.S. LLIUPAPUQUIO': 'P.S. LLIUPAPUQUIO',
   'P.S. CASCABAMBA': 'C.S. CASCABAMBA',
+  'P.S CASCABAMBA': 'C.S. CASCABAMBA',
   'P.S. MATAPUQUIO': 'C.S. MATAPUQUIO',
+  'P.S MATAPUQUIO': 'C.S. MATAPUQUIO',
   'C.S KAQUIABAMBA': 'C.S. KAKIABAMBA',
+  'C.S. KAQUIABAMBA': 'C.S. KAKIABAMBA',
+  'P.S. KAQUIABAMBA': 'C.S. KAKIABAMBA',
+  'P.S KAQUIABAMBA': 'C.S. KAKIABAMBA',
 };
 
 const EXCEL_VACUNA_MAPPING: Record<string, string> = {
+  // AMA
   'VACUNA ANTIAMARILICA 10 DOSIS 1000 DIT/0.5 ML': 'AMA',
+  'VACUNA ANTIAMARILICA 1000 DIT/0.5 ML 10 DOSIS INYECT': 'AMA',
+  'VACUNA ANTIAMARILICA 1000 DIT/0.5 ML 10 DOSIS INY': 'AMA',
+  'VACUNA ANTIAMARILICA 1000 DL/0.5 ML INY 10 DOSIS': 'AMA',
+
+  // Neumococo
   'VACUNA ANTINEUMOCOCICA CONJUGADA 13-VALENTE 1 DOSIS': 'Neumococo',
+  'VACUNA ANTINEUMOCOCICA CONJUGADA 13-VALENTE 1 DOSIS INYECT': 'Neumococo',
+  'VACUNA ANTINEUMOCOCICA CONJUGADA 13-VALENTE 1 DOSIS INY': 'Neumococo',
+  'VACUNA CONJUGADA NEUMOCOCICA 13-VALENTE (CRM197) 1 DOSIS INYECT': 'Neumococo',
+  'VACUNA ANTINEUMOCOCICA CONJUGADA 13-VALENTE INY 1 DOSIS': 'Neumococo',
+
+  // SPR
   'VACUNA ANTIPAROTIDITIS, RUBEOLA Y SARAMPION 1 DOSIS 700 DCI/0.5 ML': 'SPR X 1 DOSIS',
+  'VACUNA ANTIPAROTIDITIS, RUBEOLA Y SARAMPION 700 DCI/0.5 ML 1 DOSIS INY': 'SPR X 1 DOSIS',
+  'VACUNA ANTIPAROTIDITIS, RUBEOLA Y SARAMPION 700 DCI/0.5 ML 1 DOSIS INYECT': 'SPR X 1 DOSIS',
+  'VACUNA ANTIPAROTIDITIS RUBEOLA Y SARAMPION 700 DCI/0.5 ML INY 1 DOSIS': 'SPR X 1 DOSIS',
   'VACUNA ANTIPAROTIDITIS, RUBEOLA Y SARAMPION 5 DOSIS 700 DCI/0.5 ML': 'SPR X 5 DOSIS',
+  'VACUNA ANTIPAROTIDITIS, RUBEOLA Y SARAMPION 700 DCI/0.5 ML 5 DOSIS INY': 'SPR X 5 DOSIS',
+  'VACUNA ANTIPAROTIDITIS, RUBEOLA Y SARAMPION 700 DCI/0.5 ML 5 DOSIS INYECT': 'SPR X 5 DOSIS',
+  'VACUNA ANTIPAROTIDITIS RUBEOLA Y SARAMPION 5 DOSIS': 'SPR X 5 DOSIS',
+
+  // IPV
   'VACUNA ANTIPOLIOMIELITICA 1 DOSIS 80 LF/0.5 ML': 'IPV',
+  'VACUNA ANTIPOLIOMIELITICA 80 LF/0.5 ML 1 DOSIS INYECT': 'IPV',
+  'VACUNA ANTIPOLIOMIELITICA 80 LF/0.5 ML 1 DOSIS INY': 'IPV',
+  'VACUNA ANTIPOLIOMIELITICA 80 LF/0.5 ML INY 1 DOSIS': 'IPV',
+
+  // APO
   'VACUNA ANTIPOLIOMIELITICA BIVALENTE TIPO 1 Y 3 20 DOSIS': 'APO',
+  'VACUNA ANTIPOLIOMIELITICA BIVALENTE TIPO 1 Y 3 20 DOSIS SUSPEN': 'APO',
+  'VACUNA ANTIPOLIOMIELITICA BIVALENTE TIPO 1 Y 3 (ORAL) 10 DOSIS SUSPEN': 'APO',
+  'VACUNA ANTIPOLIOMIELITICA BIVALENTE TIPO 1 Y 3 SUSPENSION ORAL 20 DOSIS': 'APO',
+
+  // BCG
   'VACUNA ANTITUBERCULOSA (BCG) 10 DOSIS 3200000 U/0.1 ML': 'BCG',
+  'VACUNA ANTITUBERCULOSA (BCG) 3200000 U/0.1 ML 10 DOSIS INYECT': 'BCG',
+  'VACUNA ANTITUBERCULOSA (BCG) 3200000 U/0.1 ML 10 DOSIS INY': 'BCG',
+  'VACUNA ANTITUBERCULOSA (BCG) 3200000 U/0.1 ML INY 10 DOSIS': 'BCG',
   'VACUNA ANTITUBERCULOSA (BCG) 20 DOSIS -': 'BCG',
+  'VACUNA ANTITUBERCULOSA (BCG) - 20 DOSIS INYECT': 'BCG',
+  'VACUNA ANTITUBERCULOSA (BCG) 20 DOSIS INYECT': 'BCG',
+
+  // Varicela
   'VACUNA ANTIVARICELA 0.7 ML 1350 UFP/0.5 ML': 'Varicela',
+  'VACUNA ANTIVARICELA 1350 UFP/0.5 ML 0.7 ML INYECT': 'Varicela',
+  'VACUNA ANTIVARICELA 1350 UFP/0.5 ML 0.7 ML INY': 'Varicela',
+  'VACUNA ANTIVARICELA 1350 UFP/0.5 ML INY 0.7 ML': 'Varicela',
+
+  // DPT
   'VACUNA CONTRA DIFTERIA, TETANOS Y TOS FERINA (DPT, TRIPLE) 10 DOSIS': 'DPT',
+  'VACUNA CONTRA DIFTERIA, TETANOS Y TOS FERINA (DPT, TRIPLE) 10 DOSIS I': 'DPT',
+  'VACUNA CONTRA DIFTERIA, TETANOS Y TOS FERINA (DPT, TRIPLE) 10 DOSIS INYECT': 'DPT',
+  'VACUNA CONTRA DIFTERIA TETANOS Y TOS FERINA (DPT TRIPLE) INY 10 DOSIS': 'DPT',
+
+  // DPTA
+  'VACUNA CONTRA DIFTERIA, TETANOS Y TOS FERINA ACELULAR ADSORBIDA (DPTA)': 'DPTA',
   'VACUNA CONTRA DIFTERIA, TETANOS Y TOS FERINA ACELULAR ADSORBIDA (DPTA) 1 DOSIS 2,5 LF + 5 LF + 8 UG': 'DPTA',
-  'VACUNA CONTRA EL ROTAVIRUS PLV (SUSPENSION ORAL) 1 DOSIS': 'Rotavirus',
-  'VACUNA CONTRA LA DIFTERIA Y TETANOS (DT ADULTO) 10 DOSIS': 'Dt Adulto',
-  'VACUNA CONTRA LA HEPATITIS A 1 DOSIS 720 UI/0.5 ML': 'HEPATITIS A',
-  'VACUNA CONTRA LA HEPATITIS B ADULTO 1 DOSIS 20 UG/ML': 'HVB Adulto',
-  'VACUNA CONTRA LA HEPATITIS B PEDIATRICO 1 DOSIS 10 UG/0.5 ML': 'HVB Pediatrico',
-  'VACUNA CONTRA LA INFLUENZA ESTACIONARIA - ADULTO 1 DOSIS (0.5 ML)': 'Influenza Adulto',
-  'VACUNA CONTRA LA INFLUENZA PEDIATRICO (ANTIGENO TIPO A (H1N1 + H3N2) + ANTIGENO TIPO B 20 DOSIS 90 UG/ML': 'Influenza Pediatrica',
-  'VACUNA DPT, HIB Y VHB (PENTAVALENTE) 1 DOSIS OTROS': 'Pentavalente',
-  'VACUNA RECOMBINANTE TETRAVALENTE CONTRA VIRUS DEL PAPILOMA HUMANO TIPO 6, 11, 16 Y 18 (VPH) 0.5 ML': 'VPH',
   'VACUNA CONTRA DIFTERIA, TETANOS Y TOS FERINA ACELULAR ADSORBIDA (DPTA) 1 DOSIS 2,5 LF + 5 LF + 8 G': 'DPTA',
+  'VACUNA CONTRA DIFTERIA, TETANOS Y TOS FERINA ACELULAR ADSORBIDA (DPTA) 1 DOSIS 2.5 LF + 5 LF + 8 UG': 'DPTA',
+  'VACUNA DPTA ACELULAR': 'DPTA',
+
+  // Rotavirus
+  'VACUNA CONTRA EL ROTAVIRUS PLV (SUSPENSION ORAL) 1 DOSIS': 'Rotavirus',
+  'VACUNA CONTRA EL ROTAVIRUS PLV (SUSPENSION ORAL) 1 DOSIS SUSPEN': 'Rotavirus',
+  'VACUNA CONTRA EL ROTAVIRUS PLV 1 DOSIS': 'Rotavirus',
+
+  // SR
+  'VACUNA CONTRA EL SARAMPION Y LA RUBEOLA (SR) 1 DOSIS INYECT': 'SR',
+  'VACUNA CONTRA EL SARAMPION Y LA RUBEOLA (SR) 10 DOSIS INYECT': 'SR',
+  'VACUNA CONTRA EL SARAMPION Y LA RUBEOLA (SR) 1 DOSIS INY': 'SR',
+  'VACUNA CONTRA EL SARAMPION Y LA RUBEOLA (SR) 10 DOSIS INY': 'SR',
+  'VACUNA SARAMPION Y RUBEOLA (SR)': 'SR',
+
+  // DT Adulto
+  'VACUNA CONTRA LA DIFTERIA Y TETANOS (DT ADULTO) 10 DOSIS': 'Dt Adulto',
+  'VACUNA CONTRA LA DIFTERIA Y TETANOS (DT ADULTO) 10 DOSIS INYECT': 'Dt Adulto',
+  'VACUNA CONTRA LA DIFTERIA Y TETANOS (DT ADULTO) 10 DOSIS INY': 'Dt Adulto',
+  'VACUNA CONTRA LA DIFTERIA Y TETANOS (DT ADULTO) INY 10 DOSIS': 'Dt Adulto',
+
+  // DT Pediatrico
+  'VACUNA CONTRA LA DIFTERIA Y TETANOS (DT PEDIATRICO) 10 DOSIS INYECT': 'Dt Pediatrico',
+  'VACUNA CONTRA LA DIFTERIA Y TETANOS (DT PEDIATRICO) 10 DOSIS INY': 'Dt Pediatrico',
+  'VACUNA CONTRA LA DIFTERIA Y TETANOS (DT PEDIATRICO) 10 DOSIS': 'Dt Pediatrico',
+  'VACUNA CONTRA LA DIFTERIA Y TETANOS (DT PEDIATRICO) INY 10 DOSIS': 'Dt Pediatrico',
+
+  // Hepatitis A
+  'VACUNA CONTRA LA HEPATITIS A 1 DOSIS 720 UI/0.5 ML': 'HEPATITIS A',
+  'VACUNA CONTRA LA HEPATITIS A 720 UI/0.5 ML 1 DOSIS INYECT': 'HEPATITIS A',
+  'VACUNA CONTRA LA HEPATITIS A 720 UI/0.5 ML 1 DOSIS INY': 'HEPATITIS A',
+  'VACUNA CONTRA LA HEPATITIS A 720 UI/0.5 ML INY 1 DOSIS': 'HEPATITIS A',
+
+  // HVB Adulto
+  'VACUNA CONTRA LA HEPATITIS B ADULTO 1 DOSIS 20 UG/ML': 'HVB Adulto',
+  'VACUNA CONTRA LA HEPATITIS B ADULTO 20 UG/ML 1 DOSIS INYECT': 'HVB Adulto',
+  'VACUNA CONTRA LA HEPATITIS B ADULTO 20 UG/ML 1 DOSIS INY': 'HVB Adulto',
+  'VACUNA CONTRA LA HEPATITIS B ADULTO 20 UG/ML INY 1 DOSIS': 'HVB Adulto',
+
+  // HVB Pediatrico
+  'VACUNA CONTRA LA HEPATITIS B PEDIATRICO 1 DOSIS 10 UG/0.5 ML': 'HVB Pediatrico',
+  'VACUNA CONTRA LA HEPATITIS B PEDIATRICO 10 UG/0.5 ML 1 DOSIS INYECT': 'HVB Pediatrico',
+  'VACUNA CONTRA LA HEPATITIS B PEDIATRICO 10 UG/0.5 ML 1 DOSIS INY': 'HVB Pediatrico',
+  'VACUNA CONTRA LA HEPATITIS B 10 UG/0.5 ML INY 1 DOSIS': 'HVB Pediatrico',
+
+  // Influenza Adulto
+  'VACUNA CONTRA LA INFLUENZA ESTACIONARIA - ADULTO 1 DOSIS (0.5 ML)': 'Influenza Adulto',
+  'VACUNA CONTRA LA INFLUENZA ESTACIONARIA - ADULTO 1 DOSIS (0.5 ML) INY': 'Influenza Adulto',
+  'VACUNA CONTRA LA INFLUENZA ESTACIONARIA - ADULTO 1 DOSIS (0.5 ML) INYECT': 'Influenza Adulto',
+  'VACUNA CONTRA LA INFLUENZA TETRAVALENTE ANTIGENO TIPO A (H1N1 + H3N2)': 'Influenza Adulto',
+
+  // Influenza Pediatrica
+  'VACUNA CONTRA LA INFLUENZA PEDIATRICO (ANTIGENO TIPO A (H1N1 + H3N2) + ANTIGENO TIPO B 20 DOSIS 90 UG/ML': 'Influenza Pediatrica',
+  'VACUNA CONTRA LA INFLUENZA PEDIATRICO (ANTIGENO TIPO A (H1N1 + H3N2) +': 'Influenza Pediatrica',
+  'VACUNA CONTRA LA INFLUENZA (ANTIGENO TIPO A (H1N1 + H3N2) + ANTIGENO TIPO B) INY 20 DOSIS PEDIATRICO': 'Influenza Pediatrica',
+
+  // Pentavalente
+  'VACUNA DPT, HIB Y VHB (PENTAVALENTE) 1 DOSIS OTROS': 'Pentavalente',
+  'VACUNA DPT, HIB Y VHB (PENTAVALENTE) 1 DOSIS': 'Pentavalente',
+  'VACUNA DPT, HIB Y VHB (PENTAVALENTE) - 1 DOSIS INYECT': 'Pentavalente',
+  'VACUNA DPT, HIB Y VHB (PENTAVALENTE) 1 DOSIS INYECT': 'Pentavalente',
+  'VACUNA DPT, HIB Y VHB (PENTAVALENTE) INY 1 DOSIS': 'Pentavalente',
+
+  // HIB
+  'VACUNA HAEMOPHILUS INFLUENZAE TIPO B (HIB) 1 DOSIS INYECT': 'HIB',
+  'VACUNA HAEMOPHILUS INFLUENZAE TIPO B (HIB) 1 DOSIS INY': 'HIB',
+  'VACUNA HAEMOPHILUS INFLUENZAE TIPO B (HIB) 1 DOSIS': 'HIB',
+
+  // VPH
+  'VACUNA RECOMBINANTE TETRAVALENTE CONTRA VIRUS DEL PAPILOMA HUMANO TIPO 6, 11, 16 Y 18 (VPH) 0.5 ML': 'VPH',
+  'VACUNA RECOMBINANTE TETRAVALENTE CONTRA VIRUS DEL PAPILOMA HUMANO TIPO': 'VPH',
+  'VACUNA DEL VIRUS DEL PAPILOMA HUMANO': 'VPH',
+
+  // Antirrabica
+  'VACUNA ANTIRRABICA HUMANA INACTIVADA (ANTIGENO PITMAN MOORE CEPA 3218-': 'ANTIRRABICA',
+  'VACUNA ANTIRRABICA HUMANA INACTIVADA (ANTIGENO PITMAN MOORE CEPA 3218-VERO) 1 DOSIS OTROS': 'ANTIRRABICA',
+  'VACUNA ANTIRRABICA HUMANA INACTIVADA (PREPARADO DE CULTIVO CELULAR WIS': 'ANTIRRABICA',
+  'VACUNA ANTIRRABICA HUMANA INACTIVADA (PREPARADO EN CULTIVO CELULAR) 1': 'ANTIRRABICA',
+  'VACUNA ANTIRRABICA HUMANA INACTIVADA': 'ANTIRRABICA',
 };
 
 interface ParsedExcelRow {
@@ -95,7 +226,7 @@ const normalizeEstablecimientoKey = (value: unknown): string => {
     .replace(/\s+/g, ' ')
     .trim();
 
-  return normalized;
+  return EXCEL_ESTABLECIMIENTO_ALIASES[normalized] ?? normalized;
 };
 
 const parseNumber = (value: unknown): number => {
@@ -178,12 +309,129 @@ const parseExcelMonthHeader = (value: unknown): { year: number; month: number } 
 };
 
 const normalizeVacunaLookupKey = (value: unknown): string => normalizeText(value)
-  .replace(/�/g, 'U')
-  .replace(/\b8 U\b/g, '8 UG')
-  .replace(/\b8 G\b/g, '8 UG')
+  .replace(/\uFFFD/g, 'U')
+  .replace(/[µμ]/g, 'U')
+  .replace(/\b8\s*[UGug\uFFFD]+\b/g, '8 UG')
+  .replace(/\b8\s*G\b/g, '8 UG')
   .replace(/\bDPTA\b/g, 'DPTA')
   .replace(/\s+/g, ' ')
   .trim();
+
+const resolveVacuna = (
+  medicamentoOriginal: string,
+  vacunaMap: Map<string, { id: string; nombre: string }>,
+): { id: string; nombre: string } | null => {
+  const normalizedKey = normalizeVacunaLookupKey(medicamentoOriginal);
+  const normalizedText = normalizeText(medicamentoOriginal);
+
+  // 1. Mapeo directo por diccionario
+  const mappedVacunaNombre = EXCEL_VACUNA_MAPPING[normalizedKey] || EXCEL_VACUNA_MAPPING[normalizedText];
+  if (mappedVacunaNombre) {
+    const found = vacunaMap.get(normalizeVacunaLookupKey(mappedVacunaNombre))
+      ?? vacunaMap.get(normalizeText(mappedVacunaNombre));
+    if (found) return found;
+  }
+
+  // 2. Coincidencia directa en el catálogo
+  const directMatch = vacunaMap.get(normalizedKey) ?? vacunaMap.get(normalizedText);
+  if (directMatch) return directMatch;
+
+  // 3. Coincidencia por heurísticas del esquema nacional
+  let targetCanonicalName: string | null = null;
+  if (normalizedKey.includes('AMARILICA')) {
+    targetCanonicalName = 'AMA';
+  } else if (normalizedKey.includes('NEUMOCOCICA') || normalizedKey.includes('NEUMOCOCO')) {
+    targetCanonicalName = 'Neumococo';
+  } else if (normalizedKey.includes('PAROTIDITIS')) {
+    targetCanonicalName = normalizedKey.includes('5 DOSIS') ? 'SPR X 5 DOSIS' : 'SPR X 1 DOSIS';
+  } else if (normalizedKey.includes('SARAMPION') && normalizedKey.includes('RUBEOLA')) {
+    if (normalizedKey.includes('PAROTIDITIS') || normalizedKey.includes('SPR')) {
+      targetCanonicalName = normalizedKey.includes('5 DOSIS') ? 'SPR X 5 DOSIS' : 'SPR X 1 DOSIS';
+    } else {
+      targetCanonicalName = 'SR';
+    }
+  } else if (normalizedKey.includes('POLIOMIELITICA') || normalizedKey.includes('POLIO')) {
+    if (
+      normalizedKey.includes('BIVALENTE') ||
+      normalizedKey.includes('ORAL') ||
+      normalizedKey.includes('APO') ||
+      normalizedKey.includes('20 DOSIS') ||
+      normalizedKey.includes('10 DOSIS SUSPEN')
+    ) {
+      targetCanonicalName = 'APO';
+    } else {
+      targetCanonicalName = 'IPV';
+    }
+  } else if (normalizedKey.includes('RABICA') || normalizedKey.includes('PITMAN MOORE')) {
+    targetCanonicalName = 'ANTIRRABICA';
+  } else if (normalizedKey.includes('TUBERCULOSA') || normalizedKey.includes('BCG')) {
+    targetCanonicalName = 'BCG';
+  } else if (normalizedKey.includes('VARICELA')) {
+    targetCanonicalName = 'Varicela';
+  } else if (
+    normalizedKey.includes('DPTA') ||
+    (normalizedKey.includes('DIFTERIA') && normalizedKey.includes('TETANOS') && normalizedKey.includes('TOS FERINA') && normalizedKey.includes('ACELULAR'))
+  ) {
+    targetCanonicalName = 'DPTA';
+  } else if (
+    normalizedKey.includes('DPT') ||
+    (normalizedKey.includes('DIFTERIA') && normalizedKey.includes('TETANOS') && normalizedKey.includes('TOS FERINA'))
+  ) {
+    targetCanonicalName = 'DPT';
+  } else if (normalizedKey.includes('ROTAVIRUS')) {
+    targetCanonicalName = 'Rotavirus';
+  } else if (normalizedKey.includes('DIFTERIA') && normalizedKey.includes('TETANOS')) {
+    if (normalizedKey.includes('PEDIATRICO') || normalizedKey.includes('PEDIAT')) {
+      targetCanonicalName = 'Dt Pediatrico';
+    } else {
+      targetCanonicalName = 'Dt Adulto';
+    }
+  } else if (normalizedKey.includes('HEPATITIS A')) {
+    targetCanonicalName = 'HEPATITIS A';
+  } else if (normalizedKey.includes('HEPATITIS B') || normalizedKey.includes('HVB') || normalizedKey.includes('VHB')) {
+    if (normalizedKey.includes('PEDIATRICO') || normalizedKey.includes('10 UG') || normalizedKey.includes('PEDIAT')) {
+      targetCanonicalName = 'HVB Pediatrico';
+    } else {
+      targetCanonicalName = 'HVB Adulto';
+    }
+  } else if (normalizedKey.includes('INFLUENZA')) {
+    if (normalizedKey.includes('PEDIATRICO') || normalizedKey.includes('PEDIAT')) {
+      targetCanonicalName = 'Influenza Pediatrica';
+    } else {
+      targetCanonicalName = 'Influenza Adulto';
+    }
+  } else if (normalizedKey.includes('PENTAVALENTE')) {
+    targetCanonicalName = 'Pentavalente';
+  } else if (normalizedKey.includes('HAEMOPHILUS') || normalizedKey.includes('HIB')) {
+    targetCanonicalName = 'HIB';
+  } else if (normalizedKey.includes('PAPILOMA') || normalizedKey.includes('VPH')) {
+    targetCanonicalName = 'VPH';
+  } else if (normalizedKey.includes('VIRUELA')) {
+    targetCanonicalName = 'VIRUELA';
+  } else if (normalizedKey.includes('SINCITIAL') || normalizedKey.includes('VRS')) {
+    if (normalizedKey.includes('RN') || normalizedKey.includes('NIRSEVIMAB') || normalizedKey.includes('RECIEN NACIDO')) {
+      targetCanonicalName = 'VRS RN';
+    } else {
+      targetCanonicalName = 'VRS GESTANTE';
+    }
+  } else if (normalizedKey.includes('HEXAVALENTE') || normalizedKey.includes('HEXA')) {
+    if (normalizedKey.includes('ACEL')) {
+      targetCanonicalName = 'HEXA ACEL';
+    } else {
+      targetCanonicalName = 'HEXA CEL';
+    }
+  } else if (normalizedKey.includes('MENINGOCOCO') || normalizedKey.includes('MENINGO')) {
+    targetCanonicalName = 'MENINGO';
+  }
+
+  if (targetCanonicalName) {
+    return vacunaMap.get(normalizeVacunaLookupKey(targetCanonicalName))
+      ?? vacunaMap.get(normalizeText(targetCanonicalName))
+      ?? null;
+  }
+
+  return null;
+};
 
 const HEADER_MONTH_START_COLUMN = 9;
 
@@ -325,9 +573,13 @@ export class IciDemidService {
         return;
       }
 
-      const establecimientoAlias = EXCEL_ESTABLECIMIENTO_ALIASES[normalizeText(establecimientoExcel)] ?? establecimientoExcel;
+      const establecimientoAlias = EXCEL_ESTABLECIMIENTO_ALIASES[normalizeText(establecimientoExcel)]
+        ?? EXCEL_ESTABLECIMIENTO_ALIASES[normalizeEstablecimientoKey(establecimientoExcel)]
+        ?? establecimientoExcel;
       const establecimiento = establecimientoMap.get(normalizeEstablecimientoKey(establecimientoAlias))
-        ?? establecimientoMap.get(normalizeText(establecimientoAlias));
+        ?? establecimientoMap.get(normalizeText(establecimientoAlias))
+        ?? establecimientoMap.get(normalizeEstablecimientoKey(establecimientoExcel))
+        ?? establecimientoMap.get(normalizeText(establecimientoExcel));
       if (establecimiento) {
         establecimientosMapeados.set(establecimientoExcel, establecimiento.nombre);
       } else {
@@ -340,11 +592,7 @@ export class IciDemidService {
         });
       }
 
-      const normalizedMedicamento = normalizeVacunaLookupKey(medicamentoOriginal);
-      const mappedVacunaNombre = EXCEL_VACUNA_MAPPING[normalizedMedicamento];
-      const vacuna = mappedVacunaNombre
-        ? vacunaMap.get(normalizeVacunaLookupKey(mappedVacunaNombre)) ?? vacunaMap.get(normalizeText(mappedVacunaNombre))
-        : null;
+      const vacuna = resolveVacuna(medicamentoOriginal, vacunaMap);
       if (vacuna) {
         vacunasMapeadas.set(medicamentoOriginal, vacuna.nombre);
       } else {
