@@ -743,7 +743,50 @@ export class IciDemidService {
       const operacionesUnicasMap = new Map<string, (typeof operaciones)[number]>();
       for (const operacion of operaciones) {
         const key = `${operacion.establecimientoId}-${operacion.vacunaId}-${operacion.anio}`;
-        operacionesUnicasMap.set(key, operacion);
+        const existing = operacionesUnicasMap.get(key);
+
+        if (!existing) {
+          operacionesUnicasMap.set(key, {
+            ...operacion,
+            payload: {
+              ...operacion.payload,
+              distribucionMensual: [...operacion.payload.distribucionMensual],
+              mesesDisponibles: [...operacion.payload.mesesDisponibles],
+            },
+          });
+        } else {
+          // Consolidar por suma si hay múltiples filas para la misma vacuna (ej. APO 20 dosis + 10 dosis oral)
+          const combinedDistribucion = existing.payload.distribucionMensual.map((val, idx) => {
+            return (val || 0) + (operacion.payload.distribucionMensual[idx] || 0);
+          });
+
+          const combinedMeses = existing.payload.mesesDisponibles.map((val, idx) => {
+            return val || operacion.payload.mesesDisponibles[idx] || 0;
+          });
+
+          const sumCpma = (existing.payload.cpma !== null || operacion.payload.cpma !== null)
+            ? Number(((existing.payload.cpma ?? 0) + (operacion.payload.cpma ?? 0)).toFixed(4))
+            : null;
+
+          const sumRequerimiento = (existing.payload.requerimiento !== null || operacion.payload.requerimiento !== null)
+            ? Number(((existing.payload.requerimiento ?? 0) + (operacion.payload.requerimiento ?? 0)).toFixed(4))
+            : null;
+
+          const sumAjuste = (existing.payload.ajuste !== null || operacion.payload.ajuste !== null)
+            ? Number(((existing.payload.ajuste ?? 0) + (operacion.payload.ajuste ?? 0)).toFixed(4))
+            : null;
+
+          existing.payload.distribucionMensual = combinedDistribucion;
+          existing.payload.mesesDisponibles = combinedMeses;
+          existing.payload.stockFin = (existing.payload.stockFin || 0) + (operacion.payload.stockFin || 0);
+          existing.payload.totalDistribu = (existing.payload.totalDistribu || 0) + (operacion.payload.totalDistribu || 0);
+          existing.payload.cpma = sumCpma;
+          existing.payload.requerimiento = sumRequerimiento;
+          existing.payload.ajuste = sumAjuste;
+          if (operacion.payload.fecExp && (!existing.payload.fecExp || operacion.payload.fecExp > existing.payload.fecExp)) {
+            existing.payload.fecExp = operacion.payload.fecExp;
+          }
+        }
       }
       const operacionesUnicas = Array.from(operacionesUnicasMap.values());
 
