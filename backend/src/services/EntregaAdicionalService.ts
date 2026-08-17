@@ -184,19 +184,57 @@ export class EntregaAdicionalService {
       // Validaciones de negocio
       await this.validateEntregaAdicionalData(data);
 
+      const movimiento = await prisma.movimientoVacuna.findUnique({
+        where: { id: data.movimientoVacunaId },
+        include: { entregasAdicionales: true }
+      });
+
+      if (!movimiento) {
+        return {
+          success: false,
+          error: 'Movimiento de vacuna no encontrado'
+        };
+      }
+
       // Obtener siguiente número de entrega
       const numeroEntrega = await this.getNextNumeroEntrega(data.movimientoVacunaId);
 
-      const entrega = await prisma.entregaAdicional.create({
-        data: {
-          movimientoVacunaId: data.movimientoVacunaId,
-          numeroEntrega,
-          cantidad: data.cantidad,
-          fechaEntrega: data.fechaEntrega || new Date(),
-          motivo: data.motivo,
-          usuarioId: data.usuarioId
-        }
+      const { MovimientosCalculationService } = await import('./movimientos/MovimientosCalculationService');
+
+      const entrega = await prisma.$transaction(async (tx) => {
+        await MovimientosCalculationService.manejarEntregaBase(tx, data.movimientoVacunaId, movimiento);
+
+        const nuevaEntrega = await tx.entregaAdicional.create({
+          data: {
+            movimientoVacunaId: data.movimientoVacunaId,
+            numeroEntrega,
+            cantidad: data.cantidad,
+            fechaEntrega: data.fechaEntrega || new Date(),
+            motivo: data.motivo,
+            usuarioId: data.usuarioId
+          }
+        });
+
+        const entregaTotal = await MovimientosCalculationService.calcularEntregaTotal(tx, data.movimientoVacunaId);
+
+        await tx.movimientoVacuna.update({
+          where: { id: data.movimientoVacunaId },
+          data: {
+            entrega: entregaTotal,
+            updatedAt: new Date()
+          }
+        });
+
+        return nuevaEntrega;
       });
+
+      // Sincronizar saldo anterior del siguiente mes automáticamente
+      await MovimientosCalculationService.sincronizarSaldoAnteriorSiguienteMes(
+        movimiento.establecimientoId,
+        movimiento.vacunaId,
+        movimiento.mes,
+        movimiento.anio
+      );
 
       return {
         success: true,
@@ -218,7 +256,14 @@ export class EntregaAdicionalService {
     try {
       // Verificar que la entrega existe
       const entregaExistente = await prisma.entregaAdicional.findUnique({
-        where: { id }
+        where: { id },
+        include: {
+          movimientoVacuna: {
+            include: {
+              entregasAdicionales: true
+            }
+          }
+        }
       });
 
       if (!entregaExistente) {
@@ -245,10 +290,35 @@ export class EntregaAdicionalService {
         updateData.motivo = data.motivo;
       }
 
-      const entrega = await prisma.entregaAdicional.update({
-        where: { id },
-        data: updateData
+      const { MovimientosCalculationService } = await import('./movimientos/MovimientosCalculationService');
+      const movimiento = entregaExistente.movimientoVacuna;
+
+      const entrega = await prisma.$transaction(async (tx) => {
+        const entregaActualizada = await tx.entregaAdicional.update({
+          where: { id },
+          data: updateData
+        });
+
+        const entregaTotal = await MovimientosCalculationService.calcularEntregaTotal(tx, movimiento.id);
+
+        await tx.movimientoVacuna.update({
+          where: { id: movimiento.id },
+          data: {
+            entrega: entregaTotal,
+            updatedAt: new Date()
+          }
+        });
+
+        return entregaActualizada;
       });
+
+      // Sincronizar saldo anterior del siguiente mes automáticamente
+      await MovimientosCalculationService.sincronizarSaldoAnteriorSiguienteMes(
+        movimiento.establecimientoId,
+        movimiento.vacunaId,
+        movimiento.mes,
+        movimiento.anio
+      );
 
       return {
         success: true,
@@ -270,7 +340,14 @@ export class EntregaAdicionalService {
     try {
       // Verificar que la entrega existe
       const entrega = await prisma.entregaAdicional.findUnique({
-        where: { id }
+        where: { id },
+        include: {
+          movimientoVacuna: {
+            include: {
+              entregasAdicionales: true
+            }
+          }
+        }
       });
 
       if (!entrega) {
@@ -280,9 +357,42 @@ export class EntregaAdicionalService {
         };
       }
 
-      await prisma.entregaAdicional.delete({
-        where: { id }
+      const movimiento = entrega.movimientoVacuna;
+      const { MovimientosCalculationService } = await import('./movimientos/MovimientosCalculationService');
+
+      await prisma.$transaction(async (tx) => {
+        await tx.entregaAdicional.delete({
+          where: { id }
+        });
+
+        const entregaTotal = await MovimientosCalculationService.calcularEntregaTotal(tx, movimiento.id);
+
+        await tx.movimientoVacuna.update({
+          where: { id: movimiento.id },
+          data: {
+            entrega: entregaTotal,
+            updatedAt: new Date()
+          }
+        });
+
+        if (movimiento.entregasAdicionales.length === 1) {
+          await tx.movimientoVacuna.update({
+            where: { id: movimiento.id },
+            data: {
+              entregaBase: null,
+              updatedAt: new Date()
+            }
+          });
+        }
       });
+
+      // Sincronizar saldo anterior del siguiente mes automáticamente
+      await MovimientosCalculationService.sincronizarSaldoAnteriorSiguienteMes(
+        movimiento.establecimientoId,
+        movimiento.vacunaId,
+        movimiento.mes,
+        movimiento.anio
+      );
 
       return {
         success: true,

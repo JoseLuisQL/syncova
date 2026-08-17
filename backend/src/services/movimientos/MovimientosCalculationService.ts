@@ -353,13 +353,17 @@ export class MovimientosCalculationService {
     if (!movimientoCompleto) return 0;
 
     const totalAdicionales = movimientoCompleto.entregasAdicionales.reduce(
-      (sum: number, entrega: any) => sum + entrega.cantidad,
+      (sum: number, entrega: any) => sum + (Number(entrega.cantidad) || 0),
       0
     );
 
-    const entregaBase = movimientoCompleto.entregaBase ?? movimientoCompleto.entrega;
+    const entregaBase = movimientoCompleto.entregaBase !== null && movimientoCompleto.entregaBase !== undefined
+      ? movimientoCompleto.entregaBase
+      : movimientoCompleto.entrega;
 
-    return entregaBase + totalAdicionales;
+    return (movimientoCompleto.entregasAdicionales && movimientoCompleto.entregasAdicionales.length > 0)
+      ? (entregaBase + totalAdicionales)
+      : movimientoCompleto.entrega;
   }
 
   /**
@@ -609,10 +613,12 @@ export class MovimientosCalculationService {
     establecimientoId: string,
     vacunaId: string,
     mes: number,
-    anio: number
+    anio: number,
+    txOrPrisma?: any
   ): Promise<ServiceResult<{ actualizado: boolean; stockCalculado: number }>> {
     try {
-      const movimientoActual = await prisma.movimientoVacuna.findUnique({
+      const db = txOrPrisma || prisma;
+      const movimientoActual = await db.movimientoVacuna.findUnique({
         where: {
           uk_movimiento_establecimiento_vacuna_mes_anio: {
             establecimientoId,
@@ -620,6 +626,9 @@ export class MovimientosCalculationService {
             mes,
             anio
           }
+        },
+        include: {
+          entregasAdicionales: true
         }
       });
 
@@ -630,11 +639,39 @@ export class MovimientosCalculationService {
         };
       }
 
-      const stockCalculado = movimientoActual.saldoAnterior +
-                            movimientoActual.transIngreso -
-                            movimientoActual.salida -
-                            movimientoActual.transSalida +
-                            movimientoActual.entrega;
+      const totalAdicionales = movimientoActual.entregasAdicionales?.reduce(
+        (sum: number, ea: any) => sum + (Number(ea.cantidad) || 0),
+        0
+      ) || 0;
+
+      const tieneEntregasAdicionales = Boolean(
+        movimientoActual.entregasAdicionales && movimientoActual.entregasAdicionales.length > 0
+      );
+
+      const entregaBase = tieneEntregasAdicionales
+        ? (movimientoActual.entregaBase !== null && movimientoActual.entregaBase !== undefined
+            ? movimientoActual.entregaBase
+            : (movimientoActual.entrega - totalAdicionales >= 0 ? movimientoActual.entrega - totalAdicionales : movimientoActual.entrega))
+        : movimientoActual.entrega;
+
+      const entregaTotal = tieneEntregasAdicionales
+        ? entregaBase + totalAdicionales
+        : movimientoActual.entrega;
+
+      const totalSaldo = movimientoActual.saldoAnterior + movimientoActual.transIngreso;
+      const saldo = totalSaldo - movimientoActual.salida - movimientoActual.transSalida;
+      const stockCalculado = saldo + entregaTotal;
+
+      // Asegurar que entrega en DB refleje entregaTotal si difería
+      if (movimientoActual.entrega !== entregaTotal) {
+        await db.movimientoVacuna.update({
+          where: { id: movimientoActual.id },
+          data: {
+            entrega: entregaTotal,
+            updatedAt: new Date()
+          }
+        });
+      }
 
       let siguienteMes = mes + 1;
       let siguienteAnio = anio;
@@ -644,7 +681,17 @@ export class MovimientosCalculationService {
         siguienteAnio = anio + 1;
       }
 
-      const movimientoSiguiente = await prisma.movimientoVacuna.findUnique({
+      if (siguienteAnio > 2050) {
+        return {
+          success: true,
+          data: {
+            actualizado: false,
+            stockCalculado
+          }
+        };
+      }
+
+      const movimientoSiguiente = await db.movimientoVacuna.findUnique({
         where: {
           uk_movimiento_establecimiento_vacuna_mes_anio: {
             establecimientoId,
@@ -658,14 +705,57 @@ export class MovimientosCalculationService {
       let actualizado = false;
 
       if (movimientoSiguiente) {
-        await prisma.movimientoVacuna.update({
-          where: { id: movimientoSiguiente.id },
-          data: {
-            saldoAnterior: stockCalculado,
-            updatedAt: new Date()
+        if (movimientoSiguiente.saldoAnterior !== stockCalculado) {
+          await db.movimientoVacuna.update({
+            where: { id: movimientoSiguiente.id },
+            data: {
+              saldoAnterior: stockCalculado,
+              updatedAt: new Date()
+            }
+          });
+          actualizado = true;
+
+          // Propagación en cascada al siguiente mes (mes + 2)
+          await this.sincronizarSaldoAnteriorSiguienteMes(
+            establecimientoId,
+            vacunaId,
+            siguienteMes,
+            siguienteAnio,
+            db
+          );
+        }
+      } else {
+        // Si no existe movimiento para el siguiente mes, verificar si existe planificación anual
+        const planificacion = await db.planificacionAnual.findUnique({
+          where: {
+            uk_planificacion_establecimiento_vacuna_anio: {
+              establecimientoId,
+              vacunaId,
+              anio: siguienteAnio
+            }
           }
         });
-        actualizado = true;
+
+        if (planificacion) {
+          const entregaProgramada = planificacion.distribucionMensual?.[siguienteMes - 1] ?? 0;
+          const systemUser = await this.getSystemUser();
+          await db.movimientoVacuna.create({
+            data: {
+              establecimientoId,
+              vacunaId,
+              mes: siguienteMes,
+              anio: siguienteAnio,
+              saldoAnterior: stockCalculado,
+              transIngreso: 0,
+              salida: 0,
+              transSalida: 0,
+              entrega: entregaProgramada,
+              usuarioId: systemUser,
+              fechaMovimiento: new Date()
+            }
+          });
+          actualizado = true;
+        }
       }
 
       return {

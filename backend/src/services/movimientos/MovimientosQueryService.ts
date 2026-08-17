@@ -178,6 +178,111 @@ export class MovimientosQueryService {
 
       console.log(`✅ MovimientosQueryService.getAll - Resultados: ${movimientos.length} movimientos de ${total} totales`);
 
+      // Sincronización automática de saldoAnterior con el stock del mes anterior
+      if (mesBusqueda && anioBusqueda && vacunaId) {
+        let mesAnterior = mesBusqueda - 1;
+        let anioAnterior = anioBusqueda;
+        if (mesAnterior < 1) {
+          mesAnterior = 12;
+          anioAnterior = anioBusqueda - 1;
+        }
+
+        try {
+          const movimientosMesAnterior = await prisma.movimientoVacuna.findMany({
+            where: {
+              vacunaId,
+              mes: mesAnterior,
+              anio: anioAnterior
+            },
+            include: {
+              entregasAdicionales: true
+            }
+          });
+
+          if (movimientosMesAnterior.length > 0) {
+            const prevStockMap = new Map<string, number>();
+            for (const prev of movimientosMesAnterior) {
+              const totalAdic = prev.entregasAdicionales?.reduce((sum: number, ea: any) => sum + (Number(ea.cantidad) || 0), 0) || 0;
+              const tieneEntregasAdic = Boolean(prev.entregasAdicionales && prev.entregasAdicionales.length > 0);
+              const entregaBase = tieneEntregasAdic
+                ? (prev.entregaBase !== null && prev.entregaBase !== undefined
+                    ? prev.entregaBase
+                    : (prev.entrega - totalAdic >= 0 ? prev.entrega - totalAdic : prev.entrega))
+                : prev.entrega;
+              const entregaTotal = tieneEntregasAdic
+                ? entregaBase + totalAdic
+                : prev.entrega;
+              const stockFinal = prev.saldoAnterior + prev.transIngreso - prev.salida - prev.transSalida + entregaTotal;
+              prevStockMap.set(prev.establecimientoId, stockFinal);
+            }
+
+            // 1. Actualizar saldoAnterior en movimientos cargados si hay discrepancia
+            const updatesToRun: Promise<any>[] = [];
+            for (const mov of movimientos) {
+              const prevStock = prevStockMap.get(mov.establecimientoId);
+              if (prevStock !== undefined && mov.saldoAnterior !== prevStock) {
+                (mov as any).saldoAnterior = prevStock;
+                updatesToRun.push(
+                  prisma.movimientoVacuna.update({
+                    where: { id: mov.id },
+                    data: { saldoAnterior: prevStock, updatedAt: new Date() }
+                  })
+                );
+              }
+            }
+
+            // 2. Si un establecimiento tenía movimiento en el mes anterior pero no en el mes actual, crearlo con su saldo anterior
+            const existingEstablecimientoIds = new Set(movimientos.map(m => m.establecimientoId));
+            const systemUser = await prisma.usuario.findFirst({ where: { estado: 'activo' } });
+
+            if (systemUser) {
+              for (const [estId, prevStock] of prevStockMap.entries()) {
+                if (!existingEstablecimientoIds.has(estId)) {
+                  try {
+                    const planificacion = await prisma.planificacionAnual.findUnique({
+                      where: {
+                        uk_planificacion_establecimiento_vacuna_anio: {
+                          establecimientoId: estId,
+                          vacunaId,
+                          anio: anioBusqueda
+                        }
+                      }
+                    });
+
+                    const entregaProgramada = planificacion?.distribucionMensual?.[mesBusqueda - 1] ?? 0;
+                    const nuevoMov = await prisma.movimientoVacuna.create({
+                      data: {
+                        establecimientoId: estId,
+                        vacunaId,
+                        mes: mesBusqueda,
+                        anio: anioBusqueda,
+                        saldoAnterior: prevStock,
+                        transIngreso: 0,
+                        salida: 0,
+                        transSalida: 0,
+                        entrega: entregaProgramada,
+                        usuarioId: systemUser.id,
+                        fechaMovimiento: new Date()
+                      },
+                      include: MOVIMIENTO_INCLUDE
+                    });
+                    movimientos.push(nuevoMov as any);
+                  } catch (createErr) {
+                    console.error('Error al autogenerar movimiento con saldo anterior:', createErr);
+                  }
+                }
+              }
+            }
+
+            if (updatesToRun.length > 0) {
+              await Promise.allSettled(updatesToRun);
+            }
+          }
+        } catch (syncErr) {
+          console.error('Error en sincronización automática de saldoAnterior en getAll:', syncErr);
+        }
+      }
+
       const establecimientosUnicos = [...new Set(movimientos.map(m => (m as any).establecimiento?.nombre || 'Sin nombre'))];
       console.log(`🏥 Establecimientos con movimientos: ${establecimientosUnicos.length}`, establecimientosUnicos);
 
@@ -365,15 +470,28 @@ export class MovimientosQueryService {
       }
 
       const entregasAdicionalesTotal = movimiento.entregasAdicionales?.reduce(
-        (sum, ea) => sum + ea.cantidad,
+        (sum: number, ea: any) => sum + (Number(ea.cantidad) || 0),
         0
       ) || 0;
+
+      const tieneEntregasAdicionales = Boolean(
+        movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0
+      );
+
+      const entregaBase = tieneEntregasAdicionales
+        ? (movimiento.entregaBase !== null && movimiento.entregaBase !== undefined
+            ? movimiento.entregaBase
+            : (movimiento.entrega - entregasAdicionalesTotal >= 0 ? movimiento.entrega - entregasAdicionalesTotal : movimiento.entrega))
+        : movimiento.entrega;
+
+      const entregas = tieneEntregasAdicionales
+        ? entregaBase + entregasAdicionalesTotal
+        : movimiento.entrega;
 
       const saldoAnterior = movimiento.saldoAnterior;
       const ingresos = movimiento.transIngreso;
       const salidas = movimiento.salida + movimiento.transSalida;
-      const entregas = movimiento.entrega + entregasAdicionalesTotal;
-      const saldoFinal = saldoAnterior + ingresos - salidas - entregas;
+      const saldoFinal = saldoAnterior + ingresos - salidas + entregas;
       const stockDisponible = saldoFinal;
 
       console.log(`📈 [MovimientosQueryService] Stock calculado:`);
@@ -381,7 +499,7 @@ export class MovimientosQueryService {
       console.log(`   - Ingresos: ${ingresos}`);
       console.log(`   - Salidas: ${salidas}`);
       console.log(`   - Entregas (base + adicionales): ${entregas}`);
-      console.log(`   - Saldo final: ${saldoFinal}`);
+      console.log(`   - Saldo final (stock): ${saldoFinal}`);
 
       return {
         success: true,
@@ -434,20 +552,33 @@ export class MovimientosQueryService {
   }
 
   /**
-   * Calculate final balance for a movimiento
+   * Calculate final balance (stock) for a movimiento
    */
   private static calcularSaldoFinalMovimiento(movimiento: any): number {
     const entregasAdicionalesTotal = movimiento.entregasAdicionales?.reduce(
-      (sum: number, ea: any) => sum + ea.cantidad,
+      (sum: number, ea: any) => sum + (Number(ea.cantidad) || 0),
       0
     ) || 0;
+
+    const tieneEntregasAdicionales = Boolean(
+      movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0
+    );
+
+    const entregaBase = tieneEntregasAdicionales
+      ? (movimiento.entregaBase !== null && movimiento.entregaBase !== undefined
+          ? movimiento.entregaBase
+          : (movimiento.entrega - entregasAdicionalesTotal >= 0 ? movimiento.entrega - entregasAdicionalesTotal : movimiento.entrega))
+      : movimiento.entrega;
+
+    const entregaTotal = tieneEntregasAdicionales
+      ? entregaBase + entregasAdicionalesTotal
+      : movimiento.entrega;
 
     return movimiento.saldoAnterior +
            movimiento.transIngreso -
            movimiento.salida -
-           movimiento.transSalida -
-           movimiento.entrega -
-           entregasAdicionalesTotal;
+           movimiento.transSalida +
+           entregaTotal;
   }
 
   /**

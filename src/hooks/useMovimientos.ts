@@ -412,18 +412,22 @@ export const useMovimientos = () => {
     const totalSaldo = movimiento.saldoAnterior + movimiento.transIngreso;
     const saldo = totalSaldo - movimiento.salida - movimiento.transSalida;
 
-    // LÓGICA AVANZADA: Calcular entrega base y total
-    const tieneEntregasAdicionales = movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0;
-    const entregaBase = tieneEntregasAdicionales
-      ? (movimiento.entregaBase ?? 0) // Usar entrega_base si existe, sino 0 para mostrar solo la base
-      : movimiento.entrega; // Sin entregas adicionales, usar entrega normal
+    // LÓGICA AVANZADA: Calcular entrega base y total considerando entregas adicionales
+    const tieneEntregasAdicionales = Boolean(
+      movimiento.entregasAdicionales && movimiento.entregasAdicionales.length > 0
+    );
 
     const totalEntregasAdicionales = tieneEntregasAdicionales
-      ? movimiento.entregasAdicionales.reduce((sum, ea) => sum + ea.cantidad, 0)
+      ? movimiento.entregasAdicionales.reduce((sum, ea) => sum + (Number(ea.cantidad) || 0), 0)
       : 0;
 
-    // CORRECCIÓN: El backend ya calcula el total en el campo 'entrega' cuando hay entregas adicionales
-    const entregaTotal = movimiento.entrega; // Este campo ya contiene el total correcto del backend
+    const entregaBase = tieneEntregasAdicionales
+      ? (movimiento.entregaBase ?? (movimiento.entrega - totalEntregasAdicionales >= 0 ? movimiento.entrega - totalEntregasAdicionales : movimiento.entrega))
+      : movimiento.entrega;
+
+    const entregaTotal = tieneEntregasAdicionales
+      ? entregaBase + totalEntregasAdicionales
+      : movimiento.entrega;
 
     // El stock se calcula con la entrega total (base + adicionales)
     const stock = saldo + entregaTotal;
@@ -438,6 +442,7 @@ export const useMovimientos = () => {
       promedioConsumo: Math.round(promedioConsumo),
       disponibilidad: Math.round(disponibilidad * 100) / 100,
       // Campos adicionales para el frontend
+      entrega: entregaTotal,
       entregaBase: entregaBase,
       entregaTotal: entregaTotal,
       totalEntregasAdicionales: totalEntregasAdicionales

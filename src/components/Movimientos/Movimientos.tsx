@@ -385,22 +385,54 @@ const Movimientos: React.FC = () => {
         const transIngreso = getCurrentValue(establecimiento.id, 'transIngreso', movimientoExistente.transIngreso);
         const salida = getCurrentValue(establecimiento.id, 'salida', movimientoExistente.salida);
         const transSalida = getCurrentValue(establecimiento.id, 'transSalida', movimientoExistente.transSalida);
-        const entrega = getCurrentValue(establecimiento.id, 'entrega', movimientoExistente.entrega);
+
+        const tieneEntregasAdicionales = Boolean(
+          movimientoExistente.entregasAdicionales && movimientoExistente.entregasAdicionales.length > 0
+        );
+
+        const totalEntregasAdicionalesOriginal = tieneEntregasAdicionales
+          ? (movimientoExistente.entregasAdicionales?.reduce((sum, ea) => sum + (Number(ea.cantidad) || 0), 0) || 0)
+          : 0;
+
+        const entregaBaseOriginal = tieneEntregasAdicionales
+          ? (movimientoExistente.entregaBase ?? (movimientoExistente.entrega - totalEntregasAdicionalesOriginal >= 0 ? movimientoExistente.entrega - totalEntregasAdicionalesOriginal : movimientoExistente.entrega ?? 0))
+          : (movimientoExistente.entrega ?? 0);
+
+        const fieldKey = tieneEntregasAdicionales ? 'entregaBase' : 'entrega';
+        const entregaBase = getCurrentValue(establecimiento.id, fieldKey, entregaBaseOriginal);
+
+        const totalEntregasAdicionales = tieneEntregasAdicionales
+          ? (movimientoExistente.entregasAdicionales?.reduce(
+              (acumulado, entrega) => acumulado + getCurrentEntregaValue(entrega.id, entrega.cantidad),
+              0
+            ) || 0)
+          : 0;
+
+        const entregaTotal = tieneEntregasAdicionales
+          ? entregaBase + totalEntregasAdicionales
+          : entregaBase;
 
         const totalSaldo = movimientoExistente.saldoAnterior + transIngreso;
         const saldo = totalSaldo - salida - transSalida;
-        const stock = saldo + entrega;
+        const stock = saldo + entregaTotal;
+        const promedioConsumo = salida * 1.2;
+        const disponibilidad = promedioConsumo > 0 ? stock / promedioConsumo : 0;
 
         return {
           ...movimientoExistente,
           transIngreso,
           salida,
           transSalida,
-          entrega,
+          entrega: entregaTotal,
+          entregaBase,
+          entregaTotal,
+          totalEntregasAdicionales,
           totalSaldo,
           saldo,
           ici: iciValuesByEstablecimiento[establecimiento.id] ?? 0,
           stock,
+          promedioConsumo: Math.round(promedioConsumo),
+          disponibilidad: Math.round(disponibilidad * 100) / 100,
           establecimiento,
           tieneMovimiento: true
         };
@@ -413,6 +445,8 @@ const Movimientos: React.FC = () => {
         const totalSaldo = 0 + transIngreso;
         const saldo = totalSaldo - salida - transSalida;
         const stock = saldo + entrega;
+        const promedioConsumo = salida * 1.2;
+        const disponibilidad = promedioConsumo > 0 ? stock / promedioConsumo : 0;
 
         return {
           id: `temp-${establecimiento.id}`,
@@ -425,12 +459,15 @@ const Movimientos: React.FC = () => {
           salida,
           transSalida,
           entrega,
+          entregaBase: entrega,
+          entregaTotal: entrega,
+          totalEntregasAdicionales: 0,
           totalSaldo,
           saldo,
           ici: iciValuesByEstablecimiento[establecimiento.id] ?? 0,
           stock,
-          promedioConsumo: 0,
-          disponibilidad: 0,
+          promedioConsumo: Math.round(promedioConsumo),
+          disponibilidad: Math.round(disponibilidad * 100) / 100,
           observaciones: '',
           fechaMovimiento: new Date(),
           usuarioId: '',
@@ -444,7 +481,19 @@ const Movimientos: React.FC = () => {
         } as MovimientoCalculado & { tieneMovimiento: boolean };
       }
     });
-  }, [establecimientosFiltrados, movimientosCalculadosMap, selectedVacuna, selectedMes, selectedAnio, vacunaSeleccionada, getCurrentValue, iciValuesByEstablecimiento]);
+  }, [
+    establecimientosFiltrados,
+    movimientosCalculadosMap,
+    selectedVacuna,
+    selectedMes,
+    selectedAnio,
+    vacunaSeleccionada,
+    getCurrentValue,
+    getCurrentEntregaValue,
+    tempValues,
+    tempEntregasValues,
+    iciValuesByEstablecimiento
+  ]);
 
   const datosTablaMap = useMemo(
     () => new Map(datosTabla.map((movimiento) => [movimiento.establecimientoId, movimiento])),

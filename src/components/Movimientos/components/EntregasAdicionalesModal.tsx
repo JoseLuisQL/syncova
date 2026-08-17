@@ -104,7 +104,7 @@ export const EntregasAdicionalesModal: React.FC<EntregasAdicionalesModalProps> =
         <section className="grid gap-4 sm:grid-cols-3">
           <SummaryMetric label="Entrega base" value={entregaBase.toLocaleString()} tone="neutral" />
           <SummaryMetric label="Adicionales" value={totalAdicionales.toLocaleString()} tone="alt" />
-          <SummaryMetric label="Total" value={movimiento.entrega.toLocaleString()} tone="base" />
+          <SummaryMetric label="Total" value={(entregaBase + totalAdicionales).toLocaleString()} tone="base" />
         </section>
 
         <section className="rounded-xl border border-line bg-white p-5">

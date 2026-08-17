@@ -97,13 +97,44 @@ export class MovimientosWriteService {
     try {
       await this.validateMovimientoData(data);
 
+      let saldoAnterior = data.saldoAnterior || 0;
+      if (saldoAnterior === 0) {
+        // Calcular a partir del mes anterior si existe
+        const prevMes = data.mes === 1 ? 12 : data.mes - 1;
+        const prevAnio = data.mes === 1 ? data.anio - 1 : data.anio;
+        const prevMov = await prisma.movimientoVacuna.findUnique({
+          where: {
+            uk_movimiento_establecimiento_vacuna_mes_anio: {
+              establecimientoId: data.establecimientoId,
+              vacunaId: data.vacunaId,
+              mes: prevMes,
+              anio: prevAnio
+            }
+          },
+          include: {
+            entregasAdicionales: true
+          }
+        });
+
+        if (prevMov) {
+          const totalAdic = prevMov.entregasAdicionales?.reduce((sum, ea) => sum + (Number(ea.cantidad) || 0), 0) || 0;
+          const entregaBase = prevMov.entregaBase !== null && prevMov.entregaBase !== undefined
+            ? prevMov.entregaBase
+            : (prevMov.entrega - totalAdic >= 0 ? prevMov.entrega - totalAdic : prevMov.entrega);
+          const totalEntrega = (prevMov.entregasAdicionales && prevMov.entregasAdicionales.length > 0)
+            ? entregaBase + totalAdic
+            : prevMov.entrega;
+          saldoAnterior = prevMov.saldoAnterior + prevMov.transIngreso - prevMov.salida - prevMov.transSalida + totalEntrega;
+        }
+      }
+
       const movimiento = await prisma.movimientoVacuna.create({
         data: {
           establecimientoId: data.establecimientoId,
           vacunaId: data.vacunaId,
           mes: data.mes,
           anio: data.anio,
-          saldoAnterior: data.saldoAnterior || 0,
+          saldoAnterior,
           transIngreso: data.transIngreso || 0,
           salida: data.salida || 0,
           transSalida: data.transSalida || 0,
@@ -113,6 +144,15 @@ export class MovimientosWriteService {
           usuarioId: data.usuarioId
         }
       });
+
+      // Sincronizar saldo anterior del siguiente mes automáticamente
+      const { MovimientosCalculationService } = await import('./MovimientosCalculationService');
+      await MovimientosCalculationService.sincronizarSaldoAnteriorSiguienteMes(
+        movimiento.establecimientoId,
+        movimiento.vacunaId,
+        movimiento.mes,
+        movimiento.anio
+      );
 
       return {
         success: true,
@@ -224,6 +264,14 @@ export class MovimientosWriteService {
 
         return movimiento;
       });
+
+      // Sincronizar saldo anterior del siguiente mes automáticamente
+      await MovimientosCalculationService.sincronizarSaldoAnteriorSiguienteMes(
+        existingMovimiento.establecimientoId,
+        existingMovimiento.vacunaId,
+        existingMovimiento.mes,
+        existingMovimiento.anio
+      );
 
       if ((data.entrega !== undefined && data.entrega !== existingMovimiento.entrega) ||
           (data.entregaBase !== undefined && data.entregaBase !== existingMovimiento.entregaBase)) {
@@ -405,6 +453,14 @@ export class MovimientosWriteService {
         return entregaAdicional;
       });
 
+      // Sincronizar saldo anterior del siguiente mes automáticamente
+      await MovimientosCalculationService.sincronizarSaldoAnteriorSiguienteMes(
+        movimiento.establecimientoId,
+        movimiento.vacunaId,
+        movimiento.mes,
+        movimiento.anio
+      );
+
       console.log(`🔔 [MovimientosWriteService] TRIGGER: Entrega adicional creada - sincronizando vales automáticamente`);
       ValeService.onEntregaAdicionalCambiada(data.movimientoVacunaId, data.usuarioId);
 
@@ -507,6 +563,14 @@ export class MovimientosWriteService {
         return entregaActualizada;
       });
 
+      // Sincronizar saldo anterior del siguiente mes automáticamente
+      await MovimientosCalculationService.sincronizarSaldoAnteriorSiguienteMes(
+        movimiento.establecimientoId,
+        movimiento.vacunaId,
+        movimiento.mes,
+        movimiento.anio
+      );
+
       console.log(`🔔 [MovimientosWriteService] TRIGGER: Entrega adicional actualizada - sincronizando vales automáticamente`);
       ValeService.onEntregaAdicionalCambiada(movimiento.id, usuarioId || 'system-auto-sync');
 
@@ -591,6 +655,14 @@ export class MovimientosWriteService {
           });
         }
       });
+
+      // Sincronizar saldo anterior del siguiente mes automáticamente
+      await MovimientosCalculationService.sincronizarSaldoAnteriorSiguienteMes(
+        movimiento.establecimientoId,
+        movimiento.vacunaId,
+        movimiento.mes,
+        movimiento.anio
+      );
 
       console.log(`🔔 [MovimientosWriteService] TRIGGER: Entrega adicional eliminada - sincronizando vales automáticamente`);
       ValeService.onEntregaAdicionalCambiada(movimiento.id, 'system-auto-sync');
