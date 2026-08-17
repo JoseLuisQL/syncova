@@ -1,5 +1,11 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Package, Plus, ThermometerCold } from '@phosphor-icons/react';
+import {
+  Archive,
+  Package,
+  PencilSimple,
+  Plus,
+  ThermometerCold,
+} from '@phosphor-icons/react';
 import { CreateVacunaDto, UpdateVacunaDto, Vacuna } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useVacunas } from '../../hooks/useVacunas';
@@ -9,7 +15,6 @@ import {
   EmptyState,
   ErrorAlert,
   StatusBadge,
-  KeyValueGrid,
 } from './components/SharedComponents';
 import { DataTable, FilterBar, Pagination, TableCell, TableHeader, TableRow } from './components/FilterAndTable';
 import {
@@ -18,7 +23,6 @@ import {
   Modal,
   ModalFooter,
   SelectInput,
-  SideSheet,
   TextInput,
 } from '../ui/ModalElements';
 import { COMPONENT_STYLES, FILTER_OPTIONS } from './constants';
@@ -352,67 +356,14 @@ const GestionVacunas: React.FC = () => {
         </div>
       </section>
 
-      <SideSheet
-        isOpen={Boolean(selectedVacuna)}
+      <VacunaDetailModal
+        vacuna={selectedVacuna}
         onClose={() => setSelectedVacuna(null)}
-        title={selectedVacuna?.nombre || 'Detalle de vacuna'}
-        subtitle={selectedVacuna ? `${selectedVacuna.tipo} · ${selectedVacuna.presentacion}` : undefined}
-        icon={Package}
-      >
-        {selectedVacuna ? (
-          <div className="space-y-5">
-            <KeyValueGrid
-              columns={2}
-              items={[
-                { label: 'Dosis por frasco', value: <span className="font-medium">{selectedVacuna.dosisPorFrasco}</span> },
-                { label: 'Temperatura', value: <span className="font-medium">{selectedVacuna.temperaturaAlmacenamiento}</span> },
-                { label: 'Vida útil', value: <span className="font-medium">{Math.round(selectedVacuna.tiempoVidaUtil / 365)} años</span> },
-                { label: 'Estado', value: <StatusBadge status={selectedVacuna.estado} /> },
-              ]}
-            />
-
-            <KeyValueGrid
-              columns={1}
-              items={[
-                {
-                  label: 'Inventario asociado',
-                  value: (
-                    <div className="space-y-2 text-sm">
-                      <p>
-                        <span className="font-semibold text-zinc-900">{getStockInfo(selectedVacuna).stockTotal.toLocaleString()}</span>{' '}
-                        dosis en stock total
-                      </p>
-                      <p>{getStockInfo(selectedVacuna).lotesActivos} lotes disponibles</p>
-                      <p>{getStockInfo(selectedVacuna).lotesPorVencer} lotes por vencer</p>
-                      <p>{getStockInfo(selectedVacuna).lotesVencidos} lotes vencidos</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-
-            {selectedVacuna._count ? (
-              <KeyValueGrid
-                columns={3}
-                items={[
-                  { label: 'Lotes', value: <span className="font-medium">{selectedVacuna._count.lotes}</span> },
-                  { label: 'Planificaciones', value: <span className="font-medium">{selectedVacuna._count.planificaciones}</span> },
-                  { label: 'Movimientos', value: <span className="font-medium">{selectedVacuna._count.movimientos}</span> },
-                ]}
-              />
-            ) : null}
-
-            <div className="flex flex-wrap gap-2">
-              <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={() => handleEdit(selectedVacuna)}>
-                Editar vacuna
-              </button>
-              <button type="button" className={COMPONENT_STYLES.button.ghost} onClick={() => setSelectedVacuna(null)}>
-                Cerrar
-              </button>
-            </div>
-          </div>
-        ) : null}
-      </SideSheet>
+        onEdit={(v) => {
+          setSelectedVacuna(null);
+          handleEdit(v);
+        }}
+      />
 
       {showModal ? (
         <VacunaModal
@@ -437,6 +388,181 @@ const GestionVacunas: React.FC = () => {
     </div>
   );
 };
+
+interface VacunaDetailModalProps {
+  vacuna: Vacuna | null;
+  onClose: () => void;
+  onEdit: (vacuna: Vacuna) => void;
+}
+
+const VacunaDetailModal: React.FC<VacunaDetailModalProps> = memo(({ vacuna, onClose, onEdit }) => {
+  if (!vacuna) return null;
+
+  const stockInfo = getStockInfo(vacuna);
+
+  return (
+    <Modal
+      isOpen
+      onClose={onClose}
+      title="Detalle de vacuna"
+      subtitle="Especificaciones técnicas y estado de inventario"
+      icon={Package}
+      size="lg"
+      footer={
+        <div className="flex w-full items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className={COMPONENT_STYLES.button.ghost}
+          >
+            Cerrar
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              onEdit(vacuna);
+            }}
+            className={COMPONENT_STYLES.button.primary}
+          >
+            <PencilSimple className="h-4 w-4" weight="bold" />
+            <span>Editar vacuna</span>
+          </button>
+        </div>
+      }
+    >
+      <div className="space-y-4">
+        {/* Identidad del Biológico */}
+        <div className="rounded-xl border border-line bg-surface-soft/60 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 space-y-1.5">
+              <span className="text-[0.7rem] font-bold uppercase tracking-wider text-muted-2">
+                Biológico / Catálogo oficial
+              </span>
+              <h3 className="text-base sm:text-lg font-bold tracking-tight text-ink">
+                {vacuna.nombre}
+              </h3>
+              <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-semibold text-ink shadow-xs">
+                  Tipo: {vacuna.tipo}
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-semibold text-ink shadow-xs">
+                  Presentación: {vacuna.presentacion}
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-semibold text-ink shadow-xs">
+                  {vacuna.dosisPorFrasco} dosis/frasco
+                </span>
+              </div>
+            </div>
+            <div className="self-start sm:self-auto shrink-0">
+              <StatusBadge status={vacuna.estado} />
+            </div>
+          </div>
+        </div>
+
+        {/* Métricas Clínicas */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-line bg-white p-3.5 shadow-xs">
+            <div className="flex items-center justify-between text-muted">
+              <p className="text-[0.7rem] font-bold uppercase tracking-wider">Stock Total</p>
+              <Package className="h-4 w-4 text-muted-2" weight="duotone" />
+            </div>
+            <p className={`mt-1.5 text-2xl font-bold tracking-tight ${stockInfo.stockTotal > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+              {stockInfo.stockTotal.toLocaleString()}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-2">
+              {stockInfo.stockTotal > 0 ? 'Dosis en existencia' : 'Sin stock disponible'}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-line bg-white p-3.5 shadow-xs">
+            <div className="flex items-center justify-between text-muted">
+              <p className="text-[0.7rem] font-bold uppercase tracking-wider">Lotes Registrados</p>
+              <Archive className="h-4 w-4 text-muted-2" weight="duotone" />
+            </div>
+            <p className="mt-1.5 text-2xl font-bold tracking-tight text-ink">
+              {vacuna._count?.lotes || vacuna.lotes?.length || 0}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-2">
+              {stockInfo.lotesActivos} disponibles · {stockInfo.lotesVencidos} vencidos
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-line bg-white p-3.5 shadow-xs">
+            <div className="flex items-center justify-between text-muted">
+              <p className="text-[0.7rem] font-bold uppercase tracking-wider">Conservación</p>
+              <ThermometerCold className="h-4 w-4 text-muted-2" weight="duotone" />
+            </div>
+            <p className="mt-1.5 text-base font-bold tracking-tight text-ink">
+              {vacuna.temperaturaAlmacenamiento}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-2">
+              Vida útil: {Math.round(vacuna.tiempoVidaUtil / 365)} años
+            </p>
+          </div>
+        </div>
+
+        {/* Lotes Asociados */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-0.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-2">
+              Lotes Asociados ({vacuna.lotes?.length || 0})
+            </h4>
+          </div>
+
+          {vacuna.lotes && vacuna.lotes.length > 0 ? (
+            <div className="overflow-hidden rounded-xl border border-line bg-white shadow-xs">
+              <div className="max-h-56 overflow-y-auto">
+                <table className="min-w-full divide-y divide-line text-left text-xs">
+                  <thead className="sticky top-0 z-10 bg-surface-soft text-[0.68rem] font-semibold uppercase tracking-wider text-muted">
+                    <tr>
+                      <th className="px-3.5 py-2.5">N° Lote</th>
+                      <th className="px-3.5 py-2.5 text-right">Cantidad actual</th>
+                      <th className="px-3.5 py-2.5">Vencimiento</th>
+                      <th className="px-3.5 py-2.5 text-center">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line-soft bg-white text-ink">
+                    {vacuna.lotes.map((lote) => (
+                      <tr key={lote.id} className="transition-colors hover:bg-surface-soft/50">
+                        <td className="px-3.5 py-2.5 font-mono font-medium text-ink">
+                          {lote.numero}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-right font-semibold text-zinc-900">
+                          {lote.cantidadActual.toLocaleString()}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-muted-2">
+                          {formatDate(lote.fechaVencimiento)}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-center">
+                          <span
+                            className={`inline-flex items-center rounded-md px-2 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wider ${
+                              lote.estado === 'disponible'
+                                ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                                : 'border border-zinc-200 bg-zinc-100 text-zinc-600'
+                            }`}
+                          >
+                            {lote.estado}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-line bg-surface-soft/40 p-4 text-center">
+              <p className="text-xs text-muted">No se registran lotes físicos asociados actualmente a este biológico.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </Modal>
+  );
+});
+
+VacunaDetailModal.displayName = 'VacunaDetailModal';
 
 interface VacunaModalProps {
   vacuna: Vacuna | null;
@@ -594,6 +720,17 @@ const VacunaModal: React.FC<VacunaModalProps> = ({ vacuna, onClose, onSubmit, is
       </div>
     </Modal>
   );
+};
+
+const formatDate = (dateValue?: Date | string | null) => {
+  if (!dateValue) return 'No registrada';
+  const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+  if (isNaN(date.getTime())) return 'No registrada';
+  return date.toLocaleDateString('es-PE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
 };
 
 const getStockInfo = (vacuna: Vacuna) => {

@@ -160,9 +160,9 @@ export class JeringaService {
 
       const jeringa = await prisma.jeringa.create({
         data: {
-          tipo: data.tipo,
-          capacidad: data.capacidad,
-          color: data.color
+          tipo: data.tipo.trim(),
+          capacidad: data.capacidad.trim(),
+          color: data.color.trim()
         }
       });
 
@@ -197,14 +197,15 @@ export class JeringaService {
       // Validaciones de negocio para la actualización
       await this.validateJeringaData(data, id);
 
+      const updateData: any = {};
+      if (data.tipo !== undefined) updateData.tipo = data.tipo.trim();
+      if (data.capacidad !== undefined) updateData.capacidad = data.capacidad.trim();
+      if (data.color !== undefined) updateData.color = data.color.trim();
+      if (data.estado !== undefined) updateData.estado = data.estado;
+
       const jeringa = await prisma.jeringa.update({
         where: { id },
-        data: {
-          tipo: data.tipo,
-          capacidad: data.capacidad,
-          color: data.color,
-          estado: data.estado
-        }
+        data: updateData
       });
 
       return {
@@ -348,30 +349,43 @@ export class JeringaService {
    * Validar datos de jeringa
    */
   private static async validateJeringaData(data: CreateJeringaDto | UpdateJeringaDto, excludeId?: string): Promise<void> {
-    // Validar tipos permitidos
-    const tiposPermitidos = ['Desechable', 'Autoretraíble', 'De seguridad', 'Para insulina', 'Tuberculina'];
-    if (data.tipo && !tiposPermitidos.includes(data.tipo)) {
-      throw createError.badRequest(`Tipo de jeringa inválido. Tipos permitidos: ${tiposPermitidos.join(', ')}`);
+    const tipo = data.tipo?.trim();
+    const capacidad = data.capacidad?.trim();
+    const color = data.color?.trim();
+
+    if (data.tipo !== undefined) {
+      if (!tipo || tipo.length === 0) {
+        throw createError.badRequest('El tipo de jeringa es requerido');
+      }
+      if (tipo.length > 100) {
+        throw createError.badRequest('El tipo de jeringa no puede superar los 100 caracteres');
+      }
     }
 
-    // Validar capacidades permitidas
-    const capacidadesPermitidas = ['0.5ml', '1ml', '2ml', '3ml', '5ml', '10ml', '20ml'];
-    if (data.capacidad && !capacidadesPermitidas.includes(data.capacidad)) {
-      throw createError.badRequest(`Capacidad inválida. Capacidades permitidas: ${capacidadesPermitidas.join(', ')}`);
+    if (data.capacidad !== undefined) {
+      if (!capacidad || capacidad.length === 0) {
+        throw createError.badRequest('La capacidad de la jeringa es requerida');
+      }
+      if (capacidad.length > 20) {
+        throw createError.badRequest('La capacidad de la jeringa no puede superar los 20 caracteres');
+      }
     }
 
-    // Validar colores permitidos
-    const coloresPermitidos = ['Transparente', 'Azul', 'Verde', 'Rojo', 'Amarillo', 'Naranja', 'Morado'];
-    if (data.color && !coloresPermitidos.includes(data.color)) {
-      throw createError.badRequest(`Color inválido. Colores permitidos: ${coloresPermitidos.join(', ')}`);
+    if (data.color !== undefined) {
+      if (!color || color.length === 0) {
+        throw createError.badRequest('El color de la jeringa es requerido');
+      }
+      if (color.length > 50) {
+        throw createError.badRequest('El color de la jeringa no puede superar los 50 caracteres');
+      }
     }
 
     // Verificar combinación única de tipo + capacidad + color
-    if (data.tipo && data.capacidad && data.color) {
+    if (tipo && capacidad && color) {
       const where: any = {
-        tipo: data.tipo,
-        capacidad: data.capacidad,
-        color: data.color
+        tipo: { equals: tipo, mode: 'insensitive' },
+        capacidad: { equals: capacidad, mode: 'insensitive' },
+        color: { equals: color, mode: 'insensitive' }
       };
 
       if (excludeId) {
@@ -381,7 +395,7 @@ export class JeringaService {
       const jeringaExistente = await prisma.jeringa.findFirst({ where });
 
       if (jeringaExistente) {
-        throw createError.badRequest('Ya existe una jeringa con esta combinación de tipo, capacidad y color');
+        throw createError.badRequest('Ya existe una jeringa registrada con esta combinación de tipo, capacidad y color');
       }
     }
   }

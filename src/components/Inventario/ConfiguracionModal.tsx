@@ -1,8 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Package, SlidersHorizontal, Stack, Syringe, Warehouse } from '@phosphor-icons/react';
+import { SlidersHorizontal } from '@phosphor-icons/react';
 import { apiClient } from '../../config/api';
 import {
-  FormSection,
   Modal,
   ModalFooter,
   MultiSelectInput,
@@ -91,10 +90,11 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
 
   const isEditing = Boolean(editingConfig);
 
-  // Sincronizar formData con editingConfig al abrir (ajuste durante el render,
-  // sin useEffect — evita el flash de estado stale que marca react-doctor).
+  // Sincronizar formData con editingConfig al abrir sin causar flash stale
   const [lastKey, setLastKey] = useState<string | null>(null);
-  const currentKey = `${isOpen ? 'open' : 'closed'}:${editingConfig ? ('id' in editingConfig ? editingConfig.id : 'edit') : 'new'}`;
+  const currentKey = `${isOpen ? 'open' : 'closed'}:${
+    editingConfig ? ('id' in editingConfig ? editingConfig.id : 'edit') : 'new'
+  }`;
   if (currentKey !== lastKey) {
     setLastKey(currentKey);
     if (isOpen) {
@@ -128,10 +128,11 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
         .sort((a, b) => a.nombre.localeCompare(b.nombre))
         .map((vacuna) => ({
           value: vacuna.id,
-          label: vacuna.presentacion ? `${vacuna.nombre} · ${vacuna.presentacion}` : vacuna.nombre,
+          label: vacuna.presentacion ? `${vacuna.nombre} (${vacuna.presentacion})` : vacuna.nombre,
         })),
     [vacunas],
   );
+
   const jeringaOptions = useMemo(
     () =>
       jeringas
@@ -139,24 +140,19 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
         .sort((a, b) => `${a.tipo} ${a.capacidad}`.localeCompare(`${b.tipo} ${b.capacidad}`))
         .map((jeringa) => ({
           value: jeringa.id,
-          label: `${jeringa.tipo} ${jeringa.capacidad}${jeringa.color ? ` · ${jeringa.color}` : ''}`,
+          label: `${jeringa.tipo} ${jeringa.capacidad}${jeringa.color ? ` (${jeringa.color})` : ''}`,
         })),
     [jeringas],
   );
+
   const centroOptions = useMemo(
-    () => centrosAcopio.map((centro) => ({ value: centro.id, label: centro.codigo ? `${centro.nombre} (${centro.codigo})` : centro.nombre })),
+    () =>
+      centrosAcopio.map((centro) => ({
+        value: centro.id,
+        label: centro.codigo ? `${centro.nombre} (${centro.codigo})` : centro.nombre,
+      })),
     [centrosAcopio],
   );
-
-  const selectedVacunas = useMemo(() => {
-    const idSet = new Set(formData.vacunaIds);
-    return vacunas.filter((vacuna) => idSet.has(vacuna.id));
-  }, [formData.vacunaIds, vacunas]);
-  const selectedJeringas = useMemo(() => {
-    const idSet = new Set(formData.jeringaIds);
-    return jeringas.filter((jeringa) => idSet.has(jeringa.id));
-  }, [formData.jeringaIds, jeringas]);
-  const selectedCentro = centrosAcopio.find((centro) => centro.id === formData.centroAcopioId);
 
   const combinationsCount = formData.vacunaIds.length * formData.jeringaIds.length;
 
@@ -170,11 +166,21 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
     const multiplicador = Number(formData.multiplicador);
     const prioridad = Number(formData.prioridad);
 
-    if (tipo === 'centro' && !formData.centroAcopioId) nextErrors.centroAcopioId = 'Seleccione un centro.';
-    if (formData.vacunaIds.length === 0) nextErrors.vacunaIds = isEditing ? 'Seleccione una vacuna.' : 'Seleccione al menos una vacuna.';
-    if (formData.jeringaIds.length === 0) nextErrors.jeringaIds = isEditing ? 'Seleccione una jeringa.' : 'Seleccione al menos una jeringa.';
-    if (!Number.isFinite(multiplicador) || multiplicador < 0) nextErrors.multiplicador = 'Debe ser un número mayor o igual a 0.';
-    if (!Number.isFinite(prioridad) || prioridad <= 0) nextErrors.prioridad = 'La prioridad debe ser mayor a 0.';
+    if (tipo === 'centro' && !formData.centroAcopioId) {
+      nextErrors.centroAcopioId = 'Seleccione un centro de acopio';
+    }
+    if (formData.vacunaIds.length === 0) {
+      nextErrors.vacunaIds = isEditing ? 'Seleccione una vacuna' : 'Seleccione al menos una vacuna';
+    }
+    if (formData.jeringaIds.length === 0) {
+      nextErrors.jeringaIds = isEditing ? 'Seleccione una jeringa' : 'Seleccione al menos una jeringa';
+    }
+    if (!Number.isFinite(multiplicador) || multiplicador < 0) {
+      nextErrors.multiplicador = 'Debe ser mayor o igual a 0';
+    }
+    if (!Number.isFinite(prioridad) || prioridad <= 0) {
+      nextErrors.prioridad = 'Debe ser mayor a 0';
+    }
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -230,12 +236,13 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
           return;
         }
 
-        const errorMessage = result.status === 'fulfilled'
-          ? result.value.data?.message || 'Error desconocido'
-          : (result.reason?.response?.data?.message
-            || result.reason?.response?.data?.error
-            || result.reason?.message
-            || 'Error desconocido');
+        const errorMessage =
+          result.status === 'fulfilled'
+            ? result.value.data?.message || 'Error desconocido'
+            : result.reason?.response?.data?.message ||
+              result.reason?.response?.data?.error ||
+              result.reason?.message ||
+              'Error desconocido';
 
         if (/ya existe/i.test(errorMessage)) {
           duplicated.push(combo);
@@ -281,8 +288,10 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
 
       const firstError = failed[0]?.message || 'No se pudo crear ninguna configuración';
       onNotification('error', firstError);
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.response?.data?.error || error.message || 'No se pudo guardar la configuración';
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string; error?: string } }; message?: string };
+      const message =
+        err.response?.data?.message || err.response?.data?.error || err.message || 'No se pudo guardar la configuración';
       onNotification('error', message);
     } finally {
       setIsSubmitting(false);
@@ -293,9 +302,14 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={editingConfig ? 'Editar configuración' : 'Nueva configuración'}
-      subtitle={tipo === 'centro' ? 'Relación específica para un centro de acopio.' : 'Relación por defecto entre vacuna y jeringa.'}
+      title={isEditing ? 'Editar asignación' : 'Nueva asignación vacuna - jeringa'}
+      subtitle={
+        tipo === 'centro'
+          ? 'Regla de insumos aplicable exclusivamente al centro de acopio seleccionado.'
+          : 'Regla general por defecto aplicada a todos los centros del sistema.'
+      }
       icon={SlidersHorizontal}
+      size="lg"
       footer={
         <ModalFooter
           onCancel={onClose}
@@ -305,74 +319,17 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
             isEditing
               ? 'Guardar cambios'
               : combinationsCount > 1
-              ? `Crear ${combinationsCount} configuraciones`
-              : 'Crear configuración'
+              ? `Crear ${combinationsCount} asignaciones`
+              : 'Crear asignación'
           }
           isLoading={isSubmitting}
         />
       }
     >
       <div className="space-y-4">
-        <div className="rounded-3xl border border-zinc-200 bg-zinc-50/60 p-4">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-zinc-700">Vista previa</p>
-          <p className="mt-2 text-sm leading-6 text-zinc-800">
-            {isEditing ? (
-              selectedVacunas[0] ? (
-                <>
-                  Para <span className="font-semibold text-zinc-950">{selectedVacunas[0].nombre}</span>{' '}
-                  {selectedJeringas[0] ? (
-                    <>
-                      se usará{' '}
-                      <span className="font-semibold text-zinc-950">
-                        {selectedJeringas[0].tipo} {selectedJeringas[0].capacidad}
-                      </span>
-                      .
-                    </>
-                  ) : (
-                    <>debe elegir una jeringa.</>
-                  )}
-                </>
-              ) : (
-                <>Seleccione una vacuna y una jeringa para construir la regla.</>
-              )
-            ) : combinationsCount === 0 ? (
-              <>Seleccione al menos una vacuna y una jeringa para construir las reglas.</>
-            ) : combinationsCount === 1 ? (
-              <>
-                Para <span className="font-semibold text-zinc-950">{selectedVacunas[0].nombre}</span> se usará{' '}
-                <span className="font-semibold text-zinc-950">
-                  {selectedJeringas[0].tipo} {selectedJeringas[0].capacidad}
-                </span>
-                .
-              </>
-            ) : (
-              <>
-                Se crearán{' '}
-                <span className="font-semibold text-zinc-950">{combinationsCount} configuraciones</span> ·{' '}
-                <span className="text-zinc-700">
-                  {formData.vacunaIds.length} vacuna{formData.vacunaIds.length === 1 ? '' : 's'} × {formData.jeringaIds.length}{' '}
-                  jeringa{formData.jeringaIds.length === 1 ? '' : 's'}
-                </span>
-                .
-              </>
-            )}
-          </p>
-          <p className="mt-1 text-xs text-zinc-600">
-            {tipo === 'centro'
-              ? selectedCentro
-                ? `Aplicará solo en ${selectedCentro.nombre}.`
-                : 'Aplicará solo al centro seleccionado.'
-              : 'Aplicará como regla general cuando no exista una regla específica por centro.'}
-          </p>
-          {!isEditing && combinationsCount > 1 ? (
-            <p className="mt-2 text-xs leading-4 text-amber-700">
-              Si alguna combinación ya existe, se omitirá automáticamente y el resto se creará.
-            </p>
-          ) : null}
-        </div>
-
-        <FormSection title="Relación" description="Defina de forma directa qué jeringa corresponde a la vacuna.">
-          {tipo === 'centro' ? (
+        {/* Ámbito si es por centro */}
+        {tipo === 'centro' && (
+          <div>
             <SelectInput
               id="config-centro"
               label="Centro de acopio"
@@ -383,100 +340,78 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
               required
               error={errors.centroAcopioId}
             />
-          ) : null}
+          </div>
+        )}
 
-          {isEditing ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              <SelectInput
-                id="config-vacuna"
-                label="Vacuna"
-                value={formData.vacunaIds[0] || ''}
-                onChange={(value) => handleChange('vacunaIds', value ? [value] : [])}
-                options={vacunaOptions}
-                placeholder="Seleccionar vacuna..."
-                required
-                error={errors.vacunaIds}
-              />
-
-              <SelectInput
-                id="config-jeringa"
-                label="Jeringa"
-                value={formData.jeringaIds[0] || ''}
-                onChange={(value) => handleChange('jeringaIds', value ? [value] : [])}
-                options={jeringaOptions}
-                placeholder="Seleccionar jeringa..."
-                required
-                error={errors.jeringaIds}
-              />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <MultiSelectInput
-                id="config-vacuna"
-                label="Vacunas"
-                values={formData.vacunaIds}
-                onChange={(values) => handleChange('vacunaIds', values)}
-                options={vacunaOptions}
-                placeholder="Seleccionar una o más vacunas..."
-                searchPlaceholder="Buscar vacuna..."
-                itemLabel="vacuna"
-                itemLabelPlural="vacunas"
-                required
-                error={errors.vacunaIds}
-                helpText="Puede seleccionar varias vacunas; se aplicará la misma regla a todas."
-              />
-
-              <MultiSelectInput
-                id="config-jeringa"
-                label="Jeringas"
-                values={formData.jeringaIds}
-                onChange={(values) => handleChange('jeringaIds', values)}
-                options={jeringaOptions}
-                placeholder="Seleccionar una o más jeringas..."
-                searchPlaceholder="Buscar jeringa..."
-                itemLabel="jeringa"
-                itemLabelPlural="jeringas"
-                required
-                error={errors.jeringaIds}
-                helpText="Cada vacuna seleccionada se relacionará con cada jeringa elegida."
-              />
-            </div>
-          )}
-
-          <div className="grid gap-3 md:grid-cols-3">
-            {tipo === 'centro' ? (
-              <ResumeCard icon={Warehouse} label="Centro" value={selectedCentro?.nombre || 'Pendiente'} />
-            ) : null}
-            <ResumeCard
-              icon={Package}
-              label={isEditing || selectedVacunas.length <= 1 ? 'Vacuna' : 'Vacunas'}
-              value={
-                selectedVacunas.length === 0
-                  ? 'Pendiente'
-                  : selectedVacunas.length === 1
-                  ? selectedVacunas[0].nombre
-                  : `${selectedVacunas.length} seleccionadas`
-              }
+        {/* Selección de Insumos */}
+        {isEditing ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SelectInput
+              id="config-vacuna"
+              label="Vacuna"
+              value={formData.vacunaIds[0] || ''}
+              onChange={(value) => handleChange('vacunaIds', value ? [value] : [])}
+              options={vacunaOptions}
+              placeholder="Seleccionar vacuna..."
+              required
+              error={errors.vacunaIds}
             />
-            <ResumeCard
-              icon={isEditing || selectedJeringas.length <= 1 ? Syringe : Stack}
-              label={isEditing || selectedJeringas.length <= 1 ? 'Jeringa' : 'Jeringas'}
-              value={
-                selectedJeringas.length === 0
-                  ? 'Pendiente'
-                  : selectedJeringas.length === 1
-                  ? `${selectedJeringas[0].tipo} ${selectedJeringas[0].capacidad}`
-                  : `${selectedJeringas.length} seleccionadas`
-              }
+
+            <SelectInput
+              id="config-jeringa"
+              label="Jeringa"
+              value={formData.jeringaIds[0] || ''}
+              onChange={(value) => handleChange('jeringaIds', value ? [value] : [])}
+              options={jeringaOptions}
+              placeholder="Seleccionar jeringa..."
+              required
+              error={errors.jeringaIds}
             />
           </div>
-        </FormSection>
+        ) : (
+          <div className="space-y-3.5">
+            <MultiSelectInput
+              id="config-vacuna"
+              label="Vacunas"
+              values={formData.vacunaIds}
+              onChange={(values) => handleChange('vacunaIds', values)}
+              options={vacunaOptions}
+              placeholder="Seleccionar una o más vacunas..."
+              searchPlaceholder="Buscar vacuna..."
+              itemLabel="vacuna"
+              itemLabelPlural="vacunas"
+              required
+              error={errors.vacunaIds}
+            />
 
-        <FormSection title="Regla de uso" description="Solo configure multiplicador, prioridad y estado.">
-          <div className="grid gap-4 md:grid-cols-2">
+            <MultiSelectInput
+              id="config-jeringa"
+              label="Jeringas"
+              values={formData.jeringaIds}
+              onChange={(values) => handleChange('jeringaIds', values)}
+              options={jeringaOptions}
+              placeholder="Seleccionar una o más jeringas..."
+              searchPlaceholder="Buscar jeringa..."
+              itemLabel="jeringa"
+              itemLabelPlural="jeringas"
+              required
+              error={errors.jeringaIds}
+            />
+
+            {!isEditing && combinationsCount > 1 && (
+              <p className="text-xs text-muted-2">
+                Se generarán <span className="font-medium text-ink">{combinationsCount} reglas</span> ({formData.vacunaIds.length} vacunas × {formData.jeringaIds.length} jeringas). Las combinaciones existentes se omitirán automáticamente.
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Parámetros Operativos */}
+        <div className="border-t border-line-soft pt-4">
+          <div className="grid gap-3.5 sm:grid-cols-3">
             <TextInput
               id="config-multiplicador"
-              label="Multiplicador"
+              label="Jeringas por dosis"
               type="number"
               value={formData.multiplicador}
               onChange={(value) => handleChange('multiplicador', value)}
@@ -484,6 +419,7 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
               placeholder="1"
               min={0}
               required
+              helpText="Ratio por cada dosis aplicada"
             />
             <TextInput
               id="config-prioridad"
@@ -495,6 +431,7 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
               placeholder="1"
               min={1}
               required
+              helpText="1 = Primera opción sugerida"
             />
             <SelectInput
               id="config-activo"
@@ -505,28 +442,13 @@ const ConfiguracionModal: React.FC<ConfiguracionModalProps> = ({
                 { value: 'true', label: 'Activa' },
                 { value: 'false', label: 'Inactiva' },
               ]}
+              helpText="Disponibilidad en dispensación"
             />
           </div>
-        </FormSection>
+        </div>
       </div>
     </Modal>
   );
 };
-
-interface ResumeCardProps {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-}
-
-const ResumeCard: React.FC<ResumeCardProps> = ({ icon: Icon, label, value }) => (
-  <div className="rounded-2xl border border-zinc-200 bg-white p-4">
-    <div className="flex items-center gap-2 text-zinc-500">
-      <Icon className="h-4 w-4" />
-      <span className="text-xs font-medium uppercase tracking-[0.08em]">{label}</span>
-    </div>
-    <p className="mt-2 text-sm font-medium text-zinc-900">{value}</p>
-  </div>
-);
 
 export default ConfiguracionModal;

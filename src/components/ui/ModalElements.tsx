@@ -245,6 +245,8 @@ interface TextInputProps {
   disabled?: boolean;
   min?: number;
   max?: number;
+  maxLength?: number;
+  list?: string;
   helpText?: string;
 }
 
@@ -260,6 +262,8 @@ export const TextInput: React.FC<TextInputProps> = memo(({
   disabled = false,
   min,
   max,
+  maxLength,
+  list,
   helpText,
 }) => (
   <FormField id={id} label={label} required={required} error={error} helpText={helpText}>
@@ -273,12 +277,158 @@ export const TextInput: React.FC<TextInputProps> = memo(({
       disabled={disabled}
       min={min}
       max={max}
+      maxLength={maxLength}
+      list={list}
       className={`${MODAL_STYLES.input.base} ${error ? MODAL_STYLES.input.error.replace('border-error-300', 'border-rose-300').replace('focus:border-error-300', 'focus:border-rose-300').replace('focus:ring-error-100/50', 'focus:ring-rose-100') : MODAL_STYLES.input.normal}`}
       aria-invalid={Boolean(error)}
     />
   </FormField>
 ));
 TextInput.displayName = 'TextInput';
+
+export interface ComboboxOption {
+  value: string;
+  label?: string;
+  dotClass?: string;
+}
+
+interface ComboboxInputProps {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly (string | ComboboxOption)[];
+  placeholder?: string;
+  required?: boolean;
+  error?: string;
+  disabled?: boolean;
+  maxLength?: number;
+  helpText?: string;
+}
+
+export const ComboboxInput: React.FC<ComboboxInputProps> = memo(({
+  id,
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  required = false,
+  error,
+  disabled = false,
+  maxLength,
+  helpText,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const normalizedOptions: ComboboxOption[] = useMemo(() => {
+    return options.map((opt) =>
+      typeof opt === 'string'
+        ? { value: opt, label: opt }
+        : { value: opt.value, label: opt.label || opt.value, dotClass: opt.dotClass },
+    );
+  }, [options]);
+
+  const filteredOptions = useMemo(() => {
+    const q = value.trim().toLowerCase();
+    if (!q) return normalizedOptions;
+    return normalizedOptions.filter(
+      (opt) =>
+        opt.value.toLowerCase().includes(q) ||
+        (opt.label && opt.label.toLowerCase().includes(q)),
+    );
+  }, [normalizedOptions, value]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
+  return (
+    <FormField id={id} label={label} required={required} error={error} helpText={helpText}>
+      <div ref={containerRef} className="relative">
+        <input
+          id={id}
+          type="text"
+          value={value}
+          onChange={(event) => {
+            onChange(event.target.value);
+            if (!isOpen) setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          maxLength={maxLength}
+          autoComplete="off"
+          className={`${MODAL_STYLES.input.base} ${
+            error
+              ? MODAL_STYLES.input.error
+                  .replace('border-error-300', 'border-rose-300')
+                  .replace('focus:border-error-300', 'focus:border-rose-300')
+                  .replace('focus:ring-error-100/50', 'focus:ring-rose-100')
+              : MODAL_STYLES.input.normal
+          }`}
+          aria-invalid={Boolean(error)}
+          aria-expanded={isOpen}
+          aria-autocomplete="list"
+        />
+
+        {isOpen && filteredOptions.length > 0 && (
+          <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 max-h-48 overflow-y-auto rounded-[7px] border border-line bg-white py-1 shadow-lg">
+            {filteredOptions.map((opt) => {
+              const isSelected = opt.value.toLowerCase() === value.trim().toLowerCase();
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    onChange(opt.value);
+                    setIsOpen(false);
+                  }}
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
+                    isSelected
+                      ? 'bg-surface-soft font-medium text-ink'
+                      : 'text-ink hover:bg-surface-soft'
+                  }`}
+                >
+                  {opt.dotClass && (
+                    <span
+                      className={`inline-block h-3 w-3 shrink-0 rounded-full border border-black/10 ${opt.dotClass}`}
+                    />
+                  )}
+                  <span className="truncate">{opt.label || opt.value}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </FormField>
+  );
+});
+ComboboxInput.displayName = 'ComboboxInput';
 
 interface TextAreaProps {
   id: string;

@@ -360,6 +360,7 @@ export interface Jeringa {
     numero: string;
     cantidadActual: number;
     estado: string;
+    fechaVencimiento?: Date;
   }[];
   _count?: {
     lotes: number;

@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import {
   Jeringa,
   CreateJeringaDto,
@@ -8,7 +9,8 @@ import {
   apiClient,
   ApiResponse,
   PaginatedResponse,
-  buildQueryParams
+  buildQueryParams,
+  handleApiError
 } from '../config/api';
 import { logger } from '../utils/debug';
 
@@ -57,7 +59,8 @@ class JeringaService {
         createdAt: new Date(jeringa.createdAt),
         updatedAt: new Date(jeringa.updatedAt),
         lotes: jeringa.lotes?.map(lote => ({
-          ...lote
+          ...lote,
+          fechaVencimiento: lote.fechaVencimiento ? new Date(lote.fechaVencimiento) : undefined
         }))
       }));
 
@@ -68,6 +71,9 @@ class JeringaService {
       };
     } catch (error) {
       logger.error('Error al obtener jeringas:', error);
+      if (error instanceof AxiosError) {
+        throw new Error(handleApiError(error));
+      }
       throw error instanceof Error ? error : new Error('Error al obtener jeringas');
     }
   }
@@ -99,6 +105,9 @@ class JeringaService {
       return jeringa;
     } catch (error) {
       logger.error('Error al obtener jeringa por ID:', error);
+      if (error instanceof AxiosError) {
+        throw new Error(handleApiError(error));
+      }
       throw error instanceof Error ? error : new Error('Error al obtener jeringa');
     }
   }
@@ -127,6 +136,9 @@ class JeringaService {
       return jeringas;
     } catch (error) {
       logger.error('Error al obtener jeringas activas:', error);
+      if (error instanceof AxiosError) {
+        throw new Error(handleApiError(error));
+      }
       throw error instanceof Error ? error : new Error('Error al obtener jeringas activas');
     }
   }
@@ -166,6 +178,9 @@ class JeringaService {
       return jeringa;
     } catch (error) {
       logger.error('Error al crear jeringa:', error);
+      if (error instanceof AxiosError) {
+        throw new Error(handleApiError(error));
+      }
       throw error instanceof Error ? error : new Error('Error al crear jeringa');
     }
   }
@@ -205,6 +220,9 @@ class JeringaService {
       return jeringa;
     } catch (error) {
       logger.error('Error al actualizar jeringa:', error);
+      if (error instanceof AxiosError) {
+        throw new Error(handleApiError(error));
+      }
       throw error instanceof Error ? error : new Error('Error al actualizar jeringa');
     }
   }
@@ -225,6 +243,9 @@ class JeringaService {
       logger.debug('Jeringa eliminada exitosamente', { id });
     } catch (error) {
       logger.error('Error al eliminar jeringa:', error);
+      if (error instanceof AxiosError) {
+        throw new Error(handleApiError(error));
+      }
       throw error instanceof Error ? error : new Error('Error al eliminar jeringa');
     }
   }
@@ -250,6 +271,9 @@ class JeringaService {
       return response.data.data;
     } catch (error) {
       logger.error('Error al obtener estadísticas de stock:', error);
+      if (error instanceof AxiosError) {
+        throw new Error(handleApiError(error));
+      }
       throw error instanceof Error ? error : new Error('Error al obtener estadísticas de stock');
     }
   }

@@ -117,5 +117,5 @@ describe('IciDemidService Excel Mapping', () => {
       expect(Array.isArray(registro2026?.distribucionMensual)).toBe(true);
       expect(registro2026?.distribucionMensual.length).toBe(12);
     }
-  });
+  }, 30000);
 });

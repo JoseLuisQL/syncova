@@ -1,5 +1,13 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, Syringe } from '@phosphor-icons/react';
+import {
+  Archive,
+  CalendarBlank,
+  Drop,
+  Package,
+  PencilSimple,
+  Plus,
+  Syringe,
+} from '@phosphor-icons/react';
 import { CreateJeringaDto, Jeringa, UpdateJeringaDto } from '../../types';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useInventorySearch } from '../../hooks/useInventorySearch';
@@ -9,7 +17,6 @@ import {
   EmptyState,
   ErrorAlert,
   StatusBadge,
-  KeyValueGrid,
 } from './components/SharedComponents';
 import { DataTable, FilterBar, Pagination, TableCell, TableHeader, TableRow } from './components/FilterAndTable';
 import {
@@ -18,7 +25,7 @@ import {
   Modal,
   ModalFooter,
   SelectInput,
-  SideSheet,
+  TextInput,
 } from '../ui/ModalElements';
 import { COMPONENT_STYLES, FILTER_OPTIONS } from './constants';
 
@@ -29,34 +36,6 @@ const TABLE_COLUMNS = [
   { key: 'lotes', label: 'Lotes', align: 'center' as const },
   { key: 'estado', label: 'Estado', align: 'center' as const },
   { key: 'acciones', label: 'Acciones', align: 'right' as const },
-];
-
-const TIPO_OPTIONS = [
-  { value: 'Desechable', label: 'Desechable' },
-  { value: 'Autoretraible', label: 'Autoretraible' },
-  { value: 'De seguridad', label: 'De seguridad' },
-  { value: 'Para insulina', label: 'Para insulina' },
-  { value: 'Tuberculina', label: 'Tuberculina' },
-];
-
-const CAPACIDAD_OPTIONS = [
-  { value: '0.5ml', label: '0.5 ml' },
-  { value: '1ml', label: '1 ml' },
-  { value: '2ml', label: '2 ml' },
-  { value: '3ml', label: '3 ml' },
-  { value: '5ml', label: '5 ml' },
-  { value: '10ml', label: '10 ml' },
-  { value: '20ml', label: '20 ml' },
-];
-
-const COLOR_OPTIONS = [
-  { value: 'Transparente', label: 'Transparente' },
-  { value: 'Azul', label: 'Azul' },
-  { value: 'Verde', label: 'Verde' },
-  { value: 'Rojo', label: 'Rojo' },
-  { value: 'Amarillo', label: 'Amarillo' },
-  { value: 'Naranja', label: 'Naranja' },
-  { value: 'Morado', label: 'Morado' },
 ];
 
 const GestionJeringas: React.FC = () => {
@@ -81,9 +60,6 @@ const GestionJeringas: React.FC = () => {
     isCreating,
     isUpdating,
     isDeleting,
-    createError,
-    updateError,
-    deleteError,
   } = useJeringas();
 
   const { toast } = useToastContext();
@@ -143,17 +119,17 @@ const GestionJeringas: React.FC = () => {
   const handleSubmit = useCallback(
     async (payload: CreateJeringaDto | UpdateJeringaDto) => {
       if (editingJeringa) {
-        const success = await updateJeringa(editingJeringa.id, payload as UpdateJeringaDto);
-        if (!success) {
-          toast.error('No se pudo actualizar la jeringa', updateError || 'Revise los datos e intente nuevamente.');
+        const result = await updateJeringa(editingJeringa.id, payload as UpdateJeringaDto);
+        if (!result.success) {
+          toast.error('No se pudo actualizar la jeringa', result.error || 'Revise los datos e intente nuevamente.');
           return;
         }
 
         toast.success('Jeringa actualizada', 'Los cambios se guardaron correctamente.');
       } else {
-        const success = await createJeringa(payload as CreateJeringaDto);
-        if (!success) {
-          toast.error('No se pudo crear la jeringa', createError || 'Revise los datos e intente nuevamente.');
+        const result = await createJeringa(payload as CreateJeringaDto);
+        if (!result.success) {
+          toast.error('No se pudo crear la jeringa', result.error || 'Revise los datos e intente nuevamente.');
           return;
         }
 
@@ -163,15 +139,15 @@ const GestionJeringas: React.FC = () => {
       setShowModal(false);
       setEditingJeringa(null);
     },
-    [createError, createJeringa, editingJeringa, toast, updateError, updateJeringa],
+    [createJeringa, editingJeringa, toast, updateJeringa],
   );
 
   const handleDelete = useCallback(async () => {
     if (!deleteTarget) return;
 
-    const success = await deleteJeringa(deleteTarget.id);
-    if (!success) {
-      toast.error('No se pudo eliminar la jeringa', deleteError || 'Intente nuevamente.');
+    const result = await deleteJeringa(deleteTarget.id);
+    if (!result.success) {
+      toast.error('No se pudo eliminar la jeringa', result.error || 'Intente nuevamente.');
       return;
     }
 
@@ -180,7 +156,7 @@ const GestionJeringas: React.FC = () => {
     if (selectedJeringa?.id === deleteTarget.id) {
       setSelectedJeringa(null);
     }
-  }, [deleteError, deleteJeringa, deleteTarget, selectedJeringa?.id, toast]);
+  }, [deleteJeringa, deleteTarget, selectedJeringa?.id, toast]);
 
   const handleClearFilters = useCallback(() => {
     clearSearch();
@@ -353,55 +329,14 @@ const GestionJeringas: React.FC = () => {
         </div>
       </section>
 
-      <SideSheet
-        isOpen={Boolean(selectedJeringa)}
+      <JeringaDetailModal
+        jeringa={selectedJeringa}
         onClose={() => setSelectedJeringa(null)}
-        title={selectedJeringa?.tipo || 'Detalle de jeringa'}
-        subtitle={selectedJeringa ? `${selectedJeringa.capacidad} · ${selectedJeringa.color}` : undefined}
-        icon={Syringe}
-      >
-        {selectedJeringa ? (
-          <div className="space-y-5">
-            <KeyValueGrid
-              columns={2}
-              items={[
-                { label: 'Capacidad', value: <span className="font-medium">{selectedJeringa.capacidad}</span> },
-                { label: 'Color', value: <span className="font-medium">{selectedJeringa.color}</span> },
-                { label: 'Estado', value: <StatusBadge status={selectedJeringa.estado} /> },
-                { label: 'Creado', value: <span className="font-medium">{selectedJeringa.createdAt.toLocaleDateString()}</span> },
-              ]}
-            />
-
-            <KeyValueGrid
-              columns={1}
-              items={[
-                {
-                  label: 'Inventario asociado',
-                  value: (
-                    <div className="space-y-2 text-sm">
-                      <p>
-                        <span className="font-semibold text-zinc-900">{getStockInfo(selectedJeringa).stockTotal.toLocaleString()}</span>{' '}
-                        unidades en stock total
-                      </p>
-                      <p>{getStockInfo(selectedJeringa).lotesActivos} lotes disponibles</p>
-                      <p>{getStockInfo(selectedJeringa).lotesAgotados} lotes agotados</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-
-            <div className="flex flex-wrap gap-2">
-              <button type="button" className={COMPONENT_STYLES.button.secondary} onClick={() => handleEdit(selectedJeringa)}>
-                Editar jeringa
-              </button>
-              <button type="button" className={COMPONENT_STYLES.button.ghost} onClick={() => setSelectedJeringa(null)}>
-                Cerrar
-              </button>
-            </div>
-          </div>
-        ) : null}
-      </SideSheet>
+        onEdit={(j) => {
+          setSelectedJeringa(null);
+          handleEdit(j);
+        }}
+      />
 
       {showModal ? (
         <JeringaModal
@@ -427,6 +362,180 @@ const GestionJeringas: React.FC = () => {
   );
 };
 
+interface JeringaDetailModalProps {
+  jeringa: Jeringa | null;
+  onClose: () => void;
+  onEdit: (jeringa: Jeringa) => void;
+}
+
+const JeringaDetailModal: React.FC<JeringaDetailModalProps> = memo(({ jeringa, onClose, onEdit }) => {
+  if (!jeringa) return null;
+
+  const stockInfo = getStockInfo(jeringa);
+
+  return (
+    <Modal
+      isOpen
+      onClose={onClose}
+      title="Detalle de jeringa"
+      subtitle="Especificaciones técnicas y existencias en inventario"
+      icon={Syringe}
+      size="lg"
+      footer={
+        <div className="flex w-full items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className={COMPONENT_STYLES.button.ghost}
+          >
+            Cerrar
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              onEdit(jeringa);
+            }}
+            className={COMPONENT_STYLES.button.primary}
+          >
+            <PencilSimple className="h-4 w-4" weight="bold" />
+            <span>Editar jeringa</span>
+          </button>
+        </div>
+      }
+    >
+      <div className="space-y-4">
+        {/* Identidad del Insumo */}
+        <div className="rounded-xl border border-line bg-surface-soft/60 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 space-y-1.5">
+              <span className="text-[0.7rem] font-bold uppercase tracking-wider text-muted-2">
+                Insumo / Jeringa descartable
+              </span>
+              <h3 className="text-base sm:text-lg font-bold tracking-tight text-ink">
+                {jeringa.tipo}
+              </h3>
+              <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-semibold text-ink shadow-xs">
+                  <Drop className="h-3.5 w-3.5 text-teal-600" weight="duotone" />
+                  <span>Capacidad: {jeringa.capacidad}</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-semibold text-ink shadow-xs">
+                  <span className={`h-2.5 w-2.5 rounded-full border border-zinc-300 ${getColorClass(jeringa.color)}`} />
+                  <span>Color: {jeringa.color}</span>
+                </span>
+              </div>
+            </div>
+            <div className="self-start sm:self-auto shrink-0">
+              <StatusBadge status={jeringa.estado} />
+            </div>
+          </div>
+        </div>
+
+        {/* Métricas Clínicas */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-line bg-white p-3.5 shadow-xs">
+            <div className="flex items-center justify-between text-muted">
+              <p className="text-[0.7rem] font-bold uppercase tracking-wider">Stock Total</p>
+              <Package className="h-4 w-4 text-muted-2" weight="duotone" />
+            </div>
+            <p className={`mt-1.5 text-2xl font-bold tracking-tight ${stockInfo.stockTotal > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+              {stockInfo.stockTotal.toLocaleString()}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-2">
+              {stockInfo.stockTotal > 0 ? 'Unidades en existencia' : 'Sin stock disponible'}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-line bg-white p-3.5 shadow-xs">
+            <div className="flex items-center justify-between text-muted">
+              <p className="text-[0.7rem] font-bold uppercase tracking-wider">Lotes Registrados</p>
+              <Archive className="h-4 w-4 text-muted-2" weight="duotone" />
+            </div>
+            <p className="mt-1.5 text-2xl font-bold tracking-tight text-ink">
+              {jeringa._count?.lotes || jeringa.lotes?.length || 0}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-2">
+              {stockInfo.lotesActivos} disponibles · {stockInfo.lotesAgotados} agotados
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-line bg-white p-3.5 shadow-xs">
+            <div className="flex items-center justify-between text-muted">
+              <p className="text-[0.7rem] font-bold uppercase tracking-wider">Fecha de Creación</p>
+              <CalendarBlank className="h-4 w-4 text-muted-2" weight="duotone" />
+            </div>
+            <p className="mt-1.5 text-base font-bold tracking-tight text-ink">
+              {formatDate(jeringa.createdAt)}
+            </p>
+            <p className="mt-0.5 text-xs text-muted-2">
+              Catálogo SIVAC
+            </p>
+          </div>
+        </div>
+
+        {/* Lotes Asociados */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-0.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-2">
+              Lotes Asociados ({jeringa.lotes?.length || 0})
+            </h4>
+          </div>
+
+          {jeringa.lotes && jeringa.lotes.length > 0 ? (
+            <div className="overflow-hidden rounded-xl border border-line bg-white shadow-xs">
+              <div className="max-h-56 overflow-y-auto">
+                <table className="min-w-full divide-y divide-line text-left text-xs">
+                  <thead className="sticky top-0 z-10 bg-surface-soft text-[0.68rem] font-semibold uppercase tracking-wider text-muted">
+                    <tr>
+                      <th className="px-3.5 py-2.5">N° Lote</th>
+                      <th className="px-3.5 py-2.5 text-right">Cantidad actual</th>
+                      <th className="px-3.5 py-2.5">Vencimiento</th>
+                      <th className="px-3.5 py-2.5 text-center">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line-soft bg-white text-ink">
+                    {jeringa.lotes.map((lote) => (
+                      <tr key={lote.id} className="transition-colors hover:bg-surface-soft/50">
+                        <td className="px-3.5 py-2.5 font-mono font-medium text-ink">
+                          {lote.numero}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-right font-semibold text-zinc-900">
+                          {lote.cantidadActual.toLocaleString()}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-muted-2">
+                          {formatDate(lote.fechaVencimiento)}
+                        </td>
+                        <td className="px-3.5 py-2.5 text-center">
+                          <span
+                            className={`inline-flex items-center rounded-md px-2 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wider ${
+                              lote.estado === 'disponible'
+                                ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                                : 'border border-zinc-200 bg-zinc-100 text-zinc-600'
+                            }`}
+                          >
+                            {lote.estado}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-line bg-surface-soft/40 p-4 text-center">
+              <p className="text-xs text-muted">No se registran lotes físicos asociados actualmente a este insumo.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </Modal>
+  );
+});
+
+JeringaDetailModal.displayName = 'JeringaDetailModal';
+
 interface JeringaModalProps {
   jeringa: Jeringa | null;
   onClose: () => void;
@@ -436,21 +545,44 @@ interface JeringaModalProps {
 
 const JeringaModal: React.FC<JeringaModalProps> = ({ jeringa, onClose, onSubmit, isLoading = false }) => {
   const [formData, setFormData] = useState({
-    tipo: jeringa?.tipo || 'Desechable',
-    capacidad: jeringa?.capacidad || '1ml',
-    color: jeringa?.color || 'Transparente',
+    tipo: jeringa?.tipo || '',
+    capacidad: jeringa?.capacidad || '',
+    color: jeringa?.color || '',
     estado: jeringa?.estado || 'activo',
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleFieldChange = useCallback((field: string, value: string) => {
     setFormData((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: '' }));
   }, []);
 
   const handleSubmit = useCallback(async () => {
+    const nextErrors: Record<string, string> = {};
+
+    const tipo = formData.tipo.trim();
+    const capacidad = formData.capacidad.trim();
+    const color = formData.color.trim();
+
+    if (!tipo) {
+      nextErrors.tipo = 'Ingrese el tipo de jeringa.';
+    }
+    if (!capacidad) {
+      nextErrors.capacidad = 'Ingrese la capacidad (ej: 0.5 ml, 1 ml).';
+    }
+    if (!color) {
+      nextErrors.color = 'Ingrese el color identificador.';
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+
     await onSubmit({
-      tipo: formData.tipo,
-      capacidad: formData.capacidad,
-      color: formData.color,
+      tipo,
+      capacidad,
+      color,
       ...(jeringa ? { estado: formData.estado as 'activo' | 'inactivo' } : {}),
     });
   }, [formData, jeringa, onSubmit]);
@@ -460,7 +592,11 @@ const JeringaModal: React.FC<JeringaModalProps> = ({ jeringa, onClose, onSubmit,
       isOpen
       onClose={onClose}
       title={jeringa ? 'Editar jeringa' : 'Nueva jeringa'}
-      subtitle={jeringa ? 'Ajusta relaciones y atributos visibles del catálogo.' : 'Registra una nueva jeringa en el inventario maestro.'}
+      subtitle={
+        jeringa
+          ? 'Actualiza los atributos del insumo en el inventario.'
+          : 'Registra un nuevo tipo o medida de jeringa en el inventario.'
+      }
       icon={Syringe}
       size="md"
       footer={
@@ -474,54 +610,76 @@ const JeringaModal: React.FC<JeringaModalProps> = ({ jeringa, onClose, onSubmit,
       }
     >
       <div className="space-y-4">
-        <FormSection title="Producto" description="El usuario debe identificarla en una sola mirada.">
+        <FormSection
+          title="Identificación del Insumo"
+          description="Ingresa los datos para identificar y registrar la jeringa."
+        >
           <div className="grid gap-4 md:grid-cols-2">
-            <SelectInput
-              id="jeringa-tipo"
-              label="Tipo"
-              value={formData.tipo}
-              onChange={(value) => handleFieldChange('tipo', value)}
-              options={TIPO_OPTIONS}
-              required
-            />
-            <SelectInput
+            <div className="md:col-span-2">
+              <TextInput
+                id="jeringa-tipo"
+                label="Tipo de jeringa"
+                value={formData.tipo}
+                onChange={(value) => handleFieldChange('tipo', value)}
+                placeholder="Ej: Auto-destructible (AD), Desechable, De seguridad..."
+                required
+                error={errors.tipo}
+                maxLength={100}
+              />
+            </div>
+
+            <TextInput
               id="jeringa-capacidad"
               label="Capacidad"
               value={formData.capacidad}
               onChange={(value) => handleFieldChange('capacidad', value)}
-              options={CAPACIDAD_OPTIONS}
+              placeholder="Ej: 0.5 ml, 1 ml, 0.3 ml, 5 ml"
               required
+              error={errors.capacidad}
+              maxLength={20}
             />
-            <SelectInput
+
+            <TextInput
               id="jeringa-color"
               label="Color"
               value={formData.color}
               onChange={(value) => handleFieldChange('color', value)}
-              options={COLOR_OPTIONS}
+              placeholder="Ej: Transparente, Azul, Verde, Naranja"
               required
+              error={errors.color}
+              maxLength={50}
             />
+
             {jeringa ? (
-              <SelectInput
-                id="jeringa-estado"
-                label="Estado"
-                value={formData.estado}
-                onChange={(value) => handleFieldChange('estado', value)}
-                options={[
-                  { value: 'activo', label: 'Activo' },
-                  { value: 'inactivo', label: 'Inactivo' },
-                ]}
-              />
+              <div className="md:col-span-2">
+                <SelectInput
+                  id="jeringa-estado"
+                  label="Estado"
+                  value={formData.estado}
+                  onChange={(value) => handleFieldChange('estado', value)}
+                  options={[
+                    { value: 'activo', label: 'Activo' },
+                    { value: 'inactivo', label: 'Inactivo' },
+                  ]}
+                />
+              </div>
             ) : null}
-          </div>
-          <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-600">
-            Se mostrará como <span className="font-medium text-zinc-900">{formData.tipo}</span> ·{' '}
-            <span className="font-medium text-zinc-900">{formData.capacidad}</span> ·{' '}
-            <span className="font-medium text-zinc-900">{formData.color}</span>.
           </div>
         </FormSection>
       </div>
     </Modal>
   );
+};
+
+const formatDate = (dateValue?: Date | string | null) => {
+  if (!dateValue) return 'No registrada';
+  const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+  if (isNaN(date.getTime())) return 'No registrada';
+  return date.toLocaleDateString('es-PE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
 };
 
 const getStockInfo = (jeringa: Jeringa) => {
@@ -533,7 +691,8 @@ const getStockInfo = (jeringa: Jeringa) => {
   };
 };
 
-const getColorClass = (color: string) => {
+const getColorClass = (color?: string) => {
+  if (!color) return 'bg-zinc-300';
   const colorMap: Record<string, string> = {
     transparente: 'bg-white',
     azul: 'bg-blue-500',
@@ -542,9 +701,15 @@ const getColorClass = (color: string) => {
     amarillo: 'bg-yellow-400',
     naranja: 'bg-orange-500',
     morado: 'bg-purple-500',
+    gris: 'bg-zinc-400',
+    blanco: 'bg-white',
+    negro: 'bg-zinc-900',
+    rosa: 'bg-pink-400',
+    rosado: 'bg-pink-400',
+    celeste: 'bg-sky-400',
   };
 
-  return colorMap[color.toLowerCase()] || 'bg-zinc-400';
+  return colorMap[color.toLowerCase().trim()] || 'bg-zinc-400';
 };
 
 export default memo(GestionJeringas);

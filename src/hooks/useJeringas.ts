@@ -121,55 +121,55 @@ export function useJeringas(initialFilters?: JeringaFilters, options?: { autoLoa
   /**
    * Crear jeringa
    */
-  const createJeringa = useCallback(async (data: CreateJeringaDto): Promise<boolean> => {
+  const createJeringa = useCallback(async (data: CreateJeringaDto): Promise<{ success: boolean; error?: string }> => {
     logger.debug('Creando jeringa:', data);
 
-    const result = await crudApi.create.execute(() => JeringaService.create(data));
+    const result = await crudApi.create.executeWithResult(() => JeringaService.create(data));
     
-    if (result) {
+    if (result.success && result.data) {
       // Recargar la lista después de crear
       await loadJeringas(undefined, { force: true });
       await loadJeringasActivas({ force: true });
-      return true;
+      return { success: true };
     }
     
-    return false;
+    return { success: false, error: result.error || 'Error al crear la jeringa' };
   }, [crudApi.create, loadJeringas, loadJeringasActivas]);
 
   /**
    * Actualizar jeringa
    */
-  const updateJeringa = useCallback(async (id: string, data: UpdateJeringaDto): Promise<boolean> => {
+  const updateJeringa = useCallback(async (id: string, data: UpdateJeringaDto): Promise<{ success: boolean; error?: string }> => {
     logger.debug('Actualizando jeringa:', { id, data });
 
-    const result = await crudApi.update.execute(() => JeringaService.update(id, data));
+    const result = await crudApi.update.executeWithResult(() => JeringaService.update(id, data));
     
-    if (result) {
+    if (result.success && result.data) {
       // Recargar la lista después de actualizar
       await loadJeringas(undefined, { force: true });
       await loadJeringasActivas({ force: true });
-      return true;
+      return { success: true };
     }
     
-    return false;
+    return { success: false, error: result.error || 'Error al actualizar la jeringa' };
   }, [crudApi.update, loadJeringas, loadJeringasActivas]);
 
   /**
    * Eliminar jeringa
    */
-  const deleteJeringa = useCallback(async (id: string): Promise<boolean> => {
+  const deleteJeringa = useCallback(async (id: string): Promise<{ success: boolean; error?: string }> => {
     logger.debug('Eliminando jeringa:', { id });
 
-    const result = await crudApi.delete.execute(() => JeringaService.delete(id));
+    const result = await crudApi.delete.executeWithResult(() => JeringaService.delete(id));
     
-    if (result !== null) { // null indica error, undefined indica éxito para delete
+    if (result.success) {
       // Recargar la lista después de eliminar
       await loadJeringas(undefined, { force: true });
       await loadJeringasActivas({ force: true });
-      return true;
+      return { success: true };
     }
     
-    return false;
+    return { success: false, error: result.error || 'Error al eliminar la jeringa' };
   }, [crudApi.delete, loadJeringas, loadJeringasActivas]);
 
   /**
