@@ -92,7 +92,7 @@ const LotesVacunasPage: React.FC = () => {
   const handleUpdateLote = useCallback(async (loteInput: Lote | LoteJeringa) => {
     const lote = loteInput as Lote;
     try {
-      const success = await updateLote(lote.id, {
+      const result = await updateLote(lote.id, {
         numero: lote.numero,
         fechaIngreso: lote.fechaIngreso.toISOString(),
         fechaVencimiento: lote.fechaVencimiento.toISOString(),
@@ -105,27 +105,27 @@ const LotesVacunasPage: React.FC = () => {
         observaciones: lote.observaciones || undefined
       });
 
-      if (success) {
+      if (result.success) {
         toast.success('Lote actualizado', 'El lote se actualizo exitosamente');
       } else {
-        toast.error('Error al actualizar', updateError || 'Error al actualizar el lote');
+        toast.error('Error al actualizar', result.error || updateError || 'Error al actualizar el lote');
       }
-    } catch {
-      toast.error('Error inesperado', 'Error inesperado al actualizar el lote');
+    } catch (error: any) {
+      toast.error('Error inesperado', error?.message || 'Error inesperado al actualizar el lote');
     }
   }, [updateLote, updateError, toast]);
 
   const handleDeleteLote = useCallback(async (id: string) => {
     try {
-      const success = await deleteLote(id);
+      const result = await deleteLote(id);
 
-      if (success) {
+      if (result.success) {
         toast.success('Lote eliminado', 'El lote se elimino exitosamente');
       } else {
-        toast.error('Error al eliminar', deleteError || 'Error al eliminar el lote');
+        toast.error('Error al eliminar', result.error || deleteError || 'Error al eliminar el lote');
       }
-    } catch {
-      toast.error('Error inesperado', 'Error inesperado al eliminar el lote');
+    } catch (error: any) {
+      toast.error('Error inesperado', error?.message || 'Error inesperado al eliminar el lote');
     }
   }, [deleteLote, deleteError, toast]);
 

@@ -327,18 +327,53 @@ export class LoteJeringaService {
         throw createError('Lote de jeringa no encontrado', 404);
       }
 
-      await prisma.loteJeringa.delete({
-        where: { id }
+      // 1. Validar si ya se han distribuido unidades de este lote
+      if (existingLote.cantidadActual < existingLote.cantidadInicial) {
+        const distribuidas = existingLote.cantidadInicial - existingLote.cantidadActual;
+        throw createError(
+          `No se puede eliminar el lote porque ya tiene ${distribuidas} unidades distribuidas (stock actual: ${existingLote.cantidadActual} de ${existingLote.cantidadInicial} iniciales). Si necesita anularlo, debe anular primero los vales de entrega correspondientes.`,
+          400
+        );
+      }
+
+      // 2. Validar si existen movimientos de salida o vales en Kardex vinculados a este lote
+      const movimientosSalida = await prisma.kardex.findFirst({
+        where: {
+          loteId: id,
+          OR: [
+            { tipoMovimiento: TipoMovimientoKardex.salida },
+            { documento: 'VALE_ENTREGA' }
+          ]
+        }
+      });
+
+      if (movimientosSalida) {
+        throw createError(
+          'No se puede eliminar el lote porque cuenta con movimientos de salida o vales de entrega registrados en el Kardex.',
+          400
+        );
+      }
+
+      // 3. Si el lote está intacto (sin salidas ni vales), eliminar transaccionalmente
+      // eliminando también sus registros de ingreso en Kardex para evitar registros huérfanos
+      await prisma.$transaction(async (tx) => {
+        await tx.kardex.deleteMany({
+          where: { loteId: id }
+        });
+
+        await tx.loteJeringa.delete({
+          where: { id }
+        });
       });
 
       return {
         success: true,
         message: 'Lote de jeringa eliminado exitosamente'
       };
-    } catch (error) {
+    } catch (error: any) {
       if (error.statusCode) throw error;
       console.error('Error al eliminar lote de jeringa:', error);
-      throw createError('Error interno del servidor', 500);
+      throw createError(error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -586,6 +621,15 @@ export class LoteJeringaService {
     if (data.cantidadInicial !== undefined) {
       if (data.cantidadInicial <= 0) {
         throw createError('La cantidad inicial debe ser mayor a 0', 400);
+      }
+
+      // Proteger inmutabilidad de cantidadInicial si el lote ya tiene distribuciones registradas
+      const yaTieneDistribucion = existingLote.cantidadActual < existingLote.cantidadInicial;
+      if (yaTieneDistribucion && data.cantidadInicial !== existingLote.cantidadInicial) {
+        throw createError(
+          'No se puede modificar la cantidad inicial de un lote que ya tiene unidades distribuidas o vales de entrega emitidos',
+          400
+        );
       }
 
       const cantidadActual = data.cantidadActual ?? existingLote.cantidadActual;

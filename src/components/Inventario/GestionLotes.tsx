@@ -154,6 +154,11 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
 
   const handleConfirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
+    // Protección adicional: evitar borrado si el lote ya tiene dosis distribuidas
+    if (deleteTarget.cantidadActual < deleteTarget.cantidadInicial) {
+      setDeleteTarget(null);
+      return;
+    }
     await onDelete(deleteTarget.id);
     setDeleteTarget(null);
   }, [deleteTarget, onDelete]);
@@ -232,11 +237,23 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
                         <StatusBadge status={lote.estado} />
                       </TableCell>
                       <TableCell align="right">
-                        <ActionButtons
-                          onEdit={() => setEditingLote(lote)}
-                          onDelete={() => setDeleteTarget(lote)}
-                          isLoading={isUpdating || isDeleting}
-                        />
+                        {(() => {
+                          const tieneDistribucion = lote.cantidadActual < lote.cantidadInicial;
+                          const distribuidas = lote.cantidadInicial - lote.cantidadActual;
+                          return (
+                            <ActionButtons
+                              onEdit={() => setEditingLote(lote)}
+                              onDelete={tieneDistribucion ? undefined : () => setDeleteTarget(lote)}
+                              isLoading={isUpdating || isDeleting}
+                              canDelete={!tieneDistribucion}
+                              deleteTooltip={
+                                tieneDistribucion
+                                  ? `No se puede eliminar: el lote tiene ${distribuidas} ${tipo === 'vacuna' ? 'dosis distribuidas' : 'unidades distribuidas'} en vales`
+                                  : 'Eliminar lote'
+                              }
+                            />
+                          );
+                        })()}
                       </TableCell>
                     </TableRow>
                   );
@@ -300,11 +317,23 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
                   </div>
                 ) : null}
                 <div className="mt-3 flex items-center justify-end">
-                  <ActionButtons
-                    onEdit={() => setEditingLote(lote)}
-                    onDelete={() => setDeleteTarget(lote)}
-                    isLoading={isUpdating || isDeleting}
-                  />
+                  {(() => {
+                    const tieneDistribucion = lote.cantidadActual < lote.cantidadInicial;
+                    const distribuidas = lote.cantidadInicial - lote.cantidadActual;
+                    return (
+                      <ActionButtons
+                        onEdit={() => setEditingLote(lote)}
+                        onDelete={tieneDistribucion ? undefined : () => setDeleteTarget(lote)}
+                        isLoading={isUpdating || isDeleting}
+                        canDelete={!tieneDistribucion}
+                        deleteTooltip={
+                          tieneDistribucion
+                            ? `No se puede eliminar: el lote tiene ${distribuidas} ${tipo === 'vacuna' ? 'dosis distribuidas' : 'unidades distribuidas'} en vales`
+                            : 'Eliminar lote'
+                        }
+                      />
+                    );
+                  })()}
                 </div>
               </article>
             );
@@ -357,6 +386,9 @@ const mapFormaIngresoToFrontend = (formaIngreso: string): string => {
 };
 
 const LoteModal: React.FC<LoteModalProps> = ({ lote, tipo, onClose, onSubmit, isLoading = false }) => {
+  const yaTieneDistribucion = lote.cantidadActual < lote.cantidadInicial;
+  const distribuidas = lote.cantidadInicial - lote.cantidadActual;
+
   const [formData, setFormData] = useState({
     numero: lote.numero,
     fechaIngreso: lote.fechaIngreso.toISOString().split('T')[0],
@@ -391,6 +423,12 @@ const LoteModal: React.FC<LoteModalProps> = ({ lote, tipo, onClose, onSubmit, is
     if (!formData.numeroComprobante.trim()) nextErrors.numeroComprobante = 'Ingrese un número de comprobante.';
     if (!Number.isFinite(cantidadInicial) || cantidadInicial <= 0) nextErrors.cantidadInicial = 'La cantidad inicial debe ser mayor a 0.';
     if (!Number.isFinite(cantidadActual) || cantidadActual < 0) nextErrors.cantidadActual = 'La cantidad actual no puede ser negativa.';
+    if (yaTieneDistribucion && cantidadInicial !== lote.cantidadInicial) {
+      nextErrors.cantidadInicial = 'La cantidad inicial no se puede modificar en lotes con dosis ya distribuidas.';
+    }
+    if (cantidadActual > cantidadInicial) {
+      nextErrors.cantidadActual = 'La cantidad actual no puede ser mayor a la cantidad inicial.';
+    }
     if (tipo === 'vacuna' && !formData.fechaVencimiento) nextErrors.fechaVencimiento = 'La fecha de vencimiento es obligatoria para vacunas.';
 
     if (Object.keys(nextErrors).length > 0) {
@@ -509,6 +547,17 @@ const LoteModal: React.FC<LoteModalProps> = ({ lote, tipo, onClose, onSubmit, is
         </FormSection>
 
         <FormSection title="Stock" description="Asegura coherencia entre el stock físico y el stock registrado.">
+          {yaTieneDistribucion ? (
+            <div className="mb-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 p-3.5 text-sm text-amber-900">
+              <span className="text-base leading-none" aria-hidden="true">⚠️</span>
+              <div>
+                <p className="font-semibold text-amber-950">Lote con distribuciones activas</p>
+                <p className="mt-0.5 text-xs text-amber-800">
+                  Este lote ya cuenta con <strong>{distribuidas} {tipo === 'vacuna' ? 'dosis distribuidas' : 'unidades distribuidas'}</strong> en vales de entrega. Para preservar la integridad del Kardex y saldos, la cantidad inicial no es modificable.
+                </p>
+              </div>
+            </div>
+          ) : null}
           <div className="grid gap-4 md:grid-cols-2">
             <TextInput
               id="lote-cantidad-inicial"
@@ -517,6 +566,8 @@ const LoteModal: React.FC<LoteModalProps> = ({ lote, tipo, onClose, onSubmit, is
               value={formData.cantidadInicial}
               onChange={(value) => handleFieldChange('cantidadInicial', value)}
               required
+              disabled={yaTieneDistribucion}
+              helpText={yaTieneDistribucion ? 'Inmutable: existen vales asociados a este lote' : undefined}
               error={errors.cantidadInicial}
               min={1}
             />

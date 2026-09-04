@@ -113,39 +113,39 @@ export function useLotesVacunas(initialFilters?: LoteVacunaFilters) {
   /**
    * Actualizar lote de vacuna
    */
-  const updateLote = useCallback(async (id: string, data: UpdateLoteVacunaDto): Promise<boolean> => {
+  const updateLote = useCallback(async (id: string, data: UpdateLoteVacunaDto): Promise<{ success: boolean; error?: string }> => {
     logger.debug('Actualizando lote de vacuna:', { id, data });
 
-    const result = await crudApi.update.execute(() => LoteVacunaService.update(id, data));
-    
-    if (result) {
+    const result = await crudApi.update.executeWithResult(() => LoteVacunaService.update(id, data));
+
+    if (result.success && result.data) {
       // Actualizar el lote en la lista local
-      setLotes(prev => prev.map(lote => 
-        lote.id === id ? result : lote
+      setLotes(prev => prev.map(lote =>
+        lote.id === id ? result.data! : lote
       ));
       await loadStats(); // Recargar estadísticas
-      return true;
+      return { success: true };
     }
-    
-    return false;
+
+    return { success: false, error: result.error || 'Error al actualizar el lote' };
   }, [crudApi.update, loadStats]);
 
   /**
    * Eliminar lote de vacuna
    */
-  const deleteLote = useCallback(async (id: string): Promise<boolean> => {
+  const deleteLote = useCallback(async (id: string): Promise<{ success: boolean; error?: string }> => {
     logger.debug('Eliminando lote de vacuna:', { id });
 
-    const result = await crudApi.delete.execute(() => LoteVacunaService.delete(id));
-    
-    if (result !== null) {
+    const result = await crudApi.delete.executeWithResult(() => LoteVacunaService.delete(id));
+
+    if (result.success) {
       // Remover el lote de la lista local
       setLotes(prev => prev.filter(lote => lote.id !== id));
       await loadStats(); // Recargar estadísticas
-      return true;
+      return { success: true };
     }
-    
-    return false;
+
+    return { success: false, error: result.error || 'Error al eliminar el lote' };
   }, [crudApi.delete, loadStats]);
 
   /**

@@ -482,11 +482,43 @@ export class LoteVacunaService {
         throw new HttpError('Lote de vacuna no encontrado', 404);
       }
 
-      // TODO: Verificar dependencias (kardex, movimientos, etc.)
-      // Por ahora permitimos eliminación directa
+      // 1. Validar si ya se han distribuido dosis de este lote
+      if (existingLote.cantidadActual < existingLote.cantidadInicial) {
+        const distribuidas = existingLote.cantidadInicial - existingLote.cantidadActual;
+        throw new HttpError(
+          `No se puede eliminar el lote porque ya tiene ${distribuidas} dosis distribuidas (stock actual: ${existingLote.cantidadActual} de ${existingLote.cantidadInicial} iniciales). Si necesita anularlo, debe anular primero los vales de entrega correspondientes.`,
+          400
+        );
+      }
 
-      await prisma.loteVacuna.delete({
-        where: { id }
+      // 2. Validar si existen movimientos de salida o vales en Kardex vinculados a este lote
+      const movimientosSalida = await prisma.kardex.findFirst({
+        where: {
+          loteId: id,
+          OR: [
+            { tipoMovimiento: TipoMovimientoKardex.salida },
+            { documento: 'VALE_ENTREGA' }
+          ]
+        }
+      });
+
+      if (movimientosSalida) {
+        throw new HttpError(
+          'No se puede eliminar el lote porque cuenta con movimientos de salida o vales de entrega registrados en el Kardex.',
+          400
+        );
+      }
+
+      // 3. Si el lote está intacto (sin salidas ni vales), eliminar transaccionalmente
+      // eliminando también sus registros de ingreso en Kardex para evitar registros huérfanos
+      await prisma.$transaction(async (tx) => {
+        await tx.kardex.deleteMany({
+          where: { loteId: id }
+        });
+
+        await tx.loteVacuna.delete({
+          where: { id }
+        });
       });
 
       return {
@@ -494,10 +526,10 @@ export class LoteVacunaService {
         data: undefined,
         message: 'Lote de vacuna eliminado exitosamente'
       };
-    } catch (error) {
+    } catch (error: any) {
       if (error.statusCode) throw error;
       console.error('Error al eliminar lote de vacuna:', error);
-      throw createError('Error interno del servidor', 500);
+      throw createError(error.message || 'Error interno del servidor', error.statusCode || 500);
     }
   }
 
@@ -568,6 +600,15 @@ export class LoteVacunaService {
 
     if (data.cantidadActual !== undefined && data.cantidadActual < 0) {
       throw createError('La cantidad actual no puede ser negativa', 400);
+    }
+
+    // Proteger inmutabilidad de cantidadInicial si el lote ya tiene distribuciones registradas
+    const yaTieneDistribucion = existingLote.cantidadActual < existingLote.cantidadInicial;
+    if (yaTieneDistribucion && data.cantidadInicial !== undefined && data.cantidadInicial !== existingLote.cantidadInicial) {
+      throw createError(
+        'No se puede modificar la cantidad inicial de un lote que ya tiene dosis distribuidas o vales de entrega emitidos',
+        400
+      );
     }
 
     // Validar relación entre cantidades

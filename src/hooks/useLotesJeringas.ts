@@ -112,39 +112,39 @@ export function useLotesJeringas(initialFilters?: LoteJeringaFilters) {
   /**
    * Actualizar lote de jeringa
    */
-  const updateLote = useCallback(async (id: string, data: UpdateLoteJeringaDto): Promise<boolean> => {
+  const updateLote = useCallback(async (id: string, data: UpdateLoteJeringaDto): Promise<{ success: boolean; error?: string }> => {
     logger.debug('Actualizando lote de jeringa:', { id, data });
 
-    const result = await crudApi.update.execute(() => LoteJeringaService.update(id, data));
-    
-    if (result) {
+    const result = await crudApi.update.executeWithResult(() => LoteJeringaService.update(id, data));
+
+    if (result.success && result.data) {
       // Actualizar el lote en la lista local
-      setLotes(prev => prev.map(lote => 
-        lote.id === id ? result : lote
+      setLotes(prev => prev.map(lote =>
+        lote.id === id ? result.data! : lote
       ));
       await loadStats(); // Recargar estadísticas
-      return true;
+      return { success: true };
     }
-    
-    return false;
+
+    return { success: false, error: result.error || 'Error al actualizar el lote' };
   }, [crudApi.update, loadStats]);
 
   /**
    * Eliminar lote de jeringa
    */
-  const deleteLote = useCallback(async (id: string): Promise<boolean> => {
+  const deleteLote = useCallback(async (id: string): Promise<{ success: boolean; error?: string }> => {
     logger.debug('Eliminando lote de jeringa:', { id });
 
-    const result = await crudApi.delete.execute(() => LoteJeringaService.delete(id));
-    
-    if (result !== null) {
+    const result = await crudApi.delete.executeWithResult(() => LoteJeringaService.delete(id));
+
+    if (result.success) {
       // Remover el lote de la lista local
       setLotes(prev => prev.filter(lote => lote.id !== id));
       await loadStats(); // Recargar estadísticas
-      return true;
+      return { success: true };
     }
-    
-    return false;
+
+    return { success: false, error: result.error || 'Error al eliminar el lote' };
   }, [crudApi.delete, loadStats]);
 
   /**
