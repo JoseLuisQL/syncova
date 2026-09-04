@@ -20,11 +20,11 @@ const ActividadSection: React.FC = memo(() => {
   const { data, loading, error } = usePaginatedActividad(6);
 
   return (
-    <section className="flex h-full flex-col rounded-3xl border border-[#e3e9f0] bg-white shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
-      <header className="border-b border-[#eef1f5] px-5 py-4">
+    <section className="flex h-full flex-col rounded-3xl border border-line bg-surface shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
+      <header className="border-b border-line px-5 py-4">
         <div>
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9aa4b2]">Auditoría</p>
-          <h3 className="mt-1 text-md font-semibold tracking-[-0.02em] text-[#171b22]">Actividad reciente</h3>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">Auditoría</p>
+          <h3 className="mt-1 text-md font-semibold tracking-[-0.02em] text-ink">Actividad reciente</h3>
         </div>
       </header>
 
@@ -36,25 +36,25 @@ const ActividadSection: React.FC = memo(() => {
         ) : data.length === 0 ? (
           <EmptyState title="Sin actividad" description="No hay registros recientes." icon={<Clock />} />
         ) : (
-          <div className="divide-y divide-zinc-100">
+          <div className="divide-y divide-line-soft">
             {data.map((actividad) => (
               <div key={actividad.id} className="flex gap-3 py-3 first:pt-0 last:pb-0">
-                <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[#e3e9f0] bg-[#f8fbfd]">
+                <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-line bg-surface-soft">
                   {getActivityIcon(actividad.tipo)}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex items-center justify-between gap-3">
-                    <span className="truncate font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-secondary">
+                    <span className="truncate font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-2">
                       {actividad.tipo.replace('_', ' ')}
                     </span>
-                    <time className="whitespace-nowrap font-mono text-[10px] font-medium text-secondary/70">
+                    <time className="whitespace-nowrap font-mono text-[10px] font-medium text-muted">
                       {formatTimeOnly(actividad.fecha)}
                     </time>
                   </div>
-                  <p className="line-clamp-2 text-base font-medium text-[#171b22]">
+                  <p className="line-clamp-2 text-base font-medium text-ink">
                     {actividad.descripcion}
                   </p>
-                  <div className="mt-1 truncate text-xs font-medium text-secondary">
+                  <div className="mt-1 truncate text-xs font-medium text-muted-2">
                     {actividad.usuario && <span>{actividad.usuario}</span>}
                   </div>
                 </div>
@@ -64,7 +64,7 @@ const ActividadSection: React.FC = memo(() => {
         )}
       </div>
 
-      <div className="mt-auto border-t border-zinc-100 px-5 py-4">
+      <div className="mt-auto border-t border-line px-5 py-4">
         <button type="button" className="flex items-center gap-1 text-base font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276]">
           Ver registro completo <span className="text-lg leading-none">→</span>
         </button>

@@ -12,9 +12,9 @@ const UsersShell: React.FC<UsersShellProps> = ({ activeSection, children }) => {
   const { navigateToModule } = useAppNavigation();
 
   return (
-    <main className="min-h-[calc(100dvh-128px)] overflow-hidden rounded-4xl border border-white/90 bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
+    <main className="min-h-[calc(100dvh-128px)] overflow-hidden rounded-4xl border border-line bg-surface shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
       <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col`}>
-        <nav aria-label="Secciones de usuarios" className="border-b border-line-soft bg-white">
+        <nav aria-label="Secciones de usuarios" className="border-b border-line-soft bg-surface">
           <div className="flex h-12 items-end gap-7 px-5 sm:px-6">
             {USER_SECTIONS.map((section) => {
               const isActive = section.id === activeSection;

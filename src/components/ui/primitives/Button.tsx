@@ -51,9 +51,9 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
     'bg-brand text-white hover:bg-brand-600 focus-visible:ring-brand/30 shadow-sm',
   secondary:
-    'bg-white text-ink border border-line hover:bg-surface-soft hover:border-line-strong focus-visible:ring-zinc-300',
+    'bg-surface text-ink border border-line hover:bg-surface-soft hover:border-line-strong focus-visible:ring-brand/20',
   ghost:
-    'bg-white text-muted-2 border border-line hover:bg-surface-soft hover:text-ink hover:border-line-strong focus-visible:ring-zinc-300',
+    'bg-transparent text-muted-2 border border-transparent hover:bg-surface-soft hover:text-ink hover:border-line focus-visible:ring-brand/20',
   danger:
     'bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500/30 shadow-sm',
   success:

@@ -25,20 +25,20 @@ const StatCard: React.FC<StatCardProps> = memo(({
 
   if (isLoading) {
     return (
-      <div className="animate-pulse border border-zinc-200 bg-white p-5">
+      <div className="animate-pulse border border-line bg-surface p-5">
         <div className="flex items-center justify-between">
           <div className="space-y-4 flex-1">
-            <div className="h-4 w-24 bg-neutral" />
-            <div className="h-8 w-16 bg-neutral" />
+            <div className="h-4 w-24 bg-surface-soft" />
+            <div className="h-8 w-16 bg-surface-soft" />
           </div>
-          <div className="h-12 w-12 bg-neutral" />
+          <div className="h-12 w-12 bg-surface-soft" />
         </div>
       </div>
     );
   }
 
   return (
-    <motion.div 
+    <motion.div
       whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       className={`group relative overflow-hidden ${colors.bg} border ${colors.border} p-5`}
@@ -52,7 +52,7 @@ const StatCard: React.FC<StatCardProps> = memo(({
               {label}
             </p>
           </div>
-          <p className="text-3xl font-semibold leading-none tracking-[-0.03em] text-primary tabular-nums sm:text-display">
+          <p className="text-3xl font-semibold leading-none tracking-[-0.03em] text-ink tabular-nums sm:text-display">
             <CountUp
               to={value}
               from={0}
@@ -62,14 +62,14 @@ const StatCard: React.FC<StatCardProps> = memo(({
             />
           </p>
           {description && (
-            <p className="mt-1 hidden text-sm font-medium text-secondary sm:block">
+            <p className="mt-1 hidden text-sm font-medium text-muted-2 sm:block">
               {description}
             </p>
           )}
         </div>
-        
-        <div 
-          className="border border-zinc-200 bg-white p-3 text-tertiary transition-colors duration-300 group-hover:border-tertiary"
+
+        <div
+          className="border border-line bg-surface p-3 text-tertiary transition-colors duration-300 group-hover:border-tertiary"
         >
           <Icon className="h-[22px] w-[22px]" weight="bold" aria-hidden="true" />
         </div>

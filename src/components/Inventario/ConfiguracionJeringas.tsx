@@ -483,11 +483,11 @@ const ConfiguracionJeringas: React.FC = () => {
           ) : (
             <>
               {/* Vista Tabla Desktop */}
-              <div className="hidden md:block overflow-hidden rounded-xl border border-line bg-white shadow-2xs">
+              <div className="hidden md:block overflow-hidden rounded-xl border border-line bg-surface shadow-2xs">
                 <DataTable>
                   <table className="min-w-full border-separate border-spacing-0">
                     <TableHeader columns={tableColumns} />
-                    <tbody className="bg-white">
+                    <tbody className="bg-surface">
                       {filteredConfiguraciones.map((config) => (
                         <TableRow key={config.id}>
                           {/* Vacuna */}

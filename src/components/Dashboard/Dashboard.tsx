@@ -81,14 +81,14 @@ const Dashboard: React.FC = () => {
           animate="animate"
           exit="exit"
           variants={fadeVariants}
-          className="relative min-h-[calc(100dvh-4rem)] bg-[#f0eff4] text-[#111827]"
+          className="relative min-h-[calc(100dvh-4rem)] bg-app text-ink"
         >
           <div className="relative z-10 space-y-4 px-4 py-4 sm:px-5">
             <MetricsSection stats={estadisticas} isLoading={loading && !hasData} />
 
             <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
               <div className="lg:col-span-6">
-                <Suspense fallback={<div className="h-[400px] animate-pulse border border-zinc-200 bg-white p-5" />}>
+                <Suspense fallback={<div className="h-[400px] animate-pulse border border-line bg-surface p-5" />}>
                   <ChartSection
                     movimientosMensuales={movimientosMensuales}
                     isLoading={loading && !hasData}

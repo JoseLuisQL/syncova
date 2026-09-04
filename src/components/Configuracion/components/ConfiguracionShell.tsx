@@ -24,9 +24,9 @@ const ConfiguracionShell: React.FC<ConfiguracionShellProps> = ({
   children,
 }) => {
   return (
-    <main className="min-h-[calc(100dvh-128px)] overflow-hidden rounded-4xl border border-white/90 bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
+    <main className="min-h-[calc(100dvh-128px)] overflow-hidden rounded-4xl border border-line bg-surface shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
       <div className={`${MODULE_LAYOUT.fullWidth} flex flex-col`}>
-        <nav aria-label="Secciones de configuracion" className="border-b border-line-soft bg-white">
+        <nav aria-label="Secciones de configuracion" className="border-b border-line-soft bg-surface">
           <div className="flex min-h-12 flex-col gap-3 px-5 sm:px-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex h-12 items-end gap-7">
               {groups.map((section) => {

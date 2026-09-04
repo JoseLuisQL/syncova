@@ -256,7 +256,7 @@ const MovimientoDetalleModalComponent: React.FC<MovimientoDetalleModalProps> = (
                           <th className={COMPONENT_STYLES.table.headerCell}>Tipo</th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white">
+                      <tbody className="bg-surface">
                         {deliveryBreakdown.detalles.map((detalle) => (
                           <tr key={`${detalle.establecimientoId}-${detalle.vacunaId}-${detalle.cantidadEntregada}`} className={COMPONENT_STYLES.table.row}>
                             <td className={COMPONENT_STYLES.table.cell}>

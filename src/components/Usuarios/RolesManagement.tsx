@@ -361,7 +361,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
                 <th className={`${COMPONENT_STYLES.table.headerCell} rounded-r-[14px] text-right`}>Acciones</th>
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody className="bg-surface">
               {filteredRoles.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-14 text-center">

@@ -83,18 +83,18 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
   const statusConfig = useMemo(() => {
     if (!progresoVales || progresoVales.estado === 'sin_vales') {
       return {
-        card: 'border-zinc-200 bg-zinc-50',
-        pill: 'bg-zinc-100 text-zinc-700 border border-zinc-200',
-        bar: 'bg-zinc-300',
-        icon: <Clock className="h-4 w-4 text-zinc-500" />,
+        card: 'border-line bg-surface-soft',
+        pill: 'bg-surface-soft text-muted-2 border border-line',
+        bar: 'bg-line-strong',
+        icon: <Clock className="h-4 w-4 text-muted" />,
         label: 'Pendiente',
       };
     }
 
     if (progresoVales.estado === 'completo') {
       return {
-        card: 'border-line-focus bg-[#f3f0ff]',
-        pill: 'bg-white text-brand border border-line-focus',
+        card: 'border-brand/30 bg-surface-tint',
+        pill: 'bg-surface text-brand border border-brand/40',
         bar: 'bg-brand',
         icon: <CheckCircle className="h-4 w-4 text-brand" weight="fill" />,
         label: 'Completo',
@@ -102,10 +102,10 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
     }
 
     return {
-      card: 'border-rose-200 bg-rose-50/80',
-      pill: 'bg-white text-rose-700 border border-rose-200',
+      card: 'border-status-danger-border bg-status-danger-bg',
+      pill: 'bg-surface text-status-danger-text border border-status-danger-border',
       bar: 'bg-rose-500',
-      icon: <WarningCircle className="h-4 w-4 text-rose-600" weight="duotone" />,
+      icon: <WarningCircle className="h-4 w-4 text-rose-500" weight="duotone" />,
       label: 'Bloqueando',
     };
   }, [progresoVales]);
@@ -128,22 +128,22 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
         type="button"
         onClick={() => setShowDropdown((prev) => !prev)}
         disabled={isLoading}
-        className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-left transition ${
+        className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-left transition border ${
           !progresoVales || progresoVales.estado === 'sin_vales'
-            ? 'bg-zinc-100/50 hover:bg-zinc-100'
+            ? 'bg-surface-soft hover:bg-surface border-line'
             : progresoVales.estado === 'completo'
-            ? 'bg-[#f3f0ff] hover:bg-[#ede7ff]'
-            : 'bg-zinc-100/50 hover:bg-zinc-100 shadow-[inset_0_0_0_1px_rgba(228,228,231,1)]'
+            ? 'bg-surface-tint hover:bg-surface-soft border-brand/30'
+            : 'bg-surface-soft hover:bg-surface border-line'
         }`}
       >
         <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-          progresoVales?.estado === 'completo' ? 'border border-line-focus bg-white text-brand' : 'bg-white border border-zinc-200 shadow-sm'
+          progresoVales?.estado === 'completo' ? 'border border-brand/30 bg-surface text-brand' : 'bg-surface border border-line shadow-sm'
         }`}>
-          {isLoading ? <CircleNotch className={`h-4 w-4 animate-spin ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-zinc-900'}`} weight="bold" /> : <Truck className={`h-4 w-4 ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-zinc-900'}`} weight="duotone" />}
+          {isLoading ? <CircleNotch className={`h-4 w-4 animate-spin ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-ink'}`} weight="bold" /> : <Truck className={`h-4 w-4 ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-ink'}`} weight="duotone" />}
         </div>
         <div className="min-w-0">
-          <p className={`text-[0.6rem] font-bold uppercase tracking-[0.15em] ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-zinc-500'}`}>Entregas totales</p>
-          <p className={`text-[0.95rem] tracking-tight font-semibold ${progresoVales?.estado === 'completo' ? 'text-ink' : 'text-zinc-900'}`}>
+          <p className={`text-[0.6rem] font-bold uppercase tracking-[0.15em] ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-muted'}`}>Entregas totales</p>
+          <p className={`text-[0.95rem] tracking-tight font-semibold text-ink`}>
             {totalEntregas.toLocaleString()}
           </p>
         </div>
@@ -154,17 +154,17 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
               : statusConfig.label}
             {progresoVales?.porcentajeProgreso ? ` ${progresoVales.porcentajeProgreso}%` : ''}
           </span>
-          <CaretDown className={`h-3 w-3 transition-transform ${showDropdown ? 'rotate-180' : ''} ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-zinc-400'}`} weight="bold" />
+          <CaretDown className={`h-3 w-3 transition-transform ${showDropdown ? 'rotate-180' : ''} ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-muted-2'}`} weight="bold" />
         </div>
       </button>
 
       {showDropdown ? (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-[180] min-w-[340px] overflow-hidden rounded-xl border border-line bg-white shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)]">
+        <div className="absolute right-0 top-[calc(100%+8px)] z-[180] min-w-[340px] overflow-hidden rounded-xl border border-line bg-surface shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)]">
           <div className="border-b border-line-soft bg-surface-soft px-4 py-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-zinc-900">Validación de vales</h3>
-                <p className="mt-1 text-xs text-zinc-500 font-medium">
+                <h3 className="text-[0.85rem] font-bold uppercase tracking-widest text-ink">Validación de vales</h3>
+                <p className="mt-1 text-xs text-muted font-medium">
                   {progresoVales?.totalEstablecimientosConEntregas
                     ? `${progresoVales.establecimientosConValeCompleto} de ${progresoVales.totalEstablecimientosConEntregas} vales bloqueados logísticamente.`
                     : 'Aún no existen flujos transaccionales listos para generar vales.'}
@@ -175,7 +175,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
                   <button
                     type="button"
                     onClick={onRefresh}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-900 shadow-sm"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-muted-2 transition hover:bg-surface-soft hover:text-ink shadow-sm"
                     title="Forzar sincronización"
                   >
                     <ArrowsClockwise className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} weight="bold" />
@@ -184,7 +184,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
                 <button
                   type="button"
                   onClick={() => setShowDropdown(false)}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-900 shadow-sm"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-muted-2 transition hover:bg-surface-soft hover:text-ink shadow-sm"
                 >
                   <X className="h-4 w-4" weight="bold" />
                 </button>

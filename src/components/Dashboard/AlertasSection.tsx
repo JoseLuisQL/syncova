@@ -22,14 +22,14 @@ const AlertasSection: React.FC = memo(() => {
   const { data, loading, error, pagination } = usePaginatedAlertas(4);
 
   return (
-    <section className="flex h-full flex-col rounded-3xl border border-[#e3e9f0] bg-white shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
-      <header className="flex items-start justify-between border-b border-[#eef1f5] px-5 py-4">
+    <section className="flex h-full flex-col rounded-3xl border border-line bg-surface shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
+      <header className="flex items-start justify-between border-b border-line px-5 py-4">
         <div>
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9aa4b2]">Riesgo</p>
-          <h3 className="mt-1 text-md font-semibold tracking-[-0.02em] text-[#171b22]">Alertas</h3>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">Riesgo</p>
+          <h3 className="mt-1 text-md font-semibold tracking-[-0.02em] text-ink">Alertas</h3>
         </div>
         {pagination.total > 0 && (
-          <span className="rounded-full border border-[#dceeea] bg-[#effbf8] px-2 py-1 font-mono text-xs font-semibold text-[#0a8276]">
+          <span className="rounded-full border border-status-success-border bg-status-success-bg px-2 py-1 font-mono text-xs font-semibold text-status-success-text">
             {pagination.total} activas
           </span>
         )}
@@ -43,7 +43,7 @@ const AlertasSection: React.FC = memo(() => {
         ) : data.length === 0 ? (
           <EmptyState title="Cero incidencias" description="No hay alertas." icon={<Bell />} />
         ) : (
-          <div className="divide-y divide-zinc-100">
+          <div className="divide-y divide-line-soft">
             {data.map((alerta) => (
               <div key={alerta.id} className="relative flex gap-3 py-3 first:pt-0 last:pb-0">
                 <div className="mt-0.5 flex-shrink-0">
@@ -51,18 +51,18 @@ const AlertasSection: React.FC = memo(() => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-1">
-                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7a8797]">
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-2">
                       {alerta.tipo.replace('_', ' ')}
                     </span>
-                    <span className="ml-2 whitespace-nowrap font-mono text-[10px] font-medium text-secondary/70">
+                    <span className="ml-2 whitespace-nowrap font-mono text-[10px] font-medium text-muted">
                       {formatDate(alerta.fechaCreacion)}
                     </span>
                   </div>
-                  <p className="pr-4 text-base font-medium leading-snug text-[#171b22]">
+                  <p className="pr-4 text-base font-medium leading-snug text-ink">
                     {alerta.mensaje}
                   </p>
                   {alerta.establecimiento && (
-                    <p className="mt-1 truncate text-sm font-medium text-secondary">
+                    <p className="mt-1 truncate text-sm font-medium text-muted-2">
                       {alerta.establecimiento}
                     </p>
                   )}
@@ -73,7 +73,7 @@ const AlertasSection: React.FC = memo(() => {
         )}
       </div>
 
-      <div className="mt-auto border-t border-zinc-100 px-5 py-4">
+      <div className="mt-auto border-t border-line px-5 py-4">
         <button type="button" className="flex items-center gap-1 text-base font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276]">
           Centro de notificaciones <span className="text-lg leading-none">→</span>
         </button>

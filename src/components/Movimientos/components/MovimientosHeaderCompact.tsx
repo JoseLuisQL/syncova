@@ -248,7 +248,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
         <div className="relative z-[90] space-y-2 overflow-visible">
           <div className="relative z-[90] flex flex-wrap items-stretch gap-2 overflow-visible">
             <div className="flex min-h-14 items-center gap-2 rounded-[12px] border border-line bg-surface-soft px-3 py-2">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-muted-2">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-muted-2">
                 <CalendarBlank className="h-4 w-4" weight="duotone" />
               </div>
               <div>
@@ -263,7 +263,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               <button
                 type="button"
                 onClick={() => setShowStockInicialDropdown((prev) => !prev)}
-                className="flex min-h-14 items-center gap-2 rounded-[12px] border border-line bg-white px-3 py-2 text-left transition hover:bg-surface-soft"
+                className="flex min-h-14 items-center gap-2 rounded-[12px] border border-line bg-surface px-3 py-2 text-left transition hover:bg-surface-soft"
               >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2">
                   <Package className="h-4 w-4" weight="duotone" />
@@ -278,20 +278,20 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               </button>
 
               {showStockInicialDropdown ? (
-                <div className="absolute left-0 top-full z-[180] mt-2 w-[min(280px,calc(100vw-3rem))] rounded-xl border border-line bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[280px]">
+                <div className="absolute left-0 top-full z-[180] mt-2 w-[min(280px,calc(100vw-3rem))] rounded-xl border border-line bg-surface p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[280px]">
                   <h4 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-widest text-muted">Volumen desglosado</h4>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-lg border border-line bg-surface-soft px-3 py-2">
                       <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-muted">Base histórica</p>
                       <p className="mt-1 text-sm font-semibold text-ink">{stockInfo.stockInicialOriginal?.toLocaleString() || 0}</p>
                     </div>
-                    <div className="rounded-lg border border-line bg-white px-3 py-2">
+                    <div className="rounded-lg border border-line bg-surface px-3 py-2">
                       <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-muted">Nuevos ingresos</p>
                       <p className="mt-1 text-sm font-semibold text-ink">{(stockInfo.ingresosLotesDelMes ?? 0).toLocaleString()}</p>
                     </div>
                   </div>
                   {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial ? (
-                    <p className="mt-3 text-right text-[0.65rem] font-medium text-zinc-400">
+                    <p className="mt-3 text-right text-[0.65rem] font-medium text-muted">
                       Ref: {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString()}
                     </p>
                   ) : null}
@@ -323,12 +323,12 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
               }
               className={`flex min-h-14 items-center gap-2 rounded-[12px] border px-3 py-2 text-left transition ${
                 stockInfo.stockDisponible < 0
-                  ? 'cursor-pointer border-rose-200 bg-rose-50 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60'
-                  : 'border-line bg-white hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-60'
+                  ? 'cursor-pointer border-status-danger-border bg-status-danger-bg hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60'
+                  : 'border-line bg-surface hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-60'
               }`}
             >
               <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
-                stockInfo.stockDisponible < 0 ? 'border-rose-200 bg-white text-rose-600' : 'border-line bg-surface-soft text-muted-2'
+                stockInfo.stockDisponible < 0 ? 'border-status-danger-border bg-surface text-status-danger-text' : 'border-line bg-surface-soft text-muted-2'
               }`}>
                 {stockInfo.stockDisponible < 0
                   ? <Warning className="h-4 w-4" weight="fill" />

@@ -73,7 +73,7 @@ class ErrorBoundary extends Component<Props, State> {
         <div className="relative min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-hidden bg-app">
           <DotGrid color="rgb(var(--color-ink))" dotSize={1.5} gap={34} opacity={0.08} driftDuration={0} />
           <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
-            <div className="bg-white py-8 px-4 shadow-[0_24px_64px_-42px_rgba(12,15,24,0.5)] border border-line sm:rounded-xl sm:px-10">
+            <div className="bg-surface py-8 px-4 shadow-[0_24px_64px_-42px_rgba(12,15,24,0.5)] border border-line sm:rounded-xl sm:px-10">
               <div className="text-center">
                 <Warning weight="fill" className="mx-auto h-14 w-14 text-rose-500 mb-4" aria-hidden="true" />
                 <h2 className="text-2xl font-bold text-ink mb-2">
@@ -102,7 +102,7 @@ class ErrorBoundary extends Component<Props, State> {
 
                   <button type="button"
                     onClick={this.handleReload}
-                    className="w-full flex justify-center items-center px-4 py-2 border border-line rounded-md shadow-sm text-sm font-medium text-ink bg-white hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand/20 transition-colors"
+                    className="w-full flex justify-center items-center px-4 py-2 border border-line rounded-md shadow-sm text-sm font-medium text-ink bg-surface hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand/20 transition-colors"
                   >
                     <ArrowsClockwise weight="bold" className="h-4 w-4 mr-2" />
                     Recargar página
@@ -110,7 +110,7 @@ class ErrorBoundary extends Component<Props, State> {
 
                   <button type="button"
                     onClick={this.handleGoHome}
-                    className="w-full flex justify-center items-center px-4 py-2 border border-line rounded-md shadow-sm text-sm font-medium text-ink bg-white hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand/20 transition-colors"
+                    className="w-full flex justify-center items-center px-4 py-2 border border-line rounded-md shadow-sm text-sm font-medium text-ink bg-surface hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand/20 transition-colors"
                   >
                     <House weight="bold" className="h-4 w-4 mr-2" />
                     Ir al inicio

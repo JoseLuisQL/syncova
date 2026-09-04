@@ -263,6 +263,83 @@
   @apply bg-red-600;
 }
 
+/* Dark Mode Overrides para Vales */
+.dark .card-enterprise {
+  background: rgb(var(--color-surface));
+  border-color: rgb(var(--color-line));
+}
+
+.dark .table-enterprise {
+  background: rgb(var(--color-surface));
+}
+
+.dark .table-enterprise th {
+  background: rgb(var(--color-surface-soft));
+  color: rgb(var(--color-muted));
+}
+
+.dark .table-enterprise td {
+  color: rgb(var(--color-ink));
+}
+
+.dark .table-enterprise tbody tr {
+  border-bottom-color: rgb(var(--color-line-soft));
+}
+
+.dark .table-enterprise tbody tr:hover {
+  background-color: rgb(var(--color-surface-soft));
+}
+
+.dark .modal-content {
+  background: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-line));
+}
+
+.dark .input-enterprise {
+  background: rgb(var(--color-surface));
+  border-color: rgb(var(--color-line));
+  color: rgb(var(--color-ink));
+}
+
+.dark .btn-enterprise-secondary {
+  background: rgb(var(--color-surface-soft));
+  color: rgb(var(--color-ink));
+  border-color: rgb(var(--color-line));
+}
+
+.dark .btn-enterprise-secondary:hover {
+  background: rgb(var(--color-surface));
+  border-color: rgb(var(--color-line-strong));
+}
+
+.dark .status-generado {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+
+.dark .status-impreso {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+}
+
+.dark .status-entregado {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+}
+
+.dark .text-enterprise-title {
+  color: rgb(var(--color-ink));
+}
+
+.dark .text-enterprise-subtitle,
+.dark .text-enterprise-body {
+  color: rgb(var(--color-muted-2));
+}
+
+.dark .text-enterprise-caption {
+  color: rgb(var(--color-muted));
+}
+
 .text-enterprise-primary {
   @apply text-blue-600;
 }

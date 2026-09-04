@@ -92,7 +92,7 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = memo(({
   onBlur,
 }) => {
   const resolvedClassName = hasVale
-    ? 'border border-emerald-200 bg-white text-emerald-950 shadow-[0_1px_2px_rgba(0,0,0,0.04)] rounded-lg'
+    ? 'border border-status-success-border bg-surface text-status-success-text shadow-sm rounded-lg'
     : pending
     ? styles.pending
     : `${styles.normal} ${styles.focus}`;
@@ -105,8 +105,8 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = memo(({
 
   if (readOnly) {
     return (
-      <span className={`inline-flex flex-1 items-center justify-center text-[0.85rem] font-bold tabular-nums text-zinc-900 ${widthClass}`}>
-        {value === 0 ? <span className="text-zinc-300">-</span> : value.toLocaleString()}
+      <span className={`inline-flex flex-1 items-center justify-center text-[0.85rem] font-bold tabular-nums text-ink ${widthClass}`}>
+        {value === 0 ? <span className="text-muted">-</span> : value.toLocaleString()}
       </span>
     );
   }
@@ -126,7 +126,7 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = memo(({
         className={`${widthClass} bg-transparent min-h-[44px] px-2.5 py-2.5 text-center text-[0.85rem] font-bold tabular-nums transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${resolvedClassName}`}
       />
       {indicatorClassName ? (
-        <span className={`absolute right-1 top-1 h-2 w-2 rounded-full border border-white ${indicatorClassName}`} />
+        <span className={`absolute right-1 top-1 h-2 w-2 rounded-full border border-surface ${indicatorClassName}`} />
       ) : null}
       {hasVale && !indicatorClassName && (
         <CheckCircle weight="fill" className="absolute right-1 top-1 h-3.5 w-3.5 text-emerald-500 drop-shadow-sm" />
@@ -143,16 +143,16 @@ const MetricPill: React.FC<{
 }> = memo(({ value, tone }) => {
   const className =
     tone === 'emerald'
-      ? 'bg-transparent text-zinc-900 font-bold'
+      ? 'bg-transparent text-ink font-bold'
       : tone === 'cyan'
-      ? 'bg-transparent text-zinc-900 font-bold'
+      ? 'bg-transparent text-ink font-bold'
       : tone === 'teal'
-      ? 'border border-line-focus bg-[#f3f0ff] text-brand font-semibold'
-      : 'bg-transparent text-zinc-600 font-semibold';
+      ? 'border border-brand/30 bg-surface-tint text-brand font-semibold'
+      : 'bg-transparent text-muted-2 font-semibold';
 
   return (
     <span className={`inline-flex min-w-[3.5rem] items-center justify-center rounded-sm px-2 py-1 text-[0.75rem] tabular-nums tracking-tight ${className}`}>
-      {value === 0 && tone !== 'teal' ? <span className="text-zinc-300">-</span> : value.toLocaleString()}
+      {value === 0 && tone !== 'teal' ? <span className="text-muted">-</span> : value.toLocaleString()}
     </span>
   );
 });
@@ -162,10 +162,10 @@ MetricPill.displayName = 'MetricPill';
 const AvailabilityBadge: React.FC<{ value: number }> = memo(({ value }) => {
   const className =
     value >= 2
-      ? 'border-zinc-200 bg-white text-zinc-900'
+      ? 'border-line bg-surface-soft text-ink'
       : value >= 1
-      ? 'border-amber-200 bg-amber-50 text-amber-900 shadow-sm'
-      : 'border-rose-300 bg-rose-50 text-rose-900 shadow-sm shadow-rose-100';
+      ? 'border-status-warning-border bg-status-warning-bg text-status-warning-text shadow-sm'
+      : 'border-status-danger-border bg-status-danger-bg text-status-danger-text shadow-sm';
 
   return (
     <span className={`inline-flex min-w-[4.8rem] flex-col items-center rounded-xl border px-2 py-1.5 text-xs font-semibold ${className}`}>
@@ -178,8 +178,8 @@ const AvailabilityBadge: React.FC<{ value: number }> = memo(({ value }) => {
 AvailabilityBadge.displayName = 'AvailabilityBadge';
 
 const IciPill: React.FC<{ value: number }> = memo(({ value }) => (
-  <span className="inline-flex min-w-[3.5rem] items-center justify-center rounded-sm border border-indigo-100 bg-indigo-50 px-2 py-1 text-[0.75rem] font-semibold tabular-nums tracking-tight text-indigo-700">
-    {value === 0 ? <span className="text-indigo-300 opacity-60">-</span> : value.toLocaleString()}
+  <span className="inline-flex min-w-[3.5rem] items-center justify-center rounded-sm border border-line bg-surface-soft px-2 py-1 text-[0.75rem] font-semibold tabular-nums tracking-tight text-muted-2">
+    {value === 0 ? <span className="text-muted opacity-60">-</span> : value.toLocaleString()}
   </span>
 ));
 
@@ -190,9 +190,9 @@ const TotalValue: React.FC<{ value?: number; accent?: boolean }> = memo(({ value
     className={`inline-flex min-w-[3.25rem] items-center justify-center rounded-[7px] px-2 py-1 text-[0.76rem] font-semibold tabular-nums tracking-tight ${
       value && value !== 0
         ? accent
-          ? 'bg-[#f3f0ff] text-brand'
+          ? 'border border-brand/30 bg-surface-tint text-brand'
           : 'text-ink'
-        : 'text-zinc-300'
+        : 'text-muted'
     }`}
   >
     {value && value !== 0 ? value.toLocaleString() : '-'}
@@ -889,17 +889,17 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
         {/* ============================================================== */}
         {/* DESKTOP TABLE (hidden on mobile) */}
         {/* ============================================================== */}
-        <div className="hidden h-full min-h-0 flex-1 overflow-auto overscroll-contain rounded-xl border border-line bg-white shadow-[0_16px_40px_-34px_rgba(12,15,24,0.5)] md:block selection:bg-zinc-200">
+        <div className="hidden h-full min-h-0 flex-1 overflow-auto overscroll-contain rounded-xl border border-line bg-surface shadow-[0_16px_40px_-34px_rgba(12,15,24,0.5)] md:block">
           <table className="w-max min-w-full table-fixed border-separate border-spacing-0" role="table" aria-label="Matriz de datos">
-            <thead className="sticky top-0 z-40 bg-white shadow-[0_18px_34px_-30px_rgba(12,15,24,0.58)]">
-              <tr className="bg-white">
+            <thead className="sticky top-0 z-40 bg-surface shadow-[0_18px_34px_-30px_rgba(12,15,24,0.58)]">
+              <tr className="bg-surface">
                 {columnasVisibles.map((column, index) => {
                   const isFirst = index === 0;
 
                   return (
                     <th
                       key={column.key}
-                      className={`h-12 border-b border-[#eef0f6] bg-white px-3 py-2 align-middle text-[0.68rem] font-semibold uppercase tracking-[0.11em] text-muted-3 ${column.width} ${
+                      className={`h-12 border-b border-line bg-surface px-3 py-2 align-middle text-[0.68rem] font-semibold uppercase tracking-[0.11em] text-muted ${column.width} ${
                         isFirst
                           ? 'sticky left-0 z-50 shadow-[12px_0_24px_-26px_rgba(12,15,24,0.62)]'
                           : ''
@@ -970,31 +970,31 @@ export const MovimientosTabla: React.FC<MovimientosTablaProps> = memo(({
                   <tr
                     key={`${movimiento.establecimientoId}-${selectedMes}-${selectedAnio}`}
                     onClick={() => onRowSelect(movimiento.establecimientoId)}
-                    className={`${rowBg} ${selectedRowRing} cursor-pointer border-b border-white/70 transition hover:brightness-[0.98]`}
+                    className={`${rowBg} ${selectedRowRing} cursor-pointer border-b border-line-soft transition hover:brightness-[0.98]`}
                   >
                     <td className={`sticky left-0 z-10 box-border px-3 py-2.5 ${rowBg} ${isSelected ? 'ring-inset ring-[1.5px] ring-brand/35' : ''}`}>
                       <div className="min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className={`truncate text-xs font-semibold tracking-tight ${isSelected ? 'text-zinc-900' : colores.text}`}>
+                          <p className={`truncate text-xs font-semibold tracking-tight ${isSelected ? 'text-ink font-bold' : colores.text}`}>
                             {movimiento.establecimiento.nombre}
                           </p>
                           {!movimiento.tieneMovimiento && <span className="ml-2 h-1.5 w-1.5 rounded-full bg-amber-400"></span>}
                         </div>
                         <div className="mt-1 flex flex-wrap items-center gap-1.5">
                            {movimiento.establecimiento.codigo && (
-                             <span className="font-mono text-[0.6rem] font-bold text-zinc-400">{movimiento.establecimiento.codigo}</span>
+                             <span className="font-mono text-[0.6rem] font-bold text-muted">{movimiento.establecimiento.codigo}</span>
                            )}
                            <span
                              className={`inline-flex items-center rounded-sm px-1.5 py-[2px] text-[0.55rem] font-semibold uppercase tracking-[0.1em] ${
                                movimiento.tieneMovimiento
-                                 ? 'border border-zinc-300 bg-white text-zinc-800'
-                                 : 'border border-zinc-200 bg-zinc-100 text-zinc-400'
+                                 ? 'border border-line bg-surface text-ink'
+                                 : 'border border-line-soft bg-surface-soft text-muted'
                              }`}
                            >
                              {movimiento.tieneMovimiento ? 'Con mov' : 'Pendiente'}
                            </span>
                            {selectedCentroAcopio === 'todos' ? (
-                             <span className={`inline-flex rounded-sm border px-1.5 py-[2px] text-[0.55rem] font-semibold uppercase tracking-[0.1em] ${colores.border} text-zinc-500`}>
+                             <span className={`inline-flex rounded-sm border px-1.5 py-[2px] text-[0.55rem] font-semibold uppercase tracking-[0.1em] ${colores.border} text-muted-2`}>
                                {centro !== 'DEFAULT' ? centro : 'Base'}
                              </span>
                            ) : null}

@@ -114,7 +114,7 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
     >
       <table className="min-w-full border-separate border-spacing-0">
         <TableHeader columns={TABLE_COLUMNS as unknown as Array<{ key: string; label: string; align?: 'left' | 'center' | 'right' }>} />
-        <tbody className="bg-white">
+        <tbody className="bg-surface">
           {movimientos.length === 0 ? (
             <tr>
               <td colSpan={TABLE_COLUMNS.length + 1}>
@@ -219,7 +219,7 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
 
   return (
     <section className="w-full">
-      <div className="hidden lg:block bg-white">{desktopTable}</div>
+      <div className="hidden lg:block bg-surface">{desktopTable}</div>
 
       <div className="space-y-3 p-4 lg:hidden">
         {loading ? (
@@ -275,21 +275,21 @@ const KardexTablaComponent: React.FC<KardexTablaProps> = ({
                 </div>
 
                 <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
-                  <div className="rounded-none border border-zinc-200 bg-zinc-50/70 p-3">
-                    <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Entrada</p>
-                    <p className="mt-2 font-medium tabular-nums tracking-tight text-base font-semibold text-emerald-700">
+                  <div className="rounded-none border border-line bg-surface-soft p-3">
+                    <p className="text-xs uppercase tracking-[0.08em] text-muted">Entrada</p>
+                    <p className="mt-2 font-medium tabular-nums tracking-tight text-base font-semibold text-emerald-600">
                       {entrada ? entrada.toLocaleString() : '—'}
                     </p>
                   </div>
-                  <div className="rounded-none border border-zinc-200 bg-zinc-50/70 p-3">
-                    <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Salida</p>
-                    <p className="mt-2 font-medium tabular-nums tracking-tight text-base font-semibold text-rose-700">
+                  <div className="rounded-none border border-line bg-surface-soft p-3">
+                    <p className="text-xs uppercase tracking-[0.08em] text-muted">Salida</p>
+                    <p className="mt-2 font-medium tabular-nums tracking-tight text-base font-semibold text-rose-600">
                       {salida ? salida.toLocaleString() : '—'}
                     </p>
                   </div>
-                  <div className="rounded-none border border-zinc-200 bg-zinc-50/70 p-3">
-                    <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Saldo</p>
-                    <p className="mt-2 font-medium tabular-nums tracking-tight text-base font-semibold text-zinc-900">
+                  <div className="rounded-none border border-line bg-surface-soft p-3">
+                    <p className="text-xs uppercase tracking-[0.08em] text-muted">Saldo</p>
+                    <p className="mt-2 font-medium tabular-nums tracking-tight text-base font-semibold text-ink">
                       {movimiento.saldoActual.toLocaleString()}
                     </p>
                   </div>

@@ -38,28 +38,28 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const VARIANT_CLASSES: Record<BadgeVariant, { wrapper: string; dot: string }> = {
   neutral: {
-    wrapper: 'bg-white border-line text-ink',
-    dot: 'bg-zinc-400',
+    wrapper: 'bg-surface-soft border-line text-ink',
+    dot: 'bg-muted',
   },
   success: {
-    wrapper: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+    wrapper: 'bg-status-success-bg border-status-success-border text-status-success-text',
     dot: 'bg-emerald-500',
   },
   warning: {
-    wrapper: 'bg-amber-50 border-amber-200 text-amber-800',
+    wrapper: 'bg-status-warning-bg border-status-warning-border text-status-warning-text',
     dot: 'bg-amber-500',
   },
   danger: {
-    wrapper: 'bg-rose-50 border-rose-200 text-rose-800',
+    wrapper: 'bg-status-danger-bg border-status-danger-border text-status-danger-text',
     dot: 'bg-rose-500',
   },
   info: {
-    wrapper: 'bg-blue-50 border-blue-200 text-blue-800',
+    wrapper: 'bg-status-info-bg border-status-info-border text-status-info-text',
     dot: 'bg-blue-500',
   },
   teal: {
-    wrapper: 'bg-teal-50 border-teal-200 text-teal-800',
-    dot: 'bg-teal-500',
+    wrapper: 'bg-surface-tint border-brand/40 text-brand',
+    dot: 'bg-brand',
   },
 };
 

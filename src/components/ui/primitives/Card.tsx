@@ -25,10 +25,10 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const VARIANT_CLASSES: Record<CardVariant, string> = {
-  default: 'bg-white border border-line shadow-sm',
-  muted: 'bg-zinc-50 border border-line',
-  flat: 'bg-transparent',
-  elevated: 'bg-white border border-line shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+  default: 'bg-surface border border-line shadow-sm text-ink',
+  muted: 'bg-surface-soft border border-line text-ink',
+  flat: 'bg-transparent text-ink',
+  elevated: 'bg-surface border border-line shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] text-ink',
 };
 
 const RADIUS_CLASSES: Record<CardRadius, string> = {

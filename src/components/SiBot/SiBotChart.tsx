@@ -15,6 +15,7 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts';
+import { useChartTheme } from '../../hooks/useChartTheme';
 
 type ChartType = 'bar' | 'line' | 'pie';
 
@@ -166,7 +167,7 @@ function ChartLoadingState() {
       initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
       animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      className="my-3 w-full rounded-xl border border-line bg-white"
+      className="my-3 w-full rounded-xl border border-line bg-surface"
     >
       <div className="px-4 py-4">
         <div className="rounded-[12px] border border-line bg-surface-soft px-4 py-5">
@@ -224,6 +225,7 @@ function ChartLoadingState() {
 
 export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType, isStreaming = false }) => {
   const shouldReduceMotion = useReducedMotion();
+  const chartTheme = useChartTheme();
 
   if (isStreaming) {
     return <ChartLoadingState />;
@@ -270,21 +272,21 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
   const tooltipProps = {
     contentStyle: {
       borderRadius: '14px',
-      border: '1px solid #e7e7ef',
+      border: `1px solid ${chartTheme.tooltipBorder}`,
       boxShadow: 'none',
       padding: '10px 12px',
       fontSize: '12px',
       fontWeight: 600,
-      color: '#18181b',
-      backgroundColor: 'rgba(255,255,255,0.98)',
+      color: chartTheme.tooltipText,
+      backgroundColor: chartTheme.tooltipBg,
     },
     labelStyle: {
-      color: '#18181b',
+      color: chartTheme.tooltipText,
       fontWeight: 700,
       marginBottom: '6px',
     },
     itemStyle: {
-      color: '#3f3f46',
+      color: chartTheme.subtextColor,
       padding: 0,
     },
     formatter: (value: unknown, name: unknown) => [

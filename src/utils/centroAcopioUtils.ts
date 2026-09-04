@@ -133,132 +133,132 @@ export const ORDEN_ESTABLECIMIENTOS = [
  * Cada centro de acopio tendrá un color único y distintivo
  */
 export const COLORES_CENTROS_ACOPIO = {
-  // Colores base para centros principales
+  // Colores base para centros principales con soporte dark mode
   'ANDAHUAYLAS': {
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
-    text: 'text-blue-800',
+    bg: 'bg-blue-50/70 dark:bg-blue-950/30',
+    border: 'border-blue-200 dark:border-blue-900/40',
+    text: 'text-blue-800 dark:text-blue-200',
     accent: 'bg-blue-500',
     icon: '🏥',
     name: 'Azul Corporativo'
   },
   'SAN JERONIMO': {
-    bg: 'bg-emerald-50',
-    border: 'border-emerald-200',
-    text: 'text-emerald-800',
+    bg: 'bg-emerald-50/70 dark:bg-emerald-950/30',
+    border: 'border-emerald-200 dark:border-emerald-900/40',
+    text: 'text-emerald-800 dark:text-emerald-200',
     accent: 'bg-emerald-500',
     icon: '🏢',
     name: 'Verde Esmeralda'
   },
   'PACUCHA': {
-    bg: 'bg-purple-50',
-    border: 'border-purple-200',
-    text: 'text-purple-800',
+    bg: 'bg-purple-50/70 dark:bg-purple-950/30',
+    border: 'border-purple-200 dark:border-purple-900/40',
+    text: 'text-purple-800 dark:text-purple-200',
     accent: 'bg-purple-500',
     icon: '🏛️',
     name: 'Púrpura Profesional'
   },
   'KAKIABAMBA': {
-    bg: 'bg-indigo-50',
-    border: 'border-indigo-200',
-    text: 'text-indigo-800',
+    bg: 'bg-indigo-50/70 dark:bg-indigo-950/30',
+    border: 'border-indigo-200 dark:border-indigo-900/40',
+    text: 'text-indigo-800 dark:text-indigo-200',
     accent: 'bg-indigo-500',
     icon: '🏗️',
     name: 'Índigo Institucional'
   },
   'KISHUARA': {
-    bg: 'bg-zinc-50',
-    border: 'border-zinc-200',
-    text: 'text-zinc-800',
+    bg: 'bg-zinc-50/70 dark:bg-surface-soft/40',
+    border: 'border-zinc-200 dark:border-line',
+    text: 'text-zinc-800 dark:text-ink',
     accent: 'bg-zinc-500',
     icon: '🏘️',
     name: 'Zinc Claro'
   },
   'MATAPUQUIO': {
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
-    text: 'text-blue-800',
+    bg: 'bg-blue-50/70 dark:bg-blue-950/30',
+    border: 'border-blue-200 dark:border-blue-900/40',
+    text: 'text-blue-800 dark:text-blue-200',
     accent: 'bg-blue-500',
     icon: '🏪',
     name: 'Azul Institucional'
   },
   'TURPO': {
-    bg: 'bg-zinc-100',
-    border: 'border-zinc-300',
-    text: 'text-zinc-800',
+    bg: 'bg-zinc-100/70 dark:bg-surface-soft/60',
+    border: 'border-zinc-300 dark:border-line-strong',
+    text: 'text-zinc-800 dark:text-ink',
     accent: 'bg-zinc-600',
     icon: '🏬',
     name: 'Zinc Profundo'
   },
   'TALAVERA': {
-    bg: 'bg-violet-50',
-    border: 'border-violet-200',
-    text: 'text-violet-800',
+    bg: 'bg-violet-50/70 dark:bg-violet-950/30',
+    border: 'border-violet-200 dark:border-violet-900/40',
+    text: 'text-violet-800 dark:text-violet-200',
     accent: 'bg-violet-500',
     icon: '🏭',
     name: 'Violeta Elegante'
   },
   'CHICMO': {
-    bg: 'bg-rose-50',
-    border: 'border-rose-200',
-    text: 'text-rose-800',
+    bg: 'bg-rose-50/70 dark:bg-rose-950/30',
+    border: 'border-rose-200 dark:border-rose-900/40',
+    text: 'text-rose-800 dark:text-rose-200',
     accent: 'bg-rose-500',
     icon: '🏯',
     name: 'Rosa Corporativo'
   },
   'PAMPACHIRI': {
-    bg: 'bg-orange-50',
-    border: 'border-orange-200',
-    text: 'text-orange-800',
+    bg: 'bg-orange-50/70 dark:bg-amber-950/30',
+    border: 'border-orange-200 dark:border-amber-900/40',
+    text: 'text-orange-800 dark:text-amber-200',
     accent: 'bg-orange-500',
     icon: '🏰',
     name: 'Naranja Profesional'
   },
   'UMAMARCA': {
-    bg: 'bg-amber-50',
-    border: 'border-amber-200',
-    text: 'text-amber-800',
+    bg: 'bg-amber-50/70 dark:bg-amber-950/30',
+    border: 'border-amber-200 dark:border-amber-900/40',
+    text: 'text-amber-800 dark:text-amber-200',
     accent: 'bg-amber-500',
     icon: '🏢',
     name: 'Ámbar Institucional'
   },
   'HUANCARAY': {
-    bg: 'bg-lime-50',
-    border: 'border-lime-200',
-    text: 'text-lime-800',
+    bg: 'bg-lime-50/70 dark:bg-lime-950/30',
+    border: 'border-lime-200 dark:border-lime-900/40',
+    text: 'text-lime-800 dark:text-lime-200',
     accent: 'bg-lime-500',
     icon: '🏣',
     name: 'Lima Verde'
   },
   'HUANCABAMBA': {
-    bg: 'bg-green-50',
-    border: 'border-green-200',
-    text: 'text-green-800',
+    bg: 'bg-green-50/70 dark:bg-emerald-950/30',
+    border: 'border-green-200 dark:border-emerald-900/40',
+    text: 'text-green-800 dark:text-emerald-200',
     accent: 'bg-green-500',
     icon: '🏤',
     name: 'Verde Clásico'
   },
   // Color por defecto para establecimientos sin centro de acopio
   'HOSPITAL ANDAHUAYLAS': {
-    bg: 'bg-red-50',
-    border: 'border-red-200',
-    text: 'text-red-800',
-    accent: 'bg-red-500',
+    bg: 'bg-rose-50/70 dark:bg-rose-950/30',
+    border: 'border-rose-200 dark:border-rose-900/40',
+    text: 'text-rose-800 dark:text-rose-200',
+    accent: 'bg-rose-500',
     icon: '🏥',
     name: 'Hospital Andahuaylas'
   },
   'HOSP. ESSALUD-ANDAHUAYLAS': {
-    bg: 'bg-indigo-50',
-    border: 'border-indigo-200',
-    text: 'text-indigo-800',
+    bg: 'bg-indigo-50/70 dark:bg-indigo-950/30',
+    border: 'border-indigo-200 dark:border-indigo-900/40',
+    text: 'text-indigo-800 dark:text-indigo-200',
     accent: 'bg-indigo-500',
     icon: '🏥',
     name: 'Hospital EsSalud'
   },
   'DEFAULT': {
-    bg: 'bg-zinc-50',
-    border: 'border-zinc-200',
-    text: 'text-zinc-800',
+    bg: 'bg-zinc-50/70 dark:bg-surface-soft/40',
+    border: 'border-zinc-200 dark:border-line',
+    text: 'text-zinc-800 dark:text-ink',
     accent: 'bg-zinc-500',
     icon: '🏥',
     name: 'Zinc Neutro'

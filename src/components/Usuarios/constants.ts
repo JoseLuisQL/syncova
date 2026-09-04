@@ -145,19 +145,19 @@ export const COMPONENT_STYLES = {
   },
 
   input: {
-    base: `min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-base text-ink shadow-none
-           transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-line-focus/70`,
+    base: `min-h-9 w-full rounded-[7px] border bg-surface px-3 py-2 text-base text-ink shadow-none
+           transition placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-line-focus/70`,
     normal: 'border-line hover:border-line-strong focus:border-line-focus-strong',
     error: 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 text-rose-900',
-    label: 'mb-1.5 block text-sm font-medium text-[#424750]',
+    label: 'mb-1.5 block text-sm font-medium text-muted-2',
     errorText: 'mt-1 text-xs text-rose-600 font-medium',
-    helpText: 'mt-1 text-[0.7rem] text-zinc-500 leading-snug',
+    helpText: 'mt-1 text-[0.7rem] text-muted-3 leading-snug',
   },
 
   select: {
-    base: `w-full rounded-lg border bg-white px-4 py-2.5 text-sm font-medium text-ink shadow-sm
+    base: `w-full rounded-lg border bg-surface px-4 py-2.5 text-sm font-medium text-ink shadow-sm
            transition focus:outline-none focus:ring-2 focus:ring-line-focus/70
-           disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500`,
+           disabled:cursor-not-allowed disabled:bg-surface-soft disabled:text-muted`,
     normal: 'border-line hover:border-line-strong focus:border-line-focus-strong',
   },
 
@@ -168,43 +168,43 @@ export const COMPONENT_STYLES = {
     row: 'transition-colors duration-150 hover:bg-surface-soft',
     rowSelected: 'bg-surface-soft',
     cell: 'border-b border-line-soft px-4 py-3.5 text-sm text-ink tabular-nums align-middle',
-    emptyIcon: 'mx-auto mb-3 h-10 w-10 text-zinc-300',
+    emptyIcon: 'mx-auto mb-3 h-10 w-10 text-muted',
   },
 
   badge: {
-    active: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
-    inactive: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
-    count: 'inline-flex items-center justify-center rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink',
-    warning: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
-    danger: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
-    info: 'inline-flex items-center justify-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20',
+    active: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
+    inactive: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    count: 'inline-flex items-center justify-center rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink',
+    warning: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
+    danger: 'inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    info: 'inline-flex items-center justify-center rounded-md bg-status-info-bg px-2 py-0.5 text-xs font-medium text-status-info-text border border-status-info-border',
     role: 'inline-flex items-center justify-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
   },
 
   modal: {
     overlay: 'fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-ink-soft/20 p-4 backdrop-blur-[2px] sm:p-6',
-    containerShell: 'mx-auto w-full overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    container: 'max-h-[88vh] w-full max-w-lg overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    containerMedium: 'max-h-[88vh] w-full max-w-2xl overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    containerLarge: 'max-h-[88vh] w-full max-w-5xl overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    header: 'flex items-center justify-between border-b border-line-soft bg-white px-4 py-3.5 sm:px-5',
+    containerShell: 'mx-auto w-full overflow-hidden rounded-lg border border-line bg-surface shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    container: 'max-h-[88vh] w-full max-w-lg overflow-hidden rounded-lg border border-line bg-surface shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    containerMedium: 'max-h-[88vh] w-full max-w-2xl overflow-hidden rounded-lg border border-line bg-surface shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    containerLarge: 'max-h-[88vh] w-full max-w-5xl overflow-hidden rounded-lg border border-line bg-surface shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
+    header: 'flex items-center justify-between border-b border-line-soft bg-surface px-4 py-3.5 sm:px-5',
     headerTitle: 'text-md font-semibold leading-5 text-ink',
     body: 'max-h-[calc(88vh-130px)] overflow-y-auto px-4 py-4 sm:px-5',
     footer: 'flex justify-end gap-2 border-t border-line-soft bg-surface-soft px-4 py-3 sm:px-5',
   },
 
   stats: {
-    card: 'rounded-xl p-4 border border-zinc-200 bg-white hover:border-zinc-300 transition-colors duration-200 shadow-sm',
-    cardGradient: 'rounded-xl p-4 bg-teal-600 text-white shadow-md',
-    value: 'text-2xl font-bold tracking-tight tabular-nums',
-    label: 'text-[0.8rem] font-medium text-zinc-500 uppercase tracking-widest',
-    iconWrapper: 'p-2 rounded-lg bg-zinc-100 text-zinc-600',
+    card: 'rounded-xl p-4 border border-line bg-surface hover:border-line-strong transition-colors duration-200 shadow-sm',
+    cardGradient: 'rounded-xl p-4 bg-brand text-white shadow-md',
+    value: 'text-2xl font-bold tracking-tight tabular-nums text-ink',
+    label: 'text-[0.8rem] font-medium text-muted-2 uppercase tracking-widest',
+    iconWrapper: 'p-2 rounded-lg bg-surface-soft text-muted-2 border border-line',
   },
 
   filter: {
     container: 'bg-transparent p-0',
     searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2',
-    searchInput: `h-9 w-full rounded-[9px] border border-line bg-white py-1.5 pl-9 pr-3 text-sm text-ink shadow-sm
+    searchInput: `h-9 w-full rounded-[9px] border border-line bg-surface py-1.5 pl-9 pr-3 text-sm text-ink shadow-sm
                   transition placeholder:text-muted hover:border-line-strong focus:border-line-focus-strong
                   focus:outline-none focus:ring-2 focus:ring-line-focus/70`,
   },
@@ -213,15 +213,15 @@ export const COMPONENT_STYLES = {
     container: 'bg-surface-soft border-b border-line-soft sticky top-0 z-10 px-4 pt-2 flex gap-1 overflow-x-auto scrollbar-hide',
     tab: `flex items-center gap-2 px-3 py-2 text-sm font-medium border-b-2
           transition-all duration-200 cursor-pointer whitespace-nowrap`,
-    tabActive: 'text-teal-700 border-teal-600',
-    tabInactive: 'text-zinc-500 border-transparent hover:text-zinc-700 hover:border-zinc-300',
+    tabActive: 'text-brand border-brand font-semibold',
+    tabInactive: 'text-muted-2 border-transparent hover:text-ink hover:border-line',
   },
 
   pagination: {
-    container: 'border-t border-line-soft bg-white px-4 py-5 sm:px-5',
+    container: 'border-t border-line-soft bg-surface px-4 py-5 sm:px-5',
     info: 'text-sm font-medium text-muted-3',
     button: 'min-h-9 min-w-9 rounded-lg border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40',
-    buttonActive: 'bg-white border-line text-ink shadow-sm',
+    buttonActive: 'bg-surface-soft border-line text-ink shadow-sm',
     buttonInactive: 'bg-transparent border-transparent text-muted-2 hover:bg-surface-soft',
   },
 

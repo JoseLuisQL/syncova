@@ -48,7 +48,7 @@ export const Modal: React.FC<ModalProps> = memo(({
             <button
               type="button"
               onClick={onClose}
-              className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-white text-muted transition hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+              className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-surface text-muted transition hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
               aria-label="Cerrar"
             >
               <X className="h-4 w-4" weight="bold" />
@@ -116,7 +116,7 @@ export const SideSheet: React.FC<SideSheetProps> = memo(({
             <button
               type="button"
               onClick={onClose}
-              className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-white text-muted transition hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+              className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-surface text-muted transition hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
               aria-label="Cerrar panel"
             >
               <X className="h-4 w-4" weight="bold" />
@@ -395,7 +395,7 @@ export const ComboboxInput: React.FC<ComboboxInputProps> = memo(({
         />
 
         {isOpen && filteredOptions.length > 0 && (
-          <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 max-h-48 overflow-y-auto rounded-[7px] border border-line bg-white py-1 shadow-lg">
+          <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 max-h-48 overflow-y-auto rounded-[7px] border border-line bg-surface py-1 shadow-lg">
             {filteredOptions.map((opt) => {
               const isSelected = opt.value.toLowerCase() === value.trim().toLowerCase();
               return (
@@ -655,7 +655,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
         </button>
 
         {isOpen ? (
-          <div className="absolute left-0 right-0 z-[400] mt-1.5 overflow-hidden rounded-[7px] border border-line bg-white shadow-[0_22px_54px_-26px_rgba(12,15,24,0.45)]">
+          <div className="absolute left-0 right-0 z-[400] mt-1.5 overflow-hidden rounded-[7px] border border-line bg-surface shadow-[0_22px_54px_-26px_rgba(12,15,24,0.45)]">
             <div className="border-b border-line-soft p-2">
               <div className="relative">
                 <MagnifyingGlass className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" weight="bold" />
@@ -664,7 +664,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder={searchPlaceholder}
-                  className="h-8 w-full rounded-[5px] border border-line bg-surface-soft pl-7 pr-2 text-sm text-ink placeholder:text-[#a0a4ae] focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+                  className="h-8 w-full rounded-[5px] border border-line bg-surface-soft pl-7 pr-2 text-sm text-ink placeholder:text-muted focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70"
                   autoFocus
                 />
               </div>
@@ -675,7 +675,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
                 type="button"
                 onClick={selectAllVisible}
                 disabled={filteredOptions.length === 0 || allVisibleSelected}
-                className="text-xs font-semibold text-brand transition hover:text-brand-600 disabled:cursor-not-allowed disabled:text-[#a0a4ae]"
+                className="text-xs font-semibold text-brand transition hover:text-brand-600 disabled:cursor-not-allowed disabled:text-muted"
               >
                 {search.trim() ? 'Seleccionar resultados' : 'Seleccionar todo'}
               </button>
@@ -686,7 +686,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
                 type="button"
                 onClick={clearAll}
                 disabled={values.length === 0}
-                className="text-xs font-medium text-muted-2 transition hover:text-ink disabled:cursor-not-allowed disabled:text-[#c5c8d2]"
+                className="text-xs font-medium text-muted-2 transition hover:text-ink disabled:cursor-not-allowed disabled:text-muted"
               >
                 Limpiar
               </button>
@@ -708,12 +708,12 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
                       aria-selected={isSelected}
                       onClick={() => toggleOption(option.value)}
                       className={`flex w-full items-center gap-2.5 px-2.5 py-1.5 text-left text-[12.5px] transition ${
-                        isSelected ? 'bg-surface-tint text-ink' : 'text-[#424750] hover:bg-surface-soft'
+                        isSelected ? 'bg-surface-tint text-ink' : 'text-muted-2 hover:bg-surface-soft hover:text-ink'
                       }`}
                     >
                       <span
                         className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition ${
-                          isSelected ? 'border-brand bg-brand' : 'border-line-strong bg-white'
+                          isSelected ? 'border-brand bg-brand' : 'border-line-strong bg-surface'
                         }`}
                       >
                         {isSelected ? <Check className="h-3 w-3 text-white" weight="bold" /> : null}
@@ -732,7 +732,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
             {visibleChips.map((option) => (
               <span
                 key={option.value}
-                className="inline-flex max-w-full items-center gap-1 rounded-[5px] border border-line bg-surface-soft py-0.5 pl-2 pr-1 text-[11.5px] font-medium text-[#424750]"
+                className="inline-flex max-w-full items-center gap-1 rounded-[5px] border border-line bg-surface-soft py-0.5 pl-2 pr-1 text-[11.5px] font-medium text-ink"
               >
                 <span className="truncate">{option.label}</span>
                 <button
@@ -749,7 +749,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
               <button
                 type="button"
                 onClick={() => setShowAllChips(true)}
-                className="inline-flex items-center rounded-[5px] border border-dashed border-line-strong bg-white px-2 py-0.5 text-[11.5px] font-medium text-muted-2 transition hover:border-line-focus-strong hover:text-ink"
+                className="inline-flex items-center rounded-[5px] border border-dashed border-line-strong bg-surface-soft px-2 py-0.5 text-[11.5px] font-medium text-muted-2 transition hover:border-line-focus-strong hover:text-ink"
               >
                 +{hiddenChipsCount} más
               </button>
@@ -758,7 +758,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
               <button
                 type="button"
                 onClick={() => setShowAllChips(false)}
-                className="inline-flex items-center rounded-[5px] border border-dashed border-line-strong bg-white px-2 py-0.5 text-[11.5px] font-medium text-muted-2 transition hover:border-line-focus-strong hover:text-ink"
+                className="inline-flex items-center rounded-[5px] border border-dashed border-line-strong bg-surface-soft px-2 py-0.5 text-[11.5px] font-medium text-muted-2 transition hover:border-line-focus-strong hover:text-ink"
               >
                 Mostrar menos
               </button>
@@ -842,18 +842,18 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = memo(({
     <div className={MODAL_STYLES.modal.overlay} onClick={(event) => event.target === event.currentTarget && onClose()}>
       <div className={MODAL_STYLES.modal.container}>
         <div className="w-full sm:max-w-md">
-          <div className="relative w-full overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
+          <div className="relative w-full overflow-hidden rounded-lg border border-line bg-surface shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
             <div className="absolute right-3 top-3 hidden sm:block">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-white text-muted transition hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+                className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-surface text-muted transition hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
                 aria-label="Cerrar"
               >
                 <X className="h-4 w-4" weight="bold" />
               </button>
             </div>
-            
+
             <button
               type="button"
               onClick={onClose}
@@ -865,7 +865,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = memo(({
 
             <div className="border-b border-line-soft px-4 py-3.5 sm:px-5">
               <div className="flex items-start gap-3 pr-8">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-rose-200 bg-rose-50 text-rose-600">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-status-danger-border bg-status-danger-bg text-status-danger-text">
                   <Warning className="h-4 w-4" weight="regular" />
                 </div>
                 <div className="min-w-0 text-left">

@@ -265,7 +265,7 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
     >
       <table className="min-w-full border-separate border-spacing-0">
         <TableHeader columns={TABLE_COLUMNS} />
-        <tbody className="bg-white">
+        <tbody className="bg-surface">
           {centrosAcopio.length === 0 ? (
             <tr>
               <td colSpan={TABLE_COLUMNS.length + 1}>

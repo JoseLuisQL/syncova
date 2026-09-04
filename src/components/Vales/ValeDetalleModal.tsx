@@ -327,14 +327,14 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                               <th className="w-24 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Dosis/Fr</th>
                             </tr>
                           </thead>
-                          <tbody className="bg-white">
+                          <tbody className="bg-surface">
                             {consolidadoVacunas.map((item, idx) => (
                               <tr key={item.vacuna.id} className="border-b border-line-soft hover:bg-surface-soft">
-                                <td className="px-4 py-3 text-zinc-500">{idx + 1}</td>
-                                <td className="px-4 py-3 font-medium text-zinc-900">{item.vacuna.nombre}</td>
-                                <td className="px-4 py-3 text-center font-bold text-zinc-700">{formatNumber(item.cantidadTotal)}</td>
-                                <td className="px-4 py-3 text-zinc-600">{item.vacuna.presentacion}</td>
-                                <td className="px-4 py-3 text-center text-zinc-600">{item.vacuna.dosisPorFrasco}</td>
+                                <td className="px-4 py-3 text-muted-2">{idx + 1}</td>
+                                <td className="px-4 py-3 font-medium text-ink">{item.vacuna.nombre}</td>
+                                <td className="px-4 py-3 text-center font-bold text-ink">{formatNumber(item.cantidadTotal)}</td>
+                                <td className="px-4 py-3 text-muted-2">{item.vacuna.presentacion}</td>
+                                <td className="px-4 py-3 text-center text-muted-2">{item.vacuna.dosisPorFrasco}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -344,12 +344,12 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
 
                     {/* Tabla Jeringas */}
                     <div>
-                      <h3 className="flex items-center gap-2 text-sm font-semibold text-zinc-700 mb-3">
-                        <Syringe className="h-4 w-4 text-teal-600" />
+                      <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-2 mb-3">
+                        <Syringe className="h-4 w-4 text-brand" />
                         Jeringas
-                        {isLoadingJeringas && <SpinnerGap weight="bold" className="h-4 w-4 animate-spin text-teal-600" />}
+                        {isLoadingJeringas && <SpinnerGap weight="bold" className="h-4 w-4 animate-spin text-brand" />}
                       </h3>
-                      <div className="overflow-hidden rounded-3xl border border-line bg-white">
+                      <div className="overflow-hidden rounded-3xl border border-line bg-surface">
                         <table className="w-full text-sm">
                           <thead className="bg-surface-soft">
                             <tr>
@@ -358,7 +358,7 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                               <th className="w-28 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Cantidad</th>
                             </tr>
                           </thead>
-                          <tbody className="bg-white">
+                          <tbody className="bg-surface">
                             {consolidadoJeringas.length > 0 ? (
                               consolidadoJeringas.map((item, idx) => (
                                 <tr key={idx} className="border-b border-line-soft hover:bg-surface-soft">
@@ -405,20 +405,20 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                               <th className="px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Presentación</th>
                             </tr>
                           </thead>
-                          <tbody className="bg-white">
+                          <tbody className="bg-surface">
                             {Object.values(est.vacunas).map((vac, idx) => (
                               <tr key={vac.vacuna.id} className="border-b border-line-soft hover:bg-surface-soft">
-                                <td className="px-4 py-2 text-zinc-500">{idx + 1}</td>
+                                <td className="px-4 py-2 text-muted">{idx + 1}</td>
                                 <td className="px-4 py-2">
-                                  <span className="font-medium text-zinc-900">{vac.vacuna.nombre}</span>
+                                  <span className="font-medium text-ink">{vac.vacuna.nombre}</span>
                                 </td>
                                 <td className="px-4 py-2 text-center">
-                                  <span className="font-bold text-zinc-700">{formatNumber(vac.cantidadTotal)}</span>
+                                  <span className="font-bold text-ink">{formatNumber(vac.cantidadTotal)}</span>
                                   {vac.cantidadAdicional > 0 && (
-                                    <span className="block text-xs text-zinc-500">+{formatNumber(vac.cantidadAdicional)} adic.</span>
+                                    <span className="block text-xs text-muted-2">+{formatNumber(vac.cantidadAdicional)} adic.</span>
                                   )}
                                 </td>
-                                <td className="px-4 py-2 text-zinc-600">{vac.vacuna.presentacion}</td>
+                                <td className="px-4 py-2 text-muted-2">{vac.vacuna.presentacion}</td>
                               </tr>
                             ))}
                           </tbody>

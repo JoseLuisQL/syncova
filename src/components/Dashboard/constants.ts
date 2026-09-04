@@ -4,11 +4,11 @@ import { DESIGN_GRADIENTS, DESIGN_TOKENS } from '../../styles/designTokens';
 export const DASHBOARD_COLORS = {
   primary: {
     gradient: DESIGN_GRADIENTS.primary,
-    bg: 'bg-zinc-100',
+    bg: 'bg-surface-soft',
     text: DESIGN_TOKENS.text.primary,
-    icon: 'text-zinc-800',
+    icon: 'text-brand',
     border: DESIGN_TOKENS.border.default,
-    hover: 'hover:bg-zinc-200',
+    hover: 'hover:bg-surface-tint',
   },
   secondary: {
     gradient: DESIGN_GRADIENTS.secondary,

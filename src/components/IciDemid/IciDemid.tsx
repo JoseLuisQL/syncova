@@ -14,9 +14,9 @@ import IciDemidErroresModal from './IciDemidErroresModal';
 import IciDemidImportProgressModal from './IciDemidImportProgressModal';
 
 const SELECT_CLASS =
-  'h-9 w-full appearance-none rounded-[9px] border border-line bg-white px-3 py-1.5 pr-8 text-sm font-medium text-ink shadow-sm transition hover:border-line-strong focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-60';
+  'h-9 w-full appearance-none rounded-[9px] border border-line bg-surface px-3 py-1.5 pr-8 text-sm font-medium text-ink shadow-sm transition hover:border-line-strong focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-60';
 
-const FILTER_LABEL_CLASS = 'mb-1 block text-[0.84rem] font-medium text-zinc-700';
+const FILTER_LABEL_CLASS = 'mb-1 block text-[0.84rem] font-medium text-muted-2';
 
 const TotalPill: React.FC<{
   value: number | string;
@@ -26,8 +26,8 @@ const TotalPill: React.FC<{
     tone === 'purple'
       ? 'border-brand-100 bg-surface-soft text-brand'
       : tone === 'amber'
-        ? 'border-line bg-white text-amber-700'
-        : 'border-line bg-white text-ink';
+        ? 'border-line bg-surface text-amber-700 dark:text-amber-300'
+        : 'border-line bg-surface text-ink';
 
   return (
     <span className={`inline-flex min-w-[4.6rem] justify-center rounded-md border px-2.5 py-1.5 text-sm font-semibold tabular-nums ${className}`}>
@@ -42,7 +42,7 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
   return (
     <div className={`rounded-xl border p-3 transition-colors hover:brightness-[0.98] ${estilo.colores.bg} ${estilo.colores.border}`}>
       <div className="flex items-start gap-3">
-        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-white ${estilo.colores.border}`}>
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-surface ${estilo.colores.border}`}>
           <span className={`h-3 w-3 rounded-full ${estilo.colores.accent}`} aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
@@ -50,7 +50,7 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[0.68rem] text-muted-2">
             {registro.establecimiento.codigo ? <span>{registro.establecimiento.codigo}</span> : null}
             {registro.establecimiento.codigo ? <span className="text-[#c4c7d0]">•</span> : null}
-            <span className={`rounded-md border bg-white px-2 py-0.5 font-medium ${estilo.colores.border} ${estilo.colores.text}`}>
+            <span className={`rounded-md border bg-surface px-2 py-0.5 font-medium ${estilo.colores.border} ${estilo.colores.text}`}>
               {registro.vacuna.nombre}
             </span>
           </div>
@@ -58,11 +58,11 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <div className="rounded-lg border border-line bg-white/90 p-2.5">
+        <div className="rounded-lg border border-line bg-surface p-2.5">
           <p className="text-xs font-medium text-muted">Total distribuido</p>
           <p className="mt-1 text-sm font-semibold text-ink tabular-nums">{registro.totalDistribu.toLocaleString()}</p>
         </div>
-        <div className="rounded-lg border border-line bg-white/90 p-2.5">
+        <div className="rounded-lg border border-line bg-surface p-2.5">
           <p className="text-xs font-medium text-muted">Situación</p>
           <p className="mt-1 text-xs font-semibold text-ink">{registro.situacion || '-'}</p>
         </div>
@@ -70,7 +70,7 @@ const MobileIciDemidCard: React.FC<{ registro: IciDemidRegistro; mesesDelAnio: n
 
       <div className="mt-3 grid grid-cols-3 gap-2">
         {mesesDelAnio.map((month) => (
-          <div key={`${registro.id}-${month}`} className="rounded-lg border border-line bg-white/90 p-2 text-center">
+          <div key={`${registro.id}-${month}`} className="rounded-lg border border-line bg-surface p-2 text-center">
             <p className="text-[0.58rem] font-semibold uppercase tracking-wider text-muted">{MESES_CORTOS[month - 1]}</p>
             <p className="mt-1 text-sm font-semibold text-ink tabular-nums">
               {(registro.distribucionMensual[month - 1] || 0).toLocaleString()}
@@ -235,8 +235,8 @@ const IciDemid: React.FC = () => {
 
   return (
     <div className="h-[calc(100vh-4rem)] overflow-hidden bg-transparent md:h-[calc(100vh-5rem)]">
-      <div className="flex h-full w-full flex-col overflow-hidden rounded-[22px] border border-line bg-white">
-        <section className="shrink-0 border-b border-line-soft bg-white p-3 sm:p-4">
+      <div className="flex h-full w-full flex-col overflow-hidden rounded-[22px] border border-line bg-surface">
+        <section className="shrink-0 border-b border-line-soft bg-surface p-3 sm:p-4">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
               <div className="grid flex-1 grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
                 <label>
@@ -323,7 +323,7 @@ const IciDemid: React.FC = () => {
           </div>
         </section>
 
-        <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
+        <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-surface">
           <DataTable isLoading={isLoading} loadingMessage="Cargando registros ICI DEMID..." skeletonRows={8} skeletonColumns={16} loadingVariant="table">
             <div className="hidden min-h-0 flex-1 overflow-auto md:block">
               <table className="w-max min-w-full border-separate border-spacing-0 table-auto">
@@ -360,7 +360,7 @@ const IciDemid: React.FC = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white">
+                <tbody className="bg-surface">
                   {registrosFiltrados.length === 0 ? (
                     <tr>
                       <td colSpan={mesesDelAnio.length + 6} className="px-6 py-16 text-center">
@@ -378,7 +378,7 @@ const IciDemid: React.FC = () => {
                         <tr key={registro.id} className={`transition-[filter] hover:brightness-[0.98] ${estilo.colores.bg}`}>
                           <td className={`sticky left-0 z-10 border-b border-r px-4 py-3 shadow-[8px_0_14px_-12px_rgba(15,23,42,0.12)] ${estilo.colores.border} ${estilo.colores.bg}`}>
                             <div className="flex items-start gap-3">
-                              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border bg-white ${estilo.colores.border}`}>
+                              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border bg-surface ${estilo.colores.border}`}>
                                 <span className={`h-3 w-3 rounded-full ${estilo.colores.accent}`} aria-hidden="true" />
                               </div>
                               <div className="min-w-0">
@@ -405,9 +405,9 @@ const IciDemid: React.FC = () => {
               </table>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-auto bg-white p-2.5 md:hidden">
+            <div className="min-h-0 flex-1 overflow-auto bg-surface p-2.5 md:hidden">
               {registrosFiltrados.length === 0 && !isLoading ? (
-                <div className="rounded-xl border border-line bg-white">
+                <div className="rounded-xl border border-line bg-surface">
                   <EmptyState
                     icon={Warning}
                     title="Sin registros ICI DEMID"

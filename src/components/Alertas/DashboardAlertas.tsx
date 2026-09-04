@@ -101,13 +101,13 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = memo(({
 
             {isLoading ? (
               <div className="flex items-center justify-center py-10">
-                <div className="h-5 w-5 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
+                <div className="h-5 w-5 rounded-full border-2 border-brand border-t-transparent animate-spin" />
               </div>
             ) : alertasRecientes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-zinc-200 bg-zinc-50/70 px-4 py-8 text-center sm:px-6 sm:py-10">
-                <Bell className="h-8 w-8 text-zinc-300" weight="duotone" />
-                <p className="mt-3 text-sm font-semibold text-zinc-900">No hay alertas recientes</p>
-                <p className="mt-1 text-sm text-zinc-500">Cuando se registren eventos aparecerán aquí.</p>
+              <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-line bg-surface-soft px-4 py-8 text-center sm:px-6 sm:py-10">
+                <Bell className="h-8 w-8 text-muted" weight="duotone" />
+                <p className="mt-3 text-sm font-semibold text-ink">No hay alertas recientes</p>
+                <p className="mt-1 text-sm text-muted">Cuando se registren eventos aparecerán aquí.</p>
               </div>
             ) : (
               <div className="mt-4 space-y-2.5">
@@ -121,28 +121,28 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = memo(({
                       key={alerta.id}
                       className={`rounded-2xl border px-3.5 py-3 transition ${
                         alerta.leida
-                          ? 'border-zinc-200 bg-zinc-50/70'
-                          : 'border-zinc-200 bg-zinc-100/70'
+                          ? 'border-line bg-surface-soft'
+                          : 'border-line bg-surface'
                       }`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className={`mt-0.5 rounded-xl p-2 ${nivelInfo?.bgColor || 'bg-zinc-100'}`}>
-                          <Icon className={`h-4 w-4 ${nivelInfo?.color || 'text-zinc-500'}`} weight="fill" />
+                        <div className={`mt-0.5 rounded-xl p-2 ${nivelInfo?.bgColor || 'bg-surface-soft'}`}>
+                          <Icon className={`h-4 w-4 ${nivelInfo?.color || 'text-muted'}`} weight="fill" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-zinc-950">{alerta.titulo}</p>
-                              <p className="mt-1 text-sm leading-6 text-zinc-600">{alerta.descripcion}</p>
+                              <p className="truncate text-sm font-semibold text-ink">{alerta.titulo}</p>
+                              <p className="mt-1 text-sm leading-6 text-muted-2">{alerta.descripcion}</p>
                             </div>
-                            <span className="text-xs font-medium text-zinc-500">{formatearFecha(alerta.fechaCreacion)}</span>
+                            <span className="text-xs font-medium text-muted">{formatearFecha(alerta.fechaCreacion)}</span>
                           </div>
 
                           <div className="mt-3 flex flex-wrap items-center gap-2">
-                            <span className={alerta.leida ? 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700' : 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-900'}>
+                            <span className={alerta.leida ? 'inline-flex items-center rounded-full bg-surface-soft border border-line px-2.5 py-1 text-xs font-medium text-muted-2' : 'inline-flex items-center rounded-full bg-surface border border-line px-2.5 py-1 text-xs font-medium text-ink'}>
                               {alerta.leida ? 'Leída' : 'Pendiente'}
                             </span>
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${tipoInfo?.bgColor || 'bg-zinc-100'} ${tipoInfo?.color || 'text-zinc-700'}`}>
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${tipoInfo?.bgColor || 'bg-surface-soft'} ${tipoInfo?.color || 'text-muted-2'}`}>
                               {tipoInfo?.label || alerta.tipo}
                             </span>
                           </div>
@@ -156,29 +156,29 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = memo(({
           </section>
 
           <div className="grid gap-5">
-            <section className="rounded-[22px] border border-zinc-200 bg-white p-5 shadow-sm">
-              <h3 className="text-base font-semibold text-zinc-950">Distribución</h3>
+            <section className="rounded-[22px] border border-line bg-surface p-5 shadow-sm">
+              <h3 className="text-base font-semibold text-ink">Distribución</h3>
               <div className="mt-4 grid gap-4">
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Por nivel</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted">Por nivel</p>
                   <div className="space-y-2.5">
                     {distribucionNivel.map((nivel) => {
                       const Icon = nivel.icon;
                       const porcentaje = estadisticas.total > 0 ? (nivel.cantidad / estadisticas.total) * 100 : 0;
 
                       return (
-                        <div key={nivel.id} className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-3 py-2.5">
+                        <div key={nivel.id} className="rounded-xl border border-line bg-surface-soft px-3 py-2.5">
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
                               <div className={`rounded-lg p-2 ${nivel.bgColor}`}>
                                 <Icon className={`h-4 w-4 ${nivel.color}`} weight="fill" />
                               </div>
                               <div>
-                                <p className="text-sm font-medium text-zinc-900">{nivel.label}</p>
-                                <p className="text-xs text-zinc-500">{nivel.cantidad}</p>
+                                <p className="text-sm font-medium text-ink">{nivel.label}</p>
+                                <p className="text-xs text-muted">{nivel.cantidad}</p>
                               </div>
                             </div>
-                            <p className="text-sm font-semibold text-zinc-900">{porcentaje.toFixed(0)}%</p>
+                            <p className="text-sm font-semibold text-ink">{porcentaje.toFixed(0)}%</p>
                           </div>
                         </div>
                       );
@@ -187,17 +187,17 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = memo(({
                 </div>
 
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Por tipo</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted">Por tipo</p>
                   <div className="space-y-2.5">
                     {distribucionTipo.map((tipo) => {
                       const Icon = tipo.icon;
                       return (
-                        <div key={tipo.id} className="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50/70 px-3 py-2.5">
+                        <div key={tipo.id} className="flex items-center justify-between rounded-xl border border-line bg-surface-soft px-3 py-2.5">
                           <div className="flex items-center gap-2">
                             <Icon className={`h-4 w-4 ${tipo.color}`} weight="fill" />
-                            <span className="text-sm font-medium text-zinc-900">{tipo.label}</span>
+                            <span className="text-sm font-medium text-ink">{tipo.label}</span>
                           </div>
-                          <span className="text-sm font-semibold text-zinc-700">{tipo.cantidad}</span>
+                          <span className="text-sm font-semibold text-muted-2">{tipo.cantidad}</span>
                         </div>
                       );
                     })}

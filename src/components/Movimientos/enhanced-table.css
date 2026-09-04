@@ -606,3 +606,82 @@
     overflow: visible;
   }
 }
+
+/* Dark Mode Overrides for Enhanced Table */
+.dark .enhanced-table-container {
+  background: rgb(var(--color-surface));
+  border-color: rgb(var(--color-line));
+}
+
+.dark .enhanced-table-header {
+  background: rgb(var(--color-surface-soft));
+  border-bottom-color: rgb(var(--color-line-strong));
+}
+
+.dark .enhanced-header-cell {
+  color: rgb(var(--color-ink));
+  border-right-color: rgb(var(--color-line));
+}
+
+.dark .enhanced-data-row {
+  border-bottom-color: rgb(var(--color-line-soft));
+}
+
+.dark .enhanced-data-row:hover {
+  background-color: rgb(var(--color-surface-soft));
+}
+
+.dark .enhanced-data-cell {
+  border-right-color: rgb(var(--color-line-soft));
+  color: rgb(var(--color-ink));
+}
+
+.dark .numeric-label {
+  color: rgb(var(--color-muted));
+}
+
+.dark .enhanced-input:disabled {
+  background-color: rgb(var(--color-surface-soft));
+}
+
+.dark .enhanced-badge.success {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.dark .enhanced-badge.warning {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.dark .enhanced-badge.danger {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.dark .totals-row {
+  background: rgb(var(--color-surface-soft));
+  border-top-color: rgb(var(--color-brand));
+  border-bottom-color: rgb(var(--color-line));
+}
+
+.dark .sticky-header,
+.dark .sticky-totals {
+  background: rgb(var(--color-surface));
+  border-bottom-color: rgb(var(--color-line));
+}
+
+.dark .professional-table-layout tbody tr:hover {
+  background-color: rgb(var(--color-surface-soft));
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-track {
+  background: rgb(var(--color-surface-soft));
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgb(var(--color-line-strong));
+}

@@ -98,7 +98,7 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
               <th className={`${COMPONENT_STYLES.table.headerCell} rounded-r-[14px] text-center`}>Acciones</th>
             </tr>
           </thead>
-          <tbody className="bg-white">
+          <tbody className="bg-surface">
             {isLoading ? (
               <tr>
                 <td colSpan={6} className="px-6 py-12 text-center">
@@ -112,8 +112,8 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
               <tr>
                 <td colSpan={6} className="px-6 py-12 text-center">
                   <Users className={COMPONENT_STYLES.table.emptyIcon} />
-                  <p className="text-lg font-medium text-zinc-900 mb-1">No se encontraron usuarios</p>
-                  <p className="text-sm text-zinc-500">Intenta ajustar los filtros o crear un nuevo usuario</p>
+                  <p className="text-lg font-medium text-ink mb-1">No se encontraron usuarios</p>
+                  <p className="text-sm text-muted">Intenta ajustar los filtros o crear un nuevo usuario</p>
                 </td>
               </tr>
             ) : (
@@ -135,16 +135,16 @@ const UsuariosTabla: React.FC<UsuariosTablaProps> = memo(({
                   <td className={COMPONENT_STYLES.table.cell}>
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-full border border-line bg-[#f8f7fb] flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-full border border-line bg-surface-soft flex items-center justify-center">
                           <User className="h-5 w-5 text-muted-2" />
                         </div>
                       </div>
                       <div className="ml-3">
-                        <div className="text-sm font-semibold text-zinc-900">
+                        <div className="text-sm font-semibold text-ink">
                           {usuario.nombres} {usuario.apellidos}
                         </div>
-                        <div className="text-sm text-zinc-500">{usuario.email}</div>
-                        <div className="text-xs text-zinc-400 font-mono">@{usuario.usuario}</div>
+                        <div className="text-sm text-muted-2">{usuario.email}</div>
+                        <div className="text-xs text-muted font-mono">@{usuario.usuario}</div>
                       </div>
                     </div>
                   </td>

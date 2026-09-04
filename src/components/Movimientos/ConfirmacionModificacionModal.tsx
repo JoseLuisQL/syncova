@@ -89,23 +89,23 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
         <div className="space-y-6">
 
           {/* Main Action Banner */}
-          <div className="rounded-md bg-[#F1F5F7] p-4 text-[#0F2A3B]">
+          <div className="rounded-md bg-surface-soft p-4 text-ink border border-line">
             <p className="text-sm">
-              Estás modificando la entrega de <strong className="font-semibold">{impacto.resumen.vacunaNombre}</strong> para el establecimiento <strong className="font-semibold">{impacto.resumen.establecimientoNombre}</strong>.
+              Estás modificando la entrega de <strong className="font-semibold text-ink">{impacto.resumen.vacunaNombre}</strong> para el establecimiento <strong className="font-semibold text-ink">{impacto.resumen.establecimientoNombre}</strong>.
             </p>
             <div className="mt-4 flex items-center gap-6">
               <div className="flex flex-col">
-                <span className="font-mono text-[0.65rem] font-bold uppercase tracking-widest text-[#4F6B7C]">Cantidad Original</span>
-                <span className="text-xl font-medium text-[#4F6B7C] line-through">{impacto.resumen.cantidadActual.toLocaleString()}</span>
+                <span className="font-mono text-[0.65rem] font-bold uppercase tracking-widest text-muted">Cantidad Original</span>
+                <span className="text-xl font-medium text-muted-2 line-through">{impacto.resumen.cantidadActual.toLocaleString()}</span>
               </div>
-              <ArrowRight className="h-5 w-5 text-[#4F6B7C] mt-4" weight="bold" />
+              <ArrowRight className="h-5 w-5 text-muted-2 mt-4" weight="bold" />
               <div className="flex flex-col">
-                <span className="font-mono text-[0.65rem] font-bold uppercase tracking-widest text-[#4F6B7C]">Nueva Cantidad</span>
-                <span className="text-xl font-bold text-[#0E9F8E]">{impacto.resumen.cantidadNueva.toLocaleString()}</span>
+                <span className="font-mono text-[0.65rem] font-bold uppercase tracking-widest text-muted">Nueva Cantidad</span>
+                <span className="text-xl font-bold text-emerald-600">{impacto.resumen.cantidadNueva.toLocaleString()}</span>
               </div>
               <div className="ml-auto flex flex-col items-end">
-                 <span className="font-mono text-[0.65rem] font-bold uppercase tracking-widest text-[#4F6B7C]">Diferencia</span>
-                 <span className={"text-lg font-bold " + (impacto.resumen.diferencia > 0 ? "text-[#0E9F8E]" : impacto.resumen.diferencia < 0 ? "text-rose-600" : "text-[#0F2A3B]")}>
+                 <span className="font-mono text-[0.65rem] font-bold uppercase tracking-widest text-muted">Diferencia</span>
+                 <span className={"text-lg font-bold " + (impacto.resumen.diferencia > 0 ? "text-emerald-600" : impacto.resumen.diferencia < 0 ? "text-rose-600" : "text-ink")}>
                     {impacto.resumen.diferencia > 0 ? '+' : ''}{impacto.resumen.diferencia.toLocaleString()}
                  </span>
               </div>
@@ -115,28 +115,28 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
           <div className="space-y-5">
             {/* Stock Impact Table */}
             <div>
-              <p className="mb-2 font-mono text-[0.7rem] font-bold uppercase tracking-wider text-[#4F6B7C]">Impacto en Kardex (Stock)</p>
-              <div className="overflow-hidden rounded-md border border-[#e5e7eb]">
-                <table className="w-full text-left text-sm text-[#0F2A3B]">
-                  <thead className="bg-[#F1F5F7] font-mono text-[0.65rem] uppercase tracking-wider text-[#4F6B7C]">
+              <p className="mb-2 font-mono text-[0.7rem] font-bold uppercase tracking-wider text-muted-2">Impacto en Kardex (Stock)</p>
+              <div className="overflow-hidden rounded-md border border-line bg-surface">
+                <table className="w-full text-left text-sm text-ink">
+                  <thead className="bg-surface-soft font-mono text-[0.65rem] uppercase tracking-wider text-muted-2">
                     <tr>
-                      <th className="px-4 py-2 font-semibold border-b border-[#e5e7eb]">Producto</th>
-                      <th className="px-4 py-2 font-semibold text-right border-b border-[#e5e7eb]">Saldo Actual</th>
-                      <th className="px-4 py-2 font-semibold text-right border-b border-[#e5e7eb]">Nuevo Saldo</th>
-                      <th className="px-4 py-2 font-semibold text-right border-b border-[#e5e7eb]">Resumen de Impacto</th>
+                      <th className="px-4 py-2 font-semibold border-b border-line">Producto</th>
+                      <th className="px-4 py-2 font-semibold text-right border-b border-line">Saldo Actual</th>
+                      <th className="px-4 py-2 font-semibold text-right border-b border-line">Nuevo Saldo</th>
+                      <th className="px-4 py-2 font-semibold text-right border-b border-line">Resumen de Impacto</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#e5e7eb]">
+                  <tbody className="divide-y divide-line-soft bg-surface">
                     <tr>
-                      <td className="px-4 py-2 font-medium">Vacunas</td>
-                      <td className="px-4 py-2 text-right tabular-nums text-[#4F6B7C] line-through opacity-70">{impacto.impactoVacunas.stockTotalActual.toLocaleString()}</td>
-                      <td className="px-4 py-2 text-right font-medium tabular-nums text-[#0F2A3B]">{impacto.impactoVacunas.stockTotalDespues.toLocaleString()}</td>
+                      <td className="px-4 py-2 font-medium text-ink">Vacunas</td>
+                      <td className="px-4 py-2 text-right tabular-nums text-muted-2 line-through opacity-70">{impacto.impactoVacunas.stockTotalActual.toLocaleString()}</td>
+                      <td className="px-4 py-2 text-right font-medium tabular-nums text-ink">{impacto.impactoVacunas.stockTotalDespues.toLocaleString()}</td>
                       <td className="px-4 py-2 text-right font-bold tabular-nums">
                         {(() => {
                            const delta = impacto.impactoVacunas.stockTotalDespues - impacto.impactoVacunas.stockTotalActual;
-                           if (delta === 0) return <span className="text-[#4F6B7C]">0</span>;
+                           if (delta === 0) return <span className="text-muted-2">0</span>;
                            return (
-                             <span className={delta > 0 ? "text-[#0E9F8E]" : "text-rose-600"}>
+                             <span className={delta > 0 ? "text-emerald-600" : "text-rose-600"}>
                                {delta > 0 ? '+' : ''}{delta.toLocaleString()}
                              </span>
                            )
@@ -144,15 +144,15 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
                       </td>
                     </tr>
                     <tr>
-                      <td className="px-4 py-2 font-medium">Jeringas</td>
-                      <td className="px-4 py-2 text-right tabular-nums text-[#4F6B7C] line-through opacity-70">{impacto.impactoJeringas.stockTotalActual.toLocaleString()}</td>
-                      <td className="px-4 py-2 text-right font-medium tabular-nums text-[#0F2A3B]">{impacto.impactoJeringas.stockTotalDespues.toLocaleString()}</td>
+                      <td className="px-4 py-2 font-medium text-ink">Jeringas</td>
+                      <td className="px-4 py-2 text-right tabular-nums text-muted-2 line-through opacity-70">{impacto.impactoJeringas.stockTotalActual.toLocaleString()}</td>
+                      <td className="px-4 py-2 text-right font-medium tabular-nums text-ink">{impacto.impactoJeringas.stockTotalDespues.toLocaleString()}</td>
                       <td className="px-4 py-2 text-right font-bold tabular-nums">
                         {(() => {
                            const delta = impacto.impactoJeringas.stockTotalDespues - impacto.impactoJeringas.stockTotalActual;
-                           if (delta === 0) return <span className="text-[#4F6B7C]">0</span>;
+                           if (delta === 0) return <span className="text-muted-2">0</span>;
                            return (
-                             <span className={delta > 0 ? "text-[#0E9F8E]" : "text-rose-600"}>
+                             <span className={delta > 0 ? "text-emerald-600" : "text-rose-600"}>
                                {delta > 0 ? '+' : ''}{delta.toLocaleString()}
                              </span>
                            )
@@ -167,25 +167,25 @@ const ConfirmacionModificacionModal: React.FC<ConfirmacionModificacionModalProps
             {/* Vales Impact Table */}
             {impacto.valesAfectados.length > 0 && (
               <div>
-                <p className="mb-2 font-mono text-[0.7rem] font-bold uppercase tracking-wider text-[#4F6B7C]">Vales a re-emitir</p>
-                <div className="overflow-hidden rounded-md border border-[#e5e7eb]">
-                  <table className="w-full text-left text-sm text-[#0F2A3B]">
-                    <thead className="bg-[#F1F5F7] font-mono text-[0.65rem] uppercase tracking-wider text-[#4F6B7C]">
+                <p className="mb-2 font-mono text-[0.7rem] font-bold uppercase tracking-wider text-muted-2">Vales a re-emitir</p>
+                <div className="overflow-hidden rounded-md border border-line bg-surface">
+                  <table className="w-full text-left text-sm text-ink">
+                    <thead className="bg-surface-soft font-mono text-[0.65rem] uppercase tracking-wider text-muted-2">
                       <tr>
-                        <th className="px-4 py-2 font-semibold border-b border-[#e5e7eb]">Nº de Vale</th>
-                        <th className="px-4 py-2 font-semibold text-right border-b border-[#e5e7eb]">Salida (Antes)</th>
-                        <th className="px-4 py-2 font-semibold text-right border-b border-[#e5e7eb]">Salida (Nuevo)</th>
+                        <th className="px-4 py-2 font-semibold border-b border-line">Nº de Vale</th>
+                        <th className="px-4 py-2 font-semibold text-right border-b border-line">Salida (Antes)</th>
+                        <th className="px-4 py-2 font-semibold text-right border-b border-line">Salida (Nuevo)</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#e5e7eb]">
+                    <tbody className="divide-y divide-line-soft bg-surface">
                       {impacto.valesAfectados.map(vale => (
                         <tr key={vale.id}>
                           <td className="px-4 py-2">
-                            <span className="font-medium text-[#0F2A3B]">{vale.numero}</span>
-                            <span className="ml-3 text-xs text-[#4F6B7C]">{new Date(vale.fechaGeneracion).toLocaleDateString('es-PE')}</span>
+                            <span className="font-medium text-ink">{vale.numero}</span>
+                            <span className="ml-3 text-xs text-muted-2">{new Date(vale.fechaGeneracion).toLocaleDateString('es-PE')}</span>
                           </td>
-                          <td className="px-4 py-2 text-right tabular-nums text-[#4F6B7C] line-through opacity-70">{vale.cantidadAnterior.toLocaleString()}</td>
-                          <td className="px-4 py-2 text-right font-medium tabular-nums text-[#0F2A3B]">{vale.cantidadNueva.toLocaleString()}</td>
+                          <td className="px-4 py-2 text-right tabular-nums text-muted-2 line-through opacity-70">{vale.cantidadAnterior.toLocaleString()}</td>
+                          <td className="px-4 py-2 text-right font-medium tabular-nums text-ink">{vale.cantidadNueva.toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>

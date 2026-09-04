@@ -286,7 +286,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
 
   return (
     <div className={COMPONENT_STYLES.card}>
-      <div className="border-b border-zinc-100 bg-gradient-to-r from-zinc-50/80 via-zinc-50/60 to-white px-5 py-4 sm:px-6">
+      <div className="border-b border-line bg-surface px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className={`rounded-xl bg-gradient-to-br ${COLORS.primary.gradient} p-2.5 shadow-sm ${COLORS.primary.shadow}`}>
@@ -366,16 +366,16 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
                 </th>
               </tr>
 
-              <tr className="border-b border-line-soft bg-white font-medium text-muted">
-                <th className="sticky left-0 z-30 border-r border-line bg-white" />
-                <th className="sticky left-[220px] z-30 border-r border-line bg-white" />
+              <tr className="border-b border-line-soft bg-surface-soft font-medium text-muted">
+                <th className="sticky left-0 z-30 border-r border-line bg-surface-soft" />
+                <th className="sticky left-[220px] z-30 border-r border-line bg-surface-soft" />
                 {TRIMESTRES.map((quarter) => (
                   <React.Fragment key={`sub-${quarter}`}>
                     <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Prog.</th>
                     <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Entreg.</th>
                     <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Dif.</th>
                     <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Cons.</th>
-                    <th className="border-r border-zinc-200 px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Saldo</th>
+                    <th className="border-r border-line px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Saldo</th>
                   </React.Fragment>
                 ))}
                 <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Prog.</th>
@@ -384,7 +384,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
               </tr>
             </thead>
 
-            <tbody className="bg-white">
+            <tbody className="bg-surface">
               {filteredItems.map((item, index) => {
                 const totalProg = item.programacion.q1 + item.programacion.q2 + item.programacion.q3 + item.programacion.q4;
                 const totalEntr = item.entregas.q1 + item.entregas.q2 + item.entregas.q3 + item.entregas.q4;
@@ -392,12 +392,12 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
 
                 return (
                   <tr key={item.id} className="group border-b border-line-soft transition-colors hover:bg-surface-soft">
-                    <td className="sticky left-0 z-10 border-r border-line bg-white px-4 py-3 shadow-sm transition-colors group-hover:bg-surface-soft">
+                    <td className="sticky left-0 z-10 border-r border-line bg-surface px-4 py-3 shadow-sm transition-colors group-hover:bg-surface-soft">
                       <div className="flex items-center gap-2">
-                        <span className={`flex-shrink-0 rounded p-1.5 ${item.tipo === 'vacuna' ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-100 text-zinc-700'}`}>
+                        <span className={`flex-shrink-0 rounded p-1.5 ${item.tipo === 'vacuna' ? 'bg-surface-soft text-brand' : 'bg-surface-soft text-emerald-600'}`}>
                           {item.tipo === 'vacuna' ? <Package className="h-3.5 w-3.5" /> : <Syringe weight="duotone" className="h-3.5 w-3.5" />}
                         </span>
-                        <span className="max-w-[160px] truncate text-sm font-medium text-zinc-900" title={item.descripcion}>
+                        <span className="max-w-[160px] truncate text-sm font-medium text-ink" title={item.descripcion}>
                           {item.descripcion}
                         </span>
                       </div>
@@ -426,31 +426,31 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
                                 onChange={(event) => handleValueChange(index, quarter, parseInt(event.target.value, 10) || 0)}
                                 onBlur={() => handleBlur(index, quarter)}
                                 disabled={isUpdating}
-                                className={`w-16 rounded-md border px-2 py-1.5 text-center text-xs font-medium focus:outline-none focus:ring-1 focus:ring-zinc-500 disabled:cursor-not-allowed disabled:bg-zinc-100 ${
-                                  pending ? 'border-amber-400 bg-amber-50' : 'border-zinc-200 hover:border-zinc-300'
+                                className={`w-16 rounded-md border px-2 py-1.5 text-center text-xs font-medium focus:outline-none focus:ring-1 focus:ring-brand disabled:cursor-not-allowed disabled:bg-surface-soft ${
+                                  pending ? 'border-status-warning-border bg-status-warning-bg text-status-warning-text' : 'border-line bg-surface text-ink hover:border-line-strong'
                                 }`}
                               />
                               {pending ? <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-amber-400 animate-pulse" /> : null}
                             </div>
                           </td>
-                          <td className="px-1 py-2 text-center text-xs font-medium whitespace-nowrap text-zinc-700">{entr.toLocaleString()}</td>
-                          <td className={`px-1 py-2 text-center text-xs font-semibold whitespace-nowrap ${dif >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                            <span className={`rounded px-1.5 py-0.5 ${dif >= 0 ? 'bg-emerald-50' : 'bg-rose-50'}`}>
+                          <td className="px-1 py-2 text-center text-xs font-medium whitespace-nowrap text-muted-2">{entr.toLocaleString()}</td>
+                          <td className={`px-1 py-2 text-center text-xs font-semibold whitespace-nowrap ${dif >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            <span className={`rounded px-1.5 py-0.5 ${dif >= 0 ? 'bg-status-success-bg text-status-success-text' : 'bg-status-danger-bg text-status-danger-text'}`}>
                               {dif >= 0 ? '+' : ''}{dif.toLocaleString()}
                             </span>
                           </td>
-                          <td className="px-1 py-2 text-center text-xs whitespace-nowrap text-zinc-600">{cons.toLocaleString()}</td>
-                          <td className={`border-r border-zinc-200 px-1 py-2 text-center text-xs font-semibold whitespace-nowrap ${saldo >= 0 ? 'text-zinc-700' : 'text-rose-700'}`}>
+                          <td className="px-1 py-2 text-center text-xs whitespace-nowrap text-muted-2">{cons.toLocaleString()}</td>
+                          <td className={`border-r border-line px-1 py-2 text-center text-xs font-semibold whitespace-nowrap ${saldo >= 0 ? 'text-ink' : 'text-rose-600'}`}>
                             {saldo.toLocaleString()}
                           </td>
                         </React.Fragment>
                       );
                     })}
 
-                    <td className="bg-zinc-50 px-2 py-2 text-center text-xs font-bold whitespace-nowrap text-zinc-900">{totalProg.toLocaleString()}</td>
-                    <td className="bg-zinc-50 px-2 py-2 text-center text-xs font-bold whitespace-nowrap text-zinc-900">{totalEntr.toLocaleString()}</td>
-                    <td className={`bg-zinc-50 px-2 py-2 text-center text-xs font-bold whitespace-nowrap ${totalDif >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                      <span className={`rounded px-1.5 py-0.5 ${totalDif >= 0 ? 'bg-emerald-50' : 'bg-rose-50'}`}>
+                    <td className="bg-surface-soft px-2 py-2 text-center text-xs font-bold whitespace-nowrap text-ink">{totalProg.toLocaleString()}</td>
+                    <td className="bg-surface-soft px-2 py-2 text-center text-xs font-bold whitespace-nowrap text-ink">{totalEntr.toLocaleString()}</td>
+                    <td className={`bg-surface-soft px-2 py-2 text-center text-xs font-bold whitespace-nowrap ${totalDif >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                      <span className={`rounded px-1.5 py-0.5 ${totalDif >= 0 ? 'bg-status-success-bg text-status-success-text' : 'bg-status-danger-bg text-status-danger-text'}`}>
                         {totalDif >= 0 ? '+' : ''}{totalDif.toLocaleString()}
                       </span>
                     </td>
@@ -461,26 +461,26 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
           </table>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-zinc-200 via-zinc-200 to-zinc-200 opacity-50" />
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-line via-line to-line opacity-50" />
       </div>
 
-      <div className="border-t border-zinc-200 bg-zinc-50 px-5 py-4 sm:px-6">
+      <div className="border-t border-line bg-surface-soft px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-600">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-2">
             <span className="flex items-center gap-1.5 font-medium">
-              <Package className="h-4 w-4 text-zinc-600" />
-              <strong className="text-zinc-900">{filteredItems.length}</strong> items
+              <Package className="h-4 w-4 text-muted" />
+              <strong className="text-ink">{filteredItems.length}</strong> items
             </span>
-            <span className="text-zinc-300">|</span>
-            <span>Total programado: <strong className="text-zinc-700">{stats.totalProgramado.toLocaleString()}</strong></span>
-            <span className="text-zinc-300">|</span>
-            <span>Total entregado: <strong className="text-zinc-700">{stats.totalEntregado.toLocaleString()}</strong></span>
+            <span className="text-line-strong">|</span>
+            <span>Total programado: <strong className="text-ink">{stats.totalProgramado.toLocaleString()}</strong></span>
+            <span className="text-line-strong">|</span>
+            <span>Total entregado: <strong className="text-ink">{stats.totalEntregado.toLocaleString()}</strong></span>
           </div>
 
-          <div className="flex items-center gap-2 rounded-md bg-white border border-zinc-200 px-2 py-1 shadow-sm text-xs text-zinc-500 font-medium">
-            <Info className="h-4 w-4 text-zinc-400" />
+          <div className="flex items-center gap-2 rounded-md bg-surface border border-line px-2 py-1 shadow-sm text-xs text-muted font-medium">
+            <Info className="h-4 w-4 text-muted" />
             <span>Auto-guardado activo</span>
-            <FloppyDisk className="h-4 w-4 text-zinc-500" />
+            <FloppyDisk className="h-4 w-4 text-muted" />
           </div>
         </div>
       </div>

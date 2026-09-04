@@ -279,7 +279,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
     return (
       <React.Fragment>
         {/* Programado (Editable) */}
-        <td className="px-3 py-3 text-right align-middle font-medium tabular-nums text-zinc-900 border-x border-zinc-200 bg-white">
+        <td className="px-3 py-3 text-right align-middle font-medium tabular-nums text-ink border-x border-line bg-surface">
           <div className="flex justify-end relative">
             <input
               type="number"
@@ -290,8 +290,8 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
               disabled={isUpdating}
               className={`w-20 px-2 py-1 text-right text-[0.85rem] tabular-nums tracking-tight border rounded-md focus:outline-none focus:ring-1 focus:border-transparent transition-all disabled:opacity-50 ${
                 isPendingChange
-                  ? 'border-amber-400 bg-amber-50 focus:ring-amber-500'
-                  : 'border-zinc-300 hover:border-zinc-400 focus:ring-teal-500 bg-white'
+                  ? 'border-status-warning-border bg-status-warning-bg text-status-warning-text focus:ring-status-warning-border'
+                  : 'border-line hover:border-line-strong focus:ring-brand bg-surface text-ink'
               }`}
               title={isPendingChange ? 'Cambios pendientes - Se guardará automáticamente' : ''}
             />
@@ -364,19 +364,19 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]">
+    <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-[0_18px_50px_-42px_rgba(12,15,24,0.45)]">
       {/* Header Minimal */}
-      <div className="border-b border-line-soft bg-white px-5 py-4">
+      <div className="border-b border-line-soft bg-surface px-5 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
-            <div className="flex items-center justify-center rounded-xl bg-teal-100 p-2">
-              <Package className="h-5 w-5 text-teal-700" />
+            <div className="flex items-center justify-center rounded-xl bg-surface-tint p-2">
+              <Package className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold tracking-tight text-zinc-900 leading-none">
+              <h3 className="text-lg font-semibold tracking-tight text-ink leading-none">
                 CENARES {anio}
               </h3>
-              <p className="text-[0.8rem] text-zinc-500 mt-1">
+              <p className="text-[0.8rem] text-muted mt-1">
                 Matriz de programación y seguimiento trimestral con autoguardado.
               </p>
             </div>
@@ -386,7 +386,7 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
             <button type="button"
               onClick={handleExportarExcel}
               disabled={isExporting || loading || items.length === 0}
-              className="flex items-center rounded-lg border border-line bg-white px-4 py-2 text-sm font-semibold text-ink shadow-sm transition-colors hover:border-line-strong hover:bg-surface-soft focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center rounded-lg border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm transition-colors hover:border-line-strong hover:bg-surface-soft focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isExporting ? (
                 <>
@@ -395,14 +395,14 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
                 </>
               ) : (
                 <>
-                  <FileXls weight="duotone" className="mr-2 h-4 w-4 text-teal-600" />
+                  <FileXls weight="duotone" className="mr-2 h-4 w-4 text-emerald-600" />
                   Descargar MS Excel
                 </>
               )}
             </button>
 
             {isUpdating && (
-              <div className="flex items-center text-zinc-600 bg-zinc-50 px-3 py-1.5 rounded-lg border border-zinc-200 shadow-sm">
+              <div className="flex items-center text-muted bg-surface-soft px-3 py-1.5 rounded-lg border border-line shadow-sm">
                 <SpinnerGap weight="bold" className="h-[14px] w-[14px] animate-spin mr-1.5" />
                 <span className="text-[0.75rem] font-medium tracking-tight">Guardando datos...</span>
               </div>
@@ -412,11 +412,11 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
       </div>
 
       {/* Table Container with Horizontal Scroll */}
-      <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-zinc-400 md:hidden">
+      <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted md:hidden">
         <ArrowsLeftRight className="h-3.5 w-3.5" weight="bold" />
         <span>Desliza horizontalmente para ver todas las columnas</span>
       </div>
-      <div className="overflow-x-auto rounded-lg border border-zinc-200 md:border-0">
+      <div className="overflow-x-auto rounded-lg border border-line md:border-0">
         <table className="w-full min-w-[1400px]">
           <thead className="bg-surface-soft">
             <tr>
@@ -452,27 +452,27 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
             </tr>
 
             {/* Sub-headers */}
-            <tr className="border-b border-line-soft bg-white text-muted">
-              <th className="px-4 py-2 sticky left-0 bg-white z-10 border-r border-zinc-200"></th>
-              <th className="px-3 py-2 border-r border-zinc-200"></th>
+            <tr className="border-b border-line-soft bg-surface-soft text-muted">
+              <th className="px-4 py-2 sticky left-0 bg-surface-soft z-10 border-r border-line"></th>
+              <th className="px-3 py-2 border-r border-line"></th>
 
               {['Q1', 'Q2', 'Q3', 'Q4'].map((q) => (
                 <React.Fragment key={q}>
-                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-200">Prog.</th>
-                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-100">CENARES</th>
-                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-200">Dif.</th>
-                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-100">Cons.</th>
-                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-200 text-zinc-700">Saldo</th>
+                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-line">Prog.</th>
+                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-line-soft">CENARES</th>
+                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-line">Dif.</th>
+                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-line-soft">Cons.</th>
+                  <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-line text-muted-2">Saldo</th>
                 </React.Fragment>
               ))}
-              
-              <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-100">Prog.</th>
-              <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-zinc-100">Entr.</th>
-              <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider text-zinc-700">Dif.</th>
+
+              <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-line-soft">Prog.</th>
+              <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider border-r border-line-soft">Entr.</th>
+              <th className="px-3 py-2 text-right text-[0.65rem] font-medium tracking-wider text-muted-2">Dif.</th>
             </tr>
           </thead>
-          
-          <tbody className="bg-white">
+
+          <tbody className="bg-surface">
             {items.map((item, itemIndex) => {
               const totalProgramado = item.programacion.q1 + item.programacion.q2 + item.programacion.q3 + item.programacion.q4;
               const totalEntregado = item.entregas.q1 + item.entregas.q2 + item.entregas.q3 + item.entregas.q4;
@@ -481,24 +481,24 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
               return (
                 <tr key={item.id} className="border-b border-line-soft transition-colors duration-200 hover:bg-surface-soft">
                   {/* Item Description */}
-                  <td className="px-6 py-4 text-sm font-semibold text-zinc-900 sticky left-0 bg-white z-10 border-r border-zinc-100">
+                  <td className="px-6 py-4 text-sm font-semibold text-ink sticky left-0 bg-surface z-10 border-r border-line">
                     <div className="flex items-center space-x-3">
                       <div className={`p-2 rounded-lg border ${
                         item.tipo === 'vacuna'
-                          ? 'bg-blue-50 border-blue-200 text-blue-600'
-                          : 'bg-green-50 border-green-200 text-green-600'
+                          ? 'bg-status-info-bg border-status-info-border text-status-info-text'
+                          : 'bg-status-success-bg border-status-success-border text-status-success-text'
                       }`}>
                         {item.tipo === 'vacuna' ? <Package className="h-4 w-4" /> : <Syringe weight="duotone" className="h-4 w-4" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-zinc-900 truncate">
+                        <div className="font-semibold text-ink truncate">
                           {item.descripcion}
                         </div>
-                        <div className="text-xs text-zinc-500 mt-1">
+                        <div className="text-xs text-muted mt-1">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                             item.tipo === 'vacuna'
-                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                              : 'bg-green-100 text-green-800 border border-green-200'
+                              ? 'bg-status-info-bg text-status-info-text border border-status-info-border'
+                              : 'bg-status-success-bg text-status-success-text border border-status-success-border'
                           }`}>
                             {item.tipo === 'vacuna' ? 'Vacuna' : 'Jeringa'}
                           </span>
@@ -508,10 +508,10 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
                   </td>
 
                   {/* Previous Year Balance */}
-                  <td className="px-3 py-3 text-[0.85rem] font-semibold text-right text-zinc-600 border-r border-zinc-200 bg-zinc-50 align-middle tabular-nums">
+                  <td className="px-3 py-3 text-[0.85rem] font-semibold text-right text-muted-2 border-r border-line bg-surface-soft align-middle tabular-nums">
                     {item.saldoAnterior.toLocaleString()}
                   </td>
-                  
+
                   {/* Q1 Columns */}
                   {renderQuarterColumns(item, itemIndex, 'q1', 'zinc')}
 
@@ -523,16 +523,16 @@ const ProgramacionSeguimientoAnualTable: React.FC<ProgramacionSeguimientoAnualTa
 
                   {/* Q4 Columns */}
                   {renderQuarterColumns(item, itemIndex, 'q4', 'zinc')}
-                  
+
                   {/* Annual Totals */}
-                  <td className="px-3 py-3 text-[0.85rem] text-right text-zinc-800 font-semibold border-r border-zinc-100 bg-zinc-50 align-middle tabular-nums">
+                  <td className="px-3 py-3 text-[0.85rem] text-right text-ink font-semibold border-r border-line-soft bg-surface-soft align-middle tabular-nums">
                     {totalProgramado.toLocaleString()}
                   </td>
-                  <td className="px-3 py-3 text-[0.85rem] text-right text-zinc-800 font-semibold border-r border-zinc-100 bg-zinc-50 align-middle tabular-nums">
+                  <td className="px-3 py-3 text-[0.85rem] text-right text-ink font-semibold border-r border-line-soft bg-surface-soft align-middle tabular-nums">
                     {totalEntregado.toLocaleString()}
                   </td>
-                  <td className={`px-3 py-3 text-[0.85rem] text-right font-bold bg-zinc-50 align-middle tracking-tight tabular-nums ${
-                    diferenciaTotal >= 0 ? 'text-zinc-900 border-zinc-100' : 'text-rose-600 border-rose-200'
+                  <td className={`px-3 py-3 text-[0.85rem] text-right font-bold bg-surface-soft align-middle tracking-tight tabular-nums ${
+                    diferenciaTotal >= 0 ? 'text-ink border-line-soft' : 'text-rose-500 border-rose-500/30'
                   }`}>
                     {diferenciaTotal > 0 ? `+${diferenciaTotal.toLocaleString()}` : diferenciaTotal.toLocaleString()}
                   </td>

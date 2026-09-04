@@ -257,9 +257,9 @@ export const DataTable: React.FC<DataTableProps> = memo(({
             ))}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-[20px] border border-zinc-200 bg-white/95">
+          <div className="overflow-hidden rounded-[20px] border border-line bg-surface">
             <table className="min-w-full table-fixed">
-              <tbody className="bg-white">
+              <tbody className="bg-surface">
                 {Array.from({ length: skeletonRows }).map((_, rowIndex) => (
                   <tr key={`table-skeleton-${rowIndex + 1}`} className="inventory-reveal" style={{ animationDelay: `${rowIndex * 45}ms` }}>
                     {Array.from({ length: skeletonColumns }).map((__, columnIndex) => (
@@ -332,7 +332,7 @@ interface TableRowProps {
 
 export const TableRow: React.FC<TableRowProps> = memo(({ children, onClick, isSelected = false }) => (
   <tr
-    className={`${COMPONENT_STYLES.table.row} ${isSelected ? 'bg-zinc-100/60' : ''} ${onClick ? 'cursor-pointer' : ''}`}
+    className={`${COMPONENT_STYLES.table.row} ${isSelected ? 'bg-surface-soft' : ''} ${onClick ? 'cursor-pointer' : ''}`}
     onClick={onClick}
   >
     <td className="w-10 border-b border-line-soft px-3 py-3 text-center align-middle">

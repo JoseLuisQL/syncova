@@ -101,7 +101,7 @@ const Sidebar: React.FC = memo(() => {
           group/sidebar-item relative flex h-10 w-full items-center rounded-[9px]
           text-ink transition-colors duration-150
           ${isCollapsed ? 'justify-center px-0' : 'px-3'}
-          ${isActive ? 'bg-[#f7f6fb]' : 'hover:bg-surface-soft'}
+          ${isActive ? 'bg-surface-tint text-brand font-semibold' : 'hover:bg-surface-soft'}
         `}
         aria-current={isActive ? 'page' : undefined}
       >
@@ -143,7 +143,7 @@ const Sidebar: React.FC = memo(() => {
       <aside
         className={`
           fixed bottom-3 left-3 top-3 z-50 flex flex-col overflow-visible
-          rounded-3xl border border-white/90 bg-white
+          rounded-3xl border border-line bg-surface
           shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]
           transition-all duration-300 ease-out
           sm:bottom-4 sm:left-4 sm:top-4 sm:rounded-4xl
@@ -159,7 +159,7 @@ const Sidebar: React.FC = memo(() => {
             <button
               type="button"
               onClick={() => setSidebarCollapsed(false)}
-              className="group/logo-toggle relative flex h-10 w-10 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-[#f7f6fb] focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+              className="group/logo-toggle relative flex h-10 w-10 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70"
               aria-label="Expandir menú"
               aria-expanded={false}
             >
@@ -198,7 +198,7 @@ const Sidebar: React.FC = memo(() => {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(false)}
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-md text-muted-2 transition-colors hover:bg-[#f7f6fb] hover:text-ink-soft lg:hidden"
+            className="ml-auto flex h-8 w-8 items-center justify-center rounded-md text-muted-2 transition-colors hover:bg-surface-soft hover:text-ink-soft lg:hidden"
             aria-label="Cerrar menú"
           >
             <X className="h-5 w-5" weight="bold" />
@@ -210,21 +210,21 @@ const Sidebar: React.FC = memo(() => {
             <button
               type="button"
               onClick={() => setSidebarCollapsed(false)}
-              className="flex h-10 w-full items-center justify-center rounded-[9px] border border-line-focus text-[#676c77] transition-colors hover:border-[#c7c9d5] hover:bg-surface-soft"
+              className="flex h-10 w-full items-center justify-center rounded-[9px] border border-line-focus text-muted-2 transition-colors hover:border-line-strong hover:bg-surface-soft"
               aria-label="Buscar"
             >
               <MagnifyingGlass className="h-5 w-5" />
             </button>
           ) : (
-            <label className="flex h-10 items-center gap-2 rounded-[9px] border border-line-focus bg-white px-3 text-muted transition-colors focus-within:border-line-focus-strong">
+            <label className="flex h-10 items-center gap-2 rounded-[9px] border border-line-focus bg-surface px-3 text-muted transition-colors focus-within:border-line-focus-strong">
               <MagnifyingGlass className="h-4 w-4 flex-shrink-0" />
               <input
                 type="search"
-                placeholder="Search..."
-                className="min-w-0 flex-1 bg-transparent text-base font-medium text-ink-soft outline-none placeholder:text-muted"
+                placeholder="Buscar..."
+                className="min-w-0 flex-1 bg-transparent text-base font-medium text-ink outline-none placeholder:text-muted"
               />
-              <span className="hidden rounded-sm border border-[#e3e4ed] bg-[#f8f7fb] px-1.5 py-0.5 text-[10px] font-semibold text-[#686d78] sm:inline-block">⌘</span>
-              <span className="hidden rounded-sm border border-[#e3e4ed] bg-[#f8f7fb] px-1.5 py-0.5 text-[10px] font-semibold text-[#686d78] sm:inline-block">F</span>
+              <span className="hidden rounded-sm border border-line bg-surface-soft px-1.5 py-0.5 text-[10px] font-semibold text-muted-2 sm:inline-block">⌘</span>
+              <span className="hidden rounded-sm border border-line bg-surface-soft px-1.5 py-0.5 text-[10px] font-semibold text-muted-2 sm:inline-block">F</span>
             </label>
           )}
         </div>
@@ -259,15 +259,15 @@ const Sidebar: React.FC = memo(() => {
 
           <div className="relative" ref={userMenuRef}>
             {isUserMenuOpen && !isCollapsed && (
-              <div className="absolute bottom-[calc(100%+0.5rem)] left-0 z-[70] w-[min(320px,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-white/90 bg-white shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]">
+              <div className="absolute bottom-[calc(100%+0.5rem)] left-0 z-[70] w-[min(320px,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-line bg-surface shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]">
                 <div className="border-b border-line p-4">
                   <div className="flex items-start gap-3">
-                    <span className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#ffd1de] text-sm font-semibold text-ink-soft">
+                    <span className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-surface-tint text-sm font-semibold text-brand">
                       {initials}
-                      <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#ff3d73]" />
+                      <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-[#ff3d73]" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="break-words text-base font-semibold leading-snug text-ink-soft">{displayName}</p>
+                      <p className="break-words text-base font-semibold leading-snug text-ink">{displayName}</p>
                       <p className="break-all text-xs font-medium leading-snug text-muted-3">{user?.email || user?.usuario}</p>
                       {(user?.centroAcopio || user?.establecimiento || user?.ultimoAcceso) && (
                         <div className="mt-3 space-y-1.5 border-t border-line pt-3">
@@ -296,7 +296,7 @@ const Sidebar: React.FC = memo(() => {
                       setIsChangePasswordModalOpen(true);
                       setIsUserMenuOpen(false);
                     }}
-                    className="flex w-full items-center gap-3 rounded-[9px] px-3 py-2 text-left text-sm font-semibold text-muted-2 transition-colors hover:bg-[#f8f7fb] hover:text-ink-soft"
+                    className="flex w-full items-center gap-3 rounded-[9px] px-3 py-2 text-left text-sm font-semibold text-muted-2 transition-colors hover:bg-surface-soft hover:text-ink"
                   >
                     <Key className="h-4 w-4 text-muted-3" weight="duotone" />
                     Cambiar contraseña
@@ -307,7 +307,7 @@ const Sidebar: React.FC = memo(() => {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-[9px] px-3 py-2 text-left text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50 hover:text-rose-700"
+                    className="flex w-full items-center gap-3 rounded-[9px] px-3 py-2 text-left text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50/20 hover:text-rose-500"
                   >
                     <SignOut className="h-4 w-4" weight="bold" />
                     Cerrar sesión
@@ -325,13 +325,13 @@ const Sidebar: React.FC = memo(() => {
                 }
                 setIsUserMenuOpen(prev => !prev);
               }}
-              className={`flex w-full items-center rounded-[9px] border bg-white p-2 text-left transition-colors hover:border-[#c7c9d5] ${isUserMenuOpen ? 'border-[#c7c9d5] bg-[#f8f7fb]' : 'border-line-focus'} ${isCollapsed ? 'justify-center' : 'gap-3'}`}
+              className={`flex w-full items-center rounded-[9px] border bg-surface p-2 text-left transition-colors hover:border-line-strong ${isUserMenuOpen ? 'border-line-strong bg-surface-soft' : 'border-line-focus'} ${isCollapsed ? 'justify-center' : 'gap-3'}`}
               aria-expanded={isUserMenuOpen}
               aria-haspopup="menu"
             >
-              <span className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#ffd1de] text-sm font-semibold text-ink-soft">
+              <span className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-surface-tint text-sm font-semibold text-brand">
                 {initials}
-                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#ff3d73]" />
+                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface bg-[#ff3d73]" />
               </span>
               {!isCollapsed && (
                 <>

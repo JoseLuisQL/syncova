@@ -5,36 +5,36 @@ interface LoadingSkeletonProps {
   className?: string;
 }
 
-export const TableLoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ 
-  rows = 5, 
-  className = '' 
+export const TableLoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
+  rows = 5,
+  className = ''
 }) => {
   return (
     <div className={`animate-pulse ${className}`}>
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="bg-surface border border-line shadow-sm rounded-lg overflow-hidden">
         {/* Header skeleton */}
-        <div className="bg-zinc-50 px-6 py-3 border-b border-zinc-200">
+        <div className="bg-surface-soft px-6 py-3 border-b border-line">
           <div className="flex space-x-4">
-            <div className="h-4 bg-zinc-300 rounded w-1/4"></div>
-            <div className="h-4 bg-zinc-300 rounded w-1/6"></div>
-            <div className="h-4 bg-zinc-300 rounded w-1/6"></div>
-            <div className="h-4 bg-zinc-300 rounded w-1/6"></div>
-            <div className="h-4 bg-zinc-300 rounded w-1/6"></div>
+            <div className="h-4 bg-line-strong rounded w-1/4"></div>
+            <div className="h-4 bg-line-strong rounded w-1/6"></div>
+            <div className="h-4 bg-line-strong rounded w-1/6"></div>
+            <div className="h-4 bg-line-strong rounded w-1/6"></div>
+            <div className="h-4 bg-line-strong rounded w-1/6"></div>
           </div>
         </div>
-        
+
         {/* Rows skeleton */}
-        <div className="divide-y divide-zinc-200">
+        <div className="divide-y divide-line">
           {Array.from({ length: rows }).map((_, index) => (
             <div key={index} className="px-6 py-4">
               <div className="flex items-center space-x-4">
-                <div className="h-4 bg-zinc-200 rounded w-1/4"></div>
-                <div className="h-4 bg-zinc-200 rounded w-1/6"></div>
-                <div className="h-4 bg-zinc-200 rounded w-1/6"></div>
-                <div className="h-4 bg-zinc-200 rounded w-1/6"></div>
+                <div className="h-4 bg-line rounded w-1/4"></div>
+                <div className="h-4 bg-line rounded w-1/6"></div>
+                <div className="h-4 bg-line rounded w-1/6"></div>
+                <div className="h-4 bg-line rounded w-1/6"></div>
                 <div className="flex space-x-2 w-1/6">
-                  <div className="h-8 w-8 bg-zinc-200 rounded"></div>
-                  <div className="h-8 w-8 bg-zinc-200 rounded"></div>
+                  <div className="h-8 w-8 bg-line rounded"></div>
+                  <div className="h-8 w-8 bg-line rounded"></div>
                 </div>
               </div>
             </div>
@@ -45,22 +45,22 @@ export const TableLoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
   );
 };
 
-export const CardLoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ 
-  rows = 3, 
-  className = '' 
+export const CardLoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
+  rows = 3,
+  className = ''
 }) => {
   return (
     <div className={`animate-pulse ${className}`}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.from({ length: rows }).map((_, index) => (
-          <div key={index} className="bg-white shadow rounded-lg p-6">
+          <div key={index} className="bg-surface border border-line shadow-sm rounded-lg p-6">
             <div className="space-y-3">
-              <div className="h-4 bg-zinc-200 rounded w-3/4"></div>
-              <div className="h-3 bg-zinc-200 rounded w-1/2"></div>
-              <div className="h-3 bg-zinc-200 rounded w-2/3"></div>
+              <div className="h-4 bg-line rounded w-3/4"></div>
+              <div className="h-3 bg-line rounded w-1/2"></div>
+              <div className="h-3 bg-line rounded w-2/3"></div>
               <div className="flex space-x-2 mt-4">
-                <div className="h-8 w-16 bg-zinc-200 rounded"></div>
-                <div className="h-8 w-16 bg-zinc-200 rounded"></div>
+                <div className="h-8 w-16 bg-line rounded"></div>
+                <div className="h-8 w-16 bg-line rounded"></div>
               </div>
             </div>
           </div>
@@ -70,56 +70,56 @@ export const CardLoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
   );
 };
 
-export const FormLoadingSkeleton: React.FC<{ className?: string }> = ({ 
-  className = '' 
+export const FormLoadingSkeleton: React.FC<{ className?: string }> = ({
+  className = ''
 }) => {
   return (
     <div className={`animate-pulse ${className}`}>
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <div className="h-4 bg-zinc-200 rounded w-1/4 mb-2"></div>
-            <div className="h-10 bg-zinc-200 rounded"></div>
+            <div className="h-4 bg-line rounded w-1/4 mb-2"></div>
+            <div className="h-10 bg-line rounded"></div>
           </div>
           <div>
-            <div className="h-4 bg-zinc-200 rounded w-1/4 mb-2"></div>
-            <div className="h-10 bg-zinc-200 rounded"></div>
+            <div className="h-4 bg-line rounded w-1/4 mb-2"></div>
+            <div className="h-10 bg-line rounded"></div>
           </div>
         </div>
         <div>
-          <div className="h-4 bg-zinc-200 rounded w-1/4 mb-2"></div>
-          <div className="h-24 bg-zinc-200 rounded"></div>
+          <div className="h-4 bg-line rounded w-1/4 mb-2"></div>
+          <div className="h-24 bg-line rounded"></div>
         </div>
         <div className="flex justify-end space-x-3 pt-4">
-          <div className="h-10 w-20 bg-zinc-200 rounded"></div>
-          <div className="h-10 w-20 bg-zinc-200 rounded"></div>
+          <div className="h-10 w-20 bg-line rounded"></div>
+          <div className="h-10 w-20 bg-line rounded"></div>
         </div>
       </div>
     </div>
   );
 };
 
-export const FilterLoadingSkeleton: React.FC<{ className?: string }> = ({ 
-  className = '' 
+export const FilterLoadingSkeleton: React.FC<{ className?: string }> = ({
+  className = ''
 }) => {
   return (
     <div className={`animate-pulse ${className}`}>
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="bg-surface border border-line p-4 rounded-lg shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <div className="h-4 bg-zinc-200 rounded w-1/2 mb-2"></div>
-            <div className="h-10 bg-zinc-200 rounded"></div>
+            <div className="h-4 bg-line rounded w-1/2 mb-2"></div>
+            <div className="h-10 bg-line rounded"></div>
           </div>
           <div>
-            <div className="h-4 bg-zinc-200 rounded w-1/2 mb-2"></div>
-            <div className="h-10 bg-zinc-200 rounded"></div>
+            <div className="h-4 bg-line rounded w-1/2 mb-2"></div>
+            <div className="h-10 bg-line rounded"></div>
           </div>
           <div>
-            <div className="h-4 bg-zinc-200 rounded w-1/2 mb-2"></div>
-            <div className="h-10 bg-zinc-200 rounded"></div>
+            <div className="h-4 bg-line rounded w-1/2 mb-2"></div>
+            <div className="h-10 bg-line rounded"></div>
           </div>
           <div className="flex items-end">
-            <div className="h-10 w-full bg-zinc-200 rounded"></div>
+            <div className="h-10 w-full bg-line rounded"></div>
           </div>
         </div>
       </div>
@@ -132,23 +132,23 @@ interface StatCardSkeletonProps {
   className?: string;
 }
 
-export const StatCardSkeleton: React.FC<StatCardSkeletonProps> = ({ 
-  count = 4, 
-  className = '' 
+export const StatCardSkeleton: React.FC<StatCardSkeletonProps> = ({
+  count = 4,
+  className = ''
 }) => {
   return (
     <div className={`animate-pulse ${className}`}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {Array.from({ length: count }).map((_, index) => (
-          <div key={index} className="bg-white overflow-hidden shadow rounded-lg">
+          <div key={index} className="bg-surface border border-line overflow-hidden shadow-sm rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="h-8 w-8 bg-zinc-200 rounded"></div>
+                  <div className="h-8 w-8 bg-line rounded"></div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
-                  <div className="h-4 bg-zinc-200 rounded w-1/2 mb-2"></div>
-                  <div className="h-6 bg-zinc-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-line rounded w-1/2 mb-2"></div>
+                  <div className="h-6 bg-line rounded w-3/4"></div>
                 </div>
               </div>
             </div>
@@ -159,27 +159,27 @@ export const StatCardSkeleton: React.FC<StatCardSkeletonProps> = ({
   );
 };
 
-export const ListLoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ 
-  rows = 5, 
-  className = '' 
+export const ListLoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
+  rows = 5,
+  className = ''
 }) => {
   return (
     <div className={`animate-pulse ${className}`}>
-      <div className="bg-white shadow rounded-lg">
-        <div className="divide-y divide-zinc-200">
+      <div className="bg-surface border border-line shadow-sm rounded-lg">
+        <div className="divide-y divide-line">
           {Array.from({ length: rows }).map((_, index) => (
             <div key={index} className="px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 bg-zinc-200 rounded-full"></div>
+                  <div className="h-10 w-10 bg-line rounded-full"></div>
                   <div className="space-y-1">
-                    <div className="h-4 bg-zinc-200 rounded w-32"></div>
-                    <div className="h-3 bg-zinc-200 rounded w-24"></div>
+                    <div className="h-4 bg-line rounded w-32"></div>
+                    <div className="h-3 bg-line rounded w-24"></div>
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <div className="h-8 w-8 bg-zinc-200 rounded"></div>
-                  <div className="h-8 w-8 bg-zinc-200 rounded"></div>
+                  <div className="h-8 w-8 bg-line rounded"></div>
+                  <div className="h-8 w-8 bg-line rounded"></div>
                 </div>
               </div>
             </div>

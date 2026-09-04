@@ -145,7 +145,7 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
                 <th className={`${COMPONENT_STYLES.table.headerCell} rounded-r-[14px] text-right`}>Acciones</th>
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody className="bg-surface">
               {alertasPaginadas.map((alerta) => {
                 const tipoInfo = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo);
                 const nivelInfo = NIVELES_ALERTA.find((nivel) => nivel.id === alerta.nivel);

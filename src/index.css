@@ -34,6 +34,21 @@
     --color-surface-soft: 251 250 253; /* #fbfafd */
     --color-surface-tint: 245 240 253; /* #f5f0fd */
     --color-app: 240 239 244;         /* #f0eff4 fondo de página */
+
+    /* Estados semánticos adaptables (light) */
+    --color-status-success-bg: 232 247 245;
+    --color-status-success-border: 150 221 213;
+    --color-status-success-text: 10 130 118;
+    --color-status-warning-bg: 254 243 199;
+    --color-status-warning-border: 253 230 138;
+    --color-status-warning-text: 180 83 9;
+    --color-status-danger-bg: 255 241 242;
+    --color-status-danger-border: 254 205 211;
+    --color-status-danger-text: 190 18 60;
+    --color-status-info-bg: 239 246 255;
+    --color-status-info-border: 191 219 254;
+    --color-status-info-text: 29 78 216;
+
     color-scheme: light;
   }
 
@@ -45,7 +60,7 @@
     --color-brand-50: 30 27 51;       /* tinte dark */
     --color-brand-100: 60 47 97;      /* tinte dark medio */
     --color-ink: 232 233 237;         /* texto primario claro */
-    --color-ink-soft: 10 11 14;       /* overlay más profundo */
+    --color-ink-soft: 215 218 227;     /* texto suave claro en dark (corregido) */
     --color-muted: 139 143 155;       /* muted similar */
     --color-muted-2: 154 160 172;     /* texto secundario claro */
     --color-muted-3: 130 135 148;     /* texto terciario claro */
@@ -60,8 +75,25 @@
     --color-app: 21 23 29;            /* #15171d fondo página dark */
     --clinical-primary: #e8e9ed;
     --clinical-secondary: #9aa0ac;
+    --clinical-tertiary: #2eb2a4;
     --clinical-neutral: #15171d;
     --clinical-surface: #1a1d24;
+    --clinical-on-primary: #15171d;
+
+    /* Estados semánticos adaptables (dark) */
+    --color-status-success-bg: 14 60 55;
+    --color-status-success-border: 14 120 108;
+    --color-status-success-text: 94 200 189;
+    --color-status-warning-bg: 69 40 10;
+    --color-status-warning-border: 146 64 14;
+    --color-status-warning-text: 252 211 77;
+    --color-status-danger-bg: 76 5 25;
+    --color-status-danger-border: 159 18 57;
+    --color-status-danger-text: 251 113 133;
+    --color-status-info-bg: 23 37 84;
+    --color-status-info-border: 30 64 175;
+    --color-status-info-text: 147 197 253;
+
     --inventory-skeleton-base: rgba(33, 36, 44, 0.86);
     --inventory-skeleton-highlight: rgba(42, 45, 54, 0.96);
     --inventory-loading-surface: linear-gradient(180deg, rgba(26, 29, 36, 0.98) 0%, rgba(33, 36, 44, 0.94) 100%);
@@ -242,35 +274,90 @@
   }
 }
 
-/* === Dark mode: overrides globales para patrones Tailwind/zinc heredados ===
-   SIVAC tiene ~156 archivos con hex literales y clases base Tailwind
-   (bg-white ×706, text-zinc-900 ×385, etc.) que no usan tokens semánticos.
-   En lugar de editar cada archivo (arriesgado), mapeamos los patrones más
-   frecuentes a los tokens dark vía .dark. Esto da cobertura amplia y segura:
-   solo se activa en dark, y preserva text-white (texto sobre fondos coloreados).
+/* === Dark mode: overrides globales para compatibilidad inmediata ===
+   Mapeo directo y prioritario fuera de @layer base para garantizar que
+   las clases canónicas de Tailwind (bg-white, text-zinc-900, etc.)
+   se transformen correctamente en modo oscuro en toda la aplicación.
 */
-@layer base {
-  .dark {
-    /* Fondos blancos → superficie dark. NO afecta text-white (ver abajo). */
-    .dark .bg-white { background-color: rgb(var(--color-surface)); }
-    .dark .bg-zinc-50 { background-color: rgb(var(--color-surface-soft)); }
-    .dark .bg-zinc-100 { background-color: rgb(var(--color-surface-soft)); }
-    .dark .bg-zinc-200 { background-color: rgb(var(--color-line)); }
+.dark .bg-white,
+.dark [class*="bg-white/"],
+.dark [class*="bg-white\/"] {
+  background-color: rgb(var(--color-surface)) !important;
+}
+.dark .bg-zinc-50,
+.dark [class*="bg-zinc-50/"],
+.dark [class*="bg-zinc-50\/"] {
+  background-color: rgb(var(--color-surface-soft)) !important;
+}
+.dark .bg-zinc-100,
+.dark [class*="bg-zinc-100/"],
+.dark [class*="bg-zinc-100\/"] {
+  background-color: rgb(var(--color-surface-soft)) !important;
+}
+.dark .bg-zinc-200 {
+  background-color: rgb(var(--color-line)) !important;
+}
 
-    /* Bordes claros → borde dark. */
-    .dark .border-white\/90 { border-color: rgb(var(--color-line) / 0.9); }
-    .dark .border-white { border-color: rgb(var(--color-line)); }
-    .dark .border-zinc-100 { border-color: rgb(var(--color-line-soft)); }
-    .dark .border-zinc-200 { border-color: rgb(var(--color-line)); }
-    .dark .border-zinc-300 { border-color: rgb(var(--color-line-strong)); }
+/* Bordes claros → borde dark */
+.dark .border-white\/90,
+.dark .border-white {
+  border-color: rgb(var(--color-line)) !important;
+}
+.dark .border-zinc-100,
+.dark [class*="border-zinc-100/"] {
+  border-color: rgb(var(--color-line-soft)) !important;
+}
+.dark .border-zinc-200,
+.dark [class*="border-zinc-200/"] {
+  border-color: rgb(var(--color-line)) !important;
+}
+.dark .border-zinc-300 {
+  border-color: rgb(var(--color-line-strong)) !important;
+}
+.dark .divide-zinc-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(var(--color-line)) !important;
+}
+.dark .divide-zinc-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(var(--color-line-soft)) !important;
+}
 
-    /* Texto oscuro → texto claro. text-white se preserva (texto sobre brand/teal). */
-    .dark .text-zinc-900 { color: rgb(var(--color-ink)); }
-    .dark .text-zinc-800 { color: rgb(var(--color-ink)); }
-    .dark .text-zinc-700 { color: rgb(var(--color-muted-2)); }
-    .dark .text-zinc-600 { color: rgb(var(--color-muted-2)); }
-    .dark .text-zinc-500 { color: rgb(var(--color-muted)); }
-    .dark .text-zinc-400 { color: rgb(var(--color-muted)); }
-    .dark .text-zinc-950 { color: rgb(var(--color-ink)); }
-  }
+/* Texto oscuro → texto claro adaptado. Nota: text-white se preserva intacto */
+.dark .text-zinc-900,
+.dark .text-zinc-950,
+.dark .text-\[\#111827\],
+.dark .text-\[\#171b22\] {
+  color: rgb(var(--color-ink)) !important;
+}
+.dark .text-zinc-800 {
+  color: rgb(var(--color-ink)) !important;
+}
+.dark .text-zinc-700,
+.dark .text-zinc-600,
+.dark .text-\[\#424750\],
+.dark .text-\[\#556575\] {
+  color: rgb(var(--color-muted-2)) !important;
+}
+.dark .text-zinc-500,
+.dark .text-zinc-400,
+.dark .text-\[\#7a8797\],
+.dark .text-\[\#a0a4ae\] {
+  color: rgb(var(--color-muted)) !important;
+}
+
+/* Inputs y controles en dark mode */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: rgb(var(--color-muted));
+}
+.dark select option {
+  background-color: rgb(var(--color-surface));
+  color: rgb(var(--color-ink));
+}
+
+/* Scrollbars en modo oscuro */
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--color-line-strong));
+}
+.dark ::-webkit-scrollbar-track {
+  background-color: rgb(var(--color-surface-soft));
 }

@@ -222,7 +222,7 @@ const NotificationBell: React.FC = memo(() => {
           relative flex h-10 w-10 items-center justify-center rounded-[9px] border
           transition-colors duration-200
           focus:outline-none focus-visible:ring-2 focus-visible:ring-line-focus/70
-          ${isOpen ? 'border-[#c7c9d5] bg-[#f8f7fb] text-ink-soft' : 'border-line-focus bg-white text-muted-2 hover:border-[#c7c9d5] hover:text-ink-soft'}
+          ${isOpen ? 'border-line-strong bg-surface-soft text-ink' : 'border-line-focus bg-surface text-muted-2 hover:border-line-strong hover:text-ink'}
           ${hasNewAlerts ? 'text-[#ff3d73]' : ''}
         `}
         aria-label={`Notificaciones${count > 0 ? ` (${count} no leídas)` : ''}`}
@@ -231,12 +231,12 @@ const NotificationBell: React.FC = memo(() => {
         <div className={`transition-transform duration-300 ${hasNewAlerts ? 'scale-110' : 'scale-100'}`}>
           <Bell className="w-5 h-5" weight={count > 0 ? 'fill' : 'regular'} />
         </div>
-        
+
         {count > 0 && (
           <span className={`
             absolute top-1.5 right-1.5
             h-2 w-2 rounded-full
-            bg-[#ff3d73] ring-2 ring-white
+            bg-[#ff3d73] ring-2 ring-surface
             ${hasNewAlerts ? 'animate-pulse' : ''}
           `} />
         )}
@@ -245,11 +245,11 @@ const NotificationBell: React.FC = memo(() => {
       {isOpen && (
         <div className="
           absolute right-0 mt-2 w-80 sm:w-96
-          bg-white shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)] border border-white/90
+          bg-surface shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)] border border-line
           z-50 overflow-hidden rounded-3xl
           animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right
         ">
-          <div className="px-5 py-4 border-b border-line bg-white flex items-center justify-between">
+          <div className="px-5 py-4 border-b border-line bg-surface flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-base text-ink-soft uppercase tracking-widest">Notificaciones</h3>
               {count > 0 && (
@@ -280,10 +280,10 @@ const NotificationBell: React.FC = memo(() => {
               </div>
             ) : recentAlertas.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-                <div className="w-10 h-10 rounded-[9px] bg-[#f8f7fb] flex items-center justify-center mb-3 border border-line-focus">
+                <div className="w-10 h-10 rounded-[9px] bg-surface-soft flex items-center justify-center mb-3 border border-line-focus">
                   <Check className="w-5 h-5 text-muted" weight="bold" />
                 </div>
-                <p className="text-sm font-medium text-ink-soft leading-tight">Estás al día</p>
+                <p className="text-sm font-medium text-ink leading-tight">Estás al día</p>
                 <p className="text-base text-muted-3 mt-1">No tienes notificaciones pendientes por leer.</p>
               </div>
             ) : (
@@ -302,12 +302,12 @@ const NotificationBell: React.FC = memo(() => {
           </div>
 
           {/* Footer */}
-            <div className="p-2 border-t border-line bg-white">
+            <div className="p-2 border-t border-line bg-surface">
               <button type="button"
                 onClick={handleViewAll}
                 className="
                   w-full py-2.5 text-sm font-semibold text-muted-2
-                  hover:text-ink-soft hover:bg-[#f8f7fb] border border-transparent hover:border-line-focus
+                  hover:text-ink hover:bg-surface-soft border border-transparent hover:border-line-focus
                   rounded-[9px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-line-focus/70
                 "
               >

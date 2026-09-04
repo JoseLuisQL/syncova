@@ -33,7 +33,7 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
 
   if (hasBase && additionalCount > 0) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink">
+      <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink">
         <Stack weight="bold" className="h-3 w-3" />
         <span className="hidden sm:inline">Completo</span>
         <span className="sm:hidden">C</span>
@@ -43,7 +43,7 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
 
   if (hasBase) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink">
+      <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink">
         <CheckCircle weight="bold" className="h-3 w-3" />
         <span className="hidden sm:inline">Base</span>
         <span className="sm:hidden">B</span>
@@ -53,7 +53,7 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
 
   if (additionalCount > 0) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink">
+      <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink">
         <Plus weight="bold" className="h-3 w-3" />
         <span className="hidden sm:inline">Adic. #{additionalCount}</span>
         <span className="sm:hidden">A{additionalCount}</span>
@@ -62,7 +62,7 @@ const TipoBadge: React.FC<{ vale: ValeEntrega }> = memo(({ vale }) => {
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink">
+    <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink">
       <CheckCircle weight="bold" className="h-3 w-3" />
       <span>Base</span>
     </span>
@@ -77,7 +77,7 @@ const EstadoBadge: React.FC<{ estado: string }> = memo(({ estado }) => {
   const Icon = config.icon;
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink">
+    <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink">
       <Icon weight="bold" className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">{config.label}</span>
     </span>
@@ -111,22 +111,22 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
               <th className={`${COMPONENT_STYLES.table.headerCell} text-center w-32`}>Acciones</th>
             </tr>
           </thead>
-          <tbody className="bg-white">
+          <tbody className="bg-surface">
             {isLoading ? (
               <tr>
                 <td colSpan={7} className="px-6 py-12 text-center">
                   <div className="flex flex-col items-center gap-3">
-                    <SpinnerGap weight="bold" className="h-8 w-8 animate-spin text-zinc-400" />
-                    <span className="text-sm font-medium text-zinc-500">Renderizando matriz Tufte-Style...</span>
+                    <SpinnerGap weight="bold" className="h-8 w-8 animate-spin text-muted" />
+                    <span className="text-sm font-medium text-muted-2">Cargando vales...</span>
                   </div>
                 </td>
               </tr>
             ) : vales.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-6 py-16 text-center">
-                  <Receipt weight="duotone" className="mx-auto h-12 w-12 text-zinc-200 mb-4" />
-                  <p className="text-base font-semibold tracking-tight text-zinc-900">Sin vales generados</p>
-                  <p className="mt-1 text-sm text-zinc-500">
+                  <Receipt weight="duotone" className="mx-auto h-12 w-12 text-muted mb-4" />
+                  <p className="text-base font-semibold tracking-tight text-ink">Sin vales generados</p>
+                  <p className="mt-1 text-sm text-muted">
                     Use el botón Generar Vale para crear el documento de este centro y periodo.
                   </p>
                 </td>
@@ -139,7 +139,7 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
                 >
                   {/* Numero */}
                   <td className={COMPONENT_STYLES.table.cell}>
-                    <span className="font-black tracking-tight text-zinc-900">{vale.numero}</span>
+                    <span className="font-black tracking-tight text-ink">{vale.numero}</span>
                   </td>
 
                   {/* Centro de Acopio */}
@@ -193,7 +193,7 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
                     <div className="flex items-center justify-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity">
                       <button type="button"
                         onClick={() => onVerDetalle(vale)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted-2 hover:bg-surface-soft hover:text-ink transition-colors"
                         title="Ver detalle"
                         disabled={isProcessing}
                       >
@@ -201,7 +201,7 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
                       </button>
                       <button type="button"
                         onClick={() => onExportar(vale)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted-2 hover:bg-surface-soft hover:text-ink transition-colors"
                         title="Exportar"
                         disabled={isProcessing}
                       >
@@ -209,7 +209,7 @@ export const ValesTabla: React.FC<ValesTablaProps> = memo(({
                       </button>
                       <button type="button"
                         onClick={() => onRevertir(vale)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-zinc-500 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted-2 hover:bg-rose-50/20 hover:text-rose-500 transition-colors"
                         title="Revertir"
                         disabled={isProcessing}
                       >

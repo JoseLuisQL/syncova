@@ -114,6 +114,11 @@ export default {
         hh: designMdTheme.colors,
         clinical: designMdTheme.colors,
         ...clinicalPalette,
+        // Tokens clínicos adaptables a temas light y dark
+        primary: 'var(--clinical-primary)',
+        secondary: 'var(--clinical-secondary)',
+        neutral: 'var(--clinical-neutral)',
+        'on-primary': 'var(--clinical-on-primary)',
         // Tokens semánticos del sistema. Implementados como CSS variables con
         // soporte de alpha (<alpha-value>) para que `bg-ink/50`, `text-brand/70`
         // etc. funcionen. Las variables se definen en index.css bajo :root
@@ -149,6 +154,28 @@ export default {
         },
         // Fondo de la app (page background), token dedicado para dark mode.
         app: 'rgb(var(--color-app) / <alpha-value>)',
+        status: {
+          success: {
+            bg: 'rgb(var(--color-status-success-bg) / <alpha-value>)',
+            border: 'rgb(var(--color-status-success-border) / <alpha-value>)',
+            text: 'rgb(var(--color-status-success-text) / <alpha-value>)',
+          },
+          warning: {
+            bg: 'rgb(var(--color-status-warning-bg) / <alpha-value>)',
+            border: 'rgb(var(--color-status-warning-border) / <alpha-value>)',
+            text: 'rgb(var(--color-status-warning-text) / <alpha-value>)',
+          },
+          danger: {
+            bg: 'rgb(var(--color-status-danger-bg) / <alpha-value>)',
+            border: 'rgb(var(--color-status-danger-border) / <alpha-value>)',
+            text: 'rgb(var(--color-status-danger-text) / <alpha-value>)',
+          },
+          info: {
+            bg: 'rgb(var(--color-status-info-bg) / <alpha-value>)',
+            border: 'rgb(var(--color-status-info-border) / <alpha-value>)',
+            text: 'rgb(var(--color-status-info-text) / <alpha-value>)',
+          },
+        },
       },
       fontFamily: {
         ...designMdTheme.fontFamily,

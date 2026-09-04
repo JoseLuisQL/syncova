@@ -198,7 +198,7 @@ const GestionVacunas: React.FC = () => {
     >
       <table className="min-w-full border-separate border-spacing-0">
         <TableHeader columns={TABLE_COLUMNS} />
-        <tbody className="bg-white">
+        <tbody className="bg-surface">
           {vacunas.length === 0 ? (
             <tr>
               <td colSpan={TABLE_COLUMNS.length + 1}>
@@ -511,7 +511,7 @@ const VacunaDetailModal: React.FC<VacunaDetailModalProps> = memo(({ vacuna, onCl
           </div>
 
           {vacuna.lotes && vacuna.lotes.length > 0 ? (
-            <div className="overflow-hidden rounded-xl border border-line bg-white shadow-xs">
+            <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-xs">
               <div className="max-h-56 overflow-y-auto">
                 <table className="min-w-full divide-y divide-line text-left text-xs">
                   <thead className="sticky top-0 z-10 bg-surface-soft text-[0.68rem] font-semibold uppercase tracking-wider text-muted">
@@ -522,13 +522,13 @@ const VacunaDetailModal: React.FC<VacunaDetailModalProps> = memo(({ vacuna, onCl
                       <th className="px-3.5 py-2.5 text-center">Estado</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-line-soft bg-white text-ink">
+                  <tbody className="divide-y divide-line-soft bg-surface text-ink">
                     {vacuna.lotes.map((lote) => (
                       <tr key={lote.id} className="transition-colors hover:bg-surface-soft/50">
                         <td className="px-3.5 py-2.5 font-mono font-medium text-ink">
                           {lote.numero}
                         </td>
-                        <td className="px-3.5 py-2.5 text-right font-semibold text-zinc-900">
+                        <td className="px-3.5 py-2.5 text-right font-semibold text-ink">
                           {lote.cantidadActual.toLocaleString()}
                         </td>
                         <td className="px-3.5 py-2.5 text-muted-2">

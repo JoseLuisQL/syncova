@@ -108,12 +108,12 @@ export const SiBotFloating: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
               exit={{ opacity: 0, y: 12, scale: 0.96, filter: 'blur(3px)' }}
               transition={{ duration: 0.35, type: 'spring', damping: 24, stiffness: 280 }}
-              className={`fixed ${panelLayoutClass} z-50 flex flex-col overflow-hidden border border-line bg-white shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] transition-[width,height,max-width,max-height,bottom,right,border-radius] duration-300 ease-out`}
+              className={`fixed ${panelLayoutClass} z-50 flex flex-col overflow-hidden border border-line bg-surface shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] transition-[width,height,max-width,max-height,bottom,right,border-radius] duration-300 ease-out`}
             >
-            <div className="flex shrink-0 flex-col border-b border-line-soft bg-white px-5 py-4">
+            <div className="flex shrink-0 flex-col border-b border-line-soft bg-surface px-5 py-4">
                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-white text-brand">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface text-brand">
                       <SiBotLogo className="h-4 w-4" />
                     </div>
                     <div className="flex flex-col">

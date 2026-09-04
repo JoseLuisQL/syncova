@@ -74,10 +74,10 @@ const EditablePlanningField: React.FC<EditablePlanningFieldProps> = memo(({
         onBlur={onBlur}
         disabled={disabled}
         aria-label={ariaLabel}
-        className={`${widthClass} min-w-0 bg-transparent px-2.5 py-2.5 text-center text-[0.85rem] font-semibold tabular-nums text-ink transition-colors hover:bg-surface-soft focus:bg-white focus:outline-none focus:ring-[1.5px] focus:ring-inset focus:ring-brand disabled:cursor-not-allowed disabled:opacity-60 ${pending ? 'bg-amber-50 text-amber-900 focus:bg-amber-50' : ''}`}
+        className={`${widthClass} min-w-0 bg-transparent px-2.5 py-2.5 text-center text-[0.85rem] font-semibold tabular-nums text-ink transition-colors hover:bg-surface-soft focus:bg-surface focus:outline-none focus:ring-[1.5px] focus:ring-inset focus:ring-brand disabled:cursor-not-allowed disabled:opacity-60 ${pending ? 'bg-status-warning-bg text-status-warning-text focus:bg-status-warning-bg' : ''}`}
       />
       {pending ? (
-        <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-white bg-amber-500" />
+        <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-surface bg-amber-500" />
       ) : null}
     </div>
   );
@@ -94,7 +94,7 @@ const TotalPill: React.FC<{
       ? 'bg-brand text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)]'
       : tone === 'muted'
       ? 'border border-line bg-surface-soft text-muted'
-      : 'border border-line bg-white text-ink font-semibold';
+      : 'border border-line bg-surface text-ink font-semibold';
 
   return (
     <span className={`inline-flex min-w-[3.5rem] items-center justify-center rounded-md px-2 py-1 text-[0.75rem] font-semibold tabular-nums tracking-tight ${className}`}>
@@ -107,7 +107,7 @@ TotalPill.displayName = 'TotalPill';
 
 const EstadoBadge: React.FC<{ total: number }> = memo(({ total }) => (
   <span
-    className={`inline-flex items-center gap-1.5 rounded-md border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${
+    className={`inline-flex items-center gap-1.5 rounded-md border bg-surface-soft px-2 py-0.5 text-[0.68rem] font-medium ${
       total > 0
         ? 'border-line text-ink before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500 before:content-[""]'
         : 'border-line text-muted-2 before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400 before:content-[""]'
@@ -124,7 +124,7 @@ const MobileTotalesSummary: React.FC<{
   totalGeneral: number;
   calcularTotalMes: PlanificacionTablaProps['calcularTotalMes'];
 }> = memo(({ count, totalGeneral, calcularTotalMes }) => (
-  <div className="rounded-xl border border-line bg-white p-3">
+  <div className="rounded-xl border border-line bg-surface p-3">
     <div className="flex items-center justify-between gap-3 border-b border-line-soft pb-3">
       <div>
         <p className="text-xs font-medium text-muted">Total anual</p>
@@ -194,7 +194,7 @@ const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
       }`}
     >
       <div className="flex items-start gap-2.5">
-        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-white ${colores.border}`}>
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-surface ${colores.border}`}>
           <span className={`h-3 w-3 rounded-full ${colores.accent}`} aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
@@ -203,7 +203,7 @@ const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {selectedCentroAcopio === 'todos' ? (
-              <span className={`inline-flex rounded-md border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${colores.border} ${colores.text}`}>
+              <span className={`inline-flex rounded-md border bg-surface px-2 py-0.5 text-[0.68rem] font-medium ${colores.border} ${colores.text}`}>
                 {centro !== 'DEFAULT' ? centro : 'Base'}
               </span>
             ) : null}
@@ -220,7 +220,7 @@ const MobilePlanificacionCard: React.FC<MobilePlanificacionCardProps> = memo(({
           const tieneVale = hasValeGenerado?.(estData.establecimiento.id, mesIndex) ?? false;
 
           return (
-            <div key={`${estData.establecimiento.id}-${mes}`} className="rounded-[9px] border border-line bg-white p-1">
+            <div key={`${estData.establecimiento.id}-${mes}`} className="rounded-[9px] border border-line bg-surface p-1">
               <div className="mb-0.5 flex items-center justify-between px-1">
                 <span className="text-[0.58rem] font-semibold uppercase tracking-wider text-muted">{mes}</span>
                 <div className="flex items-center gap-0.5">
@@ -272,7 +272,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
   const totalGeneral = calcularTotalGeneral();
 
   return (
-    <section className="relative flex h-full flex-1 flex-col bg-white" aria-label="Matriz de planificación">
+    <section className="relative flex h-full flex-1 flex-col bg-surface" aria-label="Matriz de planificación">
       <DataTable
         isLoading={isLoading}
         loadingMessage="Cargando planificación..."
@@ -280,7 +280,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
         skeletonColumns={14}
         loadingVariant="table"
       >
-        <div className="hidden min-h-0 flex-1 overflow-auto md:block selection:bg-zinc-200">
+        <div className="hidden min-h-0 flex-1 overflow-auto md:block selection:bg-surface-soft">
           <table className="w-full border-separate border-spacing-0" role="table" aria-label="Matriz de datos">
             <thead className="sticky top-0 z-20">
               <tr className="bg-surface-soft">
@@ -299,8 +299,8 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
             </thead>
 
             <tbody className="text-[0.85rem]">
-              <tr className="sticky top-[45px] z-[15] border-b border-line-soft bg-white/95 backdrop-blur-sm">
-                <td className="sticky left-0 z-20 border-b border-r border-line bg-white/95 px-4 py-2">
+              <tr className="sticky top-[45px] z-[15] border-b border-line-soft bg-surface/95 backdrop-blur-sm">
+                <td className="sticky left-0 z-20 border-b border-r border-line bg-surface/95 px-4 py-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-muted-2">Total mensual</span>
                     <span className="text-xs font-medium text-muted">{establecimientos.length} estab.</span>
@@ -348,7 +348,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                     <td className={`sticky left-0 z-10 box-border border-b border-r px-4 py-3 ${colores.border} ${rowBg} ${isSelected ? 'ring-inset ring-[1.5px] ring-brand' : ''}`}>
                       <div className="min-w-0">
                         <div className="flex items-start gap-3">
-                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border bg-white ${colores.border}`}>
+                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border bg-surface ${colores.border}`}>
                             <span className={`h-3 w-3 rounded-full ${colores.accent}`} aria-hidden="true" />
                           </div>
                           <div className="min-w-0 flex-1">
@@ -363,7 +363,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                                 <span className="font-mono text-[0.68rem] font-medium text-muted">{estData.establecimiento.codigo}</span>
                               )}
                               {selectedCentroAcopio === 'todos' ? (
-                                <span className={`inline-flex rounded-md border bg-white px-2 py-0.5 text-[0.68rem] font-medium ${colores.border} ${colores.text}`}>
+                                <span className={`inline-flex rounded-md border bg-surface px-2 py-0.5 text-[0.68rem] font-medium ${colores.border} ${colores.text}`}>
                                   {centro !== 'DEFAULT' ? centro : 'Regional'}
                                 </span>
                               ) : null}
@@ -392,7 +392,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
                             onBlur={() => onFieldBlur(estIndex, mesIndex)}
                           />
                           {tieneVale && (
-                            <span className="pointer-events-none absolute right-0.5 top-0.5 z-10 flex items-center justify-center rounded-full bg-white/95 shadow-sm ring-1 ring-brand-100">
+                            <span className="pointer-events-none absolute right-0.5 top-0.5 z-10 flex items-center justify-center rounded-full bg-surface shadow-sm ring-1 ring-brand-100">
                               <CheckCircle className="h-3 w-3 text-brand" weight="fill" />
                             </span>
                           )}
@@ -412,7 +412,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
           </table>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-auto bg-white p-2.5 md:hidden">
+        <div className="min-h-0 flex-1 overflow-auto bg-surface p-2.5 md:hidden">
           <MobileTotalesSummary
             count={establecimientos.length}
             totalGeneral={totalGeneral}
@@ -420,7 +420,7 @@ export const PlanificacionTabla: React.FC<PlanificacionTablaProps> = memo(({
           />
 
           {establecimientos.length === 0 && !isLoading ? (
-            <div className="rounded-xl border border-line bg-white">
+            <div className="rounded-xl border border-line bg-surface">
               <EmptyState
                 icon={Package}
                 title="Sin establecimientos"

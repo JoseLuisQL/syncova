@@ -122,7 +122,7 @@ export function ReportResultsTable<T>({
                 align: column.align,
                 className: column.className,
               }))} />
-              <tbody className="bg-white">
+              <tbody className="bg-surface">
                 {rows.map((row, index) => (
                   <TableRow key={`${title}-${index + 1}`}>
                     {columns.map((column) => (

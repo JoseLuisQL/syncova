@@ -184,7 +184,7 @@ const GestionLotes: React.FC<GestionLotesProps> = ({
         >
           <table className="min-w-full border-separate border-spacing-0">
             <TableHeader columns={columns} />
-            <tbody className="bg-white">
+            <tbody className="bg-surface">
               {filteredLotes.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length + 1}>

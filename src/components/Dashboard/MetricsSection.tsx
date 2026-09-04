@@ -21,27 +21,27 @@ interface MetricCardProps {
 const BAR_HEIGHTS = [42, 70, 38, 78, 55, 88, 64, 96];
 
 const MetricCard: React.FC<MetricCardProps> = memo(({ title, value, trend, trendUp, icon: Icon, subtitle }) => (
-  <article className="min-h-[128px] rounded-3xl border border-[#e3e9f0] bg-white p-4 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_45px_-32px_rgba(15,42,59,0.65)]">
+  <article className="min-h-[128px] rounded-3xl border border-line bg-surface p-4 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_45px_-32px_rgba(15,42,59,0.65)]">
     <div className="mb-3 flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full border border-[#e4edf2] bg-[#f8fbfd] text-[#0e9f8e]">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full border border-line bg-surface-soft text-brand">
           <Icon size={15} weight="bold" />
         </div>
-        <h3 className="text-sm font-medium text-[#556575]">{title}</h3>
+        <h3 className="text-sm font-medium text-muted-2">{title}</h3>
       </div>
-      <DotsThree className="h-5 w-5 text-[#9aa4b2]" weight="bold" />
+      <DotsThree className="h-5 w-5 text-muted" weight="bold" />
     </div>
 
     <div className="flex items-start justify-between gap-4">
       <div className="min-w-0">
-        <div className="text-2xl font-semibold leading-none tracking-[-0.04em] text-[#171b22] tabular-nums">
+        <div className="text-2xl font-semibold leading-none tracking-[-0.04em] text-ink tabular-nums">
           {value}
         </div>
-        <p className="mt-2 max-w-[160px] text-xs leading-snug text-[#7a8797]">{subtitle}</p>
+        <p className="mt-2 max-w-[160px] text-xs leading-snug text-muted">{subtitle}</p>
       </div>
       {trend && (
         <span className={`mt-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
-          trendUp ? 'border-[#bdeee5] bg-[#effbf8] text-[#0a8276]' : 'border-[#f3d1d1] bg-[#fff5f5] text-[#c15d5d]'
+          trendUp ? 'border-status-success-border bg-status-success-bg text-status-success-text' : 'border-status-danger-border bg-status-danger-bg text-status-danger-text'
         }`}>
           {trendUp ? '↑' : '↓'} {trend}
         </span>
@@ -66,9 +66,9 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({ stats, isLoading }) => 
     return (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[1, 2, 3, 4, 5].map(i => (
-          <div key={i} className="h-[128px] animate-pulse rounded-3xl border border-[#e3e9f0] bg-white p-4">
-            <div className="mb-5 h-3 w-1/2 rounded bg-[#eef3f6]" />
-            <div className="h-8 w-3/4 rounded bg-[#eef3f6]" />
+          <div key={i} className="h-[128px] animate-pulse rounded-3xl border border-line bg-surface p-4">
+            <div className="mb-5 h-3 w-1/2 rounded bg-surface-soft" />
+            <div className="h-8 w-3/4 rounded bg-surface-soft" />
           </div>
         ))}
       </div>

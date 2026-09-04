@@ -51,7 +51,7 @@ const IciDemidErroresModal: React.FC<IciDemidErroresModalProps> = ({ isOpen, onC
               ) : null}
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-line bg-white">
+            <div className="overflow-hidden rounded-xl border border-line bg-surface">
               <div className="border-b border-line-soft px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Warning className="h-4 w-4 text-rose-500" />
@@ -68,7 +68,7 @@ const IciDemidErroresModal: React.FC<IciDemidErroresModalProps> = ({ isOpen, onC
                       <th className={`${COMPONENT_STYLES.table.headerCell} border-b border-line-soft`}>Descripción del error</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white">
+                  <tbody className="bg-surface">
                     {(errores.erroresDetalle || []).map((error, index) => (
                       <tr key={`${error.fila}-${index}`} className="transition-colors hover:bg-surface-soft">
                         <td className={`${COMPONENT_STYLES.table.cell} border-b border-r border-line-soft`}>
