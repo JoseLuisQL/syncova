@@ -180,6 +180,7 @@ model Establecimiento {
 
 model Vacuna {
   id                        String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  codigo                    String?               @map("codigo") @db.VarChar(50)
   nombre                    String                @db.VarChar(255)
   tipo                      String                @db.VarChar(100)
   presentacion              String                @db.VarChar(100)
@@ -201,6 +202,7 @@ model Vacuna {
   stocksInicialesMensuales  StockInicialMensual[]
   iciDemidRegistros         IciDemidRegistro[]
 
+  @@index([codigo], name: "idx_vacunas_codigo")
   @@map("vacunas")
 }
 

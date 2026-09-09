@@ -34,6 +34,7 @@ export class VacunaService {
 
       if (search) {
         where.OR = [
+          { codigo: { contains: search, mode: 'insensitive' } },
           { nombre: { contains: search, mode: 'insensitive' } },
           { tipo: { contains: search, mode: 'insensitive' } },
           { presentacion: { contains: search, mode: 'insensitive' } }
@@ -151,6 +152,7 @@ export class VacunaService {
 
       const vacuna = await prisma.vacuna.create({
         data: {
+          codigo: data.codigo ? data.codigo.trim() : null,
           nombre: data.nombre,
           tipo: data.tipo,
           presentacion: data.presentacion,
@@ -194,6 +196,7 @@ export class VacunaService {
       const vacuna = await prisma.vacuna.update({
         where: { id },
         data: {
+          codigo: data.codigo !== undefined ? (data.codigo ? data.codigo.trim() : null) : undefined,
           nombre: data.nombre,
           tipo: data.tipo,
           presentacion: data.presentacion,
@@ -329,6 +332,28 @@ export class VacunaService {
 
       if (vacunaExistente) {
         throw createError.conflict('Ya existe una vacuna con este nombre');
+      }
+    }
+
+    // Validar código único (solo si se proporciona código)
+    if (data.codigo && data.codigo.trim()) {
+      const whereCodigoCondition: any = {
+        codigo: {
+          equals: data.codigo.trim(),
+          mode: 'insensitive'
+        }
+      };
+
+      if (excludeId) {
+        whereCodigoCondition.id = { not: excludeId };
+      }
+
+      const vacunaCodigoExistente = await prisma.vacuna.findFirst({
+        where: whereCodigoCondition
+      });
+
+      if (vacunaCodigoExistente) {
+        throw createError.conflict(`Ya existe una vacuna con el código "${data.codigo.trim()}"`);
       }
     }
 

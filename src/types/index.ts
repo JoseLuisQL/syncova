@@ -192,6 +192,7 @@ export interface EstablecimientoFilters {
 
 export interface Vacuna {
   id: string;
+  codigo?: string | null;
   nombre: string;
   tipo: string;
   presentacion: string;
@@ -218,6 +219,7 @@ export interface Vacuna {
 
 // DTOs para el backend
 export interface CreateVacunaDto {
+  codigo?: string;
   nombre: string;
   tipo: string;
   presentacion: string;
@@ -227,6 +229,7 @@ export interface CreateVacunaDto {
 }
 
 export interface UpdateVacunaDto {
+  codigo?: string;
   nombre?: string;
   tipo?: string;
   presentacion?: string;

@@ -71,6 +71,7 @@ export interface IEstablecimiento {
 
 export interface IVacuna {
   id: string;
+  codigo?: string | null;
   nombre: string;
   tipo: string;
   presentacion: string;
@@ -368,6 +369,7 @@ export interface UpdateEstablecimientoDto {
 }
 
 export interface CreateVacunaDto {
+  codigo?: string;
   nombre: string;
   tipo: string;
   presentacion: string;
@@ -377,6 +379,7 @@ export interface CreateVacunaDto {
 }
 
 export interface UpdateVacunaDto {
+  codigo?: string;
   nombre?: string;
   tipo?: string;
   presentacion?: string;

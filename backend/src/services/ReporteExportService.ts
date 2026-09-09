@@ -39,10 +39,106 @@ export interface ReporteExcelResult {
 }
 
 /**
+ * Lista oficial de las 20 vacunas estándar para el reporte de Movimientos por EESS
+ * según la secuencia normativa establecida:
+ * 1. AMA, 2. APO, 3. BCG, 4. DPT, 5. DPTA, 6. Dt Adulto, 7. Dt Pediatrico,
+ * 8. HEPATITIS A, 9. HVB Adulto, 10. HVB Pediatrico, 11. Influenza Adulto,
+ * 12. Influenza Pediatrica, 13. IPV, 14. Neumococo, 15. Pentavalente,
+ * 16. Rotavirus, 17. SPR X 1 DOSIS, 18. SPR X 5 DOSIS, 19. Varicela, 20. VPH.
+ */
+export const ORDEN_VACUNAS_OFICIAL = [
+  'AMA',
+  'APO',
+  'BCG',
+  'DPT',
+  'DPTA',
+  'Dt Adulto',
+  'Dt Pediatrico',
+  'HEPATITIS A',
+  'HVB Adulto',
+  'HVB Pediatrico',
+  'Influenza Adulto',
+  'Influenza Pediatrica',
+  'IPV',
+  'Neumococo',
+  'Pentavalente',
+  'Rotavirus',
+  'SPR X 1 DOSIS',
+  'SPR X 5 DOSIS',
+  'Varicela',
+  'VPH',
+] as const;
+
+export function normalizarNombreParaOrden(nombre: string): string {
+  if (!nombre) return '';
+  return nombre
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toUpperCase()
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+export function obtenerOrdenVacuna(nombre: string): number {
+  if (!nombre) return 9999;
+  const limpio = normalizarNombreParaOrden(nombre);
+
+  // Si tiene prefijo de código (ej: "06377 - AMA"), considerar la parte del nombre
+  const sinCodigo = limpio.replace(/^[A-Z0-9_\-]+\s*[-:]\s*/, '').trim();
+  const target = sinCodigo || limpio;
+
+  // 1. Búsqueda exacta por nombre normalizado en la lista oficial
+  for (let i = 0; i < ORDEN_VACUNAS_OFICIAL.length; i++) {
+    const oficialNormalizado = normalizarNombreParaOrden(ORDEN_VACUNAS_OFICIAL[i]);
+    if (target === oficialNormalizado) {
+      return i;
+    }
+  }
+
+  // 2. Equivalencias y variantes comunes en inventarios
+  if (target === 'AMA' || target.includes('AMARILICA')) return 0; // AMA
+  if (target === 'APO' || target.includes('POLIO ORAL') || target.includes('POLIOMIELITICA ORAL')) return 1; // APO
+  if (target === 'BCG' || target.includes('TUBERCULOSA')) return 2; // BCG
+  if (target === 'DPTA') return 4; // DPTA
+  if (target === 'DPT') return 3; // DPT
+  if (target.includes('DT') && (target.includes('ADULTO') || target.includes('ADULT'))) return 5; // Dt Adulto
+  if (target.includes('DT') && (target.includes('PEDIATRICO') || target.includes('PEDIAT'))) return 6; // Dt Pediatrico
+  if (target.includes('HEPATITIS A') || target === 'HAV') return 7; // HEPATITIS A
+  if ((target.includes('HVB') || target.includes('HEPATITIS B')) && (target.includes('ADULTO') || target.includes('ADULT'))) return 8; // HVB Adulto
+  if ((target.includes('HVB') || target.includes('HEPATITIS B')) && (target.includes('PEDIATRICO') || target.includes('PEDIAT'))) return 9; // HVB Pediatrico
+  if (target.includes('INFLUENZA') && (target.includes('ADULTO') || target.includes('ADULT'))) return 10; // Influenza Adulto
+  if (target.includes('INFLUENZA') && (target.includes('PEDIATRICA') || target.includes('PEDIATRICO') || target.includes('PEDIAT'))) return 11; // Influenza Pediatrica
+  if (target === 'IPV' || target.includes('POLIO INYECTABLE') || target.includes('POLIO INACTIVADA')) return 12; // IPV
+  if (target.includes('NEUMOCOCO') || target.includes('NEUMOC')) return 13; // Neumococo
+  if (target.includes('PENTAVALENTE') || target.includes('PENTA')) return 14; // Pentavalente
+  if (target.includes('ROTAVIRUS')) return 15; // Rotavirus
+  if (target.includes('SPR') && (target.includes('1 DOSIS') || target.includes('UNIDOSIS'))) return 16; // SPR X 1 DOSIS
+  if (target.includes('SPR') && (target.includes('5 DOSIS') || target.includes('MULTIDOSIS'))) return 17; // SPR X 5 DOSIS
+  if (target.includes('VARICELA')) return 18; // Varicela
+  if (target === 'VPH' || target.includes('PAPILOMA')) return 19; // VPH
+
+  // Cualquier vacuna nueva o adicional continúa después de las 20 principales
+  return 1000;
+}
+
+export function compararVacunasOrdenOficial(nombreA: string, nombreB: string): number {
+  const ordenA = obtenerOrdenVacuna(nombreA);
+  const ordenB = obtenerOrdenVacuna(nombreB);
+
+  if (ordenA !== ordenB) {
+    return ordenA - ordenB;
+  }
+  return (nombreA || '').localeCompare(nombreB || '', 'es', { sensitivity: 'base' });
+}
+
+/**
  * Servicio para exportación de reportes a Excel
  * Implementa diseño profesional siguiendo el patrón de ValeExportService
  */
 export class ReporteExportService {
+  public static readonly ORDEN_VACUNAS_OFICIAL = ORDEN_VACUNAS_OFICIAL;
+  public static readonly obtenerOrdenVacuna = obtenerOrdenVacuna;
+  public static readonly compararVacunasOrdenOficial = compararVacunasOrdenOficial;
   // ============================================================================
   // PALETA DE COLORES PROFESIONAL - CONSISTENTE CON SIVAC (teal/cyan)
   // ============================================================================
@@ -2623,7 +2719,7 @@ export class ReporteExportService {
       const vacunasArray = Array.from(vacunasUnicas).sort((a, b) => {
         const nombreA = vacunasInfo.get(a)?.nombre || '';
         const nombreB = vacunasInfo.get(b)?.nombre || '';
-        return nombreA.localeCompare(nombreB);
+        return compararVacunasOrdenOficial(nombreA, nombreB);
       });
 
       // Configurar columnas dinámicamente
@@ -3715,7 +3811,7 @@ export class ReporteExportService {
       const vacunasArray = Array.from(vacunasUnicas).sort((a, b) => {
         const nombreA = vacunasInfo.get(a)?.nombre || '';
         const nombreB = vacunasInfo.get(b)?.nombre || '';
-        return nombreA.localeCompare(nombreB);
+        return compararVacunasOrdenOficial(nombreA, nombreB);
       });
 
       // Configurar columnas dinámicamente

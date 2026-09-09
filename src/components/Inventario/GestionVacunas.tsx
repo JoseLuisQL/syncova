@@ -222,7 +222,14 @@ const GestionVacunas: React.FC = () => {
                       className="min-w-0 text-left"
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-ink">{vacuna.nombre}</p>
+                        <div className="flex items-center gap-1.5">
+                          {vacuna.codigo ? (
+                            <span className="inline-flex items-center rounded border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 font-mono text-[0.7rem] font-semibold text-zinc-700">
+                              {vacuna.codigo}
+                            </span>
+                          ) : null}
+                          <p className="truncate text-sm font-medium text-ink">{vacuna.nombre}</p>
+                        </div>
                         <p className="text-xs text-muted">{vacuna.dosisPorFrasco} dosis por frasco</p>
                       </div>
                     </button>
@@ -285,7 +292,7 @@ const GestionVacunas: React.FC = () => {
           <FilterBar
             searchValue={searchValue}
             onSearchChange={setSearchValue}
-            searchPlaceholder="Buscar por nombre, tipo o presentación"
+            searchPlaceholder="Buscar por código, nombre, tipo o presentación"
             filters={filters}
             onClear={handleClearFilters}
             actions={
@@ -317,7 +324,14 @@ const GestionVacunas: React.FC = () => {
                   <article key={vacuna.id} className={`${COMPONENT_STYLES.panel} p-4`}>
                     <div className="flex items-start justify-between gap-3">
                       <button type="button" onClick={() => setSelectedVacuna(vacuna)} className="min-w-0 text-left">
-                        <p className="truncate text-base font-semibold text-zinc-950">{vacuna.nombre}</p>
+                        <div className="flex items-center gap-1.5">
+                          {vacuna.codigo ? (
+                            <span className="inline-flex items-center rounded border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 font-mono text-[0.7rem] font-semibold text-zinc-700">
+                              {vacuna.codigo}
+                            </span>
+                          ) : null}
+                          <p className="truncate text-base font-semibold text-zinc-950">{vacuna.nombre}</p>
+                        </div>
                         <p className="mt-1 text-sm text-zinc-500">
                           {vacuna.tipo} · {vacuna.presentacion}
                         </p>
@@ -439,9 +453,16 @@ const VacunaDetailModal: React.FC<VacunaDetailModalProps> = memo(({ vacuna, onCl
               <span className="text-[0.7rem] font-bold uppercase tracking-wider text-muted-2">
                 Biológico / Catálogo oficial
               </span>
-              <h3 className="text-base sm:text-lg font-bold tracking-tight text-ink">
-                {vacuna.nombre}
-              </h3>
+              <div className="flex items-center gap-2">
+                {vacuna.codigo ? (
+                  <span className="inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 font-mono text-xs font-semibold text-blue-700">
+                    Cód: {vacuna.codigo}
+                  </span>
+                ) : null}
+                <h3 className="text-base sm:text-lg font-bold tracking-tight text-ink">
+                  {vacuna.nombre}
+                </h3>
+              </div>
               <div className="flex flex-wrap items-center gap-2 pt-0.5">
                 <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-semibold text-ink shadow-xs">
                   Tipo: {vacuna.tipo}
@@ -573,6 +594,7 @@ interface VacunaModalProps {
 
 const VacunaModal: React.FC<VacunaModalProps> = ({ vacuna, onClose, onSubmit, isLoading = false }) => {
   const [formData, setFormData] = useState({
+    codigo: vacuna?.codigo || '',
     nombre: vacuna?.nombre || '',
     tipo: vacuna?.tipo || '',
     presentacion: vacuna?.presentacion || 'Frasco multidosis',
@@ -606,6 +628,7 @@ const VacunaModal: React.FC<VacunaModalProps> = ({ vacuna, onClose, onSubmit, is
     }
 
     const payload: CreateVacunaDto | UpdateVacunaDto = {
+      codigo: formData.codigo.trim() || undefined,
       nombre: formData.nombre.trim(),
       tipo: formData.tipo.trim(),
       presentacion: formData.presentacion,
@@ -636,8 +659,16 @@ const VacunaModal: React.FC<VacunaModalProps> = ({ vacuna, onClose, onSubmit, is
       }
     >
       <div className="space-y-4">
-        <FormSection title="Identificación" description="Datos que el usuario usa para reconocer rápidamente la vacuna.">
+        <FormSection title="Identificación" description="Datos oficiales para catalogación e integración (SIGA / DEMID / ICI).">
           <div className="grid gap-4 md:grid-cols-2">
+            <TextInput
+              id="vacuna-codigo"
+              label="Código (SIGA / DEMID)"
+              value={formData.codigo}
+              onChange={(value) => handleFieldChange('codigo', value)}
+              placeholder="Ej: 06420"
+              helpText="Código de medicamento oficial para importación automática"
+            />
             <TextInput
               id="vacuna-nombre"
               label="Nombre"

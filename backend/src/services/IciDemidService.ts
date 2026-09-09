@@ -319,8 +319,22 @@ const normalizeVacunaLookupKey = (value: unknown): string => normalizeText(value
 
 const resolveVacuna = (
   medicamentoOriginal: string,
-  vacunaMap: Map<string, { id: string; nombre: string }>,
-): { id: string; nombre: string } | null => {
+  vacunaMap: Map<string, { id: string; nombre: string; codigo?: string | null }>,
+  codigoMed?: string,
+  vacunaCodigoMap?: Map<string, { id: string; nombre: string; codigo?: string | null }>,
+): { id: string; nombre: string; codigo?: string | null } | null => {
+  // 0. Coincidencia prioritaria por código de medicamento (código SIGA/DEMID)
+  if (codigoMed && vacunaCodigoMap) {
+    const rawCode = codigoMed.trim();
+    if (rawCode) {
+      const matchByCode =
+        vacunaCodigoMap.get(rawCode)
+        ?? vacunaCodigoMap.get(rawCode.replace(/^0+/, ''))
+        ?? vacunaCodigoMap.get(rawCode.padStart(5, '0'));
+      if (matchByCode) return matchByCode;
+    }
+  }
+
   const normalizedKey = normalizeVacunaLookupKey(medicamentoOriginal);
   const normalizedText = normalizeText(medicamentoOriginal);
 
@@ -521,7 +535,7 @@ export class IciDemidService {
       select: { id: true, nombre: true },
     });
     const vacunas = await prisma.vacuna.findMany({
-      select: { id: true, nombre: true },
+      select: { id: true, nombre: true, codigo: true },
     });
 
     const establecimientoMap = new Map<string, { id: string; nombre: string }>();
@@ -530,10 +544,17 @@ export class IciDemidService {
       establecimientoMap.set(normalizeEstablecimientoKey(item.nombre), item);
     });
 
-    const vacunaMap = new Map<string, { id: string; nombre: string }>();
+    const vacunaMap = new Map<string, { id: string; nombre: string; codigo?: string | null }>();
+    const vacunaCodigoMap = new Map<string, { id: string; nombre: string; codigo?: string | null }>();
     vacunas.forEach((item) => {
       vacunaMap.set(normalizeText(item.nombre), item);
       vacunaMap.set(normalizeVacunaLookupKey(item.nombre), item);
+      if (item.codigo && item.codigo.trim()) {
+        const cod = item.codigo.trim();
+        vacunaCodigoMap.set(cod, item);
+        vacunaCodigoMap.set(cod.replace(/^0+/, ''), item);
+        vacunaCodigoMap.set(cod.padStart(5, '0'), item);
+      }
     });
 
     const headerRow = worksheet.getRow(1);
@@ -567,6 +588,7 @@ export class IciDemidService {
       if (rowNumber === 1) return;
 
       const establecimientoExcel = String(row.getCell(2).value ?? '').trim();
+      const codigoMed = String(row.getCell(3).value ?? '').trim();
       const medicamentoOriginal = String(row.getCell(4).value ?? '').trim();
 
       if (!establecimientoExcel || !medicamentoOriginal) {
@@ -592,7 +614,7 @@ export class IciDemidService {
         });
       }
 
-      const vacuna = resolveVacuna(medicamentoOriginal, vacunaMap);
+      const vacuna = resolveVacuna(medicamentoOriginal, vacunaMap, codigoMed, vacunaCodigoMap);
       if (vacuna) {
         vacunasMapeadas.set(medicamentoOriginal, vacuna.nombre);
       } else {
