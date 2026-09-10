@@ -269,6 +269,7 @@ export interface MovimientosPorEESSItem {
     [vacunaId: string]: {
       vacunaId: string;
       vacunaNombre: string;
+      vacunaCodigo?: string | null;
       totalEntrega: number;
       totalSalidas: number;
       stock: number;

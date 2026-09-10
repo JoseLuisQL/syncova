@@ -3,6 +3,7 @@ import fs from 'fs';
 import { ServiceResult } from '@/types';
 import { getLogoPath } from '@/middleware/uploadLogo';
 import { ConfiguracionService } from './ConfiguracionService';
+import { prisma } from '@/config/database';
 import {
   StockActualItem,
   StockCriticoItem,
@@ -132,6 +133,38 @@ export function compararVacunasOrdenOficial(nombreA: string, nombreB: string): n
 }
 
 /**
+ * Formatea el nombre de la vacuna para encabezados de reportes.
+ * Si cuenta con código de vacuna, concatena "CODIGO - NOMBRE".
+ * Si el nombre ya contiene el código al inicio, evita duplicar el código.
+ * Si no tiene código o es vacío, retorna únicamente el nombre.
+ */
+export function formatearNombreVacunaConCodigo(nombre: string, codigo?: string | null): string {
+  if (!nombre) return '';
+  const nombreTrim = nombre.trim();
+  const codigoTrim = (codigo || '').trim();
+
+  // Si no hay código proporcionado, retornar el nombre
+  if (!codigoTrim) {
+    return nombreTrim;
+  }
+
+  // Si el nombre ya empieza con el código seguido de guión, dos puntos o corchetes
+  // Ejemplos: "06377 - AMA", "06377-AMA", "[06377] AMA", "06377: AMA"
+  const regexPrefijo = new RegExp(`^(?:\\[?\\s*${codigoTrim.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\]?|\\(${codigoTrim.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\))\\s*[-:]?\\s*(.+)$`, 'i');
+  const match = nombreTrim.match(regexPrefijo);
+  if (match && match[1]) {
+    return `${codigoTrim} - ${match[1].trim()}`;
+  }
+
+  // Si el nombre empieza exactamente con "codigo -" ya está formateado
+  if (nombreTrim.toLowerCase().startsWith(`${codigoTrim.toLowerCase()} -`)) {
+    return nombreTrim;
+  }
+
+  return `${codigoTrim} - ${nombreTrim}`;
+}
+
+/**
  * Servicio para exportación de reportes a Excel
  * Implementa diseño profesional siguiendo el patrón de ValeExportService
  */
@@ -139,6 +172,7 @@ export class ReporteExportService {
   public static readonly ORDEN_VACUNAS_OFICIAL = ORDEN_VACUNAS_OFICIAL;
   public static readonly obtenerOrdenVacuna = obtenerOrdenVacuna;
   public static readonly compararVacunasOrdenOficial = compararVacunasOrdenOficial;
+  public static readonly formatearNombreVacunaConCodigo = formatearNombreVacunaConCodigo;
   // ============================================================================
   // PALETA DE COLORES PROFESIONAL - CONSISTENTE CON SIVAC (teal/cyan)
   // ============================================================================
@@ -2704,17 +2738,41 @@ export class ReporteExportService {
 
       // Obtener todas las vacunas únicas para crear las columnas
       const vacunasUnicas = new Set<string>();
-      const vacunasInfo = new Map<string, { id: string; nombre: string }>();
+      const vacunasInfo = new Map<string, { id: string; nombre: string; codigo?: string | null }>();
 
       data.forEach(item => {
         Object.values(item.vacunas).forEach(vacuna => {
           vacunasUnicas.add(vacuna.vacunaId);
           vacunasInfo.set(vacuna.vacunaId, {
             id: vacuna.vacunaId,
-            nombre: vacuna.vacunaNombre
+            nombre: vacuna.vacunaNombre,
+            codigo: (vacuna as any).vacunaCodigo || null
           });
         });
       });
+
+      // Si alguna vacuna no tiene código en el dataset, intentar obtenerlo de la BD
+      const vacunasSinCodigo = Array.from(vacunasInfo.values()).filter(v => !v.codigo);
+      if (vacunasSinCodigo.length > 0) {
+        try {
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+          const ids = vacunasSinCodigo.map(v => v.id).filter(id => uuidRegex.test(id));
+          if (ids.length > 0) {
+            const vacunasDb = await prisma.vacuna.findMany({
+              where: { id: { in: ids } },
+              select: { id: true, codigo: true }
+            });
+            for (const vDb of vacunasDb) {
+              const vInfo = vacunasInfo.get(vDb.id);
+              if (vInfo && vDb.codigo) {
+                vInfo.codigo = vDb.codigo;
+              }
+            }
+          }
+        } catch {
+          // Si la BD no está disponible (ej. en tests sin conexión), continuar con los datos existentes
+        }
+      }
 
       const vacunasArray = Array.from(vacunasUnicas).sort((a, b) => {
         const nombreA = vacunasInfo.get(a)?.nombre || '';
@@ -2803,7 +2861,7 @@ export class ReporteExportService {
   private static configurarColumnasMovimientosPorEESS(
     worksheet: ExcelJS.Worksheet,
     vacunasArray: string[],
-    vacunasInfo: Map<string, { id: string; nombre: string }>,
+    vacunasInfo: Map<string, { id: string; nombre: string; codigo?: string | null }>,
     config: ReporteExportConfig
   ): void {
     const headerRow1 = config.observaciones ? 6 : 5; // Primera fila de encabezados
@@ -2822,6 +2880,7 @@ export class ReporteExportService {
     vacunasArray.forEach((vacunaId, index) => {
       const vacunaInfo = vacunasInfo.get(vacunaId);
       const vacunaNombre = vacunaInfo?.nombre || `Vacuna ${index + 1}`;
+      const vacunaTitulo = formatearNombreVacunaConCodigo(vacunaNombre, vacunaInfo?.codigo);
 
       // Configurar ancho de las 3 columnas para esta vacuna
       worksheet.getColumn(currentCol).width = 14;     // Total Entrega
@@ -2834,14 +2893,14 @@ export class ReporteExportService {
 
       worksheet.mergeCells(headerRow1, startCol, headerRow1, endCol);
       const vacunaHeaderCell = worksheet.getCell(headerRow1, startCol);
-      vacunaHeaderCell.value = vacunaNombre;
+      vacunaHeaderCell.value = vacunaTitulo;
       vacunaHeaderCell.font = {
         bold: true,
         size: 11,
         color: { argb: 'FFFFFFFF' },
         name: 'Segoe UI'
       };
-      vacunaHeaderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      vacunaHeaderCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
       vacunaHeaderCell.fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -3796,17 +3855,41 @@ export class ReporteExportService {
 
       // Obtener todas las vacunas únicas para crear las columnas
       const vacunasUnicas = new Set<string>();
-      const vacunasInfo = new Map<string, { id: string; nombre: string }>();
+      const vacunasInfo = new Map<string, { id: string; nombre: string; codigo?: string | null }>();
 
       data.forEach(item => {
         Object.values(item.vacunas).forEach(vacuna => {
           vacunasUnicas.add(vacuna.vacunaId);
           vacunasInfo.set(vacuna.vacunaId, {
             id: vacuna.vacunaId,
-            nombre: vacuna.vacunaNombre
+            nombre: vacuna.vacunaNombre,
+            codigo: (vacuna as any).vacunaCodigo || null
           });
         });
       });
+
+      // Si alguna vacuna no tiene código en el dataset, intentar obtenerlo de la BD
+      const vacunasSinCodigo = Array.from(vacunasInfo.values()).filter(v => !v.codigo);
+      if (vacunasSinCodigo.length > 0) {
+        try {
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+          const ids = vacunasSinCodigo.map(v => v.id).filter(id => uuidRegex.test(id));
+          if (ids.length > 0) {
+            const vacunasDb = await prisma.vacuna.findMany({
+              where: { id: { in: ids } },
+              select: { id: true, codigo: true }
+            });
+            for (const vDb of vacunasDb) {
+              const vInfo = vacunasInfo.get(vDb.id);
+              if (vInfo && vDb.codigo) {
+                vInfo.codigo = vDb.codigo;
+              }
+            }
+          }
+        } catch {
+          // Si la BD no está disponible, continuar con los datos existentes
+        }
+      }
 
       const vacunasArray = Array.from(vacunasUnicas).sort((a, b) => {
         const nombreA = vacunasInfo.get(a)?.nombre || '';
@@ -4055,7 +4138,7 @@ export class ReporteExportService {
   private static configurarColumnasStockVacunasEESS(
     worksheet: ExcelJS.Worksheet,
     vacunasArray: string[],
-    vacunasInfo: Map<string, { id: string; nombre: string }>,
+    vacunasInfo: Map<string, { id: string; nombre: string; codigo?: string | null }>,
     config: ReporteExportConfig
   ): void {
     // El encabezado termina en fila 7 u 8 (si hay observaciones), los datos empiezan despues
@@ -4070,12 +4153,13 @@ export class ReporteExportService {
     vacunasArray.forEach((vacunaId) => {
       const vacunaInfo = vacunasInfo.get(vacunaId);
       const vacunaNombre = vacunaInfo?.nombre || 'Vacuna';
+      const vacunaTitulo = formatearNombreVacunaConCodigo(vacunaNombre, vacunaInfo?.codigo);
 
       worksheet.getColumn(currentCol).width = 15;
 
       // Encabezado de vacuna con colores teal
       const vacunaCell = worksheet.getCell(headerRow, currentCol);
-      vacunaCell.value = vacunaNombre;
+      vacunaCell.value = vacunaTitulo;
       vacunaCell.font = { bold: true, size: 10, color: { argb: this.COLORS.white }, name: 'Calibri' };
       vacunaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: this.COLORS.primaryDark } };
       vacunaCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };

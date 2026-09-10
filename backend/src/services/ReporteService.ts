@@ -261,6 +261,7 @@ export interface MovimientosPorEESSItem {
     [vacunaId: string]: {
       vacunaId: string;
       vacunaNombre: string;
+      vacunaCodigo?: string | null;
       totalEntrega: number;
       totalSalidas: number;
       stock: number; // Stock del último mes del rango
@@ -281,6 +282,7 @@ export interface StockVacunasEESSItem {
     [vacunaId: string]: {
       vacunaId: string;
       vacunaNombre: string;
+      vacunaCodigo?: string | null;
       stock: number;
     };
   };
@@ -1961,6 +1963,7 @@ export class ReporteService {
           est.vacunas.set(vacId, {
             vacunaId: mov.vacunaId,
             vacunaNombre: mov.vacuna.nombre,
+            vacunaCodigo: mov.vacuna.codigo || null,
             totalSalidas: 0
           });
         }
@@ -2048,6 +2051,7 @@ export class ReporteService {
           vacunasProcessed[vacId] = {
             vacunaId: vd.vacunaId,
             vacunaNombre: vd.vacunaNombre,
+            vacunaCodigo: vd.vacunaCodigo || null,
             totalEntrega: usarTotalUltimoMesParaEntrega
               ? (totalUltimoMesMap.get(key) || 0)
               : (entregasMap.get(key) || 0),
@@ -2226,6 +2230,7 @@ export class ReporteService {
           vacunasData[vacuna.id] = {
             vacunaId: vacuna.id,
             vacunaNombre: vacuna.nombre,
+            vacunaCodigo: vacuna.codigo || null,
             stock
           };
         }
