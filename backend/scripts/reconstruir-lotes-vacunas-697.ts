@@ -275,28 +275,28 @@ async function main() {
 
     const registrosStockInicial = [
       // Vacuna 56582 - VRS GESTANTE
-      // Mes 6 (Junio): Ingresó lote con 841
-      { vacunaId: VACUNA_56582_ID, mes: 6, anio: 2026, stock: 841, obs: 'Stock de apertura junio 2026 (Ingreso PECOSA: 58839-2026)' },
+      // Mes 6 (Junio): Stock base 0 (el lote con 841 ingresó el 15/06 y el servicio de movimientos lo suma dinámicamente)
+      { vacunaId: VACUNA_56582_ID, mes: 6, anio: 2026, stock: 0, obs: 'Stock de apertura junio 2026 (Stock previo: 0, Lote ingresado el 15/06: 841)' },
       // Mes 7 (Julio - Periodo objetivo al seleccionar Junio en la UI): Apertura = 841 (sin salidas en junio ni julio)
       { vacunaId: VACUNA_56582_ID, mes: 7, anio: 2026, stock: 841, obs: 'Stock de apertura julio 2026 (Sin salidas en julio)' },
       // Mes 8 (Agosto - Periodo objetivo al seleccionar Julio): Apertura = 841 (los vales se emitieron en agosto)
       { vacunaId: VACUNA_56582_ID, mes: 8, anio: 2026, stock: 841, obs: 'Stock inicial agosto 2026' },
       // Mes 9 (Septiembre - Periodo objetivo al seleccionar Agosto): Apertura = 841 - 241 = 600
       { vacunaId: VACUNA_56582_ID, mes: 9, anio: 2026, stock: 600, obs: 'Stock inicial septiembre 2026 (descontando 241 dosis de vales de agosto)' },
-      // Mes 10 (Octubre): Apertura = 600
-      { vacunaId: VACUNA_56582_ID, mes: 10, anio: 2026, stock: 600, obs: 'Stock inicial octubre 2026' },
+      // Mes 10 (Octubre): Apertura = 600 - 2 = 598
+      { vacunaId: VACUNA_56582_ID, mes: 10, anio: 2026, stock: 598, obs: 'Stock inicial octubre 2026 (descontando 2 dosis de vales de septiembre)' },
 
       // Vacuna 56584 - NIRSEVIMAB VRS RN
-      // Mes 6 (Junio): Ingresó lote con 433
-      { vacunaId: VACUNA_56584_ID, mes: 6, anio: 2026, stock: 433, obs: 'Stock de apertura junio 2026 (Ingreso PECOSA: 59074-2026)' },
+      // Mes 6 (Junio): Stock base 0 (el lote con 433 ingresó el 15/06 y el servicio de movimientos lo suma dinámicamente)
+      { vacunaId: VACUNA_56584_ID, mes: 6, anio: 2026, stock: 0, obs: 'Stock de apertura junio 2026 (Stock previo: 0, Lote ingresado el 15/06: 433)' },
       // Mes 7 (Julio - Periodo objetivo al seleccionar Junio en la UI): Apertura = 433 (sin salidas en junio ni julio)
       { vacunaId: VACUNA_56584_ID, mes: 7, anio: 2026, stock: 433, obs: 'Stock de apertura julio 2026 (Sin salidas en julio)' },
       // Mes 8 (Agosto - Periodo objetivo al seleccionar Julio): Apertura = 433
       { vacunaId: VACUNA_56584_ID, mes: 8, anio: 2026, stock: 433, obs: 'Stock inicial agosto 2026' },
-      // Mes 9 (Septiembre - Periodo objetivo al seleccionar Agosto): Apertura = 433 - 194 = 239
-      { vacunaId: VACUNA_56584_ID, mes: 9, anio: 2026, stock: 239, obs: 'Stock inicial septiembre 2026 (descontando 194 dosis de vales de agosto)' },
-      // Mes 10 (Octubre): Apertura = 239 - 50 = 189
-      { vacunaId: VACUNA_56584_ID, mes: 10, anio: 2026, stock: 189, obs: 'Stock inicial octubre 2026 (descontando 50 dosis de vale de septiembre)' }
+      // Mes 9 (Septiembre - Periodo objetivo al seleccionar Agosto): Apertura = 433 - 244 = 189
+      { vacunaId: VACUNA_56584_ID, mes: 9, anio: 2026, stock: 189, obs: 'Stock inicial septiembre 2026 (descontando 244 dosis de vales de agosto)' },
+      // Mes 10 (Octubre): Apertura = 189 - 25 = 164
+      { vacunaId: VACUNA_56584_ID, mes: 10, anio: 2026, stock: 164, obs: 'Stock inicial octubre 2026 (descontando 25 dosis de vales de septiembre)' }
     ];
 
     for (const reg of registrosStockInicial) {

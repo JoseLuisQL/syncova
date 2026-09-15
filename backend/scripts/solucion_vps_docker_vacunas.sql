@@ -231,18 +231,18 @@ WHERE vacuna_id IN ('a78deab1-d22d-4d7d-81bb-20a39463e99c'::uuid, 'df71ff65-4b6a
 INSERT INTO stock_inicial_mensual (id, vacuna_id, mes, anio, stock_inicial, fecha_captura, observaciones, created_at)
 VALUES
   -- Vacuna 56582 - VRS GESTANTE
-  (gen_random_uuid(), 'a78deab1-d22d-4d7d-81bb-20a39463e99c'::uuid, 6, 2026, 841, NOW(), 'Stock apertura junio 2026 (Ingreso PECOSA: 58839-2026)', NOW()),
+  (gen_random_uuid(), 'a78deab1-d22d-4d7d-81bb-20a39463e99c'::uuid, 6, 2026, 0, NOW(), 'Stock apertura junio 2026 (Stock previo: 0, Lote ingresado el 15/06: 841)', NOW()),
   (gen_random_uuid(), 'a78deab1-d22d-4d7d-81bb-20a39463e99c'::uuid, 7, 2026, 841, NOW(), 'Stock apertura julio 2026 (Sin salidas en julio)', NOW()),
   (gen_random_uuid(), 'a78deab1-d22d-4d7d-81bb-20a39463e99c'::uuid, 8, 2026, 841, NOW(), 'Stock inicial agosto 2026', NOW()),
   (gen_random_uuid(), 'a78deab1-d22d-4d7d-81bb-20a39463e99c'::uuid, 9, 2026, 600, NOW(), 'Stock inicial septiembre 2026 (descontando 241 dosis de vales)', NOW()),
-  (gen_random_uuid(), 'a78deab1-d22d-4d7d-81bb-20a39463e99c'::uuid, 10, 2026, 600, NOW(), 'Stock inicial octubre 2026', NOW()),
+  (gen_random_uuid(), 'a78deab1-d22d-4d7d-81bb-20a39463e99c'::uuid, 10, 2026, 598, NOW(), 'Stock inicial octubre 2026 (descontando 2 dosis de vales septiembre)', NOW()),
 
   -- Vacuna 56584 - NIRSEVIMAB VRS RN
-  (gen_random_uuid(), 'df71ff65-4b6a-4597-9060-ff62cb246407'::uuid, 6, 2026, 433, NOW(), 'Stock apertura junio 2026 (Ingreso PECOSA: 59074-2026)', NOW()),
+  (gen_random_uuid(), 'df71ff65-4b6a-4597-9060-ff62cb246407'::uuid, 6, 2026, 0, NOW(), 'Stock apertura junio 2026 (Stock previo: 0, Lote ingresado el 15/06: 433)', NOW()),
   (gen_random_uuid(), 'df71ff65-4b6a-4597-9060-ff62cb246407'::uuid, 7, 2026, 433, NOW(), 'Stock apertura julio 2026 (Sin salidas en julio)', NOW()),
   (gen_random_uuid(), 'df71ff65-4b6a-4597-9060-ff62cb246407'::uuid, 8, 2026, 433, NOW(), 'Stock inicial agosto 2026', NOW()),
-  (gen_random_uuid(), 'df71ff65-4b6a-4597-9060-ff62cb246407'::uuid, 9, 2026, 239, NOW(), 'Stock inicial septiembre 2026 (descontando 194 dosis de vales)', NOW()),
-  (gen_random_uuid(), 'df71ff65-4b6a-4597-9060-ff62cb246407'::uuid, 10, 2026, 189, NOW(), 'Stock inicial octubre 2026 (descontando 50 dosis de vale septiembre)', NOW());
+  (gen_random_uuid(), 'df71ff65-4b6a-4597-9060-ff62cb246407'::uuid, 9, 2026, 189, NOW(), 'Stock inicial septiembre 2026 (descontando 244 dosis de vales)', NOW()),
+  (gen_random_uuid(), 'df71ff65-4b6a-4597-9060-ff62cb246407'::uuid, 10, 2026, 164, NOW(), 'Stock inicial octubre 2026 (descontando 25 dosis de vales septiembre)', NOW());
 
 COMMIT;
 
