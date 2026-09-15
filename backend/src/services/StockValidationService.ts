@@ -225,7 +225,9 @@ export class StockValidationService {
     });
 
     const today = new Date();
-    const availableQuantity = lots.reduce((sum, lot) => sum + lot.cantidadActual, 0);
+    const availableQuantity = lots
+      .filter(lot => new Date(lot.fechaVencimiento) >= today)
+      .reduce((sum, lot) => sum + lot.cantidadActual, 0);
     const sufficient = availableQuantity >= requirement.quantity;
 
     return {
@@ -356,7 +358,9 @@ export class StockValidationService {
     });
 
     const today = new Date();
-    const availableQuantity = lots.reduce((sum, lot) => sum + lot.cantidadActual, 0);
+    const availableQuantity = lots
+      .filter(lot => !lot.fechaVencimiento || new Date(lot.fechaVencimiento) >= today)
+      .reduce((sum, lot) => sum + lot.cantidadActual, 0);
     const sufficient = availableQuantity >= requiredQuantity;
 
     return {
@@ -437,10 +441,11 @@ export class StockValidationService {
     }
 
     const syringe = availableSyringes[0];
-    const availableQuantity = syringe.lotes.reduce((sum, lot) => sum + lot.cantidadActual, 0);
-    const requiredQuantity = totalDoses; // 1:1 ratio by default
-
     const today = new Date();
+    const availableQuantity = syringe.lotes
+      .filter(lot => !lot.fechaVencimiento || new Date(lot.fechaVencimiento) >= today)
+      .reduce((sum, lot) => sum + lot.cantidadActual, 0);
+    const requiredQuantity = totalDoses; // 1:1 ratio by default
 
     return [{
       syringeId: syringe.id,

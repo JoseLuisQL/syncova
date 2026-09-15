@@ -4,8 +4,8 @@ WORKDIR /app
 
 RUN apk add --no-cache openssl
 
-COPY backend/package.json backend/package-lock.json ./
-RUN npm ci
+COPY backend/package.json ./
+RUN npm install
 
 COPY backend/tsconfig.json ./tsconfig.json
 COPY backend/jest.config.js ./jest.config.js

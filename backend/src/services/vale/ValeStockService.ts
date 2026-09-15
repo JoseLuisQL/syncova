@@ -677,11 +677,15 @@ export class ValeStockService {
         const cantidadARestaurar = Math.min(cantidadRestaurar, ultimoMovimiento.cantidad);
         const nuevoSaldoLote = lote.cantidadActual + cantidadARestaurar;
 
+        const nuevoEstado = nuevoSaldoLote === 0
+          ? 'agotado'
+          : (lote.fechaVencimiento && new Date(lote.fechaVencimiento) < new Date() ? 'vencido' : 'disponible');
+
         await tx.loteVacuna.update({
           where: { id: lote.id },
           data: {
             cantidadActual: nuevoSaldoLote,
-            estado: nuevoSaldoLote > 0 ? 'disponible' : 'agotado'
+            estado: nuevoEstado
           }
         });
 
@@ -780,11 +784,15 @@ export class ValeStockService {
           const cantidadARestaurarLote = Math.min(jeringasRestantes, ultimoMovimiento.cantidad);
           const nuevoSaldoLote = lote.cantidadActual + cantidadARestaurarLote;
 
+          const nuevoEstado = nuevoSaldoLote === 0
+            ? 'agotado'
+            : (lote.fechaVencimiento && new Date(lote.fechaVencimiento) < new Date() ? 'vencido' : 'disponible');
+
           await tx.loteJeringa.update({
             where: { id: lote.id },
             data: {
               cantidadActual: nuevoSaldoLote,
-              estado: nuevoSaldoLote > 0 ? 'disponible' : 'agotado'
+              estado: nuevoEstado
             }
           });
 

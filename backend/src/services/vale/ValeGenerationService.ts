@@ -721,12 +721,16 @@ export class ValeGenerationService {
 
           console.log(`🔄 [ValeGenerationService] Restaurando a lote ${loteDestino.numero}: +${cantidadARestaurar} unidades (${loteDestino.cantidadActual} → ${nuevaCantidadLote})`);
 
+          const nuevoEstado = nuevaCantidadLote === 0
+            ? 'agotado'
+            : (loteDestino.fechaVencimiento && new Date(loteDestino.fechaVencimiento) < new Date() ? 'vencido' : 'disponible');
+
           // Actualizar el lote
           await tx.loteVacuna.update({
             where: { id: loteDestino.id },
             data: {
               cantidadActual: nuevaCantidadLote,
-              estado: nuevaCantidadLote > 0 ? 'disponible' : 'agotado'
+              estado: nuevoEstado
             }
           });
 
@@ -809,11 +813,15 @@ export class ValeGenerationService {
 
             console.log(`🔄 [ValeGenerationService] Restaurando jeringa: +${cantidadJeringas} unidades al lote ${loteJeringa.numero}`);
 
+            const nuevoEstado = nuevaCantidadLote === 0
+              ? 'agotado'
+              : (loteJeringa.fechaVencimiento && new Date(loteJeringa.fechaVencimiento) < new Date() ? 'vencido' : 'disponible');
+
             await tx.loteJeringa.update({
               where: { id: loteJeringa.id },
               data: {
                 cantidadActual: nuevaCantidadLote,
-                estado: nuevaCantidadLote > 0 ? 'disponible' : 'agotado'
+                estado: nuevoEstado
               }
             });
 
