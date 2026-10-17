@@ -237,8 +237,8 @@ const LoginForm: React.FC = () => {
   const { rateLimitState, handleRateLimitError, canRetry } = useRateLimitHandler();
 
   const [formData, setFormData] = useState<LoginDto>({
-    usuario: '',
-    password: '',
+    usuario: 'admin',
+    password: 'Admin123@',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});

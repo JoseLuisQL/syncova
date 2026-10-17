@@ -4,11 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3000 --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "build": "tsc -p tsconfig.app.json --noEmit && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "vite preview --port 3000 --host 0.0.0.0",
     "design:lint": "node scripts/sync-design-md.mjs --check",
     "design:sync": "node scripts/sync-design-md.mjs",
     "design:export:tailwind": "node scripts/sync-design-md.mjs --print-tailwind",

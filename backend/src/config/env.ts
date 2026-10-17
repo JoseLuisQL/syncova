@@ -15,12 +15,12 @@ const envSchema = Joi.object({
     .default(3001),
   
   DATABASE_URL: Joi.string()
-    .required()
+    .default('postgresql://postgres:postgres@localhost:5432/sivac')
     .description('URL de conexión a PostgreSQL'),
   
   JWT_SECRET: Joi.string()
     .min(32)
-    .required()
+    .default('sivac-default-jwt-secret-key-min-32-chars-2026')
     .description('Clave secreta para JWT'),
   
   JWT_EXPIRES_IN: Joi.string()

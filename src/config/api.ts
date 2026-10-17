@@ -10,16 +10,12 @@ export const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
-  
-  // Detectar si estamos accediendo desde la red local
-  const currentHost = window.location.hostname;
-  
-  // Si no estamos en localhost, asumir proxy reverso bajo el mismo origen
-  if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+
+  // Usar /api bajo el mismo origen (servido por Vite o reverse proxy)
+  if (typeof window !== 'undefined' && window.location?.origin) {
     return `${window.location.origin}/api`;
   }
-  
-  // Por defecto, usar localhost
+
   return `http://localhost:${DEFAULT_PORTS.BACKEND}/api`;
 };
 
