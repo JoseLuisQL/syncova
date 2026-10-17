@@ -185,20 +185,20 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
       icon={FileText}
       size="xl"
       footer={
-        <div className="flex w-full items-center justify-between">
+        <div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
           <button type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
+            className="w-full sm:w-auto px-4 py-2 text-xs sm:text-sm font-medium text-zinc-700 bg-white border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
           >
             Cancelar
           </button>
 
           {!showVistaPrevia ? (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               <button type="button"
                 onClick={handleObtenerVistaPrevia}
                 disabled={isLoadingPreview || !vistaPrevia}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+                className="flex flex-1 sm:flex-initial items-center justify-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
                 title={!vistaPrevia ? "No hay datos para mostrar vista previa" : "Ver vista previa detallada"}
               >
                 {isLoadingPreview ? (
@@ -206,13 +206,13 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
                 ) : (
                   <Eye weight="bold" className="h-4 w-4" />
                 )}
-                Ver Detalle Completo
+                <span>Ver Detalle</span>
               </button>
 
               <button type="button"
                 onClick={handleGenerarVale}
                 disabled={isGenerating || !vistaPrevia}
-                className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-teal-600 border border-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm disabled:opacity-50"
+                className="flex flex-1 sm:flex-initial items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-medium text-white bg-teal-600 border border-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm disabled:opacity-50"
                 title={!vistaPrevia ? "No hay datos para generar el vale" : "Generar vale y afectar stocks"}
               >
                 {isGenerating ? (
@@ -220,21 +220,21 @@ const GenerarValeModal: React.FC<GenerarValeModalProps> = ({
                 ) : (
                   <Plus weight="bold" className="h-4 w-4" />
                 )}
-                Generar Vale
+                <span>Generar Vale</span>
               </button>
             </div>
           ) : (
             <button type="button"
               onClick={handleGenerarVale}
               disabled={isGenerating || !vistaPrevia}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-teal-600 border border-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors shadow-sm disabled:opacity-50"
+              className="flex w-full sm:w-auto items-center justify-center gap-2 px-5 py-2 text-xs sm:text-sm font-medium text-white bg-teal-600 border border-teal-600 rounded-lg hover:bg-teal-700 transition-colors shadow-sm disabled:opacity-50"
             >
               {isGenerating ? (
                 <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" />
               ) : (
                 <Plus weight="bold" className="h-4 w-4" />
               )}
-              Generar Vale
+              <span>Generar Vale</span>
             </button>
           )}
         </div>

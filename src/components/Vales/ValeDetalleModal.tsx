@@ -243,22 +243,22 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
         icon={FileText}
         size="xl"
         footer={
-          <div className="flex w-full items-center justify-between">
-            <div className="text-sm text-zinc-500">
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-xs sm:text-sm text-muted-2">
               Generado: {new Date(vale.fechaGeneracion).toLocaleString('es-PE')}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-2">
               <button type="button"
                 onClick={handleRevertir}
                 disabled={isReverting}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors disabled:opacity-50"
+                className="flex flex-1 sm:flex-initial items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors disabled:opacity-50"
               >
                 {isReverting ? <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" /> : <ArrowCounterClockwise weight="bold" className="h-4 w-4" />}
                 Revertir
               </button>
               <button type="button"
                 onClick={() => setShowExportModal(true)}
-                className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 rounded-lg shadow-md transition-all"
+                className="flex flex-1 sm:flex-initial items-center justify-center gap-2 px-5 py-2 text-xs sm:text-sm font-medium text-white bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 rounded-lg shadow-md transition-all"
               >
                 <FileXls className="h-4 w-4" />
                 Exportar
@@ -267,21 +267,21 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
           </div>
         }
       >
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <div className="flex items-center gap-2 px-1">
             <EstadoBadge estado={vale.estado} />
           </div>
           {/* Info Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
             <InfoCard icon={Buildings} label="Centro de Acopio" value={vale.centroAcopio.nombre} subvalue={`Código: ${vale.centroAcopio.codigo}`} />
             <InfoCard icon={User} label="Responsable" value={`${vale.usuario.nombres} ${vale.usuario.apellidos}`} />
             <InfoCard icon={CalendarBlank} label="Período" value={`${MESES[vale.mes - 1]} ${vale.anio}`} subvalue={new Date(vale.fechaGeneracion).toLocaleDateString('es-PE')} />
             <InfoCard icon={Package} label="Total Vacunas" value={formatNumber(vale.totalVacunas)} subvalue={`${vale.totalEstablecimientos} organiz.`} />
           </div>
 
-          <div className="bg-zinc-50 border border-zinc-200 rounded-xl overflow-hidden p-1">
+          <div className="bg-surface-soft border border-line rounded-xl overflow-hidden p-1">
              {/* Tabs */}
-             <div className="flex gap-1 border-b border-zinc-200 p-1">
+             <div className="flex overflow-x-auto no-scrollbar gap-1 border-b border-line p-1">
                {[
                  { id: 'consolidado', label: 'Consolidado', icon: Package },
                  { id: 'detalle', label: 'Por Establecimiento', icon: Buildings },
@@ -289,10 +289,10 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                  <button type="button"
                    key={tab.id}
                    onClick={() => setActiveTab(tab.id as 'consolidado' | 'detalle')}
-                   className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                   className={`flex shrink-0 items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
                      activeTab === tab.id
-                       ? 'bg-white text-zinc-900 shadow border border-zinc-200'
-                       : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100'
+                       ? 'bg-surface text-ink shadow border border-line'
+                       : 'text-muted-2 hover:text-ink hover:bg-surface/60'
                    }`}
                  >
                    <tab.icon className="h-4 w-4" />
@@ -302,9 +302,9 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
              </div>
 
              {/* Content view */}
-             <div className="p-4 bg-white">
+             <div className="p-2.5 sm:p-4 bg-surface">
                 {!vale.detalles?.length ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
+                  <div className="flex flex-col items-center justify-center py-12 text-muted">
                     <SpinnerGap weight="bold" className="h-8 w-8 animate-spin mb-3" />
                     <p>Cargando detalles...</p>
                   </div>
@@ -312,29 +312,29 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                   <div className="space-y-6">
                     {/* Tabla Vacunas */}
                     <div>
-                      <h3 className="flex items-center gap-2 text-sm font-semibold text-zinc-700 mb-3">
-                        <Package className="h-4 w-4 text-zinc-600" />
+                      <h3 className="flex items-center gap-2 text-sm font-semibold text-ink mb-3">
+                        <Package className="h-4 w-4 text-muted-2" />
                         Biológicos
                       </h3>
-                      <div className="overflow-hidden rounded-3xl border border-line bg-white">
-                        <table className="w-full text-sm">
+                      <div className="overflow-x-auto touch-pan-x-smooth rounded-2xl border border-line bg-surface">
+                        <table className="w-full min-w-[440px] text-xs sm:text-sm">
                           <thead className="bg-surface-soft">
                             <tr>
-                              <th className="w-12 px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">#</th>
-                              <th className="px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Vacuna</th>
-                              <th className="w-28 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Cantidad</th>
-                              <th className="px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Presentación</th>
-                              <th className="w-24 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Dosis/Fr</th>
+                              <th className="w-10 px-3 py-2.5 sm:px-4 sm:py-3 text-left text-[0.75rem] font-medium tracking-[-0.01em] text-muted">#</th>
+                              <th className="px-3 py-2.5 sm:px-4 sm:py-3 text-left text-[0.75rem] font-medium tracking-[-0.01em] text-muted">Vacuna</th>
+                              <th className="w-24 px-3 py-2.5 sm:px-4 sm:py-3 text-center text-[0.75rem] font-medium tracking-[-0.01em] text-muted">Cantidad</th>
+                              <th className="px-3 py-2.5 sm:px-4 sm:py-3 text-left text-[0.75rem] font-medium tracking-[-0.01em] text-muted">Presentación</th>
+                              <th className="w-20 px-3 py-2.5 sm:px-4 sm:py-3 text-center text-[0.75rem] font-medium tracking-[-0.01em] text-muted">Dosis/Fr</th>
                             </tr>
                           </thead>
                           <tbody className="bg-surface">
                             {consolidadoVacunas.map((item, idx) => (
                               <tr key={item.vacuna.id} className="border-b border-line-soft hover:bg-surface-soft">
-                                <td className="px-4 py-3 text-muted-2">{idx + 1}</td>
-                                <td className="px-4 py-3 font-medium text-ink">{item.vacuna.nombre}</td>
-                                <td className="px-4 py-3 text-center font-bold text-ink">{formatNumber(item.cantidadTotal)}</td>
-                                <td className="px-4 py-3 text-muted-2">{item.vacuna.presentacion}</td>
-                                <td className="px-4 py-3 text-center text-muted-2">{item.vacuna.dosisPorFrasco}</td>
+                                <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-muted-2">{idx + 1}</td>
+                                <td className="px-3 py-2.5 sm:px-4 sm:py-3 font-medium text-ink">{item.vacuna.nombre}</td>
+                                <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-center font-bold text-ink tabular-nums">{formatNumber(item.cantidadTotal)}</td>
+                                <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-muted-2">{item.vacuna.presentacion}</td>
+                                <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-center text-muted-2 tabular-nums">{item.vacuna.dosisPorFrasco}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -349,27 +349,27 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                         Jeringas
                         {isLoadingJeringas && <SpinnerGap weight="bold" className="h-4 w-4 animate-spin text-brand" />}
                       </h3>
-                      <div className="overflow-hidden rounded-3xl border border-line bg-surface">
-                        <table className="w-full text-sm">
+                      <div className="overflow-x-auto touch-pan-x-smooth rounded-2xl border border-line bg-surface">
+                        <table className="w-full min-w-[340px] text-xs sm:text-sm">
                           <thead className="bg-surface-soft">
                             <tr>
-                              <th className="px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Tipo</th>
-                              <th className="w-28 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Capacidad</th>
-                              <th className="w-28 px-4 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Cantidad</th>
+                              <th className="px-3 py-2.5 sm:px-4 sm:py-3 text-left text-[0.75rem] font-medium tracking-[-0.01em] text-muted">Tipo</th>
+                              <th className="w-24 px-3 py-2.5 sm:px-4 sm:py-3 text-center text-[0.75rem] font-medium tracking-[-0.01em] text-muted">Capacidad</th>
+                              <th className="w-24 px-3 py-2.5 sm:px-4 sm:py-3 text-center text-[0.75rem] font-medium tracking-[-0.01em] text-muted">Cantidad</th>
                             </tr>
                           </thead>
                           <tbody className="bg-surface">
                             {consolidadoJeringas.length > 0 ? (
                               consolidadoJeringas.map((item, idx) => (
                                 <tr key={idx} className="border-b border-line-soft hover:bg-surface-soft">
-                                  <td className="px-4 py-3 font-medium text-zinc-900">{item.tipo}</td>
-                                  <td className="px-4 py-3 text-center text-zinc-600">{item.capacidad}</td>
-                                  <td className="px-4 py-3 text-center font-bold text-teal-700">{formatNumber(item.cantidad)}</td>
+                                  <td className="px-3 py-2.5 sm:px-4 sm:py-3 font-medium text-ink">{item.tipo}</td>
+                                  <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-center text-muted-2">{item.capacidad}</td>
+                                  <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-center font-bold text-teal-700 tabular-nums">{formatNumber(item.cantidad)}</td>
                                 </tr>
                               ))
                             ) : (
                               <tr>
-                                <td colSpan={3} className="px-4 py-8 text-center text-zinc-500">
+                                <td colSpan={3} className="px-4 py-8 text-center text-muted">
                                   {isLoadingJeringas ? (
                                     <span className="flex items-center justify-center gap-2">
                                       <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" /> Cargando...
@@ -391,38 +391,40 @@ const ValeDetalleModal: React.FC<ValeDetalleModalProps> = ({
                 ) : (
                   <div className="space-y-4">
                     {establecimientosDetalle.map(est => (
-                      <div key={est.establecimiento.id} className="overflow-hidden rounded-3xl border border-line bg-white">
-                        <div className="border-b border-line-soft bg-surface-soft px-4 py-3">
-                          <h4 className="font-semibold text-zinc-900">{est.establecimiento.nombre}</h4>
-                          <p className="text-xs text-zinc-500">Código: {est.establecimiento.codigo}</p>
+                      <div key={est.establecimiento.id} className="overflow-hidden rounded-2xl border border-line bg-surface">
+                        <div className="border-b border-line-soft bg-surface-soft px-3.5 py-2.5 sm:px-4 sm:py-3">
+                          <h4 className="font-semibold text-sm text-ink">{est.establecimiento.nombre}</h4>
+                          <p className="text-xs text-muted">Código: {est.establecimiento.codigo}</p>
                         </div>
-                        <table className="w-full text-sm">
-                          <thead className="bg-surface-soft">
-                            <tr>
-                              <th className="w-12 px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">#</th>
-                              <th className="px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Vacuna</th>
-                              <th className="w-28 px-4 py-2 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Cantidad</th>
-                              <th className="px-4 py-2 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted">Presentación</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-surface">
-                            {Object.values(est.vacunas).map((vac, idx) => (
-                              <tr key={vac.vacuna.id} className="border-b border-line-soft hover:bg-surface-soft">
-                                <td className="px-4 py-2 text-muted">{idx + 1}</td>
-                                <td className="px-4 py-2">
-                                  <span className="font-medium text-ink">{vac.vacuna.nombre}</span>
-                                </td>
-                                <td className="px-4 py-2 text-center">
-                                  <span className="font-bold text-ink">{formatNumber(vac.cantidadTotal)}</span>
-                                  {vac.cantidadAdicional > 0 && (
-                                    <span className="block text-xs text-muted-2">+{formatNumber(vac.cantidadAdicional)} adic.</span>
-                                  )}
-                                </td>
-                                <td className="px-4 py-2 text-muted-2">{vac.vacuna.presentacion}</td>
+                        <div className="overflow-x-auto touch-pan-x-smooth">
+                          <table className="w-full min-w-[380px] text-xs sm:text-sm">
+                            <thead className="bg-surface-soft">
+                              <tr>
+                                <th className="w-10 px-3 py-2 sm:px-4 text-left text-[0.75rem] font-medium tracking-[-0.01em] text-muted">#</th>
+                                <th className="px-3 py-2 sm:px-4 text-left text-[0.75rem] font-medium tracking-[-0.01em] text-muted">Vacuna</th>
+                                <th className="w-24 px-3 py-2 sm:px-4 text-center text-[0.75rem] font-medium tracking-[-0.01em] text-muted">Cantidad</th>
+                                <th className="px-3 py-2 sm:px-4 text-left text-[0.75rem] font-medium tracking-[-0.01em] text-muted">Presentación</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody className="bg-surface">
+                              {Object.values(est.vacunas).map((vac, idx) => (
+                                <tr key={vac.vacuna.id} className="border-b border-line-soft hover:bg-surface-soft">
+                                  <td className="px-3 py-2 sm:px-4 text-muted">{idx + 1}</td>
+                                  <td className="px-3 py-2 sm:px-4">
+                                    <span className="font-medium text-ink">{vac.vacuna.nombre}</span>
+                                  </td>
+                                  <td className="px-3 py-2 sm:px-4 text-center tabular-nums">
+                                    <span className="font-bold text-ink">{formatNumber(vac.cantidadTotal)}</span>
+                                    {vac.cantidadAdicional > 0 && (
+                                      <span className="block text-[11px] text-muted-2">+{formatNumber(vac.cantidadAdicional)} adic.</span>
+                                    )}
+                                  </td>
+                                  <td className="px-3 py-2 sm:px-4 text-muted-2">{vac.vacuna.presentacion}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     ))}
                   </div>

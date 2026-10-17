@@ -38,9 +38,9 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
   }
 
   return (
-    <div className="border-t border-line-soft bg-white px-4 py-3">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="text-sm text-muted-2">
+    <div className="border-t border-line-soft bg-surface px-3 py-3 sm:px-4">
+      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="text-xs sm:text-sm text-muted-2">
           {pendingChangesCount > 0 ? (
             <span className={COMPONENT_STYLES.badge.warning}>Cambios pendientes: {pendingChangesCount}</span>
           ) : (
@@ -48,13 +48,13 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
           )}
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
         {!hideAdminActions ? (
           <button
             type="button"
             onClick={onGuardarProgramacion}
             disabled={isUpdating || isLoading}
-            className={COMPONENT_STYLES.button.primary}
+            className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`}
           >
             {isUpdating ? (
               <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
@@ -69,7 +69,7 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
           type="button"
           onClick={onRecalcular}
           disabled={isLoading}
-          className={COMPONENT_STYLES.button.secondary}
+          className={`${COMPONENT_STYLES.button.secondary} w-full sm:w-auto justify-center`}
         >
           {isLoading ? (
             <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
@@ -84,7 +84,7 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
             type="button"
             onClick={onSincronizar}
             disabled={isLoading || isUpdating}
-            className={COMPONENT_STYLES.button.primary}
+            className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`}
             title="Sincronizar entregas con módulo de movimientos"
           >
             {isLoading ? (
@@ -101,7 +101,7 @@ export const PlanificacionAcciones: React.FC<PlanificacionAccionesProps> = memo(
             type="button"
             onClick={onGuardarPendientes}
             disabled={isUpdating}
-            className={COMPONENT_STYLES.button.primary}
+            className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`}
           >
             {isUpdating ? (
               <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />

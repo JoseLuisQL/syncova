@@ -244,9 +244,9 @@ const NotificationBell: React.FC = memo(() => {
 
       {isOpen && (
         <div className="
-          absolute right-0 mt-2 w-80 sm:w-96
+          fixed inset-x-3 top-16 sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 w-auto sm:w-96 max-w-[calc(100vw-1.5rem)]
           bg-surface shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)] border border-line
-          z-50 overflow-hidden rounded-3xl
+          z-50 overflow-hidden rounded-2xl sm:rounded-3xl
           animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right
         ">
           <div className="px-5 py-4 border-b border-line bg-surface flex items-center justify-between">

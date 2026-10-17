@@ -249,7 +249,7 @@ const Microredes: React.FC<MicroredesProps> = ({
     <div className="space-y-4">
       {error ? <ErrorAlert message={error} onRetry={() => void fetchMicroredes()} /> : null}
 
-      <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+      <section className={COMPONENT_STYLES.surface}>
         <div className="space-y-4">
           <FilterBar
             searchValue={searchTerm}
@@ -258,7 +258,7 @@ const Microredes: React.FC<MicroredesProps> = ({
             filters={filtersConfig}
             onClear={handleClearFilters}
             actions={
-              <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={loading}>
+              <button type="button" className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`} onClick={() => handleOpenModal()} disabled={loading}>
                 <Plus className="h-4 w-4" />
                 <span>Nueva microred</span>
               </button>
@@ -280,16 +280,27 @@ const Microredes: React.FC<MicroredesProps> = ({
                 />
               </div>
             ) : (
-              microredes.map((microred) => (
-                <MicroredMobileCard
-                  key={microred.id}
-                  microred={microred}
-                  onEdit={() => handleOpenModal(microred)}
-                  onDelete={() => handleDelete(microred)}
-                  onNavigate={onNavigateToCentrosAcopio}
-                  isLoading={loading}
-                />
-              ))
+              <>
+                {microredes.map((microred) => (
+                  <MicroredMobileCard
+                    key={microred.id}
+                    microred={microred}
+                    onEdit={() => handleOpenModal(microred)}
+                    onDelete={() => handleDelete(microred)}
+                    onNavigate={onNavigateToCentrosAcopio}
+                    isLoading={loading}
+                  />
+                ))}
+                <div className="overflow-hidden rounded-xl border border-line bg-surface">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    total={total}
+                    limit={filters.limit || 10}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
+              </>
             )}
           </div>
         </div>

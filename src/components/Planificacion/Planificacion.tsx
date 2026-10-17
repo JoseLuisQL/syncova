@@ -1022,9 +1022,9 @@ const Planificacion: React.FC = () => {
   const isPageLoading = isLoading || isContextLoading;
 
   return (
-    <main className="flex h-[calc(100vh-4rem)] flex-col bg-transparent" role="main">
-      <div className="flex w-full flex-1 flex-col overflow-hidden p-0">
-        <section className="flex flex-1 flex-col overflow-hidden rounded-[22px] border border-line bg-white">
+    <main className="flex min-h-[calc(100dvh-128px)] md:h-[calc(100dvh-128px)] flex-col bg-transparent" role="main">
+      <div className="flex w-full flex-1 flex-col md:overflow-hidden p-0">
+        <section className="flex flex-1 flex-col md:overflow-hidden rounded-2xl sm:rounded-[22px] border border-line bg-surface">
           <div className="shrink-0">
             <PlanificacionHeader
               isReadOnly={isReadOnlyMode}

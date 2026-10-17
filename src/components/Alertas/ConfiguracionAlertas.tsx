@@ -176,7 +176,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 type="button"
                 onClick={handleGenerarAlertas}
                 disabled={isGenerating}
-                className={COMPONENT_STYLES.button.primary}
+                className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`}
               >
                 <Lightning className="h-4 w-4" weight="fill" />
                 {isGenerating ? 'Analizando...' : 'Generar alertas'}
@@ -212,7 +212,7 @@ const ConfiguracionAlertas: React.FC = memo(() => {
                 type="button"
                 onClick={() => setShowCleanConfirm(true)}
                 disabled={isCleaning}
-                className={COMPONENT_STYLES.button.secondary}
+                className={`${COMPONENT_STYLES.button.secondary} w-full sm:w-auto justify-center`}
               >
                 <Trash className="h-4 w-4" weight="bold" />
                 {isCleaning ? 'Limpiando...' : 'Limpiar antiguas'}

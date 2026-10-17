@@ -338,18 +338,18 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
 
       <div className="relative">
         {/* Indicador de scroll horizontal para móvil */}
-        <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-zinc-400 md:hidden">
-          <ArrowsLeftRight className="h-3.5 w-3.5" weight="bold" />
-          <span>Desliza horizontalmente para ver todas las columnas</span>
+        <div className="px-3 py-2 flex items-center gap-1.5 text-xs font-medium text-muted bg-surface-soft/50 border-b border-line-soft md:hidden">
+          <ArrowsLeftRight className="h-3.5 w-3.5 text-brand" weight="bold" />
+          <span>Desliza horizontalmente para ver los trimestres</span>
         </div>
-        <div className="max-h-[620px] overflow-x-auto overflow-y-auto rounded-lg border border-zinc-200 md:border-0">
-          <table className="w-full min-w-[1600px] border-collapse">
+        <div className="max-h-[620px] overflow-x-auto overflow-y-auto touch-pan-x-smooth rounded-lg border border-line md:border-0">
+          <table className="w-full min-w-[1350px] sm:min-w-[1600px] border-collapse">
             <thead className="sticky top-0 z-20">
               <tr className="bg-surface-soft text-muted">
-                <th className="sticky left-0 z-30 min-w-[220px] border-r border-line bg-surface-soft px-4 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em]">
+                <th className="sticky left-0 z-30 w-[135px] min-w-[135px] max-w-[145px] sm:w-[220px] sm:min-w-[220px] sm:max-w-none border-r border-line bg-surface-soft px-2.5 sm:px-4 py-3 text-left text-[0.75rem] sm:text-[0.78rem] font-medium tracking-[-0.01em]">
                   Item
                 </th>
-                <th className="sticky left-[220px] z-30 min-w-[90px] border-r border-line bg-surface-soft px-3 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em]">
+                <th className="sm:sticky sm:left-[220px] z-20 sm:z-30 min-w-[76px] sm:min-w-[90px] border-r border-line bg-surface-soft px-2 sm:px-3 py-3 text-center text-[0.75rem] sm:text-[0.78rem] font-medium tracking-[-0.01em]">
                   Saldo {anio - 1}
                 </th>
                 {TRIMESTRES.map((quarter) => (
@@ -368,7 +368,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
 
               <tr className="border-b border-line-soft bg-surface-soft font-medium text-muted">
                 <th className="sticky left-0 z-30 border-r border-line bg-surface-soft" />
-                <th className="sticky left-[220px] z-30 border-r border-line bg-surface-soft" />
+                <th className="sm:sticky sm:left-[220px] z-20 sm:z-30 border-r border-line bg-surface-soft" />
                 {TRIMESTRES.map((quarter) => (
                   <React.Fragment key={`sub-${quarter}`}>
                     <th className="px-2 py-2 text-[0.65rem] tracking-wider whitespace-nowrap">Prog.</th>
@@ -392,18 +392,18 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(({ anio, tipoItem = 'todo
 
                 return (
                   <tr key={item.id} className="group border-b border-line-soft transition-colors hover:bg-surface-soft">
-                    <td className="sticky left-0 z-10 border-r border-line bg-surface px-4 py-3 shadow-sm transition-colors group-hover:bg-surface-soft">
-                      <div className="flex items-center gap-2">
-                        <span className={`flex-shrink-0 rounded p-1.5 ${item.tipo === 'vacuna' ? 'bg-surface-soft text-brand' : 'bg-surface-soft text-emerald-600'}`}>
+                    <td className="sticky left-0 z-10 w-[135px] min-w-[135px] max-w-[145px] sm:w-[220px] sm:min-w-[220px] sm:max-w-none border-r border-line bg-surface px-2.5 sm:px-4 py-2.5 sm:py-3 shadow-sm transition-colors group-hover:bg-surface-soft">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <span className={`hidden sm:inline-flex flex-shrink-0 rounded p-1.5 ${item.tipo === 'vacuna' ? 'bg-surface-soft text-brand' : 'bg-surface-soft text-emerald-600'}`}>
                           {item.tipo === 'vacuna' ? <Package className="h-3.5 w-3.5" /> : <Syringe weight="duotone" className="h-3.5 w-3.5" />}
                         </span>
-                        <span className="max-w-[160px] truncate text-sm font-medium text-ink" title={item.descripcion}>
+                        <span className="truncate text-xs sm:text-sm font-medium text-ink" title={item.descripcion}>
                           {item.descripcion}
                         </span>
                       </div>
                     </td>
 
-                    <td className="sticky left-[220px] z-10 border-r border-line bg-surface-soft px-3 py-3 text-center text-sm font-semibold text-ink shadow-sm transition-colors group-hover:bg-surface-soft">
+                    <td className="sm:sticky sm:left-[220px] z-10 border-r border-line bg-surface-soft px-2 sm:px-3 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-semibold text-ink shadow-sm transition-colors group-hover:bg-surface-soft tabular-nums">
                       {item.saldoAnterior.toLocaleString()}
                     </td>
 

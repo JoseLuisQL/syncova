@@ -412,10 +412,10 @@ const ConfiguracionJeringas: React.FC = () => {
     <div className="space-y-4">
       {loadError ? <ErrorAlert message={loadError} onRetry={handleRefresh} /> : null}
 
-      <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+      <section className={COMPONENT_STYLES.surface}>
         <div className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className={`${COMPONENT_STYLES.mutedPanel} inline-flex w-full flex-wrap gap-2 p-1.5 sm:w-fit`}>
+            <div className={`${COMPONENT_STYLES.mutedPanel} grid grid-cols-2 sm:inline-flex w-full gap-1.5 sm:gap-2 p-1.5 sm:w-fit`}>
               <TabButton
                 label="Reglas por defecto"
                 count={totalDefecto}
@@ -433,7 +433,7 @@ const ConfiguracionJeringas: React.FC = () => {
             <div className="flex items-center justify-end gap-2">
               <button
                 type="button"
-                className={COMPONENT_STYLES.button.primary}
+                className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`}
                 onClick={() => {
                   setEditingConfig(null);
                   setShowModal(true);

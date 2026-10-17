@@ -150,7 +150,7 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
       </button>
 
       {showDropdown ? (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-[180] min-w-[340px] overflow-hidden rounded-xl border border-line bg-surface shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)]">
+        <div className="fixed inset-x-3 top-auto mt-1.5 sm:absolute sm:inset-x-auto sm:right-0 sm:top-[calc(100%+8px)] sm:mt-0 z-[180] w-auto sm:min-w-[340px] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-line bg-surface shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)]">
           <div className="border-b border-line-soft bg-surface-soft px-4 py-3">
             <div className="flex items-start justify-between gap-3">
               <div>

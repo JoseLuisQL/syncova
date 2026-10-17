@@ -603,3 +603,71 @@
   background-color: rgb(var(--color-surface-soft));
 }
 
+/* ============================================================================
+   SIVAC — Sistema Responsivo Automático y Profesional (Mobile-First)
+   ============================================================================ */
+
+/* Safe areas para dispositivos móviles modernos (iOS / Android notch & home indicator) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Ocultar barra de scroll manteniendo funcionalidad táctil */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Desplazamiento horizontal suave con inercia en móviles */
+.touch-pan-x-smooth {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+}
+
+/* Evitar zoom involuntario en iOS Safari al enfocar inputs/selects en móvil */
+@media (max-width: 767px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: max(16px, 0.875rem);
+  }
+
+  /* En tablas matriciales densas (Planificación / Movimientos / ICI-DEMID), mantener inputs compactos */
+  table input[type="number"],
+  table input[type="text"],
+  table select {
+    font-size: 0.8125rem;
+  }
+}
+
+/* Optimización automática de tablas anchas y columnas sticky en pantallas móviles */
+@media (max-width: 639px) {
+  .responsive-matrix-wrap {
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+    border-radius: 0.75rem;
+  }
+
+  .responsive-sticky-col {
+    max-width: 140px !important;
+    min-width: 125px !important;
+    width: 135px !important;
+  }
+}
+
+

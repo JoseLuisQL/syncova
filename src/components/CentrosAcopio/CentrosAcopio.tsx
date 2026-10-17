@@ -306,7 +306,7 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
     <div className="space-y-4">
       {error ? <ErrorAlert message={error} onRetry={() => void fetchCentrosAcopio()} /> : null}
 
-      <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+      <section className={COMPONENT_STYLES.surface}>
         <div className="space-y-4">
           <FilterBar
             searchValue={searchTerm}
@@ -317,7 +317,7 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
             actions={
               <button
                 type="button"
-                className={COMPONENT_STYLES.button.primary}
+                className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`}
                 onClick={() => handleOpenModal()}
                 disabled={loading}
               >
@@ -342,16 +342,27 @@ const CentrosAcopio: React.FC<CentrosAcopioProps> = ({
                 />
               </div>
             ) : (
-              centrosAcopio.map((centro) => (
-                <CentroMobileCard
-                  key={centro.id}
-                  centro={centro}
-                  onEdit={() => handleOpenModal(centro)}
-                  onDelete={() => handleDelete(centro)}
-                  onNavigate={onNavigateToEstablecimientos}
-                  isLoading={loading}
-                />
-              ))
+              <>
+                {centrosAcopio.map((centro) => (
+                  <CentroMobileCard
+                    key={centro.id}
+                    centro={centro}
+                    onEdit={() => handleOpenModal(centro)}
+                    onDelete={() => handleDelete(centro)}
+                    onNavigate={onNavigateToEstablecimientos}
+                    isLoading={loading}
+                  />
+                ))}
+                <div className="overflow-hidden rounded-xl border border-line bg-surface">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    total={total}
+                    limit={filters.limit || 10}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
+              </>
             )}
           </div>
         </div>

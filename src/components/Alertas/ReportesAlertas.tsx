@@ -127,14 +127,14 @@ const ReportesAlertas: React.FC<ReportesAlertasProps> = memo(({
       <div className="space-y-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-950">Reportes y análisis</h2>
-            <p className="mt-1 text-sm text-zinc-500">Filtra el período y exporta sin salir del módulo.</p>
+            <h2 className="text-base sm:text-lg font-semibold text-zinc-950">Reportes y análisis</h2>
+            <p className="mt-1 text-xs sm:text-sm text-zinc-500">Filtra el período y exporta sin salir del módulo.</p>
           </div>
           <button
             type="button"
             onClick={handleExportExcel}
             disabled={isExporting}
-            className={COMPONENT_STYLES.button.primary}
+            className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`}
           >
             {isExporting ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <FileXls className="h-4 w-4" weight="bold" />}
             Exportar Excel

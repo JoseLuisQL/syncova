@@ -234,8 +234,8 @@ const IciDemid: React.FC = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] overflow-hidden bg-transparent md:h-[calc(100vh-5rem)]">
-      <div className="flex h-full w-full flex-col overflow-hidden rounded-[22px] border border-line bg-surface">
+    <div className="min-h-[calc(100dvh-128px)] md:h-[calc(100vh-5rem)] md:overflow-hidden bg-transparent">
+      <div className="flex md:h-full w-full flex-col md:overflow-hidden rounded-2xl sm:rounded-[22px] border border-line bg-surface">
         <section className="shrink-0 border-b border-line-soft bg-surface p-3 sm:p-3.5">
           <div className="flex flex-col gap-2.5 xl:flex-row xl:items-end xl:justify-between">
             <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">

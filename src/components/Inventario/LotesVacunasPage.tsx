@@ -154,7 +154,7 @@ const LotesVacunasPage: React.FC = () => {
   }
 
   return (
-    <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+    <section className={COMPONENT_STYLES.surface}>
       <div className="space-y-4">
         <GestionLotes
           lotes={lotes}
@@ -162,7 +162,7 @@ const LotesVacunasPage: React.FC = () => {
           onDelete={handleDeleteLote}
           tipo="vacuna"
           toolbarActions={
-            <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleOpenNuevoIngreso} disabled={isCreating}>
+            <button type="button" className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`} onClick={handleOpenNuevoIngreso} disabled={isCreating}>
               <Plus className="h-4 w-4" weight="bold" />
               <span>Nuevo lote</span>
             </button>

@@ -62,61 +62,95 @@ const EstablecimientosSection: React.FC = memo(() => {
             icon={<Hospital />}
           />
         ) : (
-          <table className="w-full min-w-[380px] border-collapse text-left">
-            <thead>
-              <tr className="border-b border-line bg-surface-soft/50">
-                <th className="whitespace-nowrap px-4 py-2.5 text-left text-xs font-medium text-muted">
-                  Establecimiento
-                </th>
-                <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
-                  Código
-                </th>
-                <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
-                  Categoría
-                </th>
-                <th className="whitespace-nowrap px-4 py-2.5 text-right text-xs font-medium text-muted">
-                  Estado
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line-soft bg-surface">
+          <>
+            {/* Vista compacta para móviles (< sm) */}
+            <div className="divide-y divide-line-soft sm:hidden">
               {data.map((est) => (
-                <tr key={est.id} className="transition-colors hover:bg-surface-soft/40">
-                  <td className="px-4 py-2.5">
-                    <div className="truncate text-sm font-medium text-ink">
-                      {est.nombre}
+                <div key={`mob-est-${est.id}`} className="flex items-center justify-between gap-2.5 px-4 py-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium text-ink">{est.nombre}</div>
+                    <div className="mt-0.5 flex items-center gap-2 text-xs text-muted">
+                      <span className="font-mono tabular-nums">{est.codigo}</span>
+                      <span aria-hidden="true">·</span>
+                      <span className="capitalize truncate">{est.tipo.replace('_', ' ')}</span>
                     </div>
-                    {est.responsable && (
-                      <div className="truncate text-xs text-muted">{est.responsable}</div>
-                    )}
-                  </td>
-                  <td className="px-3 py-2.5 text-right font-mono text-xs font-medium text-muted-2 tabular-nums">
-                    {est.codigo}
-                  </td>
-                  <td className="px-3 py-2.5 text-right text-xs capitalize text-muted-2">
-                    {est.tipo.replace('_', ' ')}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-right">
+                  </div>
+                  <span
+                    className={`shrink-0 inline-flex items-center gap-1.5 text-xs font-medium ${
+                      est.estado === 'activo'
+                        ? 'text-emerald-700 dark:text-emerald-400'
+                        : 'text-muted'
+                    }`}
+                  >
                     <span
-                      className={`inline-flex items-center justify-end gap-1.5 text-xs font-medium ${
-                        est.estado === 'activo'
-                          ? 'text-emerald-700 dark:text-emerald-400'
-                          : 'text-muted'
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        est.estado === 'activo' ? 'bg-emerald-600' : 'bg-muted'
                       }`}
-                    >
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          est.estado === 'activo' ? 'bg-emerald-600' : 'bg-muted'
-                        }`}
-                        aria-hidden="true"
-                      />
-                      <span className="capitalize">{est.estado}</span>
-                    </span>
-                  </td>
-                </tr>
+                      aria-hidden="true"
+                    />
+                    <span className="capitalize">{est.estado}</span>
+                  </span>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Vista de tabla (>= sm) */}
+            <table className="hidden sm:table w-full min-w-[380px] border-collapse text-left">
+              <thead>
+                <tr className="border-b border-line bg-surface-soft/50">
+                  <th className="whitespace-nowrap px-4 py-2.5 text-left text-xs font-medium text-muted">
+                    Establecimiento
+                  </th>
+                  <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
+                    Código
+                  </th>
+                  <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
+                    Categoría
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-right text-xs font-medium text-muted">
+                    Estado
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line-soft bg-surface">
+                {data.map((est) => (
+                  <tr key={est.id} className="transition-colors hover:bg-surface-soft/40">
+                    <td className="px-4 py-2.5">
+                      <div className="truncate text-sm font-medium text-ink">
+                        {est.nombre}
+                      </div>
+                      {est.responsable && (
+                        <div className="truncate text-xs text-muted">{est.responsable}</div>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5 text-right font-mono text-xs font-medium text-muted-2 tabular-nums">
+                      {est.codigo}
+                    </td>
+                    <td className="px-3 py-2.5 text-right text-xs capitalize text-muted-2">
+                      {est.tipo.replace('_', ' ')}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2.5 text-right">
+                      <span
+                        className={`inline-flex items-center justify-end gap-1.5 text-xs font-medium ${
+                          est.estado === 'activo'
+                            ? 'text-emerald-700 dark:text-emerald-400'
+                            : 'text-muted'
+                        }`}
+                      >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            est.estado === 'activo' ? 'bg-emerald-600' : 'bg-muted'
+                          }`}
+                          aria-hidden="true"
+                        />
+                        <span className="capitalize">{est.estado}</span>
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
 

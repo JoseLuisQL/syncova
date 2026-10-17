@@ -29,18 +29,18 @@ export const MODAL_STYLES = {
     overlay:
       'fixed inset-0 z-[300] bg-slate-950/45 backdrop-blur-[3px] transition-opacity duration-200 dark:bg-black/70',
     container:
-      'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-2.5 sm:items-center sm:p-6',
+      'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-0 sm:items-center sm:p-6',
     panel:
-      'relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl border border-line bg-surface text-ink shadow-[0_24px_64px_-16px_rgba(15,23,42,0.22),0_0_1px_0_rgba(15,23,42,0.08)] sm:max-h-[88vh] sm:rounded-2xl dark:shadow-[0_28px_72px_-16px_rgba(0,0,0,0.75),0_0_1px_0_rgba(255,255,255,0.08)]',
+      'relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl border border-line bg-surface text-ink shadow-[0_24px_64px_-16px_rgba(15,23,42,0.22),0_0_1px_0_rgba(15,23,42,0.08)] sm:max-h-[88vh] sm:rounded-2xl dark:shadow-[0_28px_72px_-16px_rgba(0,0,0,0.75),0_0_1px_0_rgba(255,255,255,0.08)]',
     header:
-      'shrink-0 border-b border-line-soft bg-surface px-5 py-4 sm:px-6',
+      'shrink-0 border-b border-line-soft bg-surface px-4 py-3.5 sm:px-6 sm:py-4',
     headerIconWrapper:
-      'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-soft text-brand shadow-[0_1px_2px_rgba(16,24,40,0.03)]',
+      'flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-soft text-brand shadow-[0_1px_2px_rgba(16,24,40,0.03)]',
     body:
-      'flex-1 min-h-0 overflow-y-auto bg-surface px-5 py-5 sm:px-6',
+      'flex-1 min-h-0 overflow-y-auto overflow-x-hidden bg-surface px-4 py-4 sm:px-6 sm:py-5',
     footer:
-      'shrink-0 border-t border-line-soft bg-surface-soft/75 px-5 py-3.5 backdrop-blur-xs sm:flex sm:flex-row-reverse sm:items-center sm:px-6',
+      'shrink-0 border-t border-line-soft bg-surface-soft/75 px-4 py-3 pb-safe backdrop-blur-xs flex flex-wrap items-center justify-end gap-2 sm:flex-row-reverse sm:px-6 sm:py-3.5',
     sideSheetPanel:
-      'relative mt-auto flex h-[90vh] w-full flex-col rounded-t-2xl border-l border-line bg-surface text-ink shadow-[0_24px_64px_-16px_rgba(15,23,42,0.25)] sm:mt-0 sm:h-full sm:max-w-xl sm:rounded-none dark:shadow-[0_28px_72px_-16px_rgba(0,0,0,0.75)]',
+      'relative mt-auto flex h-[92dvh] w-full flex-col rounded-t-2xl border-l border-line bg-surface text-ink shadow-[0_24px_64px_-16px_rgba(15,23,42,0.25)] sm:mt-0 sm:h-full sm:max-w-xl sm:rounded-none dark:shadow-[0_28px_72px_-16px_rgba(0,0,0,0.75)]',
   },
 } as const;

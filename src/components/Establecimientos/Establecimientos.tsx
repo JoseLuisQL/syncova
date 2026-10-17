@@ -249,7 +249,7 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
     <div className="space-y-4">
       {errorMessage ? <ErrorAlert message={errorMessage} onRetry={refresh} /> : null}
 
-      <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+      <section className={COMPONENT_STYLES.surface}>
         <div className="space-y-4">
           <FilterBar
             searchValue={searchTerm}
@@ -258,7 +258,7 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
             filters={filtersConfig}
             onClear={handleClearFilters}
             actions={
-              <button type="button" className={COMPONENT_STYLES.button.primary} onClick={() => handleOpenModal()} disabled={isCreating}>
+              <button type="button" className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`} onClick={() => handleOpenModal()} disabled={isCreating}>
                 <Plus className="h-4 w-4" />
                 <span>Nuevo establecimiento</span>
               </button>
@@ -280,15 +280,26 @@ const Establecimientos: React.FC<EstablecimientosProps> = ({
                 />
               </div>
             ) : (
-              establecimientos.map((establecimiento) => (
-                <EstablecimientoMobileCard
-                  key={establecimiento.id}
-                  establecimiento={establecimiento}
-                  onEdit={() => handleOpenModal(establecimiento)}
-                  onDelete={() => handleDelete(establecimiento)}
-                  isLoading={isUpdating || isDeleting}
-                />
-              ))
+              <>
+                {establecimientos.map((establecimiento) => (
+                  <EstablecimientoMobileCard
+                    key={establecimiento.id}
+                    establecimiento={establecimiento}
+                    onEdit={() => handleOpenModal(establecimiento)}
+                    onDelete={() => handleDelete(establecimiento)}
+                    isLoading={isUpdating || isDeleting}
+                  />
+                ))}
+                <div className="overflow-hidden rounded-xl border border-line bg-surface">
+                  <Pagination
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    total={pagination.total}
+                    limit={pagination.limit}
+                    onPageChange={changePage}
+                  />
+                </div>
+              </>
             )}
           </div>
         </div>

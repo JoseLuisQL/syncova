@@ -8,14 +8,14 @@ interface MovimientosShellProps {
 }
 
 const MovimientosShell: React.FC<MovimientosShellProps> = ({ header, status, children }) => (
-  <main className="h-[calc(100dvh-128px)] min-h-0 overflow-hidden rounded-4xl border border-line bg-surface shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
-    <div className={`${MODULE_LAYOUT.fullWidth} flex h-full min-h-0 flex-col overflow-hidden`}>
-      <section className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-surface">
+  <main className="min-h-[calc(100dvh-128px)] md:h-[calc(100dvh-128px)] min-h-0 overflow-visible md:overflow-hidden rounded-2xl sm:rounded-4xl border border-line bg-surface shadow-[0_24px_70px_-52px_rgba(12,15,24,0.72)] sm:-m-2">
+    <div className={`${MODULE_LAYOUT.fullWidth} flex md:h-full min-h-0 flex-col md:overflow-hidden`}>
+      <section className="flex md:h-full min-h-0 flex-1 flex-col md:overflow-hidden bg-surface">
         <div className="relative z-[80] shrink-0 overflow-visible">
           {header}
         </div>
         {status ? <div className="shrink-0">{status}</div> : null}
-        <div className="relative z-0 flex min-h-0 flex-1 flex-col overflow-hidden p-4 pt-0 sm:p-6 sm:pt-0">{children}</div>
+        <div className="relative z-0 flex min-h-0 flex-1 flex-col md:overflow-hidden p-2.5 pt-2 sm:p-6 sm:pt-0">{children}</div>
       </section>
     </div>
   </main>

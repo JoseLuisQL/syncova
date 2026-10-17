@@ -50,20 +50,20 @@ export const SiBotFloating: React.FC = () => {
 
   const panelLayoutClass = isExpanded
     ? 'bottom-4 right-4 w-[min(1100px,calc(100vw-2rem))] h-[min(88vh,920px)] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] rounded-[1.9rem]'
-    : 'bottom-[96px] right-6 w-[360px] h-[640px] max-h-[calc(100vh-130px)] max-w-[calc(100vw-3rem)] rounded-[1.75rem]';
-  const messagePanePaddingClass = isExpanded ? 'px-5 pb-7' : 'px-4 pb-6';
+    : 'inset-x-2.5 bottom-[5.25rem] sm:inset-x-auto lg:bottom-[96px] sm:right-6 w-auto sm:w-[360px] h-[calc(100dvh-6.5rem)] sm:h-[640px] max-h-[calc(100dvh-6.5rem)] sm:max-h-[calc(100vh-130px)] max-w-[calc(100vw-1.25rem)] sm:max-w-[calc(100vw-3rem)] rounded-2xl sm:rounded-[1.75rem]';
+  const messagePanePaddingClass = isExpanded ? 'px-5 pb-7' : 'px-3.5 sm:px-4 pb-6';
   const emptyStateOffsetClass = isExpanded ? 'mt-0' : 'mt-[-20px]';
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-[4.5rem] right-3.5 lg:bottom-6 lg:right-6 z-40">
         {isOpen ? (
           <button type="button"
             onClick={toggleOpen}
-            className="flex h-[58px] w-[58px] items-center justify-center rounded-full border border-line bg-ink text-white shadow-[0_18px_44px_-26px_rgba(12,15,24,0.65)] transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.97]"
+            className="flex h-12 w-12 sm:h-[58px] sm:w-[58px] items-center justify-center rounded-full border border-line bg-ink text-white shadow-[0_18px_44px_-26px_rgba(12,15,24,0.65)] transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.97]"
             aria-label="Cerrar SiBot"
           >
-            <X className="h-[22px] w-[22px]" weight="bold" />
+            <X className="h-5 w-5 sm:h-[22px] sm:w-[22px]" weight="bold" />
           </button>
         ) : (
           <StarBorder
@@ -74,10 +74,10 @@ export const SiBotFloating: React.FC = () => {
           >
             <button type="button"
               onClick={toggleOpen}
-              className="flex h-[58px] w-[58px] items-center justify-center rounded-full border border-brand-100 bg-brand text-white shadow-[0_18px_44px_-26px_rgba(124,58,237,0.9)] transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.97]"
+              className="flex h-12 w-12 sm:h-[58px] sm:w-[58px] items-center justify-center rounded-full border border-brand-100 bg-brand text-white shadow-[0_18px_44px_-26px_rgba(124,58,237,0.9)] transition-all duration-300 ease-out hover:scale-[1.03] active:scale-[0.97]"
               aria-label="Abrir SiBot"
             >
-              <SiBotLogo className="h-8 w-8" />
+              <SiBotLogo className="h-6 w-6 sm:h-8 sm:w-8" />
             </button>
           </StarBorder>
         )}

@@ -329,7 +329,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
             {onNavigateToPermissions ? (
               <button type="button"
                 onClick={onNavigateToPermissions}
-                className={COMPONENT_STYLES.button.secondary}
+                className={`${COMPONENT_STYLES.button.secondary} flex-1 sm:flex-initial justify-center`}
               >
                 <Key className="h-4 w-4" />
                 <span>Ver permisos</span>
@@ -337,7 +337,7 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
             ) : null}
             <button type="button"
               onClick={() => setShowModal(true)}
-              className={COMPONENT_STYLES.button.primary}
+              className={`${COMPONENT_STYLES.button.primary} flex-1 sm:flex-initial justify-center`}
             >
               <Plus className="h-4 w-4" />
               <span>Nuevo rol</span>
@@ -346,7 +346,118 @@ const RolesManagement: React.FC<RolesManagementProps> = ({ onNavigateToPermissio
         </div>
       </section>
 
-      <section className={COMPONENT_STYLES.table.container}>
+      {/* Vista móvil de tarjetas (< md) */}
+      <div className="grid grid-cols-1 gap-3 md:hidden">
+        {filteredRoles.length === 0 ? (
+          <div className="rounded-xl border border-line bg-surface px-4 py-10 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-soft text-muted">
+              <Shield className="h-6 w-6" />
+            </div>
+            <p className="mt-3 text-sm font-semibold text-ink">No se encontraron roles</p>
+            <p className="mt-1 text-xs text-muted">
+              {hasActiveFilters
+                ? 'Intenta ajustar los filtros para encontrar el rol que buscas.'
+                : 'Todavía no hay roles personalizados registrados en el sistema.'}
+            </p>
+          </div>
+        ) : (
+          filteredRoles.map((role) => (
+            <article key={`mobile-role-${role.id}`} className="rounded-xl border border-line bg-surface p-3.5 shadow-2xs space-y-3">
+              <div className="flex items-start justify-between gap-2.5">
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-soft text-ink">
+                    <Shield className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-ink">{role.nombre}</p>
+                    <p className="mt-0.5 line-clamp-2 text-xs text-muted">{role.descripcion || 'Sin descripción registrada.'}</p>
+                  </div>
+                </div>
+                <span className={`shrink-0 inline-flex gap-1.5 rounded-md border border-line bg-surface px-2 py-0.5 text-[11px] font-medium text-ink before:mt-[5px] before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full ${role.estado === 'activo' ? 'before:bg-emerald-500' : 'before:bg-rose-500'}`}>
+                  {role.estado === 'activo' ? 'Activo' : 'Inactivo'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 rounded-lg border border-line-soft bg-surface-soft/60 p-2.5 text-xs">
+                <div className="min-w-0">
+                  <span className="block text-[10px] font-semibold uppercase tracking-wider text-muted">Código</span>
+                  <span className="mt-1 block truncate font-mono text-xs font-medium text-ink">{role.codigo}</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-semibold uppercase tracking-wider text-muted">Usuarios</span>
+                  <span className="mt-1 inline-flex items-center gap-1 font-semibold text-ink tabular-nums">
+                    <Users className="h-3.5 w-3.5 text-muted" />
+                    {role._count?.usuarios || 0}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-semibold uppercase tracking-wider text-muted">Permisos</span>
+                  <span className="mt-1 inline-flex items-center gap-1 font-semibold text-ink tabular-nums">
+                    <Key className="h-3.5 w-3.5 text-muted" />
+                    {role._count?.rolePermissions || 0}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 border-t border-line-soft pt-2.5">
+                <span className="inline-flex rounded-md border border-line bg-surface-soft px-2 py-0.5 text-[11px] font-medium text-muted-2">
+                  {role.esDefault ? 'Sistema' : 'Personalizado'}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => void handleManagePermissions(role)}
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 text-xs font-semibold text-ink hover:bg-surface-soft"
+                  >
+                    <Key className="h-3.5 w-3.5" />
+                    <span>Permisos</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleEdit(role)}
+                    disabled={role.esDefault}
+                    className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconEdit} h-8 w-8`}
+                    title={role.esDefault ? 'Rol protegido del sistema' : 'Editar rol'}
+                  >
+                    <PencilSimple className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleToggleEstado(role)}
+                    disabled={role.esDefault}
+                    className={`${COMPONENT_STYLES.button.icon} h-8 w-8 ${
+                      role.estado === 'activo'
+                        ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
+                        : 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
+                    }`}
+                    title={role.estado === 'activo' ? 'Desactivar rol' : 'Activar rol'}
+                  >
+                    {role.estado === 'activo' ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+                  </button>
+                  {!role.esDefault ? (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(role)}
+                      disabled={isDeleting}
+                      className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconDelete} h-8 w-8`}
+                      title="Eliminar rol"
+                    >
+                      {isDeleting && deleteRoleState.role?.id === role.id ? (
+                        <CircleNotch className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash className="h-4 w-4" />
+                      )}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+
+      {/* Vista de tabla para tablet y escritorio (>= md) */}
+      <section className={`hidden md:block ${COMPONENT_STYLES.table.container}`}>
         <div className="overflow-x-auto">
           <table className="min-w-full">
             <thead className={COMPONENT_STYLES.table.header}>

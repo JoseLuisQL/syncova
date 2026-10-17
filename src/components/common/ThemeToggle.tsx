@@ -42,7 +42,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
       ref={btnRef}
       type="button"
       onClick={handleClick}
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors duration-200 hover:bg-surface-soft hover:border-line-strong focus:outline-none focus:ring-2 focus:ring-brand/20 ${className}`}
+      className={`inline-flex h-10 w-10 items-center justify-center rounded-[9px] border border-line-focus bg-surface text-muted-2 transition-colors duration-200 hover:bg-surface-soft hover:border-line-strong hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-line-focus/70 ${className}`}
       aria-label={isDark ? 'Activar modo claro' : 'Activar modo oscuro'}
       title={isDark ? 'Modo claro' : 'Modo oscuro'}
     >

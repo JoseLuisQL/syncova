@@ -77,22 +77,22 @@ export const AlertaCard: React.FC<AlertaCardProps> = memo(({
             </span>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-3.5 flex items-center gap-2 border-t border-line-soft pt-3">
             {alerta.leida ? (
-              <button type="button" onClick={handleMarcarNoLeida} className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50">
-                <EyeClosed className="h-4 w-4" weight="bold" />
-                Marcar no leída
+              <button type="button" onClick={handleMarcarNoLeida} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-xs sm:text-sm font-medium text-ink transition hover:bg-surface-soft">
+                <EyeClosed className="h-4 w-4 shrink-0" weight="bold" />
+                <span className="truncate">Marcar no leída</span>
               </button>
             ) : (
-              <button type="button" onClick={handleMarcarLeida} className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100">
-                <Eye className="h-4 w-4" weight="bold" />
-                Marcar leída
+              <button type="button" onClick={handleMarcarLeida} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs sm:text-sm font-medium text-emerald-700 transition hover:bg-emerald-100">
+                <Eye className="h-4 w-4 shrink-0" weight="bold" />
+                <span className="truncate">Marcar leída</span>
               </button>
             )}
 
-            <button type="button" onClick={handleEliminar} className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">
-              <Trash className="h-4 w-4" weight="bold" />
-              Eliminar
+            <button type="button" onClick={handleEliminar} className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs sm:text-sm font-medium text-rose-700 transition hover:bg-rose-100 shrink-0">
+              <Trash className="h-4 w-4 shrink-0" weight="bold" />
+              <span>Eliminar</span>
             </button>
           </div>
         </div>

@@ -82,58 +82,93 @@ const CentrosAcopioSection: React.FC = memo(() => {
             icon={<MapPin />}
           />
         ) : (
-          <table className="w-full min-w-[380px] border-collapse text-left">
-            <thead>
-              <tr className="border-b border-line bg-surface-soft/50">
-                <th className="whitespace-nowrap px-4 py-2.5 text-left text-xs font-medium text-muted">
-                  Centro de acopio
-                </th>
-                <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
-                  EESS
-                </th>
-                <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
-                  Dosis disp.
-                </th>
-                <th className="whitespace-nowrap px-4 py-2.5 text-right text-xs font-medium text-muted">
-                  Estado
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line-soft bg-surface">
+          <>
+            {/* Vista compacta para móviles (< sm) */}
+            <div className="divide-y divide-line-soft sm:hidden">
               {data.map((centro) => {
                 const status = ESTADO_META[centro.estado] || ESTADO_META.activo;
                 return (
-                  <tr
-                    key={centro.id}
-                    className="transition-colors hover:bg-surface-soft/40"
-                  >
-                    <td className="px-4 py-2.5">
-                      <div className="truncate text-sm font-medium text-ink">
-                        {centro.nombre}
+                  <div key={`mob-ca-${centro.id}`} className="flex items-center justify-between gap-2.5 px-4 py-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium text-ink">{centro.nombre}</div>
+                      <div className="mt-0.5 flex items-center gap-2 text-xs text-muted">
+                        <span className="font-mono tabular-nums">{centro.establecimientos} EESS</span>
+                        {centro.responsable && (
+                          <>
+                            <span aria-hidden="true">·</span>
+                            <span className="truncate">{centro.responsable}</span>
+                          </>
+                        )}
                       </div>
-                      {centro.responsable && (
-                        <div className="truncate text-xs text-muted">
-                          {centro.responsable}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-3 py-2.5 text-right font-mono text-sm text-muted-2 tabular-nums">
-                      {centro.establecimientos}
-                    </td>
-                    <td className="px-3 py-2.5 text-right font-mono text-sm font-semibold text-ink tabular-nums">
-                      {centro.stockTotal.toLocaleString('es-PE')}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2.5 text-right">
-                      <span className={`inline-flex items-center justify-end gap-1.5 text-xs font-medium ${status.text}`}>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="font-mono text-sm font-semibold text-ink tabular-nums">
+                        {centro.stockTotal.toLocaleString('es-PE')}
+                      </div>
+                      <span className={`inline-flex items-center justify-end gap-1 text-[11px] font-medium ${status.text}`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} aria-hidden="true" />
                         {status.label}
                       </span>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Vista de tabla (>= sm) */}
+            <table className="hidden sm:table w-full min-w-[380px] border-collapse text-left">
+              <thead>
+                <tr className="border-b border-line bg-surface-soft/50">
+                  <th className="whitespace-nowrap px-4 py-2.5 text-left text-xs font-medium text-muted">
+                    Centro de acopio
+                  </th>
+                  <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
+                    EESS
+                  </th>
+                  <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
+                    Dosis disp.
+                  </th>
+                  <th className="whitespace-nowrap px-4 py-2.5 text-right text-xs font-medium text-muted">
+                    Estado
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line-soft bg-surface">
+                {data.map((centro) => {
+                  const status = ESTADO_META[centro.estado] || ESTADO_META.activo;
+                  return (
+                    <tr
+                      key={centro.id}
+                      className="transition-colors hover:bg-surface-soft/40"
+                    >
+                      <td className="px-4 py-2.5">
+                        <div className="truncate text-sm font-medium text-ink">
+                          {centro.nombre}
+                        </div>
+                        {centro.responsable && (
+                          <div className="truncate text-xs text-muted">
+                            {centro.responsable}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 py-2.5 text-right font-mono text-sm text-muted-2 tabular-nums">
+                        {centro.establecimientos}
+                      </td>
+                      <td className="px-3 py-2.5 text-right font-mono text-sm font-semibold text-ink tabular-nums">
+                        {centro.stockTotal.toLocaleString('es-PE')}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2.5 text-right">
+                        <span className={`inline-flex items-center justify-end gap-1.5 text-xs font-medium ${status.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} aria-hidden="true" />
+                          {status.label}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
 

@@ -86,16 +86,16 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
       </div>
 
       {selectedAlertas.length > 0 ? (
-        <div className="rounded-xl border border-line bg-surface-soft px-4 py-3">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="rounded-xl border border-line bg-surface-soft px-3.5 py-3 sm:px-4">
+          <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
             <span className="text-sm font-medium text-ink">
               {selectedAlertas.length} alerta{selectedAlertas.length === 1 ? '' : 's'} seleccionada{selectedAlertas.length === 1 ? '' : 's'}
             </span>
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={onMarcarSeleccionadasLeidas} className={COMPONENT_STYLES.button.primary}>
+              <button type="button" onClick={onMarcarSeleccionadasLeidas} className={`${COMPONENT_STYLES.button.primary} flex-1 sm:flex-initial justify-center`}>
                 Marcar leídas
               </button>
-              <button type="button" onClick={onEliminarSeleccionadas} className={COMPONENT_STYLES.button.secondary}>
+              <button type="button" onClick={onEliminarSeleccionadas} className={`${COMPONENT_STYLES.button.secondary} flex-1 sm:flex-initial justify-center`}>
                 Eliminar
               </button>
             </div>
@@ -103,7 +103,7 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
         </div>
       ) : null}
 
-      <div className="block md:hidden space-y-3 p-4 sm:p-5">
+      <div className="block md:hidden space-y-3 pt-1">
         {alertasPaginadas.map((alerta) => (
           <AlertaCard
             key={alerta.id}

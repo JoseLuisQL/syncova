@@ -113,9 +113,9 @@ const UserMenu: React.FC = memo(() => {
         {isMenuOpen && (
           <div 
             className="
-              absolute right-0 mt-2 w-72
-              bg-white rounded-3xl shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]
-              border border-white/90
+              fixed inset-x-3 top-16 sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 w-auto sm:w-72 max-w-[calc(100vw-1.5rem)]
+              bg-surface rounded-2xl sm:rounded-3xl shadow-[0_28px_80px_-52px_rgba(12,15,24,0.72)]
+              border border-line
               overflow-hidden
               z-50
               animate-in fade-in slide-in-from-top-2 duration-150

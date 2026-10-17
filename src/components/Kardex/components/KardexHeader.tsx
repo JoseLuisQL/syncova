@@ -24,21 +24,21 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
   const isRefreshing = loading || loadingEstadisticas || loadingFiltros;
 
   return (
-    <section className="border-b border-line-soft bg-white px-5 py-4 sm:px-6">
+    <section className="border-b border-line-soft bg-surface px-3.5 py-3.5 sm:px-6 sm:py-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-[1.05rem] font-semibold tracking-tight text-ink">Kardex de Movimientos</h1>
-          <p className="text-sm text-muted-3">
+          <h1 className="text-base sm:text-[1.05rem] font-semibold tracking-tight text-ink">Kardex de Movimientos</h1>
+          <p className="text-xs sm:text-sm text-muted-3">
             Consulta de ingresos, salidas, ajustes y transferencias del inventario general.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onRefresh}
             disabled={isRefreshing}
-            className={COMPONENT_STYLES.button.secondary}
+            className={`${COMPONENT_STYLES.button.secondary} w-full sm:w-auto justify-center`}
             aria-busy={isRefreshing}
           >
             {isRefreshing ? (
@@ -46,14 +46,14 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
             ) : (
               <ArrowsClockwise className="h-4 w-4" aria-hidden="true" />
             )}
-            <span className="font-semibold text-sm">Actualizar</span>
+            <span className="font-semibold text-xs sm:text-sm">Actualizar</span>
           </button>
 
           <button
             type="button"
             onClick={onExport}
             disabled={!isExportEnabled || exportando}
-            className={COMPONENT_STYLES.button.primary}
+            className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`}
             aria-busy={exportando}
           >
             {exportando ? (
@@ -61,7 +61,7 @@ const KardexHeaderComponent: React.FC<KardexHeaderProps> = ({
             ) : (
               <DownloadSimple className="h-4 w-4" aria-hidden="true" />
             )}
-            <span className="font-semibold text-sm">{exportando ? 'Exportando...' : 'Exportar Excel'}</span>
+            <span className="font-semibold text-xs sm:text-sm">{exportando ? 'Exportando...' : 'Exportar Excel'}</span>
           </button>
         </div>
       </div>

@@ -287,7 +287,7 @@ const GestionVacunas: React.FC = () => {
     <div className="space-y-4">
       {error ? <ErrorAlert message={error} onRetry={refresh} /> : null}
 
-      <section className={`${COMPONENT_STYLES.surface} p-4 sm:p-6`}>
+      <section className={COMPONENT_STYLES.surface}>
         <div className="space-y-4">
           <FilterBar
             searchValue={searchValue}
@@ -296,7 +296,7 @@ const GestionVacunas: React.FC = () => {
             filters={filters}
             onClear={handleClearFilters}
             actions={
-              <button type="button" className={COMPONENT_STYLES.button.primary} onClick={handleCreate} disabled={isCreating}>
+              <button type="button" className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`} onClick={handleCreate} disabled={isCreating}>
                 <Plus className="h-4 w-4" weight="bold" />
                 <span>Nueva vacuna</span>
               </button>
@@ -318,53 +318,65 @@ const GestionVacunas: React.FC = () => {
                 />
               </div>
             ) : (
-              vacunas.map((vacuna) => {
-                const stockInfo = getStockInfo(vacuna);
-                return (
-                  <article key={vacuna.id} className={`${COMPONENT_STYLES.panel} p-4`}>
-                    <div className="flex items-start justify-between gap-3">
-                      <button type="button" onClick={() => setSelectedVacuna(vacuna)} className="min-w-0 text-left">
-                        <div className="flex items-center gap-1.5">
-                          {vacuna.codigo ? (
-                            <span className="inline-flex items-center rounded border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 font-mono text-[0.7rem] font-semibold text-zinc-700">
-                              {vacuna.codigo}
-                            </span>
-                          ) : null}
-                          <p className="truncate text-base font-semibold text-zinc-950">{vacuna.nombre}</p>
+              <>
+                {vacunas.map((vacuna) => {
+                  const stockInfo = getStockInfo(vacuna);
+                  return (
+                    <article key={vacuna.id} className={`${COMPONENT_STYLES.panel} p-3.5 sm:p-4`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <button type="button" onClick={() => setSelectedVacuna(vacuna)} className="min-w-0 text-left">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {vacuna.codigo ? (
+                              <span className="inline-flex items-center rounded border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 font-mono text-[0.7rem] font-semibold text-zinc-700">
+                                {vacuna.codigo}
+                              </span>
+                            ) : null}
+                            <p className="truncate text-base font-semibold text-ink">{vacuna.nombre}</p>
+                          </div>
+                          <p className="mt-1 text-xs sm:text-sm text-muted-2">
+                            {vacuna.tipo} · {vacuna.presentacion}
+                          </p>
+                        </button>
+                        <StatusBadge status={vacuna.estado} />
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
+                        <div className="rounded-xl border border-line bg-surface-soft/70 p-2.5 sm:p-3">
+                          <p className="text-[11px] uppercase tracking-[0.08em] text-muted">Stock</p>
+                          <p className={`mt-1 text-base sm:text-lg font-semibold tabular-nums ${stockInfo.stockTotal > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                            {stockInfo.stockTotal.toLocaleString()}
+                          </p>
                         </div>
-                        <p className="mt-1 text-sm text-zinc-500">
-                          {vacuna.tipo} · {vacuna.presentacion}
-                        </p>
-                      </button>
-                      <StatusBadge status={vacuna.estado} />
-                    </div>
-                <div className="mt-3 grid grid-cols-2 gap-2.5 text-sm">
-                      <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
-                        <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Stock</p>
-                        <p className={`mt-2 text-lg font-semibold ${stockInfo.stockTotal > 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                          {stockInfo.stockTotal.toLocaleString()}
-                        </p>
+                        <div className="rounded-xl border border-line bg-surface-soft/70 p-2.5 sm:p-3">
+                          <p className="text-[11px] uppercase tracking-[0.08em] text-muted">Lotes activos</p>
+                          <p className="mt-1 text-base sm:text-lg font-semibold tabular-nums text-ink">{stockInfo.lotesActivos}</p>
+                        </div>
                       </div>
-                      <div className="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-3">
-                        <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">Lotes activos</p>
-                        <p className="mt-2 text-lg font-semibold text-zinc-900">{stockInfo.lotesActivos}</p>
+                      <div className="mt-3 flex items-center justify-between border-t border-line-soft pt-2.5">
+                        <div className="flex items-center gap-2 text-xs text-muted-2">
+                          <span>{stockInfo.lotesPorVencer} por vencer</span>
+                          <span>·</span>
+                          <span>{stockInfo.lotesVencidos} vencidos</span>
+                        </div>
+                        <ActionButtons
+                          onView={() => setSelectedVacuna(vacuna)}
+                          onEdit={() => handleEdit(vacuna)}
+                          onDelete={() => setDeleteTarget(vacuna)}
+                          isLoading={isUpdating || isDeleting}
+                        />
                       </div>
-                    </div>
-                <div className="mt-3 flex items-center justify-between">
-                  <div className="text-xs text-zinc-500">
-                    <p>{stockInfo.lotesPorVencer} por vencer</p>
-                    <p>{stockInfo.lotesVencidos} vencidos</p>
-                  </div>
-                      <ActionButtons
-                        onView={() => setSelectedVacuna(vacuna)}
-                        onEdit={() => handleEdit(vacuna)}
-                        onDelete={() => setDeleteTarget(vacuna)}
-                        isLoading={isUpdating || isDeleting}
-                      />
-                    </div>
-                  </article>
-                );
-              })
+                    </article>
+                  );
+                })}
+                <div className="overflow-hidden rounded-xl border border-line bg-surface">
+                  <Pagination
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    total={pagination.total}
+                    limit={pagination.limit}
+                    onPageChange={changePage}
+                  />
+                </div>
+              </>
             )}
           </div>
         </div>

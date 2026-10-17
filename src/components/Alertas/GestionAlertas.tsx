@@ -152,10 +152,10 @@ const GestionAlertas: React.FC<GestionAlertasProps> = memo(({ onRefresh }) => {
       <div className="space-y-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-950">Gestión de alertas</h2>
-            <p className="mt-1 text-sm text-zinc-500">Filtra, revisa y opera alertas activas sin salir del módulo.</p>
+            <h2 className="text-base sm:text-lg font-semibold text-zinc-950">Gestión de alertas</h2>
+            <p className="mt-1 text-xs sm:text-sm text-zinc-500">Filtra, revisa y opera alertas activas sin salir del módulo.</p>
           </div>
-          <button type="button" onClick={() => setShowModal(true)} className={COMPONENT_STYLES.button.primary}>
+          <button type="button" onClick={() => setShowModal(true)} className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`}>
             <Plus className="h-4 w-4" weight="bold" />
             Nueva alerta
           </button>

@@ -2,16 +2,16 @@ import React, { useEffect, useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './contexts/AppContext';
 import { ToastProvider } from './contexts/ToastContext';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AlertasProvider } from './contexts/AlertasContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
+import MobileBottomNav from './components/Layout/MobileBottomNav';
 import AppRoutes from './components/routing/AppRoutes';
 import PageTitle from './components/routing/PageTitle';
 import { useCurrentRoute } from './hooks/useRouting';
-import { useAuth } from './contexts/AuthContext';
 import { SiBotFloating } from './components/SiBot/SiBotFloating';
 
 function App() {
@@ -71,10 +71,19 @@ const AppContent: React.FC = () => {
         >
           <Header />
           
-          {/* Main content */}
-          <main className={currentModule === 'dashboard' ? 'p-0 [overflow-anchor:none]' : 'p-4 sm:p-6 [overflow-anchor:none]'}>
+          {/* Main content with mobile bottom nav clearance */}
+          <main
+            className={
+              currentModule === 'dashboard'
+                ? 'p-0 pb-20 lg:pb-0 [overflow-anchor:none]'
+                : 'p-2.5 sm:p-6 pb-20 lg:pb-6 [overflow-anchor:none]'
+            }
+          >
             <AppRoutes />
           </main>
+
+          {/* Barra de navegación inferior móvil */}
+          <MobileBottomNav />
           
           {/* SiBot AI Agent - Solo Administradores */}
           {user?.rol === 'administrador' && <SiBotFloating />}
@@ -85,4 +94,3 @@ const AppContent: React.FC = () => {
 };
 
 export default App;
-

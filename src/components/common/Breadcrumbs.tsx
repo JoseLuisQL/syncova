@@ -5,15 +5,16 @@ import { BREADCRUMBS_STYLES } from '../Layout/constants';
 
 const Breadcrumbs: React.FC = memo(() => {
   const { breadcrumbs } = useCurrentRoute();
-  const { navigateToHome } = useAppNavigation();
+  const { navigateToHome, navigate } = useAppNavigation();
 
-  if (breadcrumbs.length === 0) {
-    return null;
-  }
+  const items = breadcrumbs.length > 0
+    ? breadcrumbs
+    : [{ label: 'Dashboard', path: '/dashboard', isLast: true }];
 
   return (
     <nav className={BREADCRUMBS_STYLES.nav} aria-label="Breadcrumb">
-      <button type="button"
+      <button
+        type="button"
         onClick={navigateToHome}
         className={BREADCRUMBS_STYLES.homeButton}
         aria-label="Ir al Dashboard"
@@ -21,19 +22,31 @@ const Breadcrumbs: React.FC = memo(() => {
         <House className={BREADCRUMBS_STYLES.homeIcon} weight="duotone" />
       </button>
 
-      {breadcrumbs.map((crumb, idx) => {
-        // En móvil, ocultar breadcrumbs intermedios: mostrar solo el último
-        // para evitar que el header se comprima. En sm+ se ven todos.
-        const isIntermediate = idx < breadcrumbs.length - 1;
+      {items.map((crumb, idx) => {
+        const isIntermediate = idx < items.length - 1;
         return (
           <React.Fragment key={crumb.path}>
-            <CaretRight className={`${BREADCRUMBS_STYLES.separator} ${isIntermediate ? 'hidden sm:block' : ''}`} weight="bold" aria-hidden="true" />
-            <span
-              className={`${crumb.isLast ? BREADCRUMBS_STYLES.itemLast : BREADCRUMBS_STYLES.item} ${isIntermediate ? 'hidden sm:inline' : ''} truncate`}
-              aria-current={crumb.isLast ? 'page' : undefined}
-            >
-              {crumb.label}
-            </span>
+            <CaretRight
+              className={`${BREADCRUMBS_STYLES.separator} ${isIntermediate ? 'hidden sm:block' : ''}`}
+              weight="bold"
+              aria-hidden="true"
+            />
+            {crumb.isLast ? (
+              <span
+                className={`${BREADCRUMBS_STYLES.itemLast} truncate`}
+                aria-current="page"
+              >
+                {crumb.label}
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate(crumb.path)}
+                className={`${BREADCRUMBS_STYLES.item} ${isIntermediate ? 'hidden sm:inline' : ''} truncate`}
+              >
+                {crumb.label}
+              </button>
+            )}
           </React.Fragment>
         );
       })}

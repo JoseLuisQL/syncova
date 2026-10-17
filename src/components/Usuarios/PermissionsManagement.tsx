@@ -504,34 +504,51 @@ const PermissionsManagement: React.FC = () => {
 
                 {/* Mobile layout */}
                 <div className="lg:hidden space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface-soft text-sm font-bold text-muted-2">
-                      {usuario.nombres[0]}{usuario.apellidos[0]}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface-soft text-sm font-bold text-muted-2">
+                        {usuario.nombres[0]}{usuario.apellidos[0]}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-zinc-900 truncate">
+                          {usuario.apellidos}, {usuario.nombres}
+                        </p>
+                        <p className="text-xs text-zinc-500 truncate">
+                          {usuario.centrosAcopioAsignados.length > 0
+                            ? usuario.centrosAcopioAsignados.map(a => a.centroAcopio.nombre).join(', ')
+                            : usuario.centroAcopio?.nombre || 'Sin centro'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-zinc-900 truncate">
-                        {usuario.apellidos}, {usuario.nombres}
-                      </p>
-                      <p className="text-xs text-zinc-500 truncate">
-                        {usuario.centrosAcopioAsignados.length > 0
-                          ? usuario.centrosAcopioAsignados.map(a => a.centroAcopio.nombre).join(', ')
-                          : usuario.centroAcopio?.nombre || 'Sin centro'}
-                      </p>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setScheduleModal({
+                        isOpen: true,
+                        tipo: TIPOS_PERMISO.MOVIMIENTOS_EDICION,
+                        usuarioId: usuario.id,
+                        label: `${usuario.nombres} ${usuario.apellidos}`,
+                      })}
+                      className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconKey} shrink-0`}
+                      title="Programar permisos"
+                    >
+                      <Timer className="h-4 w-4" />
+                    </button>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {PERMISO_CONFIG.map((config) => {
                       const permiso = usuario.permisos[config.tipo as keyof typeof usuario.permisos];
                       const isToggling = toggling === `${config.tipo}-${usuario.id}`;
                       const Icon = config.icon;
 
                       return (
-                        <div key={config.tipo} className="flex flex-col items-center gap-1.5 rounded-lg border border-zinc-100 p-2">
-                          <Icon className="h-4 w-4 text-zinc-500" />
-                          <span className="text-[10px] font-medium text-zinc-600 text-center leading-tight">
-                            {config.label.replace('Editar ', '')}
-                          </span>
+                        <div key={config.tipo} className="flex items-center justify-between gap-2 rounded-lg border border-zinc-100 bg-surface-soft/50 px-2.5 py-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <Icon className="h-4 w-4 shrink-0 text-zinc-500" />
+                            <span className="text-[11px] font-medium text-zinc-700 truncate">
+                              {config.label.replace('Editar ', '')}
+                            </span>
+                          </div>
                           <ToggleSwitch
                             checked={permiso.habilitado}
                             onChange={(checked) => void handleToggle(config.tipo, checked, usuario.id)}
