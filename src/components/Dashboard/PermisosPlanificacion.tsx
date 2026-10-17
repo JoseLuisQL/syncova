@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, CalendarCheck, ArrowSquareOut, Timer, X, CaretDown, ArrowsClockwise } from '@phosphor-icons/react';
+import {
+  ShieldCheck,
+  CalendarCheck,
+  ArrowSquareOut,
+  Timer,
+  X,
+  CaretDown,
+  ArrowsClockwise,
+} from '@phosphor-icons/react';
 import { useToastContext } from '../../contexts/ToastContext';
 import {
   PermisoOperativoService,
@@ -8,13 +17,17 @@ import {
   type PermisosGlobales,
   type TipoPermisoOperativo,
 } from '../../services/permisoOperativoService';
+import type { DashboardStats } from '../../services/dashboardService';
 
 const MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 
-// ===== Schedule Modal =====
+interface PermisosPlanificacionProps {
+  stats?: DashboardStats | null;
+}
+
 const ScheduleModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -33,56 +46,68 @@ const ScheduleModal: React.FC<{
       onClick={onClose}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        initial={{ opacity: 0, scale: 0.96, y: 8 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="flex w-full max-w-md flex-col overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]"
-        onClick={e => e.stopPropagation()}
+        exit={{ opacity: 0, scale: 0.96 }}
+        className="flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-lg"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-line-soft px-5 py-3.5">
+        <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-muted-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2">
               <Timer className="h-4 w-4" weight="bold" />
             </div>
             <div>
-              <h3 className="text-md font-semibold leading-5 text-ink">Programar activación</h3>
-              <p className="text-sm leading-4 text-muted-2">{permisoLabel}</p>
+              <h3 className="text-sm font-semibold text-ink">Programar activación</h3>
+              <p className="text-xs text-muted-2">{permisoLabel}</p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="rounded-[7px] p-1.5 text-muted transition-colors hover:bg-surface-soft hover:text-ink">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-muted transition-colors hover:bg-surface-soft hover:text-ink"
+          >
             <X className="h-4 w-4" weight="bold" />
           </button>
         </div>
 
         <div className="space-y-4 px-5 py-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-[#424750]">
+            <label className="mb-1.5 block text-xs font-medium text-muted-2">
               Fecha y hora de activación
             </label>
             <input
               type="datetime-local"
               value={fechaActivacion}
               onChange={(e) => setFechaActivacion(e.target.value)}
-              className="min-h-9 w-full rounded-[7px] border border-line bg-white px-3 py-2 text-base text-ink transition-colors focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+              className="min-h-9 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink transition-colors focus:border-brand focus:outline-none"
             />
           </div>
 
-          <div className="flex items-center gap-3 rounded-md border border-line bg-surface-soft p-3">
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface-soft p-3">
+            <span className="text-xs font-medium text-ink">
+              Programar desactivación automática
+            </span>
             <button
               type="button"
               role="switch"
               aria-checked={usarDesactivacion}
               onClick={() => setUsarDesactivacion(!usarDesactivacion)}
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${usarDesactivacion ? 'bg-tertiary' : 'bg-zinc-300'}`}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-150 focus:outline-none ${
+                usarDesactivacion ? 'bg-brand' : 'bg-zinc-300'
+              }`}
             >
-              <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow ring-0 transition-transform duration-200 ease-in-out ${usarDesactivacion ? 'translate-x-4' : 'translate-x-0'}`} />
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transition-transform duration-150 ${
+                  usarDesactivacion ? 'translate-x-4' : 'translate-x-0'
+                }`}
+              />
             </button>
-            <span className="text-base font-semibold text-primary">Programar desactivación automática</span>
           </div>
 
           {usarDesactivacion && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-              <label className="mb-1.5 block text-sm font-medium text-[#424750]">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-muted-2">
                 Fecha y hora de desactivación
               </label>
               <input
@@ -90,33 +115,37 @@ const ScheduleModal: React.FC<{
                 value={fechaDesactivacion}
                 onChange={(e) => setFechaDesactivacion(e.target.value)}
                 min={fechaActivacion}
-                className="min-h-9 w-full rounded-[7px] border border-line bg-white px-3 py-2 text-base text-ink transition-colors focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+                className="min-h-9 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink transition-colors focus:border-brand focus:outline-none"
               />
-            </motion.div>
+            </div>
           )}
         </div>
 
-        <div className="mt-auto flex items-center justify-end gap-2 border-t border-line-soft bg-surface-soft px-5 py-3">
-          <button type="button"
+        <div className="mt-auto flex items-center justify-end gap-2 border-t border-line bg-surface-soft px-5 py-3">
+          <button
+            type="button"
             onClick={onClose}
-            className="inline-flex h-9 items-center justify-center rounded-[7px] border border-line bg-white px-3.5 text-base font-semibold text-ink transition-colors hover:bg-white"
+            className="inline-flex h-8 items-center justify-center rounded-lg border border-line bg-surface px-3 text-xs font-medium text-ink transition-colors hover:bg-surface-soft"
           >
             Cancelar
           </button>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => {
               if (!fechaActivacion) return;
               onSave(
                 new Date(fechaActivacion).toISOString(),
-                usarDesactivacion && fechaDesactivacion ? new Date(fechaDesactivacion).toISOString() : null,
+                usarDesactivacion && fechaDesactivacion
+                  ? new Date(fechaDesactivacion).toISOString()
+                  : null
               );
               onClose();
             }}
             disabled={!fechaActivacion}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[7px] border border-brand bg-brand px-3.5 text-base font-semibold text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-brand bg-brand px-3 text-xs font-medium text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Timer className="h-4 w-4" weight="bold" />
-            Programar
+            <Timer className="h-3.5 w-3.5" weight="bold" />
+            Guardar programación
           </button>
         </div>
       </motion.div>
@@ -124,22 +153,16 @@ const ScheduleModal: React.FC<{
   );
 };
 
-const PermisosPlanificacion: React.FC = () => {
+const PermisosPlanificacion: React.FC<PermisosPlanificacionProps> = ({ stats }) => {
+  const navigate = useNavigate();
   const [globales, setGlobales] = useState<PermisosGlobales | null>(null);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
   const mountedRef = useRef(true);
   const { toast } = useToastContext();
 
-  const [selectedMes, setSelectedMes] = useState(() => {
-    const mesActual = new Date().getMonth() + 1;
-    return mesActual === 1 ? 12 : mesActual - 1;
-  });
-  const [selectedAnio, setSelectedAnio] = useState(() => {
-    const mesActual = new Date().getMonth() + 1;
-    const anioActual = new Date().getFullYear();
-    return mesActual === 1 ? anioActual - 1 : anioActual;
-  });
+  const [selectedMes, setSelectedMes] = useState(() => new Date().getMonth() + 1);
+  const [selectedAnio, setSelectedAnio] = useState(() => new Date().getFullYear());
 
   const aniosDisponibles = (() => {
     const currentYear = new Date().getFullYear();
@@ -163,13 +186,21 @@ const PermisosPlanificacion: React.FC = () => {
   useEffect(() => {
     mountedRef.current = true;
     void loadGlobales();
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, [loadGlobales]);
 
   const handleToggle = async (tipo: TipoPermisoOperativo, habilitado: boolean) => {
     setToggling(tipo);
     try {
-      await PermisoOperativoService.togglePermiso({ tipo, mes: selectedMes, anio: selectedAnio, habilitado, usuarioId: null });
+      await PermisoOperativoService.togglePermiso({
+        tipo,
+        mes: selectedMes,
+        anio: selectedAnio,
+        habilitado,
+        usuarioId: null,
+      });
       await loadGlobales();
       toast.success(habilitado ? 'Permiso habilitado' : 'Permiso deshabilitado');
     } catch (err) {
@@ -207,174 +238,258 @@ const PermisosPlanificacion: React.FC = () => {
 
   const movPermiso = globales?.[TIPOS_PERMISO.MOVIMIENTOS_EDICION as keyof PermisosGlobales];
   const planPermiso = globales?.[TIPOS_PERMISO.PLANIFICACION_EDICION as keyof PermisosGlobales];
+  const planResumen = stats?.planificacionResumen;
 
   return (
     <>
-      <section className="relative flex h-full flex-col rounded-3xl border border-line bg-surface p-5 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
-        <div className="mb-7">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">Control</p>
-          <h3 className="mt-1 text-md font-semibold tracking-[-0.02em] text-ink">Permisos y planificación</h3>
-        </div>
+      <section className="relative flex h-full flex-col rounded-xl border border-line bg-surface p-5 shadow-xs">
+        <div className="mb-3 flex items-start justify-between gap-2">
+          <div>
+            <h3 className="text-base font-semibold tracking-tight text-ink">
+              Permisos y planificación
+            </h3>
+            <p className="mt-0.5 text-xs text-muted">
+              Habilitación mensual de edición operativa
+            </p>
+          </div>
 
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-base font-semibold text-ink">Mis permisos de acceso</h4>
           <div className="flex items-center gap-2">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => void loadGlobales()}
               disabled={loading}
-              className={`text-muted-2 transition-colors hover:text-ink ${loading ? 'animate-spin' : ''}`}
+              title="Actualizar estado de permisos"
+              className={`rounded-md p-1 text-muted-2 transition-colors hover:bg-surface-soft hover:text-ink ${
+                loading ? 'animate-spin' : ''
+              }`}
             >
               <ArrowsClockwise size={14} weight="bold" />
             </button>
-            <button type="button" className="flex items-center gap-1 text-sm font-semibold text-brand hover:text-brand-600">
-              Gestionar <ArrowSquareOut size={14} />
+            <button
+              type="button"
+              onClick={() => navigate('/usuarios')}
+              className="inline-flex items-center gap-1 text-xs font-medium text-brand transition-colors hover:text-brand-600 whitespace-nowrap shrink-0"
+            >
+              Usuarios
+              <ArrowSquareOut size={13} />
             </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mb-6">
-          <div className="relative flex-1">
+        <div className="mb-4 grid grid-cols-12 gap-2">
+          <div className="relative col-span-7">
             <select
               value={selectedMes}
               onChange={(e) => setSelectedMes(Number(e.target.value))}
               disabled={loading}
-              className="w-full appearance-none rounded-[12px] border border-line bg-surface py-1.5 pl-3 pr-8 text-sm font-semibold text-ink transition-colors focus:border-brand focus:outline-none disabled:opacity-50"
+              aria-label="Seleccionar mes de permiso"
+              className="w-full appearance-none rounded-lg border border-line bg-surface-soft py-1.5 pl-2.5 pr-7 text-xs font-medium text-ink transition-colors focus:border-brand focus:outline-none disabled:opacity-50"
             >
               {MESES.map((mes, i) => (
-                <option key={i} value={i + 1}>{mes}</option>
+                <option key={i} value={i + 1}>
+                  {mes}
+                </option>
               ))}
             </select>
-            <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted" size={12} weight="bold" />
+            <CaretDown
+              className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted"
+              size={12}
+              weight="bold"
+            />
           </div>
-          <div className="relative flex-[0.7]">
+          <div className="relative col-span-5">
             <select
               value={selectedAnio}
               onChange={(e) => setSelectedAnio(Number(e.target.value))}
               disabled={loading}
-              className="w-full appearance-none rounded-[12px] border border-line bg-surface py-1.5 pl-3 pr-8 text-sm font-semibold text-ink transition-colors focus:border-brand focus:outline-none disabled:opacity-50"
+              aria-label="Seleccionar año de permiso"
+              className="w-full appearance-none rounded-lg border border-line bg-surface-soft py-1.5 pl-2.5 pr-7 font-mono text-xs font-medium text-ink tabular-nums transition-colors focus:border-brand focus:outline-none disabled:opacity-50"
             >
-              {aniosDisponibles.map(anio => (
-                <option key={anio} value={anio}>{anio}</option>
+              {aniosDisponibles.map((anio) => (
+                <option key={anio} value={anio}>
+                  {anio}
+                </option>
               ))}
             </select>
-            <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted" size={12} weight="bold" />
+            <CaretDown
+              className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted"
+              size={12}
+              weight="bold"
+            />
           </div>
         </div>
 
-        <div className="space-y-6 mb-8 relative">
+        <div className="relative divide-y divide-line-soft border-y border-line-soft">
           {loading && !globales && (
-            <div className="absolute inset-0 bg-surface/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
-              <ArrowsClockwise size={20} className="animate-spin text-brand" />
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface/60">
+              <ArrowsClockwise size={18} className="animate-spin text-brand" />
             </div>
           )}
-          <div className={`flex items-start gap-3 transition-opacity ${loading ? 'opacity-50' : 'opacity-100'}`}>
-            <div className="mt-1 rounded-[12px] border border-line bg-surface-soft p-2">
-              <ShieldCheck size={16} className="text-brand" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h5 className="text-base font-semibold text-ink">Editar Movimientos</h5>
-                <button type="button"
-                  onClick={() => handleToggle(TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo, !(movPermiso?.habilitado ?? false))}
-                  disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
-                  className={`relative flex h-5 w-9 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${movPermiso?.habilitado ? 'bg-emerald-500' : 'bg-line-strong'}`}
-                >
-                  <motion.div
-                    layout
-                    className="w-4 h-4 bg-surface rounded-full shadow-sm"
-                    animate={{ x: movPermiso?.habilitado ? 16 : 0 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
-                </button>
-              </div>
-              <p className="mb-2 text-xs text-muted-2">Trans., Ingreso, Salida, Trans. Salida</p>
 
-              <div className="flex items-center gap-3">
-                <button type="button"
-                  onClick={() => setScheduleModal({ isOpen: true, label: 'Editar Movimientos', tipo: TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo })}
-                  disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
-                  className="flex items-center gap-1 rounded-lg border border-line bg-surface-soft px-2 py-1 text-xs font-semibold text-brand transition-colors hover:bg-surface disabled:opacity-50"
-                >
-                  <Timer size={13} weight="bold" /> Programar
-                </button>
-                {movPermiso?.programado && movPermiso.fechaActivacion && (
-                  <span className="border border-line bg-surface-soft px-2 py-1 font-mono text-[10px] font-semibold text-muted-2">
-                    Prog: {new Date(movPermiso.fechaActivacion).toLocaleString('es-PE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                )}
+          <div className="py-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <ShieldCheck size={16} className="shrink-0 text-brand" weight="duotone" />
+                <span className="truncate text-sm font-medium text-ink">
+                  Edición de Movimientos
+                </span>
               </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={movPermiso?.habilitado ?? false}
+                onClick={() =>
+                  handleToggle(
+                    TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo,
+                    !(movPermiso?.habilitado ?? false)
+                  )
+                }
+                disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
+                className={`relative flex h-5 w-9 shrink-0 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${
+                  movPermiso?.habilitado ? 'bg-emerald-600' : 'bg-line-strong'
+                }`}
+              >
+                <motion.div
+                  layout
+                  className="h-4 w-4 rounded-full bg-surface shadow-2xs"
+                  animate={{ x: movPermiso?.habilitado ? 16 : 0 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              </button>
+            </div>
+
+            <div className="mt-1.5 flex items-center justify-between gap-2 pl-6 text-xs text-muted">
+              <span>Ingresos, salidas y transferencias</span>
+              <button
+                type="button"
+                onClick={() =>
+                  setScheduleModal({
+                    isOpen: true,
+                    label: 'Edición de Movimientos',
+                    tipo: TIPOS_PERMISO.MOVIMIENTOS_EDICION as TipoPermisoOperativo,
+                  })
+                }
+                disabled={toggling === TIPOS_PERMISO.MOVIMIENTOS_EDICION}
+                className="inline-flex items-center gap-1 font-medium text-muted-2 transition-colors hover:text-brand whitespace-nowrap shrink-0"
+              >
+                <Timer size={12} weight="bold" />
+                {movPermiso?.programado && movPermiso.fechaActivacion
+                  ? new Date(movPermiso.fechaActivacion).toLocaleDateString('es-PE', {
+                      day: '2-digit',
+                      month: 'short',
+                    })
+                  : 'Programar'}
+              </button>
             </div>
           </div>
 
-          <div className={`flex items-start gap-3 transition-opacity ${loading ? 'opacity-50' : 'opacity-100'}`}>
-            <div className="mt-1 rounded-[12px] border border-line bg-surface-soft p-2">
-              <CalendarCheck size={16} className="text-brand" />
+          <div className="py-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <CalendarCheck size={16} className="shrink-0 text-brand" weight="duotone" />
+                <span className="truncate text-sm font-medium text-ink">
+                  Edición de Planificación
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={planPermiso?.habilitado ?? false}
+                onClick={() =>
+                  handleToggle(
+                    TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo,
+                    !(planPermiso?.habilitado ?? false)
+                  )
+                }
+                disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
+                className={`relative flex h-5 w-9 shrink-0 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${
+                  planPermiso?.habilitado ? 'bg-emerald-600' : 'bg-line-strong'
+                }`}
+              >
+                <motion.div
+                  layout
+                  className="h-4 w-4 rounded-full bg-surface shadow-2xs"
+                  animate={{ x: planPermiso?.habilitado ? 16 : 0 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              </button>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h5 className="text-base font-semibold text-ink">Editar Planificaciones</h5>
-                <button type="button"
-                  onClick={() => handleToggle(TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo, !(planPermiso?.habilitado ?? false))}
-                  disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
-                  className={`relative flex h-5 w-9 items-center rounded-full px-0.5 transition-colors disabled:opacity-50 ${planPermiso?.habilitado ? 'bg-emerald-500' : 'bg-line-strong'}`}
-                >
-                  <motion.div
-                    layout
-                    className="w-4 h-4 bg-surface rounded-full shadow-sm"
-                    animate={{ x: planPermiso?.habilitado ? 16 : 0 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
-                </button>
-              </div>
-              <p className="mb-2 text-xs text-muted-2">Modificar planificaciones anuales</p>
 
-              <div className="flex items-center gap-3">
-                <button type="button"
-                  onClick={() => setScheduleModal({ isOpen: true, label: 'Editar Planificaciones', tipo: TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo })}
-                  disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
-                  className="flex items-center gap-1 rounded-lg border border-line bg-surface-soft px-2 py-1 text-xs font-semibold text-brand transition-colors hover:bg-surface disabled:opacity-50"
-                >
-                  <Timer size={13} weight="bold" /> Programar
-                </button>
-                {planPermiso?.programado && planPermiso.fechaActivacion && (
-                  <span className="border border-line bg-surface-soft px-2 py-1 font-mono text-[10px] font-semibold text-muted-2">
-                    Prog: {new Date(planPermiso.fechaActivacion).toLocaleString('es-PE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                )}
-              </div>
+            <div className="mt-1.5 flex items-center justify-between gap-2 pl-6 text-xs text-muted">
+              <span>Metas y requerimientos anuales</span>
+              <button
+                type="button"
+                onClick={() =>
+                  setScheduleModal({
+                    isOpen: true,
+                    label: 'Edición de Planificación',
+                    tipo: TIPOS_PERMISO.PLANIFICACION_EDICION as TipoPermisoOperativo,
+                  })
+                }
+                disabled={toggling === TIPOS_PERMISO.PLANIFICACION_EDICION}
+                className="inline-flex items-center gap-1 font-medium text-muted-2 transition-colors hover:text-brand whitespace-nowrap shrink-0"
+              >
+                <Timer size={12} weight="bold" />
+                {planPermiso?.programado && planPermiso.fechaActivacion
+                  ? new Date(planPermiso.fechaActivacion).toLocaleDateString('es-PE', {
+                      day: '2-digit',
+                      month: 'short',
+                    })
+                  : 'Programar'}
+              </button>
             </div>
           </div>
         </div>
 
-        <div className="mt-auto">
-          <h4 className="mb-2 text-base font-semibold text-ink">Planificación anual 2026</h4>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-medium text-muted-2">Estado general</span>
-            <span className="font-mono text-sm font-semibold text-ink">64%</span>
-          </div>
-
-          <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-surface-soft">
-            <div className="h-full rounded-full bg-emerald-500" style={{ width: '64%' }} />
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 mb-6 text-center">
-            <div>
-              <div className="font-mono text-md font-semibold text-ink">128</div>
-              <div className="text-[10px] font-medium uppercase text-muted">Programado</div>
+        <div className="mt-auto pt-4">
+          {planResumen ? (
+            <div className="mb-3 rounded-lg border border-line-soft bg-surface-soft/50 p-3">
+              <div className="mb-1.5 flex items-center justify-between text-xs">
+                <span className="font-medium text-muted-2">
+                  Ejecución anual {planResumen.anio}
+                </span>
+                <span className="font-mono font-semibold text-ink tabular-nums">
+                  {planResumen.porcentajeAvance}%
+                </span>
+              </div>
+              <div className="mb-2.5 h-1.5 w-full overflow-hidden rounded-full bg-surface">
+                <div
+                  className="h-full rounded-full bg-brand transition-all duration-200"
+                  style={{ width: `${planResumen.porcentajeAvance}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted">
+                <span>
+                  Prog:{' '}
+                  <strong className="font-mono font-medium text-ink tabular-nums">
+                    {planResumen.dosisProgramadas.toLocaleString('es-PE')}
+                  </strong>
+                </span>
+                <span aria-hidden="true">·</span>
+                <span>
+                  Entregado:{' '}
+                  <strong className="font-mono font-medium text-ink tabular-nums">
+                    {planResumen.dosisEjecutadas.toLocaleString('es-PE')}
+                  </strong>
+                </span>
+              </div>
             </div>
-            <div>
-              <div className="font-mono text-md font-semibold text-ink">82</div>
-              <div className="text-[10px] font-medium uppercase text-muted">Ejecutado</div>
+          ) : (
+            <div className="mb-3 flex items-center justify-between text-xs text-muted">
+              <span>Establecimientos activos</span>
+              <span className="font-mono font-semibold text-ink tabular-nums">
+                {stats?.totalEstablecimientos ?? 0}
+              </span>
             </div>
-            <div>
-              <div className="font-mono text-md font-semibold text-ink">46</div>
-              <div className="text-[10px] font-medium uppercase text-muted">Pendiente</div>
-            </div>
-          </div>
+          )}
 
-          <button type="button" className="flex w-full items-center justify-center gap-2 rounded-[12px] border border-brand bg-brand py-2.5 text-base font-semibold text-white transition-colors hover:bg-brand-600">
-            <CalendarCheck size={16} />
-            Abrir planificación
+          <button
+            type="button"
+            onClick={() => navigate('/planificacion')}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-brand bg-brand px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-600 whitespace-nowrap shrink-0"
+          >
+            <CalendarCheck size={15} weight="bold" />
+            Abrir Planificación Anual
           </button>
         </div>
       </section>

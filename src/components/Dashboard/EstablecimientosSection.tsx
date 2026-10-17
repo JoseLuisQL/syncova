@@ -1,56 +1,117 @@
 import React, { memo } from 'react';
-import { Hospital } from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
+import { Hospital, ArrowRight, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { usePaginatedEstablecimientosDashboard } from '../../hooks/usePaginatedDashboard';
 import { EmptyState, SectionSkeleton } from './LoadingStates';
 
 const EstablecimientosSection: React.FC = memo(() => {
-  const { data, loading, error } = usePaginatedEstablecimientosDashboard(5);
+  const navigate = useNavigate();
+  const { data, loading, error, pagination, setPage } =
+    usePaginatedEstablecimientosDashboard(5);
 
   return (
-    <section className="flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
-      <header className="border-b border-line px-5 py-4">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">Red</p>
-        <h3 className="mt-1 text-md font-semibold tracking-[-0.02em] text-ink">
-          Establecimientos
-        </h3>
+    <section className="flex h-full flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-xs">
+      <header className="flex items-center justify-between border-b border-line px-5 py-3.5">
+        <div>
+          <h3 className="text-base font-semibold tracking-tight text-ink">
+            Establecimientos asignados
+          </h3>
+          <p className="mt-0.5 text-xs text-muted">
+            {pagination.total > 0 ? `${pagination.total} establecimientos activos` : 'Jurisdicción operativa'}
+          </p>
+        </div>
+
+        {pagination.totalPages > 1 && (
+          <div className="flex items-center gap-1.5 text-xs text-muted">
+            <span className="font-mono tabular-nums">
+              {pagination.page} / {pagination.totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+              aria-label="Página anterior de establecimientos"
+              className="flex h-6 w-6 items-center justify-center rounded border border-line bg-surface text-ink transition-colors hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <CaretLeft size={12} weight="bold" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage(pagination.page + 1)}
+              disabled={pagination.page >= pagination.totalPages}
+              aria-label="Página siguiente de establecimientos"
+              className="flex h-6 w-6 items-center justify-center rounded border border-line bg-surface text-ink transition-colors hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <CaretRight size={12} weight="bold" />
+            </button>
+          </div>
+        )}
       </header>
 
       <div className="flex-1 overflow-x-auto">
         {loading && data.length === 0 ? (
-          <div className="p-6"><SectionSkeleton rows={4} /></div>
+          <div className="p-5">
+            <SectionSkeleton rows={4} />
+          </div>
         ) : error ? (
-          <div className="p-6 text-center text-sm text-rose-600">{error}</div>
+          <div className="p-5 text-center text-xs text-rose-600">{error}</div>
         ) : data.length === 0 ? (
-          <EmptyState title="Sin establecimientos" description="No hay datos disponibles." icon={<Hospital />} />
+          <EmptyState
+            title="Sin establecimientos"
+            description="No hay datos disponibles."
+            icon={<Hospital />}
+          />
         ) : (
-          <table className="w-full min-w-[360px] border-collapse text-left">
+          <table className="w-full min-w-[380px] border-collapse text-left">
             <thead>
-              <tr className="bg-surface-soft">
-                <th className="whitespace-nowrap px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Establecimiento</th>
-                <th className="whitespace-nowrap px-3 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Código</th>
-                <th className="whitespace-nowrap px-3 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Tipo</th>
-                <th className="whitespace-nowrap px-3 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Estado</th>
+              <tr className="border-b border-line bg-surface-soft/50">
+                <th className="whitespace-nowrap px-4 py-2.5 text-left text-xs font-medium text-muted">
+                  Establecimiento
+                </th>
+                <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
+                  Código
+                </th>
+                <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
+                  Categoría
+                </th>
+                <th className="whitespace-nowrap px-4 py-2.5 text-right text-xs font-medium text-muted">
+                  Estado
+                </th>
               </tr>
             </thead>
-            <tbody className="bg-surface">
+            <tbody className="divide-y divide-line-soft bg-surface">
               {data.map((est) => (
-                <tr key={est.id} className="border-b border-line-soft transition-colors hover:bg-surface-soft">
-                  <td className="whitespace-nowrap px-3 py-3.5 text-base font-semibold text-ink sm:px-5">
-                    {est.nombre}
+                <tr key={est.id} className="transition-colors hover:bg-surface-soft/40">
+                  <td className="px-4 py-2.5">
+                    <div className="truncate text-sm font-medium text-ink">
+                      {est.nombre}
+                    </div>
+                    {est.responsable && (
+                      <div className="truncate text-xs text-muted">{est.responsable}</div>
+                    )}
                   </td>
-                  <td className="px-3 py-3.5 text-center font-mono text-base font-medium text-muted-2 sm:px-5">
+                  <td className="px-3 py-2.5 text-right font-mono text-xs font-medium text-muted-2 tabular-nums">
                     {est.codigo}
                   </td>
-                  <td className="px-3 py-3.5 text-right text-base font-medium capitalize text-muted-2 sm:px-5">
+                  <td className="px-3 py-2.5 text-right text-xs capitalize text-muted-2">
                     {est.tipo.replace('_', ' ')}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3.5 text-right sm:px-5">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <span className={`h-1.5 w-1.5 rounded-full ${est.estado === 'activo' ? 'bg-emerald-500' : 'bg-muted'}`} />
-                      <span className="text-sm font-medium capitalize text-muted-2">
-                        {est.estado}
-                      </span>
-                    </div>
+                  <td className="whitespace-nowrap px-4 py-2.5 text-right">
+                    <span
+                      className={`inline-flex items-center justify-end gap-1.5 text-xs font-medium ${
+                        est.estado === 'activo'
+                          ? 'text-emerald-700 dark:text-emerald-400'
+                          : 'text-muted'
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          est.estado === 'activo' ? 'bg-emerald-600' : 'bg-muted'
+                        }`}
+                        aria-hidden="true"
+                      />
+                      <span className="capitalize">{est.estado}</span>
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -59,9 +120,14 @@ const EstablecimientosSection: React.FC = memo(() => {
         )}
       </div>
 
-      <div className="mt-auto border-t border-zinc-100 px-5 py-4">
-        <button type="button" className="flex items-center gap-1 text-base font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276]">
-          Ver todos los establecimientos <span className="text-lg leading-none">→</span>
+      <div className="mt-auto border-t border-line-soft px-5 py-3">
+        <button
+          type="button"
+          onClick={() => navigate('/establecimientos')}
+          className="inline-flex items-center gap-1 text-xs font-medium text-brand transition-colors hover:text-brand-600 whitespace-nowrap shrink-0"
+        >
+          Ver todos los establecimientos
+          <ArrowRight size={13} weight="bold" />
         </button>
       </div>
     </section>

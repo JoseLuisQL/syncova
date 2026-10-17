@@ -15,8 +15,45 @@ interface MockRes {
 
 const nowIso = () => new Date().toISOString();
 
+const ALL_ADMIN_PERMISSIONS = [
+  '*',
+  'dashboard:read',
+  'redes:read', 'redes:write',
+  'microredes:read', 'microredes:write',
+  'centros_acopio:read', 'centros_acopio:write',
+  'establecimientos:read', 'establecimientos:write',
+  'vacunas:read', 'vacunas:write',
+  'jeringas:read', 'jeringas:write',
+  'lotes_vacunas:read', 'lotes_vacunas:write',
+  'lotes_jeringas:read', 'lotes_jeringas:write',
+  'config_jeringas:read', 'config_jeringas:write',
+  'inventario:ingreso',
+  'movimientos:read', 'movimientos:write', 'movimientos:anular',
+  'planificacion:read', 'planificacion:write', 'planificacion:aprobar',
+  'ici_demid:read', 'ici_demid:write',
+  'kardex:read', 'kardex:export',
+  'reportes_inventario:read', 'reportes_inventario:export',
+  'reportes_movimientos:read', 'reportes_movimientos:export',
+  'reportes_planificacion:read', 'reportes_planificacion:export',
+  'reportes_cenares:read', 'reportes_cenares:export',
+  'reportes_config:read', 'reportes_config:write',
+  'alertas_dashboard:read', 'alertas:read', 'alertas:write', 'alertas:marcar',
+  'alertas_reportes:read', 'alertas_config:read', 'alertas_config:write',
+  'usuarios:read', 'usuarios:write', 'usuarios:update', 'usuarios:delete', 'usuarios:password', 'usuarios:estado',
+  'roles:read', 'roles:write',
+  'permisos:read', 'permisos:assign',
+  'config_general:read', 'config_general:write',
+  'config_notificaciones:read', 'config_notificaciones:write',
+  'config_seguridad:read', 'config_seguridad:write',
+  'config_respaldos:read', 'config_respaldos:write',
+  'config_sistema:read', 'config_sistema:write',
+  'config_mantenimiento:read', 'config_mantenimiento:write',
+  'config_integraciones:read', 'config_integraciones:write',
+  'config_avanzado:read', 'config_avanzado:write',
+];
+
 const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
-  administrador: ['*'],
+  administrador: ALL_ADMIN_PERMISSIONS,
   coordinador: [
     'dashboard:read',
     'redes:read',
@@ -25,16 +62,26 @@ const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'establecimientos:read',
     'vacunas:read',
     'jeringas:read',
+    'lotes_vacunas:read',
+    'lotes_jeringas:read',
+    'config_jeringas:read',
     'movimientos:read',
     'planificacion:read',
     'planificacion:write',
     'planificacion:aprobar',
+    'kardex:read',
+    'kardex:export',
     'reportes_inventario:read',
     'reportes_inventario:export',
     'reportes_movimientos:read',
     'reportes_movimientos:export',
     'reportes_planificacion:read',
     'reportes_planificacion:export',
+    'reportes_cenares:read',
+    'reportes_cenares:export',
+    'alertas_dashboard:read',
+    'alertas:read',
+    'alertas_reportes:read',
     'roles:read',
     'permisos:read',
     'usuarios:read',
@@ -326,7 +373,7 @@ function createInitialStore() {
       ultimoAcceso: nowIso(),
       createdAt,
       updatedAt,
-      permissions: ['*'],
+      permissions: DEFAULT_ROLE_PERMISSIONS.administrador,
     },
     {
       id: 'usr-coord',
@@ -774,47 +821,126 @@ function getUserFromAuthHeader(req: MockReq) {
 }
 
 function buildDashboardData() {
-  const colors = ['#7c3aed', '#0e9f8e', '#2563eb', '#d97706', '#dc2626', '#4f46e5', '#059669', '#0891b2'];
-  const totalStock = store.lotesVacunas.reduce((acc, l) => acc + l.cantidadActual, 0);
+  const colors = ['#0e9f8e', '#0284c7', '#2563eb', '#059669', '#d97706', '#dc2626', '#4f46e5', '#0891b2'];
+  const now = new Date();
+  const currentYear = 2026;
+  const currentMonth = 10; // Octubre 2026 (mes operativo activo en el store)
+  const limitSoon = new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000);
 
-  const stockPorVacuna = store.vacunas.slice(0, 8).map((v, idx) => {
-    const stockVac = store.lotesVacunas
-      .filter((l) => l.vacunaId === v.id)
-      .reduce((acc, l) => acc + l.cantidadActual, 0) || (650 - idx * 45);
+  const availableLots = store.lotesVacunas.filter((l) => l.estado === 'disponible');
+  const totalStock = availableLots.reduce((acc, l) => acc + l.cantidadActual, 0);
+
+  // Calcular stock real por vacuna a partir de lotes y planificación mensual
+  const vacunasConLotes = store.vacunas.filter((v) =>
+    availableLots.some((l) => l.vacunaId === v.id)
+  );
+
+  const stockPorVacuna = vacunasConLotes.map((v, idx) => {
+    const lotesDeVacuna = availableLots.filter((l) => l.vacunaId === v.id);
+    const stockVac = lotesDeVacuna.reduce((acc, l) => acc + l.cantidadActual, 0);
+    const inicialVac = lotesDeVacuna.reduce((acc, l) => acc + l.cantidadInicial, 0);
+
+    // Meta mensual real sumada de las planificaciones 2026 para esta vacuna
+    const planesVacuna = store.planificaciones.filter(
+      (p) => p.anio === currentYear && p.vacunaId === v.id
+    );
+    const metaAnualVacuna = planesVacuna.reduce((acc, p) => acc + (p.metaAnual || 0), 0);
+    const stockMinimo = Math.max(300, metaAnualVacuna > 0 ? Math.round(metaAnualVacuna * 0.45) : Math.round(inicialVac * 0.2));
+
+    const proximosVencer = lotesDeVacuna.filter((l) => {
+      const fv = new Date(l.fechaVencimiento);
+      return fv >= now && fv <= limitSoon;
+    }).length;
+
+    const estado: 'critico' | 'bajo' | 'normal' =
+      stockVac <= stockMinimo * 0.5 || proximosVencer > 0 && stockVac <= stockMinimo
+        ? 'critico'
+        : stockVac <= stockMinimo
+        ? 'bajo'
+        : 'normal';
+
     return {
       vacunaId: v.id,
       vacunaNombre: v.nombre,
+      presentacion: v.presentacion,
       stockTotal: stockVac,
+      stockMinimo,
+      lotesActivos: lotesDeVacuna.length,
+      proximosVencer,
+      estado,
       porcentaje: Math.round((stockVac / Math.max(1, totalStock)) * 100),
       color: colors[idx % colors.length],
     };
   });
 
-  const movimientosMensuales = [
-    { mes: 'May', entregas: 1420, recepciones: 1800, transferencias: 120 },
-    { mes: 'Jun', entregas: 1580, recepciones: 1600, transferencias: 95 },
-    { mes: 'Jul', entregas: 1710, recepciones: 2100, transferencias: 140 },
-    { mes: 'Ago', entregas: 1640, recepciones: 1900, transferencias: 110 },
-    { mes: 'Sep', entregas: 1820, recepciones: 2200, transferencias: 130 },
-    { mes: 'Oct', entregas: 1950, recepciones: 2400, transferencias: 160 },
-  ];
+  // Movimientos mensuales reales de los 12 meses del año en curso calculados desde store.movimientos
+  const mesesNombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const movimientosMensuales = mesesNombres.map((mesNombre, idx) => {
+    const mesNum = idx + 1;
+    const movsMes = store.movimientos.filter(
+      (m) => m.anio === currentYear && m.mes === mesNum
+    );
+    const entregas = movsMes.reduce((acc, m) => acc + (m.entrega || 0), 0);
+    const recepciones = movsMes.reduce((acc, m) => acc + (m.salida || 0), 0);
+    const transferencias = movsMes.reduce(
+      (acc, m) => acc + (m.transIngreso || 0) + (m.transSalida || 0),
+      0
+    );
+    const saldo = movsMes.reduce(
+      (acc, m) => acc + Math.max(0, (m.saldoAnterior || 0) + (m.entrega || 0) - (m.salida || 0)),
+      0
+    );
+    return {
+      mes: mesNombre,
+      mesNumero: mesNum,
+      entregas,
+      recepciones,
+      transferencias,
+      saldo,
+    };
+  });
 
-  const centrosAcopioStatus = store.centrosAcopio.map((ca, idx) => ({
-    id: ca.id,
-    nombre: ca.nombre,
-    establecimientos: store.establecimientos.filter((e) => e.centroAcopioId === ca.id).length || 5,
-    stockTotal: 2800 - idx * 140,
-    alertas: idx === 1 || idx === 5 ? 1 : 0,
-    estado: (idx === 5 ? 'alerta' : 'activo') as 'activo' | 'alerta' | 'critico',
-  }));
+  // Estado real por Centro de Acopio calculado según sus establecimientos y movimientos
+  const centrosAcopioStatus = store.centrosAcopio.map((ca) => {
+    const estsDelCentro = store.establecimientos.filter((e) => e.centroAcopioId === ca.id);
+    const estIds = new Set(estsDelCentro.map((e) => e.id));
+    const movsCentroMes = store.movimientos.filter(
+      (m) => m.anio === currentYear && m.mes === currentMonth && estIds.has(m.establecimientoId)
+    );
+    const stockCentro =
+      ca.id === 'ca-chanka'
+        ? totalStock
+        : movsCentroMes.reduce(
+            (acc, m) => acc + (m.saldoAnterior || 0) + (m.entrega || 0),
+            0
+          );
+    const alertasCentro = store.alertas.filter(
+      (a) => !a.leida && a.titulo.toLowerCase().includes(ca.nombre.toLowerCase())
+    ).length;
+
+    const estado: 'activo' | 'alerta' | 'critico' =
+      alertasCentro > 0 ? 'alerta' : 'activo';
+
+    return {
+      id: ca.id,
+      codigo: ca.codigo,
+      nombre: ca.nombre,
+      responsable: ca.responsable,
+      establecimientos: estsDelCentro.length,
+      stockTotal: stockCentro,
+      alertas: alertasCentro,
+      estado,
+    };
+  });
 
   const alertasRecientes = store.alertas.map((a) => ({
     id: a.id,
     tipo: a.tipo,
     nivel: a.nivel,
     mensaje: a.titulo,
+    descripcion: a.descripcion,
     fechaCreacion: a.fechaCreacion,
-    establecimiento: 'ALMACÉN (CHANKA)',
+    establecimiento: a.titulo.includes('Huancaray') ? 'C.S. HUANCARAY' : 'ALMACÉN (CHANKA)',
   }));
 
   const actividadReciente = [
@@ -829,7 +955,7 @@ function buildDashboardData() {
     {
       id: 'act-2',
       tipo: 'lote_recibido',
-      descripcion: 'Recepción de lote 2853X019 (Pentavalente - 4,500 dosis) vía PECOSA',
+      descripcion: 'Recepción de lote 2853X019 (Pentavalente - 4,500 dosis) vía PECOSA-00145',
       fecha: '2026-10-15T10:15:00.000Z',
       usuario: 'José Luis Quispe León',
       establecimiento: 'ALMACÉN (CHANKA)',
@@ -844,23 +970,89 @@ function buildDashboardData() {
     },
     {
       id: 'act-4',
-      tipo: 'usuario_conectado',
-      descripcion: 'Inicio de sesión y verificación de programación anual 2026',
-      fecha: '2026-10-14T08:20:00.000Z',
-      usuario: 'Sonia Altamirano Silvera',
-      establecimiento: 'Talavera',
+      tipo: 'vale_generado',
+      descripcion: 'Vale de entrega VALE-2026-10-002 impreso para Centro de Acopio Huancabamba',
+      fecha: '2026-10-14T11:20:00.000Z',
+      usuario: 'José Luis Quispe León',
+      establecimiento: 'C.S. HUANCABAMBA',
+    },
+    {
+      id: 'act-5',
+      tipo: 'lote_recibido',
+      descripcion: 'Ingreso de jeringas autoretráctiles 1cc 27G x 1/2" (Lote G220216)',
+      fecha: '2026-10-13T09:10:00.000Z',
+      usuario: 'José Luis Quispe León',
+      establecimiento: 'ALMACÉN (CHANKA)',
+    },
+    {
+      id: 'act-6',
+      tipo: 'movimiento_registrado',
+      descripcion: 'Conciliación de saldos de cadena de frío en C.S. Andahuaylas',
+      fecha: '2026-10-12T17:05:00.000Z',
+      usuario: 'María Elena Cárdenas Palomino',
+      establecimiento: 'C.S. ANDAHUAYLAS',
     },
   ];
 
+  const movsMesActual = store.movimientos.filter(
+    (m) => m.anio === currentYear && m.mes === currentMonth
+  );
+  const entregasMesActual = movsMesActual.reduce((acc, m) => acc + (m.entrega || 0), 0);
+  const salidasMesActual = movsMesActual.reduce((acc, m) => acc + (m.salida || 0), 0);
+
+  const lotesCriticosCount = availableLots.filter(
+    (l) => l.cantidadActual <= l.cantidadInicial * 0.2
+  ).length;
+  const lotesPorVencerCount = availableLots.filter((l) => {
+    const fv = new Date(l.fechaVencimiento);
+    return fv >= now && fv <= limitSoon;
+  }).length;
+
+  // Resumen real de Planificación Anual 2026
+  const planesAnioActual = store.planificaciones.filter((p) => p.anio === currentYear);
+  const totalDosisProgramadasAnio = planesAnioActual.reduce(
+    (acc, p) => acc + (p.metaAnual || 0),
+    0
+  );
+  const movsHastaMesActual = store.movimientos.filter(
+    (m) => m.anio === currentYear && m.mes <= currentMonth
+  );
+  const totalDosisEjecutadasAnio = movsHastaMesActual.reduce(
+    (acc, m) => acc + (m.entrega || 0),
+    0
+  );
+  const totalDosisPendientesAnio = Math.max(
+    0,
+    totalDosisProgramadasAnio - totalDosisEjecutadasAnio
+  );
+  const porcentajeAvanceAnual =
+    totalDosisProgramadasAnio > 0
+      ? Math.min(100, Math.round((totalDosisEjecutadasAnio / totalDosisProgramadasAnio) * 100))
+      : 0;
+
   const estadisticas = {
     totalVacunas: store.vacunas.filter((v) => v.estado === 'activo').length,
-    totalEstablecimientos: store.establecimientos.length,
-    totalUsuarios: store.usuarios.length,
+    totalJeringas: store.jeringas.filter((j) => j.estado === 'activo').length,
+    totalEstablecimientos: store.establecimientos.filter((e) => e.estado === 'activo').length,
+    totalUsuarios: store.usuarios.filter((u) => u.estado === 'activo').length,
+    centrosAcopio: store.centrosAcopio.filter((c) => c.estado === 'activo').length,
+    lotesActivos: availableLots.length,
+    stockTotalVacunas: totalStock,
     alertasPendientes: store.alertas.filter((a) => !a.leida).length,
-    stockCritico: 1,
-    vencimientoProximo: 1,
-    entregasMes: 1950,
-    movimientosUltimoMes: store.movimientos.filter((m) => m.anio === 2026 && m.mes === 10).length,
+    stockCritico: lotesCriticosCount,
+    vencimientoProximo: lotesPorVencerCount,
+    entregasMes: entregasMesActual,
+    dosisAplicadasMes: salidasMesActual,
+    movimientosUltimoMes: movsMesActual.length,
+    coberturaRegional: porcentajeAvanceAnual,
+    planificacionResumen: {
+      anio: currentYear,
+      registrosActivos: planesAnioActual.length,
+      dosisProgramadas: totalDosisProgramadasAnio,
+      dosisEjecutadas: totalDosisEjecutadasAnio,
+      dosisPendientes: totalDosisPendientesAnio,
+      porcentajeAvance: porcentajeAvanceAnual,
+    },
     ultimaActualizacion: nowIso(),
   };
 

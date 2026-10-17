@@ -1,115 +1,212 @@
 import React, { memo } from 'react';
-import { DotsThree, Package, Syringe, Users, Warning } from '@phosphor-icons/react';
-import type { DashboardStats } from '../../services/dashboardService';
+import { useNavigate } from 'react-router-dom';
+import {
+  Package,
+  ClockCountdown,
+  ArrowsLeftRight,
+  WarningCircle,
+  ArrowUpRight,
+} from '@phosphor-icons/react';
+import type { DashboardStats, StockPorVacuna } from '../../services/dashboardService';
 
 interface MetricsSectionProps {
   stats: DashboardStats | null;
+  stockPorVacuna?: StockPorVacuna[];
   isLoading: boolean;
 }
 
 interface MetricCardProps {
-  title: string;
-  value: string | number;
-  trend?: string;
-  trendUp?: boolean;
+  label: string;
+  value: string;
+  unit?: string;
+  metaPrimary: string;
+  metaSecondary: string;
+  statusLabel: string;
+  statusTone: 'nominal' | 'warning' | 'critical';
   icon: React.ElementType;
-  subtitle?: string;
+  onClick: () => void;
 }
 
-// Alturas del mini-gráfico de barras — constante a nivel módulo para que no
-// se cree un array nuevo en cada render.
-const BAR_HEIGHTS = [42, 70, 38, 78, 55, 88, 64, 96];
+const TONE_STYLES: Record<MetricCardProps['statusTone'], { dot: string; text: string }> = {
+  nominal: {
+    dot: 'bg-emerald-600',
+    text: 'text-emerald-700 dark:text-emerald-400',
+  },
+  warning: {
+    dot: 'bg-amber-500',
+    text: 'text-amber-700 dark:text-amber-400',
+  },
+  critical: {
+    dot: 'bg-rose-600',
+    text: 'text-rose-700 dark:text-rose-400',
+  },
+};
 
-const MetricCard: React.FC<MetricCardProps> = memo(({ title, value, trend, trendUp, icon: Icon, subtitle }) => (
-  <article className="min-h-[128px] rounded-3xl border border-line bg-surface p-4 shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_45px_-32px_rgba(15,42,59,0.65)]">
-    <div className="mb-3 flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full border border-line bg-surface-soft text-brand">
-          <Icon size={15} weight="bold" />
+const MetricCard: React.FC<MetricCardProps> = memo(({
+  label,
+  value,
+  unit,
+  metaPrimary,
+  metaSecondary,
+  statusLabel,
+  statusTone,
+  icon: Icon,
+  onClick,
+}) => {
+  const tone = TONE_STYLES[statusTone];
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex w-full flex-col justify-between rounded-xl border border-line bg-surface p-4 text-left shadow-xs transition-all duration-150 hover:border-line-strong hover:bg-surface-soft/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2 transition-colors group-hover:border-brand/30 group-hover:text-brand">
+            <Icon size={15} weight="duotone" />
+          </span>
+          <span className="truncate text-xs font-medium text-muted-2">
+            {label}
+          </span>
         </div>
-        <h3 className="text-sm font-medium text-muted-2">{title}</h3>
-      </div>
-      <DotsThree className="h-5 w-5 text-muted" weight="bold" />
-    </div>
-
-    <div className="flex items-start justify-between gap-4">
-      <div className="min-w-0">
-        <div className="text-2xl font-semibold leading-none tracking-[-0.04em] text-ink tabular-nums">
-          {value}
-        </div>
-        <p className="mt-2 max-w-[160px] text-xs leading-snug text-muted">{subtitle}</p>
-      </div>
-      {trend && (
-        <span className={`mt-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
-          trendUp ? 'border-status-success-border bg-status-success-bg text-status-success-text' : 'border-status-danger-border bg-status-danger-bg text-status-danger-text'
-        }`}>
-          {trendUp ? '↑' : '↓'} {trend}
-        </span>
-      )}
-    </div>
-
-    <div className="mt-3 flex h-8 items-end gap-1 overflow-hidden">
-      {BAR_HEIGHTS.map((height, index) => (
-        <div
-          key={index}
-          className={`w-2 rounded-sm ${trendUp === false ? 'bg-[#f0c05a]' : 'bg-[#44c4dd]'}`}
-          style={{ height: `${height}%`, opacity: 0.42 + index * 0.06 }}
+        <ArrowUpRight
+          size={14}
+          weight="bold"
+          className="shrink-0 text-muted transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-ink"
         />
-      ))}
       </div>
-  </article>
-));
+
+      <div className="my-3 flex items-baseline justify-between gap-2">
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-mono text-2xl font-semibold tracking-tight text-ink tabular-nums">
+            {value}
+          </span>
+          {unit && (
+            <span className="text-xs font-normal text-muted">
+              {unit}
+            </span>
+          )}
+        </div>
+
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${tone.text}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} aria-hidden="true" />
+          <span>{statusLabel}</span>
+        </span>
+      </div>
+
+      <div className="flex items-center gap-1.5 truncate border-t border-line-soft pt-2.5 text-xs text-muted">
+        <span className="font-mono font-medium text-muted-2 tabular-nums">{metaPrimary}</span>
+        <span aria-hidden="true">·</span>
+        <span className="truncate">{metaSecondary}</span>
+      </div>
+    </button>
+  );
+});
+
 MetricCard.displayName = 'MetricCard';
 
-const MetricsSection: React.FC<MetricsSectionProps> = ({ stats, isLoading }) => {
+const MetricsSection: React.FC<MetricsSectionProps> = ({
+  stats,
+  stockPorVacuna = [],
+  isLoading,
+}) => {
+  const navigate = useNavigate();
+
   if (isLoading || !stats) {
     return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {[1, 2, 3, 4, 5].map(i => (
-          <div key={i} className="h-[128px] animate-pulse rounded-3xl border border-line bg-surface p-4">
-            <div className="mb-5 h-3 w-1/2 rounded bg-surface-soft" />
-            <div className="h-8 w-3/4 rounded bg-surface-soft" />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="h-[132px] animate-pulse rounded-xl border border-line bg-surface p-4"
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <div className="h-4 w-32 rounded bg-surface-soft" />
+              <div className="h-4 w-4 rounded bg-surface-soft" />
+            </div>
+            <div className="mb-4 h-7 w-24 rounded bg-surface-soft" />
+            <div className="h-3 w-40 rounded bg-surface-soft" />
           </div>
         ))}
       </div>
     );
   }
 
+  const stockTotal =
+    stats.stockTotalVacunas > 0
+      ? stats.stockTotalVacunas
+      : stockPorVacuna.reduce((acc, item) => acc + item.stockTotal, 0);
+
+  const lotesPorVencer = stats.lotesProximosVencer;
+  const stockCritico = stats.stockCritico;
+  const alertasActivas = stats.alertasPendientes;
+
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <MetricCard 
-        title="Dosis Distribuidas"
-        value={stats.entregasMes.toLocaleString() || "34,616"}
-        trend="12.4%"
-        trendUp={true}
-        subtitle="Incremento respecto al mes anterior"
+    <section
+      aria-label="Indicadores principales del sistema"
+      className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"
+    >
+      <MetricCard
+        label="Stock total disponible"
+        value={stockTotal.toLocaleString('es-PE')}
+        unit="dosis"
+        metaPrimary={`${stats.lotesActivos} lotes vigentes`}
+        metaSecondary={`${stats.totalVacunas} biológicos activos`}
+        statusLabel={stockCritico > 0 ? `${stockCritico} en nivel crítico` : 'Abastecimiento normal'}
+        statusTone={stockCritico > 0 ? 'warning' : 'nominal'}
         icon={Package}
+        onClick={() => navigate('/inventario')}
       />
-      <MetricCard 
-        title="Dosis Aplicadas"
-        value={(stats.movimientosUltimoMes || 31013).toLocaleString()}
-        trend="9.8%"
-        trendUp={true}
-        subtitle="Datos de los últimos 7 días"
-        icon={Syringe}
+
+      <MetricCard
+        label="Lotes próximos a vencer"
+        value={lotesPorVencer.toLocaleString('es-PE')}
+        unit={lotesPorVencer === 1 ? 'lote' : 'lotes'}
+        metaPrimary={`${stockCritico} con stock ≤ 20%`}
+        metaSecondary="Ventana de 45 días"
+        statusLabel={
+          lotesPorVencer > 0
+            ? 'Priorizar distribución'
+            : 'Sin riesgo inmediato'
+        }
+        statusTone={lotesPorVencer > 0 ? 'warning' : 'nominal'}
+        icon={ClockCountdown}
+        onClick={() => navigate('/inventario')}
       />
-      <MetricCard 
-        title="Cobertura Acumulada"
-        value="82.6%"
-        trend="4.7 pp"
-        trendUp={true}
-        subtitle="Promedio de cumplimiento"
-        icon={Users}
+
+      <MetricCard
+        label="Entregas del mes"
+        value={stats.entregasMes.toLocaleString('es-PE')}
+        unit="dosis"
+        metaPrimary={`${stats.movimientosUltimoMes} movimientos`}
+        metaSecondary={
+          stats.dosisAplicadasMes > 0
+            ? `${stats.dosisAplicadasMes.toLocaleString('es-PE')} dosis salidas`
+            : `${stats.totalEstablecimientos} establecimientos`
+        }
+        statusLabel="Flujo operativo activo"
+        statusTone="nominal"
+        icon={ArrowsLeftRight}
+        onClick={() => navigate('/movimientos')}
       />
-      <MetricCard 
-        title="Alertas Activas"
-        value={stats.alertasPendientes || "7"}
-        trend="2"
-        trendUp={false}
-        subtitle="vs. mes anterior"
-        icon={Warning}
+
+      <MetricCard
+        label="Alertas activas"
+        value={alertasActivas.toLocaleString('es-PE')}
+        unit={alertasActivas === 1 ? 'pendiente' : 'pendientes'}
+        metaPrimary={`${stats.centrosAcopio} centros de acopio`}
+        metaSecondary={`${stats.totalEstablecimientos} establecimientos en red`}
+        statusLabel={
+          alertasActivas > 0
+            ? 'Requiere revisión'
+            : 'Sin incidencias'
+        }
+        statusTone={alertasActivas > 2 ? 'critical' : alertasActivas > 0 ? 'warning' : 'nominal'}
+        icon={WarningCircle}
+        onClick={() => navigate('/alertas')}
       />
-    </div>
+    </section>
   );
 };
 

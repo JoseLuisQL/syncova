@@ -119,32 +119,37 @@ export const usePermissions = () => {
     return user?.permissions || [];
   }, [user?.permissions]);
 
+  const isAdmin = user?.rol === 'administrador' || permissions.includes('*');
+
   /**
    * Verifica si el usuario tiene un permiso específico
    */
   const hasPermission = useCallback((codigo: string): boolean => {
+    if (isAdmin) return true;
     return permissions.includes(codigo);
-  }, [permissions]);
+  }, [isAdmin, permissions]);
 
   /**
    * Verifica si el usuario tiene al menos uno de los permisos indicados
    */
   const hasAnyPermission = useCallback((codigos: string[]): boolean => {
+    if (isAdmin) return true;
     return codigos.some(codigo => permissions.includes(codigo));
-  }, [permissions]);
+  }, [isAdmin, permissions]);
 
   /**
    * Verifica si el usuario tiene todos los permisos indicados
    */
   const hasAllPermissions = useCallback((codigos: string[]): boolean => {
+    if (isAdmin) return true;
     return codigos.every(codigo => permissions.includes(codigo));
-  }, [permissions]);
+  }, [isAdmin, permissions]);
 
   /**
    * Verifica si el usuario puede acceder a un módulo del menú
    */
   const canAccessModule = useCallback((moduleId: string): boolean => {
-    if (user?.rol === 'administrador') {
+    if (isAdmin) {
       return true;
     }
 
@@ -164,12 +169,15 @@ export const usePermissions = () => {
       return true; // Si no hay permisos definidos, se permite acceso
     }
     return hasAnyPermission(requiredPermissions);
-  }, [hasAnyPermission, user?.rol]);
+  }, [hasAnyPermission, isAdmin, user?.rol]);
 
   /**
    * Verifica si el usuario puede acceder a una sección de un módulo
    */
   const canAccessSection = useCallback((moduleId: string, sectionId: string): boolean => {
+    if (isAdmin) {
+      return true;
+    }
     const moduleSections = SECTION_PERMISSIONS[moduleId];
     if (!moduleSections) {
       return true; // Si no hay secciones definidas, se permite acceso
@@ -179,7 +187,7 @@ export const usePermissions = () => {
       return true;
     }
     return hasAnyPermission(requiredPermissions);
-  }, [hasAnyPermission]);
+  }, [hasAnyPermission, isAdmin]);
 
   /**
    * Verifica si el usuario puede crear/escribir en un recurso

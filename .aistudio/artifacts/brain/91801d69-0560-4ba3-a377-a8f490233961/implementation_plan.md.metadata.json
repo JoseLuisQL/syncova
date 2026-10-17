@@ -1,0 +1,6 @@
+{
+  "summary": "Plan de refactorización visual y funcional del Dashboard de SIVAC (DISA Apurímac II) hacia una estética minimalista, limpia y profesional, eliminando valores fijos o inventados y conectando el 100% de las métricas, estados de inventario, controles de periodo y botones de acción con datos y rutas reales del sistema.",
+  "updatedAt": "2026-10-17T18:54:08.644921706Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

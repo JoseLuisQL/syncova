@@ -1,67 +1,150 @@
 import React, { memo } from 'react';
-import { MapPin } from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
+import { MapPin, ArrowRight, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { usePaginatedCentrosAcopio } from '../../hooks/usePaginatedDashboard';
 import { EmptyState, SectionSkeleton } from './LoadingStates';
 
+const ESTADO_META: Record<
+  string,
+  { label: string; dot: string; text: string }
+> = {
+  activo: {
+    label: 'Operativo',
+    dot: 'bg-emerald-600',
+    text: 'text-emerald-700 dark:text-emerald-400',
+  },
+  alerta: {
+    label: 'Con alerta',
+    dot: 'bg-amber-500',
+    text: 'text-amber-700 dark:text-amber-400',
+  },
+  critico: {
+    label: 'Crítico',
+    dot: 'bg-rose-600',
+    text: 'text-rose-700 dark:text-rose-400',
+  },
+};
+
 const CentrosAcopioSection: React.FC = memo(() => {
-  const { data, loading, error } = usePaginatedCentrosAcopio(5);
+  const navigate = useNavigate();
+  const { data, loading, error, pagination, setPage } = usePaginatedCentrosAcopio(5);
 
   return (
-    <section className="flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-[0_16px_40px_-34px_rgba(15,42,59,0.55)]">
-      <header className="border-b border-line px-5 py-4">
-        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">Red</p>
-        <h3 className="mt-1 text-md font-semibold tracking-[-0.02em] text-ink">
-          Centros logísticos
-        </h3>
+    <section className="flex h-full flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-xs">
+      <header className="flex items-center justify-between border-b border-line px-5 py-3.5">
+        <div>
+          <h3 className="text-base font-semibold tracking-tight text-ink">
+            Centros de acopio
+          </h3>
+          <p className="mt-0.5 text-xs text-muted">
+            {pagination.total > 0 ? `${pagination.total} centros registrados en red` : 'Red logística regional'}
+          </p>
+        </div>
+
+        {pagination.totalPages > 1 && (
+          <div className="flex items-center gap-1.5 text-xs text-muted">
+            <span className="font-mono tabular-nums">
+              {pagination.page} / {pagination.totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+              aria-label="Página anterior de centros"
+              className="flex h-6 w-6 items-center justify-center rounded border border-line bg-surface text-ink transition-colors hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <CaretLeft size={12} weight="bold" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage(pagination.page + 1)}
+              disabled={pagination.page >= pagination.totalPages}
+              aria-label="Página siguiente de centros"
+              className="flex h-6 w-6 items-center justify-center rounded border border-line bg-surface text-ink transition-colors hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <CaretRight size={12} weight="bold" />
+            </button>
+          </div>
+        )}
       </header>
 
       <div className="flex-1 overflow-x-auto">
         {loading && data.length === 0 ? (
-          <div className="p-6"><SectionSkeleton rows={4} /></div>
+          <div className="p-5">
+            <SectionSkeleton rows={4} />
+          </div>
         ) : error ? (
-          <div className="p-6 text-center text-sm text-rose-600">{error}</div>
+          <div className="p-5 text-center text-xs text-rose-600">{error}</div>
         ) : data.length === 0 ? (
-          <EmptyState title="Sin centros" description="No hay datos disponibles." icon={<MapPin />} />
+          <EmptyState
+            title="Sin centros de acopio"
+            description="No hay datos disponibles."
+            icon={<MapPin />}
+          />
         ) : (
-          <table className="w-full min-w-[360px] border-collapse text-left">
+          <table className="w-full min-w-[380px] border-collapse text-left">
             <thead>
-              <tr className="bg-surface-soft">
-                <th className="whitespace-nowrap px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Centro logístico</th>
-                <th className="whitespace-nowrap px-3 py-3 text-center text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Inst.</th>
-                <th className="whitespace-nowrap px-3 py-3 text-right text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Stock total</th>
-                <th className="whitespace-nowrap px-3 py-3 text-left text-[0.78rem] font-medium tracking-[-0.01em] text-muted sm:px-5">Estado</th>
+              <tr className="border-b border-line bg-surface-soft/50">
+                <th className="whitespace-nowrap px-4 py-2.5 text-left text-xs font-medium text-muted">
+                  Centro de acopio
+                </th>
+                <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
+                  EESS
+                </th>
+                <th className="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium text-muted">
+                  Dosis disp.
+                </th>
+                <th className="whitespace-nowrap px-4 py-2.5 text-right text-xs font-medium text-muted">
+                  Estado
+                </th>
               </tr>
             </thead>
-            <tbody className="bg-surface">
-              {data.map((centro) => (
-                <tr key={centro.id} className="border-b border-line-soft transition-colors hover:bg-surface-soft">
-                  <td className="whitespace-nowrap px-3 py-3.5 text-base font-semibold text-ink sm:px-5">
-                    {centro.nombre}
-                  </td>
-                  <td className="px-3 py-3.5 text-center font-mono text-base font-medium text-muted-2 sm:px-5">
-                    {centro.establecimientos}
-                  </td>
-                  <td className="px-3 py-3.5 text-right font-mono text-base font-semibold text-ink tabular-nums sm:px-5">
-                    {centro.stockTotal.toLocaleString()}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3.5 sm:px-5">
-                    <div className="flex items-center gap-1.5">
-                      <span className={`h-1.5 w-1.5 rounded-full ${centro.estado === 'activo' ? 'bg-emerald-500' : centro.estado === 'alerta' ? 'bg-amber-500' : 'bg-rose-500'}`} />
-                      <span className="text-sm font-medium capitalize text-muted-2">
-                        {centro.estado}
+            <tbody className="divide-y divide-line-soft bg-surface">
+              {data.map((centro) => {
+                const status = ESTADO_META[centro.estado] || ESTADO_META.activo;
+                return (
+                  <tr
+                    key={centro.id}
+                    className="transition-colors hover:bg-surface-soft/40"
+                  >
+                    <td className="px-4 py-2.5">
+                      <div className="truncate text-sm font-medium text-ink">
+                        {centro.nombre}
+                      </div>
+                      {centro.responsable && (
+                        <div className="truncate text-xs text-muted">
+                          {centro.responsable}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5 text-right font-mono text-sm text-muted-2 tabular-nums">
+                      {centro.establecimientos}
+                    </td>
+                    <td className="px-3 py-2.5 text-right font-mono text-sm font-semibold text-ink tabular-nums">
+                      {centro.stockTotal.toLocaleString('es-PE')}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2.5 text-right">
+                      <span className={`inline-flex items-center justify-end gap-1.5 text-xs font-medium ${status.text}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} aria-hidden="true" />
+                        {status.label}
                       </span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
       </div>
 
-      <div className="mt-auto border-t border-zinc-100 px-5 py-4">
-        <button type="button" className="flex items-center gap-1 text-base font-semibold text-[#0e9f8e] transition-colors hover:text-[#0a8276]">
-          Ver todos los centros <span className="text-lg leading-none">→</span>
+      <div className="mt-auto border-t border-line-soft px-5 py-3">
+        <button
+          type="button"
+          onClick={() => navigate('/establecimientos')}
+          className="inline-flex items-center gap-1 text-xs font-medium text-brand transition-colors hover:text-brand-600 whitespace-nowrap shrink-0"
+        >
+          Gestionar centros y establecimientos
+          <ArrowRight size={13} weight="bold" />
         </button>
       </div>
     </section>
