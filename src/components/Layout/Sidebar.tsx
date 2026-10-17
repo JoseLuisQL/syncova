@@ -122,7 +122,7 @@ const Sidebar: React.FC = memo(() => {
         )}
 
         {isCollapsed && (
-          <span className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-md bg-ink-soft px-3 py-2 text-sm font-semibold text-white opacity-0 shadow-[0_18px_38px_-24px_rgba(0,0,0,0.9)] transition-opacity duration-150 group-hover/sidebar-item:opacity-100 lg:block">
+          <span className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-md border border-line bg-surface px-3 py-2 text-sm font-semibold text-ink opacity-0 shadow-[0_18px_38px_-24px_rgba(0,0,0,0.9)] transition-opacity duration-150 group-hover/sidebar-item:opacity-100 lg:block">
             {item.label}
           </span>
         )}

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import { X, Key, Shield, MagnifyingGlass, CircleNotch, CaretDown, CaretRight, Check, Checks, Eye, PencilSimple, Trash, DownloadSimple, Gear, Users, Package, FileText, Bell, Buildings, ChartBar, Funnel, ArrowCounterClockwise } from '@phosphor-icons/react';
 import { Role, Permission } from '../../types';
 import { COMPONENT_STYLES } from './constants';
+import { Modal } from '../ui/ModalElements';
 
 interface PermissionsModalProps {
   isOpen: boolean;
@@ -24,6 +24,7 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
   'Movimientos': PencilSimple,
   'Planificación': FileText,
   'Kardex': FileText,
+  'Reportas': ChartBar,
   'Reportes': ChartBar,
   'Alertas': Bell,
   'Usuarios': Users,
@@ -32,16 +33,16 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 
 // Colores por categoría
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string; iconBg: string }> = {
-  'Dashboard': { bg: 'bg-zinc-50', text: 'text-zinc-700', border: 'border-zinc-200', iconBg: 'bg-zinc-100' },
-  'Establecimientos': { bg: 'bg-zinc-50', text: 'text-zinc-700', border: 'border-zinc-200', iconBg: 'bg-zinc-100' },
-  'Inventario': { bg: 'bg-zinc-50', text: 'text-zinc-700', border: 'border-zinc-200', iconBg: 'bg-zinc-100' },
-  'Movimientos': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', iconBg: 'bg-blue-100' },
-  'Planificación': { bg: 'bg-zinc-50', text: 'text-zinc-700', border: 'border-zinc-200', iconBg: 'bg-zinc-100' },
-  'Kardex': { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', iconBg: 'bg-purple-100' },
-  'Reportes': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', iconBg: 'bg-amber-100' },
-  'Alertas': { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', iconBg: 'bg-rose-100' },
-  'Usuarios': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', iconBg: 'bg-emerald-100' },
-  'Configuración': { bg: 'bg-zinc-50', text: 'text-zinc-700', border: 'border-zinc-200', iconBg: 'bg-zinc-100' },
+  'Dashboard': { bg: 'bg-zinc-50 dark:bg-zinc-900', text: 'text-zinc-700 dark:text-zinc-300', border: 'border-zinc-200 dark:border-zinc-800', iconBg: 'bg-zinc-100 dark:bg-zinc-800' },
+  'Establecimientos': { bg: 'bg-zinc-50 dark:bg-zinc-900', text: 'text-zinc-700 dark:text-zinc-300', border: 'border-zinc-200 dark:border-zinc-800', iconBg: 'bg-zinc-100 dark:bg-zinc-800' },
+  'Inventario': { bg: 'bg-zinc-50 dark:bg-zinc-900', text: 'text-zinc-700 dark:text-zinc-300', border: 'border-zinc-200 dark:border-zinc-800', iconBg: 'bg-zinc-100 dark:bg-zinc-800' },
+  'Movimientos': { bg: 'bg-blue-50/70 dark:bg-blue-950/30', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-900/60', iconBg: 'bg-blue-100/80 dark:bg-blue-900/40' },
+  'Planificación': { bg: 'bg-zinc-50 dark:bg-zinc-900', text: 'text-zinc-700 dark:text-zinc-300', border: 'border-zinc-200 dark:border-zinc-800', iconBg: 'bg-zinc-100 dark:bg-zinc-800' },
+  'Kardex': { bg: 'bg-purple-50/70 dark:bg-purple-950/30', text: 'text-purple-700 dark:text-purple-300', border: 'border-purple-200 dark:border-purple-900/60', iconBg: 'bg-purple-100/80 dark:bg-purple-900/40' },
+  'Reportes': { bg: 'bg-amber-50/70 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-900/60', iconBg: 'bg-amber-100/80 dark:bg-amber-900/40' },
+  'Alertas': { bg: 'bg-rose-50/70 dark:bg-rose-950/30', text: 'text-rose-700 dark:text-rose-300', border: 'border-rose-200 dark:border-rose-900/60', iconBg: 'bg-rose-100/80 dark:bg-rose-900/40' },
+  'Usuarios': { bg: 'bg-emerald-50/70 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-emerald-200 dark:border-emerald-900/60', iconBg: 'bg-emerald-100/80 dark:bg-emerald-900/40' },
+  'Configuración': { bg: 'bg-zinc-50 dark:bg-zinc-900', text: 'text-zinc-700 dark:text-zinc-300', border: 'border-zinc-200 dark:border-zinc-800', iconBg: 'bg-zinc-100 dark:bg-zinc-800' },
 };
 
 // Colores por acción
@@ -77,7 +78,6 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [isSaving, setIsSaving] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
 
   // Obtener categorías únicas ordenadas
   const categories = useMemo(() => {
@@ -241,59 +241,60 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
 
   const hasActiveFilters = searchTerm !== '' || filterCategory !== 'todas';
 
-  const modalContent = (
-    <div 
-      className={COMPONENT_STYLES.modal.overlay}
-      onClick={(e) => e.target === e.currentTarget && !isLoading && onClose()}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="permissions-modal-title"
-    >
-      <div 
-        ref={modalRef}
-        className={`${COMPONENT_STYLES.modal.containerShell} flex max-h-[88vh] max-w-5xl flex-col`}
-      >
-        {/* Header */}
-        <div className="border-b border-line-soft bg-white px-5 py-3.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-muted-2">
-                <Key className="h-4 w-4" aria-hidden="true" />
-              </div>
-              <div>
-                <h2 id="permissions-modal-title" className="text-md font-semibold leading-5 text-ink">
-                  Gestionar Permisos
-                </h2>
-                <p className="mt-1 text-sm leading-4 text-muted-2">
-                  Rol: <span className="font-semibold text-zinc-700">{role.nombre}</span>
-                  {isReadOnly ? ' · consulta protegida' : ''}
-                </p>
-              </div>
-            </div>
-            
-            <button type="button"
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={isLoading || isSaving ? () => undefined : onClose}
+      title="Gestionar permisos"
+      subtitle={`Rol: ${role.nombre}${isReadOnly ? ' · consulta protegida' : ''}`}
+      icon={Key}
+      size="2xl"
+      footer={
+        <div className="flex w-full flex-col items-center justify-between gap-3 sm:flex-row">
+          <div className="flex items-center gap-2 text-xs text-muted-2">
+            <Shield className="h-4 w-4 text-muted-2" />
+            <span>
+              <strong className="text-ink">{totalStats.selected}</strong> permisos asignados al rol <strong className="text-ink">{role.nombre}</strong>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
               onClick={onClose}
               disabled={isLoading || isSaving}
-              className={COMPONENT_STYLES.button.ghost}
-              aria-label="Cerrar modal"
+              className={COMPONENT_STYLES.button.secondary}
             >
-              <X className="h-5 w-5" />
+              Cancelar
             </button>
+            {!isReadOnly ? (
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isLoading || isSaving}
+                className={COMPONENT_STYLES.button.primary}
+              >
+                {(isLoading || isSaving) ? <CircleNotch className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                <span>Guardar permisos</span>
+              </button>
+            ) : null}
           </div>
         </div>
-
+      }
+    >
+      <div className="space-y-4">
         {isReadOnly && (
-          <div className="mx-5 mt-4 rounded-md border border-amber-200 bg-amber-50/80 px-3 py-2.5 text-base text-amber-800">
+          <div className="rounded-xl border border-amber-200/80 bg-amber-50/70 px-3.5 py-2.5 text-xs font-medium text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
             Este rol es parte de la configuración base del sistema. Sus permisos se muestran solo para auditoría.
           </div>
         )}
 
         {/* Filtros y estadísticas */}
-        <div className="border-b border-line-soft bg-white px-5 py-3.5">
-          <div className="flex flex-col lg:flex-row gap-4">
+        <div className="rounded-xl border border-line-soft bg-surface-soft/50 p-3.5">
+          <div className="flex flex-col gap-3 lg:flex-row">
             {/* Búsqueda */}
             <div className="relative flex-1">
-              <MagnifyingGlass className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" aria-hidden="true" />
+              <MagnifyingGlass className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
               <input
                 ref={searchInputRef}
                 type="text"
@@ -307,11 +308,11 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
 
             {/* Filtro por categoría */}
             <div className="flex items-center gap-2">
-              <Funnel className="h-4 w-4 text-zinc-400" aria-hidden="true" />
+              <Funnel className="h-4 w-4 text-muted" aria-hidden="true" />
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="h-9 w-full rounded-[7px] border border-line bg-white px-3 pr-8 text-base font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70 sm:w-auto sm:min-w-[180px]"
+                className={`${COMPONENT_STYLES.select.base} sm:w-auto sm:min-w-[190px]`}
                 aria-label="Filtrar por categoría"
               >
                 <option value="todas">Todas las categorías</option>
@@ -323,7 +324,8 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
 
             {/* Limpiar filtros */}
             {hasActiveFilters && (
-              <button type="button"
+              <button
+                type="button"
                 onClick={clearFilters}
                 className={COMPONENT_STYLES.button.ghost}
               >
@@ -334,19 +336,19 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
           </div>
 
           {/* Estadísticas y acciones rápidas */}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-4 text-sm">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-line-soft pt-3">
+            <div className="flex items-center gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-zinc-500" />
-                <span className="text-zinc-600">
-                  <span className="font-semibold text-zinc-700">{totalStats.selected}</span>
-                  <span className="text-zinc-400"> / </span>
+                <div className="h-1.5 w-1.5 rounded-full bg-brand" />
+                <span className="text-muted-2">
+                  <span className="font-semibold text-ink">{totalStats.selected}</span>
+                  <span className="text-muted"> / </span>
                   <span>{totalStats.total}</span>
-                  <span className="text-zinc-500 ml-1">seleccionados</span>
+                  <span className="ml-1 text-muted-2">seleccionados</span>
                 </span>
               </div>
               {hasActiveFilters && (
-                <div className="flex items-center gap-2 text-zinc-500">
+                <div className="flex items-center gap-2 text-muted-2">
                   <span>•</span>
                   <span>{totalStats.filtered} resultados</span>
                 </div>
@@ -355,15 +357,17 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
 
             {!isReadOnly ? (
               <div className="flex items-center gap-2">
-                <button type="button"
+                <button
+                  type="button"
                   onClick={selectAll}
-                  className="rounded-md border border-line bg-white px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-surface-soft"
+                  className="rounded-lg border border-line bg-surface px-2.5 py-1 text-xs font-medium text-ink transition hover:bg-surface-soft"
                 >
                   Seleccionar visibles
                 </button>
-                <button type="button"
+                <button
+                  type="button"
                   onClick={deselectAll}
-                  className="px-3 py-1.5 text-xs font-medium text-zinc-600 bg-zinc-100 rounded-lg hover:bg-zinc-200 transition-colors"
+                  className="rounded-lg border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-muted-2 transition hover:bg-surface hover:text-ink"
                 >
                   Deseleccionar visibles
                 </button>
@@ -373,25 +377,26 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
         </div>
 
         {/* Lista de permisos */}
-        <div className="flex-1 overflow-y-auto bg-white px-5 py-4">
+        <div>
           {Object.keys(groupedPermissions).length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <div className="p-4 rounded-2xl bg-zinc-100 mb-4">
-                <MagnifyingGlass className="h-8 w-8 text-zinc-400" />
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="mb-3 rounded-xl border border-line bg-surface-soft p-3.5">
+                <MagnifyingGlass className="h-6 w-6 text-muted" />
               </div>
-              <p className="text-zinc-600 font-medium">No se encontraron permisos</p>
-              <p className="text-zinc-400 text-sm mt-1">Intenta ajustar los filtros de búsqueda</p>
+              <p className="text-sm font-semibold text-ink">No se encontraron permisos</p>
+              <p className="mt-1 text-xs text-muted-2">Intenta ajustar los filtros de búsqueda</p>
               {hasActiveFilters && (
-                <button type="button"
+                <button
+                  type="button"
                   onClick={clearFilters}
-                  className="mt-4 px-4 py-2 text-sm font-medium text-zinc-700 bg-zinc-50 rounded-xl hover:bg-zinc-100 transition-colors"
+                  className={`${COMPONENT_STYLES.button.secondary} mt-3`}
                 >
                   Limpiar filtros
                 </button>
               )}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {Object.entries(groupedPermissions).map(([category, categoryPermissions]) => {
                 const stats = getCategoryStats(category);
                 const isExpanded = expandedCategories.has(category);
@@ -403,22 +408,23 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                 return (
                   <div 
                     key={category} 
-                    className="overflow-hidden rounded-[9px] border border-line bg-white shadow-none transition-colors duration-200 hover:bg-surface-soft"
+                    className="overflow-hidden rounded-xl border border-line bg-surface transition-colors duration-200"
                   >
                     {/* Header de categoría */}
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => toggleCategory(category)}
-                      className={`flex w-full items-center justify-between px-4 py-3 ${colors.bg} transition-colors duration-200`}
+                      className="flex w-full items-center justify-between bg-surface-soft/50 px-4 py-3 transition-colors duration-200 hover:bg-surface-soft"
                       aria-expanded={isExpanded}
                       aria-controls={`category-${category}`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`rounded-[7px] p-2 ${colors.iconBg}`}>
+                        <div className={`rounded-lg p-2 ${colors.iconBg}`}>
                           <CategoryIcon className={`h-4 w-4 ${colors.text}`} />
                         </div>
                         <div className="text-left">
-                          <h3 className={`font-semibold ${colors.text}`}>{category}</h3>
-                          <p className="text-xs text-zinc-500 mt-0.5">
+                          <h3 className="text-[0.875rem] font-semibold text-ink">{category}</h3>
+                          <p className="mt-0.5 text-xs text-muted-2">
                             {stats.selected} de {stats.total} permisos asignados
                           </p>
                         </div>
@@ -428,27 +434,27 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                         {/* Checkbox de categoría */}
                         <div 
                           onClick={(e) => toggleAllInCategory(category, e)}
-                          className={`flex items-center justify-center w-6 h-6 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                          className={`flex h-5 w-5 cursor-pointer items-center justify-center rounded-md border transition-all duration-200 ${
                             allSelected 
-                              ? 'bg-brand border-brand' 
+                              ? 'border-brand bg-brand' 
                               : someSelected 
-                                ? 'bg-[#f3f0ff] border-brand-100' 
-                                : 'bg-white border-zinc-300 hover:border-brand-100'
+                                ? 'border-brand-100 bg-surface-soft' 
+                                : 'border-line-strong bg-surface hover:border-brand-100'
                           } ${isReadOnly ? 'cursor-not-allowed opacity-60' : ''}`}
                           role="checkbox"
                           aria-checked={allSelected ? 'true' : someSelected ? 'mixed' : 'false'}
                           aria-label={`Seleccionar todos los permisos de ${category}`}
                         >
-                          {allSelected && <Check className="h-4 w-4 text-white" />}
-                          {someSelected && !allSelected && <div className="w-2 h-0.5 bg-brand rounded" />}
+                          {allSelected && <Check className="h-3.5 w-3.5 text-white" weight="bold" />}
+                          {someSelected && !allSelected && <div className="h-0.5 w-2 rounded bg-brand" />}
                         </div>
 
                         {/* Indicador expandido */}
-                        <div className={`p-1 rounded-lg ${isExpanded ? colors.iconBg : 'bg-transparent'}`}>
+                        <div className="rounded-lg p-1 text-muted">
                           {isExpanded ? (
-                            <CaretDown className={`h-5 w-5 ${colors.text}`} />
+                            <CaretDown className="h-4 w-4 text-ink" />
                           ) : (
-                            <CaretRight className="h-5 w-5 text-zinc-400" />
+                            <CaretRight className="h-4 w-4 text-muted" />
                           )}
                         </div>
                       </div>
@@ -456,8 +462,8 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
 
                     {/* Permisos de la categoría */}
                     {isExpanded && (
-                        <div id={`category-${category}`} className="border-t border-line-soft p-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div id={`category-${category}`} className="border-t border-line-soft p-3.5">
+                        <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
                           {categoryPermissions.map((permission) => {
                             const isSelected = selectedPermissions.includes(permission.id);
                             const actionStyle = getActionStyle(permission.accion);
@@ -466,10 +472,10 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                             return (
                               <label
                                 key={permission.id}
-                                  className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors duration-200 ${
+                                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors duration-200 ${
                                   isSelected
                                     ? 'border-brand-100 bg-surface-soft'
-                                    : 'border-line bg-white hover:border-line-strong hover:bg-surface-soft'
+                                    : 'border-line bg-surface hover:border-line-strong hover:bg-surface-soft'
                                 }`}
                               >
                                 <input
@@ -486,20 +492,20 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                                 />
                                 
                                 {/* Checkbox visual */}
-                                <div className={`flex-shrink-0 mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                                <div className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border transition-all duration-200 ${
                                   isSelected 
-                                    ? 'bg-brand border-brand' 
-                                    : 'bg-white border-zinc-300'
+                                    ? 'border-brand bg-brand' 
+                                    : 'border-line-strong bg-surface'
                                 }`}>
-                                  {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
+                                  {isSelected && <Check className="h-3 w-3 text-white" weight="bold" />}
                                 </div>
                                 
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className={`font-medium text-sm ${isSelected ? 'text-zinc-900' : 'text-zinc-900'}`}>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="text-[0.8125rem] font-medium text-ink">
                                       {permission.nombre}
                                     </span>
-                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-md ${actionStyle.bg} ${actionStyle.text}`}>
+                                    <span className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium ${actionStyle.bg} ${actionStyle.text}`}>
                                       <ActionIcon className="h-3 w-3" />
                                       {permission.accion}
                                     </span>
@@ -508,14 +514,14 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
                                   {permission.descripcion && (
                                     <p 
                                       id={`perm-desc-${permission.id}`}
-                                      className={`text-xs mt-1 ${isSelected ? 'text-zinc-700' : 'text-zinc-500'}`}
+                                      className="mt-1 text-xs text-muted-2"
                                     >
                                       {permission.descripcion}
                                     </p>
                                   )}
                                   
                                   <div className="mt-1.5">
-                                    <code className={`text-xs px-1.5 py-0.5 rounded ${isSelected ? 'bg-[#f3f0ff] text-brand' : 'bg-zinc-100 text-zinc-500'}`}>
+                                    <code className={`rounded px-1.5 py-0.5 text-[11px] ${isSelected ? 'bg-surface text-brand' : 'bg-surface-soft text-muted-2'}`}>
                                       {permission.codigo}
                                     </code>
                                   </div>
@@ -532,47 +538,11 @@ const PermissionsModal: React.FC<PermissionsModalProps> = ({
             </div>
           )}
         </div>
-
-        {/* Footer */}
-        <div className="border-t border-line-soft bg-surface-soft px-5 py-3">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            {/* Resumen */}
-            <div className="flex items-center gap-2 text-sm text-zinc-600">
-              <Shield className="h-4 w-4 text-zinc-600" />
-              <span>
-                {totalStats.selected} permisos serán asignados al rol <strong className="text-zinc-900">{role.nombre}</strong>
-              </span>
-            </div>
-
-            {/* Botones */}
-            <div className="flex items-center gap-2">
-              <button type="button"
-                onClick={onClose}
-                disabled={isLoading || isSaving}
-                className={COMPONENT_STYLES.button.secondary}
-              >
-                Cancelar
-              </button>
-              {!isReadOnly ? (
-                <button type="button"
-                  onClick={handleSave}
-                  disabled={isLoading || isSaving}
-                  className={COMPONENT_STYLES.button.primary}
-                >
-                  {(isLoading || isSaving) && <CircleNotch className="h-4 w-4 animate-spin" />}
-                  <Check className="h-4 w-4" />
-                  <span>Guardar Permisos</span>
-                </button>
-              ) : null}
-            </div>
-          </div>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
-
-  return createPortal(modalContent, document.body);
 };
 
 export default React.memo(PermissionsModal);
+
    

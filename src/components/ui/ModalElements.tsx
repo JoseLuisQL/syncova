@@ -18,7 +18,7 @@ interface ModalProps {
   icon?: React.ElementType; // Made optional for extreme minimalism if desired
   children: React.ReactNode;
   footer?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
 const sizeClasses = {
@@ -26,6 +26,7 @@ const sizeClasses = {
   md: 'sm:max-w-lg',
   lg: 'sm:max-w-2xl',
   xl: 'sm:max-w-4xl',
+  '2xl': 'sm:max-w-5xl',
 };
 
 export const Modal: React.FC<ModalProps> = memo(({
@@ -38,43 +39,60 @@ export const Modal: React.FC<ModalProps> = memo(({
   footer,
   size = 'lg',
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return renderOverlay(
-    <div className={MODAL_STYLES.modal.overlay} onClick={(event) => event.target === event.currentTarget && onClose()}>
-      <div className={MODAL_STYLES.modal.container}>
-        <div className={`${MODAL_STYLES.modal.panel} ${sizeClasses[size]}`}>
-          <div className="absolute right-3 top-3 hidden sm:block">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-surface text-muted transition hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
-              aria-label="Cerrar"
-            >
-              <X className="h-4 w-4" weight="bold" />
-            </button>
-          </div>
-
+    <div
+      className={MODAL_STYLES.modal.overlay}
+      onClick={(event) => event.target === event.currentTarget && onClose()}
+    >
+      <div
+        className={MODAL_STYLES.modal.container}
+        onClick={(event) => event.target === event.currentTarget && onClose()}
+      >
+        <div
+          role="dialog"
+          aria-modal="true"
+          className={`${MODAL_STYLES.modal.panel} ${sizeClasses[size]}`}
+          onClick={(event) => event.stopPropagation()}
+        >
           <div className={MODAL_STYLES.modal.header}>
-            <div className="flex items-start gap-3 pr-8">
-              {Icon && (
-                <div className={MODAL_STYLES.modal.headerIconWrapper}>
-                  <Icon className="h-4 w-4" aria-hidden="true" weight="duotone" />
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-start gap-3">
+                {Icon && (
+                  <div className={MODAL_STYLES.modal.headerIconWrapper}>
+                    <Icon className="h-[18px] w-[18px]" aria-hidden="true" weight="duotone" />
+                  </div>
+                )}
+                <div className="min-w-0 text-left">
+                  <h2 className="text-[0.95rem] font-semibold leading-5 tracking-[-0.015em] text-ink">
+                    {title}
+                  </h2>
+                  {subtitle ? (
+                    <p className="mt-1 text-[0.8125rem] leading-5 text-muted-2">{subtitle}</p>
+                  ) : null}
                 </div>
-              )}
-              <div className="min-w-0 text-left">
-                <h2 className="text-md font-semibold leading-5 tracking-[-0.01em] text-ink">{title}</h2>
-                {subtitle ? <p className="mt-1 text-sm leading-5 text-muted-2">{subtitle}</p> : null}
               </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+                aria-label="Cerrar"
+              >
+                <X className="h-4 w-4" weight="bold" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-[7px] text-muted transition hover:bg-surface-soft hover:text-ink sm:hidden"
-              aria-label="Cerrar"
-            >
-              <X className="h-4 w-4" weight="bold" />
-            </button>
           </div>
 
           <div className={MODAL_STYLES.modal.body}>{children}</div>
@@ -106,37 +124,62 @@ export const SideSheet: React.FC<SideSheetProps> = memo(({
   children,
   footer,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return renderOverlay(
-    <div className={MODAL_STYLES.modal.overlay} onClick={(event) => event.target === event.currentTarget && onClose()}>
-      <div className="flex h-full items-end justify-end sm:items-stretch">
-        <aside className={MODAL_STYLES.modal.sideSheetPanel}>
-          <div className="absolute right-3 top-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-surface text-muted transition hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
-              aria-label="Cerrar panel"
-            >
-              <X className="h-4 w-4" weight="bold" />
-            </button>
-          </div>
-          
+    <div
+      className={MODAL_STYLES.modal.overlay}
+      onClick={(event) => event.target === event.currentTarget && onClose()}
+    >
+      <div
+        className="flex h-full items-end justify-end sm:items-stretch"
+        onClick={(event) => event.target === event.currentTarget && onClose()}
+      >
+        <aside
+          role="dialog"
+          aria-modal="true"
+          className={MODAL_STYLES.modal.sideSheetPanel}
+          onClick={(event) => event.stopPropagation()}
+        >
           <div className={MODAL_STYLES.modal.header}>
-            <div className="flex items-start gap-3 pr-8">
-              {Icon && (
-                <div className={MODAL_STYLES.modal.headerIconWrapper}>
-                  <Icon className="h-4 w-4" aria-hidden="true" weight="duotone" />
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-start gap-3">
+                {Icon && (
+                  <div className={MODAL_STYLES.modal.headerIconWrapper}>
+                    <Icon className="h-[18px] w-[18px]" aria-hidden="true" weight="duotone" />
+                  </div>
+                )}
+                <div className="min-w-0 text-left">
+                  <h2 className="text-[0.95rem] font-semibold leading-5 tracking-[-0.015em] text-ink">
+                    {title}
+                  </h2>
+                  {subtitle ? (
+                    <p className="mt-1 text-[0.8125rem] leading-5 text-muted-2">{subtitle}</p>
+                  ) : null}
                 </div>
-              )}
-              <div className="min-w-0 text-left">
-                <h2 className="text-md font-semibold leading-5 tracking-[-0.01em] text-ink">{title}</h2>
-                {subtitle ? <p className="mt-1 text-sm leading-5 text-muted-2">{subtitle}</p> : null}
               </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+                aria-label="Cerrar panel"
+              >
+                <X className="h-4 w-4" weight="bold" />
+              </button>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">{children}</div>
+          <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 sm:px-6">{children}</div>
           {footer ? <div className={MODAL_STYLES.modal.footer}>{footer}</div> : null}
         </aside>
       </div>
@@ -152,7 +195,9 @@ interface ModalFooterProps {
   cancelLabel?: string;
   isLoading?: boolean;
   isSubmitDisabled?: boolean;
+  isDisabled?: boolean;
   submitType?: 'button' | 'submit';
+  submitVariant?: 'primary' | 'danger';
   submitClassName?: string;
 }
 
@@ -163,29 +208,39 @@ export const ModalFooter: React.FC<ModalFooterProps> = memo(({
   cancelLabel = 'Cancelar',
   isLoading = false,
   isSubmitDisabled = false,
+  isDisabled = false,
   submitType = 'submit',
+  submitVariant = 'primary',
   submitClassName,
-}) => (
-  <div className="flex w-full flex-col gap-2 sm:flex-row-reverse sm:gap-2">
-    <button
-      type={submitType}
-      onClick={submitType === 'button' ? onSubmit : undefined}
-      className={submitClassName ?? `${MODAL_STYLES.button.primary} sm:w-auto w-full`}
-      disabled={isLoading || isSubmitDisabled}
-      aria-busy={isLoading}
-    >
-      {isLoading ? <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" weight="bold" /> : null}
-      <span>{submitLabel}</span>
-    </button>
-    <button type="button" onClick={onCancel} className={`${MODAL_STYLES.button.secondary} w-full sm:mt-0 sm:w-auto`} disabled={isLoading}>
-      {cancelLabel}
-    </button>
-  </div>
-));
+}) => {
+  const defaultBtnClass = submitVariant === 'danger' ? MODAL_STYLES.button.danger : MODAL_STYLES.button.primary;
+  return (
+    <div className="flex w-full flex-col gap-2 sm:flex-row-reverse sm:items-center sm:gap-2.5">
+      <button
+        type={submitType}
+        onClick={submitType === 'button' ? onSubmit : undefined}
+        className={submitClassName ?? `${defaultBtnClass} w-full sm:w-auto`}
+        disabled={isLoading || isSubmitDisabled || isDisabled}
+        aria-busy={isLoading}
+      >
+        {isLoading ? <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" weight="bold" /> : null}
+        <span>{submitLabel}</span>
+      </button>
+      <button
+        type="button"
+        onClick={onCancel}
+        className={`${MODAL_STYLES.button.secondary} w-full sm:mt-0 sm:w-auto`}
+        disabled={isLoading}
+      >
+        {cancelLabel}
+      </button>
+    </div>
+  );
+});
 ModalFooter.displayName = 'ModalFooter';
 
 interface FormFieldProps {
-  id: string;
+  id?: string;
   label: string;
   required?: boolean;
   error?: string;
@@ -201,7 +256,7 @@ export const FormField: React.FC<FormFieldProps> = memo(({
   children,
   helpText,
 }) => (
-  <div className="mb-3 last:mb-0">
+  <div className="mb-3.5 last:mb-0">
     <label htmlFor={id} className={MODAL_STYLES.input.label}>
       {label}
       {required ? <span className="ml-1 text-rose-500">*</span> : null}
@@ -219,14 +274,23 @@ interface FormSectionProps {
   children: React.ReactNode;
 }
 
-export const FormSection: React.FC<FormSectionProps> = memo(({ title, children }) => (
-  <section className="mb-5 last:mb-0">
-    {title && (
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted">
-        {title}
-      </h3>
+export const FormSection: React.FC<FormSectionProps> = memo(({ title, description, children }) => (
+  <section className="mb-6 last:mb-0">
+    {(title || description) && (
+      <div className="mb-3.5 border-b border-line-soft pb-2">
+        {title && (
+          <h3 className="text-[0.75rem] font-semibold uppercase tracking-[0.08em] text-muted-2">
+            {title}
+          </h3>
+        )}
+        {description && (
+          <p className="mt-0.5 text-[0.78rem] leading-relaxed text-muted">
+            {description}
+          </p>
+        )}
+      </div>
     )}
-    <div className="space-y-3">
+    <div className="space-y-3.5">
       {children}
     </div>
   </section>
@@ -279,7 +343,7 @@ export const TextInput: React.FC<TextInputProps> = memo(({
       max={max}
       maxLength={maxLength}
       list={list}
-      className={`${MODAL_STYLES.input.base} ${error ? MODAL_STYLES.input.error.replace('border-error-300', 'border-rose-300').replace('focus:border-error-300', 'focus:border-rose-300').replace('focus:ring-error-100/50', 'focus:ring-rose-100') : MODAL_STYLES.input.normal}`}
+      className={`${MODAL_STYLES.input.base} ${error ? MODAL_STYLES.input.error : MODAL_STYLES.input.normal}`}
       aria-invalid={Boolean(error)}
     />
   </FormField>
@@ -382,12 +446,7 @@ export const ComboboxInput: React.FC<ComboboxInputProps> = memo(({
           maxLength={maxLength}
           autoComplete="off"
           className={`${MODAL_STYLES.input.base} ${
-            error
-              ? MODAL_STYLES.input.error
-                  .replace('border-error-300', 'border-rose-300')
-                  .replace('focus:border-error-300', 'focus:border-rose-300')
-                  .replace('focus:ring-error-100/50', 'focus:ring-rose-100')
-              : MODAL_STYLES.input.normal
+            error ? MODAL_STYLES.input.error : MODAL_STYLES.input.normal
           }`}
           aria-invalid={Boolean(error)}
           aria-expanded={isOpen}
@@ -395,7 +454,7 @@ export const ComboboxInput: React.FC<ComboboxInputProps> = memo(({
         />
 
         {isOpen && filteredOptions.length > 0 && (
-          <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 max-h-48 overflow-y-auto rounded-[7px] border border-line bg-surface py-1 shadow-lg">
+          <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-52 overflow-y-auto rounded-xl border border-line bg-surface p-1 shadow-[0_18px_42px_-12px_rgba(15,23,42,0.18)] dark:shadow-[0_18px_42px_-12px_rgba(0,0,0,0.65)]">
             {filteredOptions.map((opt) => {
               const isSelected = opt.value.toLowerCase() === value.trim().toLowerCase();
               return (
@@ -407,15 +466,15 @@ export const ComboboxInput: React.FC<ComboboxInputProps> = memo(({
                     onChange(opt.value);
                     setIsOpen(false);
                   }}
-                  className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
+                  className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[0.8125rem] transition-colors ${
                     isSelected
-                      ? 'bg-surface-soft font-medium text-ink'
+                      ? 'bg-surface-tint font-medium text-ink'
                       : 'text-ink hover:bg-surface-soft'
                   }`}
                 >
                   {opt.dotClass && (
                     <span
-                      className={`inline-block h-3 w-3 shrink-0 rounded-full border border-black/10 ${opt.dotClass}`}
+                      className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full border border-black/10 ${opt.dotClass}`}
                     />
                   )}
                   <span className="truncate">{opt.label || opt.value}</span>
@@ -502,22 +561,28 @@ export const SelectInput: React.FC<SelectInputProps> = memo(({
   helpText,
 }) => (
   <FormField id={id} label={label} required={required} error={error} helpText={helpText}>
-    <select
-      id={id}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      required={required}
-      disabled={disabled}
-      className={`${MODAL_STYLES.input.base} ${error ? MODAL_STYLES.input.error.replace('border-error-300', 'border-rose-300').replace('focus:border-error-300', 'focus:border-rose-300').replace('focus:ring-error-100/50', 'focus:ring-rose-100') : MODAL_STYLES.input.normal}`}
-      aria-invalid={Boolean(error)}
-    >
-      <option value="">{placeholder}</option>
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+    <div className="relative">
+      <select
+        id={id}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        required={required}
+        disabled={disabled}
+        className={`${MODAL_STYLES.input.base} ${error ? MODAL_STYLES.input.error : MODAL_STYLES.input.normal} appearance-none pr-9`}
+        aria-invalid={Boolean(error)}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <CaretDown
+        className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+        weight="bold"
+      />
+    </div>
   </FormField>
 ));
 SelectInput.displayName = 'SelectInput';
@@ -645,32 +710,32 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
           aria-haspopup="listbox"
           aria-expanded={isOpen}
         >
-          <span className={`truncate ${values.length === 0 ? 'text-[#a0a4ae]' : 'text-ink'}`}>
+          <span className={`truncate ${values.length === 0 ? 'text-muted/80' : 'text-ink'}`}>
             {triggerLabel()}
           </span>
           <CaretDown
-            className={`h-3.5 w-3.5 shrink-0 text-muted transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            className={`h-3.5 w-3.5 shrink-0 text-muted transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}
             weight="bold"
           />
         </button>
 
         {isOpen ? (
-          <div className="absolute left-0 right-0 z-[400] mt-1.5 overflow-hidden rounded-[7px] border border-line bg-surface shadow-[0_22px_54px_-26px_rgba(12,15,24,0.45)]">
+          <div className="absolute left-0 right-0 z-[400] mt-1.5 overflow-hidden rounded-xl border border-line bg-surface shadow-[0_18px_42px_-12px_rgba(15,23,42,0.2)] dark:shadow-[0_18px_42px_-12px_rgba(0,0,0,0.65)]">
             <div className="border-b border-line-soft p-2">
               <div className="relative">
-                <MagnifyingGlass className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" weight="bold" />
+                <MagnifyingGlass className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" weight="bold" />
                 <input
                   type="text"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder={searchPlaceholder}
-                  className="h-8 w-full rounded-[5px] border border-line bg-surface-soft pl-7 pr-2 text-sm text-ink placeholder:text-muted focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+                  className="h-8.5 w-full rounded-lg border border-line bg-surface-soft pl-8 pr-2.5 text-[0.8125rem] text-ink placeholder:text-muted/80 focus:border-brand focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand/12"
                   autoFocus
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-2 border-b border-line-soft bg-surface-soft px-2.5 py-1.5">
+            <div className="flex items-center justify-between gap-2 border-b border-line-soft bg-surface-soft/70 px-3 py-1.5">
               <button
                 type="button"
                 onClick={selectAllVisible}
@@ -692,7 +757,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
               </button>
             </div>
 
-            <div role="listbox" aria-multiselectable="true" className="max-h-60 overflow-y-auto py-1">
+            <div role="listbox" aria-multiselectable="true" className="max-h-60 overflow-y-auto p-1">
               {filteredOptions.length === 0 ? (
                 <p className="px-3 py-4 text-center text-sm text-muted">
                   No se encontraron coincidencias
@@ -707,16 +772,16 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
                       role="option"
                       aria-selected={isSelected}
                       onClick={() => toggleOption(option.value)}
-                      className={`flex w-full items-center gap-2.5 px-2.5 py-1.5 text-left text-[12.5px] transition ${
-                        isSelected ? 'bg-surface-tint text-ink' : 'text-muted-2 hover:bg-surface-soft hover:text-ink'
+                      className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-[0.8rem] transition ${
+                        isSelected ? 'bg-surface-tint font-medium text-ink' : 'text-muted-2 hover:bg-surface-soft hover:text-ink'
                       }`}
                     >
                       <span
-                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition ${
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border transition ${
                           isSelected ? 'border-brand bg-brand' : 'border-line-strong bg-surface'
                         }`}
                       >
-                        {isSelected ? <Check className="h-3 w-3 text-white" weight="bold" /> : null}
+                        {isSelected ? <Check className="h-2.5 w-2.5 text-white" weight="bold" /> : null}
                       </span>
                       <span className="truncate">{option.label}</span>
                     </button>
@@ -732,13 +797,13 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
             {visibleChips.map((option) => (
               <span
                 key={option.value}
-                className="inline-flex max-w-full items-center gap-1 rounded-[5px] border border-line bg-surface-soft py-0.5 pl-2 pr-1 text-[11.5px] font-medium text-ink"
+                className="inline-flex max-w-full items-center gap-1 rounded-lg border border-line bg-surface-soft py-0.5 pl-2.5 pr-1 text-xs font-medium text-ink"
               >
                 <span className="truncate">{option.label}</span>
                 <button
                   type="button"
                   onClick={() => toggleOption(option.value)}
-                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] text-muted transition hover:bg-[#fde7ec] hover:text-rose-600"
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded-md text-muted transition hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
                   aria-label={`Remover ${option.label}`}
                 >
                   <X className="h-2.5 w-2.5" weight="bold" />
@@ -749,7 +814,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
               <button
                 type="button"
                 onClick={() => setShowAllChips(true)}
-                className="inline-flex items-center rounded-[5px] border border-dashed border-line-strong bg-surface-soft px-2 py-0.5 text-[11.5px] font-medium text-muted-2 transition hover:border-line-focus-strong hover:text-ink"
+                className="inline-flex items-center rounded-lg border border-dashed border-line-strong bg-surface-soft px-2 py-0.5 text-xs font-medium text-muted-2 transition hover:border-line-focus-strong hover:text-ink"
               >
                 +{hiddenChipsCount} más
               </button>
@@ -758,7 +823,7 @@ export const MultiSelectInput: React.FC<MultiSelectInputProps> = memo(({
               <button
                 type="button"
                 onClick={() => setShowAllChips(false)}
-                className="inline-flex items-center rounded-[5px] border border-dashed border-line-strong bg-surface-soft px-2 py-0.5 text-[11.5px] font-medium text-muted-2 transition hover:border-line-focus-strong hover:text-ink"
+                className="inline-flex items-center rounded-lg border border-dashed border-line-strong bg-surface-soft px-2 py-0.5 text-xs font-medium text-muted-2 transition hover:border-line-focus-strong hover:text-ink"
               >
                 Mostrar menos
               </button>
@@ -806,14 +871,13 @@ export const DateInput: React.FC<DateInputProps> = memo(({
       disabled={disabled}
       min={min}
       max={max}
-      className={`${MODAL_STYLES.input.base} ${error ? MODAL_STYLES.input.error.replace('border-error-300', 'border-rose-300').replace('focus:border-error-300', 'focus:border-rose-300').replace('focus:ring-error-100/50', 'focus:ring-rose-100') : MODAL_STYLES.input.normal}`}
+      className={`${MODAL_STYLES.input.base} ${error ? MODAL_STYLES.input.error : MODAL_STYLES.input.normal}`}
       aria-invalid={Boolean(error)}
     />
   </FormField>
 ));
 DateInput.displayName = 'DateInput';
 
-// DeleteConfirmModal adopts the Red / Danger minimalist approach of Untitled UI
 interface DeleteConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -833,68 +897,96 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = memo(({
   onConfirm,
   itemName,
   itemType,
+  title,
+  description,
+  confirmLabel = 'Eliminar',
   isLoading = false,
   warningMessage,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isLoading) {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isLoading, onClose]);
+
   if (!isOpen) return null;
 
   return renderOverlay(
-    <div className={MODAL_STYLES.modal.overlay} onClick={(event) => event.target === event.currentTarget && onClose()}>
-      <div className={MODAL_STYLES.modal.container}>
-        <div className="w-full sm:max-w-md">
-          <div className="relative w-full overflow-hidden rounded-lg border border-line bg-surface shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
-            <div className="absolute right-3 top-3 hidden sm:block">
+    <div
+      className={MODAL_STYLES.modal.overlay}
+      onClick={(event) => event.target === event.currentTarget && !isLoading && onClose()}
+    >
+      <div
+        className={MODAL_STYLES.modal.container}
+        onClick={(event) => event.target === event.currentTarget && !isLoading && onClose()}
+      >
+        <div
+          role="dialog"
+          aria-modal="true"
+          className={`${MODAL_STYLES.modal.panel} sm:max-w-md`}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="px-5 pt-5 pb-4 sm:px-6">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3.5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50 text-rose-600 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400">
+                  <Warning className="h-5 w-5" weight="duotone" />
+                </div>
+                <div className="min-w-0 text-left">
+                  <h3 className="text-[0.95rem] font-semibold leading-5 tracking-[-0.015em] text-ink">
+                    {title || `Eliminar ${itemType || 'registro'}`}
+                  </h3>
+                  <div className="mt-1.5 space-y-2">
+                    <p className="text-[0.8125rem] leading-relaxed text-muted-2">
+                      {description ? (
+                        description
+                      ) : (
+                        <>
+                          Se eliminará <span className="font-semibold text-ink">"{itemName}"</span>. Esta acción no se puede deshacer.
+                        </>
+                      )}
+                    </p>
+                    {warningMessage ? (
+                      <div className="rounded-xl border border-amber-200/80 bg-amber-50/70 px-3 py-2 text-xs font-medium leading-relaxed text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                        {warningMessage}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-surface text-muted transition hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+                disabled={isLoading}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-soft hover:text-ink disabled:opacity-50"
                 aria-label="Cerrar"
               >
                 <X className="h-4 w-4" weight="bold" />
               </button>
             </div>
+          </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-[7px] text-muted transition hover:bg-surface-soft hover:text-ink sm:hidden"
-              aria-label="Cerrar"
-            >
-              <X className="h-4 w-4" weight="bold" />
-            </button>
-
-            <div className="border-b border-line-soft px-4 py-3.5 sm:px-5">
-              <div className="flex items-start gap-3 pr-8">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-status-danger-border bg-status-danger-bg text-status-danger-text">
-                  <Warning className="h-4 w-4" weight="regular" />
-                </div>
-                <div className="min-w-0 text-left">
-                  <h3 className="text-md font-semibold leading-5 text-ink">Eliminar {itemType}</h3>
-                  <div className="mt-1">
-                    <p className="text-sm leading-5 text-muted-2">
-                      Se eliminará <span className="font-semibold text-ink">"{itemName}"</span>. Esta acción no se puede deshacer.
-                    </p>
-                    {warningMessage ? <p className="mt-2 text-xs font-medium text-amber-700">{warningMessage}</p> : null}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="border-t border-line-soft bg-surface-soft px-4 py-3 sm:flex sm:flex-row-reverse sm:px-5">
+          <div className={MODAL_STYLES.modal.footer}>
+            <div className="flex w-full flex-col gap-2 sm:flex-row-reverse sm:items-center sm:gap-2.5">
               <button
                 type="button"
                 onClick={onConfirm}
                 disabled={isLoading}
-                className="inline-flex h-9 w-full items-center justify-center rounded-[7px] bg-rose-600 px-3.5 text-base font-semibold text-white shadow-none transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:ring-offset-2 sm:ml-2 sm:w-auto disabled:opacity-50"
+                className={`${MODAL_STYLES.button.danger} w-full sm:w-auto`}
               >
-                {isLoading ? <SpinnerGap className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" weight="bold" /> : null}
-                <span>Eliminar</span>
+                {isLoading ? <SpinnerGap className="h-4 w-4 animate-spin" aria-hidden="true" weight="bold" /> : null}
+                <span>{confirmLabel}</span>
               </button>
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isLoading}
-                className={`${MODAL_STYLES.button.secondary} mt-3 w-full sm:mt-0 sm:w-auto`}
+                className={`${MODAL_STYLES.button.secondary} w-full sm:w-auto`}
               >
                 Cancelar
               </button>

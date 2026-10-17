@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
-import { Gear, Buildings, Package, CalendarBlank, SpinnerGap } from '@phosphor-icons/react';
-import { COMPONENT_STYLES, MESES } from '../constants';
+import { Buildings, Package, CalendarBlank, CaretDown, CircleNotch } from '@phosphor-icons/react';
+import { MESES } from '../constants';
 import { Vacuna, CentroAcopio } from '../../../types';
 
 interface MovimientosFiltrosProps {
@@ -20,6 +20,10 @@ interface MovimientosFiltrosProps {
   onAnioChange: (value: number) => void;
 }
 
+const FILTER_LABEL_CLASS = 'mb-1 block text-[11px] font-semibold uppercase tracking-[0.06em] text-muted';
+const SELECT_BASE_CLASS =
+  'h-9 w-full appearance-none rounded-lg border border-line bg-surface pl-8 pr-8 text-xs sm:text-sm font-medium text-ink shadow-2xs transition hover:border-line-strong focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/15 disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-muted';
+
 export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
   selectedCentroAcopio,
   selectedVacuna,
@@ -36,65 +40,39 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
   onMesChange,
   onAnioChange,
 }) => {
-
   return (
-    <section className={COMPONENT_STYLES.filter.container} aria-label="Filtros">
-      {/* Header */}
-      <div className={COMPONENT_STYLES.filter.header}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-[12px] border border-line bg-surface-soft p-2.5">
-              <Gear weight="bold" className="h-5 w-5 text-brand" aria-hidden="true" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-zinc-900">Filtros de análisis</h3>
-              <p className="text-sm text-zinc-600">Configura los parámetros de consulta</p>
-            </div>
-          </div>
-          {(isLoadingEstablecimientos || isLoadingVacunas) && (
-            <div className="flex items-center text-brand">
-              <SpinnerGap weight="bold" className="h-4 w-4 animate-spin mr-2" />
-              <span className="text-sm font-medium">Cargando...</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Filtros */}
-      <div className={COMPONENT_STYLES.filter.body}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Centro de Acopio */}
-          <div className="space-y-2">
-            <label className="flex items-center text-sm font-semibold text-zinc-700">
-              <Buildings weight="bold" className="h-4 w-4 mr-2 text-brand" />
-              Centro de Acopio
-            </label>
+    <section className="rounded-xl border border-line bg-surface p-3.5 shadow-2xs sm:p-4" aria-label="Filtros">
+      <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+        <label className="block min-w-0">
+          <span className={FILTER_LABEL_CLASS}>Centro de Acopio</span>
+          <div className="relative">
+            <Buildings weight="duotone" className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <select
               value={selectedCentroAcopio}
               onChange={(e) => onCentroAcopioChange(e.target.value)}
               disabled={isLoadingEstablecimientos}
-              className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal}`}
+              className={SELECT_BASE_CLASS}
             >
-              <option value="todos">Todos los Centros</option>
+              <option value="todos">Todos los centros</option>
               {centrosAcopio.map((centro) => (
                 <option key={centro.id} value={centro.id}>
                   {centro.nombre}
                 </option>
               ))}
             </select>
+            <CaretDown weight="bold" className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
           </div>
+        </label>
 
-          {/* Vacuna */}
-          <div className="space-y-2">
-            <label className="flex items-center text-sm font-semibold text-zinc-700">
-              <Package weight="bold" className="h-4 w-4 mr-2 text-brand" />
-              Vacuna
-            </label>
+        <label className="block min-w-0">
+          <span className={FILTER_LABEL_CLASS}>Vacuna</span>
+          <div className="relative">
+            <Package weight="duotone" className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <select
               value={selectedVacuna}
               onChange={(e) => onVacunaChange(e.target.value)}
               disabled={isLoadingVacunas}
-              className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan}`}
+              className={SELECT_BASE_CLASS}
             >
               {vacunasActivas.length === 0 && (
                 <option value="">Seleccione una vacuna</option>
@@ -105,18 +83,18 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
                 </option>
               ))}
             </select>
+            <CaretDown weight="bold" className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
           </div>
+        </label>
 
-          {/* Mes */}
-          <div className="space-y-2">
-            <label className="flex items-center text-sm font-semibold text-zinc-700">
-              <CalendarBlank weight="bold" className="h-4 w-4 mr-2 text-brand" />
-              Período
-            </label>
+        <label className="block min-w-0">
+          <span className={FILTER_LABEL_CLASS}>Período</span>
+          <div className="relative">
+            <CalendarBlank weight="duotone" className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <select
               value={selectedMes}
               onChange={(e) => onMesChange(Number(e.target.value))}
-              className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.teal}`}
+              className={SELECT_BASE_CLASS}
             >
               {MESES.map((mes, index) => (
                 <option key={index + 1} value={index + 1}>
@@ -124,18 +102,18 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
                 </option>
               ))}
             </select>
+            <CaretDown weight="bold" className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
           </div>
+        </label>
 
-          {/* Año */}
-          <div className="space-y-2">
-            <label className="flex items-center text-sm font-semibold text-zinc-700">
-              <CalendarBlank weight="bold" className="h-4 w-4 mr-2 text-brand" />
-              Año
-            </label>
+        <label className="block min-w-0">
+          <span className={FILTER_LABEL_CLASS}>Año</span>
+          <div className="relative">
+            <CalendarBlank weight="duotone" className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <select
               value={selectedAnio}
               onChange={(e) => onAnioChange(Number(e.target.value))}
-              className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.cyan}`}
+              className={`${SELECT_BASE_CLASS} tabular-nums font-semibold`}
             >
               {aniosDisponibles.map((anio) => (
                 <option key={anio} value={anio}>
@@ -143,28 +121,34 @@ export const MovimientosFiltros: React.FC<MovimientosFiltrosProps> = memo(({
                 </option>
               ))}
             </select>
+            <CaretDown weight="bold" className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
+          </div>
+        </label>
+      </div>
+
+      {selectedVacuna && (
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2.5 text-xs text-muted">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-teal-500" />
+            <span className="font-semibold text-ink">
+              {datosTablaLength} establecimientos • {MESES[selectedMes - 1]} {selectedAnio}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {(isLoadingEstablecimientos || isLoadingVacunas) && (
+              <span className="inline-flex items-center gap-1 text-teal-600 dark:text-teal-400">
+                <CircleNotch weight="bold" className="h-3.5 w-3.5 animate-spin" />
+                Cargando...
+              </span>
+            )}
+            <span className="font-medium text-muted">
+              {selectedCentroAcopio === 'todos'
+                ? 'Todos los centros'
+                : centrosAcopio.find((c) => c.id === selectedCentroAcopio)?.nombre}
+            </span>
           </div>
         </div>
-
-        {/* Estado de selección */}
-        {selectedVacuna && (
-          <div className="mt-6 pt-6 border-t border-zinc-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 bg-brand rounded-full animate-pulse" />
-                <span className="text-sm font-semibold text-zinc-800">
-                  {datosTablaLength} establecimientos • {MESES[selectedMes - 1]} {selectedAnio}
-                </span>
-              </div>
-              <span className="text-sm text-zinc-600 font-medium">
-                {selectedCentroAcopio === 'todos' 
-                  ? 'Todos los centros' 
-                  : centrosAcopio.find(c => c.id === selectedCentroAcopio)?.nombre}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </section>
   );
 });

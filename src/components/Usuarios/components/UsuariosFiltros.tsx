@@ -1,5 +1,13 @@
 import React, { memo, useMemo } from 'react';
-import { DownloadSimple, CircleNotch, ArrowsClockwise, MagnifyingGlass, Faders, UserPlus, X } from '@phosphor-icons/react';
+import {
+  DownloadSimple,
+  CircleNotch,
+  ArrowsClockwise,
+  MagnifyingGlass,
+  CaretDown,
+  UserPlus,
+  X,
+} from '@phosphor-icons/react';
 import { CentroAcopio, Role } from '../../../types';
 import { COMPONENT_STYLES } from '../constants';
 
@@ -20,6 +28,10 @@ interface UsuariosFiltrosProps {
   isRefreshing: boolean;
   isCreating: boolean;
 }
+
+const FILTER_LABEL_CLASS = 'mb-1 block truncate text-[11px] font-semibold uppercase tracking-[0.06em] text-muted';
+const SELECT_BASE_CLASS =
+  'h-9 w-full appearance-none rounded-lg border border-line bg-surface pl-3 pr-8 text-xs sm:text-sm font-medium text-ink shadow-2xs transition hover:border-line-strong focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/15';
 
 const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
   searchTerm,
@@ -55,93 +67,105 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
     filterCentroAcopio !== 'todos';
 
   return (
-    <section aria-label="Filtros de usuarios" className={COMPONENT_STYLES.filter.container}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-          <div className="relative w-full sm:w-[280px]">
-            <label htmlFor="usuarios-search" className="sr-only">
+    <section
+      aria-label="Filtros de usuarios"
+      className="rounded-xl border border-line bg-surface p-3 shadow-2xs sm:p-3.5"
+    >
+      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-end">
+          {/* Buscador */}
+          <div className="w-full sm:w-[220px] lg:w-[240px]">
+            <label htmlFor="usuarios-search" className={FILTER_LABEL_CLASS}>
               Buscar usuario
             </label>
-            <MagnifyingGlass className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
-            <input
-              id="usuarios-search"
-              type="text"
-              placeholder="Buscar usuarios..."
-              value={searchTerm}
-              onChange={(event) => onSearchChange(event.target.value)}
-              className={COMPONENT_STYLES.filter.searchInput}
-            />
-          </div>
-
-          <details className="group relative">
-            <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-line bg-white px-3.5 text-sm font-semibold text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 [&::-webkit-details-marker]:hidden">
-              <Faders className="h-4 w-4 text-muted-2" aria-hidden="true" />
-              Filtros
-            </summary>
-            <div className="absolute left-0 top-11 z-30 w-[min(300px,calc(100vw-3rem))] rounded-xl border border-line bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
-              <div className="space-y-3">
-                <div>
-                  <label htmlFor="usuarios-filter-rol" className="mb-1 block text-xs font-medium text-muted-3">
-                    Rol
-                  </label>
-                  <select
-                    id="usuarios-filter-rol"
-                    value={filterRol}
-                    onChange={(event) => onRolChange(event.target.value)}
-                    className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
-                  >
-                    <option value="todos">Todos los roles</option>
-                    {rolesActivos.map((rol) => (
-                      <option key={rol.id} value={rol.codigo || rol.id}>{rol.nombre}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="usuarios-filter-estado" className="mb-1 block text-xs font-medium text-muted-3">
-                    Estado
-                  </label>
-                  <select
-                    id="usuarios-filter-estado"
-                    value={filterEstado}
-                    onChange={(event) => onEstadoChange(event.target.value)}
-                    className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
-                  >
-                    <option value="todos">Todos los estados</option>
-                    <option value="activo">Activos</option>
-                    <option value="inactivo">Inactivos</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="usuarios-filter-centro" className="mb-1 block text-xs font-medium text-muted-3">
-                    Centro de acopio
-                  </label>
-                  <select
-                    id="usuarios-filter-centro"
-                    value={filterCentroAcopio}
-                    onChange={(event) => onCentroAcopioChange(event.target.value)}
-                    className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
-                  >
-                    <option value="todos">Todos los centros</option>
-                    {centrosActivos.map((centro) => (
-                      <option key={centro.id} value={centro.id}>{centro.nombre}</option>
-                    ))}
-                  </select>
-                </div>
-
+            <div className="relative">
+              <MagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" aria-hidden="true" />
+              <input
+                id="usuarios-search"
+                type="text"
+                placeholder="Nombre, usuario o correo..."
+                value={searchTerm}
+                onChange={(event) => onSearchChange(event.target.value)}
+                className="h-9 w-full rounded-lg border border-line bg-surface pl-9 pr-8 text-xs sm:text-sm font-medium text-ink shadow-2xs transition placeholder:text-muted hover:border-line-strong focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/15"
+              />
+              {searchTerm ? (
                 <button
                   type="button"
-                  onClick={onRefresh}
-                  className={`${COMPONENT_STYLES.button.secondary} w-full`}
-                  disabled={isRefreshing}
+                  onClick={() => onSearchChange('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted hover:bg-surface-soft hover:text-ink"
+                  aria-label="Limpiar búsqueda"
                 >
-                  {isRefreshing ? <CircleNotch className="h-4 w-4 animate-spin" /> : <ArrowsClockwise className="h-4 w-4" />}
-                  <span>Actualizar</span>
+                  <X className="h-3.5 w-3.5" />
                 </button>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Selectores directos */}
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end">
+            <div className="min-w-0 sm:w-[160px]">
+              <label htmlFor="usuarios-filter-rol" className={FILTER_LABEL_CLASS}>
+                Rol
+              </label>
+              <div className="relative">
+                <select
+                  id="usuarios-filter-rol"
+                  value={filterRol}
+                  onChange={(event) => onRolChange(event.target.value)}
+                  className={SELECT_BASE_CLASS}
+                >
+                  <option value="todos">Todos los roles</option>
+                  {rolesActivos.map((rol) => (
+                    <option key={rol.id} value={rol.codigo || rol.id}>
+                      {rol.nombre}
+                    </option>
+                  ))}
+                </select>
+                <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" weight="bold" />
               </div>
             </div>
-          </details>
+
+            <div className="min-w-0 sm:w-[140px]">
+              <label htmlFor="usuarios-filter-estado" className={FILTER_LABEL_CLASS}>
+                Estado
+              </label>
+              <div className="relative">
+                <select
+                  id="usuarios-filter-estado"
+                  value={filterEstado}
+                  onChange={(event) => onEstadoChange(event.target.value)}
+                  className={SELECT_BASE_CLASS}
+                >
+                  <option value="todos">Todos</option>
+                  <option value="activo">Activos</option>
+                  <option value="inactivo">Inactivos</option>
+                </select>
+                <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" weight="bold" />
+              </div>
+            </div>
+
+            <div className="col-span-2 min-w-0 sm:col-span-1 sm:w-[175px]">
+              <label htmlFor="usuarios-filter-centro" className={FILTER_LABEL_CLASS}>
+                Centro de acopio
+              </label>
+              <div className="relative">
+                <select
+                  id="usuarios-filter-centro"
+                  value={filterCentroAcopio}
+                  onChange={(event) => onCentroAcopioChange(event.target.value)}
+                  className={SELECT_BASE_CLASS}
+                >
+                  <option value="todos">Todos los centros</option>
+                  {centrosActivos.map((centro) => (
+                    <option key={centro.id} value={centro.id}>
+                      {centro.nombre}
+                    </option>
+                  ))}
+                </select>
+                <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" weight="bold" />
+              </div>
+            </div>
+          </div>
 
           {hasActiveFilters ? (
             <button
@@ -152,22 +176,32 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
                 onEstadoChange('todos');
                 onCentroAcopioChange('todos');
               }}
-              className={COMPONENT_STYLES.button.ghost}
+              className="inline-flex h-9 items-center justify-center gap-1.5 self-start sm:self-end rounded-lg border border-line bg-surface-soft px-3 text-xs font-semibold text-muted-2 transition hover:border-line-strong hover:bg-surface hover:text-ink"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" weight="bold" />
               <span>Limpiar</span>
             </button>
           ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-line-soft pt-2 sm:border-t-0 sm:pt-0">
+          <button
+            type="button"
+            onClick={onRefresh}
+            className={COMPONENT_STYLES.button.secondary}
+            disabled={isRefreshing}
+            title="Actualizar lista"
+          >
+            {isRefreshing ? <CircleNotch className="h-4 w-4 animate-spin" /> : <ArrowsClockwise className="h-4 w-4" />}
+            <span className="hidden sm:inline">Actualizar</span>
+          </button>
           <button
             type="button"
             onClick={onExportar}
             className={COMPONENT_STYLES.button.secondary}
           >
             <DownloadSimple className="h-4 w-4" />
-            <span>Exportar CSV</span>
+            <span className="hidden sm:inline">Exportar CSV</span>
           </button>
           <button
             type="button"
@@ -187,4 +221,3 @@ const UsuariosFiltros: React.FC<UsuariosFiltrosProps> = memo(({
 UsuariosFiltros.displayName = 'UsuariosFiltros';
 
 export default UsuariosFiltros;
-   

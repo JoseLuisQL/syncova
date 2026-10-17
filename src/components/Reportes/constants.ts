@@ -172,34 +172,34 @@ export const COMPONENT_STYLES = {
 
   button: {
     primary:
-      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-brand border border-brand px-4 py-1.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-brand bg-brand px-4 py-1.5 text-[0.8125rem] font-semibold tracking-[-0.005em] text-white shadow-[0_1px_2px_rgba(16,24,40,0.06)] transition-all duration-150 hover:border-brand-600 hover:bg-brand-600 focus:outline-none focus:ring-3 focus:ring-brand/20 active:translate-y-[0.5px] disabled:cursor-not-allowed disabled:opacity-55',
     secondary:
-      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-line bg-white px-3.5 py-1.5 text-sm font-semibold text-ink transition hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-3.5 py-1.5 text-[0.8125rem] font-medium tracking-[-0.005em] text-ink shadow-[0_1px_2px_rgba(16,24,40,0.03)] transition-all duration-150 hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-3 focus:ring-line-focus/80 disabled:cursor-not-allowed disabled:opacity-55',
     ghost:
-      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-line bg-white px-3 py-1.5 text-sm font-semibold text-muted-2 transition hover:border-line-strong hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-transparent bg-transparent px-3 py-1.5 text-[0.8125rem] font-medium tracking-[-0.005em] text-muted-2 transition-colors duration-150 hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-55',
     success:
-      'inline-flex min-h-[40px] items-center justify-center gap-2 rounded-lg bg-brand border border-brand px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9.5 items-center justify-center gap-2 rounded-xl border border-brand bg-brand px-4 py-2 text-[0.8125rem] font-semibold text-white shadow-[0_1px_2px_rgba(16,24,40,0.06)] transition-all duration-150 hover:bg-brand-600 focus:outline-none focus:ring-3 focus:ring-brand/20 disabled:cursor-not-allowed disabled:opacity-55',
     icon:
-      'inline-flex h-9 w-9 items-center justify-center rounded-xl transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
-    iconEdit: 'border border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:ring-zinc-500',
+      'inline-flex h-8.5 w-8.5 items-center justify-center rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
+    iconEdit: 'border border-line bg-surface-soft text-muted-2 hover:bg-surface hover:text-ink',
     iconDelete: 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 focus:ring-rose-500',
-    iconView: 'border border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 focus:ring-zinc-500',
+    iconView: 'border border-line bg-surface-soft text-muted-2 hover:bg-surface hover:text-ink',
   },
 
   input: {
     base:
-      'min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-base text-ink shadow-none transition placeholder:text-[#a0a4ae] focus:outline-none focus:ring-2 focus:ring-line-focus/70',
-    normal: 'border-line hover:border-line-strong focus:border-line-focus-strong',
-    error: 'border-rose-300 bg-rose-50/60 focus:border-rose-500 focus:ring-rose-500/20',
-    label: 'mb-1.5 block text-sm font-medium text-[#424750]',
-    errorText: 'mt-1 text-xs text-rose-600',
-    helpText: 'mt-1 text-xs text-zinc-500',
+      'min-h-9.5 w-full rounded-xl border bg-surface px-3.5 py-1.5 text-[0.84rem] leading-5 text-ink shadow-[0_1px_2px_rgba(16,24,40,0.02)] transition-all duration-150 placeholder:text-muted/80 focus:outline-none focus:ring-3 focus:ring-brand/12',
+    normal: 'border-line hover:border-line-strong focus:border-brand',
+    error: 'border-rose-300 bg-rose-50/25 focus:border-rose-500 focus:ring-rose-500/15',
+    label: 'mb-1.5 block text-[0.78rem] font-medium tracking-[-0.005em] text-ink',
+    errorText: 'mt-1.5 text-[0.73rem] font-medium text-rose-600',
+    helpText: 'mt-1.5 text-[0.73rem] text-muted-2',
   },
 
   select: {
     base:
-      'min-h-9 w-full rounded-[7px] border bg-white px-3 py-2 text-base text-ink shadow-none transition focus:outline-none focus:ring-2 focus:ring-line-focus/70',
-    normal: 'border-line hover:border-line-strong focus:border-line-focus-strong',
+      'min-h-9.5 w-full rounded-xl border bg-surface px-3.5 py-1.5 text-[0.84rem] leading-5 text-ink shadow-[0_1px_2px_rgba(16,24,40,0.02)] transition-all duration-150 focus:outline-none focus:ring-3 focus:ring-brand/12',
+    normal: 'border-line hover:border-line-strong focus:border-brand',
   },
 
   table: {
@@ -212,23 +212,23 @@ export const COMPONENT_STYLES = {
   },
 
   badge: {
-    active: 'inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
-    inactive: 'inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
-    count: 'inline-flex items-center rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink',
-    warning: 'inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
-    danger: 'inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
-    info: 'inline-flex items-center rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink',
-    neutral: 'inline-flex items-center rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink',
+    active: 'inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500',
+    inactive: 'inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    count: 'inline-flex items-center rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink',
+    warning: 'inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-amber-400',
+    danger: 'inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink before:content-[""] before:h-1.5 before:w-1.5 before:rounded-full before:bg-rose-500',
+    info: 'inline-flex items-center rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink',
+    neutral: 'inline-flex items-center rounded-md border border-line bg-surface-soft px-2.5 py-1 text-xs font-medium text-ink',
   },
 
   modal: {
-    overlay: 'fixed inset-0 z-[300] bg-ink-soft/20 backdrop-blur-[2px]',
-    container: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6',
+    overlay: 'fixed inset-0 z-[300] bg-slate-950/45 backdrop-blur-[3px] dark:bg-black/70',
+    container: 'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-2.5 sm:items-center sm:p-6',
     panel:
-      'w-full overflow-hidden rounded-t-[10px] border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:max-h-[88vh] sm:rounded-lg',
-    header: 'border-b border-line-soft px-4 py-3.5 sm:px-5',
-    body: 'max-h-[calc(100vh-150px)] overflow-y-auto px-4 py-4 sm:max-h-[calc(88vh-136px)] sm:px-5',
-    footer: 'border-t border-line-soft bg-surface-soft px-4 py-3 sm:px-5',
+      'flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl border border-line bg-surface shadow-[0_24px_64px_-16px_rgba(15,23,42,0.22)] sm:max-h-[88vh] sm:rounded-2xl',
+    header: 'shrink-0 border-b border-line-soft px-5 py-4 sm:px-6',
+    body: 'flex-1 min-h-0 overflow-y-auto px-5 py-5 sm:px-6',
+    footer: 'shrink-0 border-t border-line-soft bg-surface-soft/75 px-5 py-3.5 sm:px-6',
   },
 
   stats: {
@@ -240,10 +240,10 @@ export const COMPONENT_STYLES = {
   },
 
   filter: {
-    container: 'bg-transparent p-0',
-    searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2',
+    container: 'rounded-xl border border-line bg-surface p-3.5 shadow-2xs sm:p-4',
+    searchIcon: 'pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2',
     searchInput:
-      'h-9 w-full rounded-[9px] border border-line bg-white py-1.5 pl-9 pr-3 text-sm text-ink shadow-sm transition placeholder:text-muted hover:border-line-strong focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70',
+      'h-9.5 w-full rounded-xl border border-line bg-surface py-1.5 pl-8.5 pr-3.5 text-[0.84rem] text-ink shadow-[0_1px_2px_rgba(16,24,40,0.02)] transition-all duration-150 placeholder:text-muted/80 hover:border-line-strong focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/12',
   },
 
   pagination: {

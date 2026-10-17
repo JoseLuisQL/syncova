@@ -1,11 +1,12 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Warning,
-  ArrowRight,
   Buildings,
   CalendarBlank,
   CheckCircle,
   CaretDown,
+  CaretLeft,
+  CaretRight,
   DownloadSimple,
   CircleNotch,
   Package,
@@ -97,12 +98,18 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     title={label}
   >
     {icon}
-    {showLabel ? <span className="hidden lg:inline">{label}</span> : null}
+    {showLabel ? <span className="hidden sm:inline">{label}</span> : null}
     {count ? (
-      <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold text-inherit">{count}</span>
+      <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[11px] font-semibold text-inherit tabular-nums">
+        {count}
+      </span>
     ) : null}
   </button>
 );
+
+const FILTER_LABEL_CLASS = 'mb-1 block text-[11px] font-semibold uppercase tracking-[0.06em] text-muted';
+const SELECT_BASE_CLASS =
+  'h-9 w-full appearance-none rounded-lg border border-line bg-surface pl-8 pr-8 text-xs sm:text-sm font-medium text-ink shadow-2xs transition hover:border-line-strong focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/15 disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-muted';
 
 export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> = memo(({
   isReadOnly = false,
@@ -112,7 +119,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   hideExportAction = false,
   lockedCentroAcopioLabel,
   showReadOnlyCentroFilter = false,
-  allCentrosLabel = 'Todos',
+  allCentrosLabel = 'Todos los centros',
   hideStockMetrics = false,
   selectedCentroAcopio,
   selectedVacuna,
@@ -124,6 +131,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
   isLoadingEstablecimientos,
   isLoadingVacunas,
   isLoadingAnios = false,
+  datosTablaLength,
   onCentroAcopioChange,
   onVacunaChange,
   onMesChange,
@@ -203,304 +211,312 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
 
   const lotesDisponibles = useMemo(
     () =>
-      stockInfo?.lotes
-        .filter((lote) => lote.cantidadActual > 0)
+      (stockInfo?.lotes || [])
+        .filter((lote) => (lote?.cantidadActual ?? 0) > 0)
         .sort(
           (a, b) =>
             new Date(a.fechaVencimiento).getTime() - new Date(b.fechaVencimiento).getTime(),
-        ) || [],
+        ),
     [stockInfo?.lotes],
   );
 
+  const handleStepMonth = (delta: number) => {
+    let nextMes = selectedMes + delta;
+    let nextAnio = selectedAnio;
+    if (nextMes < 1) {
+      nextMes = 12;
+      nextAnio -= 1;
+    } else if (nextMes > 12) {
+      nextMes = 1;
+      nextAnio += 1;
+    }
+    if (nextAnio !== selectedAnio && aniosDisponibles.includes(nextAnio)) {
+      onAnioChange(nextAnio);
+    }
+    onMesChange(nextMes);
+  };
+
+  const stockDisponibleVal = stockInfo?.stockDisponible ?? 0;
+  const stockActualVal = stockInfo?.stockActual ?? 0;
+  const totalEntregasVal = stockInfo?.totalEntregas ?? 0;
+
   const stockPanelContent = hideStockMetrics ? null : (
-    <div className="relative z-[90] overflow-visible border-t border-line-soft bg-white px-5 py-3 sm:px-6">
+    <div className="relative z-[90] overflow-visible border-t border-line bg-surface-muted/60 px-3 py-2 sm:px-5">
       {!selectedVacuna ? (
-        <div className="flex items-center gap-2.5 rounded-xl border border-line bg-surface-soft px-4 py-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-muted-2">
-            <Package className="h-4 w-4" weight="duotone" />
-          </div>
-          <p className="text-sm font-semibold tracking-tight text-ink">Selecciona una vacuna para visualizar el stock operativo.</p>
+        <div className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-xs font-medium text-muted">
+          <Package className="h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400" weight="duotone" />
+          <span>Selecciona una vacuna para visualizar el balance y lotes operativos.</span>
         </div>
       ) : isLoadingStock || isUpdatingStock ? (
-        <div className="flex items-center gap-2.5 rounded-xl border border-line bg-surface-soft px-4 py-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-white text-muted-2">
-            <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
-          </div>
-          <p className="text-sm font-semibold tracking-tight text-ink">Sincronizando balances...</p>
+        <div className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-xs font-medium text-muted">
+          <CircleNotch className="h-4 w-4 shrink-0 animate-spin text-teal-600 dark:text-teal-400" weight="bold" />
+          <span>Sincronizando balances del almacén...</span>
         </div>
       ) : stockError ? (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
-          <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rose-200 bg-white text-rose-600">
-              <Warning className="h-4 w-4" weight="fill" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[0.8rem] font-semibold text-rose-900 tracking-tight">Fallo en la lectura de stock</p>
-              <p className="mt-0.5 text-[0.7rem] font-medium text-rose-700">{stockError}</p>
-            </div>
-            <button type="button" onClick={onRetryStock} className={COMPONENT_STYLES.button.secondary}>
-              <ArrowsClockwise className="h-3.5 w-3.5" weight="bold" />
-              <span>Recargar</span>
-            </button>
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Warning className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" weight="fill" />
+            <p className="truncate text-xs font-medium text-rose-800 dark:text-rose-200">{stockError}</p>
           </div>
+          <button type="button" onClick={onRetryStock} className={COMPONENT_STYLES.button.secondary}>
+            <ArrowsClockwise className="h-3.5 w-3.5" weight="bold" />
+            <span>Reintentar</span>
+          </button>
         </div>
       ) : stockInfo ? (
-        <div className="relative z-[90] space-y-2 overflow-visible">
-          <div className="relative z-[90] flex flex-wrap items-stretch gap-2 overflow-visible">
-            <div className="flex min-h-14 items-center gap-2 rounded-[12px] border border-line bg-surface-soft px-3 py-2">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-muted-2">
-                <CalendarBlank className="h-4 w-4" weight="duotone" />
-              </div>
-              <div>
-                <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-muted">Periodo objetivo</p>
-                <p className="text-sm font-semibold tracking-tight text-ink">{periodoEntrega.etiqueta}</p>
-              </div>
+        <div className="relative z-[90] flex flex-wrap items-center gap-2 overflow-visible">
+          {/* Periodo objetivo */}
+          <div className="flex h-10 items-center gap-2 rounded-lg border border-line bg-surface px-2.5 py-1.5 shadow-2xs">
+            <CalendarBlank className="h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400" weight="duotone" />
+            <div className="leading-none">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">Entrega</p>
+              <p className="mt-0.5 text-xs font-semibold text-ink">{periodoEntrega.etiqueta}</p>
             </div>
+          </div>
 
-            <ArrowRight className="hidden h-14 w-3 shrink-0 text-muted lg:block" weight="bold" />
-
-            <div className="relative z-[110]" ref={stockInicialRef}>
-              <button
-                type="button"
-                onClick={() => setShowStockInicialDropdown((prev) => !prev)}
-                className="flex min-h-14 items-center gap-2 rounded-[12px] border border-line bg-surface px-3 py-2 text-left transition hover:bg-surface-soft"
-              >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2">
-                  <Package className="h-4 w-4" weight="duotone" />
-                </div>
-                <div>
-                  <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-muted">Apertura</p>
-                  <p className="text-sm font-semibold tracking-tight text-ink">
-                    {stockInfo.tieneHistorialInicial ? (stockInfo.stockInicialHistorico?.toLocaleString() || '0') : '—'}
-                  </p>
-                </div>
-                <CaretDown className={`h-3.5 w-3.5 text-muted-2 transition-transform ${showStockInicialDropdown ? 'rotate-180' : ''}`} weight="bold" />
-              </button>
-
-              {showStockInicialDropdown ? (
-                <div className="absolute left-0 top-full z-[180] mt-2 w-[min(280px,calc(100vw-3rem))] rounded-xl border border-line bg-surface p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[280px]">
-                  <h4 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-widest text-muted">Volumen desglosado</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-lg border border-line bg-surface-soft px-3 py-2">
-                      <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-muted">Base histórica</p>
-                      <p className="mt-1 text-sm font-semibold text-ink">{stockInfo.stockInicialOriginal?.toLocaleString() || 0}</p>
-                    </div>
-                    <div className="rounded-lg border border-line bg-surface px-3 py-2">
-                      <p className="text-[0.6rem] font-semibold uppercase tracking-widest text-muted">Nuevos ingresos</p>
-                      <p className="mt-1 text-sm font-semibold text-ink">{(stockInfo.ingresosLotesDelMes ?? 0).toLocaleString()}</p>
-                    </div>
-                  </div>
-                  {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial ? (
-                    <p className="mt-3 text-right text-[0.65rem] font-medium text-muted">
-                      Ref: {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString()}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
-
-            <ArrowRight className="hidden h-14 w-3 shrink-0 text-muted lg:block" weight="bold" />
-
-            <EntregasProgressBadge
-              totalEntregas={stockInfo.totalEntregas}
-              progresoVales={progresoVales}
-              isLoading={isLoadingProgresoVales}
-              onRefresh={onRefreshProgresoVales}
-            />
-
-            <ArrowRight className="hidden h-14 w-3 shrink-0 text-muted lg:block" weight="bold" />
-
+          {/* Apertura */}
+          <div className="relative z-[110]" ref={stockInicialRef}>
             <button
               type="button"
-              onClick={stockInfo.stockDisponible < 0 && !isReadOnly && onOpenAjusteDeficit ? onOpenAjusteDeficit : undefined}
-              disabled={stockInfo.stockDisponible >= 0 || isReadOnly || !onOpenAjusteDeficit}
-              title={
-                stockInfo.stockDisponible < 0
-                  ? ajusteDeficitDisponible
-                    ? 'Abrir ajuste automático de déficit'
-                    : 'Revisar déficit detectado'
-                  : 'Stock disponible'
-              }
-              className={`flex min-h-14 items-center gap-2 rounded-[12px] border px-3 py-2 text-left transition ${
-                stockInfo.stockDisponible < 0
-                  ? 'cursor-pointer border-status-danger-border bg-status-danger-bg hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60'
-                  : 'border-line bg-surface hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-60'
-              }`}
+              onClick={() => setShowStockInicialDropdown((prev) => !prev)}
+              className="flex h-10 items-center gap-2 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-left shadow-2xs transition hover:border-line-strong hover:bg-surface-muted"
             >
-              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
-                stockInfo.stockDisponible < 0 ? 'border-status-danger-border bg-surface text-status-danger-text' : 'border-line bg-surface-soft text-muted-2'
-              }`}>
-                {stockInfo.stockDisponible < 0
-                  ? <Warning className="h-4 w-4" weight="fill" />
-                  : <CheckCircle className="h-4 w-4" weight="fill" />}
-              </div>
-              <div>
-                <p className={`text-[0.6rem] font-semibold uppercase tracking-[0.12em] ${stockInfo.stockDisponible < 0 ? 'text-rose-700' : 'text-muted'}`}>
-                  {stockInfo.stockDisponible < 0 ? 'Déficit' : 'Disponible'}
-                </p>
-                <p className={`text-sm font-semibold tracking-tight ${stockInfo.stockDisponible < 0 ? 'text-rose-900' : 'text-ink'}`}>
-                  {stockInfo.stockDisponible.toLocaleString()}
+              <div className="leading-none">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">Apertura</p>
+                <p className="mt-0.5 text-xs font-semibold text-ink tabular-nums">
+                  {stockInfo.tieneHistorialInicial ? (stockInfo.stockInicialHistorico?.toLocaleString() || '0') : '—'}
                 </p>
               </div>
-              {stockInfo.stockDisponible < 0 && !isReadOnly && onOpenAjusteDeficit ? (
-                <Faders className="ml-1 h-3.5 w-3.5 text-rose-600" weight="bold" />
-              ) : null}
+              <CaretDown className={`h-3 w-3 text-muted transition-transform ${showStockInicialDropdown ? 'rotate-180' : ''}`} weight="bold" />
             </button>
 
-            <ArrowRight className="hidden h-14 w-3 shrink-0 text-muted lg:block" weight="bold" />
-
-            <div className="relative z-[110]" ref={stockActualRef}>
-              <button
-                type="button"
-                onClick={() => setShowStockActualDropdown((prev) => !prev)}
-                className="flex min-h-14 items-center gap-2 rounded-[12px] border border-line bg-white px-3 py-2 text-left transition hover:bg-surface-soft"
-              >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2">
-                  <Package className="h-4 w-4" weight="duotone" />
+            {showStockInicialDropdown ? (
+              <div className="absolute left-0 top-full z-[180] mt-1.5 w-[260px] rounded-xl border border-line bg-surface p-3 shadow-lg">
+                <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted">Volumen desglosado</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-lg border border-line bg-surface-muted px-2.5 py-2">
+                    <p className="text-[10px] font-medium text-muted">Base histórica</p>
+                    <p className="mt-0.5 text-xs font-semibold text-ink tabular-nums">
+                      {(stockInfo.stockInicialOriginal ?? 0).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-line bg-surface-muted px-2.5 py-2">
+                    <p className="text-[10px] font-medium text-muted">Nuevos ingresos</p>
+                    <p className="mt-0.5 text-xs font-semibold text-ink tabular-nums">
+                      {(stockInfo.ingresosLotesDelMes ?? 0).toLocaleString()}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-muted">Stock actual</p>
-                  <p className="text-sm font-semibold tracking-tight text-ink">{stockInfo.stockActual.toLocaleString()}</p>
-                </div>
-                <span className="inline-flex items-center gap-1 rounded-md border border-line bg-surface-soft px-2 py-0.5 text-[0.65rem] font-semibold tracking-widest text-muted-2">
-                  {lotesDisponibles.length} lotes
-                </span>
-                <CaretDown className={`h-3.5 w-3.5 text-muted-2 transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} weight="bold" />
-              </button>
-
-              {showStockActualDropdown ? (
-                <div className="absolute right-0 top-full z-[180] mt-2 w-[min(300px,calc(100vw-3rem))] rounded-xl border border-line bg-white p-3 shadow-[0_24px_60px_-28px_rgba(12,15,24,0.55)] sm:w-[300px]">
-                  <h4 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-widest text-muted">
-                    Lotes disponibles ({lotesDisponibles.length})
-                  </h4>
-                  {lotesDisponibles.length > 0 ? (
-                    <div className="max-h-56 space-y-1.5 overflow-y-auto pr-1">
-                      {lotesDisponibles.map((lote, index) => (
-                        <div
-                          key={lote.id}
-                          className={`rounded-lg border px-3 py-2.5 ${
-                            index === 0
-                              ? 'border-line-strong bg-surface-soft text-ink'
-                              : 'border-line bg-white hover:bg-surface-soft text-zinc-900'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="min-w-0">
-                              <p className="truncate text-[0.85rem] font-semibold tracking-tight">{lote.numero}</p>
-                              <p className="text-[0.65rem] font-medium text-zinc-500">
-                                Vence: {new Date(lote.fechaVencimiento).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <span className="shrink-0 rounded-md border border-line bg-white px-2.5 py-1 text-[0.75rem] font-semibold tracking-tight text-ink">
-                              {lote.cantidadActual.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="py-4 text-center text-[0.8rem] font-medium text-zinc-500">No existen lotes disponibles.</p>
-                  )}
-                </div>
-              ) : null}
-            </div>
-
-            {stockInfo.tieneHistorialInicial ? (
-              <div className="ml-auto flex min-h-14 shrink-0 items-stretch">
-                <button
-                  type="button"
-                  onClick={onActualizarStockSiguienteMes}
-                  disabled={isUpdatingStockSiguienteMes}
-                  className="flex min-h-14 items-center gap-2 rounded-[12px] border border-line bg-white px-3 py-2 text-left text-sm font-semibold text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-60"
-                  title={`Actualizar stock de ${periodoSiguiente}`}
-                >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2">
-                    {isUpdatingStockSiguienteMes ? (
-                      <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
-                    ) : (
-                      <ArrowsClockwise className="h-4 w-4" weight="bold" />
-                    )}
-                  </span>
-                  <span className="flex flex-col leading-tight">
-                    <span>Actualizar siguiente mes</span>
-                    <span className="mt-0.5 text-[0.65rem] font-semibold text-muted">{periodoSiguiente}</span>
-                  </span>
-                </button>
+                {stockInfo.tieneHistorialInicial && stockInfo.fechaCapturaStockInicial ? (
+                  <p className="mt-2 text-right text-[10px] text-muted">
+                    Ref: {new Date(stockInfo.fechaCapturaStockInicial).toLocaleDateString('es-PE')}
+                  </p>
+                ) : null}
               </div>
             ) : null}
           </div>
+
+          {/* Entregas y Progreso de Vales */}
+          <EntregasProgressBadge
+            totalEntregas={totalEntregasVal}
+            progresoVales={progresoVales}
+            isLoading={isLoadingProgresoVales}
+            onRefresh={onRefreshProgresoVales}
+          />
+
+          {/* Disponible / Déficit */}
+          <button
+            type="button"
+            onClick={stockDisponibleVal < 0 && !isReadOnly && onOpenAjusteDeficit ? onOpenAjusteDeficit : undefined}
+            disabled={stockDisponibleVal >= 0 || isReadOnly || !onOpenAjusteDeficit}
+            title={
+              stockDisponibleVal < 0
+                ? ajusteDeficitDisponible
+                  ? 'Abrir ajuste automático de déficit'
+                  : 'Revisar déficit detectado'
+                : 'Stock disponible después de entregas'
+            }
+            className={`flex h-10 items-center gap-2 rounded-lg border px-2.5 py-1.5 text-left shadow-2xs transition ${
+              stockDisponibleVal < 0
+                ? 'cursor-pointer border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20'
+                : 'border-line bg-surface'
+            }`}
+          >
+            {stockDisponibleVal < 0 ? (
+              <Warning className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" weight="fill" />
+            ) : (
+              <CheckCircle className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" weight="fill" />
+            )}
+            <div className="leading-none">
+              <p className={`text-[10px] font-semibold uppercase tracking-wider ${stockDisponibleVal < 0 ? 'text-rose-700 dark:text-rose-300' : 'text-muted'}`}>
+                {stockDisponibleVal < 0 ? 'Déficit' : 'Disponible'}
+              </p>
+              <p className={`mt-0.5 text-xs font-semibold tabular-nums ${stockDisponibleVal < 0 ? 'text-rose-900 dark:text-rose-100' : 'text-ink'}`}>
+                {stockDisponibleVal.toLocaleString()}
+              </p>
+            </div>
+            {stockDisponibleVal < 0 && !isReadOnly && onOpenAjusteDeficit ? (
+              <Faders className="ml-0.5 h-3.5 w-3.5 text-rose-600 dark:text-rose-400" weight="bold" />
+            ) : null}
+          </button>
+
+          {/* Stock actual + Lotes */}
+          <div className="relative z-[110]" ref={stockActualRef}>
+            <button
+              type="button"
+              onClick={() => setShowStockActualDropdown((prev) => !prev)}
+              className="flex h-10 items-center gap-2 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-left shadow-2xs transition hover:border-line-strong hover:bg-surface-muted"
+            >
+              <div className="leading-none">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">Stock físico</p>
+                <p className="mt-0.5 text-xs font-semibold text-ink tabular-nums">{stockActualVal.toLocaleString()}</p>
+              </div>
+              <span className="rounded-md bg-surface-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted tabular-nums">
+                {lotesDisponibles.length} {lotesDisponibles.length === 1 ? 'lote' : 'lotes'}
+              </span>
+              <CaretDown className={`h-3 w-3 text-muted transition-transform ${showStockActualDropdown ? 'rotate-180' : ''}`} weight="bold" />
+            </button>
+
+            {showStockActualDropdown ? (
+              <div className="absolute right-0 top-full z-[180] mt-1.5 w-[280px] rounded-xl border border-line bg-surface p-3 shadow-lg">
+                <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                  Lotes disponibles ({lotesDisponibles.length})
+                </h4>
+                {lotesDisponibles.length > 0 ? (
+                  <div className="max-h-52 space-y-1.5 overflow-y-auto pr-1">
+                    {lotesDisponibles.map((lote, index) => (
+                      <div
+                        key={lote.id}
+                        className={`flex items-center justify-between gap-2 rounded-lg border px-2.5 py-2 ${
+                          index === 0
+                            ? 'border-teal-500/30 bg-teal-500/10 text-ink'
+                            : 'border-line bg-surface text-ink'
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-semibold">{lote.numero}</p>
+                          <p className="text-[10px] text-muted">
+                            Vence: {new Date(lote.fechaVencimiento).toLocaleDateString('es-PE')}
+                          </p>
+                        </div>
+                        <span className="shrink-0 rounded border border-line bg-surface px-2 py-0.5 text-xs font-semibold text-ink tabular-nums">
+                          {lote.cantidadActual.toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="py-3 text-center text-xs text-muted">No existen lotes disponibles.</p>
+                )}
+              </div>
+            ) : null}
+          </div>
+
+          <span className="hidden xl:inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs text-muted">
+            <strong className="font-semibold text-ink tabular-nums">{datosTablaLength}</strong> EESS
+          </span>
+
+          {stockInfo.tieneHistorialInicial ? (
+            <div className="ml-auto flex items-center">
+              <button
+                type="button"
+                onClick={onActualizarStockSiguienteMes}
+                disabled={isUpdatingStockSiguienteMes}
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-semibold text-ink shadow-2xs transition hover:border-line-strong hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-60"
+                title={`Actualizar stock inicial de ${periodoSiguiente}`}
+              >
+                {isUpdatingStockSiguienteMes ? (
+                  <CircleNotch className="h-3.5 w-3.5 animate-spin text-teal-600 dark:text-teal-400" weight="bold" />
+                ) : (
+                  <ArrowsClockwise className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" weight="bold" />
+                )}
+                <span className="hidden sm:inline">Cerrar hacia</span>
+                <span className="font-bold text-ink">{periodoSiguiente}</span>
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
   );
 
   return (
-    <section className="relative z-[80] flex h-full flex-col overflow-visible bg-white">
-      {/* Filtros + Acciones */}
-      <div className="border-b border-line-soft px-5 py-4 sm:px-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end lg:gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-              {shouldRenderCentroSelect ? (
-                <label className="block">
-                  <span className={COMPONENT_STYLES.input.label}>Centro de acopio</span>
-                  <div className="relative">
-                    <Buildings className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" weight="duotone" />
-                    <select
-                      value={selectedCentroAcopio}
-                      onChange={(event) => onCentroAcopioChange(event.target.value)}
-                      disabled={isLoadingEstablecimientos}
-                      className={COMPONENT_STYLES.select.base + ' pl-9 pr-9 focus:ring-zinc-900'}
-                    >
-                      <option value="todos">{allCentrosLabel}</option>
-                      {centrosAcopio.map((centro) => (
-                        <option key={centro.id} value={centro.id}>
-                          {centro.nombre}
-                        </option>
-                      ))}
-                    </select>
-                    <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" weight="bold" />
-                  </div>
-                </label>
-              ) : (
-                <div>
-                  <span className={COMPONENT_STYLES.input.label}>Centro asignado</span>
-                  <div className="flex min-h-[44px] items-center gap-2.5 rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-sm">
-                    <Buildings className="h-4 w-4 shrink-0 text-zinc-500" weight="duotone" />
-                    <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
-                  </div>
-                </div>
-              )}
-
-              <label className="block">
-                <span className={COMPONENT_STYLES.input.label}>Vacuna</span>
+    <section className="relative z-[80] flex flex-col overflow-visible bg-surface">
+      {/* Barra compacta de filtros y acciones */}
+      <div className="border-b border-line px-3 py-2.5 sm:px-5 sm:py-3">
+        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-end lg:justify-between">
+          {/* Grid de selectores */}
+          <div className="grid min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5">
+            {shouldRenderCentroSelect ? (
+              <label className="block min-w-0">
+                <span className={FILTER_LABEL_CLASS}>Centro de acopio</span>
                 <div className="relative">
-                  <Package className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" weight="duotone" />
+                  <Buildings className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" weight="duotone" />
                   <select
-                    value={selectedVacuna}
-                    onChange={(event) => onVacunaChange(event.target.value)}
-                    disabled={isLoadingVacunas}
-                    className={COMPONENT_STYLES.select.base + ' pl-9 pr-9 focus:ring-zinc-900 font-medium'}
+                    value={selectedCentroAcopio}
+                    onChange={(event) => onCentroAcopioChange(event.target.value)}
+                    disabled={isLoadingEstablecimientos}
+                    className={SELECT_BASE_CLASS}
                   >
-                    {vacunasActivas.length === 0 ? <option value="">Inicializando...</option> : null}
-                    {vacunasActivas.map((vacuna) => (
-                      <option key={vacuna.id} value={vacuna.id}>
-                        {vacuna.nombre}
+                    <option value="todos">{allCentrosLabel}</option>
+                    {centrosAcopio.map((centro) => (
+                      <option key={centro.id} value={centro.id}>
+                        {centro.nombre}
                       </option>
                     ))}
                   </select>
-                  <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" weight="bold" />
+                  <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" weight="bold" />
                 </div>
               </label>
+            ) : (
+              <div className="min-w-0">
+                <span className={FILTER_LABEL_CLASS}>Centro asignado</span>
+                <div className="flex h-9 items-center gap-2 rounded-lg border border-line bg-surface-muted px-3 text-xs sm:text-sm font-semibold text-ink">
+                  <Buildings className="h-4 w-4 shrink-0 text-muted" weight="duotone" />
+                  <span className="truncate">{lockedCentroAcopioLabel || centroNombre}</span>
+                </div>
+              </div>
+            )}
 
-              <label className="block">
-                <span className={COMPONENT_STYLES.input.label}>Mes</span>
-                <div className="relative">
-                  <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" weight="duotone" />
+            <label className="block min-w-0">
+              <span className={FILTER_LABEL_CLASS}>Biológico / Vacuna</span>
+              <div className="relative">
+                <Package className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" weight="duotone" />
+                <select
+                  value={selectedVacuna}
+                  onChange={(event) => onVacunaChange(event.target.value)}
+                  disabled={isLoadingVacunas}
+                  className={SELECT_BASE_CLASS}
+                >
+                  {vacunasActivas.length === 0 ? <option value="">Cargando...</option> : null}
+                  {vacunasActivas.map((vacuna) => (
+                    <option key={vacuna.id} value={vacuna.id}>
+                      {vacuna.nombre}
+                    </option>
+                  ))}
+                </select>
+                <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" weight="bold" />
+              </div>
+            </label>
+
+            <div className="min-w-0">
+              <span className={FILTER_LABEL_CLASS}>Mes operativo</span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => handleStepMonth(-1)}
+                  className="inline-flex h-9 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-muted transition hover:border-line-strong hover:bg-surface-muted hover:text-ink"
+                  title="Mes anterior"
+                  aria-label="Mes anterior"
+                >
+                  <CaretLeft className="h-3.5 w-3.5" weight="bold" />
+                </button>
+                <div className="relative min-w-0 flex-1">
                   <select
                     value={selectedMes}
                     onChange={(event) => onMesChange(Number(event.target.value))}
-                    className={COMPONENT_STYLES.select.base + ' pl-9 pr-9 focus:ring-zinc-900 font-medium'}
+                    className="h-9 w-full appearance-none rounded-lg border border-line bg-surface pl-2.5 pr-7 text-xs sm:text-sm font-medium text-ink shadow-2xs transition hover:border-line-strong focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/15"
+                    aria-label="Seleccionar mes"
                   >
                     {MESES.map((mes, index) => (
                       <option key={mes} value={index + 1}>
@@ -508,39 +524,46 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                       </option>
                     ))}
                   </select>
-                  <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" weight="bold" />
+                  <CaretDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" weight="bold" />
                 </div>
-              </label>
-
-              <label className="block">
-                <span className={COMPONENT_STYLES.input.label}>Año</span>
-                <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
-                    AÑO
-                  </span>
-                  <select
-                    value={selectedAnio}
-                    onChange={(event) => onAnioChange(Number(event.target.value))}
-                    disabled={isLoadingAnios}
-                    className={COMPONENT_STYLES.select.base + ' pl-10 pr-9 focus:ring-zinc-900 font-bold'}
-                  >
-                    {aniosDisponibles.map((anio) => (
-                      <option key={anio} value={anio}>
-                        {anio}
-                      </option>
-                    ))}
-                  </select>
-                  <CaretDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" weight="bold" />
-                </div>
-              </label>
+                <button
+                  type="button"
+                  onClick={() => handleStepMonth(1)}
+                  className="inline-flex h-9 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-muted transition hover:border-line-strong hover:bg-surface-muted hover:text-ink"
+                  title="Mes siguiente"
+                  aria-label="Mes siguiente"
+                >
+                  <CaretRight className="h-3.5 w-3.5" weight="bold" />
+                </button>
+              </div>
             </div>
+
+            <label className="block min-w-0">
+              <span className={FILTER_LABEL_CLASS}>Año</span>
+              <div className="relative">
+                <CalendarBlank className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" weight="duotone" />
+                <select
+                  value={selectedAnio}
+                  onChange={(event) => onAnioChange(Number(event.target.value))}
+                  disabled={isLoadingAnios}
+                  className={`${SELECT_BASE_CLASS} tabular-nums font-semibold`}
+                >
+                  {aniosDisponibles.map((anio) => (
+                    <option key={anio} value={anio}>
+                      {anio}
+                    </option>
+                  ))}
+                </select>
+                <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" weight="bold" />
+              </div>
+            </label>
           </div>
 
-          {/* Action Dock */}
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {/* Botones de acción */}
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
             {!isReadOnly && pendingChangesCount > 0 ? (
               <ActionButton
-                label={isAutoSaving ? 'Guardando' : 'Guardar cambios'}
+                label={isAutoSaving ? 'Guardando' : 'Guardar'}
                 icon={isAutoSaving ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <FloppyDisk className="h-4 w-4" weight="bold" />}
                 onClick={onSaveChanges}
                 disabled={isAutoSaving}
@@ -559,35 +582,37 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
                     ? COMPONENT_STYLES.button.secondary
                     : COMPONENT_STYLES.button.primary
                 }
-                title="Vales"
+                title={selectedCentroAcopio === 'todos' ? 'Seleccione un centro de acopio para gestionar vales' : 'Generar o ver vales'}
               >
                 <Receipt className="h-4 w-4" weight="bold" />
-                <span className="hidden lg:inline">Vales</span>
+                <span className="hidden sm:inline">Vales</span>
               </button>
             ) : (
-              <span className={`inline-flex min-h-9 items-center rounded-[9px] border px-3.5 py-1.5 text-sm font-semibold ${
-                hasOperativeEditPermission
-                  ? 'border-line bg-white text-ink'
-                  : 'border-line bg-surface-soft text-muted-2'
-              }`}>
+              <span className="inline-flex h-9 items-center rounded-lg border border-line bg-surface-muted px-3 text-xs font-semibold text-muted">
                 {hasOperativeEditPermission ? 'Edición habilitada' : 'Solo lectura'}
               </span>
             )}
 
             <ActionButton
-              label="Sincronizar"
+              label="Actualizar"
               icon={<ArrowsClockwise className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} weight="bold" />}
               onClick={onRefresh}
               disabled={isLoading || !selectedVacuna}
+              showLabel={false}
             />
 
             {!isReadOnly && !hideImportAction ? (
-              <ActionButton label="Importar Excel" icon={<UploadSimple className="h-4 w-4" weight="bold" />} onClick={onImport} showLabel={false} />
+              <ActionButton
+                label="Importar Excel"
+                icon={<UploadSimple className="h-4 w-4" weight="bold" />}
+                onClick={onImport}
+                showLabel={false}
+              />
             ) : null}
 
             {!hideExportAction ? (
               <ActionButton
-                label={isExporting ? 'Procesando' : 'Exportar'}
+                label={isExporting ? 'Exportando' : 'Exportar'}
                 icon={isExporting ? <CircleNotch className="h-4 w-4 animate-spin" weight="bold" /> : <DownloadSimple className="h-4 w-4" weight="bold" />}
                 onClick={onExport}
                 disabled={isExporting || !selectedVacuna}
@@ -598,7 +623,7 @@ export const MovimientosHeaderCompact: React.FC<MovimientosHeaderCompactProps> =
         </div>
       </div>
 
-      {/* Metricas de Stock */}
+      {/* Cinta compacta de stock y balance */}
       {stockPanelContent}
     </section>
   );

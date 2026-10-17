@@ -7,7 +7,6 @@ import {
   Clock,
   CaretDown,
   ArrowsClockwise,
-  X,
 } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { useToastContext } from '../../contexts/ToastContext';
@@ -17,6 +16,7 @@ import {
   type PermisosGlobales,
   type TipoPermisoOperativo,
 } from '../../services/permisoOperativoService';
+import { Modal, FormField, ModalFooter } from '../ui/ModalElements';
 
 // ===== Config =====
 const MESES = [
@@ -96,95 +96,65 @@ const ScheduleModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[300] flex items-center justify-center bg-ink-soft/20 p-4 backdrop-blur-[2px]"
-      onClick={onClose}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Programar activación"
+      subtitle={permisoLabel}
+      icon={Timer}
+      size="sm"
+      footer={
+        <ModalFooter
+          onCancel={onClose}
+          onSubmit={() => {
+            if (!fechaActivacion) return;
+            onSave(
+              new Date(fechaActivacion).toISOString(),
+              usarDesactivacion && fechaDesactivacion ? new Date(fechaDesactivacion).toISOString() : null,
+            );
+            onClose();
+          }}
+          cancelLabel="Cancelar"
+          submitLabel="Programar"
+          submitType="button"
+          isDisabled={!fechaActivacion}
+        />
+      }
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-md overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b border-line-soft px-5 py-3.5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-muted-2">
-              <Timer className="h-4 w-4" />
-            </div>
-            <div>
-              <h3 className="text-md font-semibold leading-5 text-ink">Programar activación</h3>
-              <p className="text-sm leading-4 text-muted-2">{permisoLabel}</p>
-            </div>
-          </div>
-          <button type="button" onClick={onClose} className="rounded-[7px] p-1.5 text-muted transition-colors hover:bg-surface-soft hover:text-ink">
-            <X className="h-4 w-4" />
-          </button>
+      <div className="space-y-4">
+        <FormField label="Fecha y hora de activación" required>
+          <input
+            type="datetime-local"
+            value={fechaActivacion}
+            onChange={(e) => setFechaActivacion(e.target.value)}
+            className="h-9 w-full rounded-lg border border-zinc-200/90 bg-white px-3 text-sm text-zinc-900 transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+          />
+        </FormField>
+
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200/80 bg-zinc-50/70 px-3.5 py-2.5 dark:border-zinc-800 dark:bg-zinc-900/50">
+          <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+            Programar desactivación automática
+          </span>
+          <ToggleSwitch
+            checked={usarDesactivacion}
+            onChange={setUsarDesactivacion}
+            colorClass="bg-brand"
+          />
         </div>
 
-        <div className="space-y-4 px-5 py-4">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-[#424750]">
-              Fecha y hora de activación
-            </label>
+        {usarDesactivacion && (
+          <FormField label="Fecha y hora de desactivación">
             <input
               type="datetime-local"
-              value={fechaActivacion}
-              onChange={(e) => setFechaActivacion(e.target.value)}
-              className="min-h-9 w-full rounded-[7px] border border-line bg-white px-3 py-2 text-base text-ink focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70"
+              value={fechaDesactivacion}
+              onChange={(e) => setFechaDesactivacion(e.target.value)}
+              min={fechaActivacion}
+              className="h-9 w-full rounded-lg border border-zinc-200/90 bg-white px-3 text-sm text-zinc-900 transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
             />
-          </div>
-
-          <div className="flex items-center gap-3">
-            <ToggleSwitch
-              checked={usarDesactivacion}
-              onChange={setUsarDesactivacion}
-              colorClass="bg-brand"
-            />
-            <span className="text-sm text-zinc-700">Programar desactivación automática</span>
-          </div>
-
-          {usarDesactivacion && (
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-[#424750]">
-                Fecha y hora de desactivación
-              </label>
-              <input
-                type="datetime-local"
-                value={fechaDesactivacion}
-                onChange={(e) => setFechaDesactivacion(e.target.value)}
-                min={fechaActivacion}
-                className="min-h-9 w-full rounded-[7px] border border-line bg-white px-3 py-2 text-base text-ink focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70"
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center justify-end gap-2 border-t border-line-soft bg-surface-soft px-5 py-3">
-          <button type="button"
-            onClick={onClose}
-            className="inline-flex h-9 items-center gap-1.5 rounded-[7px] border border-line bg-white px-3.5 text-base font-semibold text-ink transition-colors hover:bg-white"
-          >
-            Cancelar
-          </button>
-          <button type="button"
-            onClick={() => {
-              if (!fechaActivacion) return;
-              onSave(
-                new Date(fechaActivacion).toISOString(),
-                usarDesactivacion && fechaDesactivacion ? new Date(fechaDesactivacion).toISOString() : null,
-              );
-              onClose();
-            }}
-            disabled={!fechaActivacion}
-            className="inline-flex h-9 items-center gap-1.5 rounded-[7px] bg-brand px-3.5 text-base font-semibold text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Timer className="h-3.5 w-3.5" />
-            Programar
-          </button>
-        </div>
-      </motion.div>
-    </div>
+          </FormField>
+        )}
+      </div>
+    </Modal>
   );
 };
 

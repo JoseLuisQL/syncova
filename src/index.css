@@ -2,17 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
+/* === Definiciones explícitas @font-face para IBM Plex Sans e IBM Plex Mono === */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2') format('woff2'),
+       url('@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-500-normal.woff2') format('woff2'),
+       url('@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-500-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff2') format('woff2'),
+       url('@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-700-normal.woff2') format('woff2'),
+       url('@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-700-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2') format('woff2'),
+       url('@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2') format('woff2'),
+       url('@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2') format('woff2'),
+       url('@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff') format('woff');
+}
+
 @layer base {
   :root {
+    --font-sans: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
     --clinical-primary: #0f2a3b;
     --clinical-secondary: #4f6b7c;
     --clinical-tertiary: #0e9f8e;
     --clinical-neutral: #f1f5f7;
     --clinical-surface: #ffffff;
     --clinical-on-primary: #ffffff;
-    --inventory-skeleton-base: rgba(241, 245, 247, 0.86);
-    --inventory-skeleton-highlight: rgba(255, 255, 255, 0.96);
-    --inventory-loading-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 247, 0.94) 100%);
+    --inventory-skeleton-base: rgba(226, 229, 238, 0.72);
+    --inventory-skeleton-highlight: rgba(246, 247, 251, 0.96);
+    --inventory-loading-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 249, 252, 0.96) 100%);
 
     /* === Tokens semánticos (light) — consumidos por tailwind.config.js === */
     /* Valores en formato "R G B" (sin rgb()) para soporte de <alpha-value>. */
@@ -94,9 +160,9 @@
     --color-status-info-border: 30 64 175;
     --color-status-info-text: 147 197 253;
 
-    --inventory-skeleton-base: rgba(33, 36, 44, 0.86);
-    --inventory-skeleton-highlight: rgba(42, 45, 54, 0.96);
-    --inventory-loading-surface: linear-gradient(180deg, rgba(26, 29, 36, 0.98) 0%, rgba(33, 36, 44, 0.94) 100%);
+    --inventory-skeleton-base: rgba(42, 46, 57, 0.78);
+    --inventory-skeleton-highlight: rgba(60, 65, 80, 0.95);
+    --inventory-loading-surface: linear-gradient(180deg, rgba(26, 29, 36, 0.99) 0%, rgba(31, 35, 44, 0.96) 100%);
     color-scheme: dark;
   }
 
@@ -107,16 +173,41 @@
     text-rendering: optimizeLegibility;
   }
 
-  body {
+  body,
+  .dark body,
+  body.dark {
     margin: 0;
     min-height: 100dvh;
-    background: var(--clinical-neutral);
-    color: var(--clinical-primary);
+    background-color: rgb(var(--color-app));
+    color: rgb(var(--color-ink));
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  input,
+  select,
+  textarea,
+  button,
+  option,
+  optgroup {
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: inherit;
+  }
+
+  code,
+  pre,
+  kbd,
+  samp {
+    font-family: 'IBM Plex Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
   }
 
   #root {
     min-height: 100dvh;
+    color: rgb(var(--color-ink));
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
 }
 
@@ -153,7 +244,8 @@
 }
 
 @layer components {
-  .inventory-skeleton {
+  .inventory-skeleton,
+  .sivac-skeleton {
     position: relative;
     overflow: hidden;
     background: linear-gradient(
@@ -163,7 +255,7 @@
       var(--inventory-skeleton-base) 100%
     );
     background-size: 200% 100%;
-    animation: inventory-shimmer 1.45s ease-in-out infinite;
+    animation: inventory-shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
 
   .inventory-loading-shell {
@@ -180,10 +272,7 @@
 }
 
 @layer utilities {
-  /* Botones teal con texto blanco: contraste correcto (WCAG AA pasa para blanco sobre #0e9f8e).
-     El hack anterior forzaba texto oscuro (#0f2a3b), contradiciendo el DESIGN.md y generando
-     contraste bajo. Si un boton teal especifico necesita texto oscuro, aplicar la clase
-     `text-primary` directamente en el componente en lugar de este override global. */
+  /* Utilidades adicionales */
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -224,11 +313,7 @@
   z-index: 1000 !important;
 }
 
-/* === Dark mode: View Transition API (theme-toggle.rdsx.dev) ===
-   Animación circle-blur: el nuevo tema se revela como un círculo difuminado
-   que crece desde el punto donde se hizo clic. En navegadores sin soporte,
-   el cambio es instantáneo (fallback graceful).
-*/
+/* === Dark mode: View Transition API (theme-toggle.rdsx.dev) === */
 :root {
   --expo-out: linear(
     0 0%, 0.1684 2.66%, 0.3165 5.49%, 0.446 8.52%, 0.5581 11.78%,
@@ -274,10 +359,9 @@
   }
 }
 
-/* === Dark mode: overrides globales para compatibilidad inmediata ===
-   Mapeo directo y prioritario fuera de @layer base para garantizar que
-   las clases canónicas de Tailwind (bg-white, text-zinc-900, etc.)
-   se transformen correctamente en modo oscuro en toda la aplicación.
+/* === Dark mode: overrides globales para compatibilidad total ===
+   Garantiza que las clases de Tailwind (zinc, slate, gray, bg-white, estados)
+   mantengan contraste, legibilidad tipográfica y coherencia en modo oscuro.
 */
 .dark .bg-white,
 .dark [class*="bg-white/"],
@@ -286,16 +370,64 @@
 }
 .dark .bg-zinc-50,
 .dark [class*="bg-zinc-50/"],
-.dark [class*="bg-zinc-50\/"] {
+.dark [class*="bg-zinc-50\/"],
+.dark .bg-slate-50,
+.dark [class*="bg-slate-50/"],
+.dark [class*="bg-slate-50\/"],
+.dark .bg-gray-50,
+.dark [class*="bg-gray-50/"] {
   background-color: rgb(var(--color-surface-soft)) !important;
 }
 .dark .bg-zinc-100,
 .dark [class*="bg-zinc-100/"],
-.dark [class*="bg-zinc-100\/"] {
+.dark [class*="bg-zinc-100\/"],
+.dark .bg-slate-100,
+.dark [class*="bg-slate-100/"],
+.dark [class*="bg-slate-100\/"],
+.dark .bg-gray-100 {
   background-color: rgb(var(--color-surface-soft)) !important;
 }
-.dark .bg-zinc-200 {
+.dark .bg-zinc-200,
+.dark .bg-slate-200,
+.dark .bg-gray-200 {
   background-color: rgb(var(--color-line)) !important;
+}
+.dark .bg-\[\#f3f0ff\],
+.dark .bg-\[\#f8f5ff\],
+.dark .bg-\[\#f8f7fb\] {
+  background-color: rgb(var(--color-surface-tint)) !important;
+}
+
+/* Fondos de estado suaves en dark mode */
+.dark .bg-teal-50,
+.dark [class*="bg-teal-50/"],
+.dark [class*="bg-teal-50\/"],
+.dark .bg-teal-100,
+.dark .bg-emerald-50,
+.dark [class*="bg-emerald-50/"],
+.dark [class*="bg-emerald-50\/"],
+.dark .bg-emerald-100 {
+  background-color: rgb(var(--color-status-success-bg) / 0.65) !important;
+}
+.dark .bg-amber-50,
+.dark [class*="bg-amber-50/"],
+.dark [class*="bg-amber-50\/"],
+.dark .bg-amber-100 {
+  background-color: rgb(var(--color-status-warning-bg) / 0.65) !important;
+}
+.dark .bg-rose-50,
+.dark [class*="bg-rose-50/"],
+.dark [class*="bg-rose-50\/"],
+.dark .bg-rose-100 {
+  background-color: rgb(var(--color-status-danger-bg) / 0.65) !important;
+}
+.dark .bg-blue-50,
+.dark [class*="bg-blue-50/"],
+.dark [class*="bg-blue-50\/"],
+.dark .bg-blue-100,
+.dark .bg-sky-50,
+.dark .bg-sky-100 {
+  background-color: rgb(var(--color-status-info-bg) / 0.65) !important;
 }
 
 /* Bordes claros → borde dark */
@@ -304,54 +436,163 @@
   border-color: rgb(var(--color-line)) !important;
 }
 .dark .border-zinc-100,
-.dark [class*="border-zinc-100/"] {
+.dark [class*="border-zinc-100/"],
+.dark .border-slate-100,
+.dark [class*="border-slate-100/"],
+.dark .border-gray-100 {
   border-color: rgb(var(--color-line-soft)) !important;
 }
 .dark .border-zinc-200,
-.dark [class*="border-zinc-200/"] {
+.dark [class*="border-zinc-200/"],
+.dark .border-slate-200,
+.dark [class*="border-slate-200/"],
+.dark .border-gray-200,
+.dark .border-\[\#e0e2ea\] {
   border-color: rgb(var(--color-line)) !important;
 }
-.dark .border-zinc-300 {
+.dark .border-zinc-300,
+.dark .border-slate-300,
+.dark .border-gray-300 {
   border-color: rgb(var(--color-line-strong)) !important;
 }
-.dark .divide-zinc-200 > :not([hidden]) ~ :not([hidden]) {
+.dark .border-teal-100,
+.dark .border-teal-200,
+.dark [class*="border-teal-200/"],
+.dark .border-teal-300,
+.dark .border-emerald-100,
+.dark .border-emerald-200,
+.dark [class*="border-emerald-200/"] {
+  border-color: rgb(var(--color-status-success-border)) !important;
+}
+.dark .border-amber-200,
+.dark [class*="border-amber-200/"],
+.dark .border-amber-300 {
+  border-color: rgb(var(--color-status-warning-border)) !important;
+}
+.dark .border-rose-200,
+.dark [class*="border-rose-200/"],
+.dark .border-rose-300 {
+  border-color: rgb(var(--color-status-danger-border)) !important;
+}
+.dark .border-blue-100,
+.dark .border-blue-200,
+.dark [class*="border-blue-200/"],
+.dark .border-blue-300,
+.dark .border-sky-200 {
+  border-color: rgb(var(--color-status-info-border)) !important;
+}
+.dark .divide-zinc-200 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
   border-color: rgb(var(--color-line)) !important;
 }
-.dark .divide-zinc-100 > :not([hidden]) ~ :not([hidden]) {
+.dark .divide-zinc-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
   border-color: rgb(var(--color-line-soft)) !important;
 }
 
-/* Texto oscuro → texto claro adaptado. Nota: text-white se preserva intacto */
+/* Texto oscuro → texto claro adaptado con alto contraste en dark mode */
+.dark .text-black,
+.dark .text-primary,
+.dark .text-clinical-primary,
+.dark .text-hh-primary,
 .dark .text-zinc-900,
 .dark .text-zinc-950,
+.dark .text-zinc-800,
+.dark .text-slate-900,
+.dark .text-slate-950,
+.dark .text-slate-800,
+.dark .text-gray-900,
+.dark .text-gray-950,
+.dark .text-gray-800,
 .dark .text-\[\#111827\],
-.dark .text-\[\#171b22\] {
+.dark .text-\[\#171b22\],
+.dark .text-\[\#0f2a3b\],
+.dark .text-\[\#0F2A3B\] {
   color: rgb(var(--color-ink)) !important;
 }
-.dark .text-zinc-800 {
-  color: rgb(var(--color-ink)) !important;
-}
+.dark .text-secondary,
+.dark .text-clinical-secondary,
+.dark .text-hh-secondary,
 .dark .text-zinc-700,
 .dark .text-zinc-600,
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark .text-gray-700,
+.dark .text-gray-600,
 .dark .text-\[\#424750\],
-.dark .text-\[\#556575\] {
+.dark .text-\[\#556575\],
+.dark .text-\[\#4F6B7C\],
+.dark .text-\[\#4f6b7c\] {
   color: rgb(var(--color-muted-2)) !important;
 }
 .dark .text-zinc-500,
 .dark .text-zinc-400,
+.dark .text-zinc-300,
+.dark .text-slate-500,
+.dark .text-slate-400,
+.dark .text-slate-300,
+.dark .text-gray-500,
+.dark .text-gray-400,
 .dark .text-\[\#7a8797\],
-.dark .text-\[\#a0a4ae\] {
+.dark .text-\[\#a0a4ae\],
+.dark .text-\[\#c4c7d0\],
+.dark .text-\[\#c8cad8\],
+.dark .text-\[\#7d828d\],
+.dark .text-\[\#a8adba\] {
   color: rgb(var(--color-muted)) !important;
 }
+.dark .text-teal-950,
+.dark .text-teal-900,
+.dark .text-teal-800,
+.dark .text-teal-700,
+.dark .text-emerald-950,
+.dark .text-emerald-900,
+.dark .text-emerald-800,
+.dark .text-emerald-700 {
+  color: rgb(var(--color-status-success-text)) !important;
+}
+.dark .text-amber-950,
+.dark .text-amber-900,
+.dark .text-amber-800,
+.dark .text-amber-700 {
+  color: rgb(var(--color-status-warning-text)) !important;
+}
+.dark .text-rose-950,
+.dark .text-rose-900,
+.dark .text-rose-800,
+.dark .text-rose-700 {
+  color: rgb(var(--color-status-danger-text)) !important;
+}
+.dark .text-blue-950,
+.dark .text-blue-900,
+.dark .text-blue-800,
+.dark .text-blue-700,
+.dark .text-sky-950,
+.dark .text-sky-900,
+.dark .text-sky-800,
+.dark .text-sky-700 {
+  color: rgb(var(--color-status-info-text)) !important;
+}
+.dark .text-\[\#5b21b6\] {
+  color: rgb(var(--color-brand-600)) !important;
+}
 
-/* Inputs y controles en dark mode */
+/* Inputs, selects y controles en dark mode */
+.dark input,
+.dark select,
+.dark textarea,
+.dark button {
+  color-scheme: dark;
+  font-family: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
 .dark input::placeholder,
 .dark textarea::placeholder {
-  color: rgb(var(--color-muted));
+  color: rgb(var(--color-muted)) !important;
 }
 .dark select option {
   background-color: rgb(var(--color-surface));
   color: rgb(var(--color-ink));
+  font-family: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* Scrollbars en modo oscuro */
@@ -361,3 +602,4 @@
 .dark ::-webkit-scrollbar-track {
   background-color: rgb(var(--color-surface-soft));
 }
+

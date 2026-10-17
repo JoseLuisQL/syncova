@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Warning, Buildings, Calculator, MicrosoftExcelLogo, SpinnerGap, Package, ArrowsClockwise, ShieldCheck, UploadSimple, CalendarBlank, Syringe } from '@phosphor-icons/react';
+import { Warning, Buildings, Calculator, CaretDown, MicrosoftExcelLogo, SpinnerGap, Package, ArrowsClockwise, ShieldCheck, UploadSimple, CalendarBlank, Syringe, X } from '@phosphor-icons/react';
 import { DataTable, EmptyState } from '../Establecimientos/components';
 import { COMPONENT_STYLES as ESTABLECIMIENTOS_STYLES } from '../Establecimientos/constants';
 import { MESES_CORTOS } from '../Planificacion/constants';
@@ -14,9 +14,9 @@ import IciDemidErroresModal from './IciDemidErroresModal';
 import IciDemidImportProgressModal from './IciDemidImportProgressModal';
 
 const SELECT_CLASS =
-  'h-9 w-full appearance-none rounded-[9px] border border-line bg-surface px-3 py-1.5 pr-8 text-sm font-medium text-ink shadow-sm transition hover:border-line-strong focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-60';
+  'h-9 w-full appearance-none rounded-[9px] border border-line bg-surface pl-8 pr-8 text-[0.8rem] font-medium text-ink shadow-xs transition hover:border-line-strong focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/60 disabled:cursor-not-allowed disabled:opacity-60';
 
-const FILTER_LABEL_CLASS = 'mb-1 block text-[0.84rem] font-medium text-muted-2';
+const FILTER_LABEL_CLASS = 'mb-1 block text-[0.68rem] font-semibold uppercase tracking-[0.06em] text-muted-2';
 
 const TotalPill: React.FC<{
   value: number | string;
@@ -236,79 +236,107 @@ const IciDemid: React.FC = () => {
   return (
     <div className="h-[calc(100vh-4rem)] overflow-hidden bg-transparent md:h-[calc(100vh-5rem)]">
       <div className="flex h-full w-full flex-col overflow-hidden rounded-[22px] border border-line bg-surface">
-        <section className="shrink-0 border-b border-line-soft bg-surface p-3 sm:p-4">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
-              <div className="grid flex-1 grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
-                <label>
-                  <span className={FILTER_LABEL_CLASS}>Año</span>
-                  <div className="relative">
-                    <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" weight="bold" />
-                    <select value={selectedAnio} onChange={(e) => setSelectedAnio(Number(e.target.value))} className={`${SELECT_CLASS} pl-9`}>
+        <section className="shrink-0 border-b border-line-soft bg-surface p-3 sm:p-3.5">
+          <div className="flex flex-col gap-2.5 xl:flex-row xl:items-end xl:justify-between">
+            <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <label>
+                <span className={FILTER_LABEL_CLASS}>Año</span>
+                <div className="relative">
+                  <CalendarBlank className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+                  <select value={selectedAnio} onChange={(e) => setSelectedAnio(Number(e.target.value))} className={SELECT_CLASS}>
                     {aniosDisponibles.map((anio) => (
                       <option key={anio} value={anio}>{anio}</option>
                     ))}
-                    </select>
-                  </div>
-                </label>
-                <label>
-                  <span className={FILTER_LABEL_CLASS}>Centro de acopio</span>
-                  <div className="relative">
-                    <Buildings className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" weight="bold" />
-                    <select value={selectedCentroAcopio} onChange={(e) => setSelectedCentroAcopio(e.target.value)} className={`${SELECT_CLASS} pl-9`}>
-                    <option value="todos">Todos</option>
+                  </select>
+                  <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+                </div>
+              </label>
+              <label>
+                <span className={FILTER_LABEL_CLASS}>Centro de acopio</span>
+                <div className="relative">
+                  <Buildings className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+                  <select value={selectedCentroAcopio} onChange={(e) => setSelectedCentroAcopio(e.target.value)} className={SELECT_CLASS}>
+                    <option value="todos">Todos los centros</option>
                     {centrosAcopio
                       .filter((centro) => !isReadOnlyMode || lockedCentroAcopioIds.includes(centro.id))
                       .map((centro) => (
                         <option key={centro.id} value={centro.id}>{centro.nombre}</option>
                       ))}
-                    </select>
-                  </div>
-                </label>
-                <label>
-                  <span className={FILTER_LABEL_CLASS}>Establecimiento</span>
-                  <div className="relative">
-                    <Buildings className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" weight="bold" />
-                    <select value={selectedEstablecimiento} onChange={(e) => setSelectedEstablecimiento(e.target.value)} className={`${SELECT_CLASS} pl-9`}>
-                    <option value="todos">Todos</option>
+                  </select>
+                  <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+                </div>
+              </label>
+              <label>
+                <span className={FILTER_LABEL_CLASS}>Establecimiento</span>
+                <div className="relative">
+                  <Buildings className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+                  <select value={selectedEstablecimiento} onChange={(e) => setSelectedEstablecimiento(e.target.value)} className={SELECT_CLASS}>
+                    <option value="todos">Todos los EESS</option>
                     {establecimientosFiltrados.map((establecimiento) => (
                       <option key={establecimiento.id} value={establecimiento.id}>{establecimiento.nombre}</option>
                     ))}
-                    </select>
-                  </div>
-                </label>
-                <label>
-                  <span className={FILTER_LABEL_CLASS}>Vacuna</span>
-                  <div className="relative">
-                    <Syringe className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" weight="bold" />
-                    <select value={selectedVacuna} onChange={(e) => setSelectedVacuna(e.target.value)} className={`${SELECT_CLASS} pl-9`}>
-                    <option value="todos">Todas</option>
+                  </select>
+                  <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+                </div>
+              </label>
+              <label>
+                <span className={FILTER_LABEL_CLASS}>Vacuna</span>
+                <div className="relative">
+                  <Syringe className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+                  <select value={selectedVacuna} onChange={(e) => setSelectedVacuna(e.target.value)} className={SELECT_CLASS}>
+                    <option value="todos">Todas las vacunas</option>
                     {vacunasActivas.map((vacuna) => (
                       <option key={vacuna.id} value={vacuna.id}>{vacuna.nombre}</option>
                     ))}
-                    </select>
-                  </div>
-                </label>
-              </div>
+                  </select>
+                  <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+                </div>
+              </label>
+            </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => loadData(true)} className={ESTABLECIMIENTOS_STYLES.button.secondary} disabled={isLoading || isRefreshing}>
-                  {isRefreshing ? <SpinnerGap className="h-4 w-4 animate-spin" /> : <ArrowsClockwise className="h-4 w-4" />}
-                  Actualizar
+            <div className="flex flex-wrap items-center gap-1.5">
+              {(selectedCentroAcopio !== 'todos' || selectedEstablecimiento !== 'todos' || selectedVacuna !== 'todos') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCentroAcopio('todos');
+                    setSelectedEstablecimiento('todos');
+                    setSelectedVacuna('todos');
+                  }}
+                  className="inline-flex h-9 items-center gap-1 rounded-[9px] border border-line bg-surface-soft px-2.5 text-xs font-medium text-muted-2 transition hover:border-line-strong hover:text-ink"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  <span>Limpiar</span>
                 </button>
-                {!isReadOnlyMode ? (
-                  <button type="button" onClick={handleImportClick} className={ESTABLECIMIENTOS_STYLES.button.primary} disabled={isImporting}>
-                    {isImporting ? <SpinnerGap className="h-4 w-4 animate-spin" /> : <UploadSimple className="h-4 w-4" />}
-                    Importar Excel
-                  </button>
-                ) : null}
-                <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleImportFile} />
-              </div>
+              )}
+              <button
+                type="button"
+                onClick={() => loadData(true)}
+                className="inline-flex h-9 items-center gap-1.5 rounded-[9px] border border-line bg-surface px-3 text-xs font-semibold text-ink shadow-xs transition hover:border-line-strong hover:bg-surface-soft disabled:opacity-60"
+                disabled={isLoading || isRefreshing}
+              >
+                {isRefreshing ? <SpinnerGap className="h-3.5 w-3.5 animate-spin" /> : <ArrowsClockwise className="h-3.5 w-3.5" />}
+                <span>Actualizar</span>
+              </button>
+              {!isReadOnlyMode ? (
+                <button
+                  type="button"
+                  onClick={handleImportClick}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-[9px] bg-brand px-3 text-xs font-semibold text-white shadow-xs transition hover:bg-brand-hover disabled:opacity-60"
+                  disabled={isImporting}
+                >
+                  {isImporting ? <SpinnerGap className="h-3.5 w-3.5 animate-spin" /> : <UploadSimple className="h-3.5 w-3.5" />}
+                  <span>Importar Excel</span>
+                </button>
+              ) : null}
+              <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleImportFile} />
+            </div>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line-soft pt-3">
-            <span className="inline-flex min-h-9 items-center gap-2 rounded-[9px] border border-brand-100 bg-surface-soft px-3 py-1.5 text-sm text-ink">
-              <MicrosoftExcelLogo className="h-4 w-4 text-brand" weight="bold" />
-              <span className="text-xs font-medium text-muted">ICI DEMID</span>
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5 border-t border-line-soft pt-2.5">
+            <span className="inline-flex h-7 items-center gap-1.5 rounded-[8px] border border-brand-100 bg-surface-soft px-2.5 text-xs text-ink">
+              <MicrosoftExcelLogo className="h-3.5 w-3.5 text-brand" weight="bold" />
+              <span className="text-[0.68rem] font-medium text-muted">ICI DEMID</span>
               <strong className="font-semibold">{selectedAnio}</strong>
             </span>
             <span className={ESTABLECIMIENTOS_STYLES.badge.neutral}>

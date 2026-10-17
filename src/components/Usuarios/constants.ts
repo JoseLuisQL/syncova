@@ -109,56 +109,56 @@ export const COMPONENT_STYLES = {
   },
 
   button: {
-    primary: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-brand px-4 py-1.5 text-sm font-semibold text-white
-              shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-brand-600
-              focus:outline-none focus:ring-2 focus:ring-brand/25 focus:ring-offset-2
-              disabled:cursor-not-allowed disabled:opacity-60`,
-    secondary: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-line bg-white px-3.5 py-1.5 text-sm font-semibold
-                text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft
-                focus:outline-none focus:ring-2 focus:ring-line-focus/70 focus:ring-offset-2
-                disabled:cursor-not-allowed disabled:opacity-60`,
-    ghost: `inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-line bg-white px-3 py-1.5
-            text-sm font-semibold text-muted-2 transition hover:border-line-strong hover:bg-surface-soft hover:text-ink
-            focus:outline-none focus:ring-2 focus:ring-line-focus/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`,
-    success: `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-emerald-800 
+    primary: `inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-brand bg-brand px-4 py-1.5 text-[0.8125rem] font-semibold tracking-[-0.005em] text-white
+              shadow-[0_1px_2px_rgba(16,24,40,0.06)] transition-all duration-150 hover:border-brand-600 hover:bg-brand-600
+              focus:outline-none focus:ring-3 focus:ring-brand/20 active:translate-y-[0.5px]
+              disabled:cursor-not-allowed disabled:opacity-55`,
+    secondary: `inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-3.5 py-1.5 text-[0.8125rem] font-medium tracking-[-0.005em]
+                text-ink shadow-[0_1px_2px_rgba(16,24,40,0.03)] transition-all duration-150 hover:border-line-strong hover:bg-surface-soft
+                focus:outline-none focus:ring-3 focus:ring-line-focus/80
+                disabled:cursor-not-allowed disabled:opacity-55`,
+    ghost: `inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-transparent bg-transparent px-3 py-1.5
+            text-[0.8125rem] font-medium tracking-[-0.005em] text-muted-2 transition-colors duration-150 hover:bg-surface-soft hover:text-ink
+            focus:outline-none focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-55`,
+    success: `flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-[0.8125rem] font-medium text-emerald-800 
               bg-emerald-50 border border-emerald-200
               hover:bg-emerald-100 hover:border-emerald-300
-              shadow-sm transition-all duration-200
+              shadow-2xs transition-all duration-150
               disabled:opacity-50 disabled:cursor-not-allowed`,
-    warning: `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-amber-800 
+    warning: `flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-[0.8125rem] font-medium text-amber-800 
               bg-amber-50 border border-amber-200
               hover:bg-amber-100 hover:border-amber-300
-              shadow-sm transition-all duration-200
+              shadow-2xs transition-all duration-150
               disabled:opacity-50 disabled:cursor-not-allowed`,
-    danger: `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-rose-800 
+    danger: `flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-[0.8125rem] font-medium text-rose-800 
              bg-rose-50 border border-rose-200
              hover:bg-rose-100 hover:border-rose-300
-             shadow-sm transition-all duration-200
+             shadow-2xs transition-all duration-150
              disabled:opacity-50 disabled:cursor-not-allowed`,
-    icon: `inline-flex h-9 w-9 items-center justify-center rounded-xl transition
+    icon: `inline-flex h-8.5 w-8.5 items-center justify-center rounded-lg transition
            focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50`,
-    iconEdit: 'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900',
+    iconEdit: 'border border-line bg-surface text-muted-2 hover:bg-surface-soft hover:text-ink',
     iconDelete: 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100',
-    iconView: 'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900',
-    iconKey: 'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900',
+    iconView: 'border border-line bg-surface text-muted-2 hover:bg-surface-soft hover:text-ink',
+    iconKey: 'border border-line bg-surface text-muted-2 hover:bg-surface-soft hover:text-ink',
     iconShield: 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
   },
 
   input: {
-    base: `min-h-9 w-full rounded-[7px] border bg-surface px-3 py-2 text-base text-ink shadow-none
-           transition placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-line-focus/70`,
-    normal: 'border-line hover:border-line-strong focus:border-line-focus-strong',
-    error: 'border-rose-300 focus:ring-rose-500 focus:border-rose-500 bg-rose-50/30 text-rose-900',
-    label: 'mb-1.5 block text-sm font-medium text-muted-2',
-    errorText: 'mt-1 text-xs text-rose-600 font-medium',
-    helpText: 'mt-1 text-[0.7rem] text-muted-3 leading-snug',
+    base: `min-h-9.5 w-full rounded-xl border bg-surface px-3.5 py-2 text-[0.84rem] leading-5 text-ink shadow-[0_1px_2px_rgba(16,24,40,0.02)]
+           transition-all duration-150 placeholder:text-muted/80 focus:outline-none focus:ring-3 focus:ring-brand/12`,
+    normal: 'border-line hover:border-line-strong focus:border-brand',
+    error: 'border-rose-300 focus:ring-rose-500/15 focus:border-rose-500 bg-rose-50/25 text-rose-900',
+    label: 'mb-1.5 block text-[0.78rem] font-medium tracking-[-0.005em] text-ink',
+    errorText: 'mt-1.5 text-[0.73rem] text-rose-600 font-medium',
+    helpText: 'mt-1.5 text-[0.73rem] text-muted-2 leading-snug',
   },
 
   select: {
-    base: `w-full rounded-lg border bg-surface px-4 py-2.5 text-sm font-medium text-ink shadow-sm
-           transition focus:outline-none focus:ring-2 focus:ring-line-focus/70
+    base: `min-h-9.5 w-full rounded-xl border bg-surface px-3.5 py-2 text-[0.84rem] leading-5 text-ink shadow-[0_1px_2px_rgba(16,24,40,0.02)]
+           transition-all duration-150 focus:outline-none focus:ring-3 focus:ring-brand/12
            disabled:cursor-not-allowed disabled:bg-surface-soft disabled:text-muted`,
-    normal: 'border-line hover:border-line-strong focus:border-line-focus-strong',
+    normal: 'border-line hover:border-line-strong focus:border-brand',
   },
 
   table: {
@@ -182,15 +182,15 @@ export const COMPONENT_STYLES = {
   },
 
   modal: {
-    overlay: 'fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-ink-soft/20 p-4 backdrop-blur-[2px] sm:p-6',
-    containerShell: 'mx-auto w-full overflow-hidden rounded-lg border border-line bg-surface shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    container: 'max-h-[88vh] w-full max-w-lg overflow-hidden rounded-lg border border-line bg-surface shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    containerMedium: 'max-h-[88vh] w-full max-w-2xl overflow-hidden rounded-lg border border-line bg-surface shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    containerLarge: 'max-h-[88vh] w-full max-w-5xl overflow-hidden rounded-lg border border-line bg-surface shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]',
-    header: 'flex items-center justify-between border-b border-line-soft bg-surface px-4 py-3.5 sm:px-5',
-    headerTitle: 'text-md font-semibold leading-5 text-ink',
-    body: 'max-h-[calc(88vh-130px)] overflow-y-auto px-4 py-4 sm:px-5',
-    footer: 'flex justify-end gap-2 border-t border-line-soft bg-surface-soft px-4 py-3 sm:px-5',
+    overlay: 'fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-slate-950/45 p-4 backdrop-blur-[3px] sm:p-6 dark:bg-black/70',
+    containerShell: 'mx-auto w-full overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_24px_64px_-16px_rgba(15,23,42,0.22)]',
+    container: 'flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_24px_64px_-16px_rgba(15,23,42,0.22)]',
+    containerMedium: 'flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_24px_64px_-16px_rgba(15,23,42,0.22)]',
+    containerLarge: 'flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_24px_64px_-16px_rgba(15,23,42,0.22)]',
+    header: 'flex shrink-0 items-center justify-between border-b border-line-soft bg-surface px-5 py-4 sm:px-6',
+    headerTitle: 'text-[0.95rem] font-semibold leading-5 tracking-[-0.015em] text-ink',
+    body: 'flex-1 min-h-0 overflow-y-auto px-5 py-5 sm:px-6',
+    footer: 'flex shrink-0 justify-end gap-2.5 border-t border-line-soft bg-surface-soft/75 px-5 py-3.5 sm:px-6',
   },
 
   stats: {
@@ -204,9 +204,9 @@ export const COMPONENT_STYLES = {
   filter: {
     container: 'bg-transparent p-0',
     searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2',
-    searchInput: `h-9 w-full rounded-[9px] border border-line bg-surface py-1.5 pl-9 pr-3 text-sm text-ink shadow-sm
-                  transition placeholder:text-muted hover:border-line-strong focus:border-line-focus-strong
-                  focus:outline-none focus:ring-2 focus:ring-line-focus/70`,
+    searchInput: `h-9.5 w-full rounded-xl border border-line bg-surface py-1.5 pl-9 pr-3.5 text-[0.84rem] text-ink shadow-[0_1px_2px_rgba(16,24,40,0.02)]
+                  transition-all duration-150 placeholder:text-muted/80 hover:border-line-strong focus:border-brand
+                  focus:outline-none focus:ring-3 focus:ring-brand/12`,
   },
 
   nav: {

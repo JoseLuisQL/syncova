@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { MagnifyingGlass, SlidersHorizontal, X } from '@phosphor-icons/react';
+import { CaretDown, MagnifyingGlass, X } from '@phosphor-icons/react';
 import { COMPONENT_STYLES } from '../constants';
 
 const SkeletonBlock: React.FC<{ className?: string }> = ({ className = '' }) => (
@@ -40,70 +40,101 @@ export const FilterBar: React.FC<FilterBarProps> = memo(({
 }) => {
   const hasActiveFilters =
     Boolean(searchValue.trim()) ||
-    filters.some((filter) => filter.value && filter.value !== 'todos');
+    filters.some((filter) => filter.value && filter.value !== 'todos' && filter.value !== '');
 
   return (
-    <section aria-label="Filtros" className={COMPONENT_STYLES.filter.container}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-          <div className="relative w-full sm:w-[220px]">
-            <label htmlFor="inventory-search" className="sr-only">
-              Buscar
+    <section
+      aria-label="Filtros"
+      className="rounded-xl border border-line bg-surface p-3 shadow-2xs sm:p-3.5"
+    >
+      <div className="flex flex-col gap-2.5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-end">
+          {/* Buscador */}
+          <div className="w-full sm:w-[240px] lg:w-[260px]">
+            <label htmlFor="inventory-search" className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.06em] text-muted">
+              Búsqueda rápida
             </label>
-            <MagnifyingGlass className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
-            <input
-              id="inventory-search"
-              type="text"
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={(event) => onSearchChange(event.target.value)}
-              className={COMPONENT_STYLES.filter.searchInput}
-            />
+            <div className="relative">
+              <MagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" aria-hidden="true" />
+              <input
+                id="inventory-search"
+                type="text"
+                placeholder={searchPlaceholder}
+                value={searchValue}
+                onChange={(event) => onSearchChange(event.target.value)}
+                className="h-9 w-full rounded-lg border border-line bg-surface pl-9 pr-8 text-xs sm:text-sm font-medium text-ink shadow-2xs transition placeholder:text-muted hover:border-line-strong focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/15"
+              />
+              {searchValue ? (
+                <button
+                  type="button"
+                  onClick={() => onSearchChange('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted transition hover:bg-surface-soft hover:text-ink"
+                  aria-label="Limpiar búsqueda"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              ) : null}
+            </div>
           </div>
 
+          {/* Selectores directos en línea (sin popovers ocultos) */}
           {filters.length > 0 ? (
-            <details className="group relative">
-              <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-line bg-white px-3.5 text-sm font-semibold text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 [&::-webkit-details-marker]:hidden">
-                <SlidersHorizontal className="h-4 w-4 text-muted-2" />
-                Filtros
-              </summary>
-              <div className="absolute left-0 top-11 z-30 w-[280px] rounded-xl border border-line bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
-                <div className="space-y-3">
-                {filters.map((filter) => (
-                  <div key={filter.id}>
-                    <label htmlFor={filter.id} className="mb-1 block text-xs font-medium text-muted-3">
+            <div className={`grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-end ${
+              filters.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+            }`}>
+              {filters.map((filter) => {
+                const isFiltered = Boolean(filter.value && filter.value !== 'todos' && filter.value !== '');
+                return (
+                  <div key={filter.id} className="min-w-0 sm:w-[175px]">
+                    <label
+                      htmlFor={filter.id}
+                      className="mb-1 block truncate text-[11px] font-semibold uppercase tracking-[0.06em] text-muted"
+                    >
                       {filter.label}
                     </label>
-                    <select
-                      id={filter.id}
-                      value={filter.value}
-                      onChange={(event) => filter.onChange(event.target.value)}
-                      disabled={filter.disabled}
-                      className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {filter.options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        id={filter.id}
+                        value={filter.value}
+                        onChange={(event) => filter.onChange(event.target.value)}
+                        disabled={filter.disabled}
+                        className={`h-9 w-full appearance-none rounded-lg border pl-3 pr-8 text-xs sm:text-sm font-medium shadow-2xs transition focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/15 disabled:cursor-not-allowed disabled:bg-surface-soft disabled:text-muted ${
+                          isFiltered
+                            ? 'border-status-success-border bg-status-success-bg/70 text-status-success-text'
+                            : 'border-line bg-surface text-ink hover:border-line-strong'
+                        }`}
+                      >
+                        {filter.options.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <CaretDown
+                        className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2"
+                        weight="bold"
+                      />
+                    </div>
                   </div>
-                ))}
-                </div>
-              </div>
-            </details>
+                );
+              })}
+            </div>
           ) : null}
 
           {hasActiveFilters && onClear ? (
-            <button type="button" onClick={onClear} className={COMPONENT_STYLES.button.ghost}>
-              <X className="h-4 w-4" />
+            <button
+              type="button"
+              onClick={onClear}
+              className="inline-flex h-9 items-center justify-center gap-1.5 self-start sm:self-end rounded-lg border border-line bg-surface-soft px-3 text-xs font-semibold text-muted-2 transition hover:border-line-strong hover:bg-surface hover:text-ink"
+            >
+              <X className="h-3.5 w-3.5" weight="bold" />
               <span>Limpiar</span>
             </button>
           ) : null}
         </div>
 
         {actions ? (
-          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-line-soft pt-2 sm:border-t-0 sm:pt-0">
             {actions}
           </div>
         ) : null}
@@ -214,20 +245,28 @@ export const DataTable: React.FC<DataTableProps> = memo(({
   children,
   isLoading = false,
   loadingMessage = 'Cargando datos...',
-  skeletonRows = 5,
+  skeletonRows = 6,
   skeletonColumns = 5,
   loadingVariant = 'table',
 }) => (
   <div className={`${COMPONENT_STYLES.table.container} flex min-h-0 flex-1 flex-col`}>
     {isLoading ? (
-      <div className="inventory-loading-shell p-4 sm:p-5">
-        <div className="flex items-center gap-3 pb-4 text-zinc-700">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 inventory-breathe">
-            <div className="h-4 w-4 rounded-full border-2 border-zinc-900 border-t-transparent animate-spin" />
+      <div className="inventory-loading-shell p-4 sm:p-5" role="status" aria-live="polite" aria-label={loadingMessage}>
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-3.5 py-2.5 shadow-2xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-soft inventory-breathe">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-brand" />
+              </span>
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-xs font-semibold text-ink">{loadingMessage}</p>
+              <p className="truncate text-[11px] text-muted">Sincronizando registros de inventario y lotes...</p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-zinc-900">{loadingMessage}</p>
-            <p className="text-xs text-zinc-500">Mostrando una vista previa mientras llega la información.</p>
+          <div className="hidden sm:flex items-center gap-2 shrink-0">
+            <SkeletonBlock className="h-5 w-20 rounded-md" />
           </div>
         </div>
 
@@ -236,40 +275,89 @@ export const DataTable: React.FC<DataTableProps> = memo(({
             {Array.from({ length: skeletonRows }).map((_, index) => (
               <div
                 key={`card-skeleton-${index + 1}`}
-                className="inventory-reveal rounded-[22px] border border-zinc-200 bg-white/90 p-4 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.14)]"
-                style={{ animationDelay: `${index * 45}ms` }}
+                className="inventory-reveal rounded-2xl border border-line bg-surface p-4 shadow-2xs"
+                style={{ animationDelay: `${index * 40}ms` }}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <SkeletonBlock className="h-5 w-36 rounded-full" />
-                    <SkeletonBlock className="mt-2 h-3.5 w-48 max-w-full rounded-full" />
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <SkeletonBlock className="h-9 w-9 shrink-0 rounded-xl" />
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <SkeletonBlock className="h-4 w-36 rounded-md" />
+                      <SkeletonBlock className="h-3 w-48 max-w-full rounded-md opacity-75" />
+                    </div>
                   </div>
-                  <SkeletonBlock className="h-7 w-20 rounded-full" />
+                  <SkeletonBlock className="h-6 w-16 shrink-0 rounded-md" />
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-2.5">
-                  <SkeletonBlock className="h-[74px] rounded-2xl" />
-                  <SkeletonBlock className="h-[74px] rounded-2xl" />
+                <div className="mt-3.5 grid grid-cols-2 gap-2.5">
+                  <div className="rounded-xl border border-line-soft bg-surface-soft/50 p-2.5 space-y-1.5">
+                    <SkeletonBlock className="h-2.5 w-14 rounded-full" />
+                    <SkeletonBlock className="h-4 w-20 rounded-md" />
+                  </div>
+                  <div className="rounded-xl border border-line-soft bg-surface-soft/50 p-2.5 space-y-1.5">
+                    <SkeletonBlock className="h-2.5 w-14 rounded-full" />
+                    <SkeletonBlock className="h-4 w-20 rounded-md" />
+                  </div>
                 </div>
 
-                <SkeletonBlock className="mt-4 h-10 w-full rounded-2xl" />
+                <div className="mt-3.5 flex items-center justify-between border-t border-line-soft pt-3">
+                  <SkeletonBlock className="h-3 w-24 rounded-full" />
+                  <div className="flex items-center gap-1.5">
+                    <SkeletonBlock className="h-7 w-7 rounded-lg" />
+                    <SkeletonBlock className="h-7 w-7 rounded-lg" />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-[20px] border border-line bg-surface">
+          <div className="overflow-hidden rounded-2xl border border-line bg-surface">
             <table className="min-w-full table-fixed">
-              <tbody className="bg-surface">
+              <thead>
+                <tr className="border-b border-line bg-surface-soft/80">
+                  {Array.from({ length: skeletonColumns }).map((_, colIdx) => (
+                    <th key={`th-skeleton-${colIdx + 1}`} className="px-4 py-3 text-left">
+                      <SkeletonBlock
+                        className={`h-3 rounded-full ${
+                          colIdx === 0
+                            ? 'w-28'
+                            : colIdx === skeletonColumns - 1
+                            ? 'ml-auto w-16'
+                            : 'w-20'
+                        }`}
+                      />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line-soft bg-surface">
                 {Array.from({ length: skeletonRows }).map((_, rowIndex) => (
-                  <tr key={`table-skeleton-${rowIndex + 1}`} className="inventory-reveal" style={{ animationDelay: `${rowIndex * 45}ms` }}>
+                  <tr key={`table-skeleton-${rowIndex + 1}`} className="inventory-reveal" style={{ animationDelay: `${rowIndex * 35}ms` }}>
                     {Array.from({ length: skeletonColumns }).map((__, columnIndex) => (
                       <td key={`table-skeleton-${rowIndex + 1}-${columnIndex + 1}`} className={COMPONENT_STYLES.table.cell}>
-                        <div className="space-y-2">
-                          <SkeletonBlock className={`h-4 rounded-full ${columnIndex === 0 ? 'w-4/5' : columnIndex === skeletonColumns - 1 ? 'w-1/2 ml-auto' : 'w-full'}`} />
-                          {(columnIndex === 0 || columnIndex === 1) ? (
-                            <SkeletonBlock className="h-3 w-2/3 rounded-full opacity-80" />
-                          ) : null}
-                        </div>
+                        {columnIndex === 0 ? (
+                          <div className="flex items-center gap-3">
+                            <SkeletonBlock className="h-8 w-8 shrink-0 rounded-lg" />
+                            <div className="min-w-0 flex-1 space-y-1.5">
+                              <SkeletonBlock className="h-3.5 w-4/5 rounded-md" />
+                              <SkeletonBlock className="h-2.5 w-1/2 rounded-md opacity-75" />
+                            </div>
+                          </div>
+                        ) : columnIndex === skeletonColumns - 1 ? (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <SkeletonBlock className="h-7 w-7 rounded-lg" />
+                            <SkeletonBlock className="h-7 w-7 rounded-lg" />
+                          </div>
+                        ) : columnIndex === skeletonColumns - 2 ? (
+                          <SkeletonBlock className="h-5 w-16 rounded-md" />
+                        ) : (
+                          <div className="space-y-1.5">
+                            <SkeletonBlock className="h-3.5 w-3/4 rounded-md" />
+                            {(columnIndex === 1) ? (
+                              <SkeletonBlock className="h-2.5 w-1/2 rounded-md opacity-75" />
+                            ) : null}
+                          </div>
+                        )}
                       </td>
                     ))}
                   </tr>

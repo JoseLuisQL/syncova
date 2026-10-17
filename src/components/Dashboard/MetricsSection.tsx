@@ -115,18 +115,25 @@ const MetricsSection: React.FC<MetricsSectionProps> = ({
 
   if (isLoading || !stats) {
     return (
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4" role="status" aria-live="polite">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="h-[132px] animate-pulse rounded-xl border border-line bg-surface p-4"
+            className="inventory-reveal flex h-[132px] flex-col justify-between rounded-xl border border-line bg-surface p-4 shadow-xs"
+            style={{ animationDelay: `${i * 35}ms` }}
           >
-            <div className="mb-4 flex items-center justify-between">
-              <div className="h-4 w-32 rounded bg-surface-soft" />
-              <div className="h-4 w-4 rounded bg-surface-soft" />
+            <div className="flex items-center justify-between">
+              <div className="inventory-skeleton h-3.5 w-32 rounded-md" />
+              <div className="inventory-skeleton h-6 w-6 rounded-md" />
             </div>
-            <div className="mb-4 h-7 w-24 rounded bg-surface-soft" />
-            <div className="h-3 w-40 rounded bg-surface-soft" />
+            <div className="flex items-baseline gap-2">
+              <div className="inventory-skeleton h-7 w-24 rounded-md" />
+              <div className="inventory-skeleton h-3 w-12 rounded-full opacity-75" />
+            </div>
+            <div className="flex items-center justify-between border-t border-line-soft pt-2">
+              <div className="inventory-skeleton h-3 w-28 rounded-full" />
+              <div className="inventory-skeleton h-3 w-16 rounded-full opacity-70" />
+            </div>
           </div>
         ))}
       </div>

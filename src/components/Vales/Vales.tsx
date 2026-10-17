@@ -27,6 +27,7 @@ import ValeTypeSelectionModal from './ValeTypeSelectionModal';
 import { DataTable, EmptyState, FilterBar, TableCell, TableHeader, TableRow } from '../Establecimientos/components';
 import { COMPONENT_STYLES as ESTABLECIMIENTOS_STYLES } from '../Establecimientos/constants';
 import { MESES, ANIOS_DISPONIBLES } from './constants';
+import { Modal } from '../ui/ModalElements';
 
 interface ValesProps {
   initialCentroAcopioId?: string;
@@ -624,39 +625,23 @@ const Vales: React.FC<ValesProps> = ({
         anio={selectedAnio}
       />
 
-      {showDiagnostico && (
-        <div className="fixed inset-0 z-[300] flex items-end justify-center bg-ink-soft/20 p-3 backdrop-blur-[2px] sm:items-center sm:p-4">
-          <div className="max-h-[95vh] w-full max-w-6xl overflow-hidden rounded-t-[10px] border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-lg">
-            <div className="flex items-center justify-between border-b border-line-soft bg-white px-4 py-3.5 sm:px-5">
-              <div className="flex items-center space-x-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-amber-600">
-                  <Gear weight="bold" className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="text-md font-semibold leading-5 text-ink">Diagnóstico de Conectividad</h3>
-                  <p className="mt-1 text-sm leading-4 text-muted-2">Verificación del estado del sistema</p>
-                </div>
-              </div>
-              <button type="button"
-                onClick={() => setShowDiagnostico(false)}
-                className="rounded-[7px] p-1.5 transition-colors hover:bg-surface-soft"
-              >
-                <X weight="bold" className="h-4 w-4 text-zinc-500" />
-              </button>
-            </div>
-            <div className="max-h-[calc(95vh-120px)] overflow-y-auto px-4 py-4 sm:px-5">
-              <ValesConnectionTest />
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        isOpen={showDiagnostico}
+        onClose={() => setShowDiagnostico(false)}
+        title="Diagnóstico de Conectividad"
+        subtitle="Verificación del estado del sistema"
+        icon={Gear}
+        size="xl"
+      >
+        <ValesConnectionTest />
+      </Modal>
 
       {generandoVale && (
-        <div className="fixed top-4 right-4 z-50 bg-zinc-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center space-x-3 animate-pulse">
-          <SpinnerGap weight="bold" className="h-5 w-5 animate-spin" />
+        <div className="fixed top-4 right-4 z-50 flex items-center space-x-3 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-white shadow-lg animate-pulse dark:border-zinc-700">
+          <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" />
           <div>
-            <p className="font-medium">Generando Vale de Entrega</p>
-            <p className="text-sm opacity-90">Procesando datos y actualizando stocks...</p>
+            <p className="text-xs font-semibold">Generando Vale de Entrega</p>
+            <p className="text-[11px] text-zinc-400">Procesando datos y actualizando stocks...</p>
           </div>
         </div>
       )}
@@ -678,140 +663,120 @@ const Vales: React.FC<ValesProps> = ({
       )}
 
       {showModificacionesModal && valeSeleccionado && (
-        <div className="fixed inset-0 z-[300] flex items-end justify-center bg-ink-soft/20 p-3 backdrop-blur-[2px] sm:items-center sm:p-4">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-t-[10px] border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:rounded-lg">
-            <div className="flex items-center justify-between border-b border-line-soft px-4 py-3.5 sm:px-5">
-              <div className="flex items-center space-x-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-muted-2">
-                  <ArrowsClockwise weight="bold" className="h-4 w-4" />
+        <Modal
+          isOpen={showModificacionesModal}
+          onClose={() => {
+            setShowModificacionesModal(false);
+            setValeSeleccionado(null);
+          }}
+          title={`Modificaciones del Vale ${valeSeleccionado.numero}`}
+          subtitle="Sincronización con datos actualizados"
+          icon={ArrowsClockwise}
+          size="lg"
+        >
+          <div className="space-y-4">
+            <div className="rounded-lg border border-zinc-200/80 bg-zinc-50/70 p-3.5 dark:border-zinc-800 dark:bg-zinc-900/50">
+              <div className="grid grid-cols-2 gap-3.5 md:grid-cols-4">
+                <div>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Centro de Acopio</p>
+                  <p className="mt-0.5 text-xs font-semibold text-zinc-900 dark:text-zinc-100">{valeSeleccionado.centroAcopio.nombre}</p>
                 </div>
                 <div>
-                  <h3 className="text-md font-semibold leading-5 text-ink">
-                    Modificaciones del Vale {valeSeleccionado.numero}
-                  </h3>
-                  <p className="mt-1 text-sm leading-4 text-muted-2">
-                    Sincronización con datos actualizados
-                  </p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Período</p>
+                  <p className="mt-0.5 text-xs font-semibold text-zinc-900 dark:text-zinc-100">{valeSeleccionado.mes}/{valeSeleccionado.anio}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Total Vacunas</p>
+                  <p className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{valeSeleccionado.totalVacunas.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Establecimientos</p>
+                  <p className="mt-0.5 text-xs font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">{valeSeleccionado.totalEstablecimientos}</p>
                 </div>
               </div>
-              <button type="button"
-                onClick={() => {
-                  setShowModificacionesModal(false);
-                  setValeSeleccionado(null);
-                }}
-                className="rounded-[7px] p-1.5 text-muted transition-colors hover:bg-surface-soft hover:text-ink"
-              >
-                <X weight="bold" className="h-4 w-4" />
-              </button>
             </div>
 
-            <div className="max-h-[calc(90vh-140px)] overflow-y-auto px-4 py-4 sm:px-5">
-              <div className="mb-5 rounded-md border border-line bg-surface-soft p-3">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <p className="text-sm text-zinc-600">Centro de Acopio</p>
-                    <p className="font-medium">{valeSeleccionado.centroAcopio.nombre}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-zinc-600">Período</p>
-                    <p className="font-medium">{valeSeleccionado.mes}/{valeSeleccionado.anio}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-zinc-600">Total Vacunas</p>
-                    <p className="font-medium">{valeSeleccionado.totalVacunas.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-zinc-600">Establecimientos</p>
-                    <p className="font-medium">{valeSeleccionado.totalEstablecimientos}</p>
-                  </div>
-                </div>
-              </div>
+            <button
+              type="button"
+              onClick={() => sincronizarVale(valeSeleccionado.id)}
+              disabled={isSyncing}
+              className="flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand px-3.5 text-xs font-semibold text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSyncing ? (
+                <>
+                  <SpinnerGap weight="bold" className="h-4 w-4 animate-spin" />
+                  <span>Sincronizando vale...</span>
+                </>
+              ) : (
+                <>
+                  <ArrowsClockwise weight="bold" className="h-4 w-4" />
+                  <span>Sincronizar con datos actualizados</span>
+                </>
+              )}
+            </button>
 
-              <div className="mb-6">
-                <button type="button"
-                  onClick={() => sincronizarVale(valeSeleccionado.id)}
-                  disabled={isSyncing}
-                  className="flex h-9 w-full items-center justify-center space-x-2 rounded-[7px] bg-brand px-3.5 text-base font-semibold text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isSyncing ? (
-                    <>
-                      <SpinnerGap weight="bold" className="h-5 w-5 animate-spin" />
-                      <span>Sincronizando vale...</span>
-                    </>
-                  ) : (
-                    <>
-                      <ArrowsClockwise weight="bold" className="h-5 w-5" />
-                      <span>Sincronizar con datos actualizados</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {modificaciones.length > 0 ? (
-                <div>
-                  <h4 className="text-lg font-medium text-zinc-900 mb-4">
-                    Modificaciones Detectadas ({modificaciones.length})
-                  </h4>
-                  <div className="space-y-3">
-                    {modificaciones.map((modificacion, index) => (
-                      <div key={index} className="rounded-md border border-line bg-white p-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                modificacion.tipo === 'cantidad_programada_modificada' ? 'bg-[#f3f0ff] text-brand' :
-                                modificacion.tipo === 'entrega_adicional_modificada' ? 'bg-amber-100 text-amber-800' :
-                                modificacion.tipo === 'entrega_adicional_agregada' ? 'bg-emerald-100 text-emerald-800' :
-                                modificacion.tipo === 'establecimiento_agregado' ? 'bg-cyan-100 text-cyan-800' :
-                                'bg-rose-100 text-rose-800'
-                              }`}>
-                                {modificacion.tipo.replace(/_/g, ' ').toUpperCase()}
-                              </span>
-                            </div>
-                            <p className="font-medium text-zinc-900">
-                              {modificacion.establecimientoNombre} - {modificacion.vacunaNombre}
-                            </p>
-                            <div className="flex items-center space-x-4 mt-2 text-sm text-zinc-600">
-                              <span>Anterior: {modificacion.cantidadAnterior.toLocaleString()}</span>
-                              <span>→</span>
-                              <span>Nueva: {modificacion.cantidadNueva.toLocaleString()}</span>
-                            </div>
+            {modificaciones.length > 0 ? (
+              <div>
+                <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  Modificaciones Detectadas ({modificaciones.length})
+                </h4>
+                <div className="space-y-2.5">
+                  {modificaciones.map((modificacion, index) => (
+                    <div key={index} className="rounded-lg border border-zinc-200/80 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900/50">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="mb-1.5 flex items-center gap-2">
+                            <span className={`px-2 py-0.5 text-[11px] font-medium rounded-md ${
+                              modificacion.tipo === 'cantidad_programada_modificada' ? 'bg-violet-50 text-brand dark:bg-violet-950/40 dark:text-violet-300' :
+                              modificacion.tipo === 'entrega_adicional_modificada' ? 'bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300' :
+                              modificacion.tipo === 'entrega_adicional_agregada' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' :
+                              modificacion.tipo === 'establecimiento_agregado' ? 'bg-cyan-50 text-cyan-800 dark:bg-cyan-950/40 dark:text-cyan-300' :
+                              'bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300'
+                            }`}>
+                              {modificacion.tipo.replace(/_/g, ' ').toUpperCase()}
+                            </span>
                           </div>
-                          <div className={`text-right ${
-                            modificacion.diferencia > 0 ? 'text-emerald-600' :
-                            modificacion.diferencia < 0 ? 'text-rose-600' : 'text-zinc-600'
-                          }`}>
-                            <p className="font-medium">
-                              {modificacion.diferencia > 0 ? '+' : ''}{modificacion.diferencia.toLocaleString()}
-                            </p>
+                          <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                            {modificacion.establecimientoNombre} — {modificacion.vacunaNombre}
+                          </p>
+                          <div className="mt-1 flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+                            <span>Anterior: {modificacion.cantidadAnterior.toLocaleString()}</span>
+                            <span>→</span>
+                            <span>Nueva: {modificacion.cantidadNueva.toLocaleString()}</span>
                           </div>
                         </div>
+                        <div className={`text-right text-xs font-semibold tabular-nums ${
+                          modificacion.diferencia > 0 ? 'text-emerald-600 dark:text-emerald-400' :
+                          modificacion.diferencia < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-zinc-600 dark:text-zinc-400'
+                        }`}>
+                          {modificacion.diferencia > 0 ? '+' : ''}{modificacion.diferencia.toLocaleString()}
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="w-12 h-12 bg-emerald-50 border border-emerald-200/60 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <ArrowsClockwise weight="bold" className="h-6 w-6 text-emerald-600" />
-                  </div>
-                  <h4 className="text-lg font-medium text-zinc-900 mb-2">Vale Sincronizado</h4>
-                  <p className="text-zinc-600">
-                    Este vale está actualizado con los datos más recientes.
-                  </p>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-zinc-200/80 bg-zinc-50/50 py-8 text-center dark:border-zinc-800 dark:bg-zinc-900/30">
+                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-200/70 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/30">
+                  <ArrowsClockwise weight="bold" className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
-              )}
+                <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Vale Sincronizado</h4>
+                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                  Este vale está actualizado con los datos más recientes.
+                </p>
+              </div>
+            )}
 
-              {ultimaSincronizacion && (
-                <div className="mt-6 pt-4 border-t border-zinc-200">
-                  <p className="text-sm text-zinc-500">
-                    Última sincronización: {ultimaSincronizacion.toLocaleString()}
-                  </p>
-                </div>
-              )}
-            </div>
+            {ultimaSincronizacion && (
+              <div className="border-t border-zinc-200/80 pt-3 dark:border-zinc-800">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  Última sincronización: {ultimaSincronizacion.toLocaleString()}
+                </p>
+              </div>
+            )}
           </div>
-        </div>
+        </Modal>
       )}
 
       {valeGlobalCombinado && (

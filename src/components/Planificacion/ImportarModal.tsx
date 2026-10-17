@@ -1,6 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo, memo } from 'react';
 import {
-  X,
   UploadSimple,
   DownloadSimple,
   FileXls,
@@ -17,6 +16,7 @@ import {
 } from '@phosphor-icons/react';
 import { Vacuna } from '../../types';
 import { COMPONENT_STYLES } from './constants';
+import { Modal } from '../ui/ModalElements';
 
 interface ImportarModalProps {
   isOpen: boolean;
@@ -53,27 +53,27 @@ const StepIndicator = memo<{ currentStep: Step; totalSteps: number }>(({ current
   ];
 
   return (
-    <div className="mb-6 flex items-center justify-center">
+    <div className="mb-5 flex items-center justify-center">
       {steps.slice(0, totalSteps).map((step, index) => (
         <React.Fragment key={step.num}>
           <div className="flex flex-col items-center">
             <div
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-all ${
+              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all ${
                 currentStep === step.num
-                  ? 'bg-brand text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] ring-2 ring-brand/25 ring-offset-2'
+                  ? 'bg-brand text-white ring-3 ring-brand/15'
                   : currentStep > step.num
-                  ? 'border border-line bg-surface-soft text-ink'
-                  : 'border border-line bg-white text-muted'
+                  ? 'border border-brand/30 bg-surface-soft text-brand'
+                  : 'border border-line bg-surface text-muted'
               }`}
             >
               {currentStep > step.num ? (
-                <CheckCircle className="h-4 w-4" weight="bold" />
+                <CheckCircle className="h-3.5 w-3.5" weight="bold" />
               ) : (
                 step.num
               )}
             </div>
             <span
-              className={`mt-2 text-[0.65rem] font-bold uppercase tracking-wider ${
+              className={`mt-1.5 text-[10px] font-semibold uppercase tracking-wider ${
                 currentStep >= step.num ? 'text-ink' : 'text-muted'
               }`}
             >
@@ -82,7 +82,7 @@ const StepIndicator = memo<{ currentStep: Step; totalSteps: number }>(({ current
           </div>
           {index < totalSteps - 1 && (
             <div
-              className={`mx-3 mb-5 h-[2px] w-12 ${
+              className={`mx-3 mb-4 h-[1.5px] w-10 ${
                 currentStep > step.num ? 'bg-brand' : 'bg-line'
               }`}
             />
@@ -103,34 +103,35 @@ const ImportTypeCard = memo<{
   const isVacuna = type === 'vacuna';
 
   return (
-    <button type="button"
+    <button
+      type="button"
       onClick={onClick}
-      className={`relative flex w-full flex-col items-center rounded-xl border p-6 transition-colors ${
+      className={`relative flex w-full flex-col items-center rounded-xl border p-5 transition-all ${
         selected
           ? 'border-brand-100 bg-surface-soft'
-          : 'border-line bg-white hover:border-line-strong hover:bg-surface-soft'
+          : 'border-line bg-surface hover:border-line-strong hover:bg-surface-soft'
       }`}
     >
       {selected && (
         <div className="absolute right-3 top-3">
-          <CheckCircle className="h-5 w-5 text-brand" weight="fill" />
+          <CheckCircle className="h-4 w-4 text-brand" weight="fill" />
         </div>
       )}
       <div
-        className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl border ${
-          selected ? 'border-line bg-white text-brand' : 'border-line bg-surface-soft text-muted'
+        className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl border ${
+          selected ? 'border-line bg-surface text-brand' : 'border-line bg-surface-soft text-muted'
         }`}
       >
         {isVacuna ? (
-          <Syringe className="h-7 w-7" weight={selected ? 'duotone' : 'regular'} />
+          <Syringe className="h-5 w-5" weight={selected ? 'duotone' : 'regular'} />
         ) : (
-          <Stack className="h-7 w-7" weight={selected ? 'duotone' : 'regular'} />
+          <Stack className="h-5 w-5" weight={selected ? 'duotone' : 'regular'} />
         )}
       </div>
-      <h4 className={`mb-1 text-sm font-semibold tracking-tight ${selected ? 'text-ink' : 'text-muted-2'}`}>
+      <h4 className={`mb-1 text-[0.875rem] font-semibold tracking-tight ${selected ? 'text-ink' : 'text-muted-2'}`}>
         {isVacuna ? 'Por vacuna' : 'Importación masiva'}
       </h4>
-      <p className="text-center text-[0.75rem] font-medium text-muted-2">
+      <p className="text-center text-xs text-muted-2">
         {isVacuna
           ? 'Carga la matriz anual de una vacuna específica.'
           : 'Carga matrices de varias vacunas desde un solo archivo.'}
@@ -339,52 +340,90 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div 
-      className={`${COMPONENT_STYLES.modal.overlay} flex items-end justify-center p-3 sm:items-center sm:p-6`}
-      onClick={(e) => e.target === e.currentTarget && handleClose()}
-    >
-      <div 
-        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-t-[10px] border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:max-h-[88vh] sm:rounded-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="border-b border-line-soft bg-white px-5 py-3.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-muted-2">
-                <UploadSimple className="h-4 w-4" weight="bold" />
-              </div>
-              <div>
-                <h2 className="text-md font-semibold leading-5 tracking-[-0.01em] text-ink">Importar planificación</h2>
-                <p className="mt-1 text-sm leading-4 text-muted-2">
-                  {step < 4 ? 'Carga matrices anuales desde Excel' : 'Resultado de la importación'}
-                </p>
-              </div>
-            </div>
-            <button type="button"
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Importar planificación"
+      subtitle={step < 4 ? 'Carga matrices anuales desde Excel' : 'Resultado de la importación'}
+      icon={UploadSimple}
+      size="lg"
+      footer={
+        <div className="flex w-full items-center justify-between">
+          <div>
+            {step > 1 && step < 4 && (
+              <button
+                type="button"
+                onClick={handlePrevStep}
+                className={COMPONENT_STYLES.button.ghost}
+              >
+                <CaretLeft className="h-4 w-4" weight="bold" />
+                Regresar
+              </button>
+            )}
+            {step === 4 && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className={COMPONENT_STYLES.button.secondary}
+              >
+                <ArrowsClockwise className="h-4 w-4" weight="bold" />
+                Nueva importación
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
               onClick={handleClose}
-              className="rounded-[7px] p-1.5 text-muted transition-colors hover:bg-surface-soft hover:text-ink"
-              aria-label="Cerrar modal"
+              className={COMPONENT_STYLES.button.secondary}
             >
-              <X className="h-4 w-4" weight="bold" />
+              {step === 4 ? 'Aceptar' : 'Cancelar'}
             </button>
+
+            {step < 4 && (
+              <button
+                type="button"
+                onClick={handleNextStep}
+                disabled={!canProceedToNextStep || isImportingExcel}
+                className={COMPONENT_STYLES.button.primary}
+              >
+                {isImportingExcel ? (
+                  <>
+                    <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
+                    Procesando...
+                  </>
+                ) : step === 3 ? (
+                  <>
+                    <UploadSimple className="h-4 w-4" weight="bold" />
+                    Importar
+                  </>
+                ) : (
+                  <>
+                    Siguiente
+                    <CaretRight className="h-4 w-4" weight="bold" />
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto bg-white px-5 py-4">
+      }
+    >
+      <div>
           <StepIndicator currentStep={step} totalSteps={4} />
 
           {/* Step 1: Tipo */}
           {step === 1 && (
             <div className="space-y-4">
-              <div className="mb-6 text-center">
-                <h3 className="text-base font-semibold text-ink">Tipo de importación</h3>
-                <p className="mt-1 text-sm text-muted-2">
+              <div className="mb-4 text-center">
+                <h3 className="text-[0.95rem] font-semibold text-ink">Tipo de importación</h3>
+                <p className="mt-1 text-xs text-muted-2">
                   Selecciona cómo deseas cargar la planificación.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
                 <ImportTypeCard
                   type="vacuna"
                   selected={tipoImportacion === 'vacuna'}
@@ -397,10 +436,10 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 />
               </div>
 
-              <div className="mt-6 rounded-xl border border-line bg-surface-soft p-4">
-                <div className="flex items-start gap-3">
-                  <Info className="mt-0.5 h-5 w-5 shrink-0 text-muted-2" weight="fill" />
-                  <div className="text-sm font-medium leading-relaxed text-muted-2">
+              <div className="mt-4 rounded-xl border border-line-soft bg-surface-soft/60 p-3.5">
+                <div className="flex items-start gap-2.5">
+                  <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-2" weight="fill" />
+                  <div className="text-xs font-medium leading-relaxed text-muted-2">
                     {tipoImportacion === 'vacuna' ? (
                       <>
                         <strong className="text-ink">Importación por vacuna:</strong> actualiza la matriz anual únicamente para el biológico seleccionado.
@@ -418,15 +457,15 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
 
           {/* Step 2: Configuración (Entorno) */}
           {step === 2 && (
-            <div className="space-y-6">
-              <div className="mb-6 text-center">
-                <h3 className="text-base font-semibold text-ink">Filtros de plantilla</h3>
-                <p className="mt-1 text-sm text-muted-2">
+            <div className="space-y-5">
+              <div className="mb-4 text-center">
+                <h3 className="text-[0.95rem] font-semibold text-ink">Filtros de plantilla</h3>
+                <p className="mt-1 text-xs text-muted-2">
                   Define la vacuna y el año de trabajo.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {tipoImportacion === 'vacuna' && (
                   <div>
                     <label className={COMPONENT_STYLES.input.label}>
@@ -472,22 +511,23 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
               </div>
 
               {/* Descargar plantilla */}
-              <div className="mt-6 rounded-xl border border-line bg-surface-soft p-5">
+              <div className="rounded-xl border border-line bg-surface-soft/60 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border border-line bg-white text-muted-2">
-                      <DownloadSimple className="h-5 w-5" weight="bold" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-muted-2">
+                      <DownloadSimple className="h-4 w-4" weight="bold" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-ink">Plantilla Excel</h4>
-                      <p className="text-sm text-muted-2">
+                      <h4 className="text-[0.8125rem] font-semibold text-ink">Plantilla Excel</h4>
+                      <p className="text-xs text-muted-2">
                         {tipoImportacion === 'vacuna'
                           ? 'Formato para una vacuna específica'
                           : 'Formato masivo para varias vacunas'}
                       </p>
                     </div>
                   </div>
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={handleDescargarPlantilla}
                     disabled={isDownloadingTemplate || (tipoImportacion === 'vacuna' && !selectedVacuna)}
                     className={COMPONENT_STYLES.button.primary}
@@ -511,10 +551,10 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
 
           {/* Step 3: Subir archivo */}
           {step === 3 && (
-            <div className="space-y-6">
-              <div className="mb-6 text-center">
-                <h3 className="text-base font-semibold text-ink">Subir archivo</h3>
-                <p className="mt-1 text-sm text-muted-2">
+            <div className="space-y-5">
+              <div className="mb-4 text-center">
+                <h3 className="text-[0.95rem] font-semibold text-ink">Subir archivo</h3>
+                <p className="mt-1 text-xs text-muted-2">
                   Selecciona el Excel con la matriz de planificación.
                 </p>
               </div>
@@ -532,7 +572,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => !archivo && fileInputRef.current?.click()}
-                className={`relative cursor-pointer rounded-xl border border-dashed p-8 text-center transition-colors ${
+                className={`relative cursor-pointer rounded-xl border border-dashed p-7 text-center transition-colors ${
                   isDragging
                     ? 'border-brand-100 bg-surface-soft'
                     : archivo
@@ -541,34 +581,35 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 }`}
               >
                 {archivo ? (
-                  <div className="flex items-center justify-center gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-line bg-white">
-                      <FileXls className="h-7 w-7 text-ink" weight="duotone" />
+                  <div className="flex items-center justify-center gap-3.5">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-line bg-surface">
+                      <FileXls className="h-6 w-6 text-ink" weight="duotone" />
                     </div>
                     <div className="text-left">
-                      <p className="font-semibold text-ink">{archivo.name}</p>
+                      <p className="text-sm font-semibold text-ink">{archivo.name}</p>
                       <p className="text-xs font-medium text-muted">
                         {(archivo.size / 1024).toFixed(1)} KB
                       </p>
                     </div>
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setArchivo(null);
                         if (fileInputRef.current) fileInputRef.current.value = '';
                       }}
-                      className="ml-2 rounded-lg p-2 text-zinc-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                      className="ml-2 rounded-lg p-1.5 text-muted transition-colors hover:bg-rose-50 hover:text-rose-600"
                     >
-                      <XCircle className="h-5 w-5" weight="bold" />
+                      <XCircle className="h-4 w-4" weight="bold" />
                     </button>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl border border-line bg-white">
-                      <UploadSimple className={`h-8 w-8 ${isDragging ? 'text-brand' : 'text-muted'}`} weight="duotone" />
+                  <div className="space-y-2.5">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-line bg-surface">
+                      <UploadSimple className={`h-6 w-6 ${isDragging ? 'text-brand' : 'text-muted'}`} weight="duotone" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-ink">
+                      <p className="text-[0.8125rem] font-semibold text-ink">
                         {isDragging ? 'Suelta el archivo aquí' : 'Haz clic o arrastra el archivo'}
                       </p>
                       <p className="mt-1 text-xs font-medium text-muted">
@@ -579,9 +620,9 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                 )}
               </div>
 
-              <div className="rounded-xl border border-line bg-surface-soft p-4">
-                <h4 className="mb-2 text-xs font-medium text-muted">Resumen</h4>
-                <div className="flex flex-wrap gap-4 text-sm font-medium text-muted-2">
+              <div className="rounded-xl border border-line-soft bg-surface-soft/60 p-3.5">
+                <h4 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.04em] text-muted">Resumen</h4>
+                <div className="flex flex-wrap gap-4 text-xs font-medium text-muted-2">
                   <span className="flex items-center gap-1.5">
                     <span className="font-semibold text-ink">Tipo:</span>
                     {tipoImportacion === 'vacuna' ? 'Por vacuna' : 'Masivo'}
@@ -603,28 +644,28 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
 
           {/* Step 4: Resultado */}
           {step === 4 && resultadoImportacion && (
-            <div className="space-y-6">
-              <div className="mb-6 text-center">
-                <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl border bg-white ${
+            <div className="space-y-5">
+              <div className="mb-4 text-center">
+                <div className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl border bg-surface ${
                   hasErrors ? 'border-amber-200 text-amber-500' : 'border-line text-brand'
                 }`}>
                   {hasErrors ? (
-                    <Warning className="h-8 w-8" weight="duotone" />
+                    <Warning className="h-6 w-6" weight="duotone" />
                   ) : (
-                    <CheckCircle className="h-8 w-8" weight="duotone" />
+                    <CheckCircle className="h-6 w-6" weight="duotone" />
                   )}
                 </div>
-                <h3 className="text-lg font-semibold tracking-tight text-ink">
+                <h3 className="text-base font-semibold tracking-tight text-ink">
                   {hasErrors ? 'Importación parcial' : 'Importación completada'}
                 </h3>
-                <p className="mt-1 text-sm text-muted-2">
+                <p className="mt-1 text-xs text-muted-2">
                   {totalSuccess} registros procesados
                 </p>
               </div>
 
               {/* Estadísticas */}
               {tipoImportacion === 'vacuna' ? (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                   <ResultCard
                     value={resultadoImportacion.creadas || 0}
                     label="Creadas"
@@ -642,7 +683,7 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
                   />
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   <ResultCard
                     value={resultadoImportacion.totalCreadas || 0}
                     label="Creadas"
@@ -668,15 +709,15 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
 
               {/* Errores */}
               {tipoImportacion === 'vacuna' && resultadoImportacion.errores && resultadoImportacion.errores.length > 0 && (
-                <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
-                  <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight text-rose-900">
+                <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-3.5">
+                  <h4 className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-tight text-rose-900">
                     <Warning className="h-4 w-4" weight="bold" />
                     Errores encontrados ({resultadoImportacion.errores.length})
                   </h4>
-                  <ul className="max-h-32 space-y-1 overflow-y-auto text-[0.8rem] font-medium text-rose-800">
+                  <ul className="max-h-32 space-y-1 overflow-y-auto text-xs font-medium text-rose-800">
                     {resultadoImportacion.errores.map((error: string, index: number) => (
                       <li key={index} className="flex items-start gap-2 border-b border-rose-200/50 pb-1">
-                        <span className="text-rose-500">-&gt;</span>
+                        <span className="text-rose-500">→</span>
                         {error}
                       </li>
                     ))}
@@ -685,14 +726,14 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
               )}
 
               {tipoImportacion === 'masivo' && resultadoImportacion.erroresPorVacuna && resultadoImportacion.erroresPorVacuna.length > 0 && (
-                <div className="max-h-48 space-y-3 overflow-y-auto pr-2">
+                <div className="max-h-48 space-y-2.5 overflow-y-auto pr-2">
                   {resultadoImportacion.erroresPorVacuna.map((vacunaError, index: number) => (
-                    <div key={index} className="rounded-xl border border-amber-200 bg-amber-50 p-3">
-                      <h5 className="mb-2 text-xs font-semibold text-amber-900">Vacuna: {vacunaError.vacuna}</h5>
-                      <ul className="space-y-1 text-[0.75rem] font-medium text-amber-800">
+                    <div key={index} className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
+                      <h5 className="mb-1.5 text-xs font-semibold text-amber-900">Vacuna: {vacunaError.vacuna}</h5>
+                      <ul className="space-y-1 text-xs font-medium text-amber-800">
                         {vacunaError.errores.map((error: string, errorIndex: number) => (
                           <li key={errorIndex} className="flex items-start gap-2">
-                            <span className="text-amber-500 font-bold">&gt;</span>
+                            <span className="font-bold text-amber-500">›</span>
                             {error}
                           </li>
                         ))}
@@ -703,68 +744,10 @@ const ImportarModal: React.FC<ImportarModalProps> = ({
               )}
             </div>
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between border-t border-line-soft bg-surface-soft px-5 py-3">
-          <div>
-            {step > 1 && step < 4 && (
-              <button type="button"
-                onClick={handlePrevStep}
-                className={COMPONENT_STYLES.button.ghost}
-              >
-                <CaretLeft className="h-4 w-4" weight="bold" />
-                Regresar
-              </button>
-            )}
-            {step === 4 && (
-              <button type="button"
-                onClick={resetForm}
-                className={COMPONENT_STYLES.button.secondary}
-              >
-                <ArrowsClockwise className="h-4 w-4" weight="bold" />
-                Nueva importación
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button type="button"
-              onClick={handleClose}
-              className={COMPONENT_STYLES.button.ghost}
-            >
-              {step === 4 ? 'Aceptar' : 'Cancelar'}
-            </button>
-
-            {step < 4 && (
-              <button type="button"
-                onClick={handleNextStep}
-                disabled={!canProceedToNextStep || isImportingExcel}
-                className={COMPONENT_STYLES.button.primary}
-              >
-                {isImportingExcel ? (
-                  <>
-                    <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
-                    Procesando...
-                  </>
-                ) : step === 3 ? (
-                  <>
-                    <UploadSimple className="h-4 w-4" weight="bold" />
-                    Importar
-                  </>
-                ) : (
-                  <>
-                    Siguiente
-                    <CaretRight className="h-4 w-4" weight="bold" />
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 
 export default memo(ImportarModal);
+

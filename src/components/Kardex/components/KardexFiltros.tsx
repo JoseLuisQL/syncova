@@ -2,7 +2,6 @@ import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarBlank, CaretDown, MagnifyingGlass, SlidersHorizontal, X } from '@phosphor-icons/react';
 import { Establecimiento, Jeringa, Vacuna } from '../../../types';
 import {
-  COMPONENT_STYLES,
   getMovimientoConfig,
   MOVIMIENTO_OPTIONS,
   TIPO_ITEM_OPTIONS,
@@ -57,6 +56,10 @@ interface SearchableSelectProps {
   disabled?: boolean;
   onChange: (value: string) => void;
 }
+
+const FILTER_LABEL_CLASS = 'mb-1 block truncate text-[11px] font-semibold uppercase tracking-[0.06em] text-muted';
+const SELECT_BASE_CLASS =
+  'h-9 w-full appearance-none rounded-lg border border-line bg-surface pl-3 pr-8 text-xs sm:text-sm font-medium text-ink shadow-2xs transition hover:border-line-strong focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/15 disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-muted';
 
 const formatExpiry = (value?: Date | string | null) => {
   if (!value) return 'Sin vencimiento';
@@ -127,8 +130,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   }, [options, query]);
 
   return (
-    <div ref={containerRef} className="relative">
-      <label htmlFor={id} className={COMPONENT_STYLES.input.label}>
+    <div ref={containerRef} className="relative min-w-0">
+      <label htmlFor={id} className={FILTER_LABEL_CLASS}>
         {label}
       </label>
       <button
@@ -136,56 +139,51 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen((current) => !current)}
-        className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} flex items-center justify-between gap-3 text-left ${
-          disabled ? 'cursor-not-allowed bg-zinc-50 text-zinc-400' : ''
+        className={`flex h-9 w-full items-center justify-between gap-2 rounded-lg border px-3 text-left text-xs sm:text-sm font-medium shadow-2xs transition focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/15 ${
+          disabled
+            ? 'cursor-not-allowed border-line bg-surface-muted text-muted'
+            : selectedOption
+            ? 'border-teal-500/30 bg-teal-500/10 text-teal-700 dark:text-teal-300'
+            : 'border-line bg-surface text-ink hover:border-line-strong'
         }`}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        <span className="min-w-0">
-          {selectedOption ? (
-            <span className="flex min-w-0 flex-col">
-              <span className="truncate text-sm text-zinc-900">{selectedOption.label}</span>
-              {selectedOption.description ? (
-                <span className="truncate text-xs text-zinc-500">{selectedOption.description}</span>
-              ) : null}
-            </span>
-          ) : (
-            <span className="text-sm text-zinc-400">{placeholder}</span>
-          )}
+        <span className="min-w-0 truncate">
+          {selectedOption ? selectedOption.label : <span className="text-muted font-normal">{placeholder}</span>}
         </span>
-        <CaretDown className={`h-4 w-4 shrink-0 text-zinc-400 transition ${isOpen ? 'rotate-180' : ''}`} />
+        <CaretDown className={`h-3.5 w-3.5 shrink-0 text-muted transition ${isOpen ? 'rotate-180' : ''}`} weight="bold" />
       </button>
 
       {isOpen ? (
-        <div className="absolute left-0 z-30 mt-2 w-full rounded-[22px] border border-zinc-200 bg-white p-3 shadow-[0_20px_45px_-28px_rgba(15,23,42,0.35)]">
+        <div className="absolute left-0 z-40 mt-1.5 w-[min(300px,calc(100vw-2rem))] rounded-xl border border-line bg-surface p-2.5 shadow-lg">
           <div className="relative">
-            <MagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <MagnifyingGlass className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
             <input
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder={`Buscar ${label.toLowerCase()}...`}
-              className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} pl-9`}
+              placeholder={`Filtrar ${label.toLowerCase()}...`}
+              className="h-8 w-full rounded-lg border border-line bg-surface-muted pl-8 pr-2.5 text-xs text-ink outline-none focus:border-teal-600 focus:bg-surface"
               autoFocus
             />
           </div>
 
-          <div className="mt-3 max-h-64 overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50/60 p-1">
+          <div className="mt-2 max-h-56 overflow-y-auto space-y-0.5 pr-0.5">
             <button
               type="button"
               onClick={() => {
                 onChange('');
                 setIsOpen(false);
               }}
-              className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-zinc-600 transition hover:bg-white hover:text-zinc-900"
+              className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-xs text-muted transition hover:bg-surface-muted hover:text-ink"
             >
               <span>{placeholder}</span>
-              {!value ? <span className="text-xs font-medium text-zinc-700">Activo</span> : null}
+              {!value ? <span className="text-[10px] font-semibold text-teal-700 dark:text-teal-300">Todos</span> : null}
             </button>
 
             {filteredOptions.length === 0 ? (
-              <div className="px-3 py-4 text-sm text-zinc-500">No se encontraron coincidencias.</div>
+              <div className="px-2.5 py-3 text-xs text-muted">Sin coincidencias.</div>
             ) : (
               filteredOptions.map((option) => (
                 <button
@@ -195,23 +193,20 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     onChange(option.value);
                     setIsOpen(false);
                   }}
-                  className={`flex w-full items-start justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+                  className={`flex w-full items-start justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left transition ${
                     option.value === value
-                      ? 'bg-white shadow-sm ring-1 ring-zinc-200'
-                      : 'hover:bg-white hover:shadow-sm'
+                      ? 'bg-teal-500/15 text-teal-700 dark:text-teal-300 font-semibold'
+                      : 'hover:bg-surface-muted text-ink'
                   }`}
                   role="option"
                   aria-selected={option.value === value}
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium text-zinc-900">{option.label}</span>
+                    <span className="block truncate text-xs font-medium">{option.label}</span>
                     {option.description ? (
-                      <span className="mt-0.5 block truncate text-xs text-zinc-500">{option.description}</span>
+                      <span className="block truncate text-[10px] text-muted">{option.description}</span>
                     ) : null}
                   </span>
-                  {option.value === value ? (
-                    <span className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-700">Actual</span>
-                  ) : null}
                 </button>
               ))
             )}
@@ -248,6 +243,8 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
   onEstablecimientoDestinoChange,
   onLimpiarFiltros,
 }) => {
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
+
   const itemOptions = useMemo<SelectOption[]>(() => {
     if (selectedTipo === 'vacuna') {
       return vacunas.map((vacuna) => ({
@@ -392,171 +389,219 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
     tipoMovimiento,
   ]);
 
+  const advancedCount = [selectedLote, establecimientoOrigenId, establecimientoDestinoId].filter(Boolean).length;
+
   return (
-    <section aria-label="Filtros del kardex" className={COMPONENT_STYLES.filter.container}>
+    <section
+      aria-label="Filtros del kardex"
+      className="rounded-xl border border-line bg-surface p-3 shadow-2xs sm:p-4"
+    >
       <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-            <div className="relative w-full sm:w-[260px]">
-              <label htmlFor="kardex-search" className="sr-only">
-              Buscar
+        {/* Fila principal de filtros directos */}
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+          {/* Buscador */}
+          <div className="col-span-2 sm:col-span-1 lg:col-span-2 min-w-0">
+            <label htmlFor="kardex-search" className={FILTER_LABEL_CLASS}>
+              Búsqueda rápida
             </label>
-              <MagnifyingGlass className={COMPONENT_STYLES.filter.searchIcon} aria-hidden="true" />
+            <div className="relative">
+              <MagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
               <input
                 id="kardex-search"
                 type="search"
                 value={searchTerm}
                 onChange={(event) => onSearchChange(event.target.value)}
-                placeholder="Documento, lote, observación o producto"
-                className={COMPONENT_STYLES.filter.searchInput}
+                placeholder="Documento, lote, producto..."
+                className="h-9 w-full rounded-lg border border-line bg-surface pl-9 pr-8 text-xs sm:text-sm text-ink shadow-2xs transition placeholder:text-muted hover:border-line-strong focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/15"
               />
+              {searchTerm ? (
+                <button
+                  type="button"
+                  onClick={() => onSearchChange('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted hover:bg-surface-muted hover:text-ink"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              ) : null}
             </div>
-
-            <details className="group relative">
-              <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-[9px] border border-line bg-white px-3.5 text-sm font-semibold text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 [&::-webkit-details-marker]:hidden">
-                <SlidersHorizontal className="h-4 w-4 text-muted-2" />
-                Filtros
-              </summary>
-
-              <div className="absolute left-0 top-11 z-40 max-h-[70vh] w-[min(760px,calc(100vw-3rem))] overflow-y-auto rounded-xl border border-line bg-white p-3 shadow-[0_18px_40px_-28px_rgba(12,15,24,0.45)]">
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                  <div>
-                    <label htmlFor="kardex-fecha-inicio" className="mb-1 block text-xs font-medium text-muted-3">
-                      Desde
-                    </label>
-                    <div className="relative">
-                      <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" />
-                      <input
-                        id="kardex-fecha-inicio"
-                        type="date"
-                        value={fechaInicio}
-                        onChange={(event) => onFechaInicioChange(event.target.value)}
-                        className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pl-9 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="kardex-fecha-fin" className="mb-1 block text-xs font-medium text-muted-3">
-                      Hasta
-                    </label>
-                    <div className="relative">
-                      <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2" />
-                      <input
-                        id="kardex-fecha-fin"
-                        type="date"
-                        value={fechaFin}
-                        onChange={(event) => onFechaFinChange(event.target.value)}
-                        className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pl-9 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="kardex-tipo-movimiento" className="mb-1 block text-xs font-medium text-muted-3">
-                      Movimiento
-                    </label>
-                    <select
-                      id="kardex-tipo-movimiento"
-                      value={tipoMovimiento}
-                      onChange={(event) => onTipoMovimientoChange(event.target.value)}
-                      className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
-                    >
-                      {MOVIMIENTO_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="kardex-tipo-item" className="mb-1 block text-xs font-medium text-muted-3">
-                      Tipo de producto
-                    </label>
-                    <select
-                      id="kardex-tipo-item"
-                      value={selectedTipo}
-                      onChange={(event) => onTipoChange(event.target.value as 'vacuna' | 'jeringa' | 'todos')}
-                      className="h-9 w-full rounded-[9px] border border-line bg-white px-3 pr-8 text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-line-focus-strong focus:ring-2 focus:ring-line-focus/70"
-                    >
-                      {TIPO_ITEM_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <SearchableSelect
-                    id="kardex-item"
-                    label="Producto específico"
-                    value={selectedItem}
-                    options={itemOptions}
-                    placeholder={selectedTipo === 'todos' ? 'Seleccione antes el tipo' : 'Todos los productos'}
-                    disabled={selectedTipo === 'todos'}
-                    onChange={(value) => onItemChange(value)}
-                  />
-
-                  <SearchableSelect
-                    id="kardex-lote"
-                    label="Lote"
-                    value={selectedLote}
-                    options={loteOptions}
-                    placeholder={selectedItem ? 'Todos los lotes' : 'Seleccione antes un producto'}
-                    disabled={!selectedItem}
-                    onChange={(value) => onLoteChange(value)}
-                  />
-
-                  <SearchableSelect
-                    id="kardex-origen"
-                    label="Establecimiento origen"
-                    value={establecimientoOrigenId}
-                    options={establecimientoOptions}
-                    placeholder="Todos los orígenes"
-                    onChange={(value) => onEstablecimientoOrigenChange(value)}
-                  />
-
-                  <SearchableSelect
-                    id="kardex-destino"
-                    label="Establecimiento destino"
-                    value={establecimientoDestinoId}
-                    options={establecimientoOptions}
-                    placeholder="Todos los destinos"
-                    onChange={(value) => onEstablecimientoDestinoChange(value)}
-                  />
-                </div>
-              </div>
-            </details>
-
-            {activeFilters.length > 0 ? (
-              <button type="button" onClick={onLimpiarFiltros} className={COMPONENT_STYLES.button.ghost}>
-                <X className="h-4 w-4" />
-                <span>Limpiar</span>
-              </button>
-            ) : null}
           </div>
 
-          <span className={`text-xs font-medium ${fechaInicio && fechaFin ? 'text-emerald-700' : 'text-amber-700'}`}>
+          {/* Tipo de producto */}
+          <div className="min-w-0">
+            <label htmlFor="kardex-tipo-item" className={FILTER_LABEL_CLASS}>
+              Categoría
+            </label>
+            <div className="relative">
+              <select
+                id="kardex-tipo-item"
+                value={selectedTipo}
+                onChange={(event) => onTipoChange(event.target.value as 'vacuna' | 'jeringa' | 'todos')}
+                className={SELECT_BASE_CLASS}
+              >
+                {TIPO_ITEM_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" weight="bold" />
+            </div>
+          </div>
+
+          {/* Producto específico */}
+          <SearchableSelect
+            id="kardex-item"
+            label="Biológico / Insumo"
+            value={selectedItem}
+            options={itemOptions}
+            placeholder={selectedTipo === 'todos' ? 'Elija categoría' : 'Todos'}
+            disabled={selectedTipo === 'todos'}
+            onChange={(value) => onItemChange(value)}
+          />
+
+          {/* Tipo de movimiento */}
+          <div className="min-w-0">
+            <label htmlFor="kardex-tipo-movimiento" className={FILTER_LABEL_CLASS}>
+              Movimiento
+            </label>
+            <div className="relative">
+              <select
+                id="kardex-tipo-movimiento"
+                value={tipoMovimiento}
+                onChange={(event) => onTipoMovimientoChange(event.target.value)}
+                className={SELECT_BASE_CLASS}
+              >
+                {MOVIMIENTO_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" weight="bold" />
+            </div>
+          </div>
+
+          {/* Botón de filtros avanzados (Fechas, Lote, Origen/Destino) */}
+          <div className="flex items-end gap-1.5">
+            <button
+              type="button"
+              onClick={() => setShowMoreFilters((prev) => !prev)}
+              className={`inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition ${
+                showMoreFilters || fechaInicio || fechaFin || advancedCount > 0
+                  ? 'border-teal-500/30 bg-teal-500/10 text-teal-700 dark:text-teal-300'
+                  : 'border-line bg-surface text-ink hover:border-line-strong hover:bg-surface-muted'
+              }`}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" weight="bold" />
+              <span>Fechas y Lotes</span>
+              {advancedCount + (fechaInicio ? 1 : 0) + (fechaFin ? 1 : 0) > 0 ? (
+                <span className="rounded-full bg-teal-600 px-1.5 py-0.2 text-[10px] text-white tabular-nums">
+                  {advancedCount + (fechaInicio ? 1 : 0) + (fechaFin ? 1 : 0)}
+                </span>
+              ) : null}
+            </button>
+          </div>
+        </div>
+
+        {/* Panel colapsable limpio para Rango de Fechas, Lote, Origen y Destino */}
+        {showMoreFilters ? (
+          <div className="grid grid-cols-2 gap-2.5 border-t border-line pt-3 sm:grid-cols-3 lg:grid-cols-5">
+            <div>
+              <label htmlFor="kardex-fecha-inicio" className={FILTER_LABEL_CLASS}>
+                Desde
+              </label>
+              <div className="relative">
+                <CalendarBlank className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+                <input
+                  id="kardex-fecha-inicio"
+                  type="date"
+                  value={fechaInicio}
+                  onChange={(event) => onFechaInicioChange(event.target.value)}
+                  className="h-9 w-full rounded-lg border border-line bg-surface pl-8 pr-2.5 text-xs sm:text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-teal-600 focus:ring-2 focus:ring-teal-500/15"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="kardex-fecha-fin" className={FILTER_LABEL_CLASS}>
+                Hasta
+              </label>
+              <div className="relative">
+                <CalendarBlank className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+                <input
+                  id="kardex-fecha-fin"
+                  type="date"
+                  value={fechaFin}
+                  onChange={(event) => onFechaFinChange(event.target.value)}
+                  className="h-9 w-full rounded-lg border border-line bg-surface pl-8 pr-2.5 text-xs sm:text-sm font-medium text-ink outline-none transition hover:border-line-strong focus:border-teal-600 focus:ring-2 focus:ring-teal-500/15"
+                />
+              </div>
+            </div>
+
+            <SearchableSelect
+              id="kardex-lote"
+              label="Lote"
+              value={selectedLote}
+              options={loteOptions}
+              placeholder={selectedItem ? 'Todos los lotes' : 'Elija producto'}
+              disabled={!selectedItem}
+              onChange={(value) => onLoteChange(value)}
+            />
+
+            <SearchableSelect
+              id="kardex-origen"
+              label="EESS Origen"
+              value={establecimientoOrigenId}
+              options={establecimientoOptions}
+              placeholder="Todos los orígenes"
+              onChange={(value) => onEstablecimientoOrigenChange(value)}
+            />
+
+            <SearchableSelect
+              id="kardex-destino"
+              label="EESS Destino"
+              value={establecimientoDestinoId}
+              options={establecimientoOptions}
+              placeholder="Todos los destinos"
+              onChange={(value) => onEstablecimientoDestinoChange(value)}
+            />
+          </div>
+        ) : null}
+
+        {/* Barra inferior de chips activos y estado de exportación */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {activeFilters.length > 0 ? (
+              <>
+                {activeFilters.map((filter) => (
+                  <button
+                    key={filter.key}
+                    type="button"
+                    onClick={filter.clear}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-muted px-2 py-0.5 text-xs font-medium text-ink transition hover:border-line-strong hover:bg-surface-strong"
+                  >
+                    <span>{filter.label}</span>
+                    <X className="h-3 w-3 text-muted" weight="bold" />
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={onLimpiarFiltros}
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
+                >
+                  <X className="h-3 w-3" weight="bold" />
+                  <span>Limpiar todo</span>
+                </button>
+              </>
+            ) : (
+              <span className="text-xs text-muted">Mostrando todos los registros de kardex</span>
+            )}
+          </div>
+
+          <span className={`text-xs font-medium ${fechaInicio && fechaFin ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted'}`}>
             {exportHint}
           </span>
         </div>
-
-        {activeFilters.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {activeFilters.map((filter) => (
-              <button
-                key={filter.key}
-                type="button"
-                onClick={filter.clear}
-                className="inline-flex items-center gap-2 rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink transition hover:bg-surface-soft"
-              >
-                <span>{filter.label}</span>
-                <X className="h-3.5 w-3.5" />
-              </button>
-            ))}
-          </div>
-        ) : null}
       </div>
     </section>
   );
@@ -564,4 +609,3 @@ const KardexFiltrosComponent: React.FC<KardexFiltrosProps> = ({
 
 export const KardexFiltros = memo(KardexFiltrosComponent);
 KardexFiltros.displayName = 'KardexFiltros';
- 

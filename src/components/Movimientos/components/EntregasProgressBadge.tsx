@@ -73,19 +73,19 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
   const porcentaje = progresoVales?.porcentajeProgreso ?? 0;
   const totalPendientes = useMemo(
     () =>
-      progresoVales?.establecimientosPendientes.reduce(
-        (acumulado, grupo) => acumulado + grupo.totalPendientes,
+      (progresoVales?.establecimientosPendientes || []).reduce(
+        (acumulado, grupo) => acumulado + (grupo?.totalPendientes || 0),
         0,
-      ) ?? 0,
+      ),
     [progresoVales?.establecimientosPendientes],
   );
 
   const statusConfig = useMemo(() => {
     if (!progresoVales || progresoVales.estado === 'sin_vales') {
       return {
-        card: 'border-line bg-surface-soft',
-        pill: 'bg-surface-soft text-muted-2 border border-line',
-        bar: 'bg-line-strong',
+        card: 'border-line bg-surface',
+        pill: 'bg-surface-muted text-muted',
+        bar: 'bg-slate-400',
         icon: <Clock className="h-4 w-4 text-muted" />,
         label: 'Pendiente',
       };
@@ -93,20 +93,20 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
 
     if (progresoVales.estado === 'completo') {
       return {
-        card: 'border-brand/30 bg-surface-tint',
-        pill: 'bg-surface text-brand border border-brand/40',
-        bar: 'bg-brand',
-        icon: <CheckCircle className="h-4 w-4 text-brand" weight="fill" />,
+        card: 'border-teal-500/30 bg-surface',
+        pill: 'bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30',
+        bar: 'bg-teal-600',
+        icon: <CheckCircle className="h-4 w-4 text-teal-600 dark:text-teal-400" weight="fill" />,
         label: 'Completo',
       };
     }
 
     return {
-      card: 'border-status-danger-border bg-status-danger-bg',
-      pill: 'bg-surface text-status-danger-text border border-status-danger-border',
-      bar: 'bg-rose-500',
-      icon: <WarningCircle className="h-4 w-4 text-rose-500" weight="duotone" />,
-      label: 'Bloqueando',
+      card: 'border-amber-500/30 bg-surface',
+      pill: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30',
+      bar: 'bg-amber-500',
+      icon: <WarningCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" weight="duotone" />,
+      label: 'En curso',
     };
   }, [progresoVales]);
 
@@ -128,34 +128,25 @@ export const EntregasProgressBadge: React.FC<EntregasProgressBadgeProps> = memo(
         type="button"
         onClick={() => setShowDropdown((prev) => !prev)}
         disabled={isLoading}
-        className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-left transition border ${
-          !progresoVales || progresoVales.estado === 'sin_vales'
-            ? 'bg-surface-soft hover:bg-surface border-line'
-            : progresoVales.estado === 'completo'
-            ? 'bg-surface-tint hover:bg-surface-soft border-brand/30'
-            : 'bg-surface-soft hover:bg-surface border-line'
-        }`}
+        className={`flex h-10 items-center gap-2 rounded-lg border px-2.5 py-1.5 text-left shadow-2xs transition hover:border-line-strong hover:bg-surface-muted ${statusConfig.card}`}
       >
-        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-          progresoVales?.estado === 'completo' ? 'border border-brand/30 bg-surface text-brand' : 'bg-surface border border-line shadow-sm'
-        }`}>
-          {isLoading ? <CircleNotch className={`h-4 w-4 animate-spin ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-ink'}`} weight="bold" /> : <Truck className={`h-4 w-4 ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-ink'}`} weight="duotone" />}
-        </div>
-        <div className="min-w-0">
-          <p className={`text-[0.6rem] font-bold uppercase tracking-[0.15em] ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-muted'}`}>Entregas totales</p>
-          <p className={`text-[0.95rem] tracking-tight font-semibold text-ink`}>
-            {totalEntregas.toLocaleString()}
+        {isLoading ? (
+          <CircleNotch className="h-4 w-4 shrink-0 animate-spin text-teal-600 dark:text-teal-400" weight="bold" />
+        ) : (
+          <Truck className="h-4 w-4 shrink-0 text-teal-600 dark:text-teal-400" weight="duotone" />
+        )}
+        <div className="leading-none">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">Entregas</p>
+          <p className="mt-0.5 text-xs font-semibold text-ink tabular-nums">
+            {(totalEntregas ?? 0).toLocaleString()}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className={`inline-flex rounded-md px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-widest ${statusConfig.pill}`}>
-            {progresoVales?.totalEstablecimientosConEntregas
-              ? `${progresoVales.establecimientosConValeCompleto}/${progresoVales.totalEstablecimientosConEntregas}`
-              : statusConfig.label}
-            {progresoVales?.porcentajeProgreso ? ` ${progresoVales.porcentajeProgreso}%` : ''}
-          </span>
-          <CaretDown className={`h-3 w-3 transition-transform ${showDropdown ? 'rotate-180' : ''} ${progresoVales?.estado === 'completo' ? 'text-brand' : 'text-muted-2'}`} weight="bold" />
-        </div>
+        <span className={`inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${statusConfig.pill}`}>
+          {progresoVales?.totalEstablecimientosConEntregas
+            ? `${progresoVales.establecimientosConValeCompleto}/${progresoVales.totalEstablecimientosConEntregas}`
+            : statusConfig.label}
+        </span>
+        <CaretDown className={`h-3 w-3 text-muted transition-transform ${showDropdown ? 'rotate-180' : ''}`} weight="bold" />
       </button>
 
       {showDropdown ? (

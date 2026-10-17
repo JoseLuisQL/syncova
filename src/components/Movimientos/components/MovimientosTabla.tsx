@@ -123,7 +123,7 @@ const EditableNumberField: React.FC<EditableNumberFieldProps> = memo(({
         disabled={disabled}
         title={title}
         aria-label={ariaLabel}
-        className={`${widthClass} bg-transparent min-h-[44px] px-2.5 py-2.5 text-center text-[0.85rem] font-bold tabular-nums transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${resolvedClassName}`}
+        className={`${widthClass} min-h-[44px] px-2.5 py-2.5 text-center text-[0.85rem] font-bold tabular-nums transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${resolvedClassName}`}
       />
       {indicatorClassName ? (
         <span className={`absolute right-1 top-1 h-2 w-2 rounded-full border border-surface ${indicatorClassName}`} />

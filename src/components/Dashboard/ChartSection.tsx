@@ -26,13 +26,31 @@ const PERIOD_OPTIONS: Array<{ id: PeriodFilter; label: string; months: number }>
   { id: '12m', label: '12 meses', months: 12 },
 ];
 
-const ChartSkeleton: React.FC = () => (
-  <div className="flex h-full min-h-[360px] animate-pulse flex-col rounded-xl border border-line bg-surface p-5">
-    <div className="mb-6 flex items-center justify-between">
-      <div className="h-5 w-48 rounded bg-surface-soft" />
-      <div className="h-8 w-36 rounded bg-surface-soft" />
+export const ChartSkeleton: React.FC = () => (
+  <div className="flex h-full min-h-[360px] flex-col justify-between rounded-xl border border-line bg-surface p-5 shadow-xs" role="status" aria-live="polite">
+    <div className="flex items-start justify-between gap-3">
+      <div className="space-y-1.5">
+        <div className="inventory-skeleton h-4 w-48 rounded-md" />
+        <div className="inventory-skeleton h-3 w-64 rounded-md opacity-75" />
+      </div>
+      <div className="inventory-skeleton h-7 w-36 rounded-lg" />
     </div>
-    <div className="flex-1 rounded-lg bg-surface-soft" />
+    <div className="my-3 grid grid-cols-3 gap-2.5">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="rounded-lg border border-line-soft bg-surface-soft/50 p-2.5 space-y-1.5">
+          <div className="inventory-skeleton h-2.5 w-16 rounded-full" />
+          <div className="inventory-skeleton h-4 w-24 rounded-md" />
+        </div>
+      ))}
+    </div>
+    <div className="flex flex-1 items-end gap-3 pt-2">
+      {[45, 70, 55, 85, 62, 90].map((h, idx) => (
+        <div key={idx} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
+          <div className="inventory-skeleton w-full rounded-t-md opacity-80" style={{ height: `${h}%` }} />
+          <div className="inventory-skeleton h-2.5 w-8 rounded-full opacity-65" />
+        </div>
+      ))}
+    </div>
   </div>
 );
 

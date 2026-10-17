@@ -477,14 +477,22 @@ interface KeyValueGridProps {
 }
 
 export const KeyValueGrid: React.FC<KeyValueGridProps> = memo(({ items, columns = 2 }) => (
-  <dl className={`grid gap-x-4 gap-y-6 ${columns === 1 ? 'grid-cols-1' : columns === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
+  <dl className={`grid gap-2.5 ${columns === 1 ? 'grid-cols-1' : columns === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
     {items.map((item) => (
-      <div key={item.label} className="sm:col-span-1">
-        <dt className="text-xs font-medium text-zinc-500">{item.label}</dt>
-        <dd className="mt-1 text-sm text-zinc-900">{item.value}</dd>
+      <div
+        key={item.label}
+        className="flex flex-col justify-between gap-1 rounded-xl border border-line-soft bg-surface-soft/55 px-3.5 py-2.5 transition-colors dark:border-slate-800/80 dark:bg-slate-900/50 sm:col-span-1"
+      >
+        <dt className="text-[11px] font-medium uppercase tracking-[0.04em] text-ink-muted dark:text-slate-400">
+          {item.label}
+        </dt>
+        <dd className="text-[0.875rem] font-semibold tracking-[-0.01em] text-ink dark:text-slate-100">
+          {item.value || '—'}
+        </dd>
       </div>
     ))}
   </dl>
 ));
 
 KeyValueGrid.displayName = 'KeyValueGrid';
+

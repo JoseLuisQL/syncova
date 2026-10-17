@@ -129,13 +129,13 @@ export const COMPONENT_STYLES = {
 
   button: {
     primary:
-      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] bg-brand px-4 py-1.5 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(124,58,237,0.75)] transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand/25 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-brand bg-brand px-4 py-1.5 text-[0.8125rem] font-semibold tracking-[-0.005em] text-white shadow-[0_1px_2px_rgba(16,24,40,0.06)] transition-all duration-150 hover:border-brand-600 hover:bg-brand-600 focus:outline-none focus:ring-3 focus:ring-brand/20 active:translate-y-[0.5px] disabled:cursor-not-allowed disabled:opacity-55',
     secondary:
-      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-line bg-surface px-3.5 py-1.5 text-sm font-semibold text-ink shadow-sm transition hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-2 focus:ring-line-focus/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-3.5 py-1.5 text-[0.8125rem] font-medium tracking-[-0.005em] text-ink shadow-[0_1px_2px_rgba(16,24,40,0.03)] transition-all duration-150 hover:border-line-strong hover:bg-surface-soft focus:outline-none focus:ring-3 focus:ring-line-focus/80 disabled:cursor-not-allowed disabled:opacity-55',
     ghost:
-      'inline-flex min-h-9 items-center justify-center gap-2 rounded-[9px] border border-line bg-surface px-3 py-1.5 text-sm font-semibold text-muted-2 transition hover:border-line-strong hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+      'inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-transparent bg-transparent px-3 py-1.5 text-[0.8125rem] font-medium tracking-[-0.005em] text-muted-2 transition-colors duration-150 hover:bg-surface-soft hover:text-ink focus:outline-none focus:ring-2 focus:ring-line-focus/70 disabled:cursor-not-allowed disabled:opacity-55',
     success:
-      'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-sm',
+      'inline-flex min-h-9.5 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-[0.8125rem] font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-3 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-55 shadow-xs',
     icon:
       'inline-flex h-8 w-8 items-center justify-center rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
     iconEdit: 'border border-line bg-surface-soft text-muted-2 hover:bg-surface hover:text-ink focus:ring-line-focus',
@@ -145,12 +145,12 @@ export const COMPONENT_STYLES = {
 
   input: {
     base:
-      'min-h-9 w-full rounded-[7px] border bg-surface px-3 py-2 text-base text-ink shadow-none transition placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-line-focus/70',
-    normal: 'border-line hover:border-line-strong focus:border-line-focus-strong',
-    error: 'border-rose-300 bg-rose-50/40 focus:border-rose-500 focus:ring-rose-500/20',
-    label: 'mb-1.5 block text-sm font-medium text-muted-2',
-    errorText: 'mt-1 text-xs font-medium text-rose-600',
-    helpText: 'mt-1.5 text-xs text-muted',
+      'min-h-9.5 w-full rounded-xl border bg-surface px-3.5 py-2 text-[0.84rem] leading-5 text-ink shadow-[0_1px_2px_rgba(16,24,40,0.02)] transition-all duration-150 placeholder:text-muted/80 focus:outline-none focus:ring-3 focus:ring-brand/12 disabled:cursor-not-allowed disabled:bg-surface-soft disabled:opacity-65',
+    normal: 'border-line hover:border-line-strong focus:border-brand',
+    error: 'border-rose-300 bg-rose-50/25 focus:border-rose-500 focus:ring-rose-500/15',
+    label: 'mb-1.5 block text-[0.78rem] font-medium tracking-[-0.005em] text-ink',
+    errorText: 'mt-1.5 text-[0.73rem] font-medium text-rose-600',
+    helpText: 'mt-1.5 text-[0.73rem] text-muted-2',
   },
 
   table: {
@@ -171,14 +171,14 @@ export const COMPONENT_STYLES = {
   },
 
   modal: {
-    overlay: 'fixed inset-0 z-[300] bg-ink-soft/20 backdrop-blur-[2px]',
+    overlay: 'fixed inset-0 z-[300] bg-slate-950/45 backdrop-blur-[3px] dark:bg-black/70',
     container:
-      'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-3 sm:items-center sm:p-6',
+      'pointer-events-auto mx-auto flex h-full w-full items-end justify-center p-2.5 sm:items-center sm:p-6',
     panel:
-      'w-full overflow-hidden rounded-t-[10px] border border-line bg-surface shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)] sm:max-h-[88vh] sm:rounded-lg',
-    header: 'border-b border-line-soft px-4 py-3.5 sm:px-5',
-    body: 'max-h-[calc(100vh-150px)] overflow-y-auto px-4 py-4 sm:max-h-[calc(88vh-136px)] sm:px-5',
-    footer: 'border-t border-line-soft bg-surface-soft px-4 py-3 sm:px-5',
+      'flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl border border-line bg-surface shadow-[0_24px_64px_-16px_rgba(15,23,42,0.22)] sm:max-h-[88vh] sm:rounded-2xl',
+    header: 'shrink-0 border-b border-line-soft px-5 py-4 sm:px-6',
+    body: 'flex-1 min-h-0 overflow-y-auto px-5 py-5 sm:px-6',
+    footer: 'shrink-0 border-t border-line-soft bg-surface-soft/75 px-5 py-3.5 sm:px-6',
   },
 
   stats: {
@@ -193,7 +193,7 @@ export const COMPONENT_STYLES = {
     container: 'bg-transparent p-0',
     searchIcon: 'pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-2',
     searchInput:
-      'h-9 w-full rounded-[9px] border border-line bg-white py-1.5 pl-9 pr-3 text-sm text-ink shadow-sm transition placeholder:text-muted hover:border-line-strong focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/70',
+      'h-9.5 w-full rounded-xl border border-line bg-surface py-1.5 pl-9 pr-3.5 text-[0.84rem] text-ink shadow-[0_1px_2px_rgba(16,24,40,0.02)] transition-all duration-150 placeholder:text-muted/80 hover:border-line-strong focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/12',
   },
 
   pagination: {

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Buildings, CaretDown, ShareNetwork, TreeStructure } from '@phosphor-icons/react';
 import { useCentrosAcopio } from '../../hooks/useCentrosAcopio';
 import { useMicroredes } from '../../hooks/useMicroredes';
 import { useRedes } from '../../hooks/useRedes';
@@ -32,6 +33,12 @@ interface CascadingSelectorProps {
     centroAcopio?: string;
   };
 }
+
+const SELECT_BASE_CLASS =
+  'h-9 w-full appearance-none rounded-[9px] border bg-surface pl-8 pr-8 text-[0.8rem] font-medium text-ink shadow-xs transition hover:border-line-strong focus:border-line-focus-strong focus:outline-none focus:ring-2 focus:ring-line-focus/60 disabled:cursor-not-allowed disabled:bg-surface-soft disabled:text-muted';
+
+const LABEL_CLASS =
+  'mb-1 block text-[0.68rem] font-semibold uppercase tracking-[0.06em] text-muted-2';
 
 const CascadingSelector: React.FC<CascadingSelectorProps> = ({
   selectedRedId = '',
@@ -130,90 +137,100 @@ const CascadingSelector: React.FC<CascadingSelectorProps> = ({
     onCentroAcopioChange?.(centroAcopioId);
   };
 
-  const getSelectClassName = (hasError?: string, isDisabled?: boolean) =>
-    `${COMPONENT_STYLES.input.base} ${hasError ? COMPONENT_STYLES.input.error : COMPONENT_STYLES.input.normal} ${
-      isDisabled ? 'cursor-not-allowed bg-zinc-50 text-zinc-500' : ''
-    }`;
+  const getSelectClassName = (hasError?: string) =>
+    `${SELECT_BASE_CLASS} ${hasError ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20' : 'border-line'}`;
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3">
       {showRed ? (
         <div className="flex flex-col">
-          <label htmlFor="cascading-red" className={COMPONENT_STYLES.input.label}>
-            Red de Salud {required.red ? <span className="ml-1 text-rose-500">*</span> : null}
+          <label htmlFor="cascading-red" className={LABEL_CLASS}>
+            Red de Salud {required.red ? <span className="ml-0.5 text-rose-500">*</span> : null}
           </label>
-          <select
-            id="cascading-red"
-            value={localRedId}
-            onChange={(event) => handleRedChange(event.target.value)}
-            disabled={loading || disabled.red}
-            className={getSelectClassName(errors.red, loading || disabled.red)}
-          >
-            <option value="">{loading ? 'Cargando redes...' : 'Seleccionar red...'}</option>
-            {redes.map((red) => (
-              <option key={red.id} value={red.id}>
-                {red.nombre} {red.codigo ? `(${red.codigo})` : ''}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <ShareNetwork className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+            <select
+              id="cascading-red"
+              value={localRedId}
+              onChange={(event) => handleRedChange(event.target.value)}
+              disabled={loading || disabled.red}
+              className={getSelectClassName(errors.red)}
+            >
+              <option value="">{loading ? 'Cargando redes...' : 'Todas las redes'}</option>
+              {redes.map((red) => (
+                <option key={red.id} value={red.id}>
+                  {red.nombre} {red.codigo ? `(${red.codigo})` : ''}
+                </option>
+              ))}
+            </select>
+            <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+          </div>
           {errors.red ? <p className={COMPONENT_STYLES.input.errorText}>{errors.red}</p> : null}
         </div>
       ) : null}
 
       {showMicrored ? (
         <div className="flex flex-col">
-          <label htmlFor="cascading-microred" className={COMPONENT_STYLES.input.label}>
-            Microred {required.microred ? <span className="ml-1 text-rose-500">*</span> : null}
+          <label htmlFor="cascading-microred" className={LABEL_CLASS}>
+            Microred {required.microred ? <span className="ml-0.5 text-rose-500">*</span> : null}
           </label>
-          <select
-            id="cascading-microred"
-            value={localMicroredId}
-            onChange={(event) => handleMicroredChange(event.target.value)}
-            disabled={loading || disabled.microred || !localRedId}
-            className={getSelectClassName(errors.microred, loading || disabled.microred || !localRedId)}
-          >
-            <option value="">
-              {!localRedId
-                ? 'Seleccione una red primero...'
-                : loading
-                ? 'Cargando microredes...'
-                : 'Seleccionar microred...'}
-            </option>
-            {filteredMicroredes.map((microred) => (
-              <option key={microred.id} value={microred.id}>
-                {microred.nombre}
+          <div className="relative">
+            <TreeStructure className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+            <select
+              id="cascading-microred"
+              value={localMicroredId}
+              onChange={(event) => handleMicroredChange(event.target.value)}
+              disabled={loading || disabled.microred || !localRedId}
+              className={getSelectClassName(errors.microred)}
+            >
+              <option value="">
+                {!localRedId
+                  ? 'Seleccione red primero'
+                  : loading
+                  ? 'Cargando microredes...'
+                  : 'Todas las microredes'}
               </option>
-            ))}
-          </select>
+              {filteredMicroredes.map((microred) => (
+                <option key={microred.id} value={microred.id}>
+                  {microred.nombre}
+                </option>
+              ))}
+            </select>
+            <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+          </div>
           {errors.microred ? <p className={COMPONENT_STYLES.input.errorText}>{errors.microred}</p> : null}
         </div>
       ) : null}
 
       {showCentroAcopio ? (
         <div className="flex flex-col">
-          <label htmlFor="cascading-centro" className={COMPONENT_STYLES.input.label}>
-            Centro de Acopio {required.centroAcopio ? <span className="ml-1 text-rose-500">*</span> : null}
+          <label htmlFor="cascading-centro" className={LABEL_CLASS}>
+            Centro de Acopio {required.centroAcopio ? <span className="ml-0.5 text-rose-500">*</span> : null}
           </label>
-          <select
-            id="cascading-centro"
-            value={localCentroAcopioId}
-            onChange={(event) => handleCentroAcopioChange(event.target.value)}
-            disabled={loading || disabled.centroAcopio || !localMicroredId}
-            className={getSelectClassName(errors.centroAcopio, loading || disabled.centroAcopio || !localMicroredId)}
-          >
-            <option value="">
-              {!localMicroredId
-                ? 'Seleccione una microred primero...'
-                : loading
-                ? 'Cargando centros de acopio...'
-                : 'Seleccionar centro de acopio...'}
-            </option>
-            {filteredCentrosAcopio.map((centroAcopio) => (
-              <option key={centroAcopio.id} value={centroAcopio.id}>
-                {centroAcopio.nombre}
+          <div className="relative">
+            <Buildings className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+            <select
+              id="cascading-centro"
+              value={localCentroAcopioId}
+              onChange={(event) => handleCentroAcopioChange(event.target.value)}
+              disabled={loading || disabled.centroAcopio || !localMicroredId}
+              className={getSelectClassName(errors.centroAcopio)}
+            >
+              <option value="">
+                {!localMicroredId
+                  ? 'Seleccione microred primero'
+                  : loading
+                  ? 'Cargando centros...'
+                  : 'Todos los centros'}
               </option>
-            ))}
-          </select>
+              {filteredCentrosAcopio.map((centroAcopio) => (
+                <option key={centroAcopio.id} value={centroAcopio.id}>
+                  {centroAcopio.nombre}
+                </option>
+              ))}
+            </select>
+            <CaretDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2" />
+          </div>
           {errors.centroAcopio ? <p className={COMPONENT_STYLES.input.errorText}>{errors.centroAcopio}</p> : null}
         </div>
       ) : null}

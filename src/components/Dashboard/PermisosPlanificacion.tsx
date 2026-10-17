@@ -6,7 +6,6 @@ import {
   CalendarCheck,
   ArrowSquareOut,
   Timer,
-  X,
   CaretDown,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
@@ -18,6 +17,7 @@ import {
   type TipoPermisoOperativo,
 } from '../../services/permisoOperativoService';
 import type { DashboardStats } from '../../services/dashboardService';
+import { Modal, FormField, ModalFooter } from '../ui/ModalElements';
 
 const MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -41,115 +41,77 @@ const ScheduleModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[300] flex items-center justify-center bg-ink-soft/20 p-4 backdrop-blur-[2px]"
-      onClick={onClose}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Programar activación"
+      subtitle={permisoLabel}
+      icon={Timer}
+      size="sm"
+      footer={
+        <ModalFooter
+          onCancel={onClose}
+          onSubmit={() => {
+            if (!fechaActivacion) return;
+            onSave(
+              new Date(fechaActivacion).toISOString(),
+              usarDesactivacion && fechaDesactivacion
+                ? new Date(fechaDesactivacion).toISOString()
+                : null
+            );
+            onClose();
+          }}
+          cancelLabel="Cancelar"
+          submitLabel="Guardar programación"
+          submitType="button"
+          isDisabled={!fechaActivacion}
+        />
+      }
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.96 }}
-        className="flex w-full max-w-md flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2">
-              <Timer className="h-4 w-4" weight="bold" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-ink">Programar activación</h3>
-              <p className="text-xs text-muted-2">{permisoLabel}</p>
-            </div>
-          </div>
+      <div className="space-y-4">
+        <FormField label="Fecha y hora de activación" required>
+          <input
+            type="datetime-local"
+            value={fechaActivacion}
+            onChange={(e) => setFechaActivacion(e.target.value)}
+            className="h-9 w-full rounded-lg border border-zinc-200/90 bg-white px-3 text-sm text-zinc-900 transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+          />
+        </FormField>
+
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200/80 bg-zinc-50/70 px-3.5 py-2.5 dark:border-zinc-800 dark:bg-zinc-900/50">
+          <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+            Programar desactivación automática
+          </span>
           <button
             type="button"
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-muted transition-colors hover:bg-surface-soft hover:text-ink"
+            role="switch"
+            aria-checked={usarDesactivacion}
+            onClick={() => setUsarDesactivacion(!usarDesactivacion)}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-150 focus:outline-none ${
+              usarDesactivacion ? 'bg-brand' : 'bg-zinc-300 dark:bg-zinc-700'
+            }`}
           >
-            <X className="h-4 w-4" weight="bold" />
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transition-transform duration-150 ${
+                usarDesactivacion ? 'translate-x-4' : 'translate-x-0'
+              }`}
+            />
           </button>
         </div>
 
-        <div className="space-y-4 px-5 py-4">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-2">
-              Fecha y hora de activación
-            </label>
+        {usarDesactivacion && (
+          <FormField label="Fecha y hora de desactivación">
             <input
               type="datetime-local"
-              value={fechaActivacion}
-              onChange={(e) => setFechaActivacion(e.target.value)}
-              className="min-h-9 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink transition-colors focus:border-brand focus:outline-none"
+              value={fechaDesactivacion}
+              onChange={(e) => setFechaDesactivacion(e.target.value)}
+              min={fechaActivacion}
+              className="h-9 w-full rounded-lg border border-zinc-200/90 bg-white px-3 text-sm text-zinc-900 transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
             />
-          </div>
-
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface-soft p-3">
-            <span className="text-xs font-medium text-ink">
-              Programar desactivación automática
-            </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={usarDesactivacion}
-              onClick={() => setUsarDesactivacion(!usarDesactivacion)}
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-150 focus:outline-none ${
-                usarDesactivacion ? 'bg-brand' : 'bg-zinc-300'
-              }`}
-            >
-              <span
-                className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transition-transform duration-150 ${
-                  usarDesactivacion ? 'translate-x-4' : 'translate-x-0'
-                }`}
-              />
-            </button>
-          </div>
-
-          {usarDesactivacion && (
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-2">
-                Fecha y hora de desactivación
-              </label>
-              <input
-                type="datetime-local"
-                value={fechaDesactivacion}
-                onChange={(e) => setFechaDesactivacion(e.target.value)}
-                min={fechaActivacion}
-                className="min-h-9 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink transition-colors focus:border-brand focus:outline-none"
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="mt-auto flex items-center justify-end gap-2 border-t border-line bg-surface-soft px-5 py-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex h-8 items-center justify-center rounded-lg border border-line bg-surface px-3 text-xs font-medium text-ink transition-colors hover:bg-surface-soft"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (!fechaActivacion) return;
-              onSave(
-                new Date(fechaActivacion).toISOString(),
-                usarDesactivacion && fechaDesactivacion
-                  ? new Date(fechaDesactivacion).toISOString()
-                  : null
-              );
-              onClose();
-            }}
-            disabled={!fechaActivacion}
-            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-brand bg-brand px-3 text-xs font-medium text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Timer className="h-3.5 w-3.5" weight="bold" />
-            Guardar programación
-          </button>
-        </div>
-      </motion.div>
-    </div>
+          </FormField>
+        )}
+      </div>
+    </Modal>
   );
 };
 

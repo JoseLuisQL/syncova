@@ -68,12 +68,13 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           cancelLabel={cancelText}
           submitLabel={confirmText}
           submitType="button"
+          submitVariant={type === 'danger' ? 'danger' : 'primary'}
           isLoading={loading}
         />
       }
     >
-      <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-        <p className="text-sm leading-6 text-zinc-700">{message}</p>
+      <div className="rounded-lg border border-zinc-200/80 bg-zinc-50/70 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/50">
+        <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">{message}</p>
       </div>
     </Modal>
   );

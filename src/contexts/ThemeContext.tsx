@@ -29,10 +29,15 @@ const getStoredPreference = (): Theme | 'system' => {
 
 const applyTheme = (resolved: ResolvedTheme) => {
   const root = document.documentElement;
+  const body = document.body;
   if (resolved === 'dark') {
     root.classList.add('dark');
+    root.style.colorScheme = 'dark';
+    body?.classList.add('dark');
   } else {
     root.classList.remove('dark');
+    root.style.colorScheme = 'light';
+    body?.classList.remove('dark');
   }
 };
 

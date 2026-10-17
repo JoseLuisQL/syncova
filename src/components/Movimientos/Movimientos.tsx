@@ -1859,9 +1859,11 @@ const Movimientos: React.FC = () => {
 
       for (const key of pendingKeys) {
         try {
-          const [establecimientoId, campo] = key.split('-');
+          const lastDashIndex = key.lastIndexOf('-');
+          const establecimientoId = lastDashIndex !== -1 ? key.slice(0, lastDashIndex) : key;
+          const campo = lastDashIndex !== -1 ? key.slice(lastDashIndex + 1) : '';
           const value = tempValues[key];
-          if (value !== undefined) {
+          if (value !== undefined && campo) {
             await handleSaveFieldValue(establecimientoId, campo, value);
             exitosos++;
           }
@@ -2114,7 +2116,7 @@ const Movimientos: React.FC = () => {
 
       {canAccessVales && showValesModal && (
         <div className={`${COMPONENT_STYLES.modal.overlay} flex items-center justify-center p-4 sm:p-6`}>
-          <div className="flex max-h-[95vh] w-full max-w-7xl flex-col overflow-hidden rounded-lg border border-line bg-white shadow-[0_22px_54px_-38px_rgba(12,15,24,0.55)]">
+          <div className="flex max-h-[95vh] w-full max-w-7xl flex-col overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.3)] dark:border-zinc-800/90 dark:bg-[#111318] dark:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.75)]">
             <ValesErrorBoundary>
               <Vales
                 initialCentroAcopioId={selectedCentroAcopio !== 'todos' ? selectedCentroAcopio : undefined}

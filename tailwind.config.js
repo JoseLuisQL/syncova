@@ -111,12 +111,29 @@ export default {
       ...designMdTheme,
       colors: {
         ...designMdTheme.colors,
-        hh: designMdTheme.colors,
-        clinical: designMdTheme.colors,
+        hh: {
+          ...designMdTheme.colors,
+          primary: 'var(--clinical-primary)',
+          secondary: 'var(--clinical-secondary)',
+          tertiary: 'var(--clinical-tertiary)',
+          neutral: 'var(--clinical-neutral)',
+          surface: 'var(--clinical-surface)',
+          'on-primary': 'var(--clinical-on-primary)',
+        },
+        clinical: {
+          ...designMdTheme.colors,
+          primary: 'var(--clinical-primary)',
+          secondary: 'var(--clinical-secondary)',
+          tertiary: 'var(--clinical-tertiary)',
+          neutral: 'var(--clinical-neutral)',
+          surface: 'var(--clinical-surface)',
+          'on-primary': 'var(--clinical-on-primary)',
+        },
         ...clinicalPalette,
         // Tokens clínicos adaptables a temas light y dark
         primary: 'var(--clinical-primary)',
         secondary: 'var(--clinical-secondary)',
+        tertiary: 'var(--clinical-tertiary)',
         neutral: 'var(--clinical-neutral)',
         'on-primary': 'var(--clinical-on-primary)',
         // Tokens semánticos del sistema. Implementados como CSS variables con
@@ -150,6 +167,8 @@ export default {
         surface: {
           DEFAULT: 'rgb(var(--color-surface) / <alpha-value>)',
           soft: 'rgb(var(--color-surface-soft) / <alpha-value>)',
+          muted: 'rgb(var(--color-surface-soft) / <alpha-value>)',
+          strong: 'rgb(var(--color-line) / <alpha-value>)',
           tint: 'rgb(var(--color-surface-tint) / <alpha-value>)',
         },
         // Fondo de la app (page background), token dedicado para dark mode.
@@ -180,7 +199,11 @@ export default {
       fontFamily: {
         ...designMdTheme.fontFamily,
         sans: ['"IBM Plex Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        display: ['"IBM Plex Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        h1: ['"IBM Plex Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        body: ['"IBM Plex Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
         mono: ['"IBM Plex Mono"', '"SFMono-Regular"', 'Consolas', '"Liberation Mono"', 'monospace'],
+        label: ['"IBM Plex Mono"', '"SFMono-Regular"', 'Consolas', '"Liberation Mono"', 'monospace'],
       },
       fontSize: {
         ...designMdTheme.fontSize,

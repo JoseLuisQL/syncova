@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { createPortal } from 'react-dom';
-import { X, Shield, CircleNotch, WarningCircle, Check, Code, FileText, ToggleLeft, ToggleRight, Sparkle, Info } from '@phosphor-icons/react';
+import { Shield, Check, ToggleLeft, ToggleRight, Sparkle, Info } from '@phosphor-icons/react';
 import { Role, CreateRoleDto, UpdateRoleDto } from '../../types';
 import { COMPONENT_STYLES } from './constants';
+import { Modal, ModalFooter, FormField } from '../ui/ModalElements';
 
 interface RoleModalProps {
   isOpen: boolean;
@@ -29,11 +29,7 @@ const RoleModal: React.FC<RoleModalProps> = ({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const nombreInputRef = useRef<HTMLInputElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
 
-  // Resetear formulario cuando cambia el rol en edición o al abrir.
-  // Ajuste durante el render (sin useEffect) para evitar el flash de estado
-  // stale que marca react-doctor (no-adjust-state-on-prop-change).
   const [lastKey, setLastKey] = useState<string | null>(null);
   const currentKey = `${isOpen ? 'open' : 'closed'}:${editingRole?.id ?? 'new'}`;
   if (currentKey !== lastKey) {
@@ -59,25 +55,12 @@ const RoleModal: React.FC<RoleModalProps> = ({
     }
   }
 
-  // Foco al abrir: timer con cleanup para evitar memory leak.
   useEffect(() => {
     if (!isOpen) return;
     const t = setTimeout(() => nombreInputRef.current?.focus(), 100);
     return () => clearTimeout(t);
   }, [isOpen]);
 
-  // Manejar tecla Escape
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen && !isLoading && !isSubmitting) {
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isLoading, isSubmitting, onClose]);
-
-  // Generar código automáticamente basado en el nombre
   const generateCodigo = useCallback((nombre: string) => {
     return nombre
       .toLowerCase()
@@ -192,8 +175,8 @@ const RoleModal: React.FC<RoleModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     
     if (!validateForm()) {
       return;
@@ -226,251 +209,171 @@ const RoleModal: React.FC<RoleModalProps> = ({
   const isSystemRole = editingRole?.esDefault ?? false;
   const canSubmit = isFormValid && !isLoading && !isSubmitting;
 
-  const modalContent = (
-    <div 
-      className={COMPONENT_STYLES.modal.overlay}
-      onClick={(e) => e.target === e.currentTarget && !isLoading && !isSubmitting && onClose()}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="role-modal-title"
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={isLoading || isSubmitting ? () => undefined : onClose}
+      title={isEditing ? 'Editar rol' : 'Nuevo rol'}
+      subtitle={isEditing ? `Modificando: ${editingRole.nombre}` : 'Define un nuevo rol operativo para el sistema'}
+      icon={Shield}
+      size="md"
+      footer={
+        <ModalFooter
+          onCancel={onClose}
+          onSubmit={() => void handleSubmit()}
+          submitType="button"
+          submitLabel={isEditing ? 'Guardar cambios' : 'Crear rol'}
+          isLoading={isLoading || isSubmitting}
+          isSubmitDisabled={!canSubmit}
+        />
+      }
     >
-      <div 
-        ref={modalRef}
-        className={`${COMPONENT_STYLES.modal.containerShell} flex max-h-[88vh] max-w-lg flex-col`}
-      >
-        {/* Header */}
-        <div className="border-b border-line-soft bg-white px-5 py-3.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-line bg-surface-soft text-muted-2">
-                <Shield className="h-4 w-4" aria-hidden="true" />
-              </div>
-              <div>
-                <h2 id="role-modal-title" className="text-md font-semibold leading-5 text-ink">
-                  {isEditing ? 'Editar Rol' : 'Crear Nuevo Rol'}
-                </h2>
-                <p className="mt-1 text-sm leading-4 text-muted-2">
-                  {isEditing 
-                    ? `Modificando: ${editingRole.nombre}` 
-                    : 'Define un nuevo rol para el sistema'}
-                </p>
-              </div>
-            </div>
-            
-            <button type="button"
-              onClick={onClose}
-              disabled={isLoading || isSubmitting}
-              className={COMPONENT_STYLES.button.ghost}
-              aria-label="Cerrar modal"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Aviso de rol del sistema */}
+      <form onSubmit={handleSubmit} className="space-y-4">
         {isSystemRole && (
-          <div className="mx-5 mt-4 flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50/80 px-3 py-2.5">
-            <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+          <div className="flex items-start gap-2.5 rounded-xl border border-amber-200/80 bg-amber-50/70 px-3.5 py-2.5 dark:border-amber-500/30 dark:bg-amber-500/10">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" weight="bold" />
             <div>
-              <p className="text-base font-medium text-amber-800">Rol del Sistema</p>
-              <p className="mt-0.5 text-xs text-amber-700">
-                Este es un rol predefinido. El código no puede ser modificado.
+              <p className="text-xs font-semibold text-amber-900 dark:text-amber-200">Rol del sistema</p>
+              <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-300">
+                Este es un rol predefinido. El código identificador no puede ser modificado.
               </p>
             </div>
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto bg-white px-5 py-4">
-          <div className="space-y-4">
-            {/* Nombre */}
-            <div>
-              <label htmlFor="nombre" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[#424750]">
-                <FileText className="h-3.5 w-3.5 text-zinc-400" />
-                Nombre del Rol
-                <span className="text-rose-500">*</span>
-              </label>
-              <input
-                ref={nombreInputRef}
-                type="text"
-                id="nombre"
-                value={formData.nombre}
-                onChange={(e) => handleNombreChange(e.target.value)}
-                onBlur={() => handleBlur('nombre')}
-                className={`${COMPONENT_STYLES.input.base} ${
-                  errors.nombre && touched.nombre 
-                    ? COMPONENT_STYLES.input.error 
-                    : COMPONENT_STYLES.input.normal
-                }`}
-                placeholder="Ej: Supervisor de Inventario"
-                disabled={isLoading || isSubmitting}
-                aria-invalid={!!errors.nombre}
-                aria-describedby={errors.nombre ? 'nombre-error' : undefined}
-              />
-              {errors.nombre && touched.nombre ? (
-                <p id="nombre-error" className="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
-                  <WarningCircle className="h-3.5 w-3.5" />
-                  {errors.nombre}
-                </p>
-              ) : (
-                <p className="mt-1.5 text-xs text-zinc-500">
-                  Nombre descriptivo para identificar el rol
-                </p>
-              )}
-            </div>
+        <FormField
+          id="nombre"
+          label="Nombre del rol"
+          required
+          error={touched.nombre ? errors.nombre : undefined}
+          helpText="Nombre descriptivo para identificar el rol"
+        >
+          <input
+            ref={nombreInputRef}
+            type="text"
+            id="nombre"
+            value={formData.nombre}
+            onChange={(e) => handleNombreChange(e.target.value)}
+            onBlur={() => handleBlur('nombre')}
+            className={`${COMPONENT_STYLES.input.base} ${
+              errors.nombre && touched.nombre
+                ? COMPONENT_STYLES.input.error
+                : COMPONENT_STYLES.input.normal
+            }`}
+            placeholder="Ej: Supervisor de Inventario"
+            disabled={isLoading || isSubmitting}
+            aria-invalid={!!errors.nombre}
+          />
+        </FormField>
 
-            {/* Código */}
-            <div>
-              <label htmlFor="codigo" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[#424750]">
-                <Code className="h-3.5 w-3.5 text-zinc-400" />
-                Código del Rol
-                <span className="text-rose-500">*</span>
-                {!isEditing && formData.codigo && (
-                  <span className="ml-auto flex items-center gap-1 text-xs text-zinc-600">
-                    <Sparkle className="h-3 w-3" />
-                    Generado automáticamente
-                  </span>
-                )}
-              </label>
-              <input
-                type="text"
-                id="codigo"
-                value={formData.codigo}
-                onChange={(e) => handleCodigoChange(e.target.value)}
-                onBlur={() => handleBlur('codigo')}
-                className={`${COMPONENT_STYLES.input.base} font-mono text-sm ${
-                  errors.codigo && touched.codigo 
-                    ? COMPONENT_STYLES.input.error 
-                    : COMPONENT_STYLES.input.normal
-                } ${isSystemRole ? 'bg-zinc-50 cursor-not-allowed' : ''}`}
-                placeholder="supervisor_inventario"
-                disabled={isLoading || isSubmitting || isSystemRole}
-                aria-invalid={!!errors.codigo}
-                aria-describedby={errors.codigo ? 'codigo-error' : 'codigo-hint'}
-              />
-              {errors.codigo && touched.codigo ? (
-                <p id="codigo-error" className="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
-                  <WarningCircle className="h-3.5 w-3.5" />
-                  {errors.codigo}
-                </p>
-              ) : (
-                <p id="codigo-hint" className="mt-1.5 text-xs text-zinc-500">
-                  Identificador único. Solo letras minúsculas, números y guiones bajos.
-                </p>
-              )}
-            </div>
-
-            {/* Descripción */}
-            <div>
-              <label htmlFor="descripcion" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[#424750]">
-                <FileText className="h-3.5 w-3.5 text-zinc-400" />
-                Descripción
-                <span className="ml-auto text-xs text-zinc-400">
-                  {formData.descripcion.length}/500
-                </span>
-              </label>
-              <textarea
-                id="descripcion"
-                value={formData.descripcion}
-                onChange={(e) => handleDescripcionChange(e.target.value)}
-                onBlur={() => handleBlur('descripcion')}
-                rows={3}
-                className={`${COMPONENT_STYLES.input.base} resize-none ${
-                  errors.descripcion && touched.descripcion 
-                    ? COMPONENT_STYLES.input.error 
-                    : COMPONENT_STYLES.input.normal
-                }`}
-                placeholder="Describe las responsabilidades y alcance de este rol..."
-                disabled={isLoading || isSubmitting}
-                aria-invalid={!!errors.descripcion}
-                aria-describedby={errors.descripcion ? 'descripcion-error' : undefined}
-              />
-              {errors.descripcion && touched.descripcion && (
-                <p id="descripcion-error" className="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
-                  <WarningCircle className="h-3.5 w-3.5" />
-                  {errors.descripcion}
-                </p>
-              )}
-            </div>
-
-            {/* Estado */}
-            <div>
-              <label className="mb-2 flex items-center gap-2 text-sm font-medium text-[#424750]">
-                Estado del Rol
-              </label>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, estado: 'activo' }))}
-                  disabled={isLoading || isSubmitting}
-                  className={`flex-1 flex items-center justify-center gap-2 rounded-[7px] border px-3 py-2 text-base transition-colors duration-200 ${
-                    formData.estado === 'activo'
-                      ? 'border-brand-100 bg-surface-soft text-brand'
-                      : 'border-line bg-white text-zinc-600 hover:border-line-strong hover:bg-surface-soft'
-                  }`}
-                >
-                  <ToggleRight className={`h-5 w-5 ${formData.estado === 'activo' ? 'text-emerald-600' : 'text-zinc-400'}`} />
-                  <span className="font-medium">Activo</span>
-                  {formData.estado === 'activo' && (
-                    <Check className="h-4 w-4 text-emerald-600" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, estado: 'inactivo' }))}
-                  disabled={isLoading || isSubmitting}
-                  className={`flex-1 flex items-center justify-center gap-2 rounded-[7px] border px-3 py-2 text-base transition-colors duration-200 ${
-                    formData.estado === 'inactivo'
-                      ? 'border-line bg-surface-soft text-zinc-700'
-                      : 'border-line bg-white text-zinc-600 hover:border-line-strong hover:bg-surface-soft'
-                  }`}
-                >
-                  <ToggleLeft className={`h-5 w-5 ${formData.estado === 'inactivo' ? 'text-zinc-600' : 'text-zinc-400'}`} />
-                  <span className="font-medium">Inactivo</span>
-                  {formData.estado === 'inactivo' && (
-                    <Check className="h-4 w-4 text-zinc-600" />
-                  )}
-                </button>
-              </div>
-              <p className="mt-2 text-xs text-zinc-500">
-                {formData.estado === 'activo' 
-                  ? 'Los usuarios con este rol podrán acceder al sistema' 
-                  : 'Los usuarios con este rol no podrán iniciar sesión'}
-              </p>
-            </div>
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label htmlFor="codigo" className="text-[0.8125rem] font-medium tracking-[-0.005em] text-ink">
+              Código del rol <span className="ml-0.5 text-rose-500">*</span>
+            </label>
+            {!isEditing && formData.codigo && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-2">
+                <Sparkle className="h-3 w-3 text-brand" weight="fill" />
+                Generado automáticamente
+              </span>
+            )}
           </div>
-        </form>
+          <input
+            type="text"
+            id="codigo"
+            value={formData.codigo}
+            onChange={(e) => handleCodigoChange(e.target.value)}
+            onBlur={() => handleBlur('codigo')}
+            className={`${COMPONENT_STYLES.input.base} font-mono text-xs ${
+              errors.codigo && touched.codigo
+                ? COMPONENT_STYLES.input.error
+                : COMPONENT_STYLES.input.normal
+            }`}
+            placeholder="supervisor_inventario"
+            disabled={isLoading || isSubmitting || isSystemRole}
+            aria-invalid={!!errors.codigo}
+          />
+          {errors.codigo && touched.codigo ? (
+            <p className={COMPONENT_STYLES.input.errorText}>{errors.codigo}</p>
+          ) : (
+            <p className="mt-1.5 text-xs text-muted-2">
+              Identificador único (solo letras minúsculas, números y guiones bajos).
+            </p>
+          )}
+        </div>
 
-        {/* Footer */}
-        <div className="border-t border-line-soft bg-surface-soft px-5 py-3">
-          <div className="flex items-center justify-end gap-2">
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label htmlFor="descripcion" className="text-[0.8125rem] font-medium tracking-[-0.005em] text-ink">
+              Descripción
+            </label>
+            <span className="text-[11px] font-medium tabular-nums text-muted">
+              {formData.descripcion.length}/500
+            </span>
+          </div>
+          <textarea
+            id="descripcion"
+            value={formData.descripcion}
+            onChange={(e) => handleDescripcionChange(e.target.value)}
+            onBlur={() => handleBlur('descripcion')}
+            rows={3}
+            className={`${COMPONENT_STYLES.input.base} min-h-[84px] resize-none py-2.5 ${
+              errors.descripcion && touched.descripcion
+                ? COMPONENT_STYLES.input.error
+                : COMPONENT_STYLES.input.normal
+            }`}
+            placeholder="Describe las responsabilidades y alcance de este rol..."
+            disabled={isLoading || isSubmitting}
+            aria-invalid={!!errors.descripcion}
+          />
+          {errors.descripcion && touched.descripcion && (
+            <p className={COMPONENT_STYLES.input.errorText}>{errors.descripcion}</p>
+          )}
+        </div>
+
+        <div>
+          <label className={COMPONENT_STYLES.input.label}>Estado del rol</label>
+          <div className="grid grid-cols-2 gap-2.5">
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => setFormData(prev => ({ ...prev, estado: 'activo' }))}
               disabled={isLoading || isSubmitting}
-              className={COMPONENT_STYLES.button.secondary}
+              className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-[0.8125rem] font-medium transition-all ${
+                formData.estado === 'activo'
+                  ? 'border-brand-100 bg-surface-soft text-brand'
+                  : 'border-line bg-surface text-muted-2 hover:border-line-strong hover:bg-surface-soft'
+              }`}
             >
-              Cancelar
+              <ToggleRight className={`h-4 w-4 ${formData.estado === 'activo' ? 'text-emerald-600' : 'text-muted'}`} weight="fill" />
+              <span>Activo</span>
+              {formData.estado === 'activo' && <Check className="h-3.5 w-3.5 text-emerald-600" weight="bold" />}
             </button>
             <button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={!canSubmit}
-              className={COMPONENT_STYLES.button.primary}
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, estado: 'inactivo' }))}
+              disabled={isLoading || isSubmitting}
+              className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-[0.8125rem] font-medium transition-all ${
+                formData.estado === 'inactivo'
+                  ? 'border-line-strong bg-surface-soft text-ink'
+                  : 'border-line bg-surface text-muted-2 hover:border-line-strong hover:bg-surface-soft'
+              }`}
             >
-              {(isLoading || isSubmitting) && <CircleNotch className="h-4 w-4 animate-spin" />}
-              <Check className="h-4 w-4" />
-              <span>{isEditing ? 'Actualizar Rol' : 'Crear Rol'}</span>
+              <ToggleLeft className={`h-4 w-4 ${formData.estado === 'inactivo' ? 'text-ink' : 'text-muted'}`} weight="fill" />
+              <span>Inactivo</span>
+              {formData.estado === 'inactivo' && <Check className="h-3.5 w-3.5 text-ink" weight="bold" />}
             </button>
           </div>
+          <p className="mt-1.5 text-xs text-muted-2">
+            {formData.estado === 'activo'
+              ? 'Los usuarios con este rol podrán acceder al sistema.'
+              : 'Los usuarios con este rol no podrán iniciar sesión.'}
+          </p>
         </div>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
-
-  return createPortal(modalContent, document.body);
 };
 
 export default React.memo(RoleModal);
+
    
