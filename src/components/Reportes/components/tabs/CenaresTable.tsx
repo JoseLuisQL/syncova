@@ -9,6 +9,8 @@ import {
   Syringe,
   ArrowsLeftRight,
   CaretDown,
+  CaretLeft,
+  CaretRight,
   MagnifyingGlass,
   X,
 } from '@phosphor-icons/react';
@@ -66,12 +68,16 @@ const TRIMESTRE_LABELS = {
   q4: '4° Trimestre',
 };
 
+const CENARES_PAGE_SIZES = [10, 15, 25, 50] as const;
+
 const CenaresTable: React.FC<CenaresTableProps> = memo(
   ({ anio, onAnioChange, tipoItem = 'todos', onTipoItemChange }) => {
     const [items, setItems] = useState<TableItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState<number>(15);
     const [tempValues, setTempValues] = useState<Record<string, number>>({});
     const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({});
     const [isUpdating, setIsUpdating] = useState(false);
@@ -112,6 +118,20 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(
         return true;
       });
     }, [items, searchQuery, tipoItem]);
+
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [anio, tipoItem, searchQuery, pageSize]);
+
+    const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+    const safePage = Math.min(currentPage, totalPages);
+    const startIndex = (safePage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, filteredItems.length);
+
+    const paginatedItems = useMemo(
+      () => filteredItems.slice(startIndex, endIndex),
+      [filteredItems, startIndex, endIndex],
+    );
 
     const stats = useMemo(() => {
       const vacunas = filteredItems.filter((item) => item.tipo === 'vacuna').length;
@@ -480,7 +500,7 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(
                   </thead>
 
                   <tbody className="divide-y divide-line-soft bg-surface">
-                    {filteredItems.map((item) => {
+                    {paginatedItems.map((item) => {
                       const q1Prog = getCurrentValue(item, 'q1');
                       const q2Prog = getCurrentValue(item, 'q2');
                       const q3Prog = getCurrentValue(item, 'q3');
@@ -597,6 +617,78 @@ const CenaresTable: React.FC<CenaresTableProps> = memo(
                   </tbody>
                 </table>
               </div>
+
+              {filteredItems.length > 0 && (
+                <div className={COMPONENT_STYLES.pagination.container}>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className={COMPONENT_STYLES.pagination.info}>
+                        Mostrando {startIndex + 1}–{endIndex} de {filteredItems.length.toLocaleString('es-PE')}
+                      </span>
+
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={pageSize}
+                          onChange={(e) => setPageSize(Number(e.target.value))}
+                          className="h-8 appearance-none rounded-lg border border-line bg-surface pl-2.5 pr-7 font-mono text-xs font-medium text-ink transition-colors hover:border-line-strong focus:border-brand focus:outline-none tabular-nums"
+                          aria-label="Ítems por página"
+                        >
+                          {CENARES_PAGE_SIZES.map((size) => (
+                            <option key={size} value={size}>
+                              {size} / pág.
+                            </option>
+                          ))}
+                        </select>
+                        <CaretDown
+                          className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-2"
+                          weight="bold"
+                        />
+                      </div>
+                    </div>
+
+                    {totalPages > 1 ? (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                          disabled={safePage === 1}
+                          className={`${COMPONENT_STYLES.pagination.button} inline-flex items-center gap-1`}
+                          aria-label="Página anterior"
+                        >
+                          <CaretLeft className="h-3.5 w-3.5" weight="bold" />
+                          <span className="hidden sm:inline">Anterior</span>
+                        </button>
+
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                          <button
+                            key={page}
+                            type="button"
+                            onClick={() => setCurrentPage(page)}
+                            className={`${COMPONENT_STYLES.pagination.button} font-mono tabular-nums ${
+                              safePage === page
+                                ? COMPONENT_STYLES.pagination.buttonActive
+                                : COMPONENT_STYLES.pagination.buttonInactive
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+
+                        <button
+                          type="button"
+                          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                          disabled={safePage === totalPages}
+                          className={`${COMPONENT_STYLES.pagination.button} inline-flex items-center gap-1`}
+                          aria-label="Página siguiente"
+                        >
+                          <span className="hidden sm:inline">Siguiente</span>
+                          <CaretRight className="h-3.5 w-3.5" weight="bold" />
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>

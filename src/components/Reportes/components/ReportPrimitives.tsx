@@ -1,5 +1,15 @@
-import React, { useState } from 'react';
-import { WarningCircle, CheckCircle, Icon, Rows, Table, X } from '@phosphor-icons/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  WarningCircle,
+  CheckCircle,
+  Icon,
+  Rows,
+  Table,
+  X,
+  CaretLeft,
+  CaretRight,
+  CaretDown,
+} from '@phosphor-icons/react';
 import { DataTable } from '../../Inventario/components/FilterAndTable';
 import { ColorScheme, COLORS, COMPONENT_STYLES } from '../constants';
 
@@ -33,7 +43,10 @@ interface ResultsTableProps<T> {
   headerActions?: React.ReactNode;
   onClose?: () => void;
   footer?: React.ReactNode;
+  defaultPageSize?: number;
 }
+
+const PAGE_SIZE_OPTIONS = [10, 15, 25, 50, 100] as const;
 
 export const ReportMetricsGrid: React.FC<{ items: ReportMetricItem[] }> = ({ items }) => (
   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -93,10 +106,45 @@ export function ReportResultsTable<T>({
   headerActions,
   onClose,
   footer,
+  defaultPageSize = 15,
 }: ResultsTableProps<T>) {
   const [mobileViewMode, setMobileViewMode] = useState<'cards' | 'table'>('cards');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(defaultPageSize);
+
   const primaryCol = columns[0];
   const detailCols = columns.slice(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [rows, title, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, rows.length);
+
+  const paginatedRows = useMemo(
+    () => rows.slice(startIndex, endIndex),
+    [rows, startIndex, endIndex],
+  );
+
+  const visiblePages = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages: Array<number | 'ellipsis-start' | 'ellipsis-end'> = [1];
+    const start = Math.max(2, safePage - 1);
+    const end = Math.min(totalPages - 1, safePage + 1);
+
+    if (start > 2) pages.push('ellipsis-start');
+    for (let p = start; p <= end; p++) {
+      pages.push(p);
+    }
+    if (end < totalPages - 1) pages.push('ellipsis-end');
+    pages.push(totalPages);
+    return pages;
+  }, [safePage, totalPages]);
 
   return (
     <section className={COMPONENT_STYLES.results.shell}>
@@ -105,8 +153,9 @@ export function ReportResultsTable<T>({
           <div className="min-w-0 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
             <h3 className="text-sm font-semibold text-ink">{title}</h3>
             <span className="font-mono text-xs text-muted-2 tabular-nums">
-              {rows.length} {rows.length === 1 ? 'registro' : 'registros'}
+              {rows.length.toLocaleString('es-PE')} {rows.length === 1 ? 'registro' : 'registros'}
               {summaryText ? ` · ${summaryText}` : ''}
+              {totalPages > 1 ? ` · Pág. ${safePage}/${totalPages}` : ''}
             </span>
           </div>
 
@@ -165,9 +214,9 @@ export function ReportResultsTable<T>({
             <>
               {mobileViewMode === 'cards' && (
                 <div className="grid grid-cols-1 gap-2.5 p-3 md:hidden">
-                  {rows.map((row, index) => (
+                  {paginatedRows.map((row, index) => (
                     <article
-                      key={`mobile-report-${title}-${index + 1}`}
+                      key={`mobile-report-${title}-${startIndex + index + 1}`}
                       className="rounded-xl border border-line bg-surface p-3.5"
                     >
                       {primaryCol && (
@@ -184,7 +233,7 @@ export function ReportResultsTable<T>({
                         <div className="mt-2.5 grid grid-cols-2 gap-2.5 text-xs">
                           {detailCols.map((col) => (
                             <div
-                              key={`mobile-col-${col.key}-${index}`}
+                              key={`mobile-col-${col.key}-${startIndex + index}`}
                               className="rounded-lg border border-line-soft bg-surface-soft/50 p-2 min-w-0"
                             >
                               <span className="block truncate text-[10px] font-semibold uppercase tracking-wider text-muted">
@@ -223,11 +272,11 @@ export function ReportResultsTable<T>({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-line-soft bg-surface">
-                    {rows.map((row, index) => (
-                      <tr key={`${title}-${index + 1}`} className={COMPONENT_STYLES.table.row}>
+                    {paginatedRows.map((row, index) => (
+                      <tr key={`${title}-${startIndex + index + 1}`} className={COMPONENT_STYLES.table.row}>
                         {columns.map((column) => (
                           <td
-                            key={`${column.key}-${index + 1}`}
+                            key={`${column.key}-${startIndex + index + 1}`}
                             className={`px-4 py-3 align-middle text-sm text-ink ${
                               column.align === 'right'
                                 ? 'text-right'
@@ -243,6 +292,83 @@ export function ReportResultsTable<T>({
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Barra minimalista de paginación */}
+              <div className={COMPONENT_STYLES.pagination.container}>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className={COMPONENT_STYLES.pagination.info}>
+                      Mostrando {startIndex + 1}–{endIndex} de {rows.length.toLocaleString('es-PE')}
+                    </span>
+
+                    <div className="relative inline-flex items-center">
+                      <select
+                        value={pageSize}
+                        onChange={(e) => setPageSize(Number(e.target.value))}
+                        className="h-8 appearance-none rounded-lg border border-line bg-surface pl-2.5 pr-7 font-mono text-xs font-medium text-ink transition-colors hover:border-line-strong focus:border-brand focus:outline-none tabular-nums"
+                        aria-label="Registros por página"
+                      >
+                        {PAGE_SIZE_OPTIONS.map((size) => (
+                          <option key={size} value={size}>
+                            {size} / pág.
+                          </option>
+                        ))}
+                      </select>
+                      <CaretDown
+                        className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-2"
+                        weight="bold"
+                      />
+                    </div>
+                  </div>
+
+                  {totalPages > 1 ? (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        disabled={safePage === 1}
+                        className={`${COMPONENT_STYLES.pagination.button} inline-flex items-center gap-1`}
+                        aria-label="Página anterior"
+                      >
+                        <CaretLeft className="h-3.5 w-3.5" weight="bold" />
+                        <span className="hidden sm:inline">Anterior</span>
+                      </button>
+
+                      {visiblePages.map((item) =>
+                        typeof item === 'number' ? (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => setCurrentPage(item)}
+                            className={`${COMPONENT_STYLES.pagination.button} font-mono tabular-nums ${
+                              safePage === item
+                                ? COMPONENT_STYLES.pagination.buttonActive
+                                : COMPONENT_STYLES.pagination.buttonInactive
+                            }`}
+                          >
+                            {item}
+                          </button>
+                        ) : (
+                          <span key={item} className="px-1 font-mono text-xs text-muted">
+                            …
+                          </span>
+                        ),
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={safePage === totalPages}
+                        className={`${COMPONENT_STYLES.pagination.button} inline-flex items-center gap-1`}
+                        aria-label="Página siguiente"
+                      >
+                        <span className="hidden sm:inline">Siguiente</span>
+                        <CaretRight className="h-3.5 w-3.5" weight="bold" />
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </>
           ) : (

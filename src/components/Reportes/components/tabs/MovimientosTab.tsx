@@ -308,10 +308,19 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
           summaryText={`${totals.entregas.toLocaleString('es-PE')} entregas · ${totals.salidas.toLocaleString('es-PE')} salidas`}
           rows={filteredRows}
           columns={columns}
+          defaultPageSize={15}
           isLoading={estado.cargando && reportes.movimientosMensuales.length === 0}
           loadingMessage="Consultando movimientos del período..."
           emptyTitle="Sin movimientos registrados en este rango"
           emptyDescription="Ajusta las fechas de inicio y fin, el centro de acopio o el término de búsqueda."
+          headerActions={
+            estado.cargando && reportes.movimientosMensuales.length > 0 ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-2">
+                <SpinnerGap className="h-3.5 w-3.5 animate-spin text-brand" weight="bold" />
+                <span>Actualizando...</span>
+              </span>
+            ) : null
+          }
         />
       </div>
 

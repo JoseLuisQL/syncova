@@ -3645,7 +3645,7 @@ export function sivacMockApiPlugin(): Plugin {
             if (vacunaId && vacunaId !== 'todas') {
               movs = movs.filter((m) => m.vacunaId === vacunaId);
             }
-            const items = movs.slice(0, 60).map((m) => ({
+            const items = movs.map((m) => ({
               establecimientoId: m.establecimientoId,
               establecimientoNombre: m.establecimiento?.nombre || 'Establecimiento',
               vacunaId: m.vacunaId,

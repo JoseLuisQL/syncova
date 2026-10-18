@@ -277,10 +277,19 @@ const PlanificacionTab: React.FC<PlanificacionTabProps> = ({ centrosAcopio, vacu
           summaryText={`${totalDosisProgramadas.toLocaleString('es-PE')} dosis programadas`}
           rows={filteredRows}
           columns={columns}
+          defaultPageSize={15}
           isLoading={estado.cargando && reportes.programacionAnual.length === 0}
           loadingMessage="Consultando programación anual..."
           emptyTitle="No se encontraron metas para los filtros aplicados"
           emptyDescription="Prueba seleccionando otro año fiscal, centro de acopio o vacuna."
+          headerActions={
+            estado.cargando && reportes.programacionAnual.length > 0 ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-2">
+                <SpinnerGap className="h-3.5 w-3.5 animate-spin text-brand" weight="bold" />
+                <span>Actualizando...</span>
+              </span>
+            ) : null
+          }
         />
       </div>
     </ReportSectionCard>
