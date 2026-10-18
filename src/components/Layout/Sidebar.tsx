@@ -14,6 +14,26 @@ const PRIMARY_IDS = ['dashboard', 'establecimientos', 'inventario', 'movimientos
 const SECONDARY_IDS = ['planificacion', 'ici-demid', 'kardex', 'reportes', 'alertas'];
 const UTILITY_IDS = ['usuarios', 'configuracion'];
 
+const normalizeSearchText = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const MODULE_SEARCH_KEYWORDS: Record<string, string[]> = {
+  dashboard: ['panel', 'inicio', 'resumen', 'metricas', 'estadisticas'],
+  establecimientos: ['redes', 'microredes', 'centros de acopio', 'eess', 'salud'],
+  inventario: ['vacunas', 'jeringas', 'lotes', 'biologicos', 'catalogo', 'stock', 'asignacion'],
+  movimientos: ['entregas', 'ingresos', 'salidas', 'transferencias', 'vales'],
+  planificacion: ['programacion', 'anual', 'metas', 'distribucion', 'mensual'],
+  'ici-demid': ['formato', 'consumo', 'integrado', 'excel', 'importar'],
+  kardex: ['historial', 'entradas', 'saldos', 'movimientos'],
+  reportes: ['cenares', 'informes', 'exportar', 'consolidados', 'seguimiento'],
+  alertas: ['notificaciones', 'vencimientos', 'criticos', 'avisos'],
+  usuarios: ['roles', 'permisos', 'accesos', 'cuentas', 'administracion'],
+  configuracion: ['ajustes', 'sistema', 'jeringas', 'diluyentes', 'parametros'],
+};
+
 const orderItems = (items: MenuItem[], ids: string[]) => {
   const byId = new Map(items.map(item => [item.id, item]));
   return ids.map(id => byId.get(id)).filter(Boolean) as MenuItem[];
@@ -29,7 +49,9 @@ const Sidebar: React.FC = memo(() => {
   const { canAccessModule } = usePermissions();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const items = useMemo(() => {
     return MENU_SECTIONS
@@ -37,11 +59,24 @@ const Sidebar: React.FC = memo(() => {
       .filter(item => canAccessModule(item.id));
   }, [canAccessModule]);
 
+  const filteredItems = useMemo(() => {
+    const query = normalizeSearchText(searchQuery.trim());
+    if (!query) return items;
+
+    return items.filter(item => {
+      const labelMatch = normalizeSearchText(item.label).includes(query);
+      const idMatch = normalizeSearchText(item.id).includes(query);
+      const keywords = MODULE_SEARCH_KEYWORDS[item.id] || [];
+      const keywordMatch = keywords.some(kw => normalizeSearchText(kw).includes(query));
+      return labelMatch || idMatch || keywordMatch;
+    });
+  }, [items, searchQuery]);
+
   const groups = useMemo(() => ({
-    primary: orderItems(items, PRIMARY_IDS),
-    secondary: orderItems(items, SECONDARY_IDS),
-    utility: orderItems(items, UTILITY_IDS),
-  }), [items]);
+    primary: orderItems(filteredItems, PRIMARY_IDS),
+    secondary: orderItems(filteredItems, SECONDARY_IDS),
+    utility: orderItems(filteredItems, UTILITY_IDS),
+  }), [filteredItems]);
 
   const isCollapsed = sidebarCollapsed && !mobileMenuOpen;
   const displayName = user?.nombres && user?.apellidos
@@ -67,6 +102,24 @@ const Sidebar: React.FC = memo(() => {
   }, []);
 
   useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        if (sidebarCollapsed) {
+          setSidebarCollapsed(false);
+        }
+        window.setTimeout(() => {
+          searchInputRef.current?.focus();
+          searchInputRef.current?.select();
+        }, 50);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [sidebarCollapsed, setSidebarCollapsed]);
+
+  useEffect(() => {
     if (isCollapsed) {
       setIsUserMenuOpen(false);
     }
@@ -75,6 +128,25 @@ const Sidebar: React.FC = memo(() => {
   const handleNavigation = (moduleId: string) => {
     navigateToModule(moduleId);
     setMobileMenuOpen(false);
+  };
+
+  const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && filteredItems.length > 0) {
+      event.preventDefault();
+      handleNavigation(filteredItems[0].id);
+      setSearchQuery('');
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      setSearchQuery('');
+      searchInputRef.current?.blur();
+    }
+  };
+
+  const handleExpandAndSearch = () => {
+    setSidebarCollapsed(false);
+    window.setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 50);
   };
 
   const handleLogout = async () => {
@@ -129,6 +201,9 @@ const Sidebar: React.FC = memo(() => {
       </button>
     );
   };
+
+  const hasSearchMatches =
+    groups.primary.length > 0 || groups.secondary.length > 0 || groups.utility.length > 0;
 
   return (
     <>
@@ -209,9 +284,9 @@ const Sidebar: React.FC = memo(() => {
           {isCollapsed ? (
             <button
               type="button"
-              onClick={() => setSidebarCollapsed(false)}
+              onClick={handleExpandAndSearch}
               className="flex h-10 w-full items-center justify-center rounded-[9px] border border-line-focus text-muted-2 transition-colors hover:border-line-strong hover:bg-surface-soft"
-              aria-label="Buscar"
+              aria-label="Buscar módulo"
             >
               <MagnifyingGlass className="h-5 w-5" />
             </button>
@@ -219,12 +294,34 @@ const Sidebar: React.FC = memo(() => {
             <label className="flex h-10 items-center gap-2 rounded-[9px] border border-line-focus bg-surface px-3 text-muted transition-colors focus-within:border-line-focus-strong">
               <MagnifyingGlass className="h-4 w-4 flex-shrink-0" />
               <input
-                type="search"
-                placeholder="Buscar..."
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Buscar módulo..."
+                aria-label="Buscar módulo"
                 className="min-w-0 flex-1 bg-transparent text-base font-medium text-ink outline-none placeholder:text-muted"
               />
-              <span className="hidden rounded-sm border border-line bg-surface-soft px-1.5 py-0.5 text-[10px] font-semibold text-muted-2 sm:inline-block">⌘</span>
-              <span className="hidden rounded-sm border border-line bg-surface-soft px-1.5 py-0.5 text-[10px] font-semibold text-muted-2 sm:inline-block">F</span>
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSearchQuery('');
+                    searchInputRef.current?.focus();
+                  }}
+                  className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded text-muted transition-colors hover:bg-surface-soft hover:text-ink"
+                  aria-label="Limpiar búsqueda"
+                >
+                  <X className="h-3.5 w-3.5" weight="bold" />
+                </button>
+              ) : (
+                <>
+                  <span className="hidden rounded-sm border border-line bg-surface-soft px-1.5 py-0.5 text-[10px] font-semibold text-muted-2 sm:inline-block">⌘</span>
+                  <span className="hidden rounded-sm border border-line bg-surface-soft px-1.5 py-0.5 text-[10px] font-semibold text-muted-2 sm:inline-block">K</span>
+                </>
+              )}
             </label>
           )}
         </div>
@@ -238,13 +335,18 @@ const Sidebar: React.FC = memo(() => {
             )}
 
             {groups.secondary.length > 0 && (
-              <div className="border-t border-line pt-5">
+              <div className={groups.primary.length > 0 ? 'border-t border-line pt-5' : ''}>
                 <div className="flex flex-col gap-1">
                   {groups.secondary.map(renderNavItem)}
                 </div>
               </div>
             )}
 
+            {!isCollapsed && !hasSearchMatches && (
+              <div className="rounded-[9px] border border-dashed border-line bg-surface-soft/50 px-3 py-4 text-center text-xs text-muted">
+                Sin módulos para «{searchQuery.trim()}»
+              </div>
+            )}
           </div>
         </nav>
 

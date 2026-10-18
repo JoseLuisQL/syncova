@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { getApiBaseUrl } from '../config/api';
 import { STORAGE_KEYS } from '../constants';
 
@@ -62,6 +62,7 @@ export function useSiBot() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -95,22 +96,35 @@ export function useSiBot() {
     }
   }, [messages]);
 
+  const stop = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsLoading(false);
+  };
+
   const clearHistory = () => {
+    stop();
     setMessages([]);
+    setError(null);
     localStorage.removeItem(STORAGE_KEY);
   };
 
-  const handleInputChange = (e: any) => {
+  const clearError = () => {
+    setError(null);
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLInputElement>) => {
     if (e.target) setInput(e.target.value);
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
-
     void sendMessage(input);
   };
 
-  const handleSuggestionAppend = (message: any) => {
+  const handleSuggestionAppend = (message: string | { role?: string; content?: string }) => {
     const content = typeof message === 'string' ? message : message?.content;
 
     if (typeof content === 'string' && content.trim()) {
@@ -118,10 +132,12 @@ export function useSiBot() {
     }
   };
 
-  const sendMessage = async (rawInput: string) => {
+  const sendMessage = async (rawInput: string, baseMessages?: Array<{ id: string; role: 'user' | 'assistant' | 'system'; content: string }>) => {
     const content = rawInput.trim();
 
     if (!content || isLoading) return;
+
+    const historyToUse = baseMessages ?? messages;
 
     const userMessage = {
       id: `user-${Date.now()}`,
@@ -130,12 +146,14 @@ export function useSiBot() {
     };
 
     const assistantId = `assistant-${Date.now()}`;
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     setError(null);
     setInput('');
     setIsLoading(true);
-    setMessages((current) => [
-      ...current,
+    setMessages([
+      ...historyToUse,
       userMessage,
       { id: assistantId, role: 'assistant', content: '' },
     ]);
@@ -147,8 +165,9 @@ export function useSiBot() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || ''}`,
         },
+        signal: controller.signal,
         body: JSON.stringify({
-          messages: [...messages, userMessage].map((message) => ({
+          messages: [...historyToUse, userMessage].map((message) => ({
             role: message.role,
             content: message.content,
           })),
@@ -202,23 +221,58 @@ export function useSiBot() {
         ),
       );
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setMessages((current) =>
+          current
+            .map((message) =>
+              message.id === assistantId && !message.content.trim()
+                ? null
+                : message,
+            )
+            .filter(Boolean) as Array<{ id: string; role: 'user' | 'assistant' | 'system'; content: string }>,
+        );
+        return;
+      }
+
       const finalError = err instanceof Error ? err : new Error('Error desconocido al conectar con SiBot');
       setError(finalError);
       setMessages((current) => current.filter((message) => message.id !== assistantId));
     } finally {
+      abortControllerRef.current = null;
       setIsLoading(false);
     }
+  };
+
+  const regenerateLast = () => {
+    if (isLoading || messages.length === 0) return;
+
+    let lastUserIndex = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') {
+        lastUserIndex = i;
+        break;
+      }
+    }
+
+    if (lastUserIndex === -1) return;
+
+    const lastUserContent = messages[lastUserIndex].content;
+    const previousHistory = messages.slice(0, lastUserIndex);
+    void sendMessage(lastUserContent, previousHistory);
   };
 
   return {
     messages,
     input,
+    setInput,
     handleInputChange,
     handleSubmit,
     isLoading,
     error,
+    clearError,
     clearHistory,
-    stop: undefined,
-    append: handleSuggestionAppend
+    stop,
+    regenerateLast,
+    append: handleSuggestionAppend,
   };
 }

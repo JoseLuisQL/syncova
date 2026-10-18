@@ -226,6 +226,7 @@ function ChartLoadingState() {
 export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType, isStreaming = false }) => {
   const shouldReduceMotion = useReducedMotion();
   const chartTheme = useChartTheme();
+  const [overrideType, setOverrideType] = React.useState<ChartType | null>(null);
 
   if (isStreaming) {
     return <ChartLoadingState />;
@@ -246,7 +247,8 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
     return null;
   }
 
-  const resolvedChartType = (propType || config.type || 'bar') as ChartType;
+  const initialChartType = (propType || config.type || 'bar') as ChartType;
+  const resolvedChartType = overrideType || initialChartType;
   const dataPoints = config.data.length;
   const xTickChars = dataPoints > 10 ? 8 : 11;
   const scrollWidth = resolvedChartType === 'pie'
@@ -464,9 +466,43 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
   return (
     <motion.section
       {...cardMotion}
-      className="my-3 w-full rounded-xl border border-line bg-white"
+      className="my-3.5 w-full overflow-hidden rounded-xl border border-line bg-surface"
     >
-      <div className="bg-white py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface-soft/70 px-3.5 py-2">
+        <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-muted-2">
+          <span className="truncate font-semibold text-ink">
+            {config.title || 'Visualización analítica'}
+          </span>
+          <span aria-hidden="true">·</span>
+          <span className="tabular-nums text-muted">{dataPoints} registros</span>
+        </div>
+
+        <div className="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5">
+          {([
+            { id: 'bar', label: 'Barras' },
+            { id: 'line', label: 'Líneas' },
+            { id: 'pie', label: 'Circular' },
+          ] as const).map((tab) => {
+            const active = resolvedChartType === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setOverrideType(tab.id)}
+                className={`whitespace-nowrap shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold transition-colors ${
+                  active
+                    ? 'bg-brand text-white'
+                    : 'text-muted-2 hover:bg-surface-soft hover:text-ink'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="bg-surface py-3">
         <div className="overflow-x-auto overflow-y-hidden px-4 pb-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-200">
           <motion.div
             {...plotMotion}
