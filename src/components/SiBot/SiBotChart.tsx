@@ -44,9 +44,10 @@ interface AxisTickProps {
     value?: unknown;
   };
   maxChars?: number;
+  fillColor?: string;
 }
 
-const COLORS = ['#7c3aed', '#606571', '#8b8f9b', '#a78bfa', '#15171d', '#c4c7d0', '#6d28d9'];
+const COLORS = ['#7c3aed', '#0e9f8e', '#8b5cf6', '#3b82f6', '#f59e0b', '#64748b', '#ec4899'];
 const numberFormatter = new Intl.NumberFormat('es-PE');
 const compactNumberFormatter = new Intl.NumberFormat('es-PE', {
   notation: 'compact',
@@ -134,7 +135,7 @@ function wrapLabel(value: unknown, maxChars: number, maxLines = 2): string[] {
   });
 }
 
-function AxisTick({ x = 0, y = 0, payload, maxChars = 10 }: AxisTickProps) {
+function AxisTick({ x = 0, y = 0, payload, maxChars = 10, fillColor = '#71717a' }: AxisTickProps) {
   const lines = wrapLabel(payload?.value, maxChars, 2);
 
   return (
@@ -143,7 +144,7 @@ function AxisTick({ x = 0, y = 0, payload, maxChars = 10 }: AxisTickProps) {
         x={0}
         y={0}
         textAnchor="middle"
-        fill="#71717a"
+        fill={fillColor}
         fontSize={11}
         fontWeight={500}
       >
@@ -159,7 +160,6 @@ function AxisTick({ x = 0, y = 0, payload, maxChars = 10 }: AxisTickProps) {
 
 function ChartLoadingState() {
   const shouldReduceMotion = useReducedMotion();
-
   const bars = [0, 1, 2, 3];
 
   return (
@@ -170,22 +170,16 @@ function ChartLoadingState() {
       className="my-3 w-full rounded-xl border border-line bg-surface"
     >
       <div className="px-4 py-4">
-        <div className="rounded-[12px] border border-line bg-surface-soft px-4 py-5">
-          <div className="mb-4 space-y-3">
-            {[0, 1, 2, 3].map((line) => (
-              <div key={line} className="h-px w-full bg-[linear-gradient(90deg,rgba(228,228,231,0),rgba(228,228,231,1),rgba(228,228,231,0))]" />
-            ))}
-          </div>
-
-          <div className="flex h-[180px] items-end justify-between gap-3">
+        <div className="rounded-lg border border-line bg-surface-soft px-4 py-5">
+          <div className="flex h-[160px] items-end justify-between gap-3">
             {bars.map((bar, index) => (
               <div key={bar} className="flex flex-1 flex-col items-center justify-end gap-3">
                 <motion.div
-                  className="w-full max-w-[34px] rounded-b-[4px] rounded-t-[10px] bg-brand-100"
+                  className="w-full max-w-[32px] rounded-t-md bg-brand/30"
                   animate={
                     shouldReduceMotion
                       ? undefined
-                      : { height: [42, 108, 72, 94, 42], opacity: [0.45, 0.9, 0.65, 0.82, 0.45] }
+                      : { height: [40, 100, 68, 88, 40], opacity: [0.45, 0.85, 0.6, 0.8, 0.45] }
                   }
                   transition={
                     shouldReduceMotion
@@ -197,23 +191,9 @@ function ChartLoadingState() {
                           delay: index * 0.12,
                         }
                   }
-                  style={{ height: 72 }}
+                  style={{ height: 68 }}
                 />
-                <motion.div
-                  className="h-2 rounded-full bg-line"
-                  animate={shouldReduceMotion ? undefined : { width: [18, 26, 18], opacity: [0.5, 0.9, 0.5] }}
-                  transition={
-                    shouldReduceMotion
-                      ? undefined
-                      : {
-                          duration: 1.6,
-                          repeat: Infinity,
-                          ease: 'easeInOut',
-                          delay: index * 0.12,
-                        }
-                  }
-                  style={{ width: 22 }}
-                />
+                <div className="h-2 w-6 rounded-full bg-line" />
               </div>
             ))}
           </div>
@@ -237,7 +217,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
     config = JSON.parse(payload);
   } catch {
     return (
-      <div className="my-4 rounded-xl border border-line bg-surface-soft px-4 py-3 text-sm font-medium text-muted-2">
+      <div className="my-3 rounded-xl border border-line bg-surface-soft px-3.5 py-2.5 text-xs font-medium text-muted-2">
         No se pudo completar la visualización del gráfico.
       </div>
     );
@@ -251,32 +231,26 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
   const resolvedChartType = overrideType || initialChartType;
   const dataPoints = config.data.length;
   const xTickChars = dataPoints > 10 ? 8 : 11;
-  const scrollWidth = resolvedChartType === 'pie'
-    ? 320
-    : Math.max(420, dataPoints * (resolvedChartType === 'bar' ? 88 : 84));
-  const plotHeight = resolvedChartType === 'pie' ? 300 : 292;
+  const scrollWidth =
+    resolvedChartType === 'pie'
+      ? 300
+      : Math.max(340, dataPoints * (resolvedChartType === 'bar' ? 76 : 72));
+  const plotHeight = resolvedChartType === 'pie' ? 270 : 260;
+
   const cardMotion: MotionProps = shouldReduceMotion
     ? {}
     : {
-        initial: { opacity: 0, y: 10 },
+        initial: { opacity: 0, y: 8 },
         animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.34, ease: [0.22, 1, 0.36, 1] },
-      };
-
-  const plotMotion: MotionProps = shouldReduceMotion
-    ? {}
-    : {
-        initial: { opacity: 0, scale: 0.985 },
-        animate: { opacity: 1, scale: 1 },
-        transition: { delay: 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+        transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] },
       };
 
   const tooltipProps = {
     contentStyle: {
-      borderRadius: '14px',
+      borderRadius: '10px',
       border: `1px solid ${chartTheme.tooltipBorder}`,
       boxShadow: 'none',
-      padding: '10px 12px',
+      padding: '8px 10px',
       fontSize: '12px',
       fontWeight: 600,
       color: chartTheme.tooltipText,
@@ -285,7 +259,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
     labelStyle: {
       color: chartTheme.tooltipText,
       fontWeight: 700,
-      marginBottom: '6px',
+      marginBottom: '4px',
     },
     itemStyle: {
       color: chartTheme.subtextColor,
@@ -304,37 +278,36 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
         const barYKey = config.yKey || 'value';
 
         return (
-          <BarChart data={config.data} margin={{ top: 12, right: 12, left: 6, bottom: 8 }}>
-            <CartesianGrid strokeDasharray="2 5" vertical={false} stroke="#e5e7eb" />
+          <BarChart data={config.data} margin={{ top: 12, right: 12, left: 4, bottom: 8 }}>
+            <CartesianGrid strokeDasharray="2 5" vertical={false} stroke={chartTheme.gridColor} />
             <XAxis
               dataKey={barXKey}
               interval={0}
-              height={58}
-              tickMargin={10}
+              height={54}
+              tickMargin={8}
               axisLine={false}
               tickLine={false}
-              tick={<AxisTick maxChars={xTickChars} />}
+              tick={<AxisTick maxChars={xTickChars} fillColor={chartTheme.tickColor} />}
             />
             <YAxis
-              width={52}
+              width={48}
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: '#71717a', fontWeight: 500 }}
+              tick={{ fontSize: 11, fill: chartTheme.tickColor, fontWeight: 500 }}
               tickFormatter={(value) => formatAxisValue(value)}
             />
             <Tooltip
               {...tooltipProps}
               labelFormatter={(label) => formatValue(label)}
-      cursor={{ fill: 'rgba(124,58,237,0.06)' }}
+              cursor={{ fill: chartTheme.isDark ? 'rgba(139,92,246,0.12)' : 'rgba(124,58,237,0.06)' }}
             />
             <Bar
               dataKey={barYKey}
               name={config.title || 'Valor'}
               fill={config.color || '#7c3aed'}
-              radius={[8, 8, 2, 2]}
-              maxBarSize={34}
-              animationDuration={shouldReduceMotion ? 0 : 620}
-              animationBegin={shouldReduceMotion ? 0 : 120}
+              radius={[6, 6, 2, 2]}
+              maxBarSize={32}
+              animationDuration={shouldReduceMotion ? 0 : 500}
               animationEasing="ease-out"
             />
           </BarChart>
@@ -345,33 +318,30 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
         const lineXKey = config.xKey || 'name';
 
         return (
-          <LineChart data={config.data} margin={{ top: 18, right: 12, left: 6, bottom: 8 }}>
-            <CartesianGrid strokeDasharray="2 5" vertical={false} stroke="#e5e7eb" />
+          <LineChart data={config.data} margin={{ top: 16, right: 12, left: 4, bottom: 8 }}>
+            <CartesianGrid strokeDasharray="2 5" vertical={false} stroke={chartTheme.gridColor} />
             <XAxis
               dataKey={lineXKey}
               interval={0}
-              height={58}
-              tickMargin={10}
+              height={54}
+              tickMargin={8}
               axisLine={false}
               tickLine={false}
-              tick={<AxisTick maxChars={xTickChars} />}
+              tick={<AxisTick maxChars={xTickChars} fillColor={chartTheme.tickColor} />}
             />
             <YAxis
-              width={52}
+              width={48}
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: '#71717a', fontWeight: 500 }}
+              tick={{ fontSize: 11, fill: chartTheme.tickColor, fontWeight: 500 }}
               tickFormatter={(value) => formatAxisValue(value)}
             />
-            <Tooltip
-              {...tooltipProps}
-              labelFormatter={(label) => formatValue(label)}
-            />
+            <Tooltip {...tooltipProps} labelFormatter={(label) => formatValue(label)} />
             {config.lines && config.lines.length > 1 ? (
               <Legend
                 verticalAlign="top"
                 align="left"
-                wrapperStyle={{ fontSize: '11px', fontWeight: 500, paddingBottom: '8px' }}
+                wrapperStyle={{ fontSize: '11px', fontWeight: 500, paddingBottom: '8px', color: chartTheme.tickColor }}
                 iconType="circle"
                 iconSize={6}
               />
@@ -384,13 +354,12 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
                   dataKey={line.key}
                   name={line.label}
                   stroke={line.color}
-                  strokeWidth={2.5}
+                  strokeWidth={2.25}
                   strokeLinecap="round"
-                  dot={{ r: 2.5, fill: line.color, stroke: '#ffffff', strokeWidth: 1.5 }}
-                  activeDot={{ r: 4, stroke: '#ffffff', strokeWidth: 2 }}
+                  dot={{ r: 2.5, fill: line.color, stroke: chartTheme.tooltipBg, strokeWidth: 1.5 }}
+                  activeDot={{ r: 4, stroke: chartTheme.tooltipBg, strokeWidth: 2 }}
                   connectNulls
-                  animationDuration={shouldReduceMotion ? 0 : 700}
-                  animationBegin={shouldReduceMotion ? 0 : 120}
+                  animationDuration={shouldReduceMotion ? 0 : 550}
                   animationEasing="ease-out"
                 />
               ))
@@ -400,13 +369,12 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
                 dataKey={config.yKey || 'value'}
                 name={config.title || 'Valor'}
                 stroke={config.color || '#7c3aed'}
-                strokeWidth={2.5}
+                strokeWidth={2.25}
                 strokeLinecap="round"
-                dot={{ r: 2.5, fill: config.color || '#7c3aed', stroke: '#ffffff', strokeWidth: 1.5 }}
-                activeDot={{ r: 4, stroke: '#ffffff', strokeWidth: 2 }}
+                dot={{ r: 2.5, fill: config.color || '#7c3aed', stroke: chartTheme.tooltipBg, strokeWidth: 1.5 }}
+                activeDot={{ r: 4, stroke: chartTheme.tooltipBg, strokeWidth: 2 }}
                 connectNulls
-                animationDuration={shouldReduceMotion ? 0 : 700}
-                animationBegin={shouldReduceMotion ? 0 : 120}
+                animationDuration={shouldReduceMotion ? 0 : 550}
                 animationEasing="ease-out"
               />
             )}
@@ -419,34 +387,30 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
         const pieNameKey = config.nameKey || 'name';
 
         return (
-          <PieChart margin={{ top: 4, right: 8, left: 8, bottom: 16 }}>
+          <PieChart margin={{ top: 4, right: 8, left: 8, bottom: 12 }}>
             <Pie
               data={config.data}
               dataKey={pieValueKey}
               nameKey={pieNameKey}
               cx="50%"
               cy="45%"
-              innerRadius={56}
-              outerRadius={88}
+              innerRadius={52}
+              outerRadius={82}
               paddingAngle={2}
-              stroke="#ffffff"
+              stroke={chartTheme.tooltipBg}
               strokeWidth={2}
-              animationDuration={shouldReduceMotion ? 0 : 620}
-              animationBegin={shouldReduceMotion ? 0 : 120}
+              animationDuration={shouldReduceMotion ? 0 : 500}
               animationEasing="ease-out"
             >
               {config.data.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip
-              {...tooltipProps}
-              labelFormatter={(label) => formatValue(label)}
-            />
+            <Tooltip {...tooltipProps} labelFormatter={(label) => formatValue(label)} />
             <Legend
               verticalAlign="bottom"
               align="center"
-              wrapperStyle={{ fontSize: '11px', fontWeight: 500, paddingTop: '12px' }}
+              wrapperStyle={{ fontSize: '11px', fontWeight: 500, paddingTop: '8px', color: chartTheme.tickColor }}
               iconType="circle"
               iconSize={6}
             />
@@ -456,7 +420,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
 
       default:
         return (
-          <div className="flex h-full items-center justify-center text-sm font-medium text-zinc-500">
+          <div className="flex h-full items-center justify-center text-xs font-medium text-muted">
             Tipo de gráfico no soportado
           </div>
         );
@@ -466,10 +430,10 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
   return (
     <motion.section
       {...cardMotion}
-      className="my-3.5 w-full overflow-hidden rounded-xl border border-line bg-surface"
+      className="my-3.5 w-full overflow-hidden rounded-xl bg-surface-soft/50 font-sans"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface-soft/70 px-3.5 py-2">
-        <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-muted-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5">
+        <div className="flex min-w-0 items-center gap-1.5 text-[11.5px] font-medium text-muted-2">
           <span className="truncate font-semibold text-ink">
             {config.title || 'Visualización analítica'}
           </span>
@@ -477,7 +441,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
           <span className="tabular-nums text-muted">{dataPoints} registros</span>
         </div>
 
-        <div className="flex items-center gap-0.5 rounded-lg border border-line bg-surface p-0.5">
+        <div className="flex items-center gap-0.5 rounded-lg bg-surface p-0.5">
           {([
             { id: 'bar', label: 'Barras' },
             { id: 'line', label: 'Líneas' },
@@ -489,7 +453,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
                 key={tab.id}
                 type="button"
                 onClick={() => setOverrideType(tab.id)}
-                className={`whitespace-nowrap shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold transition-colors ${
+                className={`whitespace-nowrap shrink-0 rounded-md px-2 py-0.5 text-[10.5px] font-semibold transition-colors ${
                   active
                     ? 'bg-brand text-white'
                     : 'text-muted-2 hover:bg-surface-soft hover:text-ink'
@@ -502,10 +466,9 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
         </div>
       </div>
 
-      <div className="bg-surface py-3">
-        <div className="overflow-x-auto overflow-y-hidden px-4 pb-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-200">
-          <motion.div
-            {...plotMotion}
+      <div className="bg-surface py-2.5">
+        <div className="overflow-x-auto overflow-y-hidden px-3 pb-1 scrollbar-thin">
+          <div
             style={{
               width: resolvedChartType === 'pie' ? '100%' : `${scrollWidth}px`,
               minWidth: `${scrollWidth}px`,
@@ -515,7 +478,7 @@ export const SiBotChart: React.FC<SiBotChartProps> = ({ payload, type: propType,
             <ResponsiveContainer width="100%" height="100%">
               {renderChart()}
             </ResponsiveContainer>
-          </motion.div>
+          </div>
         </div>
       </div>
     </motion.section>

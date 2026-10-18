@@ -289,7 +289,7 @@
   to   { background-position: 0 28px; }
 }
 
-/* React Bits — StarBorder (borde animado del botón SiBot). */
+/* React Bits — StarBorder & SiBot Aurora AI animations */
 @keyframes star-movement-bottom {
   0%   { transform: translate(0%, 0%); opacity: 1; }
   100% { transform: translate(-100%, 0%); opacity: 0; }
@@ -298,13 +298,54 @@
   0%   { transform: translate(0%, 0%); opacity: 1; }
   100% { transform: translate(100%, 0%); opacity: 0; }
 }
+@keyframes sibot-aurora-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes sibot-aurora-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes sibot-aurora-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.98); }
+  50%      { opacity: 0.9; transform: scale(1.03); }
+}
+
 .animate-star-movement-bottom { animation: star-movement-bottom 6s linear infinite alternate; }
 .animate-star-movement-top { animation: star-movement-top 6s linear infinite alternate; }
+
+.sibot-aurora-bg {
+  background: linear-gradient(125deg, #7c3aed, #06b6d4, #ec4899, #10b981, #6366f1, #7c3aed);
+  background-size: 300% 300%;
+  animation: sibot-aurora-shift 6s ease infinite;
+}
+
+.sibot-aurora-halo {
+  background: linear-gradient(125deg, rgba(124, 58, 237, 0.65), rgba(6, 182, 212, 0.55), rgba(236, 72, 153, 0.55), rgba(16, 185, 129, 0.45));
+  background-size: 260% 260%;
+  animation: sibot-aurora-shift 5s ease infinite, sibot-aurora-pulse 4s ease-in-out infinite;
+}
+
+.sibot-aurora-spin-beam {
+  background: conic-gradient(
+    from 0deg,
+    #7c3aed 0deg,
+    #06b6d4 90deg,
+    #ec4899 180deg,
+    #10b981 270deg,
+    #7c3aed 360deg
+  );
+  animation: sibot-aurora-spin 4.5s linear infinite;
+}
 
 @media (prefers-reduced-motion: reduce) {
   [data-rb-dotgrid],
   .animate-star-movement-bottom,
-  .animate-star-movement-top {
+  .animate-star-movement-top,
+  .sibot-aurora-bg,
+  .sibot-aurora-halo,
+  .sibot-aurora-spin-beam {
     animation: none !important;
   }
 }

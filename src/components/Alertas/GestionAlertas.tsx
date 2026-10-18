@@ -1,53 +1,112 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { Plus } from '@phosphor-icons/react';
-import { useAlertas } from '../../hooks/useAlertas';
-import { useToastContext } from '../../contexts/ToastContext';
-import { AlertActionDialog, AlertSectionCard, AlertasFilters, AlertasList, LoadingSpinner, NuevaAlertaModal } from './components';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AlertActionDialog,
+  AlertSectionCard,
+  AlertasFilters,
+  AlertasList,
+  LoadingSpinner,
+} from './components';
+import { SortOrderAlerta } from './components/AlertasFilters';
 import { Alerta } from '../../types';
-import { COMPONENT_STYLES } from './constants';
+import { NIVELES_ALERTA } from './constants';
 
 interface GestionAlertasProps {
-  onRefresh?: () => void;
+  alertas: Alerta[];
+  isLoading?: boolean;
+  initialFilter?: {
+    tipo?: string;
+    nivel?: string;
+    estado?: string;
+  } | null;
+  onClearInitialFilter?: () => void;
+  onMarcarLeida: (id: string) => Promise<void>;
+  onMarcarNoLeida: (id: string) => Promise<void>;
+  onEliminar: (id: string) => Promise<void>;
+  onMarcarMultiplesLeidas: (ids: string[]) => Promise<void>;
+  onMarcarMultiplesNoLeidas?: (ids: string[]) => Promise<void>;
+  onEliminarMultiples: (ids: string[]) => Promise<void>;
+  onInspect?: (alerta: Alerta) => void;
+  onGenerarAutomaticas?: () => void;
 }
 
-const GestionAlertas: React.FC<GestionAlertasProps> = memo(({ onRefresh }) => {
-  const {
-    alertas,
-    isLoading,
-    createAlerta,
-    updateAlerta,
-    deleteAlerta,
-    markAsRead,
-    markMultipleAsRead,
-    isCreating,
-  } = useAlertas();
-  const { toast } = useToastContext();
-
+const GestionAlertas: React.FC<GestionAlertasProps> = memo(({
+  alertas,
+  isLoading = false,
+  initialFilter,
+  onClearInitialFilter,
+  onMarcarLeida,
+  onMarcarNoLeida,
+  onEliminar,
+  onMarcarMultiplesLeidas,
+  onMarcarMultiplesNoLeidas,
+  onEliminarMultiples,
+  onInspect,
+  onGenerarAutomaticas,
+}) => {
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [filtroNivel, setFiltroNivel] = useState('todos');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<SortOrderAlerta>('recientes');
   const [selectedAlertas, setSelectedAlertas] = useState<string[]>([]);
-  const [showModal, setShowModal] = useState(false);
   const [deleteState, setDeleteState] = useState<{ mode: 'single' | 'multiple'; alerta?: Alerta | null } | null>(null);
 
-  const alertasFiltradas = useMemo(
-    () =>
-      alertas.filter((alerta) => {
-        const matchesSearch =
-          alerta.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          alerta.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesTipo = filtroTipo === 'todos' || alerta.tipo === filtroTipo;
-        const matchesNivel = filtroNivel === 'todos' || alerta.nivel === filtroNivel;
-        const matchesEstado =
-          filtroEstado === 'todos' ||
-          (filtroEstado === 'leidas' && alerta.leida) ||
-          (filtroEstado === 'no_leidas' && !alerta.leida);
+  useEffect(() => {
+    if (!initialFilter) return;
+    setFiltroTipo(initialFilter.tipo || 'todos');
+    setFiltroNivel(initialFilter.nivel || 'todos');
+    setFiltroEstado(initialFilter.estado || 'todos');
+    onClearInitialFilter?.();
+  }, [initialFilter, onClearInitialFilter]);
 
-        return matchesSearch && matchesTipo && matchesNivel && matchesEstado;
-      }),
-    [alertas, filtroEstado, filtroNivel, filtroTipo, searchTerm],
+  const counts = useMemo(
+    () => ({
+      total: alertas.length,
+      noLeidas: alertas.filter((a) => !a.leida).length,
+      leidas: alertas.filter((a) => a.leida).length,
+    }),
+    [alertas],
   );
+
+  const alertasFiltradas = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    const filtered = alertas.filter((alerta) => {
+      const matchesSearch =
+        !q ||
+        alerta.titulo.toLowerCase().includes(q) ||
+        alerta.descripcion.toLowerCase().includes(q) ||
+        alerta.tipo.toLowerCase().includes(q);
+      const matchesTipo = filtroTipo === 'todos' || alerta.tipo === filtroTipo;
+      const matchesNivel = filtroNivel === 'todos' || alerta.nivel === filtroNivel;
+      const matchesEstado =
+        filtroEstado === 'todos' ||
+        (filtroEstado === 'leidas' && alerta.leida) ||
+        (filtroEstado === 'no_leidas' && !alerta.leida);
+
+      return matchesSearch && matchesTipo && matchesNivel && matchesEstado;
+    });
+
+    return [...filtered].sort((a, b) => {
+      if (sortBy === 'severidad') {
+        const prioA = NIVELES_ALERTA.find((n) => n.id === a.nivel)?.priority || 0;
+        const prioB = NIVELES_ALERTA.find((n) => n.id === b.nivel)?.priority || 0;
+        if (prioB !== prioA) return prioB - prioA;
+      } else if (sortBy === 'vencimiento') {
+        const vencA = a.fechaVencimiento ? new Date(a.fechaVencimiento).getTime() : Number.MAX_SAFE_INTEGER;
+        const vencB = b.fechaVencimiento ? new Date(b.fechaVencimiento).getTime() : Number.MAX_SAFE_INTEGER;
+        if (vencA !== vencB) return vencA - vencB;
+      }
+      return new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime();
+    });
+  }, [alertas, filtroEstado, filtroNivel, filtroTipo, searchTerm, sortBy]);
+
+  useEffect(() => {
+    const visibleIds = new Set(alertasFiltradas.map((a) => a.id));
+    setSelectedAlertas((prev) => {
+      const next = prev.filter((id) => visibleIds.has(id));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [alertasFiltradas]);
 
   const handleToggleSelect = useCallback((id: string) => {
     setSelectedAlertas((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
@@ -61,119 +120,63 @@ const GestionAlertas: React.FC<GestionAlertasProps> = memo(({ onRefresh }) => {
     setSelectedAlertas([]);
   }, []);
 
-  const handleMarcarLeida = useCallback(async (id: string) => {
-    try {
-      await markAsRead(id);
-      toast.success('Alerta actualizada', 'La alerta fue marcada como leída.', { duration: 2500 });
-      onRefresh?.();
-    } catch (error) {
-      console.error('Error al marcar como leída:', error);
-      toast.error('No se pudo actualizar', 'Hubo un problema al marcar la alerta.', { duration: 3500 });
-    }
-  }, [markAsRead, onRefresh, toast]);
-
-  const handleMarcarNoLeida = useCallback(async (id: string) => {
-    try {
-      await updateAlerta(id, { leida: false });
-      toast.success('Alerta actualizada', 'La alerta volvió a estado pendiente.', { duration: 2500 });
-      onRefresh?.();
-    } catch (error) {
-      console.error('Error al marcar como no leída:', error);
-      toast.error('No se pudo actualizar', 'Hubo un problema al cambiar el estado.', { duration: 3500 });
-    }
-  }, [onRefresh, toast, updateAlerta]);
-
-  const handleEliminarRequest = useCallback((id: string) => {
-    const alerta = alertas.find((item) => item.id === id) || null;
-    setDeleteState({ mode: 'single', alerta });
-  }, [alertas]);
+  const handleEliminarRequest = useCallback(
+    (id: string) => {
+      const alerta = alertas.find((item) => item.id === id) || null;
+      setDeleteState({ mode: 'single', alerta });
+    },
+    [alertas],
+  );
 
   const handleConfirmDelete = useCallback(async () => {
     if (!deleteState) return;
 
-    try {
-      if (deleteState.mode === 'single' && deleteState.alerta) {
-        await deleteAlerta(deleteState.alerta.id);
-        toast.success('Alerta eliminada', 'La alerta se eliminó correctamente.', { duration: 2500 });
-      } else if (deleteState.mode === 'multiple') {
-        await Promise.all(selectedAlertas.map((id) => deleteAlerta(id)));
-        toast.success('Alertas eliminadas', `Se eliminaron ${selectedAlertas.length} alertas.`, { duration: 2500 });
-        setSelectedAlertas([]);
-      }
-
-      setDeleteState(null);
-      onRefresh?.();
-    } catch (error) {
-      console.error('Error al eliminar alertas:', error);
-      toast.error('No se pudo eliminar', 'Hubo un problema al eliminar las alertas seleccionadas.', { duration: 3500 });
+    if (deleteState.mode === 'single' && deleteState.alerta) {
+      await onEliminar(deleteState.alerta.id);
+      setSelectedAlertas((prev) => prev.filter((id) => id !== deleteState.alerta?.id));
+    } else if (deleteState.mode === 'multiple') {
+      await onEliminarMultiples(selectedAlertas);
+      setSelectedAlertas([]);
     }
-  }, [deleteAlerta, deleteState, onRefresh, selectedAlertas, toast]);
+
+    setDeleteState(null);
+  }, [deleteState, onEliminar, onEliminarMultiples, selectedAlertas]);
 
   const handleMarcarSeleccionadasLeidas = useCallback(async () => {
-    try {
-      await markMultipleAsRead(selectedAlertas);
-      setSelectedAlertas([]);
-      toast.success('Alertas actualizadas', 'Las alertas seleccionadas fueron marcadas como leídas.', { duration: 2500 });
-      onRefresh?.();
-    } catch (error) {
-      console.error('Error al marcar como leídas:', error);
-      toast.error('No se pudo actualizar', 'Hubo un problema al procesar la selección.', { duration: 3500 });
-    }
-  }, [markMultipleAsRead, onRefresh, selectedAlertas, toast]);
+    if (selectedAlertas.length === 0) return;
+    await onMarcarMultiplesLeidas(selectedAlertas);
+    setSelectedAlertas([]);
+  }, [onMarcarMultiplesLeidas, selectedAlertas]);
+
+  const handleMarcarSeleccionadasNoLeidas = useCallback(async () => {
+    if (selectedAlertas.length === 0 || !onMarcarMultiplesNoLeidas) return;
+    await onMarcarMultiplesNoLeidas(selectedAlertas);
+    setSelectedAlertas([]);
+  }, [onMarcarMultiplesNoLeidas, selectedAlertas]);
 
   const handleEliminarSeleccionadas = useCallback(() => {
     setDeleteState({ mode: 'multiple', alerta: null });
   }, []);
 
-  const handleCrearAlerta = useCallback(async (data: {
-    tipo: string;
-    nivel: string;
-    titulo: string;
-    descripcion: string;
-  }) => {
-    try {
-      await createAlerta({
-        tipo: data.tipo as 'vencimiento' | 'stock_bajo' | 'discrepancia' | 'sistema',
-        nivel: data.nivel as 'error' | 'warning' | 'info' | 'success',
-        titulo: data.titulo,
-        descripcion: data.descripcion,
-      });
-      setShowModal(false);
-      toast.success('Alerta creada', 'La nueva alerta ya está disponible en la lista.', { duration: 2500 });
-      onRefresh?.();
-    } catch (error) {
-      console.error('Error al crear alerta:', error);
-      toast.error('No se pudo crear', 'Verifica los datos e inténtalo nuevamente.', { duration: 3500 });
-    }
-  }, [createAlerta, onRefresh, toast]);
-
   return (
     <AlertSectionCard>
-      <div className="space-y-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-base sm:text-lg font-semibold text-zinc-950">Gestión de alertas</h2>
-            <p className="mt-1 text-xs sm:text-sm text-zinc-500">Filtra, revisa y opera alertas activas sin salir del módulo.</p>
-          </div>
-          <button type="button" onClick={() => setShowModal(true)} className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`}>
-            <Plus className="h-4 w-4" weight="bold" />
-            Nueva alerta
-          </button>
-        </div>
-
+      <div className="space-y-4">
         <AlertasFilters
           searchTerm={searchTerm}
           filtroTipo={filtroTipo}
           filtroNivel={filtroNivel}
           filtroEstado={filtroEstado}
+          sortBy={sortBy}
+          counts={counts}
           onSearchChange={setSearchTerm}
           onTipoChange={setFiltroTipo}
           onNivelChange={setFiltroNivel}
           onEstadoChange={setFiltroEstado}
+          onSortChange={setSortBy}
         />
 
         {isLoading && alertas.length === 0 ? (
-          <LoadingSpinner message="Cargando alertas..." />
+          <LoadingSpinner message="Cargando bandeja de alertas..." />
         ) : (
           <AlertasList
             alertas={alertasFiltradas}
@@ -181,29 +184,27 @@ const GestionAlertas: React.FC<GestionAlertasProps> = memo(({ onRefresh }) => {
             onToggleSelect={handleToggleSelect}
             onSelectAll={handleSelectAll}
             onDeselectAll={handleDeselectAll}
-            onMarcarLeida={handleMarcarLeida}
-            onMarcarNoLeida={handleMarcarNoLeida}
+            onMarcarLeida={onMarcarLeida}
+            onMarcarNoLeida={onMarcarNoLeida}
             onEliminar={handleEliminarRequest}
             onMarcarSeleccionadasLeidas={handleMarcarSeleccionadasLeidas}
+            onMarcarSeleccionadasNoLeidas={handleMarcarSeleccionadasNoLeidas}
             onEliminarSeleccionadas={handleEliminarSeleccionadas}
+            onInspect={onInspect}
+            onEmptyAction={onGenerarAutomaticas}
             isLoading={isLoading}
           />
         )}
       </div>
 
-      <NuevaAlertaModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onCrear={handleCrearAlerta}
-        isCreating={isCreating}
-      />
-
       <AlertActionDialog
         isOpen={Boolean(deleteState)}
         title={deleteState?.mode === 'multiple' ? 'Eliminar alertas seleccionadas' : 'Eliminar alerta'}
-        description={deleteState?.mode === 'multiple'
-          ? `Se eliminarán ${selectedAlertas.length} alertas seleccionadas. Esta acción no se puede deshacer.`
-          : `Se eliminará "${deleteState?.alerta?.titulo || 'la alerta seleccionada'}". Esta acción no se puede deshacer.`}
+        description={
+          deleteState?.mode === 'multiple'
+            ? `Se eliminarán permanentemente ${selectedAlertas.length} alertas seleccionadas. Esta acción no se puede deshacer.`
+            : `Se eliminará permanentemente "${deleteState?.alerta?.titulo || 'la alerta seleccionada'}". Esta acción no se puede deshacer.`
+        }
         onConfirm={handleConfirmDelete}
         onClose={() => setDeleteState(null)}
         confirmLabel="Eliminar"
@@ -215,4 +216,3 @@ const GestionAlertas: React.FC<GestionAlertasProps> = memo(({ onRefresh }) => {
 GestionAlertas.displayName = 'GestionAlertas';
 
 export default GestionAlertas;
- 

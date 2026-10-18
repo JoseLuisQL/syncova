@@ -2920,47 +2920,268 @@ export function sivacMockApiPlugin(): Plugin {
 
         // Alertas
         if (pathname.startsWith('/api/alertas')) {
-          if (pathname === '/api/alertas/stats') {
+          if (pathname === '/api/alertas/stream' && method === 'GET') {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Connection', 'keep-alive');
+            res.write('event: connected\ndata: {"status":"ok"}\n\n');
+            return;
+          }
+
+          if (pathname === '/api/alertas/stats' && method === 'GET') {
+            const now = new Date();
+            const proximo = new Date();
+            proximo.setDate(now.getDate() + 7);
+
+            const porTipo = {
+              vencimiento: store.alertas.filter((a) => a.tipo === 'vencimiento').length,
+              stock_bajo: store.alertas.filter((a) => a.tipo === 'stock_bajo').length,
+              discrepancia: store.alertas.filter((a) => a.tipo === 'discrepancia').length,
+              sistema: store.alertas.filter((a) => a.tipo === 'sistema').length,
+            };
+            const porNivel = {
+              info: store.alertas.filter((a) => a.nivel === 'info').length,
+              warning: store.alertas.filter((a) => a.nivel === 'warning').length,
+              error: store.alertas.filter((a) => a.nivel === 'error').length,
+              success: store.alertas.filter((a) => a.nivel === 'success').length,
+            };
+
             return sendJson(res, 200, {
               success: true,
               data: {
                 total: store.alertas.length,
-                porTipo: { vencimiento: 1, stock_bajo: 1, discrepancia: 0, sistema: 1 },
-                porNivel: { info: 1, warning: 1, error: 0, success: 1 },
+                porTipo,
+                porNivel,
                 noLeidas: store.alertas.filter((a) => !a.leida).length,
-                vencidas: 0,
-                proximasVencer: 1,
+                vencidas: store.alertas.filter((a) => a.fechaVencimiento && new Date(a.fechaVencimiento) < now).length,
+                proximasVencer: store.alertas.filter(
+                  (a) => a.fechaVencimiento && new Date(a.fechaVencimiento) >= now && new Date(a.fechaVencimiento) <= proximo,
+                ).length,
               },
               timestamp: nowIso(),
             });
           }
-          if (pathname === '/api/alertas/no-leidas') {
+
+          if (pathname === '/api/alertas/no-leidas' && method === 'GET') {
             return sendJson(res, 200, {
               success: true,
               data: store.alertas.filter((a) => !a.leida),
               timestamp: nowIso(),
             });
           }
+
+          if (pathname === '/api/alertas/leer-multiples' && method === 'PUT') {
+            const body = await readJsonBody(req);
+            const ids: string[] = Array.isArray(body?.ids) ? body.ids : [];
+            const idSet = new Set(ids);
+            let count = 0;
+            store.alertas.forEach((alerta) => {
+              if (idSet.has(alerta.id)) {
+                alerta.leida = true;
+                alerta.updatedAt = nowIso();
+                count += 1;
+              }
+            });
+            return sendJson(res, 200, {
+              success: true,
+              data: { count },
+              message: `${count} alertas marcadas como leídas`,
+              timestamp: nowIso(),
+            });
+          }
+
+          if ((pathname === '/api/alertas/limpiar-resueltas' || pathname === '/api/alertas/limpiar-antiguas') && method === 'DELETE') {
+            const beforeCount = store.alertas.length;
+            store.alertas = store.alertas.filter((a) => !a.leida);
+            const eliminadas = beforeCount - store.alertas.length;
+            return sendJson(res, 200, {
+              success: true,
+              data: { eliminadas, count: eliminadas },
+              message: `Se eliminaron ${eliminadas} alertas atendidas`,
+              timestamp: nowIso(),
+            });
+          }
+
           if (pathname === '/api/alertas/generar-automaticas' && method === 'POST') {
+            const body = await readJsonBody(req);
+            const diasAnticipacion = Number(body?.diasAnticipacion ?? 30);
+            const stockMinimo = Number(body?.stockMinimo ?? body?.porcentajeMinimo ?? 100);
+            const ahora = new Date();
+            const limiteVenc = new Date();
+            limiteVenc.setDate(ahora.getDate() + diasAnticipacion);
+
+            let alertasVencimiento = 0;
+            let alertasStockBajo = 0;
+            const detalles: string[] = [];
+
+            for (const lote of store.lotesVacunas) {
+              const fechaVenc = new Date(lote.fechaVencimiento);
+              const vacNombre = lote.vacuna?.nombre || 'Vacuna';
+              if (fechaVenc <= limiteVenc && lote.cantidadActual > 0) {
+                const titulo = `Lote próximo a vencer: ${vacNombre} (${lote.numero})`;
+                const yaExiste = store.alertas.some((a) => a.titulo === titulo && !a.leida);
+                if (!yaExiste) {
+                  const ts = nowIso();
+                  store.alertas.unshift({
+                    id: `alrt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                    tipo: 'vencimiento',
+                    titulo,
+                    descripcion: `El lote ${lote.numero} de ${vacNombre} (${lote.cantidadActual} dosis) vence el ${fechaVenc.toLocaleDateString('es-PE')}. Priorizar distribución FEFO.`,
+                    nivel: fechaVenc < ahora ? 'error' : 'warning',
+                    fechaCreacion: ts,
+                    fechaVencimiento: lote.fechaVencimiento,
+                    leida: false,
+                    usuarioId: 'usr-admin',
+                    createdAt: ts,
+                    updatedAt: ts,
+                  });
+                  alertasVencimiento += 1;
+                  detalles.push(titulo);
+                }
+              }
+
+              if (lote.cantidadActual > 0 && lote.cantidadActual <= stockMinimo) {
+                const titulo = `Stock crítico: ${vacNombre} (Lote ${lote.numero})`;
+                const yaExiste = store.alertas.some((a) => a.titulo === titulo && !a.leida);
+                if (!yaExiste) {
+                  const ts = nowIso();
+                  store.alertas.unshift({
+                    id: `alrt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                    tipo: 'stock_bajo',
+                    titulo,
+                    descripcion: `Saldo disponible de ${lote.cantidadActual} dosis para ${vacNombre} (umbral configurado: ${stockMinimo} dosis).`,
+                    nivel: lote.cantidadActual <= Math.floor(stockMinimo / 2) ? 'error' : 'warning',
+                    fechaCreacion: ts,
+                    leida: false,
+                    usuarioId: 'usr-admin',
+                    createdAt: ts,
+                    updatedAt: ts,
+                  });
+                  alertasStockBajo += 1;
+                  detalles.push(titulo);
+                }
+              }
+            }
+
+            const alertasGeneradas = alertasVencimiento + alertasStockBajo;
             return sendJson(res, 200, {
               success: true,
-              data: { alertasGeneradas: 2, alertasVencimiento: 1, alertasStockBajo: 1, detalles: ['Verificación completada'] },
+              data: {
+                alertasGeneradas,
+                alertasVencimiento,
+                alertasStockBajo,
+                detalles: detalles.length > 0 ? detalles : ['Inventario verificado con los umbrales actuales'],
+              },
               timestamp: nowIso(),
             });
           }
+
           if (pathname === '/api/alertas' && method === 'GET') {
+            let list = [...store.alertas];
+            const tipo = params.get('tipo');
+            const nivel = params.get('nivel');
+            const leida = params.get('leida');
+            const search = params.get('search')?.toLowerCase().trim();
+
+            if (tipo && tipo !== 'todos') list = list.filter((a) => a.tipo === tipo);
+            if (nivel && nivel !== 'todos') list = list.filter((a) => a.nivel === nivel);
+            if (leida === 'true') list = list.filter((a) => a.leida === true);
+            if (leida === 'false') list = list.filter((a) => a.leida === false);
+            if (search) {
+              list = list.filter(
+                (a) =>
+                  a.titulo.toLowerCase().includes(search) ||
+                  a.descripcion.toLowerCase().includes(search),
+              );
+            }
+
             return sendJson(res, 200, {
               success: true,
-              data: { alertas: store.alertas, total: store.alertas.length },
+              data: { alertas: list, total: list.length },
               timestamp: nowIso(),
             });
           }
+
+          if (pathname === '/api/alertas' && method === 'POST') {
+            const body = await readJsonBody(req);
+            const ts = nowIso();
+            const nuevaAlerta = {
+              id: `alrt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+              tipo: body?.tipo || 'sistema',
+              titulo: body?.titulo || 'Alerta del sistema',
+              descripcion: body?.descripcion || '',
+              nivel: body?.nivel || 'info',
+              fechaCreacion: ts,
+              ...(body?.fechaVencimiento ? { fechaVencimiento: body.fechaVencimiento } : {}),
+              leida: false,
+              usuarioId: body?.usuarioId || 'usr-admin',
+              createdAt: ts,
+              updatedAt: ts,
+            };
+            store.alertas.unshift(nuevaAlerta);
+            return sendJson(res, 201, {
+              success: true,
+              data: nuevaAlerta,
+              message: 'Alerta creada exitosamente',
+              timestamp: ts,
+            });
+          }
+
           const parts = pathname.split('/');
           const id = parts[3];
           const idx = store.alertas.findIndex((a) => a.id === id);
-          if (idx >= 0 && parts[4] === 'leer') {
-            store.alertas[idx].leida = true;
-            return sendJson(res, 200, { success: true, data: store.alertas[idx], timestamp: nowIso() });
+
+          if (idx >= 0) {
+            if (parts[4] === 'leer' && method === 'PUT') {
+              store.alertas[idx] = {
+                ...store.alertas[idx],
+                leida: true,
+                updatedAt: nowIso(),
+              };
+              return sendJson(res, 200, {
+                success: true,
+                data: store.alertas[idx],
+                timestamp: nowIso(),
+              });
+            }
+
+            if (!parts[4] && method === 'GET') {
+              return sendJson(res, 200, {
+                success: true,
+                data: store.alertas[idx],
+                timestamp: nowIso(),
+              });
+            }
+
+            if (!parts[4] && method === 'PUT') {
+              const body = await readJsonBody(req);
+              store.alertas[idx] = {
+                ...store.alertas[idx],
+                ...(body?.tipo !== undefined ? { tipo: body.tipo } : {}),
+                ...(body?.titulo !== undefined ? { titulo: body.titulo } : {}),
+                ...(body?.descripcion !== undefined ? { descripcion: body.descripcion } : {}),
+                ...(body?.nivel !== undefined ? { nivel: body.nivel } : {}),
+                ...(body?.leida !== undefined ? { leida: Boolean(body.leida) } : {}),
+                updatedAt: nowIso(),
+              };
+              return sendJson(res, 200, {
+                success: true,
+                data: store.alertas[idx],
+                message: 'Alerta actualizada exitosamente',
+                timestamp: nowIso(),
+              });
+            }
+
+            if (!parts[4] && method === 'DELETE') {
+              store.alertas.splice(idx, 1);
+              return sendJson(res, 200, {
+                success: true,
+                data: null,
+                message: 'Alerta eliminada exitosamente',
+                timestamp: nowIso(),
+              });
+            }
           }
         }
 
@@ -3002,6 +3223,185 @@ export function sivacMockApiPlugin(): Plugin {
 
         // Programación Anual CENARES
         if (pathname.startsWith('/api/programacion-anual-cenares')) {
+          if (pathname.endsWith('/exportar') && method === 'POST') {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename="Programacion_CENARES_2026.xlsx"');
+            res.end(Buffer.from('PK\x03\x04SIVAC_EXCEL_EXPORT_CENARES'));
+            return;
+          }
+
+          if (pathname.endsWith('/sincronizar-saldos') && method === 'POST') {
+            const totalItems = store.vacunas.length + store.jeringas.length;
+            return sendJson(res, 200, {
+              success: true,
+              data: {
+                saldosCalculados: totalItems,
+                detalles: store.vacunas.slice(0, 5).map((v) => ({
+                  id: v.id,
+                  nombre: v.nombre,
+                  tipo: 'vacuna',
+                  saldoAnterior: 420,
+                })),
+              },
+              timestamp: nowIso(),
+            });
+          }
+
+          if (pathname.includes('/tabla/')) {
+            const anioParam = Number(pathname.split('/').pop()) || 2026;
+            const vacunaItems = store.vacunas.map((v, idx) => {
+              const progRecord = store.programacionCenares.find(
+                (p: any) => p.vacunaId === v.id && Number(p.anio) === anioParam,
+              );
+              const q1 = progRecord ? Number(progRecord.programadoQ1) : 1100 + idx * 90;
+              const q2 = progRecord ? Number(progRecord.programadoQ2) : 1250 + idx * 80;
+              const q3 = progRecord ? Number(progRecord.programadoQ3) : 1200 + idx * 85;
+              const q4 = progRecord ? Number(progRecord.programadoQ4) : 1150 + idx * 75;
+              const saldoAnterior = 320 + (idx % 5) * 65;
+              const entregas = {
+                q1: Math.round(q1 * 0.96),
+                q2: Math.round(q2 * 0.94),
+                q3: Math.round(q3 * 0.92),
+                q4: Math.round(q4 * 0.85),
+              };
+              const consumo = {
+                q1: Math.round(entregas.q1 * 0.88),
+                q2: Math.round(entregas.q2 * 0.9),
+                q3: Math.round(entregas.q3 * 0.89),
+                q4: Math.round(entregas.q4 * 0.82),
+              };
+              const s1 = saldoAnterior + entregas.q1 - consumo.q1;
+              const s2 = s1 + entregas.q2 - consumo.q2;
+              const s3 = s2 + entregas.q3 - consumo.q3;
+              const s4 = s3 + entregas.q4 - consumo.q4;
+
+              return {
+                id: v.id,
+                tipo: 'vacuna' as const,
+                descripcion: `${v.nombre} (${v.presentacion})`,
+                saldoAnterior,
+                programacion: {
+                  id: progRecord?.id || `cen-v-${v.id}`,
+                  q1,
+                  q2,
+                  q3,
+                  q4,
+                },
+                entregas,
+                consumo,
+                saldos: { q1: s1, q2: s2, q3: s3, q4: s4 },
+              };
+            });
+
+            const jeringaItems = store.jeringas.map((j, idx) => {
+              const progRecord = store.programacionCenares.find(
+                (p: any) => p.jeringaId === j.id && Number(p.anio) === anioParam,
+              );
+              const q1 = progRecord ? Number(progRecord.programadoQ1) : 2400 + idx * 300;
+              const q2 = progRecord ? Number(progRecord.programadoQ2) : 2600 + idx * 300;
+              const q3 = progRecord ? Number(progRecord.programadoQ3) : 2500 + idx * 250;
+              const q4 = progRecord ? Number(progRecord.programadoQ4) : 2300 + idx * 250;
+              const saldoAnterior = 850 + idx * 140;
+              const entregas = {
+                q1: Math.round(q1 * 0.98),
+                q2: Math.round(q2 * 0.95),
+                q3: Math.round(q3 * 0.93),
+                q4: Math.round(q4 * 0.88),
+              };
+              const consumo = {
+                q1: Math.round(entregas.q1 * 0.91),
+                q2: Math.round(entregas.q2 * 0.92),
+                q3: Math.round(entregas.q3 * 0.9),
+                q4: Math.round(entregas.q4 * 0.86),
+              };
+              const s1 = saldoAnterior + entregas.q1 - consumo.q1;
+              const s2 = s1 + entregas.q2 - consumo.q2;
+              const s3 = s2 + entregas.q3 - consumo.q3;
+              const s4 = s3 + entregas.q4 - consumo.q4;
+
+              return {
+                id: j.id,
+                tipo: 'jeringa' as const,
+                descripcion: `${j.tipo} (${j.capacidad})`,
+                saldoAnterior,
+                programacion: {
+                  id: progRecord?.id || `cen-j-${j.id}`,
+                  q1,
+                  q2,
+                  q3,
+                  q4,
+                },
+                entregas,
+                consumo,
+                saldos: { q1: s1, q2: s2, q3: s3, q4: s4 },
+              };
+            });
+
+            return sendJson(res, 200, {
+              success: true,
+              data: {
+                anio: anioParam,
+                items: [...vacunaItems, ...jeringaItems],
+              },
+              timestamp: nowIso(),
+            });
+          }
+
+          if (method === 'GET') {
+            const vacunaId = params.get('vacunaId');
+            const jeringaId = params.get('jeringaId');
+            const anio = Number(params.get('anio'));
+            let list = [...store.programacionCenares] as any[];
+            if (anio) list = list.filter((p) => Number(p.anio) === anio);
+            if (vacunaId) list = list.filter((p) => p.vacunaId === vacunaId);
+            if (jeringaId) list = list.filter((p) => p.jeringaId === jeringaId);
+            return sendJson(res, 200, {
+              success: true,
+              data: list,
+              timestamp: nowIso(),
+            });
+          }
+
+          if (method === 'POST') {
+            const body = await readJsonBody(req);
+            const created = {
+              id: `cen-${Date.now()}`,
+              anio: Number(body.anio) || 2026,
+              vacunaId: body.vacunaId,
+              jeringaId: body.jeringaId,
+              programadoQ1: Number(body.programadoQ1) || 0,
+              programadoQ2: Number(body.programadoQ2) || 0,
+              programadoQ3: Number(body.programadoQ3) || 0,
+              programadoQ4: Number(body.programadoQ4) || 0,
+              createdAt: nowIso(),
+              updatedAt: nowIso(),
+            };
+            (store.programacionCenares as any[]).push(created);
+            return sendJson(res, 201, { success: true, data: created, timestamp: nowIso() });
+          }
+
+          if (method === 'PUT') {
+            const id = pathname.split('/').pop();
+            const body = await readJsonBody(req);
+            const idx = (store.programacionCenares as any[]).findIndex((p) => p.id === id);
+            if (idx >= 0) {
+              store.programacionCenares[idx] = {
+                ...store.programacionCenares[idx],
+                ...(body.programadoQ1 !== undefined ? { programadoQ1: Number(body.programadoQ1) } : {}),
+                ...(body.programadoQ2 !== undefined ? { programadoQ2: Number(body.programadoQ2) } : {}),
+                ...(body.programadoQ3 !== undefined ? { programadoQ3: Number(body.programadoQ3) } : {}),
+                ...(body.programadoQ4 !== undefined ? { programadoQ4: Number(body.programadoQ4) } : {}),
+                updatedAt: nowIso(),
+              };
+              return sendJson(res, 200, {
+                success: true,
+                data: store.programacionCenares[idx],
+                timestamp: nowIso(),
+              });
+            }
+          }
+
           return sendJson(res, 200, {
             success: true,
             data: store.programacionCenares,
@@ -3041,11 +3441,19 @@ export function sivacMockApiPlugin(): Plugin {
 
         // Reportes
         if (pathname.startsWith('/api/reportes')) {
+          if (pathname.includes('/export') || pathname.endsWith('/exportar')) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename="Reporte_SIVAC.xlsx"');
+            res.end(Buffer.from('PK\x03\x04SIVAC_REPORT_EXPORT'));
+            return;
+          }
+
           if (pathname.includes('/estadisticas')) {
             return sendJson(res, 200, {
               success: true,
               data: {
-                reportesGeneradosHoy: 4,
+                reportesGeneradosHoy: 6,
                 reportesProgramados: 2,
                 formatosDisponibles: ['excel', 'pdf', 'csv'],
                 ultimaExportacion: nowIso(),
@@ -3053,10 +3461,32 @@ export function sivacMockApiPlugin(): Plugin {
               timestamp: nowIso(),
             });
           }
+
           if (pathname.includes('/stock-actual')) {
-            const items = store.vacunas.map((v) => {
+            const vacunaId = params.get('vacunaId');
+            let vacunasList = [...store.vacunas];
+            if (vacunaId) {
+              vacunasList = vacunasList.filter((v) => v.id === vacunaId);
+            }
+            const nowMs = Date.now();
+            const items = vacunasList.map((v) => {
               const lotes = store.lotesVacunas.filter((l) => l.vacunaId === v.id);
               const stockTotal = lotes.reduce((s, l) => s + l.cantidadActual, 0);
+              const mappedLotes = lotes.map((l) => {
+                const diasParaVencer = Math.max(
+                  1,
+                  Math.ceil((new Date(l.fechaVencimiento).getTime() - nowMs) / (1000 * 60 * 60 * 24)),
+                );
+                return {
+                  id: l.id,
+                  numero: l.numero,
+                  cantidadActual: l.cantidadActual,
+                  fechaVencimiento: l.fechaVencimiento,
+                  estado: l.estado,
+                  diasParaVencer,
+                };
+              });
+              const lotesPorVencer = mappedLotes.filter((l) => l.diasParaVencer <= 90).length;
               return {
                 vacunaId: v.id,
                 vacunaNombre: v.nombre,
@@ -3064,37 +3494,354 @@ export function sivacMockApiPlugin(): Plugin {
                 presentacion: v.presentacion,
                 stockTotal,
                 totalLotes: lotes.length,
-                lotesDisponibles: lotes.length,
-                lotesPorVencer: 0,
+                lotesDisponibles: lotes.filter((l) => l.cantidadActual > 0).length,
+                lotesPorVencer,
                 ultimaActualizacion: nowIso(),
-                lotes: lotes.map((l) => ({
-                  id: l.id,
-                  numero: l.numero,
-                  cantidadActual: l.cantidadActual,
-                  fechaVencimiento: l.fechaVencimiento,
-                  estado: l.estado,
-                  diasParaVencer: 320,
-                })),
+                lotes: mappedLotes,
               };
             });
             return sendJson(res, 200, { success: true, data: items, timestamp: nowIso() });
           }
+
+          if (pathname.includes('/stock-critico')) {
+            const vacunaId = params.get('vacunaId');
+            let vacunasList = [...store.vacunas];
+            if (vacunaId) {
+              vacunasList = vacunasList.filter((v) => v.id === vacunaId);
+            }
+            const items = vacunasList
+              .map((v, idx) => {
+                const lotes = store.lotesVacunas.filter((l) => l.vacunaId === v.id);
+                const rawTotal = lotes.reduce((s, l) => s + l.cantidadActual, 0);
+                const stockMinimo = 1800 + (idx % 4) * 400;
+                const stockTotal = idx < 5 ? Math.min(rawTotal, Math.round(stockMinimo * (0.35 + idx * 0.12))) : rawTotal;
+                const porcentajeCritico = Math.round((stockTotal / stockMinimo) * 100);
+                const nivelCriticidad =
+                  porcentajeCritico <= 45 ? ('critico' as const) : ('bajo' as const);
+                return {
+                  vacunaId: v.id,
+                  vacunaNombre: v.nombre,
+                  vacunaTipo: v.tipo,
+                  presentacion: v.presentacion,
+                  stockTotal,
+                  stockMinimo,
+                  porcentajeCritico,
+                  nivelCriticidad,
+                  recomendacionAccion:
+                    nivelCriticidad === 'critico'
+                      ? 'Solicitar abastecimiento urgente a CENARES'
+                      : 'Programar reposición en próximo despacho',
+                  totalLotes: lotes.length,
+                  lotesDisponibles: lotes.length,
+                  lotesPorVencer: 0,
+                  ultimaActualizacion: nowIso(),
+                  lotes: [],
+                };
+              })
+              .filter((item) => item.stockTotal < item.stockMinimo);
+            return sendJson(res, 200, { success: true, data: items, timestamp: nowIso() });
+          }
+
+          if (pathname.includes('/proximos-vencimientos') || pathname.includes('/vencimientos')) {
+            const vacunaId = params.get('vacunaId');
+            const nowMs = Date.now();
+            const items = store.lotesVacunas
+              .filter((l) => !vacunaId || l.vacunaId === vacunaId)
+              .slice(0, 8)
+              .map((l, idx) => {
+                const rawDias = Math.ceil((new Date(l.fechaVencimiento).getTime() - nowMs) / (1000 * 60 * 60 * 24));
+                const diasParaVencer = idx < 4 ? 14 + idx * 16 : Math.max(25, rawDias);
+                const expDate = new Date(nowMs + diasParaVencer * 24 * 60 * 60 * 1000).toISOString();
+                const nivelUrgencia =
+                  diasParaVencer <= 20
+                    ? ('inmediato' as const)
+                    : diasParaVencer <= 45
+                      ? ('urgente' as const)
+                      : ('atencion' as const);
+                return {
+                  loteId: l.id,
+                  numeroLote: l.numero,
+                  vacunaId: l.vacunaId,
+                  vacunaNombre: l.vacuna?.nombre || 'Biológico',
+                  vacunaTipo: l.vacuna?.tipo || 'Vacuna',
+                  cantidadActual: l.cantidadActual,
+                  fechaVencimiento: expDate,
+                  diasParaVencer,
+                  nivelUrgencia,
+                  establecimientosAfectados: [
+                    { id: 'est-chanka', nombre: 'ALMACÉN CENTRAL CHANKA', cantidadAsignada: l.cantidadActual },
+                  ],
+                };
+              })
+              .sort((a, b) => a.diasParaVencer - b.diasParaVencer);
+            return sendJson(res, 200, { success: true, data: items, timestamp: nowIso() });
+          }
+
+          if (pathname.includes('/lotes-vencidos')) {
+            const vacunaId = params.get('vacunaId');
+            const seedExpired = [
+              {
+                loteId: 'lv-exp-1',
+                numeroLote: '2409A112',
+                vacunaId: store.vacunas[0]?.id || 'vac-bcg',
+                vacunaNombre: store.vacunas[0]?.nombre || 'BCG',
+                vacunaTipo: store.vacunas[0]?.tipo || 'Liofilizada',
+                cantidadActual: 40,
+                fechaVencimiento: '2026-08-31T00:00:00.000Z',
+                diasVencido: 48,
+                nivelCriticidad: 'critico' as const,
+                valorPerdido: 520,
+                establecimientosAfectados: [
+                  { id: 'est-chanka', nombre: 'ALMACÉN CENTRAL CHANKA', cantidadAsignada: 40 },
+                ],
+              },
+              {
+                loteId: 'lv-exp-2',
+                numeroLote: 'INFA25X',
+                vacunaId: store.vacunas[4]?.id || 'vac-infl-ad',
+                vacunaNombre: store.vacunas[4]?.nombre || 'Influenza Adulto',
+                vacunaTipo: store.vacunas[4]?.tipo || 'Suspensión',
+                cantidadActual: 65,
+                fechaVencimiento: '2026-09-15T00:00:00.000Z',
+                diasVencido: 33,
+                nivelCriticidad: 'muy_critico' as const,
+                valorPerdido: 975,
+                establecimientosAfectados: [
+                  { id: 'est-11', nombre: 'C.S. TALAVERA', cantidadAsignada: 65 },
+                ],
+              },
+            ].filter((item) => !vacunaId || item.vacunaId === vacunaId);
+            return sendJson(res, 200, { success: true, data: seedExpired, timestamp: nowIso() });
+          }
+
+          if (pathname.includes('/kardex-detallado')) {
+            const items = store.kardex.map((k: any) => ({
+              id: k.id,
+              fecha: k.fechaMovimiento,
+              tipo: k.tipo,
+              itemNombre: k.item?.nombre || 'Biológico',
+              loteNumero: k.lote?.numero || 'S/L',
+              tipoMovimiento: k.tipoMovimiento,
+              cantidad: k.cantidad,
+              saldoAnterior: k.saldoAnterior,
+              saldoActual: k.saldoActual,
+              establecimientoOrigen: k.establecimientoOrigen?.nombre,
+              establecimientoDestino: k.establecimientoDestino?.nombre,
+              documento: k.documento,
+              numeroDocumento: k.numeroDocumento,
+              observaciones: k.observaciones,
+              usuario: `${k.usuario?.nombres || ''} ${k.usuario?.apellidos || ''}`.trim(),
+            }));
+            return sendJson(res, 200, { success: true, data: items, timestamp: nowIso() });
+          }
+
+          if (pathname.includes('/movimientos-mensuales')) {
+            const centroAcopioId = params.get('centroAcopioId');
+            const vacunaId = params.get('vacunaId');
+            let movs = [...store.movimientos];
+            if (centroAcopioId && centroAcopioId !== 'todos') {
+              movs = movs.filter((m) => m.establecimiento?.centroAcopioId === centroAcopioId);
+            }
+            if (vacunaId && vacunaId !== 'todas') {
+              movs = movs.filter((m) => m.vacunaId === vacunaId);
+            }
+            const items = movs.slice(0, 60).map((m) => ({
+              establecimientoId: m.establecimientoId,
+              establecimientoNombre: m.establecimiento?.nombre || 'Establecimiento',
+              vacunaId: m.vacunaId,
+              vacunaNombre: m.vacuna?.nombre || 'Vacuna',
+              mes: m.mes,
+              anio: m.anio,
+              saldoAnterior: m.saldoAnterior || 0,
+              transIngreso: m.transIngreso || 0,
+              salida: m.salida || 0,
+              transSalida: m.transSalida || 0,
+              entrega: m.entrega || 0,
+              saldoFinal: m.saldo || 0,
+              consumoTotal: (m.salida || 0) + (m.transSalida || 0),
+              eficienciaDistribucion: 94,
+              fechaUltimaActualizacion: m.updatedAt || nowIso(),
+            }));
+            return sendJson(res, 200, { success: true, data: items, timestamp: nowIso() });
+          }
+
+          if (pathname.includes('/planificacion/programacion-anual')) {
+            const anio = Number(params.get('anio')) || 2026;
+            const vacunaId = params.get('vacunaId');
+            const centroAcopioId = params.get('centroAcopioId');
+            let plans = store.planificaciones.filter((p) => Number(p.anio) === anio);
+            if (vacunaId && vacunaId !== 'todas') {
+              plans = plans.filter((p) => p.vacunaId === vacunaId);
+            }
+            if (centroAcopioId && centroAcopioId !== 'todos') {
+              plans = plans.filter((p) => p.establecimiento?.centroAcopioId === centroAcopioId);
+            }
+            const items = plans.map((p) => ({
+              establecimiento: {
+                id: p.establecimientoId,
+                nombre: p.establecimiento?.nombre || 'Establecimiento',
+                codigo: p.establecimiento?.codigo || '0000',
+                tipo: p.establecimiento?.tipo || 'centro_salud',
+                centroAcopio: p.establecimiento?.centroAcopio?.nombre,
+              },
+              vacuna: {
+                id: p.vacunaId,
+                nombre: p.vacuna?.nombre || 'Vacuna',
+                tipo: p.vacuna?.tipo || 'Vacuna',
+                presentacion: p.vacuna?.presentacion || 'Frasco',
+              },
+              metaAnual: p.metaAnual,
+              distribucionMensual: p.distribucionMensual,
+              estado: p.estado || 'activo',
+              fechaCreacion: p.createdAt,
+              fechaActualizacion: p.updatedAt,
+              observaciones: p.observaciones,
+            }));
+            return sendJson(res, 200, { success: true, data: items, timestamp: nowIso() });
+          }
+
           return sendJson(res, 200, { success: true, data: [], timestamp: nowIso() });
         }
 
         // SiBot Chat
         if (pathname === '/api/sibot/chat' && method === 'POST') {
           const body = await readJsonBody(req);
-          const lastMsg = body?.messages?.[body.messages.length - 1]?.content || '';
+          const rawMsg = String(body?.messages?.[body.messages.length - 1]?.content || '');
+          const q = rawMsg.toLowerCase();
           const totalDosis = store.lotesVacunas.reduce((s, l) => s + l.cantidadActual, 0);
+          const totalJeringas = store.lotesJeringas.reduce((s, l) => s + l.cantidadActual, 0);
+
           res.statusCode = 200;
           res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+
+          // 1. Consultas de gráficos / evolución / comparativas visuales
+          if (q.includes('gráfico') || q.includes('grafico') || q.includes('evolución') || q.includes('comparando')) {
+            const topVacunas = store.vacunas.slice(0, 7).map((v) => {
+              const dosis = store.lotesVacunas
+                .filter((l) => l.vacunaId === v.id)
+                .reduce((acc, l) => acc + l.cantidadActual, 0);
+              return { name: v.nombre, value: dosis };
+            });
+
+            const chartJson = JSON.stringify({
+              type: 'bar',
+              title: 'Stock disponible por biológico (dosis)',
+              xKey: 'name',
+              yKey: 'value',
+              data: topVacunas,
+            });
+
+            res.end(
+              `### Análisis Visual de Disponibilidad\n\n` +
+                `Actualmente el Almacén Central registra **${totalDosis.toLocaleString('es-PE')} dosis** activas. ` +
+                `Los biológicos con mayor volumen son **Pentavalente** (\`3,650\` dosis), **IPV** (\`2,980\` dosis) y **Neumococo** (\`2,740\` dosis).\n\n` +
+                `\`\`\`chart:bar\n${chartJson}\n\`\`\`\n\n` +
+                `---\n**Sugerencias:**\n` +
+                `- Muestra la distribución actual de stock de vacunas agrupada por centro de acopio en una tabla.\n` +
+                `- ¿Cuáles son los lotes próximos a vencer en los siguientes 60 días?`
+            );
+            return;
+          }
+
+          // 2. Consultas por Centro de Acopio / Redes / Establecimientos
+          if (q.includes('centro de acopio') || q.includes('centros de acopio') || q.includes('red') || q.includes('establecimiento')) {
+            const rows = store.centrosAcopio.slice(0, 7).map((ca, idx) => {
+              const asignado = idx === 0 ? totalDosis : Math.round(1450 - idx * 140);
+              const eessCount = store.establecimientos.filter((e) => e.centroAcopioId === ca.id).length;
+              const estado = idx === 0 ? 'Almacén Central' : 'Abastecido';
+              return `| ${ca.nombre} | \`${ca.codigo}\` | ${eessCount} EESS | ${asignado.toLocaleString('es-PE')} | ${estado} |`;
+            });
+
+            res.end(
+              `### Distribución de Stock por Centro de Acopio\n\n` +
+                `Consolidado operativo en los **${store.centrosAcopio.length} centros de acopio** vinculados a las redes **José María Arguedas** y **Sondor**:\n\n` +
+                `| Centro de Acopio | Código | Cobertura | Dosis Activas | Estado |\n` +
+                `| :--- | :--- | :---: | ---: | :--- |\n` +
+                `${rows.join('\n')}\n\n` +
+                `- **Concentración Regional:** El \`ALMACÉN (CHANKA)\` concentra el stock de reserva estratégica con **${totalDosis.toLocaleString('es-PE')} dosis**.\n` +
+                `- **Despacho Prioritario:** Se recomienda priorizar la rotación del lote \`INFA26B\` hacia los centros de salud de mayor demanda.\n\n` +
+                `---\n**Sugerencias:**\n` +
+                `- Muestra un gráfico de barras con el stock actual de las principales vacunas.\n` +
+                `- ¿Cuáles son los lotes de vacunas próximos a vencer?`
+            );
+            return;
+          }
+
+          // 3. Consultas de vencimientos / FEFO / alertas / críticos
+          if (q.includes('vencer') || q.includes('vencimiento') || q.includes('fefo') || q.includes('alerta') || q.includes('crítico') || q.includes('critico')) {
+            const sortedLotes = [...store.lotesVacunas]
+              .sort((a, b) => a.fechaVencimiento.localeCompare(b.fechaVencimiento))
+              .slice(0, 6);
+
+            const rows = sortedLotes.map((l) => {
+              const vacName = l.vacuna?.nombre || 'Biológico';
+              const fecha = l.fechaVencimiento.slice(0, 10);
+              const prioridad = l.numero === 'INFA26B' ? 'Alta (FEFO)' : 'Normal';
+              return `| ${vacName} | \`${l.numero}\` | ${l.cantidadActual.toLocaleString('es-PE')} | ${fecha} | ${prioridad} |`;
+            });
+
+            res.end(
+              `### Control FEFO y Lotes Próximos a Vencer\n\n` +
+                `Se identificaron **${store.lotesVacunas.length} lotes activos** en cadena de frío, ordenados por prioridad de salida:\n\n` +
+                `| Biológico | Lote | Saldo (Dosis) | Vencimiento | Prioridad |\n` +
+                `| :--- | :--- | ---: | :---: | :--- |\n` +
+                `${rows.join('\n')}\n\n` +
+                `- **Acción Inmediata:** El lote \`INFA26B\` (Influenza Adulto, **820 dosis**) vence el \`2026-11-15\` y debe despacharse en el siguiente vale mensual.\n\n` +
+                `---\n**Sugerencias:**\n` +
+                `- Muestra la distribución actual de stock de vacunas agrupada por centro de acopio en una tabla.\n` +
+                `- ¿Cuál es el stock actual de jeringas descartables por medida?`
+            );
+            return;
+          }
+
+          // 4. Consultas de Jeringas / Diluyentes
+          if (q.includes('jeringa')) {
+            const rows = store.lotesJeringas.map((lj) => {
+              const tipo = lj.jeringa?.tipo || 'Jeringa descartable';
+              const cap = lj.jeringa?.capacidad || '1cc';
+              return `| ${tipo} | \`${lj.numero}\` | ${cap} | ${lj.cantidadActual.toLocaleString('es-PE')} | ${lj.fechaVencimiento.slice(0, 10)} |`;
+            });
+
+            res.end(
+              `### Disponibilidad de Jeringas e Insumos\n\n` +
+                `El inventario complementario cuenta con **${totalJeringas.toLocaleString('es-PE')} unidades** distribuidas en **${store.lotesJeringas.length} lotes activos**:\n\n` +
+                `| Especificación | Lote | Capacidad | Saldo Actual | Vencimiento |\n` +
+                `| :--- | :--- | :---: | ---: | :---: |\n` +
+                `${rows.join('\n')}\n\n` +
+                `- **Cobertura Operativa:** La relación actual entre jeringas autorretráctiles de \`1cc\` y dosis de biológicos está balanceada al **100%**.\n\n` +
+                `\`\`\`kardex\n` +
+                `RELACIÓN_INSUMO = Jeringas_1cc (${totalJeringas.toLocaleString('es-PE')}) / Dosis_Activas (${totalDosis.toLocaleString('es-PE')})\n` +
+                `ESTADO_CADENA   = BALANCEADO (Factor >= 1.00)\n` +
+                `\`\`\`\n\n` +
+                `---\n**Sugerencias:**\n` +
+                `- ¿Cuántas vacunas y jeringas tenemos disponibles en stock global actualmente? Muestra una tabla detallada.\n` +
+                `- Lista los lotes con vencimiento más cercano ordenados por prioridad.`
+            );
+            return;
+          }
+
+          // 5. Respuesta ejecutiva con tabla, lista y bloque de resumen técnico
+          const topLotes = store.lotesVacunas.slice(0, 7).map((l) => {
+            const nombre = l.vacuna?.nombre || 'Vacuna';
+            const pres = l.vacuna?.presentacion || 'Frasco';
+            return `| ${nombre} | \`${l.numero}\` | ${pres} | ${l.cantidadActual.toLocaleString('es-PE')} | ${l.fechaVencimiento.slice(0, 10)} |`;
+          });
+
           res.end(
-            `### Resumen Operativo SIVAC — DISA Apurímac II\n\n` +
-              `En respuesta a tu consulta${lastMsg ? ` (*"${lastMsg}"*)` : ''}:\n\n` +
-              `- **Stock disponible en Almacén Central (Chanka):** ${totalDosis.toLocaleString('es-PE')} dosis activas distribuidas en **${store.lotesVacunas.length} lotes**.\n` +
-              `- **Cobertura de Red:** **${store.redes.length} Redes de Salud** (José María Arguedas y Sondor), **${store.microredes.length} Microredes**, **${store.centrosAcopio.length} Centros de Acopio** y **${store.establecimientos.length} Establecimientos** activos.\n` +
-              `- **Alerta Prioritaria:** Lote \`INFA26B\` (Influenza Adulto, 820 dosis) con vencimiento próximo (15/11/2026).`
+            `### Balance Consolidado de Biológicos — SIVAC\n\n` +
+              `El sistema registra **${totalDosis.toLocaleString('es-PE')} dosis de vacunas** (${store.lotesVacunas.length} lotes) y **${totalJeringas.toLocaleString('es-PE')} jeringas** disponibles en almacén:\n\n` +
+              `| Biológico | Lote Activo | Presentación | Dosis Disponibles | Vencimiento |\n` +
+              `| :--- | :--- | :--- | ---: | :---: |\n` +
+              `${topLotes.join('\n')}\n\n` +
+              `- **Cobertura Territorial:** **${store.redes.length} Redes**, **${store.microredes.length} Microredes** y **${store.centrosAcopio.length} Centros de Acopio** operativos.\n` +
+              `- **Prioridad FEFO:** Lote \`INFA26B\` (Influenza Adulto, **820 dosis**) con vencimiento el \`2026-11-15\`.\n\n` +
+              `\`\`\`auditoria-lotes\n` +
+              `ALMACEN_CENTRAL : CHANKA-001 (${totalDosis.toLocaleString('es-PE')} dosis | ${store.lotesVacunas.length} lotes)\n` +
+              `ALERTA_FEFO     : Lote INFA26B -> Vence 2026-11-15 (820 dosis)\n` +
+              `\`\`\`\n\n` +
+              `---\n**Sugerencias:**\n` +
+              `- Muestra la distribución actual de stock de vacunas agrupada por centro de acopio en una tabla.\n` +
+              `- Muestra un gráfico de barras con el stock actual de las principales vacunas.`
           );
           return;
         }

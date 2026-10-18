@@ -52,16 +52,10 @@ const getFechaPeruDate = () => {
 
 const getMesActualPeru = () => String(getFechaPeruDate().getUTCMonth() + 1);
 const getAnioActualPeru = () => getFechaPeruDate().getUTCFullYear();
-
 const padZero = (value: number) => String(value).padStart(2, '0');
-
 const formatYMD = (year: number, month: number, day: number) =>
   `${year}-${padZero(month)}-${padZero(day)}`;
-
-const getUltimoDiaDelMes = (year: number, month: number) => {
-  // month es 1-12. Día 0 del mes siguiente = último día del mes actual
-  return new Date(year, month, 0).getDate();
-};
+const getUltimoDiaDelMes = (year: number, month: number) => new Date(year, month, 0).getDate();
 
 const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
   onClose,
@@ -166,7 +160,7 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
         modoFiltro === 'rango'
           ? 'Verifica el rango de fechas antes de exportar.'
           : 'Selecciona un mes y año válidos antes de exportar.',
-        { duration: 3500 }
+        { duration: 3500 },
       );
       return;
     }
@@ -177,7 +171,9 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error al exportar reporte:', error);
-      toast.error('No se pudo exportar el reporte', 'Inténtalo nuevamente con otro periodo o centro.', { duration: 4000 });
+      toast.error('No se pudo exportar el reporte', 'Inténtalo nuevamente con otro periodo o centro.', {
+        duration: 4000,
+      });
     } finally {
       setExportando(false);
     }
@@ -187,8 +183,8 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
     <Modal
       isOpen
       onClose={onClose}
-      title="Movimientos por EESS"
-      subtitle="Configura el periodo y el centro de acopio antes de generar el archivo Excel."
+      title="Matriz de movimientos por EESS"
+      subtitle="Exporta entregas, salidas y saldos agrupados por establecimiento y vacuna."
       icon={FileXls}
       size="lg"
       footer={(
@@ -196,24 +192,15 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
           onCancel={onClose}
           onSubmit={handleExportar}
           submitType="button"
-          submitLabel={exportando ? 'Generando Excel...' : 'Generar Excel'}
+          submitLabel={exportando ? 'Generando Excel...' : 'Exportar Excel'}
           isLoading={exportando}
         />
       )}
     >
       <div className="space-y-4">
         <FormSection
-          title="Resumen del reporte"
-          description="El archivo agrupa movimientos por establecimiento de salud y vacuna dentro del periodo seleccionado."
-        >
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-900">
-            Úsalo cuando necesites revisar distribución, entregas y saldos por EESS en una sola exportación.
-          </div>
-        </FormSection>
-
-        <FormSection
-          title="Periodo"
-          description="Elige el modo que mejor se adapte: rango personalizado o un mes específico."
+          title="Periodo de consulta"
+          description="Selecciona un rango de fechas personalizado o un mes calendario completo."
         >
           <div className={COMPONENT_STYLES.segmented.container} role="tablist" aria-label="Modo de filtrado por periodo">
             <button
@@ -226,7 +213,7 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
               }`}
             >
               <CalendarBlank className="h-4 w-4" weight={modoFiltro === 'rango' ? 'fill' : 'regular'} />
-              Por rango de fechas
+              <span>Rango de fechas</span>
             </button>
             <button
               type="button"
@@ -238,7 +225,7 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
               }`}
             >
               <CalendarCheck className="h-4 w-4" weight={modoFiltro === 'mes' ? 'fill' : 'regular'} />
-              Por mes
+              <span>Por mes</span>
             </button>
           </div>
 
@@ -260,7 +247,7 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
               />
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <SelectInput
                   id="movimientos-eess-mes"
@@ -282,21 +269,17 @@ const MovimientosPorEESSModal: React.FC<MovimientosPorEESSModalProps> = ({
                 />
               </div>
               {periodoResumen ? (
-                <p className="text-xs leading-5 text-muted-2">
-                  Cubrirá <span className="font-medium text-ink">{periodoResumen}</span>.
+                <p className="font-mono text-xs text-muted-2">
+                  Periodo seleccionado: <span className="font-semibold text-ink">{periodoResumen}</span>
                 </p>
               ) : null}
-              <div className="rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-2 text-sm leading-5 text-sky-900">
-                <span className="font-semibold">Salidas del mes:</span>{' '}
-                la columna <span className="font-medium">Salidas</span> mostrará los movimientos registrados para el mes seleccionado.
-              </div>
             </div>
           )}
         </FormSection>
 
         <FormSection
-          title="Cobertura"
-          description="Si no seleccionas un centro, el reporte incluirá todos los establecimientos disponibles."
+          title="Alcance territorial"
+          description="Filtra por un centro de acopio específico o incluye todos los establecimientos."
         >
           <SelectInput
             id="movimientos-eess-centro"

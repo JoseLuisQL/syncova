@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { CheckSquare, FileXls, Square } from '@phosphor-icons/react';
+import { CheckSquare, FileXls, MagnifyingGlass, Square, X } from '@phosphor-icons/react';
 import { Vacuna } from '../../../types';
 import { CentroAcopioOption } from '../../../types/reportes';
 import {
@@ -9,6 +9,7 @@ import {
   ModalFooter,
   SelectInput,
 } from '../../ui/ModalElements';
+import { COMPONENT_STYLES } from '../constants';
 import { getFechaPeruActual, getFechaPeruMesAnterior } from '../utils';
 
 interface StockVacunasEESSModalProps {
@@ -36,17 +37,24 @@ const StockVacunasEESSModal: React.FC<StockVacunasEESSModalProps> = ({
     fechaFin: getFechaPeruActual(),
     vacunaIds: vacunas.map((vacuna) => vacuna.id),
   });
+  const [searchVacuna, setSearchVacuna] = useState('');
   const [exportando, setExportando] = useState(false);
   const [errores, setErrores] = useState<Record<string, string>>({});
 
   const todasSeleccionadas = useMemo(
-    () => filtros.vacunaIds.length === vacunas.length,
+    () => vacunas.length > 0 && filtros.vacunaIds.length === vacunas.length,
     [filtros.vacunaIds.length, vacunas.length],
   );
   const algunasSeleccionadas = useMemo(
     () => filtros.vacunaIds.length > 0 && filtros.vacunaIds.length < vacunas.length,
     [filtros.vacunaIds.length, vacunas.length],
   );
+
+  const vacunasFiltradas = useMemo(() => {
+    const q = searchVacuna.trim().toLowerCase();
+    if (!q) return vacunas;
+    return vacunas.filter((v) => v.nombre.toLowerCase().includes(q));
+  }, [searchVacuna, vacunas]);
 
   const handleToggleTodasVacunas = useCallback(() => {
     setFiltros((prev) => ({
@@ -106,7 +114,7 @@ const StockVacunasEESSModal: React.FC<StockVacunasEESSModalProps> = ({
       isOpen
       onClose={onClose}
       title="Stock de vacunas por EESS"
-      subtitle="Define el periodo, el alcance territorial y las vacunas incluidas en el Excel."
+      subtitle="Define el periodo, alcance territorial y biológicos incluidos en la matriz Excel."
       icon={FileXls}
       size="xl"
       footer={(
@@ -114,23 +122,14 @@ const StockVacunasEESSModal: React.FC<StockVacunasEESSModalProps> = ({
           onCancel={onClose}
           onSubmit={handleExportar}
           submitType="button"
-          submitLabel={exportando ? 'Generando Excel...' : 'Generar Excel'}
+          submitLabel={exportando ? 'Generando Excel...' : 'Exportar Excel'}
           isLoading={exportando}
         />
       )}
     >
       <div className="space-y-4">
-        <FormSection
-          title="Resumen del reporte"
-          description="El Excel agrupa stock por establecimiento y permite seleccionar múltiples vacunas."
-        >
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-900">
-            Esta exportación es ideal para revisar cobertura territorial y disponibilidad por establecimiento.
-          </div>
-        </FormSection>
-
-        <FormSection title="Periodo" description="El rango controla la fotografía temporal del stock exportado.">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <FormSection title="Periodo y cobertura" description="Rango de fechas y centro de acopio a consultar.">
+          <div className="grid gap-3.5 sm:grid-cols-3">
             <DateInput
               id="stock-eess-start"
               label="Fecha inicio"
@@ -145,48 +144,63 @@ const StockVacunasEESSModal: React.FC<StockVacunasEESSModalProps> = ({
               onChange={(value) => setFiltros((prev) => ({ ...prev, fechaFin: value }))}
               error={errores.fechaFin}
             />
+            <SelectInput
+              id="stock-eess-centro"
+              label="Centro de acopio"
+              value={filtros.centroAcopioId || ''}
+              onChange={(value) => setFiltros((prev) => ({ ...prev, centroAcopioId: value || undefined }))}
+              options={[
+                { value: '', label: 'Todos los centros' },
+                ...centrosAcopio.map((centro) => ({ value: centro.id, label: centro.nombre })),
+              ]}
+            />
           </div>
         </FormSection>
 
         <FormSection
-          title="Cobertura"
-          description="Si no eliges un centro específico, se usarán todos los establecimientos disponibles."
-        >
-          <SelectInput
-            id="stock-eess-centro"
-            label="Centro de acopio"
-            value={filtros.centroAcopioId || ''}
-            onChange={(value) => setFiltros((prev) => ({ ...prev, centroAcopioId: value || undefined }))}
-            options={[
-              { value: '', label: 'Todos los centros de acopio' },
-              ...centrosAcopio.map((centro) => ({ value: centro.id, label: centro.nombre })),
-            ]}
-          />
-        </FormSection>
-
-        <FormSection
-          title="Vacunas incluidas"
+          title="Biológicos incluidos"
           description={`${filtros.vacunaIds.length} de ${vacunas.length} vacunas seleccionadas.`}
         >
-          <button
-            type="button"
-            onClick={handleToggleTodasVacunas}
-            className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
-          >
-            {todasSeleccionadas ? (
-              <CheckSquare className="h-4 w-4 text-zinc-600" />
-            ) : algunasSeleccionadas ? (
-              <span className="flex h-4 w-4 items-center justify-center rounded border-2 border-zinc-600 bg-zinc-100">
-                <span className="h-1.5 w-1.5 rounded-sm bg-zinc-600" />
-              </span>
-            ) : (
-              <Square className="h-4 w-4 text-zinc-400" />
-            )}
-            Seleccionar todas
-          </button>
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative flex-1">
+              <MagnifyingGlass className={COMPONENT_STYLES.filter.searchIcon} />
+              <input
+                type="search"
+                value={searchVacuna}
+                onChange={(e) => setSearchVacuna(e.target.value)}
+                placeholder="Filtrar vacunas por nombre..."
+                className={COMPONENT_STYLES.filter.searchInput}
+              />
+              {searchVacuna ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchVacuna('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted hover:text-ink"
+                  aria-label="Limpiar filtro"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              ) : null}
+            </div>
 
-          <div className="grid max-h-[280px] gap-2 overflow-y-auto pt-3 sm:grid-cols-2">
-            {vacunas.map((vacuna) => {
+            <button
+              type="button"
+              onClick={handleToggleTodasVacunas}
+              className={COMPONENT_STYLES.button.secondary}
+            >
+              {todasSeleccionadas ? (
+                <CheckSquare className="h-4 w-4 text-brand" weight="fill" />
+              ) : algunasSeleccionadas ? (
+                <CheckSquare className="h-4 w-4 text-brand" />
+              ) : (
+                <Square className="h-4 w-4 text-muted" />
+              )}
+              <span>{todasSeleccionadas ? 'Deseleccionar todas' : 'Seleccionar todas'}</span>
+            </button>
+          </div>
+
+          <div className="grid max-h-[240px] gap-2 overflow-y-auto pt-2 sm:grid-cols-2">
+            {vacunasFiltradas.map((vacuna) => {
               const selected = filtros.vacunaIds.includes(vacuna.id);
 
               return (
@@ -194,22 +208,24 @@ const StockVacunasEESSModal: React.FC<StockVacunasEESSModalProps> = ({
                   key={vacuna.id}
                   type="button"
                   onClick={() => handleToggleVacuna(vacuna.id)}
-                  className={`flex items-center gap-3 rounded-xl border px-3 py-3 text-left transition ${
-                    selected ? 'border-zinc-200 bg-zinc-50 text-zinc-900' : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
+                  className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 text-left text-xs sm:text-sm transition-colors ${
+                    selected
+                      ? 'border-brand/40 bg-brand/5 text-ink font-medium'
+                      : 'border-line bg-surface text-muted-2 hover:bg-surface-soft hover:text-ink'
                   }`}
                 >
                   {selected ? (
-                    <CheckSquare className="h-4 w-4 shrink-0 text-zinc-600" />
+                    <CheckSquare className="h-4 w-4 shrink-0 text-brand" weight="fill" />
                   ) : (
-                    <Square className="h-4 w-4 shrink-0 text-zinc-400" />
+                    <Square className="h-4 w-4 shrink-0 text-muted" />
                   )}
-                  <span className="text-sm font-medium">{vacuna.nombre}</span>
+                  <span className="truncate">{vacuna.nombre}</span>
                 </button>
               );
             })}
           </div>
 
-          {errores.vacunas ? <p className="mt-2 text-xs text-rose-600">{errores.vacunas}</p> : null}
+          {errores.vacunas ? <p className="mt-2 text-xs font-medium text-rose-600">{errores.vacunas}</p> : null}
         </FormSection>
       </div>
     </Modal>

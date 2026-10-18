@@ -4,7 +4,6 @@ import {
   ArrowsInSimple,
   ArrowsOutSimple,
   DownloadSimple,
-  SidebarSimple,
   Trash,
   WarningCircle,
   X,
@@ -13,12 +12,11 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useSiBot } from '../../hooks/useSiBot';
 import { useCurrentRoute } from '../../hooks/useRouting';
 import { useToastContext } from '../../contexts/ToastContext';
+import { useApp } from '../../contexts/AppContext';
 import { SiBotMessage } from './SiBotMessage';
 import { SiBotInput } from './SiBotInput';
 import { SiBotSuggestions } from './SiBotSuggestions';
 import { SiBotLogo } from './SiBotLogo';
-
-type PanelMode = 'compact' | 'docked' | 'expanded';
 
 const MODULE_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
@@ -35,8 +33,7 @@ const MODULE_LABELS: Record<string, string> = {
 };
 
 export const SiBotFloating: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [panelMode, setPanelMode] = useState<PanelMode>('compact');
+  const { sibotOpen, setSibotOpen, sibotExpanded, setSibotExpanded } = useApp();
   const [showScrollBottom, setShowScrollBottom] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -57,20 +54,17 @@ export const SiBotFloating: React.FC = () => {
     clearHistory,
   } = useSiBot();
 
-  const isExpanded = panelMode === 'expanded';
-  const isDocked = panelMode === 'docked';
   const activeModuleLabel = MODULE_LABELS[currentModule] || 'General';
 
   const handleSuggestion = (text: string) => {
     append({ role: 'user', content: text });
   };
 
-  // Ajuste responsivo en pantallas menores a lg
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 1024px)');
     const handleMediaChange = (event: MediaQueryList | MediaQueryListEvent) => {
       if (!event.matches) {
-        setPanelMode('compact');
+        setSibotExpanded(false);
       }
     };
 
@@ -83,28 +77,26 @@ export const SiBotFloating: React.FC = () => {
 
     mediaQuery.addListener(handleMediaChange);
     return () => mediaQuery.removeListener(handleMediaChange);
-  }, []);
+  }, [setSibotExpanded]);
 
-  // Atajos de teclado globales: Cmd/Ctrl + J para abrir/cerrar, Escape para contraer/cerrar
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'j') {
         event.preventDefault();
-        setIsOpen((prev) => !prev);
-      } else if (event.key === 'Escape' && isOpen) {
-        if (panelMode === 'expanded') {
-          setPanelMode('compact');
+        setSibotOpen((prev) => !prev);
+      } else if (event.key === 'Escape' && sibotOpen) {
+        if (sibotExpanded) {
+          setSibotExpanded(false);
         } else {
-          setIsOpen(false);
+          setSibotOpen(false);
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, panelMode]);
+  }, [sibotOpen, sibotExpanded, setSibotOpen, setSibotExpanded]);
 
-  // Auto-scroll inteligente cuando llegan mensajes nuevos
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -115,23 +107,16 @@ export const SiBotFloating: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isOpen && messages.length > 0) {
+    if (sibotOpen && messages.length > 0) {
       scrollToBottom(isLoading ? 'auto' : 'smooth');
     }
-  }, [messages, isOpen, isLoading]);
+  }, [messages, sibotOpen, isLoading]);
 
   const handleScroll = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
     const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
     setShowScrollBottom(distanceFromBottom > 140);
-  };
-
-  const toggleOpen = () => {
-    if (isOpen && panelMode === 'expanded') {
-      setPanelMode('compact');
-    }
-    setIsOpen((current) => !current);
   };
 
   const handleExportSession = () => {
@@ -166,16 +151,6 @@ export const SiBotFloating: React.FC = () => {
     toast.success('Informe exportado', 'La sesión de análisis se descargó correctamente.');
   };
 
-  const getPanelLayoutClass = () => {
-    if (isExpanded) {
-      return 'bottom-4 right-4 w-[min(1120px,calc(100vw-2rem))] h-[min(88vh,920px)] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] rounded-3xl';
-    }
-    if (isDocked) {
-      return 'bottom-4 right-4 top-4 w-[min(520px,calc(100vw-2rem))] h-[calc(100dvh-2rem)] rounded-3xl';
-    }
-    return 'inset-x-2.5 bottom-[5.25rem] sm:inset-x-auto lg:bottom-[92px] sm:right-6 w-auto sm:w-[410px] h-[calc(100dvh-6.5rem)] sm:h-[650px] max-h-[calc(100dvh-6.5rem)] sm:max-h-[calc(100vh-120px)] max-w-[calc(100vw-1.25rem)] sm:max-w-[calc(100vw-3rem)] rounded-2xl sm:rounded-3xl';
-  };
-
   let lastAssistantMessageId: string | undefined;
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i].role === 'assistant' && messages[i].content.trim()) {
@@ -186,201 +161,194 @@ export const SiBotFloating: React.FC = () => {
 
   return (
     <>
-      {/* Lanzador Flotante Especializado de SiBot */}
-      <div className="fixed bottom-[4.5rem] right-3.5 lg:bottom-6 lg:right-6 z-40">
-        <button
-          type="button"
-          onClick={toggleOpen}
-          aria-label={isOpen ? 'Cerrar copiloto SiBot (⌘J)' : 'Abrir copiloto SiBot (⌘J)'}
-          aria-expanded={isOpen}
-          className={`group relative flex items-center gap-2.5 rounded-2xl border transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 active:scale-[0.97] ${
-            isOpen
-              ? 'h-12 w-12 sm:h-13 sm:w-13 justify-center border-line bg-ink text-white shadow-[0_18px_44px_-22px_rgba(12,15,24,0.75)]'
-              : 'h-12 px-3.5 sm:h-13 sm:px-4 border-brand/30 bg-ink text-white shadow-[0_20px_48px_-20px_rgba(124,58,237,0.65)] hover:border-brand hover:bg-[#1b1e26]'
-          }`}
-        >
-          {isOpen ? (
-            <X className="h-5 w-5" weight="bold" />
-          ) : (
-            <>
-              <span className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-brand text-white">
-                <SiBotLogo className="h-5 w-5" />
+      {/* Lanzador Flotante Aurora AI (solo visible cuando el sidebar está cerrado) */}
+      <AnimatePresence>
+        {!sibotOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 12 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed bottom-[4.5rem] right-4 lg:bottom-6 lg:right-6 z-40 font-sans antialiased"
+          >
+            <button
+              type="button"
+              onClick={() => setSibotOpen(true)}
+              aria-label="Abrir panel lateral SiBot IA (⌘J)"
+              className="group relative inline-flex items-center rounded-2xl p-[1.5px] transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 active:scale-[0.97]"
+            >
+              <span
+                aria-hidden="true"
+                className="sibot-aurora-halo pointer-events-none absolute -inset-1.5 rounded-3xl opacity-65 blur-lg transition-all duration-300 group-hover:-inset-2 group-hover:opacity-100 group-hover:blur-xl"
+              />
+
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+              >
+                <span className="sibot-aurora-spin-beam absolute -inset-[120%] opacity-90 transition-opacity duration-300 group-hover:opacity-100" />
               </span>
-              <span className="flex flex-col items-start text-left">
-                <span className="flex items-center gap-1.5 text-xs font-semibold leading-none tracking-tight text-white whitespace-nowrap shrink-0">
-                  <span>SiBot IA</span>
-                  {isLoading && (
-                    <span className="inline-block h-2 w-2 animate-spin rounded-full border border-white border-r-transparent" />
+
+              <span className="relative z-10 flex h-12 items-center gap-2.5 rounded-[14.5px] bg-[#11131c]/95 px-3.5 text-white shadow-[0_16px_40px_-12px_rgba(124,58,237,0.55)] backdrop-blur-md transition-colors duration-200 group-hover:bg-[#151824]">
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-[14.5px] bg-gradient-to-r from-violet-500/15 via-cyan-400/10 to-fuchsia-500/15 opacity-80 transition-opacity duration-300 group-hover:opacity-100"
+                />
+
+                <span className="sibot-aurora-bg relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-white shadow-[0_0_20px_rgba(6,182,212,0.45)] ring-1 ring-white/25 transition-transform duration-300 group-hover:scale-105">
+                  <SiBotLogo aurora className="h-5 w-5" />
+                </span>
+
+                <span className="relative z-10 flex items-center gap-2 pr-0.5">
+                  <span className="bg-gradient-to-r from-white via-cyan-100 to-violet-200 bg-clip-text text-[13px] font-semibold tracking-tight text-transparent whitespace-nowrap shrink-0">
+                    SiBot IA
+                  </span>
+
+                  {isLoading ? (
+                    <span className="inline-block h-2.5 w-2.5 animate-spin rounded-full border-2 border-cyan-300 border-r-transparent" />
+                  ) : (
+                    <span className="hidden rounded-md bg-white/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-zinc-200 sm:inline-block whitespace-nowrap shrink-0">
+                      ⌘J
+                    </span>
                   )}
                 </span>
-                <span className="mt-1 hidden text-[10px] font-medium leading-none text-zinc-400 sm:inline whitespace-nowrap shrink-0">
-                  Copiloto · ⌘J
-                </span>
               </span>
-            </>
-          )}
-        </button>
-      </div>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Panel / Estudio Analítico de SiBot */}
+      {/* Sidebar Derecho Minimalista (Push Sidebar en escritorio) */}
       <AnimatePresence>
-        {isOpen && (
+        {sibotOpen && (
           <>
-            <AnimatePresence>
-              {isExpanded && (
-                <motion.button
-                  type="button"
-                  aria-label="Contraer vista expandida"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.18 }}
-                  onClick={() => setPanelMode('compact')}
-                  className="fixed inset-0 z-40 hidden bg-zinc-950/20 backdrop-blur-[1px] lg:block"
-                />
-              )}
-            </AnimatePresence>
+            <motion.button
+              type="button"
+              aria-label="Cerrar panel lateral"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              onClick={() => setSibotOpen(false)}
+              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[1px] lg:hidden"
+            />
 
-            <motion.div
-              initial={{ opacity: 0, y: 14, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.97 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className={`fixed ${getPanelLayoutClass()} z-50 flex flex-col overflow-hidden border border-line bg-surface shadow-[0_28px_80px_-48px_rgba(12,15,24,0.78)]`}
-              role="dialog"
+            <motion.aside
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+              className={`fixed top-0 right-0 bottom-0 z-50 flex h-[100dvh] flex-col border-l border-line-soft bg-surface font-sans antialiased transition-[width] duration-300 ease-out ${
+                sibotExpanded ? 'w-full sm:w-[640px]' : 'w-full sm:w-[400px]'
+              }`}
               aria-label="Asistente Analítico SiBot"
             >
-              {/* Cabecera del Copiloto */}
-              <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line bg-surface px-4 py-3 sm:px-5">
+              {/* Cabecera Minimalista sin bordes anidados */}
+              <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-line-soft px-5">
                 <div className="flex min-w-0 items-center gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand/25 bg-surface-tint text-brand">
-                    <SiBotLogo className="h-5 w-5" />
+                  <div className="sibot-aurora-bg flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-white">
+                    <SiBotLogo aurora className="h-3.5 w-3.5" />
                   </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="truncate text-sm font-semibold leading-none tracking-tight text-ink">
-                        SiBot Copiloto
-                      </h3>
-                    </div>
-                    <div className="mt-1 flex items-center gap-1.5 text-[11px] font-medium leading-none text-muted-2">
-                      <span>Contexto: {activeModuleLabel}</span>
-                      {messages.length > 0 && (
-                        <>
-                          <span aria-hidden="true">·</span>
-                          <span className="tabular-nums">{Math.ceil(messages.length / 2)} consultas</span>
-                        </>
-                      )}
-                    </div>
+                  <div className="flex min-w-0 items-center gap-1.5 text-[13px]">
+                    <span className="font-semibold tracking-[-0.01em] text-ink whitespace-nowrap shrink-0">
+                      SiBot
+                    </span>
+                    <span className="text-muted" aria-hidden="true">
+                      ·
+                    </span>
+                    <span className="truncate text-xs font-normal text-muted-2">
+                      {activeModuleLabel}
+                    </span>
                   </div>
                 </div>
 
-                {/* Controles de Vista y Sesión */}
-                <div className="flex shrink-0 items-center gap-1">
+                {/* Controles limpios sin cajas ni bordes */}
+                <div className="flex shrink-0 items-center gap-0.5">
                   {messages.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={handleExportSession}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-2 transition-colors hover:bg-surface-soft hover:text-ink"
-                      title="Descargar informe de la sesión (.md)"
-                      aria-label="Descargar informe de la sesión"
-                    >
-                      <DownloadSimple className="h-4 w-4" weight="bold" />
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleExportSession}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-2 transition-colors hover:bg-surface-soft hover:text-ink"
+                        title="Descargar informe (.md)"
+                        aria-label="Descargar informe de la sesión"
+                      >
+                        <DownloadSimple className="h-4 w-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          clearHistory();
+                          toast.info('Nueva sesión', 'Se limpió el historial de conversación.');
+                        }}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-2 transition-colors hover:bg-surface-soft hover:text-[rgb(var(--color-status-danger-text))]"
+                        title="Limpiar conversación"
+                        aria-label="Limpiar conversación"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </button>
+                    </>
                   )}
 
-                  {messages.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        clearHistory();
-                        toast.info('Nueva sesión', 'Se limpió el historial de conversación.');
-                      }}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-2 transition-colors hover:bg-rose-50 hover:text-rose-600"
-                      title="Nueva consulta (limpiar historial)"
-                      aria-label="Limpiar historial"
-                    >
-                      <Trash className="h-4 w-4" weight="duotone" />
-                    </button>
-                  )}
-
-                  {/* Alternar modo Acoplado Lateral en escritorio */}
                   <button
                     type="button"
-                    onClick={() => setPanelMode((prev) => (prev === 'docked' ? 'compact' : 'docked'))}
+                    onClick={() => setSibotExpanded((prev) => !prev)}
                     className={`hidden h-8 w-8 items-center justify-center rounded-lg transition-colors lg:inline-flex ${
-                      isDocked
+                      sibotExpanded
                         ? 'bg-surface-tint text-brand'
                         : 'text-muted-2 hover:bg-surface-soft hover:text-ink'
                     }`}
-                    title={isDocked ? 'Salir de vista acoplada' : 'Acoplar como panel lateral'}
-                    aria-label="Alternar vista acoplada"
+                    title={
+                      sibotExpanded
+                        ? 'Volver al ancho estándar (400px)'
+                        : 'Ampliar ancho para tablas y gráficos (640px)'
+                    }
+                    aria-label="Alternar ancho del panel"
                   >
-                    <SidebarSimple className="h-4 w-4" weight="duotone" />
-                  </button>
-
-                  {/* Alternar modo Estudio Expandido en escritorio */}
-                  <button
-                    type="button"
-                    onClick={() => setPanelMode((prev) => (prev === 'expanded' ? 'compact' : 'expanded'))}
-                    className={`hidden h-8 w-8 items-center justify-center rounded-lg transition-colors lg:inline-flex ${
-                      isExpanded
-                        ? 'bg-surface-tint text-brand'
-                        : 'text-muted-2 hover:bg-surface-soft hover:text-ink'
-                    }`}
-                    title={isExpanded ? 'Volver a tamaño compacto' : 'Expandir lienzo para tablas y gráficos'}
-                    aria-label="Alternar lienzo expandido"
-                  >
-                    {isExpanded ? (
-                      <ArrowsInSimple className="h-4 w-4" weight="bold" />
+                    {sibotExpanded ? (
+                      <ArrowsInSimple className="h-4 w-4" />
                     ) : (
-                      <ArrowsOutSimple className="h-4 w-4" weight="bold" />
+                      <ArrowsOutSimple className="h-4 w-4" />
                     )}
                   </button>
 
                   <button
                     type="button"
-                    onClick={() => setIsOpen(false)}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-2 transition-colors hover:bg-surface-soft hover:text-ink lg:hidden"
-                    title="Cerrar panel"
+                    onClick={() => setSibotOpen(false)}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-2 transition-colors hover:bg-surface-soft hover:text-ink"
+                    title="Cerrar panel (Esc)"
                     aria-label="Cerrar panel"
                   >
-                    <X className="h-4 w-4" weight="bold" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               </div>
 
-              {/* Cuerpo Principal de Conversación / Centro de Comando */}
+              {/* Lienzo de Conversación Puro */}
               <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className={`relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden ${
-                  isExpanded ? 'px-6 py-5' : 'px-3.5 py-4 sm:px-4'
-                } scroll-smooth scrollbar-thin scrollbar-thumb-zinc-200 hover:scrollbar-thumb-zinc-300`}
+                className="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 py-5 scroll-smooth scrollbar-thin"
               >
                 {messages.length === 0 ? (
-                  <div className="flex min-h-full flex-col items-center justify-center py-2">
-                    <div className={`mb-4 flex w-full ${isExpanded ? 'max-w-2xl' : 'max-w-full'} items-start gap-3`}>
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-brand/25 bg-surface-tint text-brand">
-                        <SiBotLogo className="h-6 w-6" />
-                      </div>
-                      <div className="min-w-0 text-left">
-                        <h4 className="text-base font-semibold tracking-tight text-ink">
-                          Centro Analítico de Inmunizaciones
-                        </h4>
-                        <p className="mt-0.5 text-xs leading-relaxed text-muted-2">
-                          Consulta en lenguaje natural el stock de biológicos, caducidades por lote, metas anuales y reportes exportables a Excel.
-                        </p>
-                      </div>
+                  <div className="flex min-h-full flex-col justify-center py-6">
+                    <div className="mb-6">
+                      <h4 className="text-[17px] font-semibold tracking-[-0.015em] leading-snug text-ink [text-wrap:balance]">
+                        ¿Qué necesitas consultar en {activeModuleLabel}?
+                      </h4>
+                      <p className="mt-1.5 text-[13px] font-normal leading-relaxed text-muted-2">
+                        Analiza en tiempo real el inventario de biológicos, lotes por vencer, entregas y reportes exportables a Excel.
+                      </p>
                     </div>
 
                     <SiBotSuggestions
                       onSelect={handleSuggestion}
                       currentModule={currentModule}
-                      isExpanded={isExpanded}
                     />
                   </div>
                 ) : (
-                  <div className={`mx-auto flex w-full ${isExpanded ? 'max-w-4xl' : 'max-w-full'} flex-col pb-2`}>
+                  <div className="flex w-full flex-col gap-6 pb-2">
                     {messages.map((msg) => {
                       const content = typeof msg.content === 'string' ? msg.content : '';
                       if (!content.trim() && msg.role !== 'assistant') return null;
@@ -404,45 +372,45 @@ export const SiBotFloating: React.FC = () => {
                     })}
 
                     {isLoading && messages[messages.length - 1]?.role === 'user' && (
-                      <div className="mb-4 flex w-full justify-start">
+                      <div className="flex w-full justify-start">
                         <SiBotMessage messageRole="assistant" content="" isStreaming />
                       </div>
                     )}
 
                     {error && (
                       <div
-                        className={`mx-auto mt-2 flex w-full items-start justify-between gap-3 rounded-xl border px-3.5 py-3 text-xs ${
+                        className={`flex w-full items-start justify-between gap-2.5 rounded-xl px-3.5 py-3 text-xs ${
                           error.message.includes('Límite') ||
                           error.message.includes('429') ||
                           error.message.toLowerCase().includes('quota')
-                            ? 'border-amber-200 bg-amber-50 text-amber-900'
-                            : 'border-rose-200 bg-rose-50 text-rose-800'
+                            ? 'bg-[rgb(var(--color-status-warning-bg))] text-[rgb(var(--color-status-warning-text))]'
+                            : 'bg-[rgb(var(--color-status-danger-bg))] text-[rgb(var(--color-status-danger-text))]'
                         }`}
                       >
-                        <div className="flex items-start gap-2.5">
+                        <div className="flex items-start gap-2">
                           <WarningCircle className="mt-0.5 h-4 w-4 shrink-0" weight="bold" />
                           <div className="flex flex-col">
                             <span className="font-semibold">
                               {error.message.includes('Límite') ||
                               error.message.includes('429') ||
                               error.message.toLowerCase().includes('quota')
-                                ? 'Límite de consultas alcanzado (Cuota API)'
+                                ? 'Límite de consultas alcanzado'
                                 : 'No se pudo completar la consulta'}
                             </span>
                             <span className="mt-0.5 leading-relaxed opacity-90">
                               {error.message.includes('Límite') ||
                               error.message.includes('429') ||
                               error.message.toLowerCase().includes('quota')
-                                ? 'Se alcanzó el límite temporal de peticiones al motor de IA. Espera unos segundos y vuelve a intentar.'
+                                ? 'Se alcanzó el límite temporal de peticiones. Espera unos segundos y vuelve a intentar.'
                                 : error.message || 'Ocurrió un error al procesar la respuesta.'}
                             </span>
-                            <div className="mt-2 flex items-center gap-2">
+                            <div className="mt-2">
                               <button
                                 type="button"
                                 onClick={regenerateLast}
-                                className="rounded-lg border border-current/20 bg-white/80 px-2.5 py-1 text-[11px] font-semibold transition-colors hover:bg-white"
+                                className="rounded-lg bg-surface px-2.5 py-1 text-[11px] font-semibold text-ink transition-colors hover:bg-surface-soft"
                               >
-                                Reintentar consulta
+                                Reintentar
                               </button>
                             </div>
                           </div>
@@ -450,7 +418,7 @@ export const SiBotFloating: React.FC = () => {
                         <button
                           type="button"
                           onClick={clearError}
-                          className="rounded-md p-1 opacity-70 hover:opacity-100"
+                          className="rounded-md p-1 opacity-75 hover:opacity-100"
                           aria-label="Cerrar alerta de error"
                         >
                           <X className="h-3.5 w-3.5" weight="bold" />
@@ -460,12 +428,11 @@ export const SiBotFloating: React.FC = () => {
                   </div>
                 )}
 
-                {/* Botón flotante para bajar al último mensaje */}
                 {showScrollBottom && messages.length > 0 && (
                   <button
                     type="button"
                     onClick={() => scrollToBottom('smooth')}
-                    className="sticky bottom-2 left-1/2 z-20 mx-auto flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-line bg-surface/95 px-3 py-1.5 text-xs font-semibold text-ink shadow-md backdrop-blur-xs transition-colors hover:border-brand/40 hover:text-brand"
+                    className="sticky bottom-2 left-1/2 z-20 mx-auto flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-surface-soft px-3 py-1.5 text-xs font-medium text-ink shadow-sm transition-colors hover:text-brand"
                   >
                     <ArrowDown className="h-3.5 w-3.5" weight="bold" />
                     <span>Ir al final</span>
@@ -473,17 +440,16 @@ export const SiBotFloating: React.FC = () => {
                 )}
               </div>
 
-              {/* Compositor de Consultas IA */}
+              {/* Compositor Minimalista */}
               <SiBotInput
                 input={input}
                 handleInputChange={handleInputChange}
                 handleSubmit={handleSubmit}
                 isLoading={isLoading}
                 stop={stop}
-                onQuickAction={handleSuggestion}
                 onClearDraft={() => setInput('')}
               />
-            </motion.div>
+            </motion.aside>
           </>
         )}
       </AnimatePresence>

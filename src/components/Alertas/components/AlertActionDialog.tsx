@@ -29,7 +29,7 @@ const AlertActionDialog: React.FC<AlertActionDialogProps> = ({
     isOpen={isOpen}
     onClose={onClose}
     title={title}
-    subtitle="Verifica esta acción antes de continuar."
+    subtitle="Verifica esta acción operativa antes de continuar."
     icon={icon}
     size="sm"
     footer={(
@@ -43,11 +43,10 @@ const AlertActionDialog: React.FC<AlertActionDialogProps> = ({
       />
     )}
   >
-    <div className="rounded-[22px] border border-zinc-200 bg-zinc-50/80 p-4">
-      <p className="text-sm leading-6 text-zinc-700">{description}</p>
+    <div className="rounded-xl border border-line bg-surface-soft p-4">
+      <p className="text-sm leading-relaxed text-ink">{description}</p>
     </div>
   </Modal>
 );
 
 export default AlertActionDialog;
- 

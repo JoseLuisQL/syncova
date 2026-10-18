@@ -1,19 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Warning,
   Archive,
-  CalendarBlank,
-  DownloadSimple,
-  Eye,
+  Buildings,
+  CaretDown,
   FileXls,
-  Package,
-  ShieldWarning,
+  MagnifyingGlass,
+  SpinnerGap,
+  X,
 } from '@phosphor-icons/react';
 import { Vacuna } from '../../../../types';
-import { CentroAcopioOption } from '../../../../types/reportes';
-import { useReportes } from '../../../../hooks/useReportes';
-import { useToastContext } from '../../../../contexts/ToastContext';
 import {
+  CentroAcopioOption,
   ConfiguracionExportacion,
   FiltrosKardexDetallado,
   FiltrosReporteBase,
@@ -24,13 +21,18 @@ import {
   ItemStockCritico,
   ItemVencimiento,
 } from '../../../../types/reportes';
+import { useReportes } from '../../../../hooks/useReportes';
+import { useToastContext } from '../../../../contexts/ToastContext';
 import { COMPONENT_STYLES } from '../../constants';
-import ReporteCard from '../ReporteCard';
-import { ReportInlineStatus, ReportSectionCard, ReportTableColumn } from '../ReportPrimitives';
+import {
+  ReportInlineStatus,
+  ReportResultsTable,
+  ReportSectionCard,
+  ReportTableColumn,
+} from '../ReportPrimitives';
 import KardexDetalladoModal from '../../modals/KardexDetalladoModal';
 import StockVacunasEESSModal, { StockVacunasEESSFiltros } from '../../modals/StockVacunasEESSModal';
-import VisualizarReporteModal from '../../modals/VisualizarReporteModal';
-import { formatCompactDate, formatLastUpdated } from '../../utils';
+import { formatCompactDate } from '../../utils';
 
 interface InventarioTabProps {
   centrosAcopio: CentroAcopioOption[];
@@ -40,85 +42,75 @@ interface InventarioTabProps {
 type PreviewReportId = 'stock_actual' | 'stock_critico' | 'vencimientos' | 'lotes_vencidos';
 type PreviewRow = ItemStockActual | ItemStockCritico | ItemVencimiento | ItemLoteVencido;
 
+const REPORT_VIEWS: Array<{ id: PreviewReportId; label: string; shortLabel: string }> = [
+  { id: 'stock_actual', label: 'Stock actual', shortLabel: 'Stock' },
+  { id: 'stock_critico', label: 'Stock crítico', shortLabel: 'Crítico' },
+  { id: 'vencimientos', label: 'Por vencer', shortLabel: 'Por vencer' },
+  { id: 'lotes_vencidos', label: 'Vencidos', shortLabel: 'Vencidos' },
+];
+
 const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas }) => {
   const {
     reportes,
-    estadisticas,
     estado,
     generarStockActual,
     generarStockCritico,
     generarVencimientos,
     generarLotesVencidos,
     generarKardexDetallado,
-    obtenerEstadisticas,
     exportarExcel,
     exportarKardexDetallado,
     exportarStockVacunasEESS,
   } = useReportes();
   const { toast } = useToastContext();
 
-  const [filtrosReportes, setFiltrosReportes] = useState<{
-    stockActual: FiltrosReporteBase;
-    stockCritico: FiltrosStockCritico;
-    vencimientos: FiltrosVencimientos;
-    lotesVencidos: FiltrosReporteBase;
-  }>({
-    stockActual: {},
-    stockCritico: { porcentajeMinimo: 20, cantidadMinima: 50 },
-    vencimientos: { diasAnticipacion: 30 },
-    lotesVencidos: {},
-  });
+  const [activeReport, setActiveReport] = useState<PreviewReportId>('stock_actual');
+  const [centroAcopioId, setCentroAcopioId] = useState<string>('');
+  const [vacunaId, setVacunaId] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [showKardexModal, setShowKardexModal] = useState(false);
   const [showStockVacunasEESSModal, setShowStockVacunasEESSModal] = useState(false);
-  const [reporteActivo, setReporteActivo] = useState<string | null>(null);
-  const [reporteVisualizando, setReporteVisualizando] = useState<PreviewReportId | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
-  useEffect(() => {
-    obtenerEstadisticas();
-  }, [obtenerEstadisticas]);
+  const baseFilters = useMemo<FiltrosReporteBase>(
+    () => ({
+      centroAcopioId: centroAcopioId || undefined,
+      vacunaId: vacunaId || undefined,
+      incluirInactivos: false,
+    }),
+    [centroAcopioId, vacunaId],
+  );
 
-  const handleGenerarReporte = useCallback(async (tipoReporte: PreviewReportId) => {
-    try {
-      setReporteActivo(tipoReporte);
-      let resultado: unknown[] | null = null;
-
+  const loadActiveReport = useCallback(
+    async (tipoReporte: PreviewReportId, filters: FiltrosReporteBase) => {
       switch (tipoReporte) {
         case 'stock_actual':
-          resultado = await generarStockActual(filtrosReportes.stockActual);
-          break;
+          return generarStockActual(filters);
         case 'stock_critico':
-          resultado = await generarStockCritico(filtrosReportes.stockCritico);
-          break;
+          return generarStockCritico({
+            ...filters,
+            porcentajeMinimo: 20,
+            cantidadMinima: 50,
+          } as FiltrosStockCritico);
         case 'vencimientos':
-          resultado = await generarVencimientos(filtrosReportes.vencimientos);
-          break;
+          return generarVencimientos({
+            ...filters,
+            diasAnticipacion: 30,
+          } as FiltrosVencimientos);
         case 'lotes_vencidos':
-          resultado = await generarLotesVencidos(filtrosReportes.lotesVencidos);
-          break;
+          return generarLotesVencidos(filters);
       }
+    },
+    [generarLotesVencidos, generarStockActual, generarStockCritico, generarVencimientos],
+  );
 
-      if (resultado && Array.isArray(resultado) && resultado.length > 0) {
-        setReporteVisualizando(tipoReporte);
-      } else {
-        setReporteVisualizando(null);
-        toast.warning('Sin datos disponibles', 'No hay registros para los filtros aplicados.', { duration: 3500 });
-      }
-    } catch (error) {
-      console.error('Error al generar reporte:', error);
-    } finally {
-      setReporteActivo(null);
-    }
-  }, [
-    filtrosReportes,
-    generarLotesVencidos,
-    generarStockActual,
-    generarStockCritico,
-    generarVencimientos,
-    toast,
-  ]);
+  useEffect(() => {
+    void loadActiveReport(activeReport, baseFilters);
+  }, [activeReport, baseFilters, loadActiveReport]);
 
-  const handleExportarExcel = useCallback(async (tipoReporte: PreviewReportId) => {
+  const handleExportarExcel = useCallback(async () => {
     try {
+      setIsExporting(true);
       const config: ConfiguracionExportacion = {
         incluirDetalles: true,
         incluirGraficos: false,
@@ -127,347 +119,567 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
         responsableReporte: 'Sistema SIVAC',
         observaciones: `Reporte generado el ${new Date().toLocaleDateString('es-PE')}`,
       };
-      await exportarExcel(tipoReporte, config);
+      await exportarExcel(activeReport, config);
+      toast.success('Excel descargado', 'El archivo se generó correctamente.', { duration: 2500 });
     } catch (error) {
       console.error('Error al exportar reporte:', error);
+    } finally {
+      setIsExporting(false);
     }
-  }, [exportarExcel]);
+  }, [activeReport, exportarExcel, toast]);
 
-  const handleExportarKardex = useCallback(async (filtros: FiltrosKardexDetallado) => {
-    try {
-      const resultado = await generarKardexDetallado(filtros);
+  const handleExportarKardex = useCallback(
+    async (filtros: FiltrosKardexDetallado) => {
+      try {
+        const resultado = await generarKardexDetallado(filtros);
 
-      if (resultado && Array.isArray(resultado) && resultado.length === 0) {
-        toast.warning('Sin datos disponibles', 'No hay datos para el kardex detallado.', { duration: 4000 });
-        return;
+        if (resultado && Array.isArray(resultado) && resultado.length === 0) {
+          toast.warning('Sin datos disponibles', 'No hay movimientos para el kardex detallado.', {
+            duration: 3500,
+          });
+          return;
+        }
+
+        const config: ConfiguracionExportacion = {
+          incluirDetalles: true,
+          incluirGraficos: false,
+          incluirEstadisticas: true,
+          formatoFecha: 'dd/mm/yyyy',
+          responsableReporte: 'Sistema SIVAC',
+          observaciones: `Kardex detallado generado el ${new Date().toLocaleDateString('es-PE')}`,
+        };
+
+        await exportarKardexDetallado(filtros, config);
+        setShowKardexModal(false);
+        toast.success('Exportación lista', `Kardex exportado del ${filtros.fechaInicio} al ${filtros.fechaFin}.`, {
+          duration: 3000,
+        });
+      } catch (error: unknown) {
+        const err = error as { response?: { data?: { error?: string } }; message?: string };
+        toast.error(
+          'Error de exportación',
+          err?.response?.data?.error || err?.message || 'No se pudo exportar el kardex.',
+          { duration: 4000 },
+        );
       }
+    },
+    [exportarKardexDetallado, generarKardexDetallado, toast],
+  );
 
-      const config: ConfiguracionExportacion = {
-        incluirDetalles: true,
-        incluirGraficos: false,
-        incluirEstadisticas: true,
-        formatoFecha: 'dd/mm/yyyy',
-        responsableReporte: 'Sistema SIVAC',
-        observaciones: `Kardex detallado generado el ${new Date().toLocaleDateString('es-PE')}`,
-      };
+  const handleExportarStockVacunasEESS = useCallback(
+    async (filtros: StockVacunasEESSFiltros) => {
+      try {
+        const config: ConfiguracionExportacion = {
+          incluirDetalles: true,
+          incluirGraficos: false,
+          incluirEstadisticas: true,
+          formatoFecha: 'dd/mm/yyyy',
+          responsableReporte: 'Sistema SIVAC',
+          observaciones: 'Stock de vacunas por establecimiento',
+        };
 
-      await exportarKardexDetallado(filtros, config);
-      setShowKardexModal(false);
-      toast.success('Exportación lista', `Kardex exportado del ${filtros.fechaInicio} al ${filtros.fechaFin}.`, { duration: 3000 });
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } }; message?: string };
-      toast.error('Error de exportación', err?.response?.data?.error || err?.message || 'No se pudo exportar el kardex.', { duration: 5000 });
-    }
-  }, [exportarKardexDetallado, generarKardexDetallado, toast]);
+        await exportarStockVacunasEESS(filtros, config);
+        setShowStockVacunasEESSModal(false);
+        toast.success('Exportación lista', 'El reporte de stock por EESS se descargó correctamente.', {
+          duration: 3000,
+        });
+      } catch (error: unknown) {
+        const err = error as { response?: { data?: { error?: string } }; message?: string };
+        toast.error(
+          'Error de exportación',
+          err?.response?.data?.error || err?.message || 'No se pudo exportar el reporte.',
+          { duration: 4000 },
+        );
+        throw error;
+      }
+    },
+    [exportarStockVacunasEESS, toast],
+  );
 
-  const handleExportarStockVacunasEESS = useCallback(async (filtros: StockVacunasEESSFiltros) => {
-    try {
-      const config: ConfiguracionExportacion = {
-        incluirDetalles: true,
-        incluirGraficos: false,
-        incluirEstadisticas: true,
-        formatoFecha: 'dd/mm/yyyy',
-        responsableReporte: 'Sistema SIVAC',
-        observaciones: 'Stock de vacunas por establecimiento',
-      };
+  const hasActiveFilters = Boolean(centroAcopioId || vacunaId || searchQuery.trim());
 
-      await exportarStockVacunasEESS(filtros, config);
-      setShowStockVacunasEESSModal(false);
-      toast.success('Exportación lista', 'El reporte de stock por EESS se descargó correctamente.', { duration: 3000 });
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } }; message?: string };
-      toast.error('Error de exportación', err?.response?.data?.error || err?.message || 'No se pudo exportar el reporte.', { duration: 5000 });
-      throw error;
-    }
-  }, [exportarStockVacunasEESS, toast]);
-
-  const handleFiltroChange = useCallback((campo: string, valor: string | undefined) => {
-    const normalized = campo === 'incluirInactivos' ? valor === 'true' : valor;
-
-    setFiltrosReportes((prev) => ({
-      ...prev,
-      stockActual: { ...prev.stockActual, [campo]: normalized },
-      stockCritico: { ...prev.stockCritico, [campo]: normalized },
-      vencimientos: { ...prev.vencimientos, [campo]: normalized },
-      lotesVencidos: { ...prev.lotesVencidos, [campo]: normalized },
-    }));
+  const handleClearFilters = useCallback(() => {
+    setCentroAcopioId('');
+    setVacunaId('');
+    setSearchQuery('');
   }, []);
 
-  const previewConfig = useMemo(() => {
-    switch (reporteVisualizando) {
-      case 'stock_actual':
+  const activeConfig = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+
+    switch (activeReport) {
+      case 'stock_actual': {
+        const rows = reportes.stockActual.filter(
+          (r) =>
+            !q ||
+            r.vacunaNombre.toLowerCase().includes(q) ||
+            r.vacunaTipo.toLowerCase().includes(q) ||
+            r.presentacion.toLowerCase().includes(q),
+        );
+        const totalDosis = rows.reduce((sum, r) => sum + (r.stockTotal || 0), 0);
         return {
-          title: 'Vista previa: stock actual',
-          subtitle: 'Resumen por vacuna con stock total y lotes disponibles.',
-          rows: reportes.stockActual,
-          emptyTitle: 'Genera el stock actual para revisar resultados',
-          emptyDescription: 'La tabla se llenará cuando ejecutes el análisis con los filtros comunes.',
+          title: 'Stock actual de biológicos',
+          summaryText: `${totalDosis.toLocaleString('es-PE')} dosis disponibles`,
+          rows: rows as PreviewRow[],
+          emptyTitle: 'Sin registros de stock actual',
+          emptyDescription: 'Ajusta el centro de acopio, vacuna o término de búsqueda.',
           columns: [
             {
               key: 'vacuna',
-              label: 'Vacuna',
+              label: 'Biológico / Presentación',
               render: (row: PreviewRow) => {
                 const typedRow = row as ItemStockActual;
                 return (
-                <div>
-                  <p className="font-medium text-zinc-900">{typedRow.vacunaNombre}</p>
-                  <p className="text-xs text-zinc-500">{typedRow.vacunaTipo} · {typedRow.presentacion}</p>
-                </div>
+                  <div>
+                    <p className="font-semibold text-ink">{typedRow.vacunaNombre}</p>
+                    <p className="text-xs text-muted-2">
+                      {typedRow.vacunaTipo} · {typedRow.presentacion}
+                    </p>
+                  </div>
                 );
               },
             },
             {
               key: 'stockTotal',
-              label: 'Stock total',
+              label: 'Stock disponible',
               align: 'right' as const,
-              render: (row: PreviewRow) => <span className="font-semibold text-zinc-900">{(row as ItemStockActual).stockTotal.toLocaleString()}</span>,
+              render: (row: PreviewRow) => (
+                <span className="font-mono font-semibold text-ink tabular-nums">
+                  {(row as ItemStockActual).stockTotal.toLocaleString('es-PE')}
+                </span>
+              ),
             },
             {
               key: 'lotes',
-              label: 'Lotes',
+              label: 'Lotes activos',
               align: 'center' as const,
-              render: (row: PreviewRow) => <span className={COMPONENT_STYLES.badge.count}>{(row as ItemStockActual).totalLotes}</span>,
+              render: (row: PreviewRow) => (
+                <span className={COMPONENT_STYLES.badge.count}>
+                  {(row as ItemStockActual).totalLotes}
+                </span>
+              ),
             },
             {
               key: 'porVencer',
-              label: 'Por vencer',
+              label: 'Por vencer (90d)',
               align: 'center' as const,
               render: (row: PreviewRow) => {
                 const typedRow = row as ItemStockActual;
-                return <span className={typedRow.lotesPorVencer > 0 ? COMPONENT_STYLES.badge.warning : COMPONENT_STYLES.badge.neutral}>{typedRow.lotesPorVencer}</span>;
+                return (
+                  <span
+                    className={`font-mono tabular-nums ${
+                      typedRow.lotesPorVencer > 0 ? COMPONENT_STYLES.badge.warning : COMPONENT_STYLES.badge.neutral
+                    }`}
+                  >
+                    {typedRow.lotesPorVencer}
+                  </span>
+                );
               },
             },
             {
               key: 'actualizacion',
               label: 'Actualización',
-              render: (row: PreviewRow) => <span className="text-sm text-zinc-600">{formatCompactDate((row as ItemStockActual).ultimaActualizacion)}</span>,
+              align: 'right' as const,
+              render: (row: PreviewRow) => (
+                <span className="font-mono text-xs text-muted-2 tabular-nums">
+                  {formatCompactDate((row as ItemStockActual).ultimaActualizacion)}
+                </span>
+              ),
             },
           ] as ReportTableColumn<PreviewRow>[],
         };
-      case 'stock_critico':
+      }
+      case 'stock_critico': {
+        const rows = reportes.stockCritico.filter(
+          (r) =>
+            !q ||
+            r.vacunaNombre.toLowerCase().includes(q) ||
+            r.recomendacionAccion.toLowerCase().includes(q),
+        );
         return {
-          title: 'Vista previa: stock crítico',
-          subtitle: 'Priorización por criticidad y acción recomendada.',
-          rows: reportes.stockCritico,
-          emptyTitle: 'Genera el reporte de stock crítico',
-          emptyDescription: 'Se mostrarán aquí las vacunas que requieren reposición o seguimiento.',
+          title: 'Biológicos con stock crítico',
+          summaryText: 'Bajo umbral mínimo de seguridad',
+          rows: rows as PreviewRow[],
+          emptyTitle: 'Sin vacunas en nivel crítico',
+          emptyDescription: 'Todos los biológicos cumplen con el umbral mínimo configurado.',
           columns: [
             {
               key: 'vacuna',
-              label: 'Vacuna',
+              label: 'Biológico',
               render: (row: PreviewRow) => {
                 const typedRow = row as ItemStockCritico;
                 return (
-                <div>
-                  <p className="font-medium text-zinc-900">{typedRow.vacunaNombre}</p>
-                  <p className="text-xs text-zinc-500">{typedRow.vacunaTipo}</p>
-                </div>
+                  <div>
+                    <p className="font-semibold text-ink">{typedRow.vacunaNombre}</p>
+                    <p className="text-xs text-muted-2">{typedRow.vacunaTipo}</p>
+                  </div>
                 );
               },
             },
             {
               key: 'stockTotal',
-              label: 'Actual',
+              label: 'Saldo actual',
               align: 'right' as const,
-              render: (row: PreviewRow) => <span className="font-semibold text-zinc-900">{(row as ItemStockCritico).stockTotal.toLocaleString()}</span>,
+              render: (row: PreviewRow) => (
+                <span className="font-mono font-semibold text-ink tabular-nums">
+                  {(row as ItemStockCritico).stockTotal.toLocaleString('es-PE')}
+                </span>
+              ),
             },
             {
               key: 'stockMinimo',
-              label: 'Mínimo',
+              label: 'Umbral mínimo',
               align: 'right' as const,
-              render: (row: PreviewRow) => <span className="text-zinc-700">{(row as ItemStockCritico).stockMinimo.toLocaleString()}</span>,
+              render: (row: PreviewRow) => (
+                <span className="font-mono text-muted-2 tabular-nums">
+                  {(row as ItemStockCritico).stockMinimo.toLocaleString('es-PE')}
+                </span>
+              ),
             },
             {
               key: 'criticidad',
-              label: 'Nivel',
+              label: 'Estado',
               align: 'center' as const,
               render: (row: PreviewRow) => {
                 const typedRow = row as ItemStockCritico;
                 return (
-                <span className={typedRow.nivelCriticidad === 'agotado' || typedRow.nivelCriticidad === 'critico' ? COMPONENT_STYLES.badge.danger : COMPONENT_STYLES.badge.warning}>
-                  {typedRow.nivelCriticidad}
-                </span>
+                  <span
+                    className={
+                      typedRow.nivelCriticidad === 'agotado' || typedRow.nivelCriticidad === 'critico'
+                        ? COMPONENT_STYLES.badge.danger
+                        : COMPONENT_STYLES.badge.warning
+                    }
+                  >
+                    {typedRow.nivelCriticidad === 'critico'
+                      ? 'Crítico'
+                      : typedRow.nivelCriticidad === 'agotado'
+                        ? 'Agotado'
+                        : 'Bajo'}
+                  </span>
                 );
               },
             },
             {
               key: 'accion',
               label: 'Acción recomendada',
-              render: (row: PreviewRow) => <span className="text-sm text-zinc-600">{(row as ItemStockCritico).recomendacionAccion}</span>,
+              render: (row: PreviewRow) => (
+                <span className="text-xs text-muted-2">{(row as ItemStockCritico).recomendacionAccion}</span>
+              ),
             },
           ] as ReportTableColumn<PreviewRow>[],
         };
-      case 'vencimientos':
+      }
+      case 'vencimientos': {
+        const rows = reportes.vencimientos.filter(
+          (r) =>
+            !q ||
+            r.numeroLote.toLowerCase().includes(q) ||
+            r.vacunaNombre.toLowerCase().includes(q),
+        );
+        const totalPorVencer = rows.reduce((sum, r) => sum + (r.cantidadActual || 0), 0);
         return {
-          title: 'Vista previa: próximos vencimientos',
-          subtitle: 'Lotes que requieren redistribución o uso prioritario.',
-          rows: reportes.vencimientos,
-          emptyTitle: 'Genera el reporte de vencimientos',
-          emptyDescription: 'Se listarán aquí los lotes próximos a vencer según los filtros aplicados.',
+          title: 'Lotes próximos a vencer (Control FEFO)',
+          summaryText: `${totalPorVencer.toLocaleString('es-PE')} dosis en seguimiento`,
+          rows: rows as PreviewRow[],
+          emptyTitle: 'Sin lotes próximos a vencer',
+          emptyDescription: 'No se encontraron lotes dentro del horizonte de alerta.',
           columns: [
             {
               key: 'lote',
-              label: 'Lote',
+              label: 'N° Lote / Biológico',
               render: (row: PreviewRow) => {
                 const typedRow = row as ItemVencimiento;
                 return (
-                <div>
-                  <p className="font-medium text-zinc-900">{typedRow.numeroLote}</p>
-                  <p className="text-xs text-zinc-500">{typedRow.vacunaNombre}</p>
-                </div>
+                  <div>
+                    <p className="font-mono font-semibold text-ink">{typedRow.numeroLote}</p>
+                    <p className="text-xs text-muted-2">{typedRow.vacunaNombre}</p>
+                  </div>
                 );
               },
             },
             {
               key: 'cantidad',
-              label: 'Cantidad',
+              label: 'Saldo actual',
               align: 'right' as const,
-              render: (row: PreviewRow) => <span className="font-semibold text-zinc-900">{(row as ItemVencimiento).cantidadActual.toLocaleString()}</span>,
-            },
-            {
-              key: 'fecha',
-              label: 'Vence',
-              render: (row: PreviewRow) => <span className="text-sm text-zinc-700">{formatCompactDate((row as ItemVencimiento).fechaVencimiento)}</span>,
-            },
-            {
-              key: 'dias',
-              label: 'Días',
-              align: 'center' as const,
-              render: (row: PreviewRow) => <span className="text-sm text-zinc-700">{(row as ItemVencimiento).diasParaVencer}</span>,
-            },
-            {
-              key: 'urgencia',
-              label: 'Urgencia',
-              align: 'center' as const,
-              render: (row: PreviewRow) => {
-                const typedRow = row as ItemVencimiento;
-                return (
-                <span className={typedRow.nivelUrgencia === 'inmediato' || typedRow.nivelUrgencia === 'urgente' ? COMPONENT_STYLES.badge.danger : COMPONENT_STYLES.badge.warning}>
-                  {typedRow.nivelUrgencia}
+              render: (row: PreviewRow) => (
+                <span className="font-mono font-semibold text-ink tabular-nums">
+                  {(row as ItemVencimiento).cantidadActual.toLocaleString('es-PE')}
                 </span>
-                );
-              },
-            },
-          ] as ReportTableColumn<PreviewRow>[],
-        };
-      case 'lotes_vencidos':
-        return {
-          title: 'Vista previa: lotes vencidos',
-          subtitle: 'Lotes fuera de vigencia para descarte o auditoría.',
-          rows: reportes.lotesVencidos,
-          emptyTitle: 'Genera el reporte de lotes vencidos',
-          emptyDescription: 'El panel mostrará los lotes vencidos con criticidad y pérdida asociada.',
-          columns: [
-            {
-              key: 'lote',
-              label: 'Lote',
-              render: (row: PreviewRow) => {
-                const typedRow = row as ItemLoteVencido;
-                return (
-                <div>
-                  <p className="font-medium text-zinc-900">{typedRow.numeroLote}</p>
-                  <p className="text-xs text-zinc-500">{typedRow.vacunaNombre}</p>
-                </div>
-                );
-              },
-            },
-            {
-              key: 'cantidad',
-              label: 'Cantidad',
-              align: 'right' as const,
-              render: (row: PreviewRow) => <span className="font-semibold text-zinc-900">{(row as ItemLoteVencido).cantidadActual.toLocaleString()}</span>,
+              ),
             },
             {
               key: 'fecha',
               label: 'Vencimiento',
-              render: (row: PreviewRow) => <span className="text-sm text-zinc-700">{formatCompactDate((row as ItemLoteVencido).fechaVencimiento)}</span>,
+              render: (row: PreviewRow) => (
+                <span className="font-mono text-xs text-ink tabular-nums">
+                  {formatCompactDate((row as ItemVencimiento).fechaVencimiento)}
+                </span>
+              ),
             },
             {
               key: 'dias',
-              label: 'Días vencido',
+              label: 'Vigencia restante',
               align: 'center' as const,
-              render: (row: PreviewRow) => <span className="font-medium text-rose-700">{(row as ItemLoteVencido).diasVencido}</span>,
+              render: (row: PreviewRow) => (
+                <span className="font-mono text-xs font-semibold text-ink tabular-nums">
+                  {(row as ItemVencimiento).diasParaVencer} días
+                </span>
+              ),
             },
             {
-              key: 'criticidad',
-              label: 'Criticidad',
+              key: 'urgencia',
+              label: 'Prioridad',
               align: 'center' as const,
-              render: (row: PreviewRow) => <span className={COMPONENT_STYLES.badge.danger}>{(row as ItemLoteVencido).nivelCriticidad}</span>,
+              render: (row: PreviewRow) => {
+                const typedRow = row as ItemVencimiento;
+                return (
+                  <span
+                    className={
+                      typedRow.nivelUrgencia === 'inmediato' || typedRow.nivelUrgencia === 'urgente'
+                        ? COMPONENT_STYLES.badge.danger
+                        : COMPONENT_STYLES.badge.warning
+                    }
+                  >
+                    {typedRow.nivelUrgencia === 'inmediato'
+                      ? 'Inmediata'
+                      : typedRow.nivelUrgencia === 'urgente'
+                        ? 'Urgente'
+                        : 'Atención'}
+                  </span>
+                );
+              },
             },
           ] as ReportTableColumn<PreviewRow>[],
         };
-      default:
-        return null;
+      }
+      case 'lotes_vencidos': {
+        const rows = reportes.lotesVencidos.filter(
+          (r) =>
+            !q ||
+            r.numeroLote.toLowerCase().includes(q) ||
+            r.vacunaNombre.toLowerCase().includes(q),
+        );
+        return {
+          title: 'Lotes fuera de vigencia',
+          summaryText: 'Control para baja sanitaria y auditoría',
+          rows: rows as PreviewRow[],
+          emptyTitle: 'Sin lotes vencidos registrados',
+          emptyDescription: 'No existen lotes fuera de vigencia con saldo activo.',
+          columns: [
+            {
+              key: 'lote',
+              label: 'N° Lote / Biológico',
+              render: (row: PreviewRow) => {
+                const typedRow = row as ItemLoteVencido;
+                return (
+                  <div>
+                    <p className="font-mono font-semibold text-ink">{typedRow.numeroLote}</p>
+                    <p className="text-xs text-muted-2">{typedRow.vacunaNombre}</p>
+                  </div>
+                );
+              },
+            },
+            {
+              key: 'cantidad',
+              label: 'Cantidad',
+              align: 'right' as const,
+              render: (row: PreviewRow) => (
+                <span className="font-mono font-semibold text-ink tabular-nums">
+                  {(row as ItemLoteVencido).cantidadActual.toLocaleString('es-PE')}
+                </span>
+              ),
+            },
+            {
+              key: 'fecha',
+              label: 'Vencimiento',
+              render: (row: PreviewRow) => (
+                <span className="font-mono text-xs text-muted-2 tabular-nums">
+                  {formatCompactDate((row as ItemLoteVencido).fechaVencimiento)}
+                </span>
+              ),
+            },
+            {
+              key: 'dias',
+              label: 'Tiempo vencido',
+              align: 'center' as const,
+              render: (row: PreviewRow) => (
+                <span className="font-mono text-xs font-semibold text-rose-600 dark:text-rose-400 tabular-nums">
+                  {(row as ItemLoteVencido).diasVencido} días
+                </span>
+              ),
+            },
+            {
+              key: 'criticidad',
+              label: 'Estado',
+              align: 'center' as const,
+              render: () => <span className={COMPONENT_STYLES.badge.danger}>Baja pendiente</span>,
+            },
+          ] as ReportTableColumn<PreviewRow>[],
+        };
+      }
     }
   }, [
-    reporteVisualizando,
+    activeReport,
     reportes.lotesVencidos,
     reportes.stockActual,
     reportes.stockCritico,
     reportes.vencimientos,
+    searchQuery,
   ]);
 
-  const commonFacts = [
-    filtrosReportes.stockActual.centroAcopioId ? 'Centro filtrado' : 'Todos los centros',
-    filtrosReportes.stockActual.vacunaId ? 'Vacuna filtrada' : 'Todas las vacunas',
-  ];
-
   return (
-    <ReportSectionCard
-      title="Inventario y stock"
-      subtitle="Stock, criticidad y vencimientos en un flujo más directo."
-      aside={<span className={COMPONENT_STYLES.badge.info}>{formatLastUpdated(estadisticas?.ultimaActualizacion)}</span>}
-      showHeader={false}
-    >
-      <div className="space-y-6">
-        <section className={COMPONENT_STYLES.filter.container}>
-          <div className="hidden">
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Filtros comunes</h3>
+    <ReportSectionCard>
+      <div className="space-y-3.5">
+        {/* Barra simétrica de 12 columnas: Selector de vista + Filtros + Exportación */}
+        <section className={COMPONENT_STYLES.filter.container} aria-label="Controles de inventario">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-12 lg:items-center">
+            {/* Selector de reporte (5 cols) */}
+            <div className="sm:col-span-2 lg:col-span-5 grid grid-cols-4 gap-1 rounded-lg border border-line bg-surface-soft p-1 h-9 items-center">
+              {REPORT_VIEWS.map((view) => {
+                const isSelected = activeReport === view.id;
+                return (
+                  <button
+                    key={view.id}
+                    type="button"
+                    onClick={() => setActiveReport(view.id)}
+                    className={`inline-flex h-7 w-full items-center justify-center rounded-md px-2 text-xs font-medium transition-colors focus-visible:outline-none truncate ${
+                      isSelected
+                        ? 'bg-surface text-ink font-semibold shadow-2xs'
+                        : 'text-muted-2 hover:text-ink'
+                    }`}
+                  >
+                    <span className="hidden sm:inline truncate">{view.label}</span>
+                    <span className="sm:hidden truncate">{view.shortLabel}</span>
+                  </button>
+                );
+              })}
             </div>
-            <span className={COMPONENT_STYLES.badge.neutral}>Contexto operativo</span>
-          </div>
 
-          <div className="grid gap-2 lg:grid-cols-3">
-            <div>
-              <label className={COMPONENT_STYLES.input.label}>Centro de acopio</label>
+            {/* Centro de acopio (2 cols) */}
+            <div className="relative lg:col-span-2">
               <select
-                value={filtrosReportes.stockActual.centroAcopioId || ''}
-                onChange={(event) => handleFiltroChange('centroAcopioId', event.target.value || undefined)}
+                value={centroAcopioId}
+                onChange={(event) => setCentroAcopioId(event.target.value)}
                 className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+                aria-label="Filtrar por centro de acopio"
               >
-                <option value="">Todos los centros</option>
+                <option value="">Centro: Todos</option>
                 {centrosAcopio.map((centro) => (
-                  <option key={centro.id} value={centro.id}>{centro.nombre}</option>
+                  <option key={centro.id} value={centro.id}>
+                    {centro.nombre}
+                  </option>
                 ))}
               </select>
+              <CaretDown
+                className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2"
+                weight="bold"
+              />
             </div>
-            <div>
-              <label className={COMPONENT_STYLES.input.label}>Vacuna</label>
+
+            {/* Vacuna / Biológico (2 cols) */}
+            <div className="relative lg:col-span-2">
               <select
-                value={filtrosReportes.stockActual.vacunaId || ''}
-                onChange={(event) => handleFiltroChange('vacunaId', event.target.value || undefined)}
+                value={vacunaId}
+                onChange={(event) => setVacunaId(event.target.value)}
                 className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+                aria-label="Filtrar por biológico"
               >
-                <option value="">Todas las vacunas</option>
+                <option value="">Vacuna: Todas</option>
                 {vacunas.map((vacuna) => (
-                  <option key={vacuna.id} value={vacuna.id}>{vacuna.nombre}</option>
+                  <option key={vacuna.id} value={vacuna.id}>
+                    {vacuna.nombre}
+                  </option>
                 ))}
               </select>
+              <CaretDown
+                className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2"
+                weight="bold"
+              />
             </div>
-            <div>
-              <label className={COMPONENT_STYLES.input.label}>Estado de catálogo</label>
-              <select
-                value={filtrosReportes.stockActual.incluirInactivos ? 'true' : 'false'}
-                onChange={(event) => handleFiltroChange('incluirInactivos', event.target.value)}
-                className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+
+            {/* Búsqueda rápida + Limpiar + Exportar (3 cols) */}
+            <div className="sm:col-span-2 lg:col-span-3 flex items-center gap-2">
+              <div className="relative flex-1 min-w-0">
+                <MagnifyingGlass className={COMPONENT_STYLES.filter.searchIcon} />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Buscar vacuna o lote..."
+                  className={COMPONENT_STYLES.filter.searchInput}
+                />
+                {searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted hover:text-ink"
+                    aria-label="Limpiar búsqueda"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                ) : null}
+              </div>
+
+              {hasActiveFilters ? (
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line bg-surface-soft text-muted-2 transition-colors hover:border-line-strong hover:bg-surface hover:text-ink"
+                  title="Restablecer filtros"
+                  aria-label="Restablecer filtros"
+                >
+                  <X className="h-4 w-4" weight="bold" />
+                </button>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={handleExportarExcel}
+                disabled={isExporting || activeConfig.rows.length === 0}
+                className={COMPONENT_STYLES.button.primary}
+                title="Exportar vista actual a Excel"
               >
-                <option value="false">Solo activos</option>
-                <option value="true">Incluir inactivos</option>
-              </select>
+                {isExporting ? (
+                  <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+                ) : (
+                  <FileXls className="h-4 w-4" weight="bold" />
+                )}
+                <span>Exportar</span>
+              </button>
             </div>
           </div>
         </section>
+
+        {/* Barra minimalista de matrices especializadas (Kardex y Stock por EESS) */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-line bg-surface-soft/50 px-3.5 py-2.5">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs">
+            <span className="font-semibold text-ink">Matrices especializadas en Excel</span>
+            <span className="hidden sm:inline text-muted" aria-hidden="true">·</span>
+            <span className="text-muted-2">
+              Exportaciones parametrizadas de trazabilidad completa y cobertura por establecimiento
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowKardexModal(true)}
+              className={`${COMPONENT_STYLES.button.secondary} h-8 px-3 text-xs`}
+            >
+              <Archive className="h-3.5 w-3.5 text-brand" weight="bold" />
+              <span>Kardex detallado</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowStockVacunasEESSModal(true)}
+              className={`${COMPONENT_STYLES.button.secondary} h-8 px-3 text-xs`}
+            >
+              <Buildings className="h-3.5 w-3.5 text-brand" weight="bold" />
+              <span>Stock por EESS</span>
+            </button>
+          </div>
+        </div>
 
         {estado.error ? (
           <ReportInlineStatus
@@ -477,174 +689,17 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
           />
         ) : null}
 
-        <section className="space-y-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Análisis rápidos</h3>
-            </div>
-            <span className={COMPONENT_STYLES.badge.count}>
-              {(['stock_actual', 'stock_critico', 'vencimientos', 'lotes_vencidos'] as PreviewReportId[]).filter((id) => {
-                switch (id) {
-                  case 'stock_actual':
-                    return reportes.stockActual.length > 0;
-                  case 'stock_critico':
-                    return reportes.stockCritico.length > 0;
-                  case 'vencimientos':
-                    return reportes.vencimientos.length > 0;
-                  case 'lotes_vencidos':
-                    return reportes.lotesVencidos.length > 0;
-                }
-              }).length} listos
-            </span>
-          </div>
-
-          <div className="grid gap-4 xl:grid-cols-2">
-            <ReporteCard
-              title="Stock actual"
-              description="Stock total, lotes vigentes y última actualización."
-              icon={Package}
-              tone="primary"
-              statusLabel={reportes.stockActual.length > 0 ? `${reportes.stockActual.length} filas` : 'Pendiente'}
-              facts={commonFacts}
-              actions={[
-                {
-                  label: reporteActivo === 'stock_actual' ? 'Consultando' : 'Ver reporte',
-                  icon: Eye,
-                  onClick: () => handleGenerarReporte('stock_actual'),
-                  variant: 'primary',
-                  isLoading: estado.cargando && reporteActivo === 'stock_actual',
-                },
-                {
-                  label: 'Excel',
-                  icon: DownloadSimple,
-                  onClick: () => handleExportarExcel('stock_actual'),
-                  disabled: reportes.stockActual.length === 0,
-                },
-              ]}
-            />
-
-            <ReporteCard
-              title="Stock crítico"
-              description="Vacunas con reposición urgente y prioridad operativa."
-              icon={ShieldWarning}
-              tone="danger"
-              statusLabel={reportes.stockCritico.length > 0 ? `${reportes.stockCritico.length} alertas` : 'Pendiente'}
-              facts={commonFacts}
-              actions={[
-                {
-                  label: reporteActivo === 'stock_critico' ? 'Consultando' : 'Ver reporte',
-                  icon: Eye,
-                  onClick: () => handleGenerarReporte('stock_critico'),
-                  variant: 'primary',
-                  isLoading: estado.cargando && reporteActivo === 'stock_critico',
-                },
-                {
-                  label: 'Excel',
-                  icon: DownloadSimple,
-                  onClick: () => handleExportarExcel('stock_critico'),
-                  disabled: reportes.stockCritico.length === 0,
-                },
-              ]}
-            />
-
-            <ReporteCard
-              title="Por vencer"
-              description="Lotes a redistribuir antes de afectar el abastecimiento."
-              icon={CalendarBlank}
-              tone="warning"
-              statusLabel={reportes.vencimientos.length > 0 ? `${reportes.vencimientos.length} lotes` : 'Pendiente'}
-              facts={commonFacts}
-              actions={[
-                {
-                  label: reporteActivo === 'vencimientos' ? 'Consultando' : 'Ver reporte',
-                  icon: Eye,
-                  onClick: () => handleGenerarReporte('vencimientos'),
-                  variant: 'primary',
-                  isLoading: estado.cargando && reporteActivo === 'vencimientos',
-                },
-                {
-                  label: 'Excel',
-                  icon: DownloadSimple,
-                  onClick: () => handleExportarExcel('vencimientos'),
-                  disabled: reportes.vencimientos.length === 0,
-                },
-              ]}
-            />
-
-            <ReporteCard
-              title="Vencidos"
-              description="Lotes fuera de vigencia para descarte y control."
-              icon={Warning}
-              tone="danger"
-              statusLabel={reportes.lotesVencidos.length > 0 ? `${reportes.lotesVencidos.length} lotes` : 'Pendiente'}
-              facts={commonFacts}
-              actions={[
-                {
-                  label: reporteActivo === 'lotes_vencidos' ? 'Consultando' : 'Ver reporte',
-                  icon: Eye,
-                  onClick: () => handleGenerarReporte('lotes_vencidos'),
-                  variant: 'primary',
-                  isLoading: estado.cargando && reporteActivo === 'lotes_vencidos',
-                },
-                {
-                  label: 'Excel',
-                  icon: DownloadSimple,
-                  onClick: () => handleExportarExcel('lotes_vencidos'),
-                  disabled: reportes.lotesVencidos.length === 0,
-                },
-              ]}
-            />
-          </div>
-        </section>
-
-        <section className="space-y-4">
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Exportaciones especializadas</h3>
-          </div>
-
-          <div className="grid gap-4 xl:grid-cols-2">
-            <ReporteCard
-              title="Kardex"
-              description="Filtro avanzado y exportación directa."
-              icon={Archive}
-              tone="success"
-              statusLabel="Avanzado"
-              facts={[
-                'Vacuna o jeringa',
-                'Trazabilidad',
-              ]}
-              actions={[
-                {
-                  label: 'Configurar',
-                  icon: FileXls,
-                  onClick: () => setShowKardexModal(true),
-                  variant: 'primary',
-                },
-              ]}
-            />
-
-            <ReporteCard
-              title="Stock por EESS"
-              description="Stock por establecimiento con selección de vacunas."
-              icon={FileXls}
-              tone="secondary"
-              statusLabel="Especializado"
-              facts={[
-                'Centro opcional',
-                'Selección múltiple',
-              ]}
-              actions={[
-                {
-                  label: 'Configurar',
-                  icon: FileXls,
-                  onClick: () => setShowStockVacunasEESSModal(true),
-                  variant: 'primary',
-                },
-              ]}
-            />
-          </div>
-        </section>
-
+        {/* Tabla principal de resultados (siempre visible y reactiva) */}
+        <ReportResultsTable
+          title={activeConfig.title}
+          summaryText={activeConfig.summaryText}
+          rows={activeConfig.rows}
+          columns={activeConfig.columns}
+          isLoading={estado.cargando && activeConfig.rows.length === 0}
+          loadingMessage="Consultando registros de inventario..."
+          emptyTitle={activeConfig.emptyTitle}
+          emptyDescription={activeConfig.emptyDescription}
+        />
       </div>
 
       {showKardexModal ? (
@@ -662,21 +717,6 @@ const InventarioTab: React.FC<InventarioTabProps> = ({ centrosAcopio, vacunas })
           onExportar={handleExportarStockVacunasEESS}
           vacunas={vacunas}
           centrosAcopio={centrosAcopio}
-        />
-      ) : null}
-
-      {previewConfig ? (
-        <VisualizarReporteModal
-          isOpen={Boolean(reporteVisualizando)}
-          title={previewConfig.title}
-          subtitle={previewConfig.subtitle}
-          rows={previewConfig.rows}
-          columns={previewConfig.columns}
-          isLoading={estado.cargando && Boolean(reporteActivo)}
-          loadingMessage="Generando vista previa del reporte..."
-          emptyTitle={previewConfig.emptyTitle}
-          emptyDescription={previewConfig.emptyDescription}
-          onClose={() => setReporteVisualizando(null)}
         />
       ) : null}
     </ReportSectionCard>

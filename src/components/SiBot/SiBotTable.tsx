@@ -60,27 +60,27 @@ export const SiBotTable: React.FC<SiBotTableProps> = ({ children }) => {
   };
 
   return (
-    <div className="my-3.5 overflow-hidden rounded-xl border border-line bg-surface">
+    <div className="my-3.5 overflow-hidden rounded-xl bg-surface-soft/50 font-sans">
       <div
         data-export-ignore="true"
-        className="flex items-center justify-between gap-2 border-b border-line bg-surface-soft/70 px-3 py-2"
+        className="flex items-center justify-between gap-2 px-3 py-2"
       >
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-2">
+        <div className="flex items-center gap-1.5 text-[11.5px] font-medium text-muted-2">
           <TableIcon className="h-3.5 w-3.5 text-brand" weight="duotone" />
           <span>Datos estructurados</span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => void handleCopyTable()}
-            className="inline-flex items-center gap-1 whitespace-nowrap shrink-0 rounded-lg border border-line bg-surface px-2.5 py-1 text-[11px] font-medium text-muted-2 transition-colors hover:border-line-strong hover:bg-surface-soft hover:text-ink"
+            className="inline-flex items-center gap-1 whitespace-nowrap shrink-0 rounded-md px-2 py-1 text-[11px] font-medium text-muted-2 transition-colors hover:bg-surface hover:text-ink"
             title="Copiar tabla para hoja de cálculo"
           >
             {copied ? (
               <>
-                <Check className="h-3.5 w-3.5 text-emerald-600" weight="bold" />
-                <span>Copiado</span>
+                <Check className="h-3.5 w-3.5 text-[rgb(var(--color-status-success-text))]" weight="bold" />
+                <span className="text-[rgb(var(--color-status-success-text))]">Copiado</span>
               </>
             ) : (
               <>
@@ -94,22 +94,22 @@ export const SiBotTable: React.FC<SiBotTableProps> = ({ children }) => {
             type="button"
             onClick={() => void handleExcel()}
             disabled={isExporting}
-            className="inline-flex items-center gap-1 whitespace-nowrap shrink-0 rounded-lg border border-line bg-surface px-2.5 py-1 text-[11px] font-semibold text-ink transition-colors hover:border-brand/40 hover:bg-surface-tint/40 hover:text-brand disabled:cursor-not-allowed disabled:opacity-55"
+            className="inline-flex items-center gap-1 whitespace-nowrap shrink-0 rounded-md bg-surface px-2.5 py-1 text-[11px] font-semibold text-ink transition-colors hover:bg-surface-tint hover:text-brand disabled:cursor-not-allowed disabled:opacity-55"
           >
             {isExporting ? (
               <CircleNotch className="h-3.5 w-3.5 animate-spin text-brand" />
             ) : (
-              <FileXls className="h-3.5 w-3.5 text-emerald-600" weight="duotone" />
+              <FileXls className="h-3.5 w-3.5 text-[rgb(var(--color-status-success-text))]" weight="duotone" />
             )}
             <span>Exportar Excel</span>
           </button>
         </div>
       </div>
 
-      <div className="overflow-x-auto bg-surface scrollbar-thin scrollbar-thumb-zinc-200">
+      <div className="overflow-x-auto bg-surface scrollbar-thin">
         <table
           ref={tableRef}
-          className="min-w-full border-collapse text-left text-xs tabular-nums"
+          className="min-w-full border-collapse text-left font-sans text-xs tabular-nums"
         >
           {children}
         </table>

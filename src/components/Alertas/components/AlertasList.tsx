@@ -1,7 +1,24 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
+import {
+  Check,
+  Checks,
+  ArrowCounterClockwise,
+  Trash,
+  Eye,
+  Clock,
+  CheckCircle,
+  X,
+} from '@phosphor-icons/react';
 import { Alerta } from '../../../types';
 import { DataTable, Pagination } from '../../Inventario/components/FilterAndTable';
-import { COMPONENT_STYLES, ITEMS_PER_PAGE, NIVELES_ALERTA, TIPOS_ALERTA } from '../constants';
+import {
+  COMPONENT_STYLES,
+  ITEMS_PER_PAGE,
+  NIVELES_ALERTA,
+  TIPOS_ALERTA,
+  formatExactAlertDate,
+  formatRelativeAlertDate,
+} from '../constants';
 import { AlertaCard } from './AlertaCard';
 import { EmptyState } from './EmptyState';
 
@@ -15,24 +32,12 @@ interface AlertasListProps {
   onMarcarNoLeida: (id: string) => void;
   onEliminar: (id: string) => void;
   onMarcarSeleccionadasLeidas: () => void;
+  onMarcarSeleccionadasNoLeidas?: () => void;
   onEliminarSeleccionadas: () => void;
+  onInspect?: (alerta: Alerta) => void;
+  onEmptyAction?: () => void;
   isLoading?: boolean;
 }
-
-const formatearFecha = (fecha: Date | string) => {
-  const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
-  const ahora = new Date();
-  const diferencia = ahora.getTime() - fechaObj.getTime();
-  const minutos = Math.floor(diferencia / (1000 * 60));
-  const horas = Math.floor(diferencia / (1000 * 60 * 60));
-  const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-
-  if (minutos < 1) return 'Ahora';
-  if (minutos < 60) return `${minutos} min`;
-  if (horas < 24) return `${horas}h`;
-  if (dias < 7) return `${dias}d`;
-  return fechaObj.toLocaleDateString('es-PE');
-};
 
 export const AlertasList: React.FC<AlertasListProps> = memo(({
   alertas,
@@ -44,7 +49,10 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
   onMarcarNoLeida,
   onEliminar,
   onMarcarSeleccionadasLeidas,
+  onMarcarSeleccionadasNoLeidas,
   onEliminarSeleccionadas,
+  onInspect,
+  onEmptyAction,
   isLoading = false,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,49 +69,98 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
     return alertas.slice(start, start + ITEMS_PER_PAGE);
   }, [alertas, currentPage]);
 
+  const selectionSummary = useMemo(() => {
+    const selectedSet = new Set(selectedAlertas);
+    const items = alertas.filter((a) => selectedSet.has(a.id));
+    const unreadCount = items.filter((a) => !a.leida).length;
+    const readCount = items.filter((a) => a.leida).length;
+    return {
+      hasUnread: unreadCount > 0,
+      hasRead: readCount > 0,
+      unreadCount,
+      readCount,
+      count: items.length,
+    };
+  }, [alertas, selectedAlertas]);
+
+  const allFilteredSelected =
+    alertas.length > 0 && alertas.every((a) => selectedAlertas.includes(a.id));
+
   if (!isLoading && alertas.length === 0) {
-    return <EmptyState />;
+    return (
+      <EmptyState
+        title="No hay alertas que coincidan con la vista actual"
+        description="Puedes ajustar los filtros de búsqueda o ejecutar un análisis automático del inventario para verificar lotes por vencer y stock crítico."
+        action={
+          onEmptyAction
+            ? {
+                label: 'Analizar inventario ahora',
+                onClick: onEmptyAction,
+              }
+            : undefined
+        }
+      />
+    );
   }
 
   return (
     <section className="space-y-3">
-      <div className="border-b border-line-soft bg-white pb-3">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h3 className="text-[1.05rem] font-semibold text-ink">Alertas filtradas</h3>
-            <p className="mt-1 text-sm text-muted-3">{alertas.length} resultado(s) listos para revisión.</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <button type="button" onClick={onSelectAll} className={COMPONENT_STYLES.button.ghost}>
-              Seleccionar todo
-            </button>
-            <button type="button" onClick={onDeselectAll} className={COMPONENT_STYLES.button.ghost}>
-              Limpiar selección
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {selectedAlertas.length > 0 ? (
-        <div className="rounded-xl border border-line bg-surface-soft px-3.5 py-3 sm:px-4">
-          <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
-            <span className="text-sm font-medium text-ink">
-              {selectedAlertas.length} alerta{selectedAlertas.length === 1 ? '' : 's'} seleccionada{selectedAlertas.length === 1 ? '' : 's'}
+      {/* Barra contextual de selección múltiple (solo aparece cuando hay selección activa) */}
+      {selectionSummary.count > 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-brand/30 bg-surface-tint px-3.5 py-2">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-semibold text-ink tabular-nums">
+              {selectionSummary.count} alerta{selectionSummary.count === 1 ? '' : 's'} seleccionada{selectionSummary.count === 1 ? '' : 's'}
             </span>
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={onMarcarSeleccionadasLeidas} className={`${COMPONENT_STYLES.button.primary} flex-1 sm:flex-initial justify-center`}>
-                Marcar leídas
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {selectionSummary.hasUnread ? (
+              <button
+                type="button"
+                onClick={onMarcarSeleccionadasLeidas}
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 text-xs font-semibold text-white transition-colors hover:bg-emerald-700 whitespace-nowrap"
+              >
+                <Checks className="h-3.5 w-3.5" weight="bold" />
+                <span>Atender ({selectionSummary.unreadCount})</span>
               </button>
-              <button type="button" onClick={onEliminarSeleccionadas} className={`${COMPONENT_STYLES.button.secondary} flex-1 sm:flex-initial justify-center`}>
-                Eliminar
+            ) : null}
+
+            {selectionSummary.hasRead && onMarcarSeleccionadasNoLeidas ? (
+              <button
+                type="button"
+                onClick={onMarcarSeleccionadasNoLeidas}
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-soft whitespace-nowrap"
+              >
+                <ArrowCounterClockwise className="h-3.5 w-3.5" weight="bold" />
+                <span>Reabrir ({selectionSummary.readCount})</span>
               </button>
-            </div>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={onEliminarSeleccionadas}
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-rose-200 dark:border-rose-800/60 bg-rose-50 dark:bg-rose-950/40 px-3 text-xs font-semibold text-rose-700 dark:text-rose-300 transition-colors hover:bg-rose-100 whitespace-nowrap"
+            >
+              <Trash className="h-3.5 w-3.5" weight="bold" />
+              <span>Eliminar ({selectionSummary.count})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onDeselectAll}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-2 hover:bg-surface hover:text-ink"
+              aria-label="Cancelar selección"
+              title="Cancelar selección"
+            >
+              <X className="h-4 w-4" weight="bold" />
+            </button>
           </div>
         </div>
       ) : null}
 
-      <div className="block md:hidden space-y-3 pt-1">
+      {/* Vista móvil en tarjetas limpias */}
+      <div className="block md:hidden space-y-2.5">
         {alertasPaginadas.map((alerta) => (
           <AlertaCard
             key={alerta.id}
@@ -113,115 +170,198 @@ export const AlertasList: React.FC<AlertasListProps> = memo(({
             onMarcarLeida={onMarcarLeida}
             onMarcarNoLeida={onMarcarNoLeida}
             onEliminar={onEliminar}
+            onInspect={onInspect}
           />
         ))}
       </div>
 
+      {/* Vista desktop en tabla operativa limpia y sin redundancias */}
       <div className="hidden md:block">
-        <DataTable isLoading={isLoading} loadingMessage="Cargando alertas..." skeletonRows={5} skeletonColumns={7}>
-          <table className="min-w-full table-auto border-separate border-spacing-0">
-            <thead className={COMPONENT_STYLES.table.header}>
-              <tr>
-                <th className="w-10 rounded-l-[14px] bg-surface-soft px-3 py-3 text-center">
-                  <input
-                    type="checkbox"
-                    checked={alertas.length > 0 && selectedAlertas.length === alertas.length}
-                    onChange={() => {
-                      if (selectedAlertas.length === alertas.length) {
-                        onDeselectAll();
-                        return;
-                      }
-                      onSelectAll();
-                    }}
-                    className="h-4 w-4 rounded-[5px] border-[#e0e2ea] text-brand focus:ring-brand/20"
-                    aria-label="Seleccionar todas las alertas"
-                  />
-                </th>
-                <th className={COMPONENT_STYLES.table.headerCell}>Alerta</th>
-                <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Tipo</th>
-                <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Nivel</th>
-                <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Fecha</th>
-                <th className={`${COMPONENT_STYLES.table.headerCell} text-center`}>Estado</th>
-                <th className={`${COMPONENT_STYLES.table.headerCell} rounded-r-[14px] text-right`}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="bg-surface">
-              {alertasPaginadas.map((alerta) => {
-                const tipoInfo = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo);
-                const nivelInfo = NIVELES_ALERTA.find((nivel) => nivel.id === alerta.nivel);
-
-                return (
-                  <tr key={alerta.id} className={`${COMPONENT_STYLES.table.row} ${selectedAlertas.includes(alerta.id) ? 'bg-zinc-100/60' : ''}`}>
-                    <td className="w-10 border-b border-line-soft px-3 py-3 text-center align-middle">
+        <DataTable isLoading={isLoading} loadingMessage="Cargando bandeja de alertas..." skeletonRows={6} skeletonColumns={6}>
+          <div className={COMPONENT_STYLES.table.container}>
+            <table className="min-w-full table-auto border-collapse">
+              <thead className={COMPONENT_STYLES.table.header}>
+                <tr>
+                  <th className="w-11 px-3.5 py-3 text-center">
+                    <label className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded hover:bg-surface">
                       <input
                         type="checkbox"
-                        checked={selectedAlertas.includes(alerta.id)}
-                        onChange={() => onToggleSelect(alerta.id)}
-                        className="h-4 w-4 rounded-[5px] border-line text-brand focus:ring-brand/20"
-                        aria-label={`Seleccionar alerta: ${alerta.titulo}`}
+                        checked={allFilteredSelected}
+                        onChange={() => {
+                          if (allFilteredSelected) {
+                            onDeselectAll();
+                            return;
+                          }
+                          onSelectAll();
+                        }}
+                        className="h-4 w-4 cursor-pointer rounded border-line accent-violet-600 focus:ring-brand/20"
+                        aria-label="Seleccionar todas las alertas"
                       />
-                    </td>
-                    <td className={COMPONENT_STYLES.table.cell}>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-ink">{alerta.titulo}</p>
-                          {!alerta.leida ? <span className="h-2 w-2 rounded-full bg-brand" /> : null}
+                    </label>
+                  </th>
+                  <th className={COMPONENT_STYLES.table.headerCell}>Tipo / Severidad</th>
+                  <th className={COMPONENT_STYLES.table.headerCell}>Incidente</th>
+                  <th className={COMPONENT_STYLES.table.headerCell}>Fecha</th>
+                  <th className={COMPONENT_STYLES.table.headerCell}>Estado</th>
+                  <th className={`${COMPONENT_STYLES.table.headerCell} text-right`}>Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line-soft bg-surface">
+                {alertasPaginadas.map((alerta) => {
+                  const tipoInfo = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo) || TIPOS_ALERTA[3];
+                  const nivelInfo = NIVELES_ALERTA.find((nivel) => nivel.id === alerta.nivel) || NIVELES_ALERTA[2];
+                  const NivelIcon = nivelInfo.icon;
+                  const isSelected = selectedAlertas.includes(alerta.id);
+
+                  return (
+                    <tr
+                      key={alerta.id}
+                      className={`${COMPONENT_STYLES.table.row} ${
+                        isSelected
+                          ? 'bg-surface-tint'
+                          : !alerta.leida
+                            ? 'bg-surface'
+                            : 'bg-surface-soft/35'
+                      }`}
+                    >
+                      <td className="w-11 px-3.5 py-3 text-center align-middle">
+                        <label className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded hover:bg-surface-soft">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => onToggleSelect(alerta.id)}
+                            className="h-4 w-4 cursor-pointer rounded border-line accent-violet-600 focus:ring-brand/20"
+                            aria-label={`Seleccionar alerta: ${alerta.titulo}`}
+                          />
+                        </label>
+                      </td>
+
+                      {/* Tipo y Severidad compactos en una sola línea visual */}
+                      <td className="px-4 py-3 align-middle whitespace-nowrap">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${nivelInfo.bgColor}`}>
+                            <NivelIcon className={`h-4 w-4 ${nivelInfo.color}`} weight="fill" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold text-ink">
+                              {tipoInfo.label}
+                            </p>
+                            <p className={`text-[11px] font-medium ${nivelInfo.color}`}>
+                              {nivelInfo.label}
+                            </p>
+                          </div>
                         </div>
-                        <p className="mt-1 text-sm text-muted-3">{alerta.descripcion}</p>
-                      </div>
-                    </td>
-                    <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                      <span className="inline-flex items-center rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink">
-                        {tipoInfo?.label || alerta.tipo}
-                      </span>
-                    </td>
-                    <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                      <span className="inline-flex items-center rounded-md border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink">
-                        {nivelInfo?.label || alerta.nivel}
-                      </span>
-                    </td>
-                    <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                      <span className="text-sm text-zinc-600">{formatearFecha(alerta.fechaCreacion)}</span>
-                    </td>
-                    <td className={`${COMPONENT_STYLES.table.cell} text-center`}>
-                      <span className={alerta.leida ? COMPONENT_STYLES.badge.neutral : COMPONENT_STYLES.badge.count}>
-                        {alerta.leida ? 'Leída' : 'Pendiente'}
-                      </span>
-                    </td>
-                    <td className={`${COMPONENT_STYLES.table.cell} text-right`}>
-                      <div className="flex justify-end gap-2">
-                        {alerta.leida ? (
-                          <button type="button" onClick={() => onMarcarNoLeida(alerta.id)} className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconView}`} aria-label="Marcar no leída">
-                            <span className="text-xs font-semibold">NL</span>
-                          </button>
-                        ) : (
-                          <button type="button" onClick={() => onMarcarLeida(alerta.id)} className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconView}`} aria-label="Marcar leída">
-                            <span className="text-xs font-semibold">L</span>
-                          </button>
-                        )}
-                        <button type="button" onClick={() => onEliminar(alerta.id)} className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconDelete}`} aria-label="Eliminar alerta">
-                          <span className="text-xs font-semibold">X</span>
+                      </td>
+
+                      {/* Incidente y descripción */}
+                      <td className="px-4 py-3 align-middle max-w-md xl:max-w-xl">
+                        <button
+                          type="button"
+                          onClick={() => onInspect?.(alerta)}
+                          className="text-left group focus-visible:outline-none block w-full"
+                        >
+                          <p className={`text-sm group-hover:text-brand transition-colors truncate ${!alerta.leida ? 'font-semibold text-ink' : 'font-medium text-muted-2'}`}>
+                            {alerta.titulo}
+                          </p>
+                          <p className="mt-0.5 text-xs text-muted-2 line-clamp-1">
+                            {alerta.descripcion}
+                          </p>
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+
+                      {/* Fecha sin duplicar líneas */}
+                      <td
+                        className="px-4 py-3 align-middle whitespace-nowrap"
+                        title={formatExactAlertDate(alerta.fechaCreacion)}
+                      >
+                        <span className="font-mono text-xs text-muted-2 tabular-nums">
+                          {formatRelativeAlertDate(alerta.fechaCreacion)}
+                        </span>
+                      </td>
+
+                      {/* Estado semántico con icono + texto */}
+                      <td className="px-4 py-3 align-middle whitespace-nowrap">
+                        {alerta.leida ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                            <CheckCircle className="h-4 w-4 shrink-0" weight="fill" />
+                            <span>Atendida</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                            <Clock className="h-4 w-4 shrink-0" weight="fill" />
+                            <span>Pendiente</span>
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Acciones claras e intuitivas */}
+                      <td className="px-4 py-3 align-middle text-right whitespace-nowrap">
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          {alerta.leida ? (
+                            <button
+                              type="button"
+                              onClick={() => onMarcarNoLeida(alerta.id)}
+                              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 text-xs font-medium text-ink transition-colors hover:border-line-strong hover:bg-surface-soft"
+                              title="Marcar nuevamente como pendiente"
+                            >
+                              <ArrowCounterClockwise className="h-3.5 w-3.5" weight="bold" />
+                              <span>Reabrir</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => onMarcarLeida(alerta.id)}
+                              className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/80 dark:bg-emerald-950/40 px-2.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-950/70"
+                              title="Marcar alerta como atendida"
+                            >
+                              <Check className="h-3.5 w-3.5" weight="bold" />
+                              <span>Atender</span>
+                            </button>
+                          )}
+
+                          {onInspect ? (
+                            <button
+                              type="button"
+                              onClick={() => onInspect(alerta)}
+                              className={COMPONENT_STYLES.button.icon}
+                              aria-label="Ver detalle completo"
+                              title="Ver detalle completo"
+                            >
+                              <Eye className="h-4 w-4" weight="bold" />
+                            </button>
+                          ) : null}
+
+                          <button
+                            type="button"
+                            onClick={() => onEliminar(alerta.id)}
+                            className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconDelete}`}
+                            aria-label="Eliminar alerta"
+                            title="Eliminar alerta"
+                          >
+                            <Trash className="h-4 w-4" weight="bold" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </DataTable>
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        total={alertas.length}
-        limit={ITEMS_PER_PAGE}
-        onPageChange={setCurrentPage}
-      />
+      {totalPages > 1 ? (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          total={alertas.length}
+          limit={ITEMS_PER_PAGE}
+          onPageChange={setCurrentPage}
+        />
+      ) : null}
     </section>
   );
 });
 
 AlertasList.displayName = 'AlertasList';
- 

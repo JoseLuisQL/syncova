@@ -1,8 +1,30 @@
-import React, { memo, useMemo } from 'react';
-import { Bell } from '@phosphor-icons/react';
+import React, { memo, useMemo, useState } from 'react';
+import {
+  Bell,
+  WarningOctagon,
+  Clock,
+  CheckCircle,
+  Check,
+  ArrowCounterClockwise,
+  Eye,
+  Trash,
+  ArrowRight,
+  ShieldWarning,
+  Lightning,
+} from '@phosphor-icons/react';
 import { Alerta } from '../../types';
-import { AlertInlineStatus, AlertSectionCard } from './components';
-import { NIVELES_ALERTA, TIPOS_ALERTA } from './constants';
+import {
+  AlertInlineStatus,
+  AlertMetricItem,
+  AlertMetricsGrid,
+  AlertSectionCard,
+} from './components';
+import {
+  COMPONENT_STYLES,
+  NIVELES_ALERTA,
+  TIPOS_ALERTA,
+  formatRelativeAlertDate,
+} from './constants';
 
 interface DashboardAlertasProps {
   alertas: Alerta[];
@@ -14,195 +36,465 @@ interface DashboardAlertasProps {
     informativas: number;
     exitosas: number;
     hoy: number;
+    porTipo?: {
+      vencimiento: number;
+      stock_bajo: number;
+      discrepancia: number;
+      sistema: number;
+    };
     porNivel: { error: number; warning: number; info: number; success: number };
   };
   isLoading?: boolean;
+  isGenerating?: boolean;
   error?: string | null;
+  onMarcarLeida?: (id: string) => void;
+  onMarcarNoLeida?: (id: string) => void;
+  onEliminar?: (id: string) => void;
+  onInspect?: (alerta: Alerta) => void;
+  onNavigateToFilter?: (filter: { tipo?: string; nivel?: string; estado?: string }) => void;
+  onGenerarAutomaticas?: () => void;
 }
 
-const formatearFecha = (fecha: Date | string) => {
-  const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
-  if (Number.isNaN(fechaObj.getTime())) return 'Fecha inválida';
-
-  const ahora = new Date();
-  const diferencia = ahora.getTime() - fechaObj.getTime();
-  const minutos = Math.floor(diferencia / (1000 * 60));
-  const horas = Math.floor(diferencia / (1000 * 60 * 60));
-  const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-
-  if (minutos < 1) return 'Hace un momento';
-  if (minutos < 60) return `Hace ${minutos} min`;
-  if (horas < 24) return `Hace ${horas}h`;
-  if (dias < 7) return `Hace ${dias}d`;
-  return fechaObj.toLocaleDateString('es-PE');
-};
+type FeedFilterMode = 'pendientes' | 'criticas' | 'recientes';
 
 const DashboardAlertas: React.FC<DashboardAlertasProps> = memo(({
   alertas,
   estadisticas,
   isLoading = false,
+  isGenerating = false,
   error,
+  onMarcarLeida,
+  onMarcarNoLeida,
+  onEliminar,
+  onInspect,
+  onNavigateToFilter,
+  onGenerarAutomaticas,
 }) => {
-  const alertasRecientes = useMemo(() => alertas.slice(0, 6), [alertas]);
+  const [feedMode, setFeedMode] = useState<FeedFilterMode>('pendientes');
+
+  const tasaAtencion = useMemo(() => {
+    if (estadisticas.total === 0) return 100;
+    const atendidas = Math.max(0, estadisticas.total - estadisticas.noLeidas);
+    return Math.round((atendidas / estadisticas.total) * 100);
+  }, [estadisticas.noLeidas, estadisticas.total]);
+
+  const riesgoInventarioCount = useMemo(() => {
+    const venc = estadisticas.porTipo?.vencimiento ?? alertas.filter((a) => a.tipo === 'vencimiento').length;
+    const stock = estadisticas.porTipo?.stock_bajo ?? alertas.filter((a) => a.tipo === 'stock_bajo').length;
+    return venc + stock;
+  }, [alertas, estadisticas.porTipo]);
+
+  const kpiItems = useMemo<AlertMetricItem[]>(
+    () => [
+      {
+        id: 'pendientes',
+        label: 'Pendientes de atención',
+        value: estadisticas.noLeidas,
+        icon: Clock,
+        tone: estadisticas.noLeidas > 0 ? 'warning' : 'neutral',
+        description:
+          estadisticas.noLeidas > 0
+            ? 'Requieren revisión operativa'
+            : 'Bandeja al día sin pendientes',
+        onClick: () => onNavigateToFilter?.({ estado: 'no_leidas' }),
+      },
+      {
+        id: 'criticas',
+        label: 'Incidentes críticos',
+        value: estadisticas.criticas,
+        icon: WarningOctagon,
+        tone: estadisticas.criticas > 0 ? 'danger' : 'neutral',
+        description:
+          estadisticas.criticas > 0
+            ? 'Atención prioritaria inmediata'
+            : 'Sin incidentes críticos activos',
+        onClick: () => onNavigateToFilter?.({ nivel: 'error' }),
+      },
+      {
+        id: 'riesgo_inventario',
+        label: 'Vencimientos y stock bajo',
+        value: riesgoInventarioCount,
+        icon: ShieldWarning,
+        tone: riesgoInventarioCount > 0 ? 'info' : 'neutral',
+        description: 'Alertas vinculadas a lotes y saldos',
+        onClick: () => onNavigateToFilter?.({ tipo: 'vencimiento' }),
+      },
+      {
+        id: 'tasa_atencion',
+        label: 'Tasa de atención',
+        value: `${tasaAtencion}%`,
+        icon: CheckCircle,
+        tone: tasaAtencion >= 80 ? 'success' : 'secondary',
+        description: `${estadisticas.hoy} registrada${estadisticas.hoy === 1 ? '' : 's'} hoy · ${estadisticas.total} en total`,
+        onClick: () => onNavigateToFilter?.({ estado: 'leidas' }),
+      },
+    ],
+    [
+      estadisticas.criticas,
+      estadisticas.hoy,
+      estadisticas.noLeidas,
+      estadisticas.total,
+      onNavigateToFilter,
+      riesgoInventarioCount,
+      tasaAtencion,
+    ],
+  );
+
+  const alertasFeed = useMemo(() => {
+    let list = [...alertas];
+    if (feedMode === 'pendientes') {
+      list = list.filter((a) => !a.leida);
+    } else if (feedMode === 'criticas') {
+      list = list.filter((a) => a.nivel === 'error' || a.nivel === 'warning');
+    }
+    return list.slice(0, 7);
+  }, [alertas, feedMode]);
 
   const distribucionNivel = useMemo(
-    () => NIVELES_ALERTA.map((nivel) => ({
-      ...nivel,
-      cantidad: estadisticas.porNivel[nivel.id as keyof typeof estadisticas.porNivel] || 0,
-    })),
+    () =>
+      NIVELES_ALERTA.map((nivel) => {
+        const cantidad = estadisticas.porNivel[nivel.id as keyof typeof estadisticas.porNivel] || 0;
+        const porcentaje = estadisticas.total > 0 ? Math.round((cantidad / estadisticas.total) * 100) : 0;
+        return {
+          ...nivel,
+          cantidad,
+          porcentaje,
+        };
+      }),
     [estadisticas],
   );
 
   const distribucionTipo = useMemo(
-    () => TIPOS_ALERTA.map((tipo) => ({
-      ...tipo,
-      cantidad: alertas.filter((alerta) => alerta.tipo === tipo.id).length,
-    })),
-    [alertas],
+    () =>
+      TIPOS_ALERTA.map((tipo) => {
+        const cantidad =
+          estadisticas.porTipo?.[tipo.id as keyof NonNullable<typeof estadisticas.porTipo>] ??
+          alertas.filter((alerta) => alerta.tipo === tipo.id).length;
+        const porcentaje = estadisticas.total > 0 ? Math.round((cantidad / estadisticas.total) * 100) : 0;
+        return {
+          ...tipo,
+          cantidad,
+          porcentaje,
+        };
+      }),
+    [alertas, estadisticas],
   );
 
   if (error) {
     return (
       <AlertSectionCard>
-        <AlertInlineStatus tone="danger" title="No se pudo cargar el dashboard" description={error} />
+        <AlertInlineStatus
+          tone="danger"
+          title="No se pudo sincronizar el resumen de alertas"
+          description={error}
+        />
       </AlertSectionCard>
     );
   }
 
   return (
     <AlertSectionCard>
-      <div className="space-y-4">
-        <section className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-sm font-medium text-zinc-700">
-            Total {estadisticas.total}
-          </span>
-          <span className={`${estadisticas.noLeidas > 0 ? 'bg-zinc-100 text-zinc-900' : 'bg-zinc-100 text-zinc-700'} inline-flex items-center rounded-full px-3 py-1 text-sm font-medium`}>
-            Sin leer {estadisticas.noLeidas}
-          </span>
-          <span className={`${estadisticas.criticas > 0 ? 'bg-rose-50 text-rose-700' : 'bg-zinc-100 text-zinc-700'} inline-flex items-center rounded-full px-3 py-1 text-sm font-medium`}>
-            Críticas {estadisticas.criticas}
-          </span>
-          <span className="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-sm font-medium text-zinc-700">
-            Hoy {estadisticas.hoy}
-          </span>
-        </section>
+      <div className="space-y-5">
+        {/* Fila superior de 4 KPIs ejecutivos */}
+        <AlertMetricsGrid items={kpiItems} />
 
-        <div className="grid gap-4 xl:grid-cols-[1.18fr_0.82fr]">
-          <section className="rounded-[22px] border border-zinc-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-3">
+        {/* Espacio de trabajo dividido: Triaje Prioritario + Diagnóstico */}
+        <div className="grid gap-5 xl:grid-cols-[1.35fr_0.65fr] items-start">
+          {/* Columna izquierda: Bandeja de Triaje Prioritario */}
+          <section className="rounded-xl border border-line bg-surface p-4 sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-line-soft pb-3.5">
               <div>
-                <h3 className="text-base font-semibold text-zinc-950">Alertas recientes</h3>
-                <p className="mt-1 text-sm text-zinc-500">Últimos eventos relevantes del sistema.</p>
+                <h2 className="text-base font-semibold text-ink">Bandeja de triaje prioritario</h2>
+                <p className="mt-0.5 text-xs text-muted-2">
+                  Atiende o inspecciona las alertas directamente desde el panel de monitoreo.
+                </p>
               </div>
-              <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700">
-                {alertasRecientes.length} visibles
-              </span>
+
+              <div className="flex items-center gap-1 rounded-lg border border-line bg-surface-soft p-1 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setFeedMode('pendientes')}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap ${
+                    feedMode === 'pendientes'
+                      ? 'bg-surface text-ink font-semibold shadow-2xs'
+                      : 'text-muted-2 hover:text-ink'
+                  }`}
+                >
+                  Pendientes ({estadisticas.noLeidas})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFeedMode('criticas')}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap ${
+                    feedMode === 'criticas'
+                      ? 'bg-surface text-rose-600 dark:text-rose-400 font-semibold shadow-2xs'
+                      : 'text-muted-2 hover:text-ink'
+                  }`}
+                >
+                  Críticas ({estadisticas.criticas})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFeedMode('recientes')}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap ${
+                    feedMode === 'recientes'
+                      ? 'bg-surface text-ink font-semibold shadow-2xs'
+                      : 'text-muted-2 hover:text-ink'
+                  }`}
+                >
+                  Todas
+                </button>
+              </div>
             </div>
 
             {isLoading ? (
-              <div className="flex items-center justify-center py-10">
+              <div className="flex items-center justify-center py-12">
                 <div className="h-5 w-5 rounded-full border-2 border-brand border-t-transparent animate-spin" />
               </div>
-            ) : alertasRecientes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-line bg-surface-soft px-4 py-8 text-center sm:px-6 sm:py-10">
-                <Bell className="h-8 w-8 text-muted" weight="duotone" />
-                <p className="mt-3 text-sm font-semibold text-ink">No hay alertas recientes</p>
-                <p className="mt-1 text-sm text-muted">Cuando se registren eventos aparecerán aquí.</p>
+            ) : alertasFeed.length === 0 ? (
+              <div className="my-4 flex flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface-soft/50 px-4 py-10 text-center">
+                <Bell className="h-7 w-7 text-muted" weight="duotone" />
+                <p className="mt-2.5 text-sm font-semibold text-ink">
+                  {feedMode === 'pendientes'
+                    ? 'No tienes alertas pendientes de revisión'
+                    : feedMode === 'criticas'
+                      ? 'No hay alertas críticas ni advertencias activas'
+                      : 'No hay alertas registradas en el sistema'}
+                </p>
+                <p className="mt-1 max-w-md text-xs text-muted-2">
+                  {feedMode === 'pendientes' && estadisticas.total > 0
+                    ? 'Todas las alertas registradas ya fueron atendidas. Puedes ver el historial completo o analizar el inventario.'
+                    : 'Ejecuta un análisis automático del inventario para detectar lotes próximos a vencer o biológicos con stock bajo.'}
+                </p>
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                  {feedMode !== 'recientes' && estadisticas.total > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => setFeedMode('recientes')}
+                      className={COMPONENT_STYLES.button.secondary}
+                    >
+                      Ver todas las alertas ({estadisticas.total})
+                    </button>
+                  ) : null}
+                  {onGenerarAutomaticas ? (
+                    <button
+                      type="button"
+                      onClick={onGenerarAutomaticas}
+                      disabled={isGenerating}
+                      className={COMPONENT_STYLES.button.primary}
+                    >
+                      <Lightning className="h-4 w-4" weight="fill" />
+                      <span>{isGenerating ? 'Analizando inventario...' : 'Analizar inventario ahora'}</span>
+                    </button>
+                  ) : null}
+                </div>
               </div>
             ) : (
-              <div className="mt-4 space-y-2.5">
-                {alertasRecientes.map((alerta) => {
-                  const nivelInfo = NIVELES_ALERTA.find((nivel) => nivel.id === alerta.nivel);
-                  const tipoInfo = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo);
-                  const Icon = nivelInfo?.icon || Bell;
+              <div className="divide-y divide-line-soft">
+                {alertasFeed.map((alerta) => {
+                  const nivelInfo = NIVELES_ALERTA.find((nivel) => nivel.id === alerta.nivel) || NIVELES_ALERTA[2];
+                  const tipoInfo = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo) || TIPOS_ALERTA[3];
+                  const Icon = nivelInfo.icon;
 
                   return (
                     <article
                       key={alerta.id}
-                      className={`rounded-2xl border px-3.5 py-3 transition ${
-                        alerta.leida
-                          ? 'border-line bg-surface-soft'
-                          : 'border-line bg-surface'
-                      }`}
+                      className="flex flex-col gap-3 py-3.5 transition-colors sm:flex-row sm:items-start sm:justify-between"
                     >
-                      <div className="flex items-start gap-3">
-                        <div className={`mt-0.5 rounded-xl p-2 ${nivelInfo?.bgColor || 'bg-surface-soft'}`}>
-                          <Icon className={`h-4 w-4 ${nivelInfo?.color || 'text-muted'}`} weight="fill" />
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${nivelInfo.bgColor}`}>
+                          <Icon className={`h-4 w-4 ${nivelInfo.color}`} weight="fill" />
                         </div>
+
                         <div className="min-w-0 flex-1">
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-ink">{alerta.titulo}</p>
-                              <p className="mt-1 text-sm leading-6 text-muted-2">{alerta.descripcion}</p>
-                            </div>
-                            <span className="text-xs font-medium text-muted">{formatearFecha(alerta.fechaCreacion)}</span>
+                          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                            <button
+                              type="button"
+                              onClick={() => onInspect?.(alerta)}
+                              className="text-left focus-visible:outline-none group max-w-full"
+                            >
+                              <p className={`text-sm group-hover:text-brand transition-colors truncate ${!alerta.leida ? 'font-semibold text-ink' : 'font-medium text-muted-2'}`}>
+                                {alerta.titulo}
+                              </p>
+                            </button>
                           </div>
 
-                          <div className="mt-3 flex flex-wrap items-center gap-2">
-                            <span className={alerta.leida ? 'inline-flex items-center rounded-full bg-surface-soft border border-line px-2.5 py-1 text-xs font-medium text-muted-2' : 'inline-flex items-center rounded-full bg-surface border border-line px-2.5 py-1 text-xs font-medium text-ink'}>
-                              {alerta.leida ? 'Leída' : 'Pendiente'}
-                            </span>
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${tipoInfo?.bgColor || 'bg-surface-soft'} ${tipoInfo?.color || 'text-muted-2'}`}>
-                              {tipoInfo?.label || alerta.tipo}
+                          <p className="mt-0.5 text-xs sm:text-sm leading-relaxed text-muted-2 line-clamp-2">
+                            {alerta.descripcion}
+                          </p>
+
+                          {/* Línea de metadatos limpia sin píldoras */}
+                          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-2">
+                            <span className={`font-medium ${nivelInfo.color}`}>{nivelInfo.label}</span>
+                            <span aria-hidden="true">·</span>
+                            <span>{tipoInfo.label}</span>
+                            <span aria-hidden="true">·</span>
+                            <span className="font-mono tabular-nums">{formatRelativeAlertDate(alerta.fechaCreacion)}</span>
+                            <span aria-hidden="true">·</span>
+                            <span className={alerta.leida ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-amber-600 dark:text-amber-400 font-medium'}>
+                              {alerta.leida ? 'Atendida' : 'Pendiente'}
                             </span>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Acciones operativas en 1 clic */}
+                      <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+                        {alerta.leida ? (
+                          onMarcarNoLeida ? (
+                            <button
+                              type="button"
+                              onClick={() => onMarcarNoLeida(alerta.id)}
+                              className={COMPONENT_STYLES.button.ghost}
+                              title="Marcar como pendiente"
+                            >
+                              <ArrowCounterClockwise className="h-3.5 w-3.5" weight="bold" />
+                              <span>Reabrir</span>
+                            </button>
+                          ) : null
+                        ) : onMarcarLeida ? (
+                          <button
+                            type="button"
+                            onClick={() => onMarcarLeida(alerta.id)}
+                            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/80 dark:bg-emerald-950/40 px-2.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-950/70"
+                            title="Marcar alerta como atendida"
+                          >
+                            <Check className="h-3.5 w-3.5" weight="bold" />
+                            <span>Atender</span>
+                          </button>
+                        ) : null}
+
+                        {onInspect ? (
+                          <button
+                            type="button"
+                            onClick={() => onInspect(alerta)}
+                            className={COMPONENT_STYLES.button.icon}
+                            aria-label="Inspeccionar alerta"
+                            title="Ver detalle"
+                          >
+                            <Eye className="h-4 w-4" weight="bold" />
+                          </button>
+                        ) : null}
+
+                        {onEliminar ? (
+                          <button
+                            type="button"
+                            onClick={() => onEliminar(alerta.id)}
+                            className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconDelete}`}
+                            aria-label="Eliminar alerta"
+                            title="Eliminar alerta"
+                          >
+                            <Trash className="h-4 w-4" weight="bold" />
+                          </button>
+                        ) : null}
                       </div>
                     </article>
                   );
                 })}
               </div>
             )}
+
+            {alertas.length > 0 && onNavigateToFilter ? (
+              <div className="mt-3 border-t border-line-soft pt-3 flex items-center justify-between">
+                <span className="text-xs text-muted-2 font-mono tabular-nums">
+                  Mostrando {alertasFeed.length} de {alertas.length} alertas
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onNavigateToFilter({})}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand hover:underline"
+                >
+                  <span>Abrir bandeja completa</span>
+                  <ArrowRight className="h-3.5 w-3.5" weight="bold" />
+                </button>
+              </div>
+            ) : null}
           </section>
 
-          <div className="grid gap-5">
-            <section className="rounded-[22px] border border-line bg-surface p-5 shadow-sm">
-              <h3 className="text-base font-semibold text-ink">Distribución</h3>
-              <div className="mt-4 grid gap-4">
+          {/* Columna derecha: Diagnóstico interactivo por Severidad y Categoría */}
+          <div className="space-y-4">
+            <section className="rounded-xl border border-line bg-surface p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted">Por nivel</p>
-                  <div className="space-y-2.5">
-                    {distribucionNivel.map((nivel) => {
-                      const Icon = nivel.icon;
-                      const porcentaje = estadisticas.total > 0 ? (nivel.cantidad / estadisticas.total) * 100 : 0;
-
-                      return (
-                        <div key={nivel.id} className="rounded-xl border border-line bg-surface-soft px-3 py-2.5">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2">
-                              <div className={`rounded-lg p-2 ${nivel.bgColor}`}>
-                                <Icon className={`h-4 w-4 ${nivel.color}`} weight="fill" />
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-ink">{nivel.label}</p>
-                                <p className="text-xs text-muted">{nivel.cantidad}</p>
-                              </div>
-                            </div>
-                            <p className="text-sm font-semibold text-ink">{porcentaje.toFixed(0)}%</p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <h3 className="text-sm font-semibold text-ink">Distribución por severidad</h3>
+                  <p className="mt-0.5 text-xs text-muted-2">Haz clic en un nivel para filtrar la bandeja</p>
                 </div>
+                <span className="font-mono text-xs text-muted-2 tabular-nums">
+                  {estadisticas.total} total
+                </span>
+              </div>
 
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted">Por tipo</p>
-                  <div className="space-y-2.5">
-                    {distribucionTipo.map((tipo) => {
-                      const Icon = tipo.icon;
-                      return (
-                        <div key={tipo.id} className="flex items-center justify-between rounded-xl border border-line bg-surface-soft px-3 py-2.5">
-                          <div className="flex items-center gap-2">
-                            <Icon className={`h-4 w-4 ${tipo.color}`} weight="fill" />
-                            <span className="text-sm font-medium text-ink">{tipo.label}</span>
-                          </div>
-                          <span className="text-sm font-semibold text-muted-2">{tipo.cantidad}</span>
+              <div className="mt-4 space-y-3">
+                {distribucionNivel.map((nivel) => {
+                  const Icon = nivel.icon;
+                  return (
+                    <button
+                      key={nivel.id}
+                      type="button"
+                      onClick={() => onNavigateToFilter?.({ nivel: nivel.id })}
+                      className="w-full text-left group rounded-lg p-2 -mx-2 transition-colors hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20"
+                    >
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-2">
+                          <Icon className={`h-4 w-4 ${nivel.color}`} weight="fill" />
+                          <span className="font-medium text-ink group-hover:text-brand transition-colors">
+                            {nivel.pluralLabel}
+                          </span>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                        <div className="flex items-center gap-2 font-mono tabular-nums">
+                          <span className="font-semibold text-ink">{nivel.cantidad}</span>
+                          <span className="text-muted w-9 text-right">{nivel.porcentaje}%</span>
+                        </div>
+                      </div>
+                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-soft border border-line-soft">
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${nivel.barColor}`}
+                          style={{ width: `${Math.max(nivel.cantidad > 0 ? 4 : 0, nivel.porcentaje)}%` }}
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="rounded-xl border border-line bg-surface p-4 sm:p-5">
+              <div>
+                <h3 className="text-sm font-semibold text-ink">Distribución por categoría</h3>
+                <p className="mt-0.5 text-xs text-muted-2">Origen operativo de las notificaciones</p>
+              </div>
+
+              <div className="mt-4 space-y-3">
+                {distribucionTipo.map((tipo) => {
+                  const Icon = tipo.icon;
+                  return (
+                    <button
+                      key={tipo.id}
+                      type="button"
+                      onClick={() => onNavigateToFilter?.({ tipo: tipo.id })}
+                      className="w-full text-left group rounded-lg p-2 -mx-2 transition-colors hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20"
+                    >
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-2">
+                          <Icon className={`h-4 w-4 ${tipo.color}`} weight="fill" />
+                          <span className="font-medium text-ink group-hover:text-brand transition-colors">
+                            {tipo.pluralLabel}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 font-mono tabular-nums">
+                          <span className="font-semibold text-ink">{tipo.cantidad}</span>
+                          <span className="text-muted w-9 text-right">{tipo.porcentaje}%</span>
+                        </div>
+                      </div>
+                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-soft border border-line-soft">
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${tipo.barColor}`}
+                          style={{ width: `${Math.max(tipo.cantidad > 0 ? 4 : 0, tipo.porcentaje)}%` }}
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </section>
           </div>
@@ -215,4 +507,3 @@ const DashboardAlertas: React.FC<DashboardAlertasProps> = memo(({
 DashboardAlertas.displayName = 'DashboardAlertas';
 
 export default DashboardAlertas;
- 

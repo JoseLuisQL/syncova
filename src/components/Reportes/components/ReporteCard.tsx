@@ -1,6 +1,6 @@
 import React from 'react';
 import { SpinnerGap, Icon } from '@phosphor-icons/react';
-import { ColorScheme, COLORS, COMPONENT_STYLES } from '../constants';
+import { ColorScheme, COMPONENT_STYLES } from '../constants';
 
 interface ReportCardAction {
   label: string;
@@ -17,113 +17,87 @@ interface ReporteCardProps {
   icon: Icon;
   tone?: ColorScheme;
   statusLabel?: string;
-  helperText?: string;
-  facts?: string[];
+  isActive?: boolean;
   actions: ReportCardAction[];
 }
 
-const TONE_CLASSES: Record<ColorScheme, { icon: string; border: string; bg: string; text: string; shadow: string }> = {
+const TONE_CLASSES: Record<ColorScheme, { icon: string; border: string; bg: string }> = {
   primary: {
-    icon: 'text-zinc-700',
-    border: 'border-zinc-200',
-    bg: 'bg-zinc-50',
-    text: 'text-zinc-700',
-    shadow: 'shadow-sm',
+    icon: 'text-brand',
+    border: 'border-brand/25',
+    bg: 'bg-brand/10',
   },
   secondary: {
-    icon: 'text-zinc-700',
-    border: 'border-zinc-200',
-    bg: 'bg-zinc-50',
-    text: 'text-zinc-700',
-    shadow: 'shadow-sm',
+    icon: 'text-muted-2',
+    border: 'border-line',
+    bg: 'bg-surface-soft',
   },
   success: {
-    icon: 'text-emerald-700',
-    border: 'border-emerald-200',
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-700',
-    shadow: 'shadow-sm',
+    icon: 'text-emerald-600 dark:text-emerald-400',
+    border: 'border-emerald-200 dark:border-emerald-800/60',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/40',
   },
   warning: {
-    icon: 'text-amber-700',
-    border: 'border-amber-200',
-    bg: 'bg-amber-50',
-    text: 'text-amber-700',
-    shadow: 'shadow-sm',
+    icon: 'text-amber-600 dark:text-amber-400',
+    border: 'border-amber-200 dark:border-amber-800/60',
+    bg: 'bg-amber-50 dark:bg-amber-950/40',
   },
   danger: {
-    icon: 'text-rose-700',
-    border: 'border-rose-200',
-    bg: 'bg-rose-50',
-    text: 'text-rose-700',
-    shadow: 'shadow-sm',
+    icon: 'text-rose-600 dark:text-rose-400',
+    border: 'border-rose-200 dark:border-rose-800/60',
+    bg: 'bg-rose-50 dark:bg-rose-950/40',
   },
   neutral: {
-    icon: 'text-zinc-700',
-    border: 'border-zinc-200',
-    bg: 'bg-zinc-50',
-    text: 'text-zinc-700',
-    shadow: 'shadow-sm',
+    icon: 'text-muted-2',
+    border: 'border-line',
+    bg: 'bg-surface-soft',
   },
   info: {
-    icon: 'text-zinc-700',
-    border: 'border-zinc-200',
-    bg: 'bg-zinc-50',
-    text: 'text-zinc-700',
-    shadow: 'shadow-sm',
+    icon: 'text-blue-600 dark:text-blue-400',
+    border: 'border-blue-200 dark:border-blue-800/60',
+    bg: 'bg-blue-50 dark:bg-blue-950/40',
   },
 };
 
-const buttonClasses = (variant: 'primary' | 'secondary' | 'ghost', tone: ColorScheme) => {
-  if (variant === 'secondary') return COMPONENT_STYLES.button.secondary;
+const getActionClass = (variant: 'primary' | 'secondary' | 'ghost' = 'secondary') => {
+  if (variant === 'primary') return COMPONENT_STYLES.button.primary;
   if (variant === 'ghost') return COMPONENT_STYLES.button.ghost;
-
-  const accent = COLORS[tone];
-  return `inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r ${accent.gradient} px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:brightness-[0.97] focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60`;
+  return COMPONENT_STYLES.button.secondary;
 };
 
 const ReporteCard: React.FC<ReporteCardProps> = ({
   title,
   description,
-  icon: Icon,
+  icon: IconComponent,
   tone = 'primary',
   statusLabel,
-  helperText,
-  facts = [],
+  isActive = false,
   actions,
 }) => {
   const accent = TONE_CLASSES[tone];
 
   return (
-    <article className={COMPONENT_STYLES.reportCard.container}>
-      <div>
-        <div className="flex items-start justify-between gap-2.5">
-          <div className={`${COMPONENT_STYLES.reportCard.iconWrapper} ${accent.border} ${accent.bg} ${accent.shadow}`}>
-            <Icon className={`h-4 w-4 ${accent.icon}`} aria-hidden="true" />
-          </div>
-          {statusLabel ? (
-            <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700">
-              {statusLabel}
-            </span>
-          ) : null}
+    <article
+      className={`${COMPONENT_STYLES.reportCard.container} ${
+        isActive ? 'border-brand ring-1 ring-brand/20 bg-surface-tint/25' : ''
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <div className={`${COMPONENT_STYLES.reportCard.iconWrapper} ${accent.border} ${accent.bg}`}>
+          <IconComponent className={`h-4 w-4 ${accent.icon}`} weight="bold" aria-hidden="true" />
         </div>
 
-        <div className="mt-3">
-          <h3 className={COMPONENT_STYLES.reportCard.title}>{title}</h3>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-2">
+            <h3 className={COMPONENT_STYLES.reportCard.title}>{title}</h3>
+            {statusLabel ? (
+              <span className="font-mono text-[11px] font-medium text-muted tabular-nums shrink-0">
+                {statusLabel}
+              </span>
+            ) : null}
+          </div>
           <p className={COMPONENT_STYLES.reportCard.description}>{description}</p>
         </div>
-
-        {facts.length > 0 ? (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {facts.map((fact) => (
-              <span key={fact} className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[0.68rem] font-medium text-zinc-600">
-                {fact}
-              </span>
-            ))}
-          </div>
-        ) : null}
-
-        {helperText ? <p className="mt-3 text-[0.72rem] font-medium text-zinc-500">{helperText}</p> : null}
       </div>
 
       <div className={COMPONENT_STYLES.reportCard.actionRow}>
@@ -136,9 +110,9 @@ const ReporteCard: React.FC<ReporteCardProps> = ({
               type="button"
               onClick={action.onClick}
               disabled={action.disabled || action.isLoading}
-              className={`${buttonClasses(action.variant || 'secondary', tone)} ${action.variant === 'ghost' ? 'min-h-[40px]' : 'min-h-[40px] flex-1 sm:flex-none'} px-3 py-1.5 text-[0.82rem]`}
+              className={`${getActionClass(action.variant)} h-8 px-3 text-xs`}
             >
-              <ActionIcon className={`h-4 w-4 ${action.isLoading ? 'animate-spin' : ''}`} />
+              <ActionIcon className={`h-3.5 w-3.5 ${action.isLoading ? 'animate-spin' : ''}`} weight="bold" />
               <span>{action.label}</span>
             </button>
           );
