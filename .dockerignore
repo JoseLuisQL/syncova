@@ -2,12 +2,14 @@ node_modules
 dist
 dist-ssr
 .git
+.aistudio
 .factory
 .agents
 .claude
 .env
 .env.*
 *.log
+*.dump
 frontend-dev.log
 backend-dev.log
 test-results
@@ -16,6 +18,7 @@ docs
 output
 image.png
 ICI DEMID.xlsx
+DISPONIBILIDAD MES DE JULIO 2026.xlsx
 backend/node_modules
 backend/dist
 backend/uploads

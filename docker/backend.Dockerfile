@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN apk add --no-cache openssl
 
-COPY backend/package.json ./
+COPY backend/package.json backend/package-lock.json* ./
 RUN npm install
 
 COPY backend/tsconfig.json ./tsconfig.json
@@ -23,7 +23,7 @@ ENV NODE_ENV=production
 
 RUN apk add --no-cache openssl
 
-COPY --from=build /app/package.json /app/package-lock.json ./
+COPY --from=build /app/package.json /app/package-lock.json* ./
 COPY --from=build /app/node_modules ./node_modules
 RUN npm prune --omit=dev
 
