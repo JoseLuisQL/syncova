@@ -41,21 +41,18 @@ interface UseAlertasResult {
   createAlerta: (data: CreateAlertaDto) => Promise<Alerta | null>;
   updateAlerta: (id: string, data: UpdateAlertaDto) => Promise<Alerta | null>;
   deleteAlerta: (id: string) => Promise<boolean>;
+  deleteMultipleAlertas: (ids: string[]) => Promise<boolean>;
   getAlertaById: (id: string) => Promise<Alerta | null>;
   markAsRead: (id: string) => Promise<Alerta | null>;
   markMultipleAsRead: (ids: string[]) => Promise<boolean>;
+  markMultipleAsUnread: (ids: string[]) => Promise<boolean>;
   cleanupOldAlerts: (days?: number) => Promise<boolean>;
   refreshData: () => Promise<void>;
   reset: () => void;
 }
 
-/**
- * Hook personalizado para gestión de alertas del sistema
- * Proporciona funcionalidades CRUD y operaciones especiales para alertas
- */
 export const useAlertas = (): UseAlertasResult => {
   const initialLoadRef = useRef(false);
-  // Estados locales
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [alertaActual, setAlertaActual] = useState<Alerta | null>(null);
   const [alertasNoLeidas, setAlertasNoLeidas] = useState<Alerta[]>([]);
@@ -64,7 +61,6 @@ export const useAlertas = (): UseAlertasResult => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
-  // APIs para operaciones CRUD
   const listApi = useApi<{
     alertas: Alerta[];
     total: number;
@@ -82,7 +78,6 @@ export const useAlertas = (): UseAlertasResult => {
   const markMultipleApi = useApi<{ count: number }>();
   const cleanupApi = useApi<{ count: number }>();
 
-  // Estados derivados
   const isLoading = listApi.loading;
   const isLoadingStats = statsApi.loading;
   const isLoadingUnread = unreadApi.loading;
@@ -98,259 +93,198 @@ export const useAlertas = (): UseAlertasResult => {
   const deleteError = crudApi.delete.error;
   const markAsReadError = markAsReadApi.error || markMultipleApi.error;
 
-  /**
-   * Cargar alertas con filtros
-   */
   const loadAlertas = useCallback(async (newFilters?: AlertaFilters) => {
-    // Evitar múltiples llamadas simultáneas
-    if (listApi.loading) {
-      logger.debug('🔄 useAlertas.loadAlertas - Ya hay una carga en progreso, saltando...');
-      return;
-    }
-
     const currentFilters = newFilters || filters;
-    
     logger.debug('🔄 useAlertas.loadAlertas - Iniciando carga', { filters: currentFilters });
 
     const result = await listApi.execute(() => AlertasService.getAll(currentFilters));
-    
-    if (result) {
+
+    if (result && Array.isArray(result.alertas)) {
       setAlertas(result.alertas);
       setTotal(result.total);
       setCurrentPage(result.pagination.page);
       setTotalPages(result.pagination.totalPages);
-      
+
       if (newFilters) {
         setFilters(newFilters);
       }
-      
-      logger.debug('✅ useAlertas.loadAlertas - Carga completada', {
-        alertasCount: result.alertas.length,
-        total: result.total,
-        page: result.pagination.page
-      });
     }
-  }, [filters, listApi]);
+  }, [filters, listApi.execute]);
 
-  /**
-   * Cargar estadísticas de alertas
-   */
   const loadStats = useCallback(async () => {
-    logger.debug('🔄 useAlertas.loadStats - Cargando estadísticas');
-    
-    const result = await statsApi.execute(() => AlertasService.getStats());
-    
-    if (result) {
-      logger.debug('✅ useAlertas.loadStats - Estadísticas cargadas', result);
-    }
-  }, [statsApi]);
+    await statsApi.execute(() => AlertasService.getStats());
+  }, [statsApi.execute]);
 
-  /**
-   * Cargar alertas no leídas
-   */
   const loadUnreadAlertas = useCallback(async () => {
-    logger.debug('🔄 useAlertas.loadUnreadAlertas - Cargando alertas no leídas');
-    
     const result = await unreadApi.execute(() => AlertasService.getUnreadForUser());
-    
-    if (result) {
+    if (Array.isArray(result)) {
       setAlertasNoLeidas(result);
-      logger.debug('✅ useAlertas.loadUnreadAlertas - Alertas no leídas cargadas', {
-        count: result.length
-      });
     }
-  }, [unreadApi]);
+  }, [unreadApi.execute]);
 
-  /**
-   * Crear nueva alerta
-   */
   const createAlerta = useCallback(async (data: CreateAlertaDto): Promise<Alerta | null> => {
-    logger.debug('🔄 useAlertas.createAlerta - Creando alerta', { data });
-
     const result = await crudApi.create.execute(() => AlertasService.create(data));
-
     if (result) {
-      // Actualizar la lista local
-      setAlertas(prev => [result, ...prev]);
-      setTotal(prev => prev + 1);
-      
-      logger.debug('✅ useAlertas.createAlerta - Alerta creada exitosamente', { id: result.id });
-      
-      // Recargar datos para mantener sincronización (las 3 cargas son
-      // independientes entre sí: paralelizar).
-      await Promise.all([loadAlertas(), loadStats(), loadUnreadAlertas()]);
+      setAlertas((prev) => [result, ...prev]);
+      setTotal((prev) => prev + 1);
+      await Promise.all([loadStats(), loadUnreadAlertas()]);
     }
-
     return result;
-  }, [crudApi.create, loadAlertas, loadStats, loadUnreadAlertas]);
+  }, [crudApi.create.execute, loadStats, loadUnreadAlertas]);
 
-  /**
-   * Actualizar alerta existente
-   */
   const updateAlerta = useCallback(async (id: string, data: UpdateAlertaDto): Promise<Alerta | null> => {
-    logger.debug('🔄 useAlertas.updateAlerta - Actualizando alerta', { id, data });
+    const now = new Date();
+    setAlertas((prev) =>
+      prev.map((alerta) =>
+        alerta.id === id
+          ? {
+              ...alerta,
+              ...data,
+              updatedAt: now,
+            }
+          : alerta,
+      ),
+    );
 
-    const result = await crudApi.update.execute(() => AlertasService.update(id, data));
-
-    if (result) {
-      // Actualizar la lista local
-      setAlertas(prev => prev.map(alerta => alerta.id === id ? result : alerta));
-      
-      // Actualizar alerta actual si es la misma
-      if (alertaActual?.id === id) {
-        setAlertaActual(result);
+    try {
+      const result = await AlertasService.update(id, data);
+      if (result && result.id) {
+        setAlertas((prev) => prev.map((alerta) => (alerta.id === id ? result : alerta)));
+        if (alertaActual?.id === id) {
+          setAlertaActual(result);
+        }
       }
-      
-      logger.debug('✅ useAlertas.updateAlerta - Alerta actualizada exitosamente', { id });
-      
-      // Recargar estadísticas y alertas no leídas
-      await loadStats();
-      await loadUnreadAlertas();
+      await Promise.all([loadStats(), loadUnreadAlertas()]);
+      return result;
+    } catch (err) {
+      await loadAlertas();
+      throw err;
     }
+  }, [alertaActual, loadAlertas, loadStats, loadUnreadAlertas]);
 
-    return result;
-  }, [crudApi.update, alertaActual, loadStats, loadUnreadAlertas]);
-
-  /**
-   * Eliminar alerta
-   */
   const deleteAlerta = useCallback(async (id: string): Promise<boolean> => {
-    logger.debug('🔄 useAlertas.deleteAlerta - Eliminando alerta', { id });
-
-    const result = await crudApi.delete.execute(() => AlertasService.delete(id));
-
-    if (result !== null) {
-      // Actualizar la lista local
-      setAlertas(prev => prev.filter(alerta => alerta.id !== id));
-      setTotal(prev => Math.max(0, prev - 1));
-      
-      // Limpiar alerta actual si es la misma
-      if (alertaActual?.id === id) {
-        setAlertaActual(null);
-      }
-      
-      logger.debug('✅ useAlertas.deleteAlerta - Alerta eliminada exitosamente', { id });
-      
-      // Recargar datos
-      await loadStats();
-      await loadUnreadAlertas();
-      
-      return true;
+    setAlertas((prev) => prev.filter((alerta) => alerta.id !== id));
+    setTotal((prev) => Math.max(0, prev - 1));
+    if (alertaActual?.id === id) {
+      setAlertaActual(null);
     }
 
-    return false;
-  }, [crudApi.delete, alertaActual, loadStats, loadUnreadAlertas]);
+    try {
+      await AlertasService.delete(id);
+      await Promise.all([loadStats(), loadUnreadAlertas()]);
+      return true;
+    } catch (err) {
+      await loadAlertas();
+      throw err;
+    }
+  }, [alertaActual, loadAlertas, loadStats, loadUnreadAlertas]);
 
-  /**
-   * Obtener alerta por ID
-   */
+  const deleteMultipleAlertas = useCallback(async (ids: string[]): Promise<boolean> => {
+    if (ids.length === 0) return true;
+    const idSet = new Set(ids);
+
+    setAlertas((prev) => prev.filter((alerta) => !idSet.has(alerta.id)));
+    setTotal((prev) => Math.max(0, prev - ids.length));
+    if (alertaActual && idSet.has(alertaActual.id)) {
+      setAlertaActual(null);
+    }
+
+    try {
+      await Promise.all(ids.map((id) => AlertasService.delete(id)));
+      await Promise.all([loadStats(), loadUnreadAlertas()]);
+      return true;
+    } catch (err) {
+      await loadAlertas();
+      throw err;
+    }
+  }, [alertaActual, loadAlertas, loadStats, loadUnreadAlertas]);
+
   const getAlertaById = useCallback(async (id: string): Promise<Alerta | null> => {
-    logger.debug('🔄 useAlertas.getAlertaById - Obteniendo alerta por ID', { id });
-
     const result = await crudApi.getById.execute(() => AlertasService.getById(id));
-
     if (result) {
       setAlertaActual(result);
-      logger.debug('✅ useAlertas.getAlertaById - Alerta obtenida exitosamente', { id });
     }
-
     return result;
-  }, [crudApi.getById]);
+  }, [crudApi.getById.execute]);
 
-  /**
-   * Marcar alerta como leída
-   */
   const markAsRead = useCallback(async (id: string): Promise<Alerta | null> => {
-    logger.debug('🔄 useAlertas.markAsRead - Marcando alerta como leída', { id });
+    const now = new Date();
+    setAlertas((prev) =>
+      prev.map((alerta) => (alerta.id === id ? { ...alerta, leida: true, updatedAt: now } : alerta)),
+    );
 
-    const result = await markAsReadApi.execute(() => AlertasService.markAsRead(id));
-
-    if (result) {
-      // Actualizar la lista local
-      setAlertas(prev => prev.map(alerta => alerta.id === id ? result : alerta));
-      
-      // Actualizar alerta actual si es la misma
-      if (alertaActual?.id === id) {
-        setAlertaActual(result);
+    try {
+      const result = await AlertasService.markAsRead(id);
+      if (result && result.id) {
+        setAlertas((prev) => prev.map((alerta) => (alerta.id === id ? result : alerta)));
+        if (alertaActual?.id === id) {
+          setAlertaActual(result);
+        }
       }
-      
-      logger.debug('✅ useAlertas.markAsRead - Alerta marcada como leída', { id });
-      
-      // Recargar alertas no leídas
-      await loadUnreadAlertas();
-      await loadStats();
-    }
-
-    return result;
-  }, [markAsReadApi, alertaActual, loadUnreadAlertas, loadStats]);
-
-  /**
-   * Marcar múltiples alertas como leídas
-   */
-  const markMultipleAsRead = useCallback(async (ids: string[]): Promise<boolean> => {
-    logger.debug('🔄 useAlertas.markMultipleAsRead - Marcando múltiples alertas como leídas', { ids });
-
-    const result = await markMultipleApi.execute(() => AlertasService.markMultipleAsRead(ids));
-
-    if (result) {
-      logger.debug('✅ useAlertas.markMultipleAsRead - Alertas marcadas como leídas', { 
-        count: result.count,
-        ids 
-      });
-      
-      // Recargar datos (las 3 cargas son independientes: paralelizar)
-      await Promise.all([loadAlertas(), loadUnreadAlertas(), loadStats()]);
-
-      return true;
-    }
-
-    return false;
-  }, [markMultipleApi, loadAlertas, loadUnreadAlertas, loadStats]);
-
-  /**
-   * Limpiar alertas antiguas
-   */
-  const cleanupOldAlerts = useCallback(async (days: number = 30): Promise<boolean> => {
-    logger.debug('🔄 useAlertas.cleanupOldAlerts - Limpiando alertas antiguas', { days });
-
-    const result = await cleanupApi.execute(() => AlertasService.cleanupOldAlerts(days));
-
-    if (result) {
-      logger.debug('✅ useAlertas.cleanupOldAlerts - Alertas antiguas eliminadas', { 
-        count: result.count 
-      });
-      
-      // Recargar datos
+      await Promise.all([loadUnreadAlertas(), loadStats()]);
+      return result;
+    } catch (err) {
       await loadAlertas();
-      await loadStats();
-      
+      throw err;
+    }
+  }, [alertaActual, loadAlertas, loadUnreadAlertas, loadStats]);
+
+  const markMultipleAsRead = useCallback(async (ids: string[]): Promise<boolean> => {
+    if (ids.length === 0) return true;
+    const idSet = new Set(ids);
+    const now = new Date();
+
+    setAlertas((prev) =>
+      prev.map((alerta) => (idSet.has(alerta.id) ? { ...alerta, leida: true, updatedAt: now } : alerta)),
+    );
+
+    try {
+      await AlertasService.markMultipleAsRead(ids);
+      await Promise.all([loadUnreadAlertas(), loadStats()]);
+      return true;
+    } catch (err) {
+      await loadAlertas();
+      throw err;
+    }
+  }, [loadAlertas, loadUnreadAlertas, loadStats]);
+
+  const markMultipleAsUnread = useCallback(async (ids: string[]): Promise<boolean> => {
+    if (ids.length === 0) return true;
+    const idSet = new Set(ids);
+    const now = new Date();
+
+    setAlertas((prev) =>
+      prev.map((alerta) => (idSet.has(alerta.id) ? { ...alerta, leida: false, updatedAt: now } : alerta)),
+    );
+
+    try {
+      await Promise.all(ids.map((id) => AlertasService.update(id, { leida: false })));
+      await Promise.all([loadUnreadAlertas(), loadStats()]);
+      return true;
+    } catch (err) {
+      await loadAlertas();
+      throw err;
+    }
+  }, [loadAlertas, loadUnreadAlertas, loadStats]);
+
+  const cleanupOldAlerts = useCallback(async (days: number = 30): Promise<boolean> => {
+    const result = await cleanupApi.execute(() => AlertasService.cleanupOldAlerts(days));
+    if (result) {
+      await Promise.all([loadAlertas(), loadStats()]);
       return true;
     }
-
     return false;
-  }, [cleanupApi, loadAlertas, loadStats]);
+  }, [cleanupApi.execute, loadAlertas, loadStats]);
 
-  /**
-   * Refrescar todos los datos
-   */
   const refreshData = useCallback(async () => {
-    logger.debug('🔄 useAlertas.refreshData - Refrescando todos los datos');
-    
     await Promise.all([
       loadAlertas(),
       loadStats(),
-      loadUnreadAlertas()
+      loadUnreadAlertas(),
     ]);
-    
-    logger.debug('✅ useAlertas.refreshData - Datos refrescados');
   }, [loadAlertas, loadStats, loadUnreadAlertas]);
 
-  /**
-   * Resetear todos los estados
-   */
   const reset = useCallback(() => {
-    logger.debug('🔄 useAlertas.reset - Reseteando estados');
-    
     setAlertas([]);
     setAlertaActual(null);
     setAlertasNoLeidas([]);
@@ -358,8 +292,7 @@ export const useAlertas = (): UseAlertasResult => {
     setTotal(0);
     setCurrentPage(1);
     setTotalPages(0);
-    
-    // Resetear APIs
+
     listApi.reset();
     crudApi.reset();
     statsApi.reset();
@@ -369,7 +302,6 @@ export const useAlertas = (): UseAlertasResult => {
     cleanupApi.reset();
   }, [listApi, crudApi, statsApi, unreadApi, markAsReadApi, markMultipleApi, cleanupApi]);
 
-  // Cargar datos iniciales
   useEffect(() => {
     if (initialLoadRef.current) return;
     initialLoadRef.current = true;
@@ -379,19 +311,7 @@ export const useAlertas = (): UseAlertasResult => {
     void loadUnreadAlertas();
   }, [loadAlertas, loadStats, loadUnreadAlertas]);
 
-  useEffect(() => {
-    const handleAlertasUpdated = () => {
-      void refreshData();
-    };
-
-    window.addEventListener('alertas:updated', handleAlertasUpdated);
-    return () => {
-      window.removeEventListener('alertas:updated', handleAlertasUpdated);
-    };
-  }, [refreshData]);
-
   return {
-    // Datos
     alertas,
     alertaActual,
     stats: statsApi.data,
@@ -401,7 +321,6 @@ export const useAlertas = (): UseAlertasResult => {
     totalPages,
     filters,
 
-    // Estados de carga
     isLoading,
     isLoadingStats,
     isLoadingUnread,
@@ -410,7 +329,6 @@ export const useAlertas = (): UseAlertasResult => {
     isDeleting,
     isMarkingAsRead,
 
-    // Errores
     error,
     statsError,
     unreadError,
@@ -419,7 +337,6 @@ export const useAlertas = (): UseAlertasResult => {
     deleteError,
     markAsReadError,
 
-    // Acciones
     setFilters,
     loadAlertas,
     loadStats,
@@ -427,11 +344,13 @@ export const useAlertas = (): UseAlertasResult => {
     createAlerta,
     updateAlerta,
     deleteAlerta,
+    deleteMultipleAlertas,
     getAlertaById,
     markAsRead,
     markMultipleAsRead,
+    markMultipleAsUnread,
     cleanupOldAlerts,
     refreshData,
-    reset
+    reset,
   };
 };

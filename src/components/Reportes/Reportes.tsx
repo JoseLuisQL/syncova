@@ -7,6 +7,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { ReportScheduleModal, ReportsShell } from './components';
 import { COMPONENT_STYLES, REPORTS_SECTIONS, ReporteProgramado, SectionId } from './constants';
 import { ConfiguracionTab, InventarioTab, MovimientosTab, PlanificacionTab, CenaresTab } from './components/tabs';
+import { getFechaPeruActual } from './utils';
 
 const INITIAL_PROGRAMADOS: ReporteProgramado[] = [
   {
@@ -36,9 +37,10 @@ const Reportes: React.FC = () => {
   const { canAccessSection } = usePermissions();
   const { vacunas: vacunasReales, centrosAcopio: centrosAcopioReales, loading } = useKardexFiltros();
 
+  const currentYear = new Date().getFullYear();
   const [filtrosFechas, setFiltrosFechas] = useState({
-    fechaInicio: new Date().toISOString().split('T')[0],
-    fechaFin: new Date().toISOString().split('T')[0],
+    fechaInicio: `${currentYear}-01-01`,
+    fechaFin: getFechaPeruActual(),
     centroAcopio: 'todos',
   });
   const [reportesProgramados, setReportesProgramados] = useState<ReporteProgramado[]>(INITIAL_PROGRAMADOS);
@@ -56,7 +58,9 @@ const Reportes: React.FC = () => {
 
   const activeSection = useMemo<SectionId>(() => {
     if (currentSubModule === 'programacion-seguimiento-anual') return 'cenares';
-    const current = accessibleSections.find((section) => section.routeSegment === currentSubModule || section.id === currentSubModule);
+    const current = accessibleSections.find(
+      (section) => section.routeSegment === currentSubModule || section.id === currentSubModule,
+    );
     return current?.id || 'inventario';
   }, [accessibleSections, currentSubModule]);
 
@@ -75,17 +79,18 @@ const Reportes: React.FC = () => {
     setScheduleModalReporte(null);
   }, []);
 
-  const handleSaveScheduledReport = useCallback((reporte: Omit<ReporteProgramado, 'id'>, existingId?: string) => {
-    setReportesProgramados((prev) => {
-      if (existingId) {
-        return prev.map((item) => (item.id === existingId ? { ...item, ...reporte } : item));
-      }
-
-      return [...prev, { ...reporte, id: Date.now().toString() }];
-    });
-
-    closeScheduleModal();
-  }, [closeScheduleModal]);
+  const handleSaveScheduledReport = useCallback(
+    (reporte: Omit<ReporteProgramado, 'id'>, existingId?: string) => {
+      setReportesProgramados((prev) => {
+        if (existingId) {
+          return prev.map((item) => (item.id === existingId ? { ...item, ...reporte } : item));
+        }
+        return [...prev, { ...reporte, id: Date.now().toString() }];
+      });
+      closeScheduleModal();
+    },
+    [closeScheduleModal],
+  );
 
   const handleDeleteScheduledReport = useCallback((id: string) => {
     setReportesProgramados((prev) => prev.filter((item) => item.id !== id));
@@ -93,25 +98,23 @@ const Reportes: React.FC = () => {
 
   const handleToggleScheduledReport = useCallback((id: string) => {
     setReportesProgramados((prev) =>
-      prev.map((item) => (
+      prev.map((item) =>
         item.id === id
           ? { ...item, estado: item.estado === 'activo' ? 'inactivo' : 'activo' }
-          : item
-      )),
+          : item,
+      ),
     );
   }, []);
 
   if (loading) {
     return (
       <main className={COMPONENT_STYLES.pageBackground}>
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="flex flex-col items-center gap-4 rounded-xl border border-zinc-200 bg-white px-4 py-8 shadow-sm sm:px-8 sm:py-10">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-50 text-zinc-600">
-              <SpinnerGap weight="bold" className="h-6 w-6 animate-spin" />
-            </div>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-line bg-surface px-6 py-8">
+            <SpinnerGap weight="bold" className="h-6 w-6 animate-spin text-brand" />
             <div className="text-center">
-              <p className="text-sm font-semibold text-zinc-900">Cargando entorno de reportes</p>
-              <p className="mt-1 text-sm text-zinc-500">Preparando filtros y catálogos operativos.</p>
+              <p className="text-sm font-semibold text-ink">Cargando reportes</p>
+              <p className="mt-0.5 text-xs text-muted-2">Preparando catálogos y filtros operativos...</p>
             </div>
           </div>
         </div>
@@ -121,20 +124,12 @@ const Reportes: React.FC = () => {
 
   return (
     <>
-      <ReportsShell
-        activeSection={activeSection}
-        sections={visibleSections}
-      >
+      <ReportsShell activeSection={activeSection} sections={visibleSections}>
         <Routes>
           <Route path="/" element={<Navigate to="inventario" replace />} />
           <Route
             path="inventario"
-            element={(
-              <InventarioTab
-                centrosAcopio={centrosAcopioReales}
-                vacunas={vacunasReales}
-              />
-            )}
+            element={<InventarioTab centrosAcopio={centrosAcopioReales} vacunas={vacunasReales} />}
           />
           <Route
             path="movimientos"
@@ -148,21 +143,11 @@ const Reportes: React.FC = () => {
           />
           <Route
             path="planificacion"
-            element={(
-              <PlanificacionTab
-                centrosAcopio={centrosAcopioReales}
-                vacunas={vacunasReales}
-              />
-            )}
+            element={<PlanificacionTab centrosAcopio={centrosAcopioReales} vacunas={vacunasReales} />}
           />
           <Route
             path="programacion-seguimiento-anual"
-            element={(
-              <CenaresTab
-                centrosAcopio={centrosAcopioReales}
-                vacunas={vacunasReales}
-              />
-            )}
+            element={<CenaresTab centrosAcopio={centrosAcopioReales} vacunas={vacunasReales} />}
           />
           <Route
             path="configuracion"
@@ -176,7 +161,10 @@ const Reportes: React.FC = () => {
               />
             )}
           />
-          <Route path="*" element={<Navigate to={visibleSections[0]?.routeSegment || 'inventario'} replace />} />
+          <Route
+            path="*"
+            element={<Navigate to={visibleSections[0]?.routeSegment || 'inventario'} replace />}
+          />
         </Routes>
       </ReportsShell>
 

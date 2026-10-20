@@ -9,6 +9,11 @@ interface AppContextType {
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
   toggleMobileMenu: () => void;
+  sibotOpen: boolean;
+  setSibotOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  sibotExpanded: boolean;
+  setSibotExpanded: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleSibot: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -26,31 +31,47 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   });
-  
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sibotOpen, setSibotOpen] = useState(false);
+  const [sibotExpanded, setSibotExpanded] = useState(false);
 
   const toggleMobileMenu = useCallback(() => {
-    setMobileMenuOpen(prev => !prev);
+    setMobileMenuOpen((prev) => !prev);
   }, []);
 
-  // Valor memoizado para que el provider no provoque re-renders en cascada
-  // de todos los consumidores cuando nada relevante cambió.
-  const value = useMemo<AppContextType>(() => ({
-    currentUser,
-    setCurrentUser,
-    sidebarCollapsed,
-    setSidebarCollapsed,
-    mobileMenuOpen,
-    setMobileMenuOpen,
-    toggleMobileMenu,
-  }), [currentUser, sidebarCollapsed, mobileMenuOpen, toggleMobileMenu]);
+  const toggleSibot = useCallback(() => {
+    setSibotOpen((prev) => !prev);
+  }, []);
 
-  return (
-    <AppContext.Provider value={value}>
-      {children}
-    </AppContext.Provider>
+  const value = useMemo<AppContextType>(
+    () => ({
+      currentUser,
+      setCurrentUser,
+      sidebarCollapsed,
+      setSidebarCollapsed,
+      mobileMenuOpen,
+      setMobileMenuOpen,
+      toggleMobileMenu,
+      sibotOpen,
+      setSibotOpen,
+      sibotExpanded,
+      setSibotExpanded,
+      toggleSibot,
+    }),
+    [
+      currentUser,
+      sidebarCollapsed,
+      mobileMenuOpen,
+      toggleMobileMenu,
+      sibotOpen,
+      sibotExpanded,
+      toggleSibot,
+    ],
   );
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
 export const useApp = () => {

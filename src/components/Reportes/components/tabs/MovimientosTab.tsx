@@ -1,15 +1,23 @@
-import React, { useCallback, useState } from 'react';
-import { ArrowsLeftRight, DownloadSimple, Eye, FileXls } from '@phosphor-icons/react';
-import { CentroAcopioOption } from '../../../../types/reportes';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Buildings,
+  CaretDown,
+  FileXls,
+  MagnifyingGlass,
+  SpinnerGap,
+  X,
+} from '@phosphor-icons/react';
+import { CentroAcopioOption, ItemMovimientoMensual } from '../../../../types/reportes';
 import { useReportes } from '../../../../hooks/useReportes';
 import { useToastContext } from '../../../../contexts/ToastContext';
-import { ItemMovimientoMensual } from '../../../../types/reportes';
 import { COMPONENT_STYLES } from '../../constants';
-import ReporteCard from '../ReporteCard';
-import { ReportInlineStatus, ReportSectionCard, ReportTableColumn } from '../ReportPrimitives';
+import {
+  ReportInlineStatus,
+  ReportResultsTable,
+  ReportSectionCard,
+  ReportTableColumn,
+} from '../ReportPrimitives';
 import MovimientosPorEESSModal, { MovimientosPorEESSFiltros } from '../../MovimientosPorEESSModal';
-import VisualizarReporteModal from '../../modals/VisualizarReporteModal';
-import { formatCompactDate } from '../../utils';
 
 interface MovimientosTabProps {
   centrosAcopio: CentroAcopioOption[];
@@ -35,37 +43,27 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
   } = useReportes();
   const { toast } = useToastContext();
 
-  const [reporteActivo, setReporteActivo] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isExportingMensual, setIsExportingMensual] = useState(false);
   const [showMovimientosPorEESSModal, setShowMovimientosPorEESSModal] = useState(false);
-  const [showResultados, setShowResultados] = useState(false);
 
-  const buildFiltros = useCallback(() => ({
-    centroAcopioId: filtrosFechas.centroAcopio !== 'todos' ? filtrosFechas.centroAcopio : undefined,
-    fechaInicio: filtrosFechas.fechaInicio,
-    fechaFin: filtrosFechas.fechaFin,
-    incluirInactivos: false,
-  }), [filtrosFechas]);
+  const buildFiltros = useCallback(
+    () => ({
+      centroAcopioId: filtrosFechas.centroAcopio !== 'todos' ? filtrosFechas.centroAcopio : undefined,
+      fechaInicio: filtrosFechas.fechaInicio,
+      fechaFin: filtrosFechas.fechaFin,
+      incluirInactivos: false,
+    }),
+    [filtrosFechas],
+  );
 
-  const handleGenerarReporte = useCallback(async () => {
-    try {
-      setReporteActivo('movimientos_mensuales');
-      const resultado = await generarMovimientosMensuales(buildFiltros());
-
-      if (resultado && Array.isArray(resultado) && resultado.length > 0) {
-        setShowResultados(true);
-      } else {
-        setShowResultados(false);
-        toast.warning('Sin datos disponibles', 'No hay movimientos para el rango seleccionado.', { duration: 3500 });
-      }
-    } catch (error) {
-      console.error('Error al generar reporte:', error);
-    } finally {
-      setReporteActivo(null);
-    }
-  }, [buildFiltros, generarMovimientosMensuales, toast]);
+  useEffect(() => {
+    void generarMovimientosMensuales(buildFiltros());
+  }, [buildFiltros, generarMovimientosMensuales]);
 
   const handleExportarReporte = useCallback(async () => {
     try {
+      setIsExportingMensual(true);
       const config = {
         incluirDetalles: true,
         incluirGraficos: false,
@@ -76,121 +74,223 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
       };
 
       await exportarMovimientosMensuales(buildFiltros(), config);
+      toast.success('Excel descargado', 'El reporte mensual se exportó correctamente.', { duration: 2500 });
     } catch (error) {
       console.error('Error al exportar reporte:', error);
+    } finally {
+      setIsExportingMensual(false);
     }
-  }, [buildFiltros, exportarMovimientosMensuales]);
+  }, [buildFiltros, exportarMovimientosMensuales, toast]);
 
-  const handleExportarMovimientosPorEESS = useCallback(async (filtros: MovimientosPorEESSFiltros) => {
-    try {
-      const config = {
-        incluirDetalles: true,
-        incluirGraficos: false,
-        incluirEstadisticas: true,
-        formatoFecha: 'dd/mm/yyyy' as const,
-        responsableReporte: 'Sistema SIVAC',
-        observaciones: `Periodo del ${filtros.fechaInicio} al ${filtros.fechaFin}`,
-      };
+  const handleExportarMovimientosPorEESS = useCallback(
+    async (filtros: MovimientosPorEESSFiltros) => {
+      try {
+        const config = {
+          incluirDetalles: true,
+          incluirGraficos: false,
+          incluirEstadisticas: true,
+          formatoFecha: 'dd/mm/yyyy' as const,
+          responsableReporte: 'Sistema SIVAC',
+          observaciones: `Periodo del ${filtros.fechaInicio} al ${filtros.fechaFin}`,
+        };
 
-      await exportarMovimientosPorEESS(filtros, config);
-      toast.success('Exportación lista', 'El reporte por EESS se descargó correctamente.', { duration: 3000 });
-    } catch (error) {
-      console.error('Error al exportar Movimientos por EESS:', error);
-      toast.error('Error al exportar', 'No se pudo generar el archivo solicitado.', { duration: 4000 });
-      throw error;
-    }
-  }, [exportarMovimientosPorEESS, toast]);
+        await exportarMovimientosPorEESS(filtros, config);
+        toast.success('Exportación lista', 'El reporte por EESS se descargó correctamente.', { duration: 3000 });
+      } catch (error) {
+        console.error('Error al exportar Movimientos por EESS:', error);
+        toast.error('Error al exportar', 'No se pudo generar el archivo solicitado.', { duration: 4000 });
+        throw error;
+      }
+    },
+    [exportarMovimientosPorEESS, toast],
+  );
 
-  const columns: ReportTableColumn<ItemMovimientoMensual>[] = [
-    {
-      key: 'establecimiento',
-      label: 'Establecimiento',
-      render: (row) => (
-        <div>
-          <p className="font-medium text-zinc-900">{row.establecimientoNombre}</p>
-          <p className="text-xs text-zinc-500">{row.vacunaNombre}</p>
-        </div>
-      ),
-    },
-    {
-      key: 'periodo',
-      label: 'Periodo',
-      render: (row) => <span className="text-sm text-zinc-600">{`${row.mes}/${row.anio}`}</span>,
-      align: 'center',
-    },
-    {
-      key: 'ingresos',
-      label: 'Ingresos',
-      render: (row) => <span className="text-sm text-zinc-700">{(row.transIngreso || 0).toLocaleString()}</span>,
-      align: 'right',
-    },
-    {
-      key: 'entregas',
-      label: 'Entregas',
-      render: (row) => <span className="text-sm text-zinc-700">{(row.entrega || 0).toLocaleString()}</span>,
-      align: 'right',
-    },
-    {
-      key: 'salidas',
-      label: 'Salidas',
-      render: (row) => <span className="text-sm text-zinc-700">{(row.salida || 0).toLocaleString()}</span>,
-      align: 'right',
-    },
-    {
-      key: 'saldoFinal',
-      label: 'Saldo final',
-      render: (row) => <span className="font-semibold text-zinc-900">{row.saldoFinal.toLocaleString()}</span>,
-      align: 'right',
-    },
-  ];
+  const filteredRows = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return reportes.movimientosMensuales;
+    return reportes.movimientosMensuales.filter(
+      (row) =>
+        row.establecimientoNombre.toLowerCase().includes(q) ||
+        row.vacunaNombre.toLowerCase().includes(q) ||
+        `${row.mes}/${row.anio}`.includes(q),
+    );
+  }, [reportes.movimientosMensuales, searchQuery]);
+
+  const totals = useMemo(() => {
+    const entregas = filteredRows.reduce((sum, r) => sum + (r.entrega || 0), 0);
+    const salidas = filteredRows.reduce((sum, r) => sum + (r.salida || 0), 0);
+    return { entregas, salidas };
+  }, [filteredRows]);
+
+  const columns: ReportTableColumn<ItemMovimientoMensual>[] = useMemo(
+    () => [
+      {
+        key: 'establecimiento',
+        label: 'Establecimiento / Biológico',
+        render: (row) => (
+          <div>
+            <p className="font-semibold text-ink">{row.establecimientoNombre}</p>
+            <p className="text-xs text-muted-2">{row.vacunaNombre}</p>
+          </div>
+        ),
+      },
+      {
+        key: 'periodo',
+        label: 'Período',
+        align: 'center',
+        render: (row) => (
+          <span className="font-mono text-xs text-muted-2 tabular-nums">
+            {`${String(row.mes).padStart(2, '0')}/${row.anio}`}
+          </span>
+        ),
+      },
+      {
+        key: 'saldoAnterior',
+        label: 'Saldo ant.',
+        align: 'right',
+        render: (row) => (
+          <span className="font-mono text-xs text-muted-2 tabular-nums">
+            {(row.saldoAnterior || 0).toLocaleString('es-PE')}
+          </span>
+        ),
+      },
+      {
+        key: 'ingresos',
+        label: 'Ingresos',
+        align: 'right',
+        render: (row) => (
+          <span className="font-mono text-xs text-ink tabular-nums">
+            {(row.transIngreso || 0).toLocaleString('es-PE')}
+          </span>
+        ),
+      },
+      {
+        key: 'entregas',
+        label: 'Entregas',
+        align: 'right',
+        render: (row) => (
+          <span className="font-mono text-xs text-ink tabular-nums">
+            {(row.entrega || 0).toLocaleString('es-PE')}
+          </span>
+        ),
+      },
+      {
+        key: 'salidas',
+        label: 'Salidas',
+        align: 'right',
+        render: (row) => (
+          <span className="font-mono text-xs text-ink tabular-nums">
+            {(row.salida || 0).toLocaleString('es-PE')}
+          </span>
+        ),
+      },
+      {
+        key: 'saldoFinal',
+        label: 'Saldo final',
+        align: 'right',
+        render: (row) => (
+          <span className="font-mono text-xs font-semibold text-ink tabular-nums">
+            {row.saldoFinal.toLocaleString('es-PE')}
+          </span>
+        ),
+      },
+    ],
+    [],
+  );
 
   return (
-    <ReportSectionCard
-      title="Movimientos y distribución"
-      subtitle="Resumen mensual y exportación por EESS en un flujo directo."
-      aside={<span className={COMPONENT_STYLES.badge.info}>{`${formatCompactDate(filtrosFechas.fechaInicio)} a ${formatCompactDate(filtrosFechas.fechaFin)}`}</span>}
-      showHeader={false}
-    >
-      <div className="space-y-6">
-        <section className={COMPONENT_STYLES.filter.container}>
-          <div className="hidden">
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Rango operativo</h3>
-            </div>
-            <span className={COMPONENT_STYLES.badge.neutral}>Filtros sincronizados</span>
-          </div>
-
-          <div className="grid gap-2 lg:grid-cols-3">
-            <div>
-              <label className={COMPONENT_STYLES.input.label}>Fecha inicio</label>
+    <ReportSectionCard>
+      <div className="space-y-3.5">
+        {/* Barra simétrica de 12 columnas: Fechas + Centro + Buscador + Acciones */}
+        <section className={COMPONENT_STYLES.filter.container} aria-label="Filtros de movimientos">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-2">
               <input
                 type="date"
                 value={filtrosFechas.fechaInicio}
                 onChange={(event) => onFiltrosChange({ ...filtrosFechas, fechaInicio: event.target.value })}
-                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
+                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} font-mono tabular-nums`}
+                aria-label="Fecha de inicio"
+                title="Fecha de inicio"
               />
             </div>
-            <div>
-              <label className={COMPONENT_STYLES.input.label}>Fecha fin</label>
+
+            <div className="lg:col-span-2">
               <input
                 type="date"
                 value={filtrosFechas.fechaFin}
                 onChange={(event) => onFiltrosChange({ ...filtrosFechas, fechaFin: event.target.value })}
-                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal}`}
+                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} font-mono tabular-nums`}
+                aria-label="Fecha de fin"
+                title="Fecha de fin"
               />
             </div>
-            <div>
-              <label className={COMPONENT_STYLES.input.label}>Centro de acopio</label>
+
+            <div className="relative lg:col-span-3">
               <select
                 value={filtrosFechas.centroAcopio}
                 onChange={(event) => onFiltrosChange({ ...filtrosFechas, centroAcopio: event.target.value })}
                 className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+                aria-label="Centro de acopio"
               >
-                <option value="todos">Todos</option>
+                <option value="todos">Centro: Todos</option>
                 {centrosAcopio.map((centro) => (
-                  <option key={centro.id} value={centro.id}>{centro.nombre}</option>
+                  <option key={centro.id} value={centro.id}>
+                    {centro.nombre}
+                  </option>
                 ))}
               </select>
+              <CaretDown
+                className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2"
+                weight="bold"
+              />
+            </div>
+
+            <div className="relative lg:col-span-2">
+              <MagnifyingGlass className={COMPONENT_STYLES.filter.searchIcon} />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Buscar EESS o vacuna..."
+                className={COMPONENT_STYLES.filter.searchInput}
+              />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted hover:text-ink"
+                  aria-label="Limpiar búsqueda"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              ) : null}
+            </div>
+
+            <div className="sm:col-span-2 lg:col-span-3 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowMovimientosPorEESSModal(true)}
+                className={`${COMPONENT_STYLES.button.secondary} flex-1 lg:flex-initial`}
+                title="Configurar matriz de movimientos por establecimiento"
+              >
+                <Buildings className="h-4 w-4 text-brand" weight="bold" />
+                <span>Matriz EESS</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleExportarReporte}
+                disabled={isExportingMensual || filteredRows.length === 0}
+                className={`${COMPONENT_STYLES.button.primary} flex-1 lg:flex-initial`}
+              >
+                {isExportingMensual ? (
+                  <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+                ) : (
+                  <FileXls className="h-4 w-4" weight="bold" />
+                )}
+                <span>Exportar</span>
+              </button>
             </div>
           </div>
         </section>
@@ -203,49 +303,25 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
           />
         ) : null}
 
-        <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
-          <ReporteCard
-            title="Movimientos mensuales"
-            description="Ingresos, entregas, salidas y saldo final por EESS."
-            icon={ArrowsLeftRight}
-            tone="success"
-            statusLabel={reportes.movimientosMensuales.length > 0 ? `${reportes.movimientosMensuales.length} filas` : 'Pendiente'}
-            facts={['Rango superior', 'Vista inline']}
-            actions={[
-              {
-                label: reporteActivo === 'movimientos_mensuales' ? 'Consultando' : 'Ver reporte',
-                icon: Eye,
-                onClick: handleGenerarReporte,
-                variant: 'primary',
-                isLoading: estado.cargando && reporteActivo === 'movimientos_mensuales',
-              },
-              {
-                label: 'Excel',
-                icon: DownloadSimple,
-                  onClick: handleExportarReporte,
-                  disabled: reportes.movimientosMensuales.length === 0,
-              },
-            ]}
-          />
-
-            <ReporteCard
-              title="Movimientos por EESS"
-            description="Excel por establecimientos con filtros de rango y centro."
-            icon={FileXls}
-            tone="secondary"
-            statusLabel="Especializado"
-            facts={['Exportación avanzada', 'Salida Excel']}
-            actions={[
-                {
-                label: 'Configurar',
-                  icon: FileXls,
-                  onClick: () => setShowMovimientosPorEESSModal(true),
-                  variant: 'primary',
-              },
-            ]}
-          />
-        </div>
-
+        <ReportResultsTable
+          title="Consolidado de movimientos mensuales"
+          summaryText={`${totals.entregas.toLocaleString('es-PE')} entregas · ${totals.salidas.toLocaleString('es-PE')} salidas`}
+          rows={filteredRows}
+          columns={columns}
+          defaultPageSize={15}
+          isLoading={estado.cargando && reportes.movimientosMensuales.length === 0}
+          loadingMessage="Consultando movimientos del período..."
+          emptyTitle="Sin movimientos registrados en este rango"
+          emptyDescription="Ajusta las fechas de inicio y fin, el centro de acopio o el término de búsqueda."
+          headerActions={
+            estado.cargando && reportes.movimientosMensuales.length > 0 ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-2">
+                <SpinnerGap className="h-3.5 w-3.5 animate-spin text-brand" weight="bold" />
+                <span>Actualizando...</span>
+              </span>
+            ) : null
+          }
+        />
       </div>
 
       {showMovimientosPorEESSModal ? (
@@ -255,19 +331,6 @@ const MovimientosTab: React.FC<MovimientosTabProps> = ({
           centrosAcopio={centrosAcopio}
         />
       ) : null}
-
-      <VisualizarReporteModal
-        isOpen={showResultados}
-        title="Vista previa: movimientos mensuales"
-        subtitle="Resumen generado con el rango y centro seleccionados."
-        rows={reportes.movimientosMensuales}
-        columns={columns}
-        isLoading={estado.cargando && Boolean(reporteActivo)}
-        loadingMessage="Generando resumen de movimientos..."
-        emptyTitle="Genera el reporte mensual para revisar resultados"
-        emptyDescription="Cuando ejecutes el análisis, aquí verás ingresos, entregas, salidas y saldos finales."
-        onClose={() => setShowResultados(false)}
-      />
     </ReportSectionCard>
   );
 };

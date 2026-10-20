@@ -65,6 +65,8 @@ export const usePlanificacionReportes = () => {
     establecimientoId: undefined,
     incluirInactivos: false
   });
+  const filtrosRef = useRef<PlanificacionReportesFilters>(filtros);
+  filtrosRef.current = filtros;
 
   // Referencias para cancelar requests
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -102,11 +104,12 @@ export const usePlanificacionReportes = () => {
       }));
 
       return resultado;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errMessage = error instanceof Error ? error.message : 'Error desconocido';
       setEstado(prev => ({
         ...prev,
         cargando: false,
-        error: error.message || 'Error desconocido',
+        error: errMessage,
         reporteActivo: null
       }));
       return null;
@@ -119,7 +122,7 @@ export const usePlanificacionReportes = () => {
   const generarProgramacionAnual = useCallback(async (
     filtrosCustom?: PlanificacionReportesFilters
   ) => {
-    const filtrosFinales = { ...filtros, ...filtrosCustom };
+    const filtrosFinales = { ...filtrosRef.current, ...filtrosCustom };
     
     const resultado = await ejecutarConCarga(async () => {
       const datos = await PlanificacionReportesService.generarProgramacionAnual(filtrosFinales);
@@ -128,7 +131,7 @@ export const usePlanificacionReportes = () => {
     }, 'programacion_anual');
 
     return resultado;
-  }, [filtros, ejecutarConCarga]);
+  }, [ejecutarConCarga]);
 
   /**
    * Generar reporte de cumplimiento de metas
@@ -136,7 +139,7 @@ export const usePlanificacionReportes = () => {
   const generarCumplimientoMetas = useCallback(async (
     filtrosCustom?: PlanificacionReportesFilters
   ) => {
-    const filtrosFinales = { ...filtros, ...filtrosCustom };
+    const filtrosFinales = { ...filtrosRef.current, ...filtrosCustom };
     
     const resultado = await ejecutarConCarga(async () => {
       const datos = await PlanificacionReportesService.generarCumplimientoMetas(filtrosFinales);
@@ -145,7 +148,7 @@ export const usePlanificacionReportes = () => {
     }, 'cumplimiento_metas');
 
     return resultado;
-  }, [filtros, ejecutarConCarga]);
+  }, [ejecutarConCarga]);
 
   /**
    * Generar reporte de proyección de demanda
@@ -153,7 +156,7 @@ export const usePlanificacionReportes = () => {
   const generarProyeccionDemanda = useCallback(async (
     filtrosCustom?: PlanificacionReportesFilters
   ) => {
-    const filtrosFinales = { ...filtros, ...filtrosCustom };
+    const filtrosFinales = { ...filtrosRef.current, ...filtrosCustom };
     
     const resultado = await ejecutarConCarga(async () => {
       const datos = await PlanificacionReportesService.generarProyeccionDemanda(filtrosFinales);
@@ -162,7 +165,7 @@ export const usePlanificacionReportes = () => {
     }, 'proyeccion_demanda');
 
     return resultado;
-  }, [filtros, ejecutarConCarga]);
+  }, [ejecutarConCarga]);
 
   /**
    * Generar reporte de distribución geográfica
@@ -170,7 +173,7 @@ export const usePlanificacionReportes = () => {
   const generarDistribucionGeografica = useCallback(async (
     filtrosCustom?: PlanificacionReportesFilters
   ) => {
-    const filtrosFinales = { ...filtros, ...filtrosCustom };
+    const filtrosFinales = { ...filtrosRef.current, ...filtrosCustom };
     
     const resultado = await ejecutarConCarga(async () => {
       const datos = await PlanificacionReportesService.generarDistribucionGeografica(filtrosFinales);
@@ -179,7 +182,7 @@ export const usePlanificacionReportes = () => {
     }, 'distribucion_geografica');
 
     return resultado;
-  }, [filtros, ejecutarConCarga]);
+  }, [ejecutarConCarga]);
 
   /**
    * Exportar reporte de programación anual a Excel

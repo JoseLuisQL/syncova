@@ -1,42 +1,38 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { ArrowsClockwise, GearSix, Trash, Lightning } from '@phosphor-icons/react';
+import {
+  ArrowsClockwise,
+  Trash,
+  Lightning,
+  Clock,
+  ShieldWarning,
+  Archive,
+  CheckCircle,
+} from '@phosphor-icons/react';
 import { AlertasService } from '../../services/alertasService';
 import { useAlertasGlobal } from '../../contexts/AlertasContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import { AlertActionDialog, AlertSectionCard } from './components';
-import { COMPONENT_STYLES } from './constants';
+import {
+  COMPONENT_STYLES,
+  ConfiguracionUmbralesAlerta,
+  DEFAULT_ALERTAS_CONFIG,
+  loadAlertasConfig,
+  saveAlertasConfig,
+} from './constants';
 
-interface ConfiguracionLocal {
-  diasAnticipacion: number;
-  stockMinimo: number;
-  diasRetencion: number;
+interface ConfiguracionAlertasProps {
+  totalLeidas?: number;
+  onRefreshModule?: () => Promise<void> | void;
 }
 
-const defaultConfig: ConfiguracionLocal = {
-  diasAnticipacion: 30,
-  stockMinimo: 100,
-  diasRetencion: 30,
-};
-
-const loadConfig = (): ConfiguracionLocal => {
-  try {
-    const saved = localStorage.getItem('alertas_umbrales_v3');
-    if (saved) return { ...defaultConfig, ...JSON.parse(saved) };
-  } catch {
-    // ignore
-  }
-  return defaultConfig;
-};
-
-const saveConfig = (config: ConfiguracionLocal) => {
-  localStorage.setItem('alertas_umbrales_v3', JSON.stringify(config));
-};
-
-const ConfiguracionAlertas: React.FC = memo(() => {
+const ConfiguracionAlertas: React.FC<ConfiguracionAlertasProps> = memo(({
+  totalLeidas = 0,
+  onRefreshModule,
+}) => {
   const { toast } = useToastContext();
-  const { count, refresh } = useAlertasGlobal();
+  const { refresh } = useAlertasGlobal();
 
-  const [config, setConfig] = useState<ConfiguracionLocal>(loadConfig);
+  const [config, setConfig] = useState<ConfiguracionUmbralesAlerta>(loadAlertasConfig);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCleaning, setIsCleaning] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -45,19 +41,20 @@ const ConfiguracionAlertas: React.FC = memo(() => {
     alertasGeneradas?: number;
     alertasVencimiento?: number;
     alertasStockBajo?: number;
+    detalles?: string[];
   } | null>(null);
 
   useEffect(() => {
-    saveConfig(config);
+    saveAlertasConfig(config);
   }, [config]);
 
-  const handleUpdate = useCallback((field: keyof ConfiguracionLocal, value: number) => {
+  const handleUpdate = useCallback((field: keyof ConfiguracionUmbralesAlerta, value: number) => {
     setConfig((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   const handleReset = useCallback(() => {
-    setConfig(defaultConfig);
-    toast.success('Configuración restablecida', 'Los umbrales volvieron a sus valores por defecto.', { duration: 2500 });
+    setConfig(DEFAULT_ALERTAS_CONFIG);
+    toast.success('Parámetros restablecidos', 'Los umbrales volvieron a sus valores recomendados.', { duration: 2500 });
     setShowResetConfirm(false);
   }, [toast]);
 
@@ -70,167 +67,296 @@ const ConfiguracionAlertas: React.FC = memo(() => {
       );
       setLastResult(result);
       if (result.alertasGeneradas > 0) {
-        toast.success('Alertas generadas', `Se generaron ${result.alertasGeneradas} alertas.`, { duration: 3000 });
+        toast.success('Diagnóstico completado', `Se generaron ${result.alertasGeneradas} nuevas alertas.`, { duration: 3000 });
       } else {
-        toast.success('Sin novedades', 'No se encontraron nuevas alertas para generar.', { duration: 2500 });
+        toast.success('Inventario verificado', 'No se detectaron nuevos incidentes fuera de umbral.', { duration: 2500 });
       }
-      await refresh();
+      await Promise.all([refresh(), Promise.resolve(onRefreshModule?.())]);
     } catch (error) {
       console.error(error);
-      toast.error('No se pudo generar', 'Hubo un problema al analizar el inventario.', { duration: 3500 });
+      toast.error('No se pudo ejecutar el análisis', 'Hubo un problema al verificar el inventario.', { duration: 3500 });
     } finally {
       setIsGenerating(false);
     }
-  }, [config.diasAnticipacion, config.stockMinimo, refresh, toast]);
+  }, [config.diasAnticipacion, config.stockMinimo, onRefreshModule, refresh, toast]);
 
   const handleLimpiarAntiguas = useCallback(async () => {
     setIsCleaning(true);
     try {
       const result = await AlertasService.limpiarAntiguas(config.diasRetencion);
-      toast.success('Limpieza completada', `Se eliminaron ${result.eliminadas} alertas antiguas.`, { duration: 3000 });
-      await refresh();
+      toast.success('Depuración completada', `Se eliminaron ${result.eliminadas} alertas atendidas antiguas.`, { duration: 3000 });
+      await Promise.all([refresh(), Promise.resolve(onRefreshModule?.())]);
       setShowCleanConfirm(false);
     } catch (error) {
       console.error(error);
-      toast.error('No se pudo limpiar', 'Hubo un problema al eliminar alertas antiguas.', { duration: 3500 });
+      toast.error('No se pudo depurar', 'Hubo un problema al eliminar alertas antiguas.', { duration: 3500 });
     } finally {
       setIsCleaning(false);
     }
-  }, [config.diasRetencion, refresh, toast]);
+  }, [config.diasRetencion, onRefreshModule, refresh, toast]);
 
   return (
     <AlertSectionCard>
       <div className="space-y-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-zinc-950">Configuración de alertas</h2>
-            <p className="mt-1 text-sm text-zinc-500">Umbrales, generación y limpieza del módulo.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {count > 0 ? <span className="inline-flex items-center rounded-full bg-rose-50 px-3 py-1 text-sm font-medium text-rose-700">{count} sin leer</span> : null}
-            <button type="button" onClick={() => setShowResetConfirm(true)} className={COMPONENT_STYLES.button.secondary}>
-              <ArrowsClockwise className="h-4 w-4" weight="bold" />
-              Restablecer
+        {/* Sección 1: Reglas y umbrales de detección */}
+        <section className="rounded-xl border border-line bg-surface p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-line-soft pb-3.5">
+            <div>
+              <h2 className="text-base font-semibold text-ink">Umbrales de detección automática</h2>
+              <p className="mt-0.5 text-xs text-muted-2">
+                Los cambios se guardan automáticamente y se aplican al analizar lotes y saldos de inventario.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowResetConfirm(true)}
+              className={COMPONENT_STYLES.button.secondary}
+            >
+              <ArrowsClockwise className="h-3.5 w-3.5" weight="bold" />
+              <span>Restablecer valores</span>
             </button>
           </div>
-        </div>
 
-        <section className="rounded-[22px] border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-2">
-            <GearSix className="h-4 w-4 text-zinc-900" weight="fill" />
-            <h3 className="text-base font-semibold text-zinc-950">Umbrales activos</h3>
-          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            {/* Umbral 1: Vencimientos */}
+            <div className="rounded-xl border border-line bg-surface-soft/50 p-4 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-ink">
+                    <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" weight="fill" />
+                    <span>Anticipación de vencimiento</span>
+                  </div>
+                  <span className="font-mono text-sm font-semibold text-ink tabular-nums">
+                    {config.diasAnticipacion} días
+                  </span>
+                </div>
+                <p className="mt-1.5 text-xs text-muted-2">
+                  Emite alerta cuando un lote de vacuna o jeringa vence dentro de este plazo.
+                </p>
+              </div>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            <div className="rounded-3xl border border-zinc-200 bg-zinc-50/70 p-4">
-              <label className="block text-sm font-medium text-zinc-700">Días de anticipación</label>
-              <input
-                type="number"
-                min="7"
-                max="90"
-                value={config.diasAnticipacion}
-                onChange={(event) => handleUpdate('diasAnticipacion', parseInt(event.target.value, 10) || defaultConfig.diasAnticipacion)}
-                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} mt-3`}
-              />
-              <p className="mt-2 text-xs text-zinc-500">Controla cuándo se dispara una alerta de vencimiento.</p>
+              <div className="mt-4 space-y-2.5">
+                <input
+                  type="number"
+                  min="7"
+                  max="180"
+                  value={config.diasAnticipacion}
+                  onChange={(e) =>
+                    handleUpdate('diasAnticipacion', Math.max(1, parseInt(e.target.value, 10) || DEFAULT_ALERTAS_CONFIG.diasAnticipacion))
+                  }
+                  className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} font-mono tabular-nums`}
+                  aria-label="Días de anticipación de vencimiento"
+                />
+                <div className="flex items-center gap-1.5">
+                  {[15, 30, 60, 90].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => handleUpdate('diasAnticipacion', val)}
+                      className={`flex-1 rounded-md border py-1 font-mono text-xs tabular-nums transition-colors ${
+                        config.diasAnticipacion === val
+                          ? 'border-brand bg-surface-tint text-brand font-semibold'
+                          : 'border-line bg-surface text-muted-2 hover:text-ink'
+                      }`}
+                    >
+                      {val}d
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <div className="rounded-3xl border border-zinc-200 bg-zinc-50/70 p-4">
-              <label className="block text-sm font-medium text-zinc-700">Stock mínimo</label>
-              <input
-                type="number"
-                min="10"
-                max="500"
-                step="10"
-                value={config.stockMinimo}
-                onChange={(event) => handleUpdate('stockMinimo', parseInt(event.target.value, 10) || defaultConfig.stockMinimo)}
-                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} mt-3`}
-              />
-              <p className="mt-2 text-xs text-zinc-500">Se usa para generar alertas automáticas de stock bajo.</p>
+            {/* Umbral 2: Stock mínimo */}
+            <div className="rounded-xl border border-line bg-surface-soft/50 p-4 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-ink">
+                    <ShieldWarning className="h-4 w-4 text-rose-600 dark:text-rose-400" weight="fill" />
+                    <span>Umbral de stock mínimo</span>
+                  </div>
+                  <span className="font-mono text-sm font-semibold text-ink tabular-nums">
+                    {config.stockMinimo} dosis/ud.
+                  </span>
+                </div>
+                <p className="mt-1.5 text-xs text-muted-2">
+                  Dispara alerta de abastecimiento cuando el saldo disponible cae por debajo de este valor.
+                </p>
+              </div>
+
+              <div className="mt-4 space-y-2.5">
+                <input
+                  type="number"
+                  min="10"
+                  max="2000"
+                  step="10"
+                  value={config.stockMinimo}
+                  onChange={(e) =>
+                    handleUpdate('stockMinimo', Math.max(1, parseInt(e.target.value, 10) || DEFAULT_ALERTAS_CONFIG.stockMinimo))
+                  }
+                  className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} font-mono tabular-nums`}
+                  aria-label="Umbral de stock mínimo"
+                />
+                <div className="flex items-center gap-1.5">
+                  {[50, 100, 250, 500].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => handleUpdate('stockMinimo', val)}
+                      className={`flex-1 rounded-md border py-1 font-mono text-xs tabular-nums transition-colors ${
+                        config.stockMinimo === val
+                          ? 'border-brand bg-surface-tint text-brand font-semibold'
+                          : 'border-line bg-surface text-muted-2 hover:text-ink'
+                      }`}
+                    >
+                      {val}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <div className="rounded-3xl border border-zinc-200 bg-zinc-50/70 p-4">
-              <label className="block text-sm font-medium text-zinc-700">Retención de resueltas</label>
-              <input
-                type="number"
-                min="7"
-                max="365"
-                value={config.diasRetencion}
-                onChange={(event) => handleUpdate('diasRetencion', parseInt(event.target.value, 10) || defaultConfig.diasRetencion)}
-                className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} mt-3`}
-              />
-              <p className="mt-2 text-xs text-zinc-500">Define cuántos días conservar alertas resueltas antes de limpiar.</p>
+            {/* Umbral 3: Retención de historial */}
+            <div className="rounded-xl border border-line bg-surface-soft/50 p-4 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-ink">
+                    <Archive className="h-4 w-4 text-blue-600 dark:text-blue-400" weight="fill" />
+                    <span>Retención de atendidas</span>
+                  </div>
+                  <span className="font-mono text-sm font-semibold text-ink tabular-nums">
+                    {config.diasRetencion} días
+                  </span>
+                </div>
+                <p className="mt-1.5 text-xs text-muted-2">
+                  Tiempo de conservación de alertas ya resueltas antes de habilitar su depuración.
+                </p>
+              </div>
+
+              <div className="mt-4 space-y-2.5">
+                <input
+                  type="number"
+                  min="7"
+                  max="365"
+                  value={config.diasRetencion}
+                  onChange={(e) =>
+                    handleUpdate('diasRetencion', Math.max(1, parseInt(e.target.value, 10) || DEFAULT_ALERTAS_CONFIG.diasRetencion))
+                  }
+                  className={`${COMPONENT_STYLES.input.base} ${COMPONENT_STYLES.input.normal} font-mono tabular-nums`}
+                  aria-label="Días de retención de alertas atendidas"
+                />
+                <div className="flex items-center gap-1.5">
+                  {[15, 30, 60, 180].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => handleUpdate('diasRetencion', val)}
+                      className={`flex-1 rounded-md border py-1 font-mono text-xs tabular-nums transition-colors ${
+                        config.diasRetencion === val
+                          ? 'border-brand bg-surface-tint text-brand font-semibold'
+                          : 'border-line bg-surface text-muted-2 hover:text-ink'
+                      }`}
+                    >
+                      {val}d
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
-          <section className="rounded-[22px] border border-zinc-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2">
-              <Lightning className="h-4 w-4 text-zinc-900" weight="fill" />
-              <h3 className="text-base font-semibold text-zinc-950">Generación manual</h3>
+        {/* Sección 2: Diagnóstico de Inventario y Mantenimiento */}
+        <div className="grid gap-5 lg:grid-cols-2">
+          <section className="rounded-xl border border-line bg-surface p-4 sm:p-5 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <Lightning className="h-4 w-4 text-brand" weight="fill" />
+                <h3 className="text-sm font-semibold text-ink">Diagnóstico automático de inventario</h3>
+              </div>
+              <p className="mt-1 text-xs sm:text-sm text-muted-2 leading-relaxed">
+                Inspecciona todos los lotes activos de vacunas y jeringas comparándolos con los umbrales de{' '}
+                <span className="font-mono font-medium text-ink tabular-nums">{config.diasAnticipacion} días</span> y{' '}
+                <span className="font-mono font-medium text-ink tabular-nums">{config.stockMinimo} unidades</span>.
+              </p>
+
+              {lastResult ? (
+                <div className="mt-4 rounded-xl border border-line bg-surface-soft p-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-ink flex items-center gap-1.5">
+                      <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" weight="fill" />
+                      Resultado de la última ejecución
+                    </span>
+                    <span className="font-mono font-semibold text-ink tabular-nums">
+                      {lastResult.alertasGeneradas || 0} nuevas
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-2 font-mono tabular-nums">
+                    <span>Por vencimiento: {lastResult.alertasVencimiento || 0}</span>
+                    <span aria-hidden="true">·</span>
+                    <span>Por stock bajo: {lastResult.alertasStockBajo || 0}</span>
+                  </div>
+                  {lastResult.detalles && lastResult.detalles.length > 0 ? (
+                    <ul className="mt-2 max-h-28 overflow-y-auto space-y-1 border-t border-line-soft pt-2 text-xs text-muted-2">
+                      {lastResult.detalles.slice(0, 8).map((det, idx) => (
+                        <li key={idx} className="truncate">• {det}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
-            <p className="mt-2 text-sm text-zinc-500">Analiza inventario y genera alertas usando los umbrales actuales.</p>
-            <div className="mt-5 flex flex-wrap gap-3">
+
+            <div className="mt-5 pt-3 border-t border-line-soft flex items-center justify-between gap-3">
+              <span className="text-xs text-muted-2">Evita duplicar alertas ya activas</span>
               <button
                 type="button"
                 onClick={handleGenerarAlertas}
                 disabled={isGenerating}
-                className={`${COMPONENT_STYLES.button.primary} w-full sm:w-auto justify-center`}
+                className={COMPONENT_STYLES.button.primary}
               >
                 <Lightning className="h-4 w-4" weight="fill" />
-                {isGenerating ? 'Analizando...' : 'Generar alertas'}
+                <span>{isGenerating ? 'Analizando inventario...' : 'Ejecutar análisis ahora'}</span>
               </button>
             </div>
-
-            {lastResult ? (
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-teal-200 bg-teal-50/70 p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-teal-700">Vencimiento</p>
-                  <p className="mt-2 text-xl font-semibold text-teal-900">{lastResult.alertasVencimiento || 0}</p>
-                </div>
-                <div className="rounded-2xl border border-rose-200 bg-rose-50/70 p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-rose-700">Stock bajo</p>
-                  <p className="mt-2 text-xl font-semibold text-rose-900">{lastResult.alertasStockBajo || 0}</p>
-                </div>
-                <div className="rounded-2xl border border-cyan-200 bg-zinc-100/70 p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-900">Total</p>
-                  <p className="mt-2 text-xl font-semibold text-cyan-900">{lastResult.alertasGeneradas || 0}</p>
-                </div>
-              </div>
-            ) : null}
           </section>
 
-          <section className="rounded-[22px] border border-zinc-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2">
-              <Trash className="h-4 w-4 text-zinc-600" weight="fill" />
-              <h3 className="text-base font-semibold text-zinc-950">Limpieza y mantenimiento</h3>
+          <section className="rounded-xl border border-line bg-surface p-4 sm:p-5 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <Trash className="h-4 w-4 text-muted-2" weight="bold" />
+                <h3 className="text-sm font-semibold text-ink">Depuración de historial resuelto</h3>
+              </div>
+              <p className="mt-1 text-xs sm:text-sm text-muted-2 leading-relaxed">
+                Elimina únicamente las alertas que ya fueron marcadas como atendidas y tienen una antigüedad mayor a{' '}
+                <span className="font-mono font-medium text-ink tabular-nums">{config.diasRetencion} días</span>. Las alertas pendientes nunca se eliminan en este proceso.
+              </p>
+
+              <div className="mt-4 rounded-xl border border-line bg-surface-soft p-3.5 flex items-center justify-between text-xs">
+                <span className="text-muted-2">Alertas atendidas en bandeja actual</span>
+                <span className="font-mono font-semibold text-ink tabular-nums">{totalLeidas} registro(s)</span>
+              </div>
             </div>
-            <p className="mt-2 text-sm text-zinc-500">Elimina alertas resueltas antiguas para mantener el módulo útil y legible.</p>
-            <div className="mt-5 flex flex-wrap gap-3">
+
+            <div className="mt-5 pt-3 border-t border-line-soft flex items-center justify-between gap-3">
+              <span className="text-xs text-muted-2">Operación segura sobre histórico</span>
               <button
                 type="button"
                 onClick={() => setShowCleanConfirm(true)}
                 disabled={isCleaning}
-                className={`${COMPONENT_STYLES.button.secondary} w-full sm:w-auto justify-center`}
+                className={COMPONENT_STYLES.button.secondary}
               >
                 <Trash className="h-4 w-4" weight="bold" />
-                {isCleaning ? 'Limpiando...' : 'Limpiar antiguas'}
+                <span>{isCleaning ? 'Depurando...' : 'Depurar alertas antiguas'}</span>
               </button>
-            </div>
-
-            <div className="mt-5 rounded-3xl border border-sky-200 bg-sky-50/80 p-4 text-sm leading-6 text-sky-900">
-              Se eliminarán únicamente alertas ya leídas con más de {config.diasRetencion} días de antigüedad.
             </div>
           </section>
         </div>
-
       </div>
 
       <AlertActionDialog
         isOpen={showResetConfirm}
-        title="Restablecer configuración"
-        description="Se restaurarán los umbrales por defecto del módulo. Esta acción no afecta alertas ya creadas."
+        title="Restablecer umbrales por defecto"
+        description="Se restaurarán los parámetros recomendados (30 días de anticipación, 100 unidades de stock mínimo y 30 días de retención). Esta acción no modifica las alertas existentes."
         onConfirm={handleReset}
         onClose={() => setShowResetConfirm(false)}
         confirmLabel="Restablecer"
@@ -238,11 +364,11 @@ const ConfiguracionAlertas: React.FC = memo(() => {
 
       <AlertActionDialog
         isOpen={showCleanConfirm}
-        title="Limpiar alertas antiguas"
-        description={`Se eliminarán alertas resueltas con más de ${config.diasRetencion} días de antigüedad.`}
+        title="Depurar alertas atendidas antiguas"
+        description={`Se eliminarán del historial las alertas ya atendidas con más de ${config.diasRetencion} días de antigüedad.`}
         onConfirm={handleLimpiarAntiguas}
         onClose={() => setShowCleanConfirm(false)}
-        confirmLabel="Limpiar"
+        confirmLabel="Depurar historial"
         isLoading={isCleaning}
       />
     </AlertSectionCard>
@@ -252,4 +378,3 @@ const ConfiguracionAlertas: React.FC = memo(() => {
 ConfiguracionAlertas.displayName = 'ConfiguracionAlertas';
 
 export default ConfiguracionAlertas;
- 

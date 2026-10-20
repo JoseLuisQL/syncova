@@ -12,9 +12,17 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { sidebarCollapsed } = useApp();
+  const { sidebarCollapsed, sibotOpen, sibotExpanded } = useApp();
   const { currentModule } = useCurrentRoute();
   const { user } = useAuth();
+
+  const canUseSiBot = user?.rol === 'administrador';
+  const rightPushClass =
+    canUseSiBot && sibotOpen
+      ? sibotExpanded
+        ? 'lg:mr-[640px]'
+        : 'lg:mr-[400px]'
+      : '';
 
   return (
     <div className="min-h-[100dvh] bg-app">
@@ -25,6 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           min-h-[100dvh]
           transition-all duration-300 ease-out
           ${sidebarCollapsed ? 'lg:ml-[100px]' : 'lg:ml-[286px]'}
+          ${rightPushClass}
         `}
       >
         <Header />
@@ -40,9 +49,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </main>
 
         <MobileBottomNav />
-
-        {user?.rol === 'administrador' && <SiBotFloating />}
       </div>
+
+      {canUseSiBot && <SiBotFloating />}
     </div>
   );
 };

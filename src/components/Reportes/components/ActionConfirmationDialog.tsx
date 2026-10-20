@@ -43,8 +43,8 @@ const ActionConfirmationDialog: React.FC<ActionConfirmationDialogProps> = ({
       />
     )}
   >
-    <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-      <p className="text-sm leading-6 text-zinc-700">{description}</p>
+    <div className="rounded-xl border border-line bg-surface-soft p-4">
+      <p className="text-sm leading-6 text-ink">{description}</p>
     </div>
   </Modal>
 );

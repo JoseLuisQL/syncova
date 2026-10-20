@@ -1,7 +1,19 @@
 import React, { memo, useCallback } from 'react';
-import { Eye, EyeClosed, Trash } from '@phosphor-icons/react';
+import {
+  Check,
+  ArrowCounterClockwise,
+  Trash,
+  Eye,
+  Clock,
+  CheckCircle,
+} from '@phosphor-icons/react';
 import { Alerta } from '../../../types';
-import { NIVELES_ALERTA, TIPOS_ALERTA } from '../constants';
+import {
+  COMPONENT_STYLES,
+  NIVELES_ALERTA,
+  TIPOS_ALERTA,
+  formatRelativeAlertDate,
+} from '../constants';
 
 interface AlertaCardProps {
   alerta: Alerta;
@@ -10,22 +22,8 @@ interface AlertaCardProps {
   onMarcarLeida: (id: string) => void;
   onMarcarNoLeida: (id: string) => void;
   onEliminar: (id: string) => void;
+  onInspect?: (alerta: Alerta) => void;
 }
-
-const formatearFecha = (fecha: Date | string) => {
-  const fechaObj = typeof fecha === 'string' ? new Date(fecha) : fecha;
-  const ahora = new Date();
-  const diferencia = ahora.getTime() - fechaObj.getTime();
-  const minutos = Math.floor(diferencia / (1000 * 60));
-  const horas = Math.floor(diferencia / (1000 * 60 * 60));
-  const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-
-  if (minutos < 1) return 'Hace un momento';
-  if (minutos < 60) return `Hace ${minutos} min`;
-  if (horas < 24) return `Hace ${horas}h`;
-  if (dias < 7) return `Hace ${dias}d`;
-  return fechaObj.toLocaleDateString('es-PE');
-};
 
 export const AlertaCard: React.FC<AlertaCardProps> = memo(({
   alerta,
@@ -34,65 +32,126 @@ export const AlertaCard: React.FC<AlertaCardProps> = memo(({
   onMarcarLeida,
   onMarcarNoLeida,
   onEliminar,
+  onInspect,
 }) => {
-  const tipoInfo = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo);
-  const nivelInfo = NIVELES_ALERTA.find((nivel) => nivel.id === alerta.nivel);
-  const IconoNivel = nivelInfo?.icon || NIVELES_ALERTA[2].icon;
+  const tipoInfo = TIPOS_ALERTA.find((tipo) => tipo.id === alerta.tipo) || TIPOS_ALERTA[3];
+  const nivelInfo = NIVELES_ALERTA.find((nivel) => nivel.id === alerta.nivel) || NIVELES_ALERTA[2];
+  const IconoNivel = nivelInfo.icon;
 
   const handleToggle = useCallback(() => onToggleSelect(alerta.id), [alerta.id, onToggleSelect]);
   const handleMarcarLeida = useCallback(() => onMarcarLeida(alerta.id), [alerta.id, onMarcarLeida]);
   const handleMarcarNoLeida = useCallback(() => onMarcarNoLeida(alerta.id), [alerta.id, onMarcarNoLeida]);
   const handleEliminar = useCallback(() => onEliminar(alerta.id), [alerta.id, onEliminar]);
+  const handleInspect = useCallback(() => onInspect?.(alerta), [alerta, onInspect]);
 
   return (
-    <article className={`rounded-[20px] border p-4 ${isSelected ? 'border-teal-300 bg-teal-50/70' : !alerta.leida ? 'border-zinc-200 bg-white' : 'border-zinc-200 bg-white'}`}>
+    <article
+      className={`rounded-xl border p-4 transition-colors ${
+        isSelected
+          ? 'border-brand/50 bg-surface-tint'
+          : !alerta.leida
+            ? 'border-line bg-surface'
+            : 'border-line-soft bg-surface-soft/50'
+      }`}
+    >
       <div className="flex items-start gap-3">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={handleToggle}
-          className="mt-1 h-4 w-4 rounded border-zinc-300 text-teal-600 focus:ring-teal-500"
-          aria-label={`Seleccionar alerta: ${alerta.titulo}`}
-        />
+        <label className="mt-0.5 inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded hover:bg-surface-soft">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={handleToggle}
+            className="h-4 w-4 cursor-pointer rounded border-line accent-violet-600 focus:ring-brand/25"
+            aria-label={`Seleccionar alerta: ${alerta.titulo}`}
+          />
+        </label>
 
-        <div className={`mt-0.5 rounded-xl p-2 ${nivelInfo?.bgColor || 'bg-zinc-100'}`}>
-          <IconoNivel className={`h-4 w-4 ${nivelInfo?.color || 'text-zinc-500'}`} weight="fill" />
+        <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${nivelInfo.bgColor}`}>
+          <IconoNivel className={`h-4 w-4 ${nivelInfo.color}`} weight="fill" />
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-zinc-950">{alerta.titulo}</p>
-              <p className="mt-1 text-sm leading-6 text-zinc-600">{alerta.descripcion}</p>
+          <div className="flex items-start justify-between gap-2">
+            <button
+              type="button"
+              onClick={handleInspect}
+              className="text-left focus-visible:outline-none group min-w-0 flex-1"
+            >
+              <p className={`text-sm group-hover:text-brand transition-colors ${!alerta.leida ? 'font-semibold text-ink' : 'font-medium text-muted-2'}`}>
+                {alerta.titulo}
+              </p>
+            </button>
+            <span className="font-mono text-xs text-muted tabular-nums shrink-0">
+              {formatRelativeAlertDate(alerta.fechaCreacion)}
+            </span>
+          </div>
+
+          <p className="mt-1 text-xs sm:text-sm leading-relaxed text-muted-2 line-clamp-2">
+            {alerta.descripcion}
+          </p>
+
+          {/* Metadatos limpios sin cajas tipo píldora */}
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-2">
+            <span className={`font-medium ${nivelInfo.color}`}>{nivelInfo.label}</span>
+            <span aria-hidden="true">·</span>
+            <span>{tipoInfo.label}</span>
+            <span aria-hidden="true">·</span>
+            <span className="inline-flex items-center gap-1">
+              {alerta.leida ? (
+                <>
+                  <CheckCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" weight="fill" />
+                  <span className="text-emerald-700 dark:text-emerald-400 font-medium">Atendida</span>
+                </>
+              ) : (
+                <>
+                  <Clock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" weight="fill" />
+                  <span className="text-amber-700 dark:text-amber-400 font-medium">Pendiente</span>
+                </>
+              )}
+            </span>
+          </div>
+
+          {/* Barra de acciones clara */}
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line-soft pt-2.5">
+            <div className="flex items-center gap-1.5">
+              {alerta.leida ? (
+                <button
+                  type="button"
+                  onClick={handleMarcarNoLeida}
+                  className={COMPONENT_STYLES.button.secondary}
+                >
+                  <ArrowCounterClockwise className="h-3.5 w-3.5" weight="bold" />
+                  <span>Reabrir</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleMarcarLeida}
+                  className={COMPONENT_STYLES.button.primary}
+                >
+                  <Check className="h-3.5 w-3.5" weight="bold" />
+                  <span>Marcar atendida</span>
+                </button>
+              )}
+              {onInspect ? (
+                <button
+                  type="button"
+                  onClick={handleInspect}
+                  className={COMPONENT_STYLES.button.ghost}
+                >
+                  <Eye className="h-3.5 w-3.5" weight="bold" />
+                  <span>Ver detalle</span>
+                </button>
+              ) : null}
             </div>
-            <span className="text-xs font-medium text-zinc-500">{formatearFecha(alerta.fechaCreacion)}</span>
-          </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${tipoInfo?.bgColor || 'bg-zinc-100'} ${tipoInfo?.color || 'text-zinc-700'}`}>
-              {tipoInfo?.label || alerta.tipo}
-            </span>
-            <span className={alerta.leida ? 'inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700' : 'inline-flex items-center rounded-full bg-teal-100 px-2.5 py-1 text-xs font-medium text-teal-700'}>
-              {alerta.leida ? 'Leída' : 'Pendiente'}
-            </span>
-          </div>
-
-          <div className="mt-3.5 flex items-center gap-2 border-t border-line-soft pt-3">
-            {alerta.leida ? (
-              <button type="button" onClick={handleMarcarNoLeida} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-xs sm:text-sm font-medium text-ink transition hover:bg-surface-soft">
-                <EyeClosed className="h-4 w-4 shrink-0" weight="bold" />
-                <span className="truncate">Marcar no leída</span>
-              </button>
-            ) : (
-              <button type="button" onClick={handleMarcarLeida} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs sm:text-sm font-medium text-emerald-700 transition hover:bg-emerald-100">
-                <Eye className="h-4 w-4 shrink-0" weight="bold" />
-                <span className="truncate">Marcar leída</span>
-              </button>
-            )}
-
-            <button type="button" onClick={handleEliminar} className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs sm:text-sm font-medium text-rose-700 transition hover:bg-rose-100 shrink-0">
-              <Trash className="h-4 w-4 shrink-0" weight="bold" />
-              <span>Eliminar</span>
+            <button
+              type="button"
+              onClick={handleEliminar}
+              className={`${COMPONENT_STYLES.button.icon} ${COMPONENT_STYLES.button.iconDelete}`}
+              aria-label="Eliminar alerta"
+              title="Eliminar alerta"
+            >
+              <Trash className="h-4 w-4" weight="bold" />
             </button>
           </div>
         </div>
@@ -102,4 +161,3 @@ export const AlertaCard: React.FC<AlertaCardProps> = memo(({
 });
 
 AlertaCard.displayName = 'AlertaCard';
- 

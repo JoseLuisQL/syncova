@@ -24,6 +24,9 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['@phosphor-icons/react'],
+    esbuildOptions: {
+      sourcemap: false,
+    },
   },
   build: {
     chunkSizeWarningLimit: 900,

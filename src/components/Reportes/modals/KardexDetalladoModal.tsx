@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Archive } from '@phosphor-icons/react';
 import { Vacuna } from '../../../types';
-import { CentroAcopioOption } from '../../../types/reportes';
-import { FiltrosKardexDetallado } from '../../../types/reportes';
+import { CentroAcopioOption, FiltrosKardexDetallado } from '../../../types/reportes';
 import { KardexService } from '../../../services/KardexService';
 import {
   DateInput,
@@ -103,7 +102,7 @@ const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
       isOpen
       onClose={onClose}
       title="Kardex detallado"
-      subtitle="Configura filtros avanzados para exportar movimientos con trazabilidad completa."
+      subtitle="Configura los filtros para exportar movimientos con trazabilidad completa en Excel."
       icon={Archive}
       size="xl"
       footer={(
@@ -118,10 +117,10 @@ const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
     >
       <div className="space-y-4">
         <FormSection
-          title="Periodo"
-          description="Define el rango principal para cortar los movimientos del kardex."
+          title="Periodo y alcance"
+          description="Rango de fechas, tipo de movimiento y establecimiento de salud."
         >
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
             <DateInput
               id="kardex-start"
               label="Fecha inicio"
@@ -136,24 +135,59 @@ const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
               onChange={(value) => setFiltros((prev) => ({ ...prev, fechaFin: value }))}
               required
             />
+            <SelectInput
+              id="kardex-movement"
+              label="Tipo de movimiento"
+              value={filtros.tipoMovimiento || ''}
+              onChange={(value) =>
+                setFiltros((prev) => ({
+                  ...prev,
+                  tipoMovimiento: (value || undefined) as
+                    | 'ingreso'
+                    | 'salida'
+                    | 'transferencia'
+                    | 'ajuste'
+                    | undefined,
+                }))
+              }
+              options={[
+                { value: '', label: 'Todos' },
+                { value: 'ingreso', label: 'Ingreso' },
+                { value: 'salida', label: 'Salida' },
+                { value: 'transferencia', label: 'Transferencia' },
+                { value: 'ajuste', label: 'Ajuste' },
+              ]}
+            />
+            <SelectInput
+              id="kardex-establecimiento"
+              label="Centro de acopio"
+              value={filtros.establecimientoId || ''}
+              onChange={(value) => setFiltros((prev) => ({ ...prev, establecimientoId: value || undefined }))}
+              options={[
+                { value: '', label: 'Todos' },
+                ...centrosAcopio.map((centro) => ({ value: centro.id, label: centro.nombre })),
+              ]}
+            />
           </div>
         </FormSection>
 
         <FormSection
-          title="Producto"
-          description="Acota el kardex por tipo, item y lote cuando necesites una revisión fina."
+          title="Producto y lote"
+          description="Acota por tipo de insumo, biológico específico o lote cuando requieras auditoría fina."
         >
-          <div className="grid gap-4 xl:grid-cols-3">
+          <div className="grid gap-3.5 sm:grid-cols-3">
             <SelectInput
               id="kardex-type"
-              label="Tipo"
+              label="Tipo de ítem"
               value={filtros.tipo || ''}
-              onChange={(value) => setFiltros((prev) => ({
-                ...prev,
-                tipo: (value || undefined) as 'vacuna' | 'jeringa' | undefined,
-                itemId: undefined,
-                loteId: undefined,
-              }))}
+              onChange={(value) =>
+                setFiltros((prev) => ({
+                  ...prev,
+                  tipo: (value || undefined) as 'vacuna' | 'jeringa' | undefined,
+                  itemId: undefined,
+                  loteId: undefined,
+                }))
+              }
               options={[
                 { value: '', label: 'Todos' },
                 { value: 'vacuna', label: 'Vacunas' },
@@ -162,7 +196,7 @@ const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
             />
             <SelectInput
               id="kardex-item"
-              label={filtros.tipo === 'jeringa' ? 'Jeringa' : 'Vacuna / item'}
+              label={filtros.tipo === 'jeringa' ? 'Jeringa' : 'Vacuna / ítem'}
               value={filtros.itemId || ''}
               onChange={(value) => setFiltros((prev) => ({ ...prev, itemId: value || undefined, loteId: undefined }))}
               options={[
@@ -183,58 +217,26 @@ const KardexDetalladoModal: React.FC<KardexDetalladoModalProps> = ({
               disabled={!filtros.itemId || loadingLotes}
             />
           </div>
-        </FormSection>
 
-        <FormSection
-          title="Movimiento"
-          description="Aplica filtros adicionales para exportaciones de auditoría."
-        >
-          <div className="grid gap-4 xl:grid-cols-2">
-            <SelectInput
-              id="kardex-movement"
-              label="Tipo de movimiento"
-              value={filtros.tipoMovimiento || ''}
-              onChange={(value) => setFiltros((prev) => ({
-                ...prev,
-                tipoMovimiento: (value || undefined) as 'ingreso' | 'salida' | 'transferencia' | 'ajuste' | undefined,
-              }))}
-              options={[
-                { value: '', label: 'Todos' },
-                { value: 'ingreso', label: 'Ingreso' },
-                { value: 'salida', label: 'Salida' },
-                { value: 'transferencia', label: 'Transferencia' },
-                { value: 'ajuste', label: 'Ajuste' },
-              ]}
+          <div className="grid gap-3.5 sm:grid-cols-2 items-end pt-1">
+            <TextInput
+              id="kardex-search"
+              label="Búsqueda por documento o referencia"
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Ej. PECOSA, VALE, observaciones..."
             />
-            <SelectInput
-              id="kardex-establecimiento"
-              label="Centro / establecimiento"
-              value={filtros.establecimientoId || ''}
-              onChange={(value) => setFiltros((prev) => ({ ...prev, establecimientoId: value || undefined }))}
-              options={[
-                { value: '', label: 'Todos' },
-                ...centrosAcopio.map((centro) => ({ value: centro.id, label: centro.nombre })),
-              ]}
-            />
+
+            <label className="flex h-10 cursor-pointer items-center gap-3 rounded-xl border border-line bg-surface-soft px-3.5 text-xs sm:text-sm text-ink">
+              <input
+                type="checkbox"
+                checked={filtros.incluirTrazabilidad || false}
+                onChange={(event) => setFiltros((prev) => ({ ...prev, incluirTrazabilidad: event.target.checked }))}
+                className="h-4 w-4 rounded border-line accent-violet-600 focus:ring-brand/25"
+              />
+              <span>Incluir trazabilidad de lotes y documentos</span>
+            </label>
           </div>
-
-          <TextInput
-            id="kardex-search"
-            label="Búsqueda libre"
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Documento, número, observaciones..."
-          />
-
-          <label className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-            <input
-              type="checkbox"
-              checked={filtros.incluirTrazabilidad || false}
-              onChange={(event) => setFiltros((prev) => ({ ...prev, incluirTrazabilidad: event.target.checked }))}
-              className="h-4 w-4 rounded border-zinc-300 text-zinc-600 focus:ring-zinc-500"
-            />
-            <span className="text-sm text-zinc-700">Incluir información de trazabilidad completa</span>
-          </label>
         </FormSection>
       </div>
     </Modal>

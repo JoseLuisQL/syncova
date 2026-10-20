@@ -1,5 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { Bell, Clock, PencilSimple, Gear, EnvelopeSimple, ShieldCheck, Trash } from '@phosphor-icons/react';
+import {
+  Bell,
+  CaretDown,
+  Clock,
+  PencilSimple,
+  Gear,
+  EnvelopeSimple,
+  ShieldCheck,
+  Trash,
+} from '@phosphor-icons/react';
 import { useToastContext } from '../../../../contexts/ToastContext';
 import { COMPONENT_STYLES, ReporteProgramado } from '../../constants';
 import ActionConfirmationDialog from '../ActionConfirmationDialog';
@@ -36,7 +45,14 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
     backupAutomatico: true,
   });
 
-  const toggleBooleanSetting = (key: 'incluirFirmaDigital' | 'marcaAgua' | 'encriptacionReportes' | 'notificacionesEmail' | 'backupAutomatico') => {
+  const toggleBooleanSetting = (
+    key:
+      | 'incluirFirmaDigital'
+      | 'marcaAgua'
+      | 'encriptacionReportes'
+      | 'notificacionesEmail'
+      | 'backupAutomatico',
+  ) => {
     setConfiguracion((prev) => ({
       ...prev,
       [key]: !prev[key],
@@ -58,40 +74,43 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
     [reportesProgramados],
   );
 
-  const metrics = useMemo(() => [
-    {
-      id: 'total',
-      label: 'Programados',
-      value: reportesProgramados.length,
-      icon: Clock,
-      tone: 'primary' as const,
-      description: 'Flujos disponibles en el módulo.',
-    },
-    {
-      id: 'activos',
-      label: 'Activos',
-      value: reportesProgramados.filter((reporte) => reporte.estado === 'activo').length,
-      icon: ShieldCheck,
-      tone: 'success' as const,
-      description: 'Programaciones listas para ejecutarse.',
-    },
-    {
-      id: 'proximo',
-      label: 'Próxima ejecución',
-      value: proximoProgramado ? formatCompactDate(proximoProgramado.proximaEjecucion) : 'Sin agenda',
-      icon: Bell,
-      tone: 'warning' as const,
-      description: proximoProgramado ? proximoProgramado.nombre : 'No hay reportes activos programados.',
-    },
-    {
-      id: 'destinatarios',
-      label: 'Destinatarios',
-      value: destinatariosConfigurados,
-      icon: EnvelopeSimple,
-      tone: 'secondary' as const,
-      description: `${formatosConfigurados} formato(s) configurado(s)`,
-    },
-  ], [destinatariosConfigurados, formatosConfigurados, proximoProgramado, reportesProgramados]);
+  const metrics = useMemo(
+    () => [
+      {
+        id: 'total',
+        label: 'Programados',
+        value: reportesProgramados.length,
+        icon: Clock,
+        tone: 'primary' as const,
+        description: 'Flujos disponibles en el módulo.',
+      },
+      {
+        id: 'activos',
+        label: 'Activos',
+        value: reportesProgramados.filter((reporte) => reporte.estado === 'activo').length,
+        icon: ShieldCheck,
+        tone: 'success' as const,
+        description: 'Programaciones listas para ejecutarse.',
+      },
+      {
+        id: 'proximo',
+        label: 'Próxima ejecución',
+        value: proximoProgramado ? formatCompactDate(proximoProgramado.proximaEjecucion) : 'Sin agenda',
+        icon: Bell,
+        tone: 'warning' as const,
+        description: proximoProgramado ? proximoProgramado.nombre : 'No hay reportes activos programados.',
+      },
+      {
+        id: 'destinatarios',
+        label: 'Destinatarios',
+        value: destinatariosConfigurados,
+        icon: EnvelopeSimple,
+        tone: 'secondary' as const,
+        description: `${formatosConfigurados} formato(s) configurado(s)`,
+      },
+    ],
+    [destinatariosConfigurados, formatosConfigurados, proximoProgramado, reportesProgramados],
+  );
 
   const columns: ReportTableColumn<ReporteProgramado>[] = [
     {
@@ -99,8 +118,10 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
       label: 'Reporte',
       render: (row) => (
         <div>
-          <p className="font-medium text-zinc-900">{row.nombre}</p>
-          <p className="text-xs text-zinc-500">{row.tipo} · {row.formato.toUpperCase()}</p>
+          <p className="font-semibold text-ink">{row.nombre}</p>
+          <p className="text-xs text-muted-2">
+            {row.tipo} · {row.formato.toUpperCase()}
+          </p>
         </div>
       ),
     },
@@ -113,12 +134,12 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
     {
       key: 'proxima',
       label: 'Próxima ejecución',
-      render: (row) => <span className="text-sm text-zinc-700">{formatDateTime(row.proximaEjecucion)}</span>,
+      render: (row) => <span className="font-mono text-xs text-ink tabular-nums">{formatDateTime(row.proximaEjecucion)}</span>,
     },
     {
       key: 'destinatarios',
       label: 'Destinatarios',
-      render: (row) => <span className="text-sm text-zinc-700">{row.destinatarios.length} contacto(s)</span>,
+      render: (row) => <span className="text-xs text-muted-2">{row.destinatarios.length} contacto(s)</span>,
       align: 'center',
     },
     {
@@ -140,7 +161,7 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
       label: 'Acciones',
       align: 'right',
       render: (row) => (
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-1.5">
           <button
             type="button"
             onClick={() => onOpenEdit(row)}
@@ -163,7 +184,7 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
   ];
 
   const handleGuardarConfiguracion = () => {
-    toast.success('Preferencias actualizadas', 'La configuración visual del módulo quedó guardada en esta sesión.', { duration: 3000 });
+    toast.success('Preferencias actualizadas', 'La configuración del módulo quedó guardada.', { duration: 3000 });
   };
 
   const handleConfirmDelete = () => {
@@ -174,47 +195,48 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
 
   return (
     <>
-      <ReportSectionCard
-        title="Configuración del módulo"
-        subtitle="Administra reportes programados y preferencias de salida sin perder el contexto operativo."
-        aside={(
-          <button type="button" onClick={onOpenCreate} className={COMPONENT_STYLES.button.primary}>
-            <Clock className="h-4 w-4" />
-            Nuevo programado
-          </button>
-        )}
-      >
-        <div className="space-y-6">
-          <div className={COMPONENT_STYLES.segmented.container}>
-            <button
-              type="button"
-              onClick={() => setActiveSubTab('programados')}
-              className={`${COMPONENT_STYLES.segmented.item} ${
-                activeSubTab === 'programados' ? COMPONENT_STYLES.segmented.itemActive : COMPONENT_STYLES.segmented.itemInactive
-              }`}
-            >
-              <Clock className="h-4 w-4" />
-              Reportes programados
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSubTab('configuracion')}
-              className={`${COMPONENT_STYLES.segmented.item} ${
-                activeSubTab === 'configuracion' ? COMPONENT_STYLES.segmented.itemActive : COMPONENT_STYLES.segmented.itemInactive
-              }`}
-            >
-              <Gear className="h-4 w-4" />
-              Preferencias de salida
+      <ReportSectionCard>
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <div className={COMPONENT_STYLES.segmented.container}>
+              <button
+                type="button"
+                onClick={() => setActiveSubTab('programados')}
+                className={`${COMPONENT_STYLES.segmented.item} ${
+                  activeSubTab === 'programados'
+                    ? COMPONENT_STYLES.segmented.itemActive
+                    : COMPONENT_STYLES.segmented.itemInactive
+                }`}
+              >
+                <Clock className="h-4 w-4" />
+                <span>Reportes programados</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveSubTab('configuracion')}
+                className={`${COMPONENT_STYLES.segmented.item} ${
+                  activeSubTab === 'configuracion'
+                    ? COMPONENT_STYLES.segmented.itemActive
+                    : COMPONENT_STYLES.segmented.itemInactive
+                }`}
+              >
+                <Gear className="h-4 w-4" />
+                <span>Preferencias de salida</span>
+              </button>
+            </div>
+
+            <button type="button" onClick={onOpenCreate} className={COMPONENT_STYLES.button.primary}>
+              <Clock className="h-4 w-4" weight="bold" />
+              <span>Nuevo programado</span>
             </button>
           </div>
 
           {activeSubTab === 'programados' ? (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <ReportMetricsGrid items={metrics} />
 
               <ReportResultsTable
                 title="Programados activos y en revisión"
-                subtitle="Cada fila conserva estado, frecuencia y destinatarios configurados."
                 rows={reportesProgramados}
                 columns={columns}
                 emptyTitle="Aún no hay reportes programados"
@@ -222,93 +244,134 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
               />
             </div>
           ) : (
-            <div className="space-y-5">
-              <section className="grid gap-5 xl:grid-cols-2">
+            <div className="space-y-4">
+              <section className="grid gap-4 xl:grid-cols-2">
                 <article className={COMPONENT_STYLES.panel}>
-                  <div className="border-b border-zinc-100 px-5 py-4">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Salida predeterminada</h3>
-                    <p className="mt-1 text-sm text-zinc-500">Controla el formato visual y la retención de archivos exportados.</p>
+                  <div className="border-b border-line-soft px-5 py-3.5">
+                    <h3 className="text-sm font-semibold text-ink">Salida predeterminada</h3>
+                    <p className="mt-0.5 text-xs text-muted-2">
+                      Controla el formato visual y la retención de archivos exportados.
+                    </p>
                   </div>
-                  <div className="grid gap-4 px-5 py-5 sm:grid-cols-2">
+                  <div className="grid gap-4 px-5 py-4 sm:grid-cols-2">
                     <div>
                       <label className={COMPONENT_STYLES.input.label}>Formato de fecha</label>
-                      <select
-                        value={configuracion.formatoFechaDefault}
-                        onChange={(event) => setConfiguracion((prev) => ({ ...prev, formatoFechaDefault: event.target.value }))}
-                        className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-                      >
-                        <option value="dd/mm/yyyy">DD/MM/YYYY</option>
-                        <option value="mm/dd/yyyy">MM/DD/YYYY</option>
-                        <option value="yyyy-mm-dd">YYYY-MM-DD</option>
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={configuracion.formatoFechaDefault}
+                          onChange={(event) =>
+                            setConfiguracion((prev) => ({ ...prev, formatoFechaDefault: event.target.value }))
+                          }
+                          className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+                        >
+                          <option value="dd/mm/yyyy">DD/MM/YYYY</option>
+                          <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                          <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                        </select>
+                        <CaretDown
+                          className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2"
+                          weight="bold"
+                        />
+                      </div>
                     </div>
                     <div>
                       <label className={COMPONENT_STYLES.input.label}>Idioma</label>
-                      <select
-                        value={configuracion.idiomaDefault}
-                        onChange={(event) => setConfiguracion((prev) => ({ ...prev, idiomaDefault: event.target.value }))}
-                        className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-                      >
-                        <option value="es">Español</option>
-                        <option value="en">English</option>
-                        <option value="qu">Quechua</option>
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={configuracion.idiomaDefault}
+                          onChange={(event) =>
+                            setConfiguracion((prev) => ({ ...prev, idiomaDefault: event.target.value }))
+                          }
+                          className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+                        >
+                          <option value="es">Español</option>
+                          <option value="en">English</option>
+                          <option value="qu">Quechua</option>
+                        </select>
+                        <CaretDown
+                          className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2"
+                          weight="bold"
+                        />
+                      </div>
                     </div>
                     <div>
                       <label className={COMPONENT_STYLES.input.label}>Retención</label>
-                      <select
-                        value={configuracion.tiempoRetencion}
-                        onChange={(event) => setConfiguracion((prev) => ({ ...prev, tiempoRetencion: event.target.value }))}
-                        className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-                      >
-                        <option value="6">6 meses</option>
-                        <option value="12">12 meses</option>
-                        <option value="24">24 meses</option>
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={configuracion.tiempoRetencion}
+                          onChange={(event) =>
+                            setConfiguracion((prev) => ({ ...prev, tiempoRetencion: event.target.value }))
+                          }
+                          className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+                        >
+                          <option value="6">6 meses</option>
+                          <option value="12">12 meses</option>
+                          <option value="24">24 meses</option>
+                        </select>
+                        <CaretDown
+                          className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2"
+                          weight="bold"
+                        />
+                      </div>
                     </div>
                     <div>
                       <label className={COMPONENT_STYLES.input.label}>Compresión PDF</label>
-                      <select
-                        value={configuracion.compressionPDF}
-                        onChange={(event) => setConfiguracion((prev) => ({ ...prev, compressionPDF: event.target.value }))}
-                        className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
-                      >
-                        <option value="baja">Baja</option>
-                        <option value="media">Media</option>
-                        <option value="alta">Alta</option>
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={configuracion.compressionPDF}
+                          onChange={(event) =>
+                            setConfiguracion((prev) => ({ ...prev, compressionPDF: event.target.value }))
+                          }
+                          className={`${COMPONENT_STYLES.select.base} ${COMPONENT_STYLES.select.normal}`}
+                        >
+                          <option value="baja">Baja</option>
+                          <option value="media">Media</option>
+                          <option value="alta">Alta</option>
+                        </select>
+                        <CaretDown
+                          className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-2"
+                          weight="bold"
+                        />
+                      </div>
                     </div>
                   </div>
                 </article>
 
                 <article className={COMPONENT_STYLES.panel}>
-                  <div className="border-b border-zinc-100 px-5 py-4">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-700">Seguridad y notificaciones</h3>
-                    <p className="mt-1 text-sm text-zinc-500">Preferencias locales del módulo para salida y seguimiento.</p>
+                  <div className="border-b border-line-soft px-5 py-3.5">
+                    <h3 className="text-sm font-semibold text-ink">Seguridad y notificaciones</h3>
+                    <p className="mt-0.5 text-xs text-muted-2">
+                      Preferencias locales del módulo para salida y seguimiento.
+                    </p>
                   </div>
-                  <div className="space-y-3 px-5 py-5">
-                    {[
-                      ['incluirFirmaDigital', 'Firma digital', 'Incluir firma en exportaciones PDF'],
-                      ['marcaAgua', 'Marca de agua', 'Agregar sello institucional en archivos sensibles'],
-                      ['encriptacionReportes', 'Encriptación', 'Aplicar protección adicional en reportes críticos'],
-                      ['notificacionesEmail', 'Notificaciones email', 'Avisar cuando una ejecución termine'],
-                      ['backupAutomatico', 'Backup automático', 'Guardar respaldo local del archivo exportado'],
-                    ].map(([key, label, description]) => (
-                      <div key={key} className="flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                  <div className="space-y-2.5 px-5 py-4">
+                    {(
+                      [
+                        ['incluirFirmaDigital', 'Firma digital', 'Incluir firma en exportaciones PDF'],
+                        ['marcaAgua', 'Marca de agua', 'Agregar sello institucional en archivos sensibles'],
+                        ['encriptacionReportes', 'Encriptación', 'Aplicar protección adicional en reportes críticos'],
+                        ['notificacionesEmail', 'Notificaciones email', 'Avisar cuando una ejecución termine'],
+                        ['backupAutomatico', 'Backup automático', 'Guardar respaldo local del archivo exportado'],
+                      ] as const
+                    ).map(([key, label, description]) => (
+                      <div
+                        key={key}
+                        className="flex items-center justify-between gap-4 rounded-xl border border-line bg-surface-soft/50 px-3.5 py-2.5"
+                      >
                         <div>
-                          <p className="text-sm font-medium text-zinc-900">{label}</p>
-                          <p className="mt-1 text-xs text-zinc-500">{description}</p>
+                          <p className="text-xs sm:text-sm font-medium text-ink">{label}</p>
+                          <p className="mt-0.5 text-xs text-muted-2">{description}</p>
                         </div>
                         <button
                           type="button"
-                          onClick={() => toggleBooleanSetting(key as 'incluirFirmaDigital' | 'marcaAgua' | 'encriptacionReportes' | 'notificacionesEmail' | 'backupAutomatico')}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            configuracion[key as 'incluirFirmaDigital' | 'marcaAgua' | 'encriptacionReportes' | 'notificacionesEmail' | 'backupAutomatico'] ? 'bg-zinc-600' : 'bg-zinc-300'
+                          onClick={() => toggleBooleanSetting(key)}
+                          className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+                            configuracion[key] ? 'bg-brand' : 'bg-line-strong'
                           }`}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              configuracion[key as 'incluirFirmaDigital' | 'marcaAgua' | 'encriptacionReportes' | 'notificacionesEmail' | 'backupAutomatico'] ? 'tranzinc-x-6' : 'tranzinc-x-1'
+                            className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                              configuracion[key] ? 'translate-x-4' : 'translate-x-1'
                             }`}
                           />
                         </button>
@@ -331,9 +394,11 @@ const ConfiguracionTab: React.FC<ConfiguracionTabProps> = ({
       <ActionConfirmationDialog
         isOpen={Boolean(reporteAEliminar)}
         title="Eliminar reporte programado"
-        description={reporteAEliminar
-          ? `Se eliminará "${reporteAEliminar.nombre}" de la agenda del módulo. Esta acción no modifica archivos ya exportados.`
-          : ''}
+        description={
+          reporteAEliminar
+            ? `Se eliminará "${reporteAEliminar.nombre}" de la agenda del módulo. Esta acción no modifica archivos ya exportados.`
+            : ''
+        }
         onConfirm={handleConfirmDelete}
         onClose={() => setReporteAEliminar(null)}
         confirmLabel="Eliminar"

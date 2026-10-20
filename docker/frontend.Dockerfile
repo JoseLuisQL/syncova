@@ -2,8 +2,8 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json package-lock.json* ./
+RUN npm install
 
 COPY tsconfig.json tsconfig.app.json tsconfig.node.json ./
 COPY vite.config.ts tailwind.config.js postcss.config.js eslint.config.js index.html ./
