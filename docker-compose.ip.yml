@@ -1,0 +1,17 @@
+# Despliegue temporal por IP pública (HTTP, sin dominio).
+# Uso: docker compose -f docker-compose.yml -f docker-compose.ip.yml up -d
+services:
+  backend:
+    environment:
+      CORS_ORIGIN: https://sivac.qware.me,http://sivac.qware.me,http://82.180.163.171,http://localhost:5173
+    labels:
+      - traefik.http.routers.sivac-ip-api.rule=Host(`82.180.163.171`) && (PathPrefix(`/api`) || Path(`/health`) || PathPrefix(`/uploads`))
+      - traefik.http.routers.sivac-ip-api.entrypoints=web
+      - traefik.http.routers.sivac-ip-api.priority=100
+      - traefik.http.routers.sivac-ip-api.service=sivac-api
+  frontend:
+    labels:
+      - traefik.http.routers.sivac-ip-web.rule=Host(`82.180.163.171`)
+      - traefik.http.routers.sivac-ip-web.entrypoints=web
+      - traefik.http.routers.sivac-ip-web.priority=10
+      - traefik.http.routers.sivac-ip-web.service=sivac-web
